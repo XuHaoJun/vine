@@ -1,5 +1,6 @@
 import { memo, useState } from 'react'
-import { SizableText, Spinner, Theme, XStack, YStack } from 'tamagui'
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
+import { isWeb, ScrollView, SizableText, Spinner, Theme, XStack, YStack } from 'tamagui'
 
 import { useTodos } from '~/features/todo/useTodos'
 import { Button } from '~/interface/buttons/Button'
@@ -10,6 +11,7 @@ import { H1, H3 } from '~/interface/text/Headings'
 export const HomePage = memo(() => {
   const { todos, isLoading, addTodo, toggleTodo, deleteTodo } = useTodos()
   const [newTodoText, setNewTodoText] = useState('')
+  const insets = useSafeAreaInsets()
 
   const handleAddTodo = () => {
     if (!newTodoText.trim()) return
@@ -17,15 +19,18 @@ export const HomePage = memo(() => {
     setNewTodoText('')
   }
 
-  return (
+  const content = (
     <YStack
       position="relative"
       flexBasis="auto"
       bg="$background"
-      width="100vw"
-      ml="50%"
-      transform="translateX(-50%)"
-      minH="100vh"
+      flex={1}
+      {...(isWeb && {
+        width: '100vw' as any,
+        ml: '50%' as any,
+        transform: 'translateX(-50%)' as any,
+        minHeight: '100vh' as any,
+      })}
     >
       {/* notice banner */}
       <Theme name="yellow">
@@ -39,15 +44,14 @@ export const HomePage = memo(() => {
         </XStack>
       </Theme>
 
-      <XStack
-        pb="$10"
+      <YStack
+        pb={isWeb ? '$10' : insets.bottom + 40}
         gap="$6"
         px="$4"
         width="100%"
         maxW={1200}
         mx="auto"
-        flexDirection="column"
-        $lg={{ flexDirection: 'row' }}
+        flex={1}
       >
         {/* todo list */}
         <YStack flex={1} gap="$4" pt="$4">
@@ -162,7 +166,17 @@ export const HomePage = memo(() => {
             </YStack>
           </Theme>
         </YStack>
-      </XStack>
+      </YStack>
     </YStack>
+  )
+
+  if (isWeb) {
+    return content
+  }
+
+  return (
+    <ScrollView flex={1} pt={insets.top + 16}>
+      {content}
+    </ScrollView>
   )
 })
