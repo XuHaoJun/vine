@@ -1,4 +1,4 @@
-import { Slot, Tabs } from 'one'
+import { Tabs } from 'one'
 
 export function TabsLayout() {
   return (
