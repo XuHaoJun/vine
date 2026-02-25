@@ -1,6 +1,6 @@
 import { useEmitter } from '@take-out/helpers'
 import { memo, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
-import { Pressable, StyleSheet, useWindowDimensions } from 'react-native'
+import { Pressable, StyleSheet } from 'react-native'
 import {
   Gesture,
   GestureDetector,
@@ -51,8 +51,6 @@ function getThemeForType(type?: ToastType): ThemeName | null {
       return null
   }
 }
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
 
 const createEnteringAnimation = () =>
   SlideInUp.withInitialValues({
