@@ -4,6 +4,7 @@ import { Slot, Stack } from 'one'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { YStack } from 'tamagui'
 
+import { PlatformSpecificRootProvider } from '~/interface/platform/PlatformSpecificRootProvider'
 import { TamaguiRootProvider } from '~/tamagui/TamaguiRootProvider'
 
 export function Layout() {
@@ -26,19 +27,21 @@ export function Layout() {
 
       <body>
         <div style={{ display: 'contents' }} data-testid="app-container">
-          <TamaguiRootProvider>
-            <SafeAreaProvider>
-              {process.env.VITE_PLATFORM === 'web' ? (
-                <YStack flex={1}>
-                  <Slot />
-                </YStack>
-              ) : (
-                <Stack screenOptions={{ headerShown: false }}>
-                  <Stack.Screen name="(app)" />
-                </Stack>
-              )}
-            </SafeAreaProvider>
-          </TamaguiRootProvider>
+          <PlatformSpecificRootProvider>
+            <TamaguiRootProvider>
+              <SafeAreaProvider>
+                {process.env.VITE_PLATFORM === 'web' ? (
+                  <YStack flex={1}>
+                    <Slot />
+                  </YStack>
+                ) : (
+                  <Stack screenOptions={{ headerShown: false }}>
+                    <Stack.Screen name="(app)" />
+                  </Stack>
+                )}
+              </SafeAreaProvider>
+            </TamaguiRootProvider>
+          </PlatformSpecificRootProvider>
         </div>
       </body>
     </html>
