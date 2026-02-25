@@ -1,14 +1,14 @@
-import { Slot } from 'one'
-import { Spacer } from 'tamagui'
-
-import { MainHeader } from '~/features/app/MainHeader'
+import { Slot, Tabs } from 'one'
 
 export function TabsLayout() {
   return (
-    <>
-      <MainHeader />
-      <Spacer height={50} />
-      <Slot />
-    </>
+    <Tabs
+      initialRouteName="feed"
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Tabs.Screen name="feed" />
+    </Tabs>
   )
 }
