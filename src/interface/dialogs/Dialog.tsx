@@ -35,8 +35,10 @@ export function DialogProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const handleClose = (confirmed: boolean) => {
-    state.resolve?.(confirmed)
+    if (!state.resolve) return
+    const resolve = state.resolve
     setState({ type: null, title: '', description: '' })
+    resolve(confirmed)
   }
 
   return (
@@ -44,7 +46,12 @@ export function DialogProvider({ children }: { children: ReactNode }) {
       {children}
       <AlertDialog
         open={state.type !== null}
-        onOpenChange={(open) => !open && handleClose(false)}
+        onOpenChange={(open) => {
+          // only handle dismissal (backdrop tap / swipe), not button presses
+          if (!open && state.type !== null) {
+            handleClose(false)
+          }
+        }}
       >
         <AlertDialog.Portal>
           <AlertDialog.Overlay
@@ -75,21 +82,15 @@ export function DialogProvider({ children }: { children: ReactNode }) {
               <XStack gap="$3" justify="flex-end">
                 {state.type === 'confirm' ? (
                   <>
-                    <AlertDialog.Cancel asChild>
-                      <Button onPress={() => handleClose(false)}>Cancel</Button>
-                    </AlertDialog.Cancel>
-                    <AlertDialog.Action asChild>
-                      <Button theme="blue" onPress={() => handleClose(true)}>
-                        Confirm
-                      </Button>
-                    </AlertDialog.Action>
+                    <Button onPress={() => handleClose(false)}>Cancel</Button>
+                    <Button theme="blue" onPress={() => handleClose(true)}>
+                      Confirm
+                    </Button>
                   </>
                 ) : (
-                  <AlertDialog.Action asChild>
-                    <Button theme="blue" onPress={() => handleClose(false)}>
-                      OK
-                    </Button>
-                  </AlertDialog.Action>
+                  <Button theme="blue" onPress={() => handleClose(false)}>
+                    OK
+                  </Button>
                 )}
               </XStack>
             </YStack>
