@@ -94,7 +94,7 @@ async function waitForMigrations(timeoutMs = DOCKER_TIMEOUT) {
     try {
       const proc = Bun.spawn(
         ['docker', 'compose', 'ps', '--all', '--format', 'json', 'migrate'],
-        { stdout: 'pipe', stderr: 'pipe' }
+        { stdout: 'pipe', stderr: 'pipe' },
       )
       const text = await new Response(proc.stdout).text()
       await proc.exited
@@ -181,7 +181,7 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error('\n✗ integration tests failed:', err.message)
+main().catch((err: unknown) => {
+  console.error('\n✗ integration tests failed:', err instanceof Error ? err.message : err)
   process.exit(1)
 })

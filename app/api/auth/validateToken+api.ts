@@ -1,4 +1,4 @@
-import { validateToken } from '~/features/auth/server/validateToken'
+import { isValidJWT } from '@take-out/better-auth-utils/server'
 
 import type { Endpoint } from 'one'
 
@@ -6,10 +6,8 @@ export const POST: Endpoint = async (req) => {
   const body = await req.json()
   if (body && typeof body.token === 'string') {
     try {
-      const found = await validateToken(body.token)
-      return Response.json({
-        valid: !!found,
-      })
+      const valid = await isValidJWT(body.token, {})
+      return Response.json({ valid })
     } catch (err) {
       console.error(`Error validating token`, err)
     }

@@ -95,7 +95,7 @@ export const Link = ({
               router.navigate(href)
             }
           },
-          typeof delayNavigation === 'number' ? delayNavigation : 50
+          typeof delayNavigation === 'number' ? delayNavigation : 50,
         )
         return
       }
@@ -111,7 +111,7 @@ export const Link = ({
     1000,
     {
       leading: true,
-    }
+    },
   )
 
   if (passThrough) {

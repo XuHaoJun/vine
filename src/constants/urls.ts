@@ -1,7 +1,5 @@
 import { getURL } from 'one'
 
-// TODO
-
 // Server URLs configuration
 // Force localhost on client to avoid 0.0.0.0 CORS issues
 const rawServerUrl = process.env.ONE_SERVER_URL || 'http://localhost:8081'
@@ -21,7 +19,7 @@ export const SERVER_URL = (() => {
     'http://one-server.example.com' /* Means that this is not running through dev server but is a release build */
   ) {
     // Default to production URL if not set
-    url = import.meta.env.VITE_PUBLIC_SERVER || 'https://takeout.tamagui.dev'
+    url = process.env.VITE_SERVER || 'https://takeout.tamagui.dev'
   }
   return url
 })()
@@ -45,13 +43,14 @@ export const ZERO_SERVER_URL = (() => {
     'http://one-server.example.com' /* Means that this is not running through dev server but is a release build */
   ) {
     // Default to production URL if not set
-    return import.meta.env.VITE_PUBLIC_ZERO_SERVER || 'https://zero.tamagui.dev'
+    const hostname = process.env.VITE_ZERO_HOSTNAME
+    return hostname ? `https://${hostname}` : 'https://zero.tamagui.dev'
   } else {
-    return import.meta.env.VITE_PUBLIC_ZERO_SERVER || 'http://localhost:4948'
+    const hostname = process.env.VITE_ZERO_HOSTNAME
+    return hostname ? `https://${hostname}` : 'http://localhost:4948'
   }
 })()
 
-// TODO
 export const DEFAULT_HOT_UPDATE_SERVER_URL =
   'https://pckjvzbtdczlpkgujgkb.supabase.co/functions/v1/update-server'
 

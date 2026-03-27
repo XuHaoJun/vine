@@ -9,7 +9,7 @@ type LoadEnvOptions = {
 
 export async function loadEnv(
   _stage: string,
-  options: LoadEnvOptions = {}
+  options: LoadEnvOptions = {},
 ): Promise<Record<string, string>> {
   const { optional = [] } = options
 

@@ -15,6 +15,10 @@ export const createPool = (connectionString?: string) => {
   const connStr = connectionString || ZERO_UPSTREAM_DB
   return new Pool({
     connectionString: connStr,
+    max: 20,
+    idleTimeoutMillis: 30_000,
+    connectionTimeoutMillis: 5_000,
+    allowExitOnIdle: true,
     // handle self-signed certificates in production
     ssl: connStr?.includes('sslmode=require') ? { rejectUnauthorized: false } : undefined,
   })
@@ -22,10 +26,7 @@ export const createPool = (connectionString?: string) => {
 
 export const createDb = () => {
   const pool = createPool()
-  return drizzle(pool, {
-    schema,
-    logger: false,
-  })
+  return drizzle({ client: pool, schema, logger: false })
 }
 
 let db: ReturnType<typeof createDb>

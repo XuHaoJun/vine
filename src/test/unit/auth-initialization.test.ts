@@ -64,7 +64,7 @@ describe('auth initialization requirements', () => {
 
       const clientPath = path.resolve(
         process.cwd(),
-        'src/features/auth/client/platformClient.native.ts'
+        'src/features/auth/client/platformClient.native.ts',
       )
       expect(existsSync(clientPath)).toBe(true)
 
@@ -88,7 +88,7 @@ describe('regression: d75c598 storage change', () => {
 
     const clientPath = path.resolve(
       process.cwd(),
-      'src/features/auth/client/platformClient.native.ts'
+      'src/features/auth/client/platformClient.native.ts',
     )
     const platformClient = readFileSync(clientPath, 'utf-8')
 

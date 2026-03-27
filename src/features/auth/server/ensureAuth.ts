@@ -18,7 +18,7 @@ export async function ensureAuth(req: Request, role?: 'admin') {
       },
       {
         status: 401,
-      }
+      },
     )
   }
 
@@ -30,7 +30,7 @@ export async function ensureAuth(req: Request, role?: 'admin') {
       },
       {
         status: 403,
-      }
+      },
     )
   }
 

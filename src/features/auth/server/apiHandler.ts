@@ -31,7 +31,7 @@ export function authAPIHandler(method: 'GET' | 'POST') {
           const signInRes = await authServer.handler(signInReq)
           console.info(
             `[auth] Auto sign-in for existing user ${signInRes.status}`,
-            signInUrl
+            signInUrl,
           )
 
           if (process.env.DEBUG || signInRes.status >= 400) {

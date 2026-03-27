@@ -18,7 +18,7 @@ const IS_DEV = APP_VARIANT === 'development'
 const getBundleId = () => {
   // use tamagui bundle ids for production/preview, takeout for dev
   if (APP_VARIANT === 'development') {
-    return 'com.takeout.app.dev'
+    return 'dev.tamagui.takeout.dev'
   } else if (APP_VARIANT === 'preview') {
     return 'dev.tamagui.takeout.preview'
   }
@@ -39,7 +39,7 @@ export default {
           return ' (Dev)'
         case 'preview':
           return ' (Preview)'
-        default:
+        case 'production':
           return ''
       }
     })()}`,
@@ -48,9 +48,8 @@ export default {
     scheme: appId,
     version,
     runtimeVersion: version, // must be set to use hot-updater "appVersion" update strategy
-    newArchEnabled: true,
     platforms: ['ios', 'android', 'web'],
-    userInterfaceStyle: 'dark',
+    userInterfaceStyle: 'automatic',
     icon: getAppIcon(),
     ios: {
       supportsTablet: false,
@@ -88,24 +87,11 @@ export default {
       'expo-font',
       'react-native-bottom-tabs',
       [
-        'expo-plugin-ios-static-libraries',
-        {
-          libraries: ['RNPermissions', 'op-sqlite'],
-        },
-      ],
-      [
         'expo-build-properties',
         {
           ios: {
-            useFrameworks: 'static',
             deploymentTarget: '17.0',
           },
-        },
-      ],
-      [
-        'expo-dev-client',
-        {
-          addGeneratedScheme: !!IS_DEV,
         },
       ],
       [

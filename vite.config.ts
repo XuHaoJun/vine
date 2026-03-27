@@ -10,14 +10,10 @@ export default {
   },
 
   optimizeDeps: {
-    esbuildOptions: {
-      sourcemap: false,
-    },
-
     include: ['async-retry'],
     // @hot-updater/cli-tools contains native .node binaries (oxc-transform)
     // that esbuild can't handle - exclude from optimization
-    exclude: ['@hot-updater/cli-tools'],
+    exclude: ['@hot-updater/cli-tools', 'qrcode-terminal', 'oxc-parser'],
   },
 
   ssr: {
@@ -35,6 +31,35 @@ export default {
     ),
 
     one({
+      // reanimated 4.2.x dev-only error false positive: _requiresAnimatedComponent getter
+      // throws when any code calls Object.keys() on animated style (tamagui does this)
+      // fixed in reanimated 4.3.0 (PR #8990) - remove this patch when upgrading
+      // see: https://github.com/software-mansion/react-native-reanimated/issues/8799
+      patches: {
+        'react-native-reanimated': {
+          'lib/module/hook/useAnimatedStyle.js': (contents) =>
+            contents?.replace(
+              /throw new ReanimatedError\(\s*'Perhaps you are trying to pass an animated style[^)]+\);/g,
+              'return true;',
+            ),
+        },
+        // fix: vxrn expo-plugin generates `exec {}` which fails on Gradle 9 / RN 0.83
+        // Gradle 9 removed project.exec {} — use ExecOperations injection instead
+        // remove when vxrn fixes this upstream
+        vxrn: {
+          'expo-plugin.cjs': (contents) =>
+            contents
+              ?.replace(
+                /exec \{\s*\n\s+commandLine vxrnCli, "patch"\s*\n\s+\}/g,
+                `injected.execOps.exec {\n                commandLine "node", vxrnCli, "patch"\n            }`,
+              )
+              .replace(
+                'gradle.taskGraph.whenReady',
+                `interface InjectedExecOps {\n    @Inject\n    ExecOperations getExecOps()\n}\n\ndef injected = objects.newInstance(InjectedExecOps)\n\ngradle.taskGraph.whenReady`,
+              ),
+        },
+      },
+
       setupFile: {
         client: './src/setupClient.ts',
         native: './src/setupNative.ts',
@@ -53,9 +78,6 @@ export default {
             return {
               ...config,
               plugins: [
-                // react compiler for automatic memoization - must run first
-                'babel-plugin-react-compiler',
-                ...(config?.plugins || []),
                 // reanimated worklet compilation - MUST be last
                 'react-native-reanimated/plugin',
               ],
@@ -85,10 +107,6 @@ export default {
             '/settings/**',
           ],
         },
-      },
-
-      deps: {
-        pg: true,
       },
 
       build: {

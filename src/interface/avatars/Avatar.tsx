@@ -100,7 +100,7 @@ export const Avatar = memo(
         ) : null}
       </YStack>
     )
-  }
+  },
 )
 
 const SelectableCircle = styled(Circle, {

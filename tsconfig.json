@@ -20,8 +20,6 @@
     "strict": true,
     "jsx": "react-jsx",
     "noImplicitReturns": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
     "noUncheckedIndexedAccess": true,
     "preserveConstEnums": true,
     "skipLibCheck": true,

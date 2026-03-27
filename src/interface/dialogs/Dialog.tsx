@@ -10,7 +10,7 @@ type DialogState = {
 
 let globalShowDialog:
   | ((
-      state: Omit<DialogState, 'resolve'> & { resolve?: (value: boolean) => void }
+      state: Omit<DialogState, 'resolve'> & { resolve?: (value: boolean) => void },
     ) => void)
   | null = null
 
@@ -22,7 +22,7 @@ export function DialogProvider({ children }: { children: ReactNode }) {
   })
 
   const showDialog = (
-    newState: Omit<DialogState, 'resolve'> & { resolve?: (value: boolean) => void }
+    newState: Omit<DialogState, 'resolve'> & { resolve?: (value: boolean) => void },
   ) => {
     setState({ ...newState, resolve: newState.resolve } as DialogState)
   }

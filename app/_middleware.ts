@@ -1,17 +1,31 @@
-import { createMiddleware } from 'one'
+import type { Middleware } from 'one'
 
-/**
- * Simple middleware - can be extended for auth checks, redirects, etc.
- */
-
-export default createMiddleware(async ({ request, next }) => {
+const middleware: Middleware = async ({ request, next }) => {
   const response = await next()
 
-  // log errors in development
-  if (response && response.status >= 400 && process.env.NODE_ENV === 'development') {
-    const url = new URL(request.url)
-    console.error(`[middleware] ${request.method} ${url.pathname} - ${response.status}`)
+  if (response && response.status >= 400) {
+    await trackApiError(response, request, new URL(request.url).pathname)
   }
 
   return response
-})
+}
+
+async function trackApiError(response: Response, request: Request, pathname: string) {
+  try {
+    const contentType = response.headers.get('content-type')
+    if (!contentType?.includes('application/json')) return
+
+    const body = await response.clone().json()
+
+    if (process.env.NODE_ENV === 'development') {
+      console.error(`[middleware] ${request.method} ${pathname} - ${response.status}`, {
+        errorCode: body.code,
+        errorMessage: body.error || body.message,
+      })
+    }
+  } catch {
+    // ignore parse errors
+  }
+}
+
+export default middleware

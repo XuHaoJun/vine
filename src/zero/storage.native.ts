@@ -1,7 +1,10 @@
-import { opSQLiteStoreProvider } from '@rocicorp/zero/op-sqlite'
+import { expoSQLiteStoreProvider } from '@rocicorp/zero/expo-sqlite'
 
-type StoreProvider = ReturnType<typeof opSQLiteStoreProvider>
+type StoreProvider = ReturnType<typeof expoSQLiteStoreProvider>
 
 export function createKVStore(userId: string | null): StoreProvider | 'mem' {
-  return opSQLiteStoreProvider()
+  if (!userId || userId === 'anon') {
+    return 'mem'
+  }
+  return expoSQLiteStoreProvider()
 }

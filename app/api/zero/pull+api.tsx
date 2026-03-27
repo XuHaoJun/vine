@@ -1,4 +1,5 @@
-import { getAuthDataFromRequest } from '~/features/auth/server/validateAuthHeader'
+import { getAuthDataFromRequest } from '@take-out/better-auth-utils/server'
+import { authServer } from '~/features/auth/server/authServer'
 import { zeroServer } from '~/zero/server'
 
 // this sets up the synced queries endpoint
@@ -8,7 +9,7 @@ import type { Endpoint } from 'one'
 
 export const POST: Endpoint = async (request) => {
   try {
-    const authData = await getAuthDataFromRequest(request)
+    const authData = await getAuthDataFromRequest(authServer, request)
     const { response } = await zeroServer.handleQueryRequest({
       authData,
       request,

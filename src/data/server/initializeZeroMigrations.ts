@@ -25,7 +25,7 @@ export async function initializeZeroMigrations() {
     }
     if (migration.version <= lastVersion || existingVersions.has(migration.version)) {
       console.error(
-        `[zero.migrate] ❌ Error: Zero migration at index ${index} version is not greater than last or duplicate of previous migration`
+        `[zero.migrate] ❌ Error: Zero migration at index ${index} version is not greater than last or duplicate of previous migration`,
       )
       process.exit(1)
     }
@@ -44,7 +44,7 @@ export async function initializeZeroMigrations() {
       completedMigrationsResult.rows.map((row: { name: string }) => {
         const version = row.name.replace(ZERO_MIGRATION_PREFIX, '')
         return Number.parseInt(version, 10)
-      })
+      }),
     )
 
     const highestCompletedVersion =
@@ -53,7 +53,7 @@ export async function initializeZeroMigrations() {
     const migrationsToRun = migrations.filter((m) => m.version > highestCompletedVersion)
 
     console.info(
-      `[zero.migrate] at version ${highestCompletedVersion}, ${migrations.length} total migrations, ${migrationsToRun.length} left to run`
+      `[zero.migrate] at version ${highestCompletedVersion}, ${migrations.length} total migrations, ${migrationsToRun.length} left to run`,
     )
 
     if (migrationsToRun.length === 0) {
@@ -61,7 +61,7 @@ export async function initializeZeroMigrations() {
     }
 
     console.info(
-      `[zero.migrate] v${highestCompletedVersion} → v${Math.max(...migrationsToRun.map((m) => m.version))}`
+      `[zero.migrate] v${highestCompletedVersion} → v${Math.max(...migrationsToRun.map((m) => m.version))}`,
     )
 
     for (const migration of migrationsToRun) {
@@ -79,7 +79,7 @@ export async function initializeZeroMigrations() {
       } catch (error) {
         console.error(
           `[zero.migrate] ❌ v${migration.version} (${migration.name})`,
-          error
+          error,
         )
         break
       }

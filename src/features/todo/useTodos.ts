@@ -19,7 +19,7 @@ export function useTodos() {
   const [todos, { type }] = useQuery(
     todosByUserId,
     { userId: userId || '' },
-    { enabled: Boolean(userId) }
+    { enabled: Boolean(userId) },
   )
 
   const isLoading = type === 'unknown'

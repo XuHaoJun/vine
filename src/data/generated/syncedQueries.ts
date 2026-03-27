@@ -11,13 +11,13 @@ const todo = {
       userId: v.string(),
       limit: v.optional(v.number()),
     }),
-    ({ args }) => Queries.todo.todosByUserId(args)
+    ({ args }) => Queries.todo.todosByUserId(args),
   ),
   todoById: defineQuery(
     v.object({
       todoId: v.string(),
     }),
-    ({ args }) => Queries.todo.todoById(args)
+    ({ args }) => Queries.todo.todoById(args),
   ),
 }
 
@@ -26,13 +26,13 @@ const user = {
     v.object({
       userId: v.string(),
     }),
-    ({ args }) => Queries.user.userById(args)
+    ({ args }) => Queries.user.userById(args),
   ),
   userWithState: defineQuery(
     v.object({
       userId: v.string(),
     }),
-    ({ args }) => Queries.user.userWithState(args)
+    ({ args }) => Queries.user.userWithState(args),
   ),
 }
 

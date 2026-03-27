@@ -4,7 +4,7 @@ export const analyticsActions = () => {
     logEvent: async (
       userId: string,
       event: string,
-      properties?: Record<string, unknown>
+      properties?: Record<string, unknown>,
     ) => {
       if (process.env.NODE_ENV === 'development') {
         console.info(`[Analytics] User ${userId}: ${event}`, properties)
@@ -20,7 +20,7 @@ export const analyticsActions = () => {
     trackException: async (
       error: Error,
       userId?: string,
-      context?: Record<string, unknown>
+      context?: Record<string, unknown>,
     ) => {
       console.error(`[Analytics] Exception for ${userId || 'anonymous'}:`, error, context)
     },

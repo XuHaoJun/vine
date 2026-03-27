@@ -84,7 +84,7 @@ export async function waitForZeroSync(page: Page, timeout = 5000) {
         const statusEl = document.querySelector('[data-zero-status]')
         return statusEl?.getAttribute('data-zero-status') === 'connected'
       },
-      { timeout }
+      { timeout },
     )
     .catch(() => {
       console.info('Zero status element not found, continuing anyway')

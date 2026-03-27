@@ -71,7 +71,7 @@ export const authServer = betterAuth({
   ],
 
   logger: {
-    level: 'debug',
+    level: 'warn',
     log(level, message, ...args) {
       console.info(level, message, ...args)
     },

@@ -47,7 +47,7 @@ function getThemeForType(type?: ToastType): ThemeName | null {
     case 'success':
       return 'green'
     case 'info':
-    default:
+    case undefined:
       return null
   }
 }
@@ -148,7 +148,7 @@ const ToastBanner = memo(({ toast, onHide }: ToastBannerProps) => {
           }
         })
       }
-    }
+    },
   )
 
   useAnimatedReaction(
@@ -162,10 +162,10 @@ const ToastBanner = memo(({ toast, onHide }: ToastBannerProps) => {
             if (finished) {
               scheduleOnRN(hide)
             }
-          }
+          },
         )
       }
-    }
+    },
   )
 
   const animatedStyle = useAnimatedStyle(() => {
