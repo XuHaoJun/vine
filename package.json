@@ -44,6 +44,7 @@
     "test:integration": "bun run env:dev bun --cwd=./src/test playwright test",
     "test:unit": "bun run:dev vitest run -c ./src/test/vitest.config.ts",
     "test": "bun run test:unit && bun run test:integration",
+    "up": "tko up",
     "zero:generate": "on-zero generate --after 'bun lint:fix'"
   },
   "overrides": {
@@ -78,12 +79,12 @@
     "@tamagui/themes": "2.0.0-rc.31",
     "@tamagui/toast": "2.0.0-rc.31",
     "@tamagui/vite-plugin": "2.0.0-rc.31",
-    "@vxrn/color-scheme": "1.12.8-1774559791762",
-    "@vxrn/compiler": "1.12.8-1774559791762",
-    "@vxrn/resolve": "1.12.8-1774559791762",
-    "@vxrn/tslib-lite": "1.12.8-1774559791762",
-    "@vxrn/use-isomorphic-layout-effect": "1.12.8-1774559791762",
-    "@vxrn/vite-plugin-metro": "1.12.8-1774559791762",
+    "@vxrn/color-scheme": "1.13.0",
+    "@vxrn/compiler": "1.13.0",
+    "@vxrn/resolve": "1.13.0",
+    "@vxrn/tslib-lite": "1.13.0",
+    "@vxrn/use-isomorphic-layout-effect": "1.13.0",
+    "@vxrn/vite-plugin-metro": "1.13.0",
     "better-auth": "^1.3.32",
     "burnt": "^0.12.2",
     "drizzle-orm": "1.0.0-beta.9-e89174b",
@@ -103,7 +104,7 @@
     "expo-web-browser": "~55.0.10",
     "motion": "12.36.0",
     "on-zero": "0.2.10",
-    "one": "1.12.8-1774559791762",
+    "one": "1.13.0",
     "pg": "8.18.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
@@ -123,7 +124,7 @@
     "rolldown": "^1.0.0-rc.10",
     "tamagui": "2.0.0-rc.31",
     "valibot": "^1.1.0",
-    "vxrn": "1.12.8-1774559791762",
+    "vxrn": "1.13.0",
     "zeego": "^3.0.6"
   },
   "devDependencies": {
@@ -146,7 +147,7 @@
   },
   "reanimated": {
     "staticFeatureFlags": {
-      "ENABLE_SHARED_ELEMENT_TRANSITIONS": true,
+      "ENABLE_SHARED_ELEMENT_TRANSITIONS": false,
       "ANDROID_SYNCHRONOUSLY_UPDATE_UI_PROPS": true,
       "IOS_SYNCHRONOUSLY_UPDATE_UI_PROPS": true,
       "USE_COMMIT_HOOK_ONLY_FOR_REACT_COMMITS": true,
@@ -173,6 +174,32 @@
     "ZERO_MUTATE_FORWARD_COOKIES": "true",
     "ZERO_QUERY_FORWARD_COOKIES": "true",
     "ZERO_APP_PUBLICATIONS": "zero_takeout"
+  },
+  "upgradeSets": {
+    "takeout": [
+      "@take-out/*",
+      "on-zero"
+    ],
+    "tamagui": [
+      "tamagui",
+      "@tamagui/*"
+    ],
+    "one": [
+      "one",
+      "vxrn",
+      "@vxrn/*"
+    ],
+    "zero": [
+      "@rocicorp/zero"
+    ],
+    "better-auth": [
+      "better-auth",
+      "@better-auth/*"
+    ],
+    "drizzle": [
+      "drizzle-orm",
+      "drizzle-kit"
+    ]
   },
   "publishConfig": {
     "access": "public"

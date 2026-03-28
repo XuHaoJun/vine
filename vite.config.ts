@@ -71,19 +71,7 @@ export default {
       },
 
       native: {
-        bundler: 'metro',
-        bundlerOptions: {
-          watchman: false,
-          babelConfigOverrides: (config) => {
-            return {
-              ...config,
-              plugins: [
-                // reanimated worklet compilation - MUST be last
-                'react-native-reanimated/plugin',
-              ],
-            }
-          },
-        },
+        bundler: 'rolldown',
       },
 
       router: {
