@@ -50,3 +50,5 @@ dist
 # Docker volume data
 .docker
 .vxrn-entry-native.tsx
+
+.turbo

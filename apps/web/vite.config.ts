@@ -1,10 +1,26 @@
 import { tamaguiPlugin } from '@tamagui/vite-plugin'
 import { one } from 'one/vite'
 import { visualizer } from 'rollup-plugin-visualizer'
+import { createRequire } from 'node:module'
+import path from 'node:path'
 
 import type { UserConfig } from 'vite'
 
+const _require = createRequire(import.meta.url)
+const tamaguiToastV1 = path.join(
+  path.dirname(_require.resolve('@tamagui/toast/package.json')),
+  'dist/esm/v1.mjs',
+)
+
 export default {
+  resolve: {
+    alias: {
+      // @tamagui/toast v2 moved the v1 API (ToastProvider, ToastViewport, useToastController,
+      // useToastState) out of the main entry point. Alias back to the v1 submodule.
+      '@tamagui/toast': tamaguiToastV1,
+    },
+  },
+
   server: {
     allowedHosts: ['host.docker.internal'],
   },
