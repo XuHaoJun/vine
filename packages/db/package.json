@@ -1,0 +1,29 @@
+{
+  "name": "@vine/db",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./database": "./src/database.ts",
+    "./schema": "./src/schema.ts",
+    "./schema-private": "./src/schema-private.ts",
+    "./schema-public": "./src/schema-public.ts",
+    "./helpers": "./src/helpers.ts",
+    "./migrate": "./src/migrate.ts"
+  },
+  "scripts": {
+    "build": "echo 'db package - no build step'",
+    "dev": "echo 'db package - no dev step'"
+  },
+  "dependencies": {
+    "@take-out/postgres": "^0.2.10",
+    "drizzle-orm": "1.0.0-beta.9-e89174b",
+    "pg": "8.18.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.10",
+    "drizzle-kit": "1.0.0-beta.9-e89174b",
+    "typescript": "^5.9.3"
+  }
+}

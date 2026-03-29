@@ -1,0 +1,29 @@
+{
+  "name": "@vine/zero-schema",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts",
+    "./models/*": "./src/models/*.ts",
+    "./queries/*": "./src/queries/*.ts",
+    "./generated/*": "./src/generated/*.ts",
+    "./server/*": "./src/server/*.ts"
+  },
+  "scripts": {
+    "build": "echo 'zero-schema package - no build step'",
+    "dev": "echo 'zero-schema package - no dev step'",
+    "zero:generate": "on-zero generate --after 'bun lint:fix'"
+  },
+  "dependencies": {
+    "@rocicorp/zero": "0.26.2",
+    "@vine/db": "workspace:*",
+    "drizzle-orm": "1.0.0-beta.9-e89174b",
+    "on-zero": "0.2.10",
+    "valibot": "^1.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
