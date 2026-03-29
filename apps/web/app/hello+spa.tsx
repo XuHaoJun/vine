@@ -1,6 +1,6 @@
 import { createConnectTransport } from '@connectrpc/connect-web'
 import { createClient } from '@connectrpc/connect'
-import { GreeterService } from '@vine/proto/greeter-connect'
+import { GreeterService } from '@vine/proto/greeter'
 import { useState } from 'react'
 import { Button, Input, SizableText, YStack, XStack } from 'tamagui'
 

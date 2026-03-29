@@ -4,7 +4,3 @@ plugins:
     out: gen
     opt:
       - target=ts
-  - local: protoc-gen-connect-es
-    out: gen
-    opt:
-      - target=ts

@@ -1,5 +1,5 @@
 import { ConnectRouter } from '@connectrpc/connect'
-import { GreeterService } from '@vine/proto/greeter-connect'
+import { GreeterService } from '@vine/proto/greeter'
 
 export function greeterHandler(router: ConnectRouter) {
   router.service(GreeterService, {
