@@ -26,6 +26,7 @@ declare module 'one' {
         | `/auth`
         | `/auth/login`
         | `/auth/login/password`
+        | `/hello`
         | `/home`
         | `/home/(tabs)`
         | `/home/(tabs)/feed`
