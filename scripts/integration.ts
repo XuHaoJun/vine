@@ -163,7 +163,7 @@ async function main() {
     // start frontend
     console.info('\nstarting frontend...')
     const testEnv = await getTestEnv()
-    await spawnWithEnv('bun one serve --port 8081', {
+    await spawnWithEnv('cd apps/web && bun one serve --port 8081', {
       ...testEnv,
       IS_TESTING: '1',
       ONE_SERVER_URL: 'http://localhost:8081',
@@ -173,7 +173,7 @@ async function main() {
 
     // run tests
     console.info('\nrunning tests...')
-    await $('cd src/test && bunx playwright test', { timeout: TEST_TIMEOUT })
+    await $('cd apps/web/src/test && bunx playwright test', { timeout: TEST_TIMEOUT })
 
     console.info('\n✓ integration tests passed')
   } finally {
