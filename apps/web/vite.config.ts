@@ -23,6 +23,9 @@ export default {
 
   server: {
     allowedHosts: ['host.docker.internal'],
+    proxy: {
+      '/api': 'http://localhost:3001',
+    },
   },
 
   optimizeDeps: {
