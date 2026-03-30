@@ -17,7 +17,7 @@ const { values } = parseArgs({
 })
 
 if (values.watch) {
-  await $`tsc --noEmit --watch`
+  await $`turbo typecheck -- --watch`
 } else {
-  await $`tsc --noEmit`
+  await $`turbo typecheck`
 }

@@ -31,6 +31,7 @@
     "test:integration": "bun run env:dev bun --cwd=./src/test playwright test",
     "test:unit": "bun run:dev vitest run -c ./src/test/vitest.config.ts",
     "test": "bun run test:unit && bun run test:integration",
+    "typecheck": "tsc --noEmit",
     "up": "tko up",
     "zero:generate": "on-zero generate --after 'bun lint:fix'"
   },

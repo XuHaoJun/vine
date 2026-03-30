@@ -92,9 +92,9 @@
   "overrides": [
     {
       "files": [
-        "src/interface/**/*.tsx",
-        "src/interface/**/*.ts",
-        "src/features/auth/ui/OtpInput.tsx"
+        "**/src/interface/**/*.tsx",
+        "**/src/interface/**/*.ts",
+        "**/src/features/auth/ui/OtpInput.tsx"
       ],
       "rules": {
         "no-restricted-imports": "off"

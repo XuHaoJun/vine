@@ -14,7 +14,8 @@
   "scripts": {
     "build": "echo 'zero-schema package - no build step'",
     "dev": "echo 'zero-schema package - no dev step'",
-    "zero:generate": "on-zero generate --after 'bun lint:fix'"
+    "zero:generate": "on-zero generate --after 'bun lint:fix'",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@rocicorp/zero": "0.26.2",

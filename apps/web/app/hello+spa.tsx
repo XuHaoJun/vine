@@ -2,7 +2,9 @@ import { createConnectTransport } from '@connectrpc/connect-web'
 import { createClient } from '@connectrpc/connect'
 import { GreeterService } from '@vine/proto/greeter'
 import { useState } from 'react'
-import { Button, Input, SizableText, YStack, XStack } from 'tamagui'
+import { SizableText, YStack, XStack } from 'tamagui'
+import { Button } from '~/interface/buttons/Button'
+import { Input } from '~/interface/forms/Input'
 
 const transport = createConnectTransport({
   baseUrl: (import.meta.env.VITE_SERVER_URL as string | undefined) ?? 'http://localhost:3001',
