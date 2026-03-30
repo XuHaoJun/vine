@@ -175,6 +175,7 @@ async function main() {
       ONE_SERVER_URL: 'http://localhost:3001',
       BETTER_AUTH_URL: 'http://localhost:3001',
       VITE_SERVER_URL: 'http://localhost:3001',
+      VITE_DEMO_MODE: '1',
     })
     await waitForPort(FRONTEND_PORT, 60_000)
 
