@@ -9,7 +9,7 @@ import { zeroPlugin } from './plugins/zero'
 const app = Fastify({ logger: true })
 
 await app.register(cors, {
-  origin: true,
+  origin: process.env['ALLOWED_ORIGIN'] ?? true,
   credentials: true,
 })
 

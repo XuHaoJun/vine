@@ -20,6 +20,7 @@
     "@vine/proto": "workspace:*",
     "@vine/zero-schema": "workspace:*",
     "better-auth": "^1.3.32",
+    "drizzle-orm": "1.0.0-beta.9-e89174b",
     "fastify": "^5.3.3",
     "on-zero": "0.2.10"
   },
