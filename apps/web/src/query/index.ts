@@ -7,7 +7,10 @@ export {
   useQueryClient as useTanQueryClient,
 } from '@tanstack/react-query'
 
-export { useMutation as useConnectMutation, useQuery as useConnectQuery } from '@connectrpc/connect-query'
+export {
+  useMutation as useConnectMutation,
+  useQuery as useConnectQuery,
+} from '@connectrpc/connect-query'
 
 import { QueryClient } from '@tanstack/react-query'
 
