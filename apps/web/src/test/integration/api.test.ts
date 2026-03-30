@@ -4,7 +4,7 @@ const BASE_URL = 'http://localhost:8081'
 
 test.describe('API Integration Tests', () => {
   test('health endpoint should return ok status', async ({ request }) => {
-    const response = await request.get(`${BASE_URL}/api/health`)
+    const response = await request.get(`${BASE_URL}/api/healthz`)
 
     expect(response.ok()).toBe(true)
     expect(response.status()).toBe(200)
@@ -20,7 +20,7 @@ test.describe('API Integration Tests', () => {
 
   test('health endpoint should respond quickly', async ({ request }) => {
     const start = Date.now()
-    const response = await request.get(`${BASE_URL}/api/health`)
+    const response = await request.get(`${BASE_URL}/api/healthz`)
     const end = Date.now()
 
     expect(response.ok()).toBe(true)
