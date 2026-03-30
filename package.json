@@ -10,7 +10,8 @@
   "packageManager": "bun@1.3.9",
   "scripts": {
     "postinstall": "turbo postinstall",
-    "check:all": "turbo check:all",
+    "check": "tko check",
+    "check:all": "tko check --all",
     "dev": "turbo dev",
     "build": "turbo build",
     "test": "turbo test",
