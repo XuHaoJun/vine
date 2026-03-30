@@ -54,7 +54,7 @@ services:
       - ZERO_UPSTREAM_DB=postgresql://user:password@pgdb:5432/postgres
       - ZERO_CVR_DB=postgresql://user:password@pgdb:5432/zero_cvr
       - ZERO_CHANGE_DB=postgresql://user:password@pgdb:5432/zero_cdb
-    command: bun run migrate.ts
+    command: bun run migrate-dist.js
 
   zero:
     image: "rocicorp/zero:${ZERO_VERSION:-error-run-bun-tko-run-env-update}"
