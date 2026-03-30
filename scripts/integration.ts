@@ -172,8 +172,8 @@ async function main() {
     await spawnWithEnv('cd apps/web && bun one serve --port 8081', {
       ...commonEnv,
       IS_TESTING: '1',
-      ONE_SERVER_URL: 'http://localhost:8081',
-      BETTER_AUTH_URL: 'http://localhost:8081',
+      ONE_SERVER_URL: 'http://localhost:3001',
+      BETTER_AUTH_URL: 'http://localhost:3001',
       VITE_SERVER_URL: 'http://localhost:3001',
     })
     await waitForPort(FRONTEND_PORT, 60_000)
