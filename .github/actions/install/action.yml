@@ -30,3 +30,7 @@ runs:
     - name: Postinstall
       shell: bash
       run: bun run postinstall
+
+    - name: Build
+      shell: bash
+      run: turbo build
