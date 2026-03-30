@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test'
 
-const BASE_URL = 'http://localhost:8081'
+const BASE_URL = 'http://localhost:3001'
 
 test.describe('API Integration Tests', () => {
   test('health endpoint should return ok status', async ({ request }) => {
-    const response = await request.get(`${BASE_URL}/api/healthz`)
+    const response = await request.get(`${BASE_URL}/healthz`)
 
     expect(response.ok()).toBe(true)
     expect(response.status()).toBe(200)
@@ -20,7 +20,7 @@ test.describe('API Integration Tests', () => {
 
   test('health endpoint should respond quickly', async ({ request }) => {
     const start = Date.now()
-    const response = await request.get(`${BASE_URL}/api/healthz`)
+    const response = await request.get(`${BASE_URL}/healthz`)
     const end = Date.now()
 
     expect(response.ok()).toBe(true)

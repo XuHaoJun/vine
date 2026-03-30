@@ -159,7 +159,7 @@ async function main() {
 
     // build
     console.info('\nbuilding...')
-    await $('bun run build', { timeout: BUILD_TIMEOUT })
+    await $('VITE_DEMO_MODE=1 VITE_API_URL=http://localhost:3001 bun run build', { timeout: BUILD_TIMEOUT })
 
     // start backend
     console.info('\nstarting backend...')

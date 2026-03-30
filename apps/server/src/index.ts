@@ -24,7 +24,7 @@ await app.register(authPlugin)
 // Zero sync endpoints (/api/zero/*)
 await app.register(zeroPlugin)
 
-app.get('/healthz', async () => ({ ok: true }))
+app.get('/healthz', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))
 
 const port = Number(process.env['PORT'] ?? 3001)
 await app.listen({ port, host: '0.0.0.0' })
