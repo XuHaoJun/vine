@@ -33,4 +33,4 @@ runs:
 
     - name: Build
       shell: bash
-      run: turbo build
+      run: bun run build
