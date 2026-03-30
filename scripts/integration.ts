@@ -11,6 +11,7 @@ import { getTestEnv } from './helpers/get-test-env'
 
 // --- config ---
 const FRONTEND_PORT = 8081
+const BACKEND_PORT = 3001
 const DOCKER_TIMEOUT = 120_000 // 2 min
 const BUILD_TIMEOUT = 300_000 // 5 min
 const TEST_TIMEOUT = 120_000 // 2 min
@@ -160,14 +161,20 @@ async function main() {
     console.info('\nbuilding...')
     await $('bun run build', { timeout: BUILD_TIMEOUT })
 
+    // start backend
+    console.info('\nstarting backend...')
+    const commonEnv = await getTestEnv()
+    await spawnWithEnv('cd apps/server && bun start', commonEnv)
+    await waitForPort(BACKEND_PORT, 30_000)
+
     // start frontend
     console.info('\nstarting frontend...')
-    const testEnv = await getTestEnv()
     await spawnWithEnv('cd apps/web && bun one serve --port 8081', {
-      ...testEnv,
+      ...commonEnv,
       IS_TESTING: '1',
       ONE_SERVER_URL: 'http://localhost:8081',
       BETTER_AUTH_URL: 'http://localhost:8081',
+      VITE_SERVER_URL: 'http://localhost:3001',
     })
     await waitForPort(FRONTEND_PORT, 60_000)
 
