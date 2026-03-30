@@ -1,14 +1,66 @@
 import { expo } from '@better-auth/expo'
+import { eq } from 'drizzle-orm'
 import { time } from '@take-out/helpers'
 import { betterAuth } from 'better-auth'
 import { admin, bearer, jwt, magicLink } from 'better-auth/plugins'
 import type { FastifyInstance } from 'fastify'
 import { getDatabase } from '@vine/db/database'
+import { getDb } from '@vine/db'
+import { user as userTable } from '@vine/db/schema-private'
+import { userPublic, userState } from '@vine/db/schema-public'
 
 const DOMAIN = 'takeout.tamagui.dev'
 const APP_SCHEME = 'takeout'
 const BETTER_AUTH_URL = process.env['BETTER_AUTH_URL'] ?? 'http://localhost:3001'
+const DEMO_EMAIL = process.env['DEMO_EMAIL'] ?? `demo@${DOMAIN}`
 const DB_CONFIGURED = Boolean(process.env['ZERO_UPSTREAM_DB'])
+
+async function afterCreateUser(user: { id: string; email: string }) {
+  try {
+    const db = getDb()
+    const { id: userId, email } = user
+
+    const existingUser = await db
+      .select()
+      .from(userPublic)
+      .where(eq(userPublic.id, userId))
+      .limit(1)
+
+    const [userPrivate] = await db
+      .select({
+        name: userTable.name,
+        username: userTable.username,
+        image: userTable.image,
+        createdAt: userTable.createdAt,
+      })
+      .from(userTable)
+      .where(eq(userTable.id, userId))
+
+    if (existingUser.length === 1 || !userPrivate) return
+
+    const existingUserState = await db
+      .select()
+      .from(userState)
+      .where(eq(userState.userId, userId))
+      .limit(1)
+
+    if (existingUserState.length === 0) {
+      await db.insert(userState).values({ userId, darkMode: false })
+    }
+
+    const { name, username, image, createdAt } = userPrivate
+    await db.insert(userPublic).values({
+      id: userId,
+      name: name || '',
+      username: email === DEMO_EMAIL ? 'demo' : username || '',
+      image: image || '',
+      joinedAt: createdAt ? new Date(createdAt).toISOString() : new Date().toISOString(),
+    })
+  } catch (error) {
+    console.error(`[afterCreateUser] error`, error)
+    throw error
+  }
+}
 
 function createAuthServer() {
   return betterAuth({
@@ -28,6 +80,14 @@ function createAuthServer() {
       `${APP_SCHEME}://`,
       BETTER_AUTH_URL,
     ],
+
+    databaseHooks: {
+      user: {
+        create: {
+          after: afterCreateUser,
+        },
+      },
+    },
 
     plugins: [
       jwt({
