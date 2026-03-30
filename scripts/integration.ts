@@ -184,13 +184,29 @@ async function main() {
       port: FRONTEND_PORT,
       async fetch(req) {
         const url = new URL(req.url)
-        const target = url.pathname.startsWith('/api')
-          ? `http://localhost:${BACKEND_PORT}${url.pathname}${url.search}`
-          : `http://localhost:${STATIC_PORT}${url.pathname}${url.search}`
-        return fetch(target, {
+        const isApi = url.pathname.startsWith('/api')
+        const targetPort = isApi ? BACKEND_PORT : STATIC_PORT
+        const target = `http://localhost:${targetPort}${url.pathname}${url.search}`
+
+        // Disable compression so we can buffer and forward the body without re-encoding issues
+        const reqHeaders = new Headers(req.headers)
+        reqHeaders.set('accept-encoding', 'identity')
+
+        const upstream = await fetch(target, {
           method: req.method,
-          headers: req.headers,
+          headers: reqHeaders,
           body: req.method !== 'GET' && req.method !== 'HEAD' ? req.body : undefined,
+        })
+
+        // Buffer the full body to avoid chunked transfer encoding issues with Bun.serve
+        const body = await upstream.arrayBuffer()
+        const resHeaders = new Headers(upstream.headers)
+        resHeaders.delete('transfer-encoding')
+        resHeaders.set('content-length', String(body.byteLength))
+
+        return new Response(body, {
+          status: upstream.status,
+          headers: resHeaders,
         })
       },
     })
