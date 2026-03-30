@@ -38,23 +38,23 @@ services:
       # -c log_line_prefix='%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
     volumes:
       - pgdb_data:/var/lib/postgresql/data
-      - ./src/database/:/docker-entrypoint-initdb.d
+      - ./packages/db/src/:/docker-entrypoint-initdb.d
 
   migrate:
-    image: node:24-slim
+    image: oven/bun:1
     depends_on:
       pgdb:
         condition: service_healthy
     volumes:
       - .:/app
-    working_dir: /app/src/database
+    working_dir: /app/packages/db/src
     environment:
       - RUN=1
       - ALLOW_MISSING_ENV=1
       - ZERO_UPSTREAM_DB=postgresql://user:password@pgdb:5432/postgres
       - ZERO_CVR_DB=postgresql://user:password@pgdb:5432/zero_cvr
       - ZERO_CHANGE_DB=postgresql://user:password@pgdb:5432/zero_cdb
-    command: node migrate-dist.js
+    command: bun run migrate.ts
 
   zero:
     image: "rocicorp/zero:${ZERO_VERSION:-error-run-bun-tko-run-env-update}"
