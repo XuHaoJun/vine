@@ -75,8 +75,8 @@ services:
       ZERO_UPSTREAM_DB: postgresql://user:password@pgdb:5432/postgres
       ZERO_CVR_DB: postgresql://user:password@pgdb:5432/zero_cvr
       ZERO_CHANGE_DB: postgresql://user:password@pgdb:5432/zero_cdb
-      ZERO_MUTATE_URL: http://host.docker.internal:${VITE_PORT_WEB:-8081}/api/zero/push
-      ZERO_QUERY_URL: http://host.docker.internal:${VITE_PORT_WEB:-8081}/api/zero/pull
+      ZERO_MUTATE_URL: http://host.docker.internal:3001/api/zero/push
+      ZERO_QUERY_URL: http://host.docker.internal:3001/api/zero/pull
       ZERO_ADMIN_PASSWORD: 'dev'
       ZERO_APP_PUBLICATIONS: ${ZERO_APP_PUBLICATIONS:-zero_takeout}
       ZERO_CVR_MAX_CONNS: ${ZERO_CVR_MAX_CONNS:-4}
