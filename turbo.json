@@ -6,7 +6,8 @@
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "gen/**", ".expo/**"]
+      "outputs": ["dist/**", "gen/**", ".expo/**"],
+      "env": ["VITE_DEMO_MODE"]
     },
     "dev": {
       "dependsOn": ["^build"],
