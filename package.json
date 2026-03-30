@@ -22,7 +22,6 @@
     "backend": "bun --cwd apps/web run migrate:build && docker compose up --remove-orphans"
   },
   "devDependencies": {
-    "@fastify/cors": "10",
     "oxfmt": "^0.16.0",
     "oxlint": "^1.31.0",
     "turbo": "^2"

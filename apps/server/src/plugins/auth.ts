@@ -1,4 +1,5 @@
 import { expo } from '@better-auth/expo'
+import { isValidJWT } from '@take-out/better-auth-utils/server'
 import { eq } from 'drizzle-orm'
 import { time } from '@take-out/helpers'
 import { betterAuth } from 'better-auth'
@@ -8,6 +9,7 @@ import { getDatabase } from '@vine/db/database'
 import { getDb } from '@vine/db'
 import { user as userTable } from '@vine/db/schema-private'
 import { userPublic, userState } from '@vine/db/schema-public'
+import { toWebRequest } from '../utils'
 
 const DOMAIN = 'takeout.tamagui.dev'
 const APP_SCHEME = 'takeout'
@@ -130,31 +132,6 @@ export function getAuthServer() {
 // Named export for backward compat with zero plugin
 export { getAuthServer as authServer }
 
-function toWebRequest(fastifyReq: {
-  method: string
-  url: string
-  headers: Record<string, string | string[] | undefined>
-  body?: unknown
-}): Request {
-  const url = new URL(fastifyReq.url, BETTER_AUTH_URL)
-  const headers = new Headers()
-  for (const [key, value] of Object.entries(fastifyReq.headers)) {
-    if (value !== undefined) {
-      headers.set(key, Array.isArray(value) ? value.join(', ') : value)
-    }
-  }
-  const body =
-    fastifyReq.method !== 'GET' && fastifyReq.method !== 'HEAD' && fastifyReq.body != null
-      ? JSON.stringify(fastifyReq.body)
-      : undefined
-
-  return new Request(url.toString(), {
-    method: fastifyReq.method,
-    headers,
-    body,
-  })
-}
-
 /** Fastify plugin that mounts Better Auth at /api/auth/* */
 export async function authPlugin(fastify: FastifyInstance) {
   if (!DB_CONFIGURED) {
@@ -164,6 +141,9 @@ export async function authPlugin(fastify: FastifyInstance) {
       handler: async (_request, reply) => {
         return reply.status(503).send({ error: 'Database not configured' })
       },
+    })
+    fastify.post('/api/auth/validateToken', async (_request, reply) => {
+      return reply.status(503).send({ error: 'Database not configured' })
     })
     return
   }
@@ -193,5 +173,19 @@ export async function authPlugin(fastify: FastifyInstance) {
         return reply.status(500).send({ error: 'Auth handler error' })
       }
     },
+  })
+
+  fastify.post('/api/auth/validateToken', async (request, reply) => {
+    const body = request.body as { token?: unknown } | null
+    if (body && typeof body.token === 'string') {
+      try {
+        const valid = await isValidJWT(body.token, {})
+        return reply.send({ valid })
+      } catch (err) {
+        console.error('[auth] validateToken error', err)
+      }
+      return reply.send({ valid: false })
+    }
+    return reply.send({ valid: false })
   })
 }

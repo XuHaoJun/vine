@@ -5,9 +5,10 @@ import { useState } from 'react'
 import { SizableText, YStack, XStack } from 'tamagui'
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
+import { SERVER_URL } from '~/constants/urls'
 
 const transport = createConnectTransport({
-  baseUrl: (import.meta.env.VITE_SERVER_URL as string | undefined) ?? 'http://localhost:3001',
+  baseUrl: SERVER_URL,
 })
 
 const client = createClient(GreeterService, transport)

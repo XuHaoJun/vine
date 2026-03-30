@@ -7,7 +7,7 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "gen/**", ".expo/**"],
-      "env": ["VITE_DEMO_MODE"]
+      "env": ["VITE_DEMO_MODE", "VITE_API_URL", "VITE_ZERO_HOSTNAME", "VITE_WEB_HOSTNAME"]
     },
     "dev": {
       "dependsOn": ["^build"],

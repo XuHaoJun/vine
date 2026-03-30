@@ -7,3 +7,6 @@
 [submodule "learn-projects/zero-mono"]
 	path = learn-projects/zero-mono
 	url = git@github.com:rocicorp/mono.git
+[submodule "learn-projects/takeout-free"]
+	path = learn-projects/takeout-free
+	url = git@github.com:tamagui/takeout-free.git

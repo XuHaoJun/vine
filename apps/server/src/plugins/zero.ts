@@ -5,6 +5,7 @@ import { createZeroServer } from 'on-zero/server'
 
 import { models, queries, schema, createServerActions } from '@vine/zero-schema'
 import { getAuthServer } from './auth'
+import { toWebRequest } from '../utils'
 
 const ZERO_UPSTREAM_DB = process.env['ZERO_UPSTREAM_DB']
 const DB_CONFIGURED = Boolean(ZERO_UPSTREAM_DB)
@@ -62,31 +63,5 @@ export async function zeroPlugin(fastify: FastifyInstance) {
       console.error('[zero] push error', err)
       return reply.status(500).send({ err: String(err) })
     }
-  })
-}
-
-function toWebRequest(fastifyReq: {
-  method: string
-  url: string
-  headers: Record<string, string | string[] | undefined>
-  body?: unknown
-}): Request {
-  const baseUrl = process.env['BETTER_AUTH_URL'] ?? 'http://localhost:3001'
-  const url = new URL(fastifyReq.url, baseUrl)
-  const headers = new Headers()
-  for (const [key, value] of Object.entries(fastifyReq.headers)) {
-    if (value !== undefined) {
-      headers.set(key, Array.isArray(value) ? value.join(', ') : value)
-    }
-  }
-  const body =
-    fastifyReq.method !== 'GET' && fastifyReq.method !== 'HEAD' && fastifyReq.body != null
-      ? JSON.stringify(fastifyReq.body)
-      : undefined
-
-  return new Request(url.toString(), {
-    method: fastifyReq.method,
-    headers,
-    body,
   })
 }
