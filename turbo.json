@@ -1,6 +1,9 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
+    "postinstall": {
+      "cache": false
+    },
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "gen/**", ".expo/**"]
@@ -9,6 +12,12 @@
       "dependsOn": ["^build"],
       "persistent": true,
       "cache": false
+    },
+    "check": {
+      "dependsOn": ["^build"]
+    },
+    "check:all": {
+      "dependsOn": ["^build"]
     },
     "lint": {},
     "test": {
