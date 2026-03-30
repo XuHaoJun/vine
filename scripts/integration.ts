@@ -11,6 +11,7 @@ import { getTestEnv } from './helpers/get-test-env'
 
 // --- config ---
 const FRONTEND_PORT = 8081
+const STATIC_PORT = 9090
 const BACKEND_PORT = 3001
 const DOCKER_TIMEOUT = 120_000 // 2 min
 const BUILD_TIMEOUT = 300_000 // 5 min
@@ -18,6 +19,7 @@ const TEST_TIMEOUT = 120_000 // 2 min
 
 // --- state ---
 const processes: Bun.Subprocess[] = []
+let proxyServer: ReturnType<typeof Bun.serve> | null = null
 
 // --- helpers ---
 
@@ -126,6 +128,9 @@ async function cleanup() {
       p.kill()
     } catch {}
   }
+  try {
+    proxyServer?.stop(true)
+  } catch {}
   await $('docker compose down', { silent: true, timeout: 30_000 }).catch(() => {})
 }
 
@@ -157,9 +162,9 @@ async function main() {
     console.info('\ninstalling playwright...')
     await $('bunx playwright install chromium', { timeout: BUILD_TIMEOUT })
 
-    // build
+    // build (bake VITE_DEMO_MODE into client bundle at build time)
     console.info('\nbuilding...')
-    await $('VITE_DEMO_MODE=1 VITE_API_URL=http://localhost:3001 bun run build', { timeout: BUILD_TIMEOUT })
+    await $('VITE_DEMO_MODE=1 bun run build', { timeout: BUILD_TIMEOUT })
 
     // start backend
     console.info('\nstarting backend...')
@@ -167,18 +172,29 @@ async function main() {
     await spawnWithEnv('cd apps/server && bun start', commonEnv)
     await waitForPort(BACKEND_PORT, 30_000)
 
-    // start frontend
+    // start static file server on internal port
     console.info('\nstarting frontend...')
-    await spawnWithEnv('cd apps/web && bun one serve --port 8081', {
-      ...commonEnv,
-      IS_TESTING: '1',
-      ONE_SERVER_URL: 'http://localhost:3001',
-      BETTER_AUTH_URL: 'http://localhost:3001',
-      VITE_SERVER_URL: 'http://localhost:3001',
-      NODE_ENV: 'development',
-      VITE_DEMO_MODE: '1',
+    await spawnWithEnv(`cd apps/web && bun one serve --port ${STATIC_PORT}`, commonEnv)
+    await waitForPort(STATIC_PORT, 60_000)
+
+    // start proxy on FRONTEND_PORT: routes /api/* to backend, everything else to static server
+    // this keeps the browser on a single origin so auth cookies work without cross-origin CORS
+    console.info(`\nstarting proxy on port ${FRONTEND_PORT}...`)
+    proxyServer = Bun.serve({
+      port: FRONTEND_PORT,
+      async fetch(req) {
+        const url = new URL(req.url)
+        const target = url.pathname.startsWith('/api')
+          ? `http://localhost:${BACKEND_PORT}${url.pathname}${url.search}`
+          : `http://localhost:${STATIC_PORT}${url.pathname}${url.search}`
+        return fetch(target, {
+          method: req.method,
+          headers: req.headers,
+          body: req.method !== 'GET' && req.method !== 'HEAD' ? req.body : undefined,
+        })
+      },
     })
-    await waitForPort(FRONTEND_PORT, 60_000)
+    console.info(`  ➜  Proxy:  http://localhost:${FRONTEND_PORT}/`)
 
     // run tests
     console.info('\nrunning tests...')
