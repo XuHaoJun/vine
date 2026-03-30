@@ -1,5 +1,6 @@
 import { authClient, clearAuthClientToken } from '~/features/auth/client/authClient'
 import { dialogConfirm, showError } from '~/interface/dialogs/actions'
+import { queryClient } from '~/query'
 
 export const useLogout = () => {
   const logout = async (options?: { skipConfirm?: boolean }) => {
@@ -15,6 +16,7 @@ export const useLogout = () => {
     try {
       await authClient.signOut()
       clearAuthClientToken()
+      queryClient.clear()
       // don't manually navigate - let AppLayout handle redirect when state changes to 'logged-out'
       // manual navigation causes double navigation on native
       return true

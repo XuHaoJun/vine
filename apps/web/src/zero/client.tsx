@@ -28,7 +28,7 @@ import { createKVStore } from './storage'
 
 export const {
   usePermission,
-  useQuery,
+  useQuery: useZeroQuery,
   getQuery,
   zero,
   ProvideZero: ProvideZeroWithoutAuth,

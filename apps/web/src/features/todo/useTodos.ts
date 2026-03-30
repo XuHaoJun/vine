@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 
 import { todosByUserId } from '@vine/zero-schema/queries/todo'
 import { useAuth } from '~/features/auth/client/authClient'
-import { useQuery, zero } from '~/zero/client'
+import { useZeroQuery, zero } from '~/zero/client'
 
 export interface Todo {
   id: string
@@ -16,7 +16,7 @@ export function useTodos() {
   const auth = useAuth()
   const userId = auth?.user?.id
 
-  const [todos, { type }] = useQuery(
+  const [todos, { type }] = useZeroQuery(
     todosByUserId,
     { userId: userId || '' },
     { enabled: Boolean(userId) },

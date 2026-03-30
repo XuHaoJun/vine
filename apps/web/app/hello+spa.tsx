@@ -1,38 +1,14 @@
-import { createConnectTransport } from '@connectrpc/connect-web'
-import { createClient } from '@connectrpc/connect'
+import { useMutation } from '@connectrpc/connect-query'
 import { GreeterService } from '@vine/proto/greeter'
 import { useState } from 'react'
 import { SizableText, YStack, XStack } from 'tamagui'
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
-import { SERVER_URL } from '~/constants/urls'
-
-const transport = createConnectTransport({
-  baseUrl: SERVER_URL,
-})
-
-const client = createClient(GreeterService, transport)
 
 export default function HelloPage() {
   const [name, setName] = useState('')
-  const [message, setMessage] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
-  async function sayHello() {
-    if (!name.trim()) return
-    setLoading(true)
-    setError(null)
-    setMessage(null)
-    try {
-      const res = await client.sayHello({ name: name.trim() })
-      setMessage(res.message)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const { mutate, data, isPending, error } = useMutation(GreeterService.method.sayHello)
 
   return (
     <YStack flex={1} items="center" justify="center" gap="$4" px="$6" maxW={480}>
@@ -50,26 +26,26 @@ export default function HelloPage() {
           placeholder="Your name"
           value={name}
           onChangeText={setName}
-          onSubmitEditing={sayHello}
+          onSubmitEditing={() => mutate({ name: name.trim() })}
         />
         <Button
           theme="accent"
-          onPress={sayHello}
-          disabled={loading || !name.trim()}
+          onPress={() => mutate({ name: name.trim() })}
+          disabled={isPending || !name.trim()}
         >
-          {loading ? '...' : 'Say Hello'}
+          {isPending ? '...' : 'Say Hello'}
         </Button>
       </XStack>
 
-      {message && (
+      {data?.message && (
         <SizableText size="$5" fontWeight="600" color="$green10">
-          {message}
+          {data.message}
         </SizableText>
       )}
 
       {error && (
         <SizableText size="$4" color="$red10">
-          Error: {error}
+          Error: {error.message}
         </SizableText>
       )}
     </YStack>
