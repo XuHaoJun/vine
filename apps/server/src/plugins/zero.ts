@@ -30,8 +30,12 @@ function getZeroServer() {
 /** Fastify plugin that mounts Zero sync endpoints at /api/zero/* */
 export async function zeroPlugin(fastify: FastifyInstance) {
   if (!DB_CONFIGURED) {
-    fastify.post('/api/zero/pull', async (_req, reply) => reply.status(503).send({ error: 'Database not configured' }))
-    fastify.post('/api/zero/push', async (_req, reply) => reply.status(503).send({ error: 'Database not configured' }))
+    fastify.post('/api/zero/pull', async (_req, reply) =>
+      reply.status(503).send({ error: 'Database not configured' }),
+    )
+    fastify.post('/api/zero/push', async (_req, reply) =>
+      reply.status(503).send({ error: 'Database not configured' }),
+    )
     return
   }
 
