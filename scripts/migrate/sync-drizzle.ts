@@ -6,7 +6,7 @@ import { existsSync } from 'node:fs'
 import { readdir, readFile, writeFile, stat } from 'node:fs/promises'
 import { join } from 'node:path'
 
-const MIGRATIONS_DIR = './src/database/migrations'
+const MIGRATIONS_DIR = './packages/db/src/migrations'
 
 /**
  * drizzle-kit v1 beta generates migrations as directories:
