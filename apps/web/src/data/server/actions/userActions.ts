@@ -1,8 +1,8 @@
 import { eq } from 'drizzle-orm'
 
-import { getDb } from '~/database'
-import { user as userTable } from '~/database/schema-private'
-import { todo, userPublic, userState } from '~/database/schema-public'
+import { getDb } from '@vine/db'
+import { user as userTable } from '@vine/db/schema-private'
+import { todo, userPublic, userState } from '@vine/db/schema-public'
 
 import type { AuthData } from '~/features/auth/types'
 

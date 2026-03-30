@@ -1,4 +1,4 @@
-import { sql } from '~/database/helpers'
+import { sql } from '@vine/db/helpers'
 import { ZERO_UPSTREAM_DB } from '~/server/env-server'
 
 import { migrations } from './migrations'

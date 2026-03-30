@@ -1,9 +1,9 @@
 import { eq } from 'drizzle-orm'
 
 import { DEMO_EMAIL } from '~/constants/app'
-import { getDb } from '~/database'
-import { user as userTable } from '~/database/schema-private'
-import { userPublic, userState } from '~/database/schema-public'
+import { getDb } from '@vine/db'
+import { user as userTable } from '@vine/db/schema-private'
+import { userPublic, userState } from '@vine/db/schema-public'
 
 export async function afterCreateUser(user: { id: string; email: string }) {
   try {

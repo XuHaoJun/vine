@@ -4,7 +4,7 @@ import { betterAuth } from 'better-auth'
 import { admin, bearer, jwt, magicLink } from 'better-auth/plugins'
 
 import { DOMAIN } from '~/constants/app'
-import { database } from '~/database/database'
+import { database } from '@vine/db/database'
 import { BETTER_AUTH_SECRET, BETTER_AUTH_URL } from '~/server/env-server'
 
 import { APP_SCHEME } from '../constants'
