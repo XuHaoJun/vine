@@ -58,6 +58,7 @@
     "@tamagui/themes": "2.0.0-rc.33",
     "@tamagui/toast": "2.0.0-rc.33",
     "@tamagui/vite-plugin": "2.0.0-rc.33",
+    "@vine/db": "workspace:*",
     "@vine/proto": "workspace:*",
     "@vine/zero-schema": "workspace:*",
     "@vxrn/color-scheme": "1.13.0",
