@@ -1,0 +1,23 @@
+{
+  "skill_name": "one",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I need to add a new page to the vine web app at the route /home/notifications. It should be SSR, fetch a list of notifications from /api/notifications, and show a loading state while the data loads. Show me the files I need to create and what to put in them.",
+      "expected_output": "Creates app/(app)/home/notifications.tsx (or index.tsx in a folder) with correct +ssr suffix or without suffix (SSR default), exports loader() with correct LoaderProps, uses useLoader() in the component, uses useLoaderState for loading state, and calls the API correctly. Also describes where the file goes in the vine directory structure.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "How do I create an API endpoint in the vine web app that handles POST requests to /api/posts, reads a JSON body, and returns the created post? Also show how to handle errors properly.",
+      "expected_output": "Creates apps/web/app/api/posts+api.ts with exported POST function, correct Request/Response signatures, uses request.json() to parse body, returns Response.json() with appropriate status codes, handles errors with try/catch.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I want to add a blog section to the vine web app with statically generated pages. There will be a list page at /blog and individual posts at /blog/[slug]. The slugs come from a CMS. Show me the full implementation including the layout, list page, and detail page.",
+      "expected_output": "Creates: app/blog/_layout.tsx with Slot, app/blog/index+ssg.tsx with loader for list, app/blog/[slug]+ssg.tsx with generateStaticParams() + loader + useLoader, all with correct file naming conventions and rendering modes.",
+      "files": []
+    }
+  ]
+}
