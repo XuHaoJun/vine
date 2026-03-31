@@ -26,6 +26,21 @@ jobs:
       - name: Check
         run: bun check:all
 
+  test-server:
+    if: "!contains(github.event.head_commit.message || github.event.pull_request.title || '', 'docs:')"
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: Server Unit Tests
+        run: bun --cwd apps/server run test
+
   integration:
     if: "!contains(github.event.head_commit.message || github.event.pull_request.title || '', 'docs:')"
     timeout-minutes: 20

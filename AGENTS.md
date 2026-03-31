@@ -154,6 +154,53 @@ import type { Todo } from './types'
 
 ---
 
+## Server Patterns
+
+### Service Factory + DI
+
+All server services use manual dependency injection via factory functions. No DI containers or module-level singletons.
+
+```ts
+// Service definition
+type AuthDeps = {
+  database: Pool
+  db: NodePgDatabase<typeof schema>
+}
+
+function createAuthService(deps: AuthDeps) {
+  // ... service logic using deps.database, deps.db
+}
+
+// Plugin registration
+async function authPlugin(fastify: FastifyInstance, deps: { auth: ReturnType<typeof createAuthService> }) {
+  // ... register routes using deps.auth
+}
+```
+
+### Wiring in `index.ts`
+
+Dependencies are assembled explicitly in the entry point:
+
+```ts
+const database = getDatabase()
+const db = createDb()
+
+const auth = createAuthService({ database, db })
+const zero = createZeroService({ auth, zeroUpstreamDb: process.env['ZERO_UPSTREAM_DB'] ?? '' })
+
+await authPlugin(app, { auth })
+await zeroPlugin(app, { auth, zero })
+```
+
+### Rules
+
+- **No module-level singletons** — avoid `let _instance: T | null` + `getInstance()` patterns
+- **No cross-plugin imports** — plugins should never import each other; inject via `deps`
+- **Factory functions are pure** — `createXxxService(deps)` should not read env vars or import singletons
+- **Env vars read in `index.ts`** — pass values through deps, not `process.env` inside services
+
+---
+
 ## Git Conventions
 
 - Commit messages: conventional commits (`feat:`, `fix:`, `chore:`)
