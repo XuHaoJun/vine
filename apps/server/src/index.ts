@@ -1,10 +1,12 @@
 import cors from '@fastify/cors'
 import { fastifyConnectPlugin } from '@connectrpc/connect-fastify'
 import Fastify from 'fastify'
+import { getDatabase } from '@vine/db/database'
+import { createDb } from '@vine/db'
 
 import { greeterRoutes } from './connect/routes'
-import { authPlugin } from './plugins/auth'
-import { zeroPlugin } from './plugins/zero'
+import { createAuthServer, authPlugin } from './plugins/auth'
+import { createZeroService, zeroPlugin } from './plugins/zero'
 
 const app = Fastify({ logger: true })
 
@@ -18,11 +20,19 @@ await app.register(fastifyConnectPlugin, {
   routes: greeterRoutes,
 })
 
-// Better Auth endpoints (/api/auth/*)
-await app.register(authPlugin)
+// Wire services with explicit dependencies
+const database = getDatabase()
+const db = createDb()
 
-// Zero sync endpoints (/api/zero/*)
-await app.register(zeroPlugin)
+const auth = createAuthServer({ database, db })
+const zero = createZeroService({
+  auth,
+  zeroUpstreamDb: process.env['ZERO_UPSTREAM_DB'] ?? '',
+})
+
+// Register plugins with injected dependencies
+await authPlugin(app, { auth })
+await zeroPlugin(app, { auth, zero })
 
 app.get('/healthz', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))
 
