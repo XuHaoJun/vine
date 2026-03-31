@@ -7,6 +7,31 @@ description: Zero data layer guide for this turborepo (vine). Use when working w
 
 This project uses `@rocicorp/zero` + `on-zero` helpers for real-time local-first data sync.
 
+## When to Use Zero vs React Query
+
+**Rule: If the data lives in Zero schema → use Zero. Everything else → React Query.**
+
+### Use Zero (`useZeroQuery` / `zero.mutate`)
+
+- CRUD operations on entities defined in zero-schema
+- Real-time sync across clients
+- Offline support required
+- List → Detail navigation (Zero's local cache makes it instant)
+- Multiple clients share the same data state
+
+### Use React Query (`useTanQuery` / `useTanMutation`)
+
+- One-off API calls that don't need sync
+- External API integrations (payment, analytics, third-party)
+- File upload/download operations
+- Server actions that don't modify Zero models
+
+### Use ConnectRPC Query (`useConnectQuery` / `useConnectMutation`)
+
+- ConnectRPC service calls that don't touch Zero models
+- Streaming RPC responses
+- See the `connect` skill for details
+
 ## Project Layout
 
 The canonical data layer lives in `packages/zero-schema/` (`@vine/zero-schema`):
