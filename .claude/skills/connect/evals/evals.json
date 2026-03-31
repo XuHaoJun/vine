@@ -1,0 +1,23 @@
+{
+  "skill_name": "connect",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "我要新增一個 UserService，有 GetUser (拿單一使用者) 和 ListUsers (拿所有使用者) 兩個 method，請問要動到哪些檔案？",
+      "expected_output": "應該列出 packages/proto/proto/ (新增 .proto), packages/proto/gen/ (產生代碼), apps/server/src/connect/ (實作 handler), apps/server/src/connect/routes.ts (註冊), apps/web/src/features/auth/client/ (client 使用)",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "假設 UserService 已經實作了，我要從 web frontend 呼叫它，該怎麼做？",
+      "expected_output": "應該說明如何 import client stub、建立 transport、使用 createPromiseClient、呼叫 method",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "我在 packages/proto/proto/user/v1/user.proto 定義了新的 proto，請問要執行什麼指令來產生 TypeScript 代碼？",
+      "expected_output": "應該回答 bun turbo proto:generate",
+      "files": []
+    }
+  ]
+}

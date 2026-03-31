@@ -26,6 +26,9 @@
     },
     "typecheck": {
       "dependsOn": ["^build"]
+    },
+    "proto:generate": {
+      "cache": false
     }
   }
 }

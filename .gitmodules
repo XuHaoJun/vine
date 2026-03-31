@@ -10,3 +10,6 @@
 [submodule "learn-projects/takeout-free"]
 	path = learn-projects/takeout-free
 	url = https://github.com/tamagui/takeout-free.git
+[submodule "learn-projects/connect-es"]
+	path = learn-projects/connect-es
+	url = https://github.com/connectrpc/connect-es.git

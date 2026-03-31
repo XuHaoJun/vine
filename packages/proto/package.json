@@ -8,7 +8,8 @@
     "./greeter": "./gen/greeter/v1/greeter_pb.ts"
   },
   "scripts": {
-    "build": "buf generate"
+    "build": "buf generate",
+    "proto:generate": "buf generate"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.0.0"
