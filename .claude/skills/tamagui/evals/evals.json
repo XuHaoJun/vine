@@ -1,0 +1,20 @@
+{
+  "skill_name": "takeout-tamagui",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a card component with a heading, some text, and a button. The card should have padding of $4, a background color, and rounded corners. The heading should use the heading font family.",
+      "expected_output": "A Stack/Card with Text components using proper token syntax ($4, $rounded, etc.) and ButtonSimple with correct props"
+    },
+    {
+      "id": 2,
+      "prompt": "I need a responsive layout that shows a full-width stack on mobile, then switches to a 2-column layout on medium screens and a 3-column layout on large screens. Also add a dark mode theme wrapper.",
+      "expected_output": "Stack with $md and $lg media query props for responsive width changes, Theme name='dark' wrapper"
+    },
+    {
+      "id": 3,
+      "prompt": "What's the difference between Button and ButtonSimple? I want to build a settings page with some toggle switches and form inputs. Should I use Theme reset anywhere?",
+      "expected_output": "Explanation of ButtonSimple being in src/interface, guidance on using custom Select/Switch from tamagui vs src/interface, Theme reset usage"
+    }
+  ]
+}
