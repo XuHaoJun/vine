@@ -1,0 +1,94 @@
+{
+  "skill_name": "zero",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Add a new 'post' table to the zero data layer. It should have id, userId, caption (optional), imageUrl, and createdAt fields. Users should only be able to see their own posts. Include basic CRUD mutations.",
+      "expected_output": "Creates packages/zero-schema/src/models/post.ts with correct schema using @rocicorp/zero column types, serverWhere permission scoped to userId, mutations() call, and TableInsertRow type. Mentions running bun zero:generate.",
+      "assertions": [
+        {
+          "name": "imports-from-correct-packages",
+          "description": "Uses @rocicorp/zero for column types and on-zero for mutations/serverWhere"
+        },
+        {
+          "name": "correct-file-path",
+          "description": "Places file at packages/zero-schema/src/models/post.ts"
+        },
+        {
+          "name": "permission-scoped-to-user",
+          "description": "serverWhere permission uses _.cmp('userId', auth?.id || '')"
+        },
+        {
+          "name": "optional-caption-column",
+          "description": "caption field uses string().optional()"
+        },
+        {
+          "name": "mentions-generate",
+          "description": "Mentions running bun zero:generate after creating the model"
+        },
+        {
+          "name": "exports-type",
+          "description": "Exports a TypeScript type using TableInsertRow<typeof schema>"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Write a React hook called useUserPosts that fetches all posts for the current logged-in user, ordered by newest first. Show me how to use it in a component.",
+      "expected_output": "Creates a query in packages/zero-schema/src/queries/post.ts using zql, then a hook that uses useZeroQuery from ~/zero/client and useAuth() for the userId (not useUser()). Shows component usage with isLoading check.",
+      "assertions": [
+        {
+          "name": "query-uses-zql",
+          "description": "Query function uses zql from on-zero"
+        },
+        {
+          "name": "uses-useAuth-not-useUser",
+          "description": "Hook uses useAuth() to get userId, not useUser() - avoids waterfall"
+        },
+        {
+          "name": "uses-useZeroQuery",
+          "description": "Uses useZeroQuery from ~/zero/client (not useQuery)"
+        },
+        {
+          "name": "enabled-guard",
+          "description": "Passes { enabled: Boolean(userId) } option to avoid query with empty userId"
+        },
+        {
+          "name": "correct-query-file-path",
+          "description": "Query function placed in packages/zero-schema/src/queries/post.ts"
+        },
+        {
+          "name": "loading-check",
+          "description": "Checks type === 'unknown' for loading state"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I want to add comments to posts in zero. Each comment has id, postId, userId, text, createdAt. I also need a query that loads a post WITH its comments and each comment's author (user). Walk me through all the steps.",
+      "expected_output": "Covers: 1) model file for comment, 2) relationship between post->comments and comment->user in relationships.ts, 3) query using .related() for comments and nested .related() for user, 4) run bun zero:generate. Importantly generates IDs/timestamps on the client before calling mutate.",
+      "assertions": [
+        {
+          "name": "creates-comment-model",
+          "description": "Creates packages/zero-schema/src/models/comment.ts with correct schema"
+        },
+        {
+          "name": "adds-relationships",
+          "description": "Adds relationships to relationships.ts and exports in allRelationships array"
+        },
+        {
+          "name": "uses-related-for-nested-data",
+          "description": "Query uses .related('comments') and nested .related('user') on comments"
+        },
+        {
+          "name": "mentions-generate-step",
+          "description": "Mentions bun zero:generate as a required step"
+        },
+        {
+          "name": "convergence-for-mutations",
+          "description": "When showing how to add a comment, generates id and createdAt on the client before calling zero.mutate.comment.insert()"
+        }
+      ]
+    }
+  ]
+}
