@@ -52,3 +52,4 @@ dist
 .vxrn-entry-native.tsx
 
 .turbo
+__pycache__

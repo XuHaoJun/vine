@@ -1,12 +1,12 @@
 [submodule "learn-projects/tamagui"]
 	path = learn-projects/tamagui
-	url = git@github.com:tamagui/tamagui.git
+	url = https://github.com/tamagui/tamagui.git
 [submodule "learn-projects/one"]
 	path = learn-projects/one
-	url = git@github.com:onejs/one.git
+	url = https://github.com/onejs/one.git
 [submodule "learn-projects/zero-mono"]
 	path = learn-projects/zero-mono
-	url = git@github.com:rocicorp/mono.git
+	url = https://github.com/rocicorp/mono.git
 [submodule "learn-projects/takeout-free"]
 	path = learn-projects/takeout-free
-	url = git@github.com:tamagui/takeout-free.git
+	url = https://github.com/tamagui/takeout-free.git
