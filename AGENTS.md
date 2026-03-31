@@ -201,6 +201,93 @@ await zeroPlugin(app, { auth, zero })
 
 ---
 
+## Testing
+
+### Test Infrastructure
+
+| App | Runner | Command |
+|-----|--------|---------|
+| `apps/web/` | vitest + Playwright | `bun --cwd apps/web run test:unit` / `test:integration` |
+| `apps/server/` | vitest | `bun --cwd apps/server run test` |
+| Packages | vitest | `bun --cwd packages/<name> run test` (add when needed) |
+
+Test files: `src/**/*.test.ts` (server), `src/test/unit/**/*.test.ts` (web)
+
+### What to Test
+
+**Server (unit tests):**
+- Utility functions (pure logic, no external deps)
+- Service factories — test business logic by passing mock deps
+- Data transformations, validators, parsers
+
+**Web (unit tests):**
+- React hooks (`useXxx`) — mock providers, test state/logic
+- Utility functions, formatters, validators
+- Components with complex logic (not trivial UI)
+
+**Integration tests (web):**
+- Page flows (login, navigation, form submission)
+- API route interactions
+- End-to-end user journeys
+
+### What NOT to Test
+
+- Trivial UI components (just Tamagui wrappers)
+- Generated code (proto, zero types)
+- Third-party library behavior
+- Simple getters/setters
+
+### When to Rewrite Tests
+
+| Scenario | Action |
+|----------|--------|
+| Refactor internal logic, same API | Update test implementation, keep assertions |
+| Change function signature | Update test setup + assertions |
+| Extract function from larger module | Move test to new file, keep assertions |
+| Remove feature entirely | Delete corresponding tests |
+| Add new edge case | Add new test, don't modify existing ones |
+
+### Server Testing Patterns
+
+**Test pure utilities directly:**
+
+```ts
+import { describe, expect, it } from 'vitest'
+import { toWebRequest } from './utils'
+
+describe('toWebRequest', () => {
+  it('converts a basic GET request', () => {
+    const req = toWebRequest({ method: 'GET', url: '/api/test', headers: {} })
+    expect(req.method).toBe('GET')
+  })
+})
+```
+
+**Test service factories with mock deps:**
+
+```ts
+import { describe, expect, it, vi } from 'vitest'
+import { createAuthService } from './auth'
+
+describe('createAuthService', () => {
+  it('creates user in public table after registration', async () => {
+    const mockDb = { insert: vi.fn(), select: vi.fn().mockReturnValue({ where: vi.fn() }) }
+    const auth = createAuthService({ database: {} as any, db: mockDb as any })
+    // ... test auth behavior with mock db
+  })
+})
+```
+
+### Rules
+
+- Tests live next to source or in `src/test/unit/` (web)
+- Test files end with `.test.ts`
+- Use `describe` / `it` blocks with clear descriptions
+- Mock external dependencies, don't hit real DB/APIs in unit tests
+- Run `bun test` before committing
+
+---
+
 ## Git Conventions
 
 - Commit messages: conventional commits (`feat:`, `fix:`, `chore:`)
