@@ -1,6 +1,8 @@
+import { valibotResolver } from '@hookform/resolvers/valibot'
 import { router, useParams } from 'one'
-import { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { Keyboard } from 'react-native'
+import * as v from 'valibot'
 import { YStack } from 'tamagui'
 
 import { passwordLogin } from '~/features/auth/client/passwordLogin'
@@ -11,36 +13,40 @@ import { PasswordIcon } from '~/interface/icons/phosphor/PasswordIcon'
 import { KeyboardStickyFooter } from '~/interface/keyboard/KeyboardStickyFooter'
 import { StepPageLayout } from '~/interface/pages/StepPageLayout'
 
+const schema = v.object({
+  password: v.pipe(v.string(), v.minLength(1, 'Password is required')),
+})
+
+type FormData = v.InferInput<typeof schema>
+
 export const PasswordPage = () => {
   const params = useParams<{ value?: string }>()
-  const [loading, setLoading] = useState<boolean>(false)
+
+  const {
+    control,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<FormData>({
+    resolver: valibotResolver(schema),
+    defaultValues: { password: '' },
+  })
 
   const displayValue = params.value || 'example@gmail.com'
 
-  const [password, setPassword] = useState('')
-
-  const handleContinue = async () => {
+  const onSubmit = async (data: FormData) => {
     if (!params.value) {
       showError('Email is not specified.')
       return
     }
 
-    setLoading(true)
+    const { error } = await passwordLogin(params.value, data.password)
 
-    try {
-      const { error } = await passwordLogin(params.value, password)
-
-      if (error) {
-        Keyboard.dismiss()
-        showError(error)
-        return
-      }
-      router.replace('/home')
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setLoading(false)
+    if (error) {
+      Keyboard.dismiss()
+      showError(error)
+      return
     }
+    router.replace('/home')
   }
 
   return (
@@ -54,22 +60,29 @@ export const PasswordPage = () => {
           <Button
             data-testid="submit-password-button"
             size="$5"
-            onPress={handleContinue}
-            disabled={!password || loading}
+            onPress={handleSubmit(onSubmit)}
+            disabled={isSubmitting}
           >
-            {loading ? 'Verifying...' : 'Next'}
+            {isSubmitting ? 'Verifying...' : 'Next'}
           </Button>
         </KeyboardStickyFooter>
       }
     >
       <YStack>
-        <Input
-          data-testid="password-input"
-          type="password"
-          autoFocus
-          value={password}
-          onChange={(e) => setPassword((e.target as HTMLInputElement).value)}
-          onSubmitEditing={handleContinue}
+        <Controller
+          control={control}
+          name="password"
+          render={({ field: { onChange, value }, fieldState: { error } }) => (
+            <Input
+              data-testid="password-input"
+              type="password"
+              autoFocus
+              value={value}
+              onChangeText={onChange}
+              error={error?.message}
+              onSubmitEditing={() => handleSubmit(onSubmit)()}
+            />
+          )}
         />
       </YStack>
     </StepPageLayout>

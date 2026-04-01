@@ -1,11 +1,14 @@
+import { forwardRef } from 'react'
 import {
   Input as TamaguiInput,
   styled,
   type GetProps,
   type TamaguiElement,
+  SizableText,
+  YStack,
 } from 'tamagui'
 
-export const Input = styled(TamaguiInput, {
+const StyledInput = styled(TamaguiInput, {
   height: 50,
   size: '$5',
   borderWidth: 0.5,
@@ -19,6 +22,37 @@ export const Input = styled(TamaguiInput, {
     borderWidth: 0.5,
     borderColor: '$color5',
   },
+
+  variants: {
+    hasError: {
+      true: {
+        borderColor: '$red7',
+        focusVisibleStyle: {
+          borderColor: '$red9',
+          outlineColor: '$red4',
+        },
+      },
+    },
+  } as const,
 })
 
-export type InputProps = GetProps<typeof Input>
+export type InputProps = GetProps<typeof StyledInput> & {
+  error?: string | undefined
+}
+
+export const Input = forwardRef<TamaguiElement, InputProps>(
+  ({ error, ...props }, ref) => {
+    return (
+      <YStack gap="$2">
+        <StyledInput ref={ref} hasError={!!error} {...props} />
+        {error && (
+          <SizableText size="$2" color="$red9">
+            {error}
+          </SizableText>
+        )}
+      </YStack>
+    )
+  },
+)
+
+Input.displayName = 'Input'

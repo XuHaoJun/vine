@@ -69,6 +69,85 @@ For the remaining 10% (high-frequency updates, cross-component state, complex de
 
 ---
 
+## Form Patterns
+
+**Use `react-hook-form` + `@hookform/resolvers/valibot` for ALL forms.**
+
+Do NOT use `useState` per field for form state. The only exception is trivial single-input components that don't submit (e.g. search filters, live search boxes).
+
+### Schema Definition
+
+Define valibot schemas alongside the component or in a shared `schemas.ts` file:
+
+```ts
+import * as v from 'valibot'
+
+const schema = v.object({
+  email: v.pipe(v.string(), v.email('Invalid email'), v.nonEmpty('Required')),
+  password: v.pipe(v.string(), v.minLength(1, 'Required')),
+})
+
+type FormData = v.InferInput<typeof schema>
+```
+
+### Form Hook Setup
+
+```ts
+import { valibotResolver } from '@hookform/resolvers/valibot'
+import { useForm } from 'react-hook-form'
+
+const { control, handleSubmit, formState: { isSubmitting } } = useForm<FormData>({
+  resolver: valibotResolver(schema),
+  defaultValues: { email: '', password: '' },
+})
+```
+
+### Input Integration
+
+Use `Controller` to connect inputs. The `~/interface/forms/Input` component supports an `error` prop:
+
+```ts
+import { Controller } from 'react-hook-form'
+import { Input } from '~/interface/forms/Input'
+
+<Controller
+  control={control}
+  name="email"
+  render={({ field: { onChange, value }, fieldState: { error } }) => (
+    <Input
+      value={value}
+      onChangeText={onChange}
+      error={error?.message}
+      onSubmitEditing={() => handleSubmit(onSubmit)()}
+    />
+  )}
+/>
+```
+
+### Submit Handler
+
+```ts
+const onSubmit = async (data: FormData) => {
+  // data is already validated
+}
+
+// Button
+<Button onPress={handleSubmit(onSubmit)}>Submit</Button>
+
+// Native submit
+<Input onSubmitEditing={() => handleSubmit(onSubmit)()} />
+```
+
+### Rules
+
+- Always use `valibotResolver` — never manual validation in submit handlers
+- Use `Controller` for all inputs (do NOT pass `control`/`name` directly to Input)
+- Use `onSubmitEditing={() => handleSubmit(onSubmit)()}` for native keyboard submit
+- Display errors via the Input `error` prop — do NOT use `showError()` dialogs for field errors
+- Use `formState.isSubmitting` for loading/disabled states instead of manual `useState`
+
+---
+
 ## Code Style
 
 - **Formatter**: oxfmt (2 spaces, no semicolons, single quotes, trailing commas)

@@ -1,14 +1,29 @@
+import { valibotResolver } from '@hookform/resolvers/valibot'
 import { useMutation } from '@connectrpc/connect-query'
 import { GreeterService } from '@vine/proto/greeter'
-import { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import * as v from 'valibot'
 import { SizableText, YStack, XStack } from 'tamagui'
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
 
-export default function HelloPage() {
-  const [name, setName] = useState('')
+const schema = v.object({
+  name: v.pipe(v.string(), v.minLength(1, 'Name is required')),
+})
 
+type FormData = v.InferInput<typeof schema>
+
+export default function HelloPage() {
   const { mutate, data, isPending, error } = useMutation(GreeterService.method.sayHello)
+
+  const { control, handleSubmit } = useForm<FormData>({
+    resolver: valibotResolver(schema),
+    defaultValues: { name: '' },
+  })
+
+  const onSubmit = (formData: FormData) => {
+    mutate({ name: formData.name.trim() })
+  }
 
   return (
     <YStack flex={1} items="center" justify="center" gap="$4" px="$6" maxW={480}>
@@ -21,17 +36,24 @@ export default function HelloPage() {
       </SizableText>
 
       <XStack gap="$3" width="100%">
-        <Input
-          flex={1}
-          placeholder="Your name"
-          value={name}
-          onChangeText={setName}
-          onSubmitEditing={() => mutate({ name: name.trim() })}
+        <Controller
+          control={control}
+          name="name"
+          render={({ field: { onChange, value }, fieldState: { error } }) => (
+            <Input
+              flex={1}
+              placeholder="Your name"
+              value={value}
+              onChangeText={onChange}
+              error={error?.message}
+              onSubmitEditing={() => handleSubmit(onSubmit)()}
+            />
+          )}
         />
         <Button
           theme="accent"
-          onPress={() => mutate({ name: name.trim() })}
-          disabled={isPending || !name.trim()}
+          onPress={handleSubmit(onSubmit)}
+          disabled={isPending}
         >
           {isPending ? '...' : 'Say Hello'}
         </Button>

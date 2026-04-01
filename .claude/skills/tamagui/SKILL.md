@@ -193,6 +193,71 @@ Bouncy: `bouncy`, `superBouncy`, `kindaBouncy`, `quickLessBouncy`, etc.
 
 Default font family is `body`. Available: `body`, `heading`, `mono` (JetBrains Mono).
 
+## Package Compatibility
+
+Before installing any npm package, check if it supports React Native:
+
+| Package Type | Action Required |
+|--------------|-----------------|
+| Pure JS / TypeScript | ✅ Usually works on both |
+| Has native code (iOS/Android) | ❌ Do NOT install directly |
+| Web-only (DOM APIs) | ⚠️ Use platform detection or fallback |
+
+### Red Flags (web-only, avoid)
+
+- Uses `window`, `document` without guards
+- Uses Node.js built-ins (`fs`, `path`, `crypto`)
+- Browser-only APIs
+
+### Safe Alternatives
+
+| Web-only | Use Instead |
+|----------|-------------|
+| `localStorage` | `@react-native-async-storage/async-storage` or `react-native-mmkv` |
+| `IntersectionObserver` | `react-native-reanimated` + `useAnimatedReaction` |
+| `fetch` (advanced) | `@tanstack/react-query` |
+
+### Platform Detection
+
+```ts
+import { isWeb, isNative } from 'tamagui'
+
+if (isWeb) {
+  // Web-only code
+}
+```
+
+---
+
+## Platform-Specific Files
+
+Tamagui uses file extensions for platform-specific code:
+
+| Extension | Platform | Behavior |
+|-----------|----------|----------|
+| `File.ts` | Shared | Base file, used if no platform-specific version exists |
+| `File.native.ts` | Native only | Replaces base file on iOS/Android |
+| `File.web.ts` | Web only | Replaces base file on web |
+| `File.ios.ts` | iOS only | Replaces base file on iOS only |
+| `File.android.ts` | Android only | Replaces base file on Android only |
+
+**Important:** When both `.native.ts` and `.web.ts` exist, the base `.ts` file is **skipped**.
+
+**Examples:**
+
+```
+// Both platforms use the same implementation
+format.ts
+
+// Native uses special implementation, web uses base
+format.ts
+format.native.ts
+
+// Each platform has its own version
+format.native.ts  // native (iOS + Android)
+format.web.ts     // web only
+```
+
 ## Best Practices
 
 1. Always use shorthands — full property names error out (except `width`, `height`, `flex`, `zIndex`)
@@ -202,6 +267,7 @@ Default font family is `body`. Available: `body`, `heading`, `mono` (JetBrains M
 5. Check `~/interface/` for custom components before using Tamagui defaults
 6. Use semantic HTML components for accessibility
 7. Use media query props over conditional rendering
+8. Use platform extensions (`.native.ts`, `.web.ts`) instead of runtime platform checks when possible
 
 ## Additional Resources
 
