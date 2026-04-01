@@ -148,6 +148,75 @@ const onSubmit = async (data: FormData) => {
 
 ---
 
+## Toast & Dialog System
+
+### Toasts
+
+Use `showToast()` for non-blocking notifications:
+
+```tsx
+import { showToast } from '~/interface/toast/Toast'
+
+showToast('Saved!', { type: 'success' })
+showToast('Something went wrong', { type: 'error' })
+showToast('Coming soon', { type: 'info' })
+showToast('Warning', { type: 'warn' })
+```
+
+Types: `'success'` | `'error'` | `'info'` | `'warn'`
+
+### Dialogs
+
+Use imperative dialog system for blocking interactions:
+
+```tsx
+import { showError, dialogConfirm } from '~/interface/dialogs/actions'
+
+// Error dialog (auto-parses error types)
+showError(error, 'Failed to save')
+
+// Confirm dialog (returns Promise<boolean>)
+const confirmed = await dialogConfirm({
+  title: 'Delete item?',
+  description: 'This cannot be undone.',
+})
+if (confirmed) { /* proceed */ }
+```
+
+**Rules:**
+- Use `showError()` for unexpected errors, NOT for form field errors
+- Use `dialogConfirm()` for destructive actions requiring confirmation
+- Do NOT use dialogs for validation feedback — use inline error props instead
+
+---
+
+## Storage Patterns
+
+**Three-tier storage strategy:**
+
+| Platform | Storage | Setup |
+|----------|---------|-------|
+| Native | MMKV (`react-native-mmkv`) | `setupStorage.native.ts` |
+| Web | localStorage | Default via `@take-out/helpers` |
+| Zero (synced) | IndexedDB (web) / SQLite (native) | Auto-configured by `ProvideZero` |
+
+Use `@take-out/helpers` `createStorage()` for typed key-value storage:
+
+```ts
+import { createStorage } from '@take-out/helpers'
+
+const settings = createStorage({
+  theme: 'system' as 'light' | 'dark' | 'system',
+  notifications: true,
+})
+
+// Usage
+settings.get('theme')
+settings.set('theme', 'dark')
+```
+
+---
+
 ## Code Style
 
 - **Formatter**: oxfmt (2 spaces, no semicolons, single quotes, trailing commas)
