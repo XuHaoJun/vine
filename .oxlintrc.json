@@ -111,6 +111,7 @@
     }
   ],
   "ignorePatterns": [
+    "learn-projects/**",
     "**/.claude/**",
     "**/*.generated.js",
     "**/.tamagui/**",

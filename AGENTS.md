@@ -4,12 +4,12 @@
 
 ```bash
 bun install                    # Install dependencies
-bun dev                        # Start all apps (turbo dev)
-bun build                      # Build all packages
-bun lint                       # Lint all packages (oxlint)
-bun format                     # Format all files (oxfmt)
-bun test                       # Run all tests
-bun check                      # Type check + lint (tko check)
+bun run dev                    # Start all apps (turbo dev)
+bun run build                  # Build all packages (turbo build)
+bun run lint                   # Lint all packages (oxlint)
+bun run format                 # Format all files (oxfmt)
+bun run test                   # Run all tests (turbo test)
+bun run check                  # Type check + lint (tko check)
 ```
 
 ### Running Single Tests

@@ -63,7 +63,9 @@ function createAuthServer(deps: AuthDeps) {
         name: name || '',
         username: email === DEMO_EMAIL ? 'demo' : username || '',
         image: image || '',
-        joinedAt: createdAt ? new Date(createdAt).toISOString() : new Date().toISOString(),
+        joinedAt: createdAt
+          ? new Date(createdAt).toISOString()
+          : new Date().toISOString(),
       })
     } catch (error) {
       console.error(`[afterCreateUser] error`, error)

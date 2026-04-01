@@ -50,11 +50,7 @@ export default function HelloPage() {
             />
           )}
         />
-        <Button
-          theme="accent"
-          onPress={handleSubmit(onSubmit)}
-          disabled={isPending}
-        >
+        <Button theme="accent" onPress={handleSubmit(onSubmit)} disabled={isPending}>
           {isPending ? '...' : 'Say Hello'}
         </Button>
       </XStack>
