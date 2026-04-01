@@ -50,6 +50,25 @@ Raw `fetch()` bypasses caching, loading states, error handling, and sync.
 
 ---
 
+## State Management
+
+**90% of cases → `useState` / `useReducer`**
+
+For the remaining 10% (high-frequency updates, cross-component state, complex derived state, or persistence):
+
+**→ Use Jotai only**
+
+| Scenario | Jotai Solution |
+|----------|----------------|
+| Streaming / high-frequency updates | `atom` + `useAtom` (signals-based, bypasses reconciliation) |
+| Cross-component shared state | Shared atoms in a module |
+| Dependent selects (derived state) | `atom` with `get` for derived values |
+| Cross-page persistence | `atom` + `useStorage` or persist middleware |
+
+**Avoid Zustand, Redux, etc.** — Jotai covers all these cases without additional libraries.
+
+---
+
 ## Code Style
 
 - **Formatter**: oxfmt (2 spaces, no semicolons, single quotes, trailing commas)
