@@ -85,6 +85,7 @@
     "expo-splash-screen": "~55.0.12",
     "expo-sqlite": "^55.0.11",
     "expo-web-browser": "~55.0.10",
+    "jotai": "^2.19.0",
     "motion": "12.36.0",
     "on-zero": "0.2.10",
     "one": "1.13.0",
