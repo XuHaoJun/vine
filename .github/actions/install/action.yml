@@ -20,6 +20,10 @@ runs:
       with:
         bun-version-file: 'package.json'
 
+    - name: Install System Dependencies
+      shell: bash
+      run: sudo apt-get update && sudo apt-get install -y libreadline-dev
+
     - name: Install Dependencies
       shell: bash
       # touch .env so our postinstall doesn't create a fake env
