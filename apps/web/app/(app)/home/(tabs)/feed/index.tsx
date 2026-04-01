@@ -1,5 +1,8 @@
-import { memo, useState } from 'react'
+import { valibotResolver } from '@hookform/resolvers/valibot'
+import { memo } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
+import * as v from 'valibot'
 import { isWeb, ScrollView, SizableText, Spinner, Theme, XStack, YStack } from 'tamagui'
 
 import { useTodos } from '~/features/todo/useTodos'
@@ -8,15 +11,24 @@ import { Input } from '~/interface/forms/Input'
 import { PageContainer } from '~/interface/layout/PageContainer'
 import { H1, H3 } from '~/interface/text/Headings'
 
+const schema = v.object({
+  text: v.pipe(v.string(), v.minLength(1, 'Todo text is required')),
+})
+
+type FormData = v.InferInput<typeof schema>
+
 export const HomePage = memo(() => {
   const { todos, isLoading, addTodo, toggleTodo, deleteTodo } = useTodos()
-  const [newTodoText, setNewTodoText] = useState('')
   const insets = useSafeAreaInsets()
 
-  const handleAddTodo = () => {
-    if (!newTodoText.trim()) return
-    addTodo(newTodoText.trim())
-    setNewTodoText('')
+  const { control, handleSubmit, reset } = useForm<FormData>({
+    resolver: valibotResolver(schema),
+    defaultValues: { text: '' },
+  })
+
+  const handleAddTodo = (data: FormData) => {
+    addTodo(data.text.trim())
+    reset()
   }
 
   const content = (
@@ -60,16 +72,23 @@ export const HomePage = memo(() => {
           </H1>
 
           <XStack gap="$2" width="100%">
-            <Input
-              flex={1}
-              placeholder="What needs to be done?"
-              value={newTodoText}
-              onChangeText={setNewTodoText}
-              onSubmitEditing={handleAddTodo}
-              size="$6"
-              height={56}
+            <Controller
+              control={control}
+              name="text"
+              render={({ field: { onChange, value }, fieldState: { error } }) => (
+                <Input
+                  flex={1}
+                  placeholder="What needs to be done?"
+                  value={value}
+                  onChangeText={onChange}
+                  error={error?.message}
+                  onSubmitEditing={() => handleSubmit(handleAddTodo)()}
+                  size="$6"
+                  height={56}
+                />
+              )}
             />
-            <Button onPress={handleAddTodo} theme="blue" px="$5">
+            <Button onPress={handleSubmit(handleAddTodo)} theme="blue" px="$5">
               Add
             </Button>
           </XStack>

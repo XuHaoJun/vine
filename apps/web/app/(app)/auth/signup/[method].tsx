@@ -1,16 +1,28 @@
+import { valibotResolver } from '@hookform/resolvers/valibot'
 import { useParams, useRouter, createRoute } from 'one'
-import { memo, useLayoutEffect, useRef, useState } from 'react'
+import { memo, useLayoutEffect, useRef } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import * as v from 'valibot'
 import { SizableText, Spinner, useEvent, XStack, YStack } from 'tamagui'
 
 import { Button } from '~/interface/buttons/Button'
 import { Pressable } from '~/interface/buttons/Pressable'
-import { showError } from '~/interface/dialogs/actions'
 import { Input } from '~/interface/forms/Input'
 import { CaretLeftIcon } from '~/interface/icons/phosphor/CaretLeftIcon'
 import { PageLayout } from '~/interface/pages/PageLayout'
 
 const route = createRoute<'/(app)/auth/signup/[method]'>()
+
+const schema = v.object({
+  email: v.pipe(
+    v.string(),
+    v.email('Please enter a valid email address'),
+    v.nonEmpty('Email is required'),
+  ),
+})
+
+type FormData = v.InferInput<typeof schema>
 
 export const SignupPage = memo(() => {
   const { method } = useParams<{
@@ -19,10 +31,15 @@ export const SignupPage = memo(() => {
   const { top } = useSafeAreaInsets()
   const router = useRouter()
   const inputRef = useRef<any>(null)
-  const [inputValue, setInputValue] = useState<string>('')
-  const [loading, setLoading] = useState<boolean>(false)
 
-  const isDisabled = !inputValue.trim()
+  const {
+    control,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<FormData>({
+    resolver: valibotResolver(schema),
+    defaultValues: { email: '' },
+  })
 
   useLayoutEffect(() => {
     const timer = setTimeout(() => {
@@ -34,21 +51,14 @@ export const SignupPage = memo(() => {
 
   const handleGoBack = useEvent(() => router.back())
 
-  const handleContinue = useEvent(async () => {
+  const onSubmit = useEvent(async (data: FormData) => {
     if (!method) {
-      showError('Authentication method is not specified.')
       return
     }
 
-    setLoading(true)
-
-    try {
-      router.push(
-        `/auth/login/password?method=${method}&value=${encodeURIComponent(inputValue)}`,
-      )
-    } finally {
-      setLoading(false)
-    }
+    router.push(
+      `/auth/login/password?method=${method}&value=${encodeURIComponent(data.email)}`,
+    )
   })
 
   if (method !== 'email') {
@@ -85,18 +95,24 @@ export const SignupPage = memo(() => {
         </SizableText>
 
         <YStack gap="$4" mt="$4">
-          <Input
-            data-testid="email-input"
-            ref={inputRef}
-            placeholder="Enter email address"
-            value={inputValue}
-            onChange={(e) => setInputValue((e.target as HTMLInputElement).value)}
-            autoCapitalize="none"
-            onSubmitEditing={handleContinue}
-            type="email"
+          <Controller
+            control={control}
             name="email"
-            autoComplete="email"
-            inputMode="email"
+            render={({ field: { onChange, value }, fieldState: { error } }) => (
+              <Input
+                data-testid="email-input"
+                ref={inputRef}
+                placeholder="Enter email address"
+                value={value}
+                onChangeText={onChange}
+                error={error?.message}
+                autoCapitalize="none"
+                onSubmitEditing={() => handleSubmit(onSubmit)()}
+                type="email"
+                autoComplete="email"
+                inputMode="email"
+              />
+            )}
           />
 
           <Button
@@ -106,10 +122,10 @@ export const SignupPage = memo(() => {
               scale: 0.97,
               opacity: 0.9,
             }}
-            onPress={handleContinue}
-            disabled={isDisabled || loading}
+            onPress={handleSubmit(onSubmit)}
+            disabled={isSubmitting}
           >
-            {loading ? <Spinner size="small" /> : 'Next'}
+            {isSubmitting ? <Spinner size="small" /> : 'Next'}
           </Button>
         </YStack>
       </YStack>
