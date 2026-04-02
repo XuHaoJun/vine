@@ -190,6 +190,100 @@ if (confirmed) { /* proceed */ }
 
 ---
 
+## Auth Patterns
+
+**Better Auth via `@take-out/better-auth-utils` with platform-specific plugins.**
+
+### Core Hook: `useAuth()`
+
+```ts
+import { useAuth } from '~/features/auth/client/authClient'
+
+const { state, user, authData, authClient, loginLink } = useAuth()
+// state: 'loading' | 'logged-in' | 'logged-out'
+// authData: { id: string, role?: 'admin' } | null (for Zero sync)
+```
+
+### Auth Guard
+
+Route guards live in `app/(app)/_layout.tsx` — NOT middleware:
+
+```tsx
+const { state } = useAuth()
+if (state === 'logged-out' && pathname.startsWith('/home')) {
+  return <Redirect href="/auth/login" />
+}
+if (state === 'logged-in' && pathname.startsWith('/auth')) {
+  return <Redirect href="/home/feed" />
+}
+```
+
+### Login Functions
+
+- `passwordLogin(email, password)` — wraps `authClient.signIn.email()`, returns `{ success, error }`
+- `signInAsDemo()` — auto-creates demo user (ignores 422), then signs in
+- `authClient.signUp.email()` / `authClient.signIn.email()` — direct client access
+
+### Rules
+
+- Use `useAuth()` (signal-based JWT state) NOT `useUser()` (DB query) to avoid waterfalls
+- `authData` is memoized for Zero — pass it to `ProvideZero` for auth sync
+- Auth errors auto-show toasts via `onAuthError` handler in client setup
+- For form-level auth errors, use `passwordLogin()` result pattern, NOT `showError()` dialogs
+
+---
+
+## learn-projects/ Exclusion Rules
+
+**`learn-projects/` contains reference implementations of latest beta/rc packages for AI learning. NEVER modify files inside it.**
+
+### What to Exclude
+
+Both `.oxlintrc.json` and `.oxfmtrc.jsonc` must ignore `learn-projects/**`:
+
+- `.oxlintrc.json` → `ignorePatterns: ["learn-projects/**"]`
+- `.oxfmtrc.jsonc` → `ignorePatterns: ["learn-projects/**"]`
+- `.oxfmtignore` → already has `learn-projects/**`
+
+### Rules
+
+- Never run `bun lint` or `bun format` on files inside `learn-projects/`
+- Never commit changes from `learn-projects/` submodules
+- If a submodule shows as dirty, restore it: `git -C learn-projects/<name> checkout -- .`
+- `learn-projects/` is NOT part of bun workspaces — turbo commands won't touch it
+
+---
+
+## CI/CD Pipeline
+
+**Three parallel jobs on GitHub Actions (ubuntu-latest).**
+
+### Jobs
+
+| Job | Purpose | Skip Condition |
+|-----|---------|----------------|
+| `check` | `bun check:all` (typecheck + lint) | Commit/PR title contains `docs:` |
+| `test-server` | Server unit tests (`bun --cwd apps/server run test`) | Commit/PR title contains `docs:` |
+| `integration` | Full integration tests via `bun scripts/integration.ts` | Commit/PR title contains `docs:` |
+
+### Install Action (`.github/actions/install/action.yml`)
+
+Steps: Node.js 20.x → Bun (from `package.json`) → `libreadline-dev` → `bun install` → `bun run postinstall` → `bun run build`
+
+### Common Failure Points
+
+- **`zero-sqlite3` native build**: requires `libreadline-dev` (already in install action)
+- **Missing env vars**: integration job needs secrets from `bun env:update`
+- **`.env` file**: `touch .env` before `bun install` prevents postinstall from creating fake env
+
+### Rules
+
+- Commit messages starting with `docs:` skip all CI jobs
+- Integration tests require all secrets to be configured in repo settings
+- Concurrency: cancels in-progress jobs on PR updates
+
+---
+
 ## Storage Patterns
 
 **Three-tier storage strategy:**
