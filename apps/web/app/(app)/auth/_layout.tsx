@@ -10,6 +10,7 @@ export function AuthAndOnboardingLayout() {
           <Stack.Screen name="login" />
           <Stack.Screen name="login/password" />
           <Stack.Screen name="signup/[method]" />
+          <Stack.Screen name="consent" />
         </Stack>
       )}
     </>
