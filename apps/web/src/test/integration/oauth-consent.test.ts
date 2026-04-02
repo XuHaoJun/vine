@@ -25,7 +25,9 @@ test.beforeEach(async ({ context }) => {
   await context.clearCookies()
 })
 
-test('authorization endpoint redirects logged-out user to login page', async ({ page }) => {
+test('authorization endpoint redirects logged-out user to login page', async ({
+  page,
+}) => {
   test.setTimeout(15000)
 
   await page.goto(AUTH_URL, { waitUntil: 'domcontentloaded', timeout: 10000 })
@@ -34,7 +36,9 @@ test('authorization endpoint redirects logged-out user to login page', async ({ 
   await expect(page).toHaveURL(/\/auth\/login/, { timeout: 8000 })
 })
 
-test('clicking Allow redirects to redirect_uri with authorization code', async ({ page }) => {
+test('clicking Allow redirects to redirect_uri with authorization code', async ({
+  page,
+}) => {
   test.setTimeout(30000)
 
   await loginAsDemo(page)
@@ -45,14 +49,18 @@ test('clicking Allow redirects to redirect_uri with authorization code', async (
   await page.getByRole('button', { name: 'Allow' }).click()
 
   // Wait for navigation away from consent page
-  await page.waitForURL((url) => !url.toString().includes('/auth/consent'), { timeout: 10000 })
+  await page.waitForURL((url) => !url.toString().includes('/auth/consent'), {
+    timeout: 10000,
+  })
 
   // URL should have changed from consent page
   const currentUrl = page.url()
   expect(currentUrl).not.toContain('/auth/consent')
 })
 
-test('clicking Cancel redirects to redirect_uri with access_denied error', async ({ page }) => {
+test('clicking Cancel redirects to redirect_uri with access_denied error', async ({
+  page,
+}) => {
   test.setTimeout(30000)
 
   await loginAsDemo(page)
@@ -63,7 +71,9 @@ test('clicking Cancel redirects to redirect_uri with access_denied error', async
   await page.getByText('Cancel').click()
 
   // Wait for navigation away from consent page
-  await page.waitForURL((url) => !url.toString().includes('/auth/consent'), { timeout: 10000 })
+  await page.waitForURL((url) => !url.toString().includes('/auth/consent'), {
+    timeout: 10000,
+  })
 
   // URL should have changed from consent page
   const currentUrl = page.url()
@@ -73,7 +83,9 @@ test('clicking Cancel redirects to redirect_uri with access_denied error', async
 test('LINE discovery endpoint returns OIDC metadata', async ({ request }) => {
   test.setTimeout(10000)
 
-  const res = await request.get('http://localhost:3001/api/auth/.well-known/openid-configuration')
+  const res = await request.get(
+    'http://localhost:3001/api/auth/.well-known/openid-configuration',
+  )
   expect(res.status()).toBe(200)
 
   const body = await res.json()

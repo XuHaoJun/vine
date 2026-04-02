@@ -54,7 +54,9 @@ export const ConsentPage = () => {
 
   useEffect(() => {
     if (!consentCode) return
-    fetch(`${SERVER_URL}/api/auth/oauth2/consent-details?consent_code=${encodeURIComponent(consentCode)}`)
+    fetch(
+      `${SERVER_URL}/api/auth/oauth2/consent-details?consent_code=${encodeURIComponent(consentCode)}`,
+    )
       .then((res) => res.json())
       .then((data: ConsentDetails) => setConsentDetails(data))
       .catch(() => {})
@@ -64,7 +66,12 @@ export const ConsentPage = () => {
 
   if (state === 'loading') {
     return (
-      <YStack flex={1} justify="center" items="center" minHeight="100vh">
+      <YStack
+        flex={1}
+        justify="center"
+        items="center"
+        $platform-web={{ minHeight: '100vh' }}
+      >
         <SizableText>Loading...</SizableText>
       </YStack>
     )
@@ -76,7 +83,11 @@ export const ConsentPage = () => {
     return null
   }
 
-  const { clientId = '', appName = '', scopes: scopesFromDetails = [] } = consentDetails ?? {}
+  const {
+    clientId = '',
+    appName = '',
+    scopes: scopesFromDetails = [],
+  } = consentDetails ?? {}
   const displayAppName = appName || clientIdFromUrl || 'Unknown App'
   const scopes = scopesFromDetails.length > 0 ? scopesFromDetails : scopesFromUrl
 
@@ -114,13 +125,7 @@ export const ConsentPage = () => {
       bg="$background"
       $platform-web={{ minHeight: '100vh' }}
     >
-      <YStack
-        width="100%"
-        items="center"
-        gap="$5"
-        p="$6"
-        maxW={380}
-      >
+      <YStack width="100%" items="center" gap="$5" p="$6" maxW={380}>
         <YStack items="center" gap="$2">
           <YStack
             width={64}

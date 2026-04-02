@@ -245,7 +245,11 @@ export async function authPlugin(fastify: FastifyInstance, deps: AuthPluginDeps)
           const isFormEncoded = contentType.includes('application/x-www-form-urlencoded')
 
           let body: string | undefined
-          if (request.method !== 'GET' && request.method !== 'HEAD' && request.body != null) {
+          if (
+            request.method !== 'GET' &&
+            request.method !== 'HEAD' &&
+            request.body != null
+          ) {
             body = isFormEncoded
               ? new URLSearchParams(request.body as Record<string, string>).toString()
               : JSON.stringify(request.body)
@@ -253,7 +257,9 @@ export async function authPlugin(fastify: FastifyInstance, deps: AuthPluginDeps)
 
           const url = new URL(authUrl, BETTER_AUTH_URL)
           const originalUrl = new URL(request.url, BETTER_AUTH_URL)
-          originalUrl.searchParams.forEach((value, key) => url.searchParams.set(key, value))
+          originalUrl.searchParams.forEach((value, key) =>
+            url.searchParams.set(key, value),
+          )
 
           const headers = new Headers()
           for (const [key, value] of Object.entries(request.headers)) {
@@ -262,7 +268,10 @@ export async function authPlugin(fastify: FastifyInstance, deps: AuthPluginDeps)
             }
           }
           if (body !== undefined) {
-            headers.set('content-type', isFormEncoded ? 'application/x-www-form-urlencoded' : 'application/json')
+            headers.set(
+              'content-type',
+              isFormEncoded ? 'application/x-www-form-urlencoded' : 'application/json',
+            )
           }
 
           const webReq = new Request(url.toString(), {

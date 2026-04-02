@@ -28,7 +28,7 @@ type FormData = v.InferInput<typeof schema>
 export const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [demoLoading, setDemoLoading] = useState(false)
-  const passwordInputRef = useRef<{ focus: () => void } | null>(null)
+  
 
   const {
     control,
@@ -84,39 +84,39 @@ export const LoginPage = () => {
                 autoCorrect={false}
                 error={error?.message}
                 returnKeyType="next"
-                onSubmitEditing={() => passwordInputRef.current?.focus()}
+                onSubmitEditing={() => handleSubmit(onSubmit)()}
               />
             )}
           />
+        </YStack>
 
-          <XStack width="100%" items="flex-start">
-            <YStack flex={1}>
-              <Controller
-                control={control}
-                name="password"
-                render={({ field: { onChange, value }, fieldState: { error } }) => (
-                  <Input
-                    ref={passwordInputRef}
-                    value={value}
-                    onChangeText={onChange}
-                    placeholder="Password"
-                    secureTextEntry={!showPassword}
-                    error={error?.message}
-                    onSubmitEditing={() => handleSubmit(onSubmit)()}
-                  />
-                )}
-              />
-            </YStack>
-            <Pressable
-              mt={14}
-              ml="$2"
-              onPress={() => setShowPassword((prev) => !prev)}
-            >
-              <SizableText size="$3" color="$color9">
-                {showPassword ? 'Hide' : 'Show'}
-              </SizableText>
-            </Pressable>
-          </XStack>
+        <XStack width="100%" items="flex-start">
+          <YStack flex={1}>
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, value }, fieldState: { error } }) => (
+                <Input
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="Password"
+                  secureTextEntry={!showPassword}
+                  error={error?.message}
+                  onSubmitEditing={() => handleSubmit(onSubmit)()}
+                />
+              )}
+            />
+          </YStack>
+          <Pressable
+            mt={14}
+            ml="$2"
+            onPress={() => setShowPassword((prev) => !prev)}
+          >
+            <SizableText size="$3" color="$color9">
+              {showPassword ? 'Hide' : 'Show'}
+            </SizableText>
+          </Pressable>
+        </XStack>
 
           <Button
             size="$5"
@@ -124,17 +124,16 @@ export const LoginPage = () => {
             disabled={isSubmitting}
             onPress={handleSubmit(onSubmit)}
             bg={LINE_GREEN}
-            color="white"
             hoverStyle={{ bg: LINE_GREEN, opacity: 0.9 }}
             pressStyle={{ bg: LINE_GREEN, opacity: 0.7 }}
           >
-            {isSubmitting ? <Spinner size="small" color="white" /> : 'Log in'}
+            {isSubmitting ? <Spinner size="small" color="white" /> : <SizableText color="white">Log in</SizableText>}
           </Button>
 
+          {/* @ts-expect-error OneJS routing type mismatch */}
           <Link href="/auth/forgot-password" size="$3" color="$color9" textAlign="center">
             Forgot password?
           </Link>
-        </YStack>
 
         {/* Demo mode — dev only */}
         {isDemoMode && (

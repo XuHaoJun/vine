@@ -22,7 +22,9 @@ export function AppLayout() {
   }
 
   // redirect logged-in users away from auth routes (except consent and oauth-callback — require login)
-  const isAuthRoute = pathname.startsWith('/auth') && !['/auth/consent', '/auth/oauth-callback'].some(path => pathname === path)
+  const isAuthRoute =
+    pathname.startsWith('/auth') &&
+    !['/auth/consent', '/auth/oauth-callback'].some((path) => pathname === path)
   if (state === 'logged-in' && isAuthRoute) {
     return <Redirect href="/home/feed" />
   }
