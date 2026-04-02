@@ -23,7 +23,7 @@
     "lint:fix": "oxfmt && oxlint --import-plugin --type-aware --fix --fix-suggestions",
     "lint": "oxlint --import-plugin --type-aware",
     "migrate": "bun run env:dev bun ../../packages/db/src/migrate.ts",
-    "migrate:build": "tko migrate build",
+    "migrate:build": "sh -c 'cd ../../packages/db/src && bunx --bun vite build --config vite.config.ts'",
     "prebuild:native": "one prebuild",
     "run:dev": "bun env:dev bun",
     "run:prod": "NODE_ENV=production dotenvx run -f ../../.env -f ../../.env.production -- bun",
