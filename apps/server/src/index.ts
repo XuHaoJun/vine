@@ -1,4 +1,5 @@
 import cors from '@fastify/cors'
+import formbody from '@fastify/formbody'
 import { fastifyConnectPlugin } from '@connectrpc/connect-fastify'
 import Fastify from 'fastify'
 import { getDatabase } from '@vine/db/database'
@@ -14,6 +15,8 @@ await app.register(cors, {
   origin: process.env['ALLOWED_ORIGIN'] ?? true,
   credentials: true,
 })
+
+await app.register(formbody)
 
 // ConnectRPC routes (GreeterService, etc.)
 await app.register(fastifyConnectPlugin, {

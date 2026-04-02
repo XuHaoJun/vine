@@ -18,6 +18,7 @@
     "@connectrpc/connect": "^2.0.0",
     "@connectrpc/connect-fastify": "^2.0.0",
     "@fastify/cors": "^10.0.0",
+    "@fastify/formbody": "^8.0.2",
     "@take-out/better-auth-utils": "^0.2.10",
     "@take-out/helpers": "^0.2.10",
     "@vine/db": "workspace:*",

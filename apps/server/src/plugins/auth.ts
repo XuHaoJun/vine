@@ -3,7 +3,7 @@ import { isValidJWT } from '@take-out/better-auth-utils/server'
 import { eq } from 'drizzle-orm'
 import { time } from '@take-out/helpers'
 import { betterAuth } from 'better-auth'
-import { admin, bearer, jwt, magicLink } from 'better-auth/plugins'
+import { admin, bearer, jwt, magicLink, oidcProvider } from 'better-auth/plugins'
 import type { FastifyInstance } from 'fastify'
 import type { Pool } from 'pg'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
@@ -112,6 +112,11 @@ function createAuthServer(deps: AuthDeps) {
         },
       }),
       admin(),
+      oidcProvider({
+        loginPage: '/auth/login',
+        consentPage: '/auth/consent',
+        scopes: ['openid', 'profile', 'email'],
+      }),
     ],
 
     logger: {
@@ -172,4 +177,74 @@ export async function authPlugin(fastify: FastifyInstance, deps: AuthPluginDeps)
     }
     reply.send({ valid: false })
   })
+
+  const LINE_ALIAS_ROUTES: Array<{
+    lineUrl: string
+    authUrl: string
+    methods: ('GET' | 'POST')[]
+  }> = [
+    {
+      lineUrl: '/oauth2/v2.1/authorize',
+      authUrl: '/api/auth/oauth2/authorize',
+      methods: ['GET', 'POST'],
+    },
+    {
+      lineUrl: '/oauth2/v2.1/token',
+      authUrl: '/api/auth/oauth2/token',
+      methods: ['POST'],
+    },
+    {
+      lineUrl: '/oauth2/v2.1/userinfo',
+      authUrl: '/api/auth/oauth2/userinfo',
+      methods: ['GET'],
+    },
+  ]
+
+  for (const { lineUrl, authUrl, methods } of LINE_ALIAS_ROUTES) {
+    fastify.route({
+      method: methods,
+      url: lineUrl,
+      handler: async (request, reply) => {
+        try {
+          const contentType = (request.headers['content-type'] ?? '') as string
+          const isFormEncoded = contentType.includes('application/x-www-form-urlencoded')
+
+          let body: string | undefined
+          if (request.method !== 'GET' && request.method !== 'HEAD' && request.body != null) {
+            body = isFormEncoded
+              ? new URLSearchParams(request.body as Record<string, string>).toString()
+              : JSON.stringify(request.body)
+          }
+
+          const url = new URL(authUrl, BETTER_AUTH_URL)
+          const originalUrl = new URL(request.url, BETTER_AUTH_URL)
+          originalUrl.searchParams.forEach((value, key) => url.searchParams.set(key, value))
+
+          const headers = new Headers()
+          for (const [key, value] of Object.entries(request.headers)) {
+            if (value !== undefined) {
+              headers.set(key, Array.isArray(value) ? value.join(', ') : value)
+            }
+          }
+          if (body !== undefined) {
+            headers.set('content-type', isFormEncoded ? 'application/x-www-form-urlencoded' : 'application/json')
+          }
+
+          const webReq = new Request(url.toString(), {
+            method: request.method,
+            headers,
+            body,
+          })
+
+          const res = await deps.auth.handler(webReq)
+          reply.status(res.status)
+          res.headers.forEach((value, key) => void reply.header(key, value))
+          reply.send(await res.text())
+        } catch (err) {
+          console.error('[oauth-alias] handler error', err)
+          reply.status(500).send({ error: 'OAuth handler error' })
+        }
+      },
+    })
+  }
 }
