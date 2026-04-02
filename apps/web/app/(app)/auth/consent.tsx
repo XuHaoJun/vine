@@ -1,5 +1,5 @@
 import { router } from 'one'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { isWeb, SizableText, Spinner, XStack, YStack } from 'tamagui'
 
 import { useAuth } from '~/features/auth/client/authClient'
@@ -36,31 +36,14 @@ function getScopesFromUrl() {
   return scopeParam.split(' ').filter(Boolean)
 }
 
-type ConsentDetails = {
-  clientId: string
-  appName: string
-  scopes: string[]
-}
-
 export const ConsentPage = () => {
   const { state } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [consentDetails, setConsentDetails] = useState<ConsentDetails | null>(null)
   const isSubmittingRef = useRef(false)
 
   const consentCode = getConsentCode()
   const clientIdFromUrl = getClientIdFromUrl()
   const scopesFromUrl = getScopesFromUrl()
-
-  useEffect(() => {
-    if (!consentCode) return
-    fetch(
-      `${SERVER_URL}/api/auth/oauth2/consent-details?consent_code=${encodeURIComponent(consentCode)}`,
-    )
-      .then((res) => res.json())
-      .then((data: ConsentDetails) => setConsentDetails(data))
-      .catch(() => {})
-  }, [consentCode])
 
   if (!isWeb) return null
 
@@ -83,38 +66,54 @@ export const ConsentPage = () => {
     return null
   }
 
-  const {
-    clientId = '',
-    appName = '',
-    scopes: scopesFromDetails = [],
-  } = consentDetails ?? {}
-  const displayAppName = appName || clientIdFromUrl || 'Unknown App'
-  const scopes = scopesFromDetails.length > 0 ? scopesFromDetails : scopesFromUrl
+  const displayAppName = clientIdFromUrl || 'Unknown App'
+  const scopes = scopesFromUrl
 
-  const postConsent = (accept: boolean) => {
+  const postConsent = async (accept: boolean) => {
     if (isSubmittingRef.current) return
     isSubmittingRef.current = true
     setIsSubmitting(true)
-    fetch(`${SERVER_URL}/api/auth/oauth2/consent`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ accept, consent_code: consentCode }),
-    })
-      .then((res) => {
-        if (res.redirected && res.url) {
-          window.location.replace(res.url)
-        } else if (res.ok) {
-          showToast('Consent recorded', { type: 'success' })
-        }
+    try {
+      const params = new URLSearchParams({
+        consent_code: consentCode,
+        client_id: clientIdFromUrl,
+        scope: scopes.join(' '),
       })
-      .catch(() => {
-        showToast('Network error', { type: 'error' })
-      })
-      .finally(() => {
-        isSubmittingRef.current = false
-        setIsSubmitting(false)
-      })
+
+      const res = await fetch(
+        `${SERVER_URL}/api/auth/oauth2/consent?${params.toString()}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ accept, consent_code: consentCode }),
+        },
+      )
+
+      const data = (await res.json().catch(() => null)) as {
+        redirectURI?: string
+        redirectUrl?: string
+        error?: string
+      } | null
+
+      const redirectTarget = data?.redirectURI ?? data?.redirectUrl
+      if (res.ok && redirectTarget) {
+        window.location.replace(redirectTarget)
+        return
+      }
+
+      if (res.redirected && res.url) {
+        window.location.replace(res.url)
+        return
+      }
+
+      showToast(data?.error ?? 'Something went wrong', { type: 'error' })
+    } catch {
+      showToast('Network error', { type: 'error' })
+    } finally {
+      isSubmittingRef.current = false
+      setIsSubmitting(false)
+    }
   }
 
   return (

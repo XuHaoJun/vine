@@ -28,7 +28,6 @@ type FormData = v.InferInput<typeof schema>
 export const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [demoLoading, setDemoLoading] = useState(false)
-  
 
   const {
     control,
@@ -107,33 +106,33 @@ export const LoginPage = () => {
               )}
             />
           </YStack>
-          <Pressable
-            mt={14}
-            ml="$2"
-            onPress={() => setShowPassword((prev) => !prev)}
-          >
+          <Pressable mt={14} ml="$2" onPress={() => setShowPassword((prev) => !prev)}>
             <SizableText size="$3" color="$color9">
               {showPassword ? 'Hide' : 'Show'}
             </SizableText>
           </Pressable>
         </XStack>
 
-          <Button
-            size="$5"
-            width="100%"
-            disabled={isSubmitting}
-            onPress={handleSubmit(onSubmit)}
-            bg={LINE_GREEN}
-            hoverStyle={{ bg: LINE_GREEN, opacity: 0.9 }}
-            pressStyle={{ bg: LINE_GREEN, opacity: 0.7 }}
-          >
-            {isSubmitting ? <Spinner size="small" color="white" /> : <SizableText color="white">Log in</SizableText>}
-          </Button>
+        <Button
+          size="$5"
+          width="100%"
+          disabled={isSubmitting}
+          onPress={handleSubmit(onSubmit)}
+          bg={LINE_GREEN}
+          hoverStyle={{ bg: LINE_GREEN, opacity: 0.9 }}
+          pressStyle={{ bg: LINE_GREEN, opacity: 0.7 }}
+        >
+          {isSubmitting ? (
+            <Spinner size="small" color="white" />
+          ) : (
+            <SizableText color="white">Log in</SizableText>
+          )}
+        </Button>
 
-          {/* @ts-expect-error OneJS routing type mismatch */}
-          <Link href="/auth/forgot-password" size="$3" color="$color9" textAlign="center">
-            Forgot password?
-          </Link>
+        {/* @ts-expect-error OneJS routing type mismatch */}
+        <Link href="/auth/forgot-password" size="$3" color="$color9" textAlign="center">
+          Forgot password?
+        </Link>
 
         {/* Demo mode — dev only */}
         {isDemoMode && (
