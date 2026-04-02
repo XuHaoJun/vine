@@ -53,3 +53,5 @@ dist
 
 .turbo
 __pycache__
+
+packages/db/src/migrate-dist.js
