@@ -74,7 +74,7 @@ message GetOlderMessagesRequest {
 |---|---|---|
 | 用途 | Better Auth 基礎設施 | 應用資料（Zero sync） |
 | 表格 | `user`, `account`, `session`, `jwks`, `verification` | `userPublic`, `userState`, `todo` + 未來聊天 tables |
-| 內容 | email、密碼 hash、token、session | name、username、image |
+| 內容 | `user`: email、role、banned、emailVerified；`account`: 密碼 hash；`session`/`jwks`/`verification`: token | `userPublic`: name、username、image、joinedAt |
 | Zero 能否存取 | ❌ 排除在 replication publication 之外 | ✅ 透過 WAL 同步到 client |
 
 **資料流：** Better Auth 寫入 private `user` → `afterCreateUser` hook 複製安全欄位到 public `userPublic` → WAL replication → Zero 同步到 client。
@@ -137,9 +137,3 @@ client: zero.mutate.table.insert(data)
 | 統計/分析 | ❌ | 不需要即時同步 |
 
 ---
-
-## Design / Figma
-
-- Vine 已有 Tamagui UI 系統 + `~/interface/*` 元件庫
-- MVP 階段可用現有元件快速搭建
-- 如需高度還原 LINE 視覺風格，提供 Figma 或截圖參考會更好
