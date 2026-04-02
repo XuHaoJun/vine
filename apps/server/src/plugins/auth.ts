@@ -169,11 +169,10 @@ export async function authPlugin(fastify: FastifyInstance, deps: AuthPluginDeps)
     if (body && typeof body.token === 'string') {
       try {
         const valid = await isValidJWT(body.token, {})
-        reply.send({ valid })
+        return await reply.send({ valid })
       } catch (err) {
         console.error('[auth] validateToken error', err)
       }
-      reply.send({ valid: false })
     }
     reply.send({ valid: false })
   })
