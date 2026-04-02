@@ -131,9 +131,9 @@ export const LoginPage = () => {
             {isSubmitting ? <Spinner size="small" color="white" /> : 'Log in'}
           </Button>
 
-          <SizableText size="$3" color="$color9" textAlign="center">
+          <Link href="/auth/forgot-password" size="$3" color="$color9" textAlign="center">
             Forgot password?
-          </SizableText>
+          </Link>
         </YStack>
 
         {/* Demo mode — dev only */}
