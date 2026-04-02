@@ -120,6 +120,7 @@ export const LoginPage = () => {
             disabled={isSubmitting}
             onPress={handleSubmit(onSubmit)}
             bg={LINE_GREEN}
+            color="white"
             hoverStyle={{ bg: LINE_GREEN, opacity: 0.9 }}
             pressStyle={{ bg: LINE_GREEN, opacity: 0.7 }}
           >
