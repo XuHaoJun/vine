@@ -1,5 +1,5 @@
 import { router } from 'one'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { isWeb, SizableText, Spinner, XStack, YStack } from 'tamagui'
@@ -28,6 +28,7 @@ type FormData = v.InferInput<typeof schema>
 export const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [demoLoading, setDemoLoading] = useState(false)
+  const passwordInputRef = useRef<{ focus: () => void } | null>(null)
 
   const {
     control,
@@ -82,6 +83,8 @@ export const LoginPage = () => {
                 autoCapitalize="none"
                 autoCorrect={false}
                 error={error?.message}
+                returnKeyType="next"
+                onSubmitEditing={() => passwordInputRef.current?.focus()}
               />
             )}
           />
@@ -93,6 +96,7 @@ export const LoginPage = () => {
                 name="password"
                 render={({ field: { onChange, value }, fieldState: { error } }) => (
                   <Input
+                    ref={passwordInputRef}
                     value={value}
                     onChangeText={onChange}
                     placeholder="Password"
@@ -106,7 +110,7 @@ export const LoginPage = () => {
             <Pressable
               mt={14}
               ml="$2"
-              onPress={() => setShowPassword((v) => !v)}
+              onPress={() => setShowPassword((prev) => !prev)}
             >
               <SizableText size="$3" color="$color9">
                 {showPassword ? 'Hide' : 'Show'}
@@ -127,11 +131,9 @@ export const LoginPage = () => {
             {isSubmitting ? <Spinner size="small" color="white" /> : 'Log in'}
           </Button>
 
-          <Button variant="transparent" size="$4" width="100%" disabled>
-            <SizableText size="$3" color="$color9">
-              Forgot password?
-            </SizableText>
-          </Button>
+          <SizableText size="$3" color="$color9" textAlign="center">
+            Forgot password?
+          </SizableText>
         </YStack>
 
         {/* Demo mode — dev only */}
