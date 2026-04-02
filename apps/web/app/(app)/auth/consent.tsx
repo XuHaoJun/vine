@@ -1,5 +1,5 @@
 import { router } from 'one'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { isWeb, SizableText, Spinner, XStack, YStack } from 'tamagui'
 
 import { useAuth } from '~/features/auth/client/authClient'
@@ -17,32 +17,68 @@ const SCOPE_LABELS: Record<string, string> = {
   email: 'Email address',
 }
 
-function getConsentParams() {
-  if (!isWeb) return { consentCode: '', clientId: '', scopes: [] as string[] }
+function getConsentCode() {
+  if (!isWeb) return ''
   const params = new URLSearchParams(window.location.search)
-  return {
-    consentCode: params.get('consent_code') ?? '',
-    clientId: params.get('client_id') ?? '',
-    scopes: (params.get('scope') ?? 'openid profile').split(' ').filter(Boolean),
-  }
+  return params.get('consent_code') ?? ''
+}
+
+function getClientIdFromUrl() {
+  if (!isWeb) return ''
+  const params = new URLSearchParams(window.location.search)
+  return params.get('client_id') ?? ''
+}
+
+function getScopesFromUrl() {
+  if (!isWeb) return [] as string[]
+  const params = new URLSearchParams(window.location.search)
+  const scopeParam = params.get('scope') ?? 'openid profile'
+  return scopeParam.split(' ').filter(Boolean)
+}
+
+type ConsentDetails = {
+  clientId: string
+  appName: string
+  scopes: string[]
 }
 
 export const ConsentPage = () => {
   const { state } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [consentDetails, setConsentDetails] = useState<ConsentDetails | null>(null)
   const isSubmittingRef = useRef(false)
 
-  const { consentCode, clientId, scopes } = getConsentParams()
+  const consentCode = getConsentCode()
+  const clientIdFromUrl = getClientIdFromUrl()
+  const scopesFromUrl = getScopesFromUrl()
+
+  useEffect(() => {
+    if (!consentCode) return
+    fetch(`${SERVER_URL}/api/auth/oauth2/consent-details?consent_code=${encodeURIComponent(consentCode)}`)
+      .then((res) => res.json())
+      .then((data: ConsentDetails) => setConsentDetails(data))
+      .catch(() => {})
+  }, [consentCode])
 
   if (!isWeb) return null
 
-  if (state === 'loading') return null
+  if (state === 'loading') {
+    return (
+      <YStack flex={1} justify="center" items="center" minHeight="100vh">
+        <SizableText>Loading...</SizableText>
+      </YStack>
+    )
+  }
 
   if (state === 'logged-out') {
     const returnUrl = `/auth/consent${window.location.search}`
     router.replace(`/auth/login?redirect=${encodeURIComponent(returnUrl)}`)
     return null
   }
+
+  const { clientId = '', appName = '', scopes: scopesFromDetails = [] } = consentDetails ?? {}
+  const displayAppName = appName || clientIdFromUrl || 'Unknown App'
+  const scopes = scopesFromDetails.length > 0 ? scopesFromDetails : scopesFromUrl
 
   const postConsent = (accept: boolean) => {
     if (isSubmittingRef.current) return
@@ -92,7 +128,7 @@ export const ConsentPage = () => {
           >
             <LineIcon size={36} fill={LINE_GREEN} />
           </YStack>
-          <H2 text="center">{clientId}</H2>
+          <H2 text="center">{displayAppName}</H2>
           <SizableText size="$3" color="$color10" text="center">
             Provider: Vine
           </SizableText>
@@ -143,7 +179,6 @@ export const ConsentPage = () => {
             disabled={isSubmitting}
             onPress={() => postConsent(true)}
             bg={LINE_GREEN}
-            color="white"
             hoverStyle={{ bg: LINE_GREEN, opacity: 0.9 }}
             pressStyle={{ bg: LINE_GREEN, opacity: 0.7 }}
           >

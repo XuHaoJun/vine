@@ -1,6 +1,6 @@
 import { expo } from '@better-auth/expo'
 import { isValidJWT } from '@take-out/better-auth-utils/server'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { time } from '@take-out/helpers'
 import { betterAuth } from 'better-auth'
 import { admin, bearer, jwt, magicLink, oidcProvider } from 'better-auth/plugins'
@@ -135,6 +135,7 @@ export type { AuthDeps }
 
 type AuthPluginDeps = {
   auth: ReturnType<typeof createAuthServer>
+  db: NodePgDatabase<typeof schema>
 }
 
 export async function authPlugin(fastify: FastifyInstance, deps: AuthPluginDeps) {
@@ -175,6 +176,40 @@ export async function authPlugin(fastify: FastifyInstance, deps: AuthPluginDeps)
       }
     }
     return reply.send({ valid: false })
+  })
+
+  fastify.get('/api/auth/oauth2/consent-details', async (request, reply) => {
+    const { consent_code } = request.query as { consent_code?: string }
+    if (!consent_code) {
+      return reply.status(400).send({ error: 'Missing consent_code' })
+    }
+    try {
+      const parsed = Buffer.from(consent_code, 'base64url').toString('utf-8')
+      const consentData = JSON.parse(parsed) as {
+        clientId?: string
+        scope?: string
+        redirectUri?: string
+        codeChallenge?: string
+        state?: string
+      }
+      const { clientId = '', scope = '' } = consentData
+      let appName = clientId
+      if (clientId && deps.db) {
+        const result = await deps.db.execute(
+          sql`SELECT name FROM "oauthApplication" WHERE "clientId" = ${clientId} LIMIT 1`,
+        )
+        if (result.rows.length > 0) {
+          appName = (result.rows[0] as { name?: string }).name || clientId
+        }
+      }
+      return await reply.send({
+        clientId,
+        appName,
+        scopes: scope.split(' ').filter(Boolean),
+      })
+    } catch {
+      return reply.status(400).send({ error: 'Invalid consent_code' })
+    }
   })
 
   const LINE_ALIAS_ROUTES: Array<{

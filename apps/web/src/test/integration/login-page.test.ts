@@ -47,7 +47,7 @@ test('login page shows login form elements', async ({ page }) => {
   await expect(page.getByPlaceholder('Password')).toBeVisible()
 
   // Log in button should be present
-  await expect(page.getByText('Log in')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Log in' })).toBeVisible()
 })
 
 test('login page does not redirect infinitely', async ({ page }) => {

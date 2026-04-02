@@ -34,7 +34,7 @@ const zero = createZeroService({
 })
 
 // Register plugins with injected dependencies
-await authPlugin(app, { auth })
+await authPlugin(app, { auth, db })
 await zeroPlugin(app, { auth, zero })
 
 app.get('/healthz', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))
