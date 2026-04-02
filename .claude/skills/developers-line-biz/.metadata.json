@@ -1,0 +1,20 @@
+{
+  "source_url": "https://developers.line.biz/llms.txt",
+  "domain": "developers-line-biz",
+  "entry_count": 228,
+  "sections": [
+    "Docs",
+    "LINE Platform basics",
+    "LINE Developers Console",
+    "Messaging API",
+    "LINE Social Plugins",
+    "LINE Login",
+    "LINE Login SDKs",
+    "LINE Front-end Framework (LIFF)",
+    "LINE MINI App",
+    "Options for corporate customers",
+    "Optional"
+  ],
+  "generated_at": "2026-04-02T02:55:23.988197Z",
+  "generator_version": "1.0.0"
+}
