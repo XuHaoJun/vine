@@ -1,5 +1,5 @@
 import { router } from 'one'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { isWeb, SizableText, Spinner, XStack, YStack } from 'tamagui'
 
 import { useAuth } from '~/features/auth/client/authClient'
@@ -30,6 +30,7 @@ function getConsentParams() {
 export const ConsentPage = () => {
   const { state } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const isSubmittingRef = useRef(false)
 
   const { consentCode, clientId, scopes } = getConsentParams()
 
@@ -43,7 +44,9 @@ export const ConsentPage = () => {
     return null
   }
 
-  const postConsent = async (accept: boolean) => {
+  const postConsent = (accept: boolean) => {
+    if (isSubmittingRef.current) return
+    isSubmittingRef.current = true
     setIsSubmitting(true)
     const form = document.createElement('form')
     form.method = 'POST'
