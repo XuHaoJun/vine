@@ -48,19 +48,22 @@ export const ConsentPage = () => {
     if (isSubmittingRef.current) return
     isSubmittingRef.current = true
     setIsSubmitting(true)
-    const form = document.createElement('form')
-    form.method = 'POST'
-    form.action = `${SERVER_URL}/api/auth/oauth2/consent`
-    const acceptInput = document.createElement('input')
-    acceptInput.name = 'accept'
-    acceptInput.value = String(accept)
-    form.appendChild(acceptInput)
-    const codeInput = document.createElement('input')
-    codeInput.name = 'consent_code'
-    codeInput.value = consentCode
-    form.appendChild(codeInput)
-    document.body.appendChild(form)
-    form.submit()
+    fetch(`${SERVER_URL}/api/auth/oauth2/consent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ accept, consent_code: consentCode }),
+    })
+      .then((res) => {
+        if (res.redirected && res.url) {
+          window.location.replace(res.url)
+        } else if (res.ok) {
+          window.location.replace(res.url)
+        }
+      })
+      .catch(() => {
+        showToast('Network error', { type: 'error' })
+      })
   }
 
   return (
