@@ -52,17 +52,24 @@ export const ConsentPage = () => {
         credentials: 'include',
         body: JSON.stringify({ accept, consent_code: consentCode }),
       })
-      if (res.redirected || res.ok) {
-        window.location.href = res.url
+      if (res.redirected) {
+        const location = res.headers.get('location')
+        if (location) {
+          window.location.replace(location.startsWith('/') ? `${window.location.origin}${location}` : location)
+          return
+        }
+      }
+      if (!res.ok) {
+        const contentType = res.headers.get('content-type') ?? ''
+        if (contentType.includes('application/json')) {
+          const json = await res.json()
+          showToast(json.error ?? 'Something went wrong', { type: 'error' })
+        } else {
+          showToast('Something went wrong', { type: 'error' })
+        }
         return
       }
-      const contentType = res.headers.get('content-type') ?? ''
-      if (contentType.includes('application/json')) {
-        const json = await res.json()
-        showToast(json.error ?? 'Something went wrong', { type: 'error' })
-      } else {
-        showToast('Something went wrong', { type: 'error' })
-      }
+      window.location.href = res.url
     } catch {
       showToast('Network error', { type: 'error' })
     } finally {
