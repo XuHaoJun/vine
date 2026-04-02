@@ -196,7 +196,17 @@ async function main() {
           method: req.method,
           headers: reqHeaders,
           body: req.method !== 'GET' && req.method !== 'HEAD' ? req.body : undefined,
+          redirect: 'manual',
         })
+
+        // Pass through redirects directly to the browser
+        if (upstream.status >= 300 && upstream.status < 400) {
+          const resHeaders = new Headers(upstream.headers)
+          return new Response(null, {
+            status: upstream.status,
+            headers: resHeaders,
+          })
+        }
 
         // Buffer the full body to avoid chunked transfer encoding issues with Bun.serve
         const body = await upstream.arrayBuffer()
