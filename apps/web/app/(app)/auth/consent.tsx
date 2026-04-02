@@ -94,11 +94,15 @@ export const ConsentPage = () => {
         if (res.redirected && res.url) {
           window.location.replace(res.url)
         } else if (res.ok) {
-          window.location.replace(res.url)
+          showToast('Consent recorded', { type: 'success' })
         }
       })
       .catch(() => {
         showToast('Network error', { type: 'error' })
+      })
+      .finally(() => {
+        isSubmittingRef.current = false
+        setIsSubmitting(false)
       })
   }
 

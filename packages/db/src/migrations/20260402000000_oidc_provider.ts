@@ -22,7 +22,7 @@ CREATE TABLE "oauthAccessToken" (
   "refreshToken" text NOT NULL UNIQUE,
   "accessTokenExpiresAt" timestamp NOT NULL,
   "refreshTokenExpiresAt" timestamp NOT NULL,
-  "clientId" text NOT NULL REFERENCES "oauthApplication"("id") ON DELETE CASCADE,
+  "clientId" text NOT NULL REFERENCES "oauthApplication"("clientId") ON DELETE CASCADE,
   "userId" text REFERENCES "user"("id") ON DELETE CASCADE,
   "scopes" text NOT NULL,
   "createdAt" timestamp NOT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE "oauthAccessToken" (
 --> statement-breakpoint
 CREATE TABLE "oauthConsent" (
   "id" text PRIMARY KEY,
-  "clientId" text NOT NULL REFERENCES "oauthApplication"("id") ON DELETE CASCADE,
+  "clientId" text NOT NULL REFERENCES "oauthApplication"("clientId") ON DELETE CASCADE,
   "userId" text NOT NULL REFERENCES "user"("id") ON DELETE CASCADE,
   "scopes" text NOT NULL,
   "createdAt" timestamp NOT NULL,

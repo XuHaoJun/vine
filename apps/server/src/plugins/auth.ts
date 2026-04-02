@@ -173,6 +173,7 @@ export async function authPlugin(fastify: FastifyInstance, deps: AuthPluginDeps)
         return await reply.send({ valid })
       } catch (err) {
         console.error('[auth] validateToken error', err)
+        return reply.send({ valid: false })
       }
     }
     return reply.send({ valid: false })
