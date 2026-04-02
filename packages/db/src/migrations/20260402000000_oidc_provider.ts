@@ -22,7 +22,7 @@ CREATE TABLE "oauthAccessToken" (
   "refreshToken" text NOT NULL UNIQUE,
   "accessTokenExpiresAt" timestamp NOT NULL,
   "refreshTokenExpiresAt" timestamp NOT NULL,
-  "clientId" text NOT NULL REFERENCES "oauthApplication"("clientId") ON DELETE CASCADE,
+  "clientId" text NOT NULL REFERENCES "oauthApplication"("id") ON DELETE CASCADE,
   "userId" text REFERENCES "user"("id") ON DELETE CASCADE,
   "scopes" text NOT NULL,
   "createdAt" timestamp NOT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE "oauthAccessToken" (
 --> statement-breakpoint
 CREATE TABLE "oauthConsent" (
   "id" text PRIMARY KEY,
-  "clientId" text NOT NULL REFERENCES "oauthApplication"("clientId") ON DELETE CASCADE,
+  "clientId" text NOT NULL REFERENCES "oauthApplication"("id") ON DELETE CASCADE,
   "userId" text NOT NULL REFERENCES "user"("id") ON DELETE CASCADE,
   "scopes" text NOT NULL,
   "createdAt" timestamp NOT NULL,
@@ -56,6 +56,7 @@ INSERT INTO "oauthApplication" (
   'vine-dev-client-001',
   'Vine Dev Test App',
   'vine-dev-client',
+  -- dev-only plaintext secret (not a real credential)
   'vine-dev-secret',
   'http://localhost:8081/auth/oauth-callback',
   'web',
@@ -67,4 +68,12 @@ INSERT INTO "oauthApplication" (
 
 export async function up(client: PoolClient) {
   await client.query(sql)
+}
+
+export async function down(client: PoolClient) {
+  await client.query(`
+    DROP TABLE IF EXISTS "oauthConsent";
+    DROP TABLE IF EXISTS "oauthAccessToken";
+    DROP TABLE IF EXISTS "oauthApplication";
+  `)
 }
