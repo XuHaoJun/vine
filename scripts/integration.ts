@@ -184,7 +184,7 @@ async function main() {
       port: FRONTEND_PORT,
       async fetch(req) {
         const url = new URL(req.url)
-        const isApi = url.pathname.startsWith('/api')
+        const isApi = url.pathname.startsWith('/api') || url.pathname.startsWith('/oauth2')
         const targetPort = isApi ? BACKEND_PORT : STATIC_PORT
         const target = `http://localhost:${targetPort}${url.pathname}${url.search}`
 
