@@ -53,7 +53,7 @@ test('consent page renders for logged-in user', async ({ page }) => {
 
   // Action buttons present
   await expect(page.getByRole('button', { name: 'Allow' })).toBeVisible()
-  await expect(page.getByText('Cancel')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Cancel' })).toBeVisible()
 })
 
 test('clicking Allow redirects to redirect_uri with authorization code', async ({ page }) => {
@@ -93,7 +93,7 @@ test('clicking Cancel redirects to redirect_uri with access_denied error', async
     { timeout: 10000 }
   )
 
-  await page.getByText('Cancel').click()
+  await page.getByRole('button', { name: 'Cancel' }).click()
 
   await navigationPromise
 
