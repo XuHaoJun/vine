@@ -45,36 +45,19 @@ export const ConsentPage = () => {
 
   const postConsent = async (accept: boolean) => {
     setIsSubmitting(true)
-    try {
-      const res = await fetch(`${SERVER_URL}/api/auth/oauth2/consent`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ accept, consent_code: consentCode }),
-      })
-      if (res.redirected) {
-        const location = res.headers.get('location')
-        if (location) {
-          window.location.replace(location.startsWith('/') ? `${window.location.origin}${location}` : location)
-          return
-        }
-      }
-      if (!res.ok) {
-        const contentType = res.headers.get('content-type') ?? ''
-        if (contentType.includes('application/json')) {
-          const json = await res.json()
-          showToast(json.error ?? 'Something went wrong', { type: 'error' })
-        } else {
-          showToast('Something went wrong', { type: 'error' })
-        }
-        return
-      }
-      window.location.href = res.url
-    } catch {
-      showToast('Network error', { type: 'error' })
-    } finally {
-      setIsSubmitting(false)
-    }
+    const form = document.createElement('form')
+    form.method = 'POST'
+    form.action = `${SERVER_URL}/api/auth/oauth2/consent`
+    const acceptInput = document.createElement('input')
+    acceptInput.name = 'accept'
+    acceptInput.value = String(accept)
+    form.appendChild(acceptInput)
+    const codeInput = document.createElement('input')
+    codeInput.name = 'consent_code'
+    codeInput.value = consentCode
+    form.appendChild(codeInput)
+    document.body.appendChild(form)
+    form.submit()
   }
 
   return (
