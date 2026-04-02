@@ -6,10 +6,9 @@
 bun install                    # Install dependencies
 bun run dev                    # Start all apps (turbo dev)
 bun run build                  # Build all packages (turbo build)
-bun run lint                   # Lint all packages (oxlint)
+bun run check:all              # Type check + lint (tko check)
 bun run format                 # Format all files (oxfmt)
 bun run test                   # Run all tests (turbo test)
-bun run check                  # Type check + lint (tko check)
 ```
 
 ### Running Single Tests
