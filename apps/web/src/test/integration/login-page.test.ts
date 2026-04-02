@@ -39,9 +39,15 @@ test('login page shows login form elements', async ({ page }) => {
     timeout: 10000,
   })
 
-  // wait for the "Continue with Email" button - this proves the page fully rendered
-  const emailButton = page.getByText('Continue with Email')
-  await expect(emailButton).toBeVisible({ timeout: 10000 })
+  // wait for the heading - this proves the page fully rendered
+  await expect(page.getByText('Log in to LINE')).toBeVisible({ timeout: 10000 })
+
+  // email and password inputs should be present
+  await expect(page.getByPlaceholder('Email')).toBeVisible()
+  await expect(page.getByPlaceholder('Password')).toBeVisible()
+
+  // Log in button should be present
+  await expect(page.getByText('Log in')).toBeVisible()
 })
 
 test('login page does not redirect infinitely', async ({ page }) => {
