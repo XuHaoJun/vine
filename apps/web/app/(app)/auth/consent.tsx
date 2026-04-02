@@ -56,8 +56,13 @@ export const ConsentPage = () => {
         window.location.href = res.url
         return
       }
-      const text = await res.text()
-      showToast(text || 'Something went wrong', { type: 'error' })
+      const contentType = res.headers.get('content-type') ?? ''
+      if (contentType.includes('application/json')) {
+        const json = await res.json()
+        showToast(json.error ?? 'Something went wrong', { type: 'error' })
+      } else {
+        showToast('Something went wrong', { type: 'error' })
+      }
     } catch {
       showToast('Network error', { type: 'error' })
     } finally {
