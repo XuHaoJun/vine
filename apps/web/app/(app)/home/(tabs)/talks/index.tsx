@@ -67,58 +67,61 @@ export const TalksPage = memo(() => {
         pendingCount={pendingCount}
       />
 
-      <ScrollView flex={1} pb={insets.bottom}>
-        {activeTab === 'chats' ? (
-          filteredChats.length === 0 ? (
+      {/* Note: flex={1} is on outer YStack, NOT on ScrollView, to avoid display:contents issue on web */}
+      <YStack flex={1}>
+        <ScrollView pb={insets.bottom}>
+          {activeTab === 'chats' ? (
+            filteredChats.length === 0 ? (
+              <YStack p="$6" items="center" justify="center">
+                <H3 color="$color9">
+                  {searchQuery ? '找不到符合的聊天' : '還沒有聊天，先加好友吧！'}
+                </H3>
+              </YStack>
+            ) : (
+              filteredChats.map((chat) => {
+                const otherMember = chat.members?.find((m) => m.userId !== userId)
+                const myMembership = chat.members?.find((m) => m.userId === userId)
+                const lastMsg = chat.lastMessage
+
+                const hasUnread =
+                  lastMsg &&
+                  myMembership?.lastReadMessageId !== lastMsg.id &&
+                  lastMsg.senderId !== userId
+
+                return (
+                  <ChatListItem
+                    key={chat.id}
+                    name={otherMember?.user?.name ?? '未知用戶'}
+                    image={otherMember?.user?.image}
+                    lastMessageText={lastMsg?.text ?? null}
+                    lastMessageAt={chat.lastMessageAt}
+                    unreadCount={hasUnread ? 1 : 0}
+                    onPress={() => handleChatPress(chat.id)}
+                  />
+                )
+              })
+            )
+          ) : filteredFriends.length === 0 ? (
             <YStack p="$6" items="center" justify="center">
               <H3 color="$color9">
-                {searchQuery ? '找不到符合的聊天' : '還沒有聊天，先加好友吧！'}
+                {searchQuery ? '找不到符合的好友' : '還沒有好友，點 ＋ 新增！'}
               </H3>
             </YStack>
           ) : (
-            filteredChats.map((chat) => {
-              const otherMember = chat.members?.find((m) => m.userId !== userId)
-              const myMembership = chat.members?.find((m) => m.userId === userId)
-              const lastMsg = chat.lastMessage
-
-              const hasUnread =
-                lastMsg &&
-                myMembership?.lastReadMessageId !== lastMsg.id &&
-                lastMsg.senderId !== userId
-
+            filteredFriends.map((f) => {
+              const otherUser = f.requesterId === userId ? f.addressee : f.requester
               return (
-                <ChatListItem
-                  key={chat.id}
-                  name={otherMember?.user?.name ?? '未知用戶'}
-                  image={otherMember?.user?.image}
-                  lastMessageText={lastMsg?.text ?? null}
-                  lastMessageAt={chat.lastMessageAt}
-                  unreadCount={hasUnread ? 1 : 0}
-                  onPress={() => handleChatPress(chat.id)}
+                <FriendListItem
+                  key={f.id}
+                  name={otherUser?.name ?? '未知用戶'}
+                  image={otherUser?.image}
+                  onPress={() => handleFriendPress(f)}
                 />
               )
             })
-          )
-        ) : filteredFriends.length === 0 ? (
-          <YStack p="$6" items="center" justify="center">
-            <H3 color="$color9">
-              {searchQuery ? '找不到符合的好友' : '還沒有好友，點 ＋ 新增！'}
-            </H3>
-          </YStack>
-        ) : (
-          filteredFriends.map((f) => {
-            const otherUser = f.requesterId === userId ? f.addressee : f.requester
-            return (
-              <FriendListItem
-                key={f.id}
-                name={otherUser?.name ?? '未知用戶'}
-                image={otherUser?.image}
-                onPress={() => handleFriendPress(f)}
-              />
-            )
-          })
-        )}
-      </ScrollView>
+          )}
+        </ScrollView>
+      </YStack>
     </YStack>
   )
 })
