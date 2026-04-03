@@ -1,4 +1,11 @@
-import { boolean, index, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
+import {
+  boolean,
+  index,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+} from 'drizzle-orm/pg-core'
 
 export const userPublic = pgTable(
   'userPublic',
@@ -80,13 +87,20 @@ export const message = pgTable(
     senderId: text('senderId').notNull(),
     type: text('type')
       .notNull()
-      .$type<'text' | 'image' | 'video' | 'audio' | 'sticker' | 'location' | 'flex' | 'template'>(),
+      .$type<
+        | 'text'
+        | 'image'
+        | 'video'
+        | 'audio'
+        | 'sticker'
+        | 'location'
+        | 'flex'
+        | 'template'
+      >(),
     text: text('text'),
     metadata: text('metadata'),
     replyToMessageId: text('replyToMessageId'),
     createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
   },
-  (table) => [
-    index('message_chatId_createdAt_idx').on(table.chatId, table.createdAt),
-  ],
+  (table) => [index('message_chatId_createdAt_idx').on(table.chatId, table.createdAt)],
 )

@@ -21,10 +21,8 @@ const StyledSearchInput = styled(TamaguiInput, {
 
 export type SearchInputProps = GetProps<typeof StyledSearchInput>
 
-export const SearchInput = forwardRef<TamaguiElement, SearchInputProps>(
-  (props, ref) => {
-    return <StyledSearchInput ref={ref} {...props} />
-  },
-)
+export const SearchInput = forwardRef<TamaguiElement, SearchInputProps>((props, ref) => {
+  return <StyledSearchInput ref={ref} {...props} />
+})
 
 SearchInput.displayName = 'SearchInput'

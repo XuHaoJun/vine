@@ -50,6 +50,13 @@ export const mutationValidators = {
     delete: v.object({
       id: v.string(),
     }),
+    accept: v.object({
+      friendshipId: v.string(),
+      chatId: v.string(),
+      member1Id: v.string(),
+      member2Id: v.string(),
+      requesterId: v.string(),
+    }),
   },
   message: {
     insert: v.object({
@@ -74,6 +81,16 @@ export const mutationValidators = {
     }),
     delete: v.object({
       id: v.string(),
+    }),
+    send: v.object({
+      text: v.optional(v.nullable(v.string())),
+      metadata: v.optional(v.nullable(v.string())),
+      replyToMessageId: v.optional(v.nullable(v.string())),
+      id: v.string(),
+      chatId: v.string(),
+      senderId: v.string(),
+      type: v.string(),
+      createdAt: v.number(),
     }),
   },
   todo: {

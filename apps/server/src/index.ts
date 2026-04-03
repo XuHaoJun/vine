@@ -4,6 +4,7 @@ import { fastifyConnectPlugin } from '@connectrpc/connect-fastify'
 import Fastify from 'fastify'
 import { getDatabase } from '@vine/db/database'
 import { createDb } from '@vine/db'
+import { ensureSeed } from '@vine/db/seed'
 
 import { greeterRoutes } from './connect/routes'
 import { createAuthServer, authPlugin } from './plugins/auth'
@@ -26,6 +27,9 @@ await app.register(fastifyConnectPlugin, {
 // Wire services with explicit dependencies
 const database = getDatabase()
 const db = createDb()
+
+// Seed test data (only in dev with VITE_DEMO_MODE=1)
+await ensureSeed(database, db)
 
 const auth = createAuthServer({ database, db })
 const zero = createZeroService({

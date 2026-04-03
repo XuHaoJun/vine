@@ -101,7 +101,10 @@ export const ConsentPage = () => {
       const params = new URLSearchParams({
         consent_code: consentCode,
         client_id: clientIdFromUrl,
-        scope: (consentDetails?.scopes.length ? consentDetails.scopes : scopesFromUrl).join(' '),
+        scope: (consentDetails?.scopes.length
+          ? consentDetails.scopes
+          : scopesFromUrl
+        ).join(' '),
       })
 
       const res = await fetch(

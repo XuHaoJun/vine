@@ -1,6 +1,10 @@
 import { useMemo } from 'react'
 
-import { friendsByUserId, pendingRequestsByUserId, usersByUsername } from '@vine/zero-schema/queries/friendship'
+import {
+  friendsByUserId,
+  pendingRequestsByUserId,
+  usersByUsername,
+} from '@vine/zero-schema/queries/friendship'
 import { useAuth } from '~/features/auth/client/authClient'
 import { showError } from '~/interface/dialogs/actions'
 import { zero, useZeroQuery } from '~/zero/client'
@@ -57,10 +61,7 @@ export function useFriendshipActions() {
     })
   }
 
-  const acceptRequest = (friendship: {
-    id: string
-    requesterId: string
-  }) => {
+  const acceptRequest = (friendship: { id: string; requesterId: string }) => {
     if (!userId) return
     zero.mutate.friendship.accept({
       friendshipId: friendship.id,
@@ -83,10 +84,6 @@ export function useFriendshipActions() {
 }
 
 export function useUserSearch(query: string) {
-  const [users] = useZeroQuery(
-    usersByUsername,
-    { query },
-    { enabled: query.length >= 2 },
-  )
+  const [users] = useZeroQuery(usersByUsername, { query }, { enabled: query.length >= 2 })
   return { users: users ?? [] }
 }

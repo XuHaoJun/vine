@@ -2,22 +2,67 @@
 // server-side query definitions with validators
 import { defineQuery, defineQueries } from '@rocicorp/zero'
 import * as v from 'valibot'
-
 import * as Queries from './groupedQueries'
 
+const chat = {
+  chatMembersByChatId: defineQuery(
+    v.object({
+      chatId: v.string(),
+    }),
+    ({ args }) => Queries.chat.chatMembersByChatId(args),
+  ),
+  chatsByUserId: defineQuery(
+    v.object({
+      userId: v.string(),
+    }),
+    ({ args }) => Queries.chat.chatsByUserId(args),
+  ),
+}
+
+const friendship = {
+  friendsByUserId: defineQuery(
+    v.object({
+      userId: v.string(),
+    }),
+    ({ args }) => Queries.friendship.friendsByUserId(args),
+  ),
+  pendingRequestsByUserId: defineQuery(
+    v.object({
+      userId: v.string(),
+    }),
+    ({ args }) => Queries.friendship.pendingRequestsByUserId(args),
+  ),
+  usersByUsername: defineQuery(
+    v.object({
+      query: v.string(),
+    }),
+    ({ args }) => Queries.friendship.usersByUsername(args),
+  ),
+}
+
+const message = {
+  messagesByChatId: defineQuery(
+    v.object({
+      chatId: v.string(),
+      limit: v.optional(v.number()),
+    }),
+    ({ args }) => Queries.message.messagesByChatId(args),
+  ),
+}
+
 const todo = {
+  todoById: defineQuery(
+    v.object({
+      todoId: v.string(),
+    }),
+    ({ args }) => Queries.todo.todoById(args),
+  ),
   todosByUserId: defineQuery(
     v.object({
       userId: v.string(),
       limit: v.optional(v.number()),
     }),
     ({ args }) => Queries.todo.todosByUserId(args),
-  ),
-  todoById: defineQuery(
-    v.object({
-      todoId: v.string(),
-    }),
-    ({ args }) => Queries.todo.todoById(args),
   ),
 }
 
@@ -37,6 +82,9 @@ const user = {
 }
 
 export const queries = defineQueries({
+  chat,
+  friendship,
+  message,
   todo,
   user,
 })
