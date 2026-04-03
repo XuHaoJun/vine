@@ -7,9 +7,8 @@ import { useChats } from '~/features/chat/useChats'
 import { useFriends } from '~/features/chat/useFriendship'
 import { ChatListItem } from '~/features/chat/ui/ChatListItem'
 import { FriendListItem } from '~/features/chat/ui/FriendListItem'
+import { TalksHeader } from '~/features/chat/ui/TalksHeader'
 import { useAuth } from '~/features/auth/client/authClient'
-import { Button } from '~/interface/buttons/Button'
-import { Input } from '~/interface/forms/Input'
 import { H3 } from '~/interface/text/Headings'
 
 type Tab = 'chats' | 'friends'
@@ -55,65 +54,13 @@ export const TalksPage = memo(() => {
 
   return (
     <YStack flex={1} bg="$background">
-      <XStack px="$3" py="$2" gap="$2" items="center">
-        <Input
-          flex={1}
-          placeholder={activeTab === 'chats' ? '搜尋聊天' : '搜尋好友'}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-        {pendingCount > 0 && activeTab === 'friends' && (
-          <Button
-            variant="transparent"
-            onPress={() => router.push('/home/talks/requests')}
-            px="$2"
-          >
-            <XStack
-              bg="$red9"
-              rounded="$10"
-              minW={20}
-              height={20}
-              items="center"
-              justify="center"
-              px="$1"
-            >
-              <SizableText size="$1" color="white" fontWeight="bold">
-                {pendingCount}
-              </SizableText>
-            </XStack>
-          </Button>
-        )}
-        <Button
-          variant="transparent"
-          onPress={() => router.push('/home/talks/requests')}
-          px="$2"
-        >
-          <SizableText size="$3">＋</SizableText>
-        </Button>
-      </XStack>
-
-      <XStack px="$3" pb="$2" gap="$2">
-        <Button
-          bg={activeTab === 'chats' ? '$color3' : 'transparent'}
-          variant={activeTab === 'chats' ? undefined : 'outlined'}
-          onPress={() => setActiveTab('chats')}
-          rounded="$10"
-          px="$4"
-          py="$1"
-        >
-          聊天
-        </Button>
-        <Button
-          bg={activeTab === 'friends' ? '$color3' : 'transparent'}
-          variant={activeTab === 'friends' ? undefined : 'outlined'}
-          onPress={() => setActiveTab('friends')}
-          rounded="$10"
-          px="$4"
-          py="$1"
-        >
-          好友
-        </Button>
-      </XStack>
+      <TalksHeader
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        pendingCount={pendingCount}
+      />
 
       <ScrollView flex={1} pb={insets.bottom}>
         {activeTab === 'chats' ? (
