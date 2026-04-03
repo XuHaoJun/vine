@@ -16,14 +16,16 @@ declare module 'one' {
         | `/(app)/auth/oauth-callback`
         | `/(app)/home`
         | `/(app)/home/(tabs)`
-        | `/(app)/home/(tabs)/feed`
-        | `/(app)/home/(tabs)/feed/`
-        | `/(app)/home/feed`
-        | `/(app)/home/feed/`
+        | `/(app)/home/(tabs)/talks`
+        | `/(app)/home/(tabs)/talks/`
+        | `/(app)/home/(tabs)/talks/requests`
         | `/(app)/home/settings`
         | `/(app)/home/settings/`
         | `/(app)/home/settings/blocked-users`
         | `/(app)/home/settings/edit-profile`
+        | `/(app)/home/talks`
+        | `/(app)/home/talks/`
+        | `/(app)/home/talks/requests`
         | `/_sitemap`
         | `/auth`
         | `/auth/consent`
@@ -33,24 +35,38 @@ declare module 'one' {
         | `/hello`
         | `/home`
         | `/home/(tabs)`
-        | `/home/(tabs)/feed`
-        | `/home/(tabs)/feed/`
-        | `/home/feed`
-        | `/home/feed/`
+        | `/home/(tabs)/talks`
+        | `/home/(tabs)/talks/`
+        | `/home/(tabs)/talks/requests`
         | `/home/settings`
         | `/home/settings/`
         | `/home/settings/blocked-users`
         | `/home/settings/edit-profile`
+        | `/home/talks`
+        | `/home/talks/`
+        | `/home/talks/requests`
       DynamicRoutes: 
         | `/(app)/auth/signup/${OneRouter.SingleRoutePart<T>}`
+        | `/(app)/home/(tabs)/talks/${OneRouter.SingleRoutePart<T>}`
+        | `/(app)/home/talks/${OneRouter.SingleRoutePart<T>}`
         | `/auth/signup/${OneRouter.SingleRoutePart<T>}`
+        | `/home/(tabs)/talks/${OneRouter.SingleRoutePart<T>}`
+        | `/home/talks/${OneRouter.SingleRoutePart<T>}`
       DynamicRouteTemplate: 
         | `/(app)/auth/signup/[method]`
+        | `/(app)/home/(tabs)/talks/[chatId]`
+        | `/(app)/home/talks/[chatId]`
         | `/auth/signup/[method]`
+        | `/home/(tabs)/talks/[chatId]`
+        | `/home/talks/[chatId]`
       IsTyped: true
       RouteTypes: {
         '/(app)/auth/signup/[method]': RouteInfo<{ method: string }>
+        '/(app)/home/(tabs)/talks/[chatId]': RouteInfo<{ chatId: string }>
+        '/(app)/home/talks/[chatId]': RouteInfo<{ chatId: string }>
         '/auth/signup/[method]': RouteInfo<{ method: string }>
+        '/home/(tabs)/talks/[chatId]': RouteInfo<{ chatId: string }>
+        '/home/talks/[chatId]': RouteInfo<{ chatId: string }>
       }
     }
   }

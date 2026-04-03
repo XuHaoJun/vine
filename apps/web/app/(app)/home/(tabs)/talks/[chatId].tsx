@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from 'one'
+import { useLocalSearchParams, createRoute } from 'one'
 import { memo, useEffect, useRef } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
@@ -10,6 +10,8 @@ import { useAuth } from '~/features/auth/client/authClient'
 import { Avatar } from '~/interface/avatars/Avatar'
 import { Button } from '~/interface/buttons/Button'
 import { H3 } from '~/interface/text/Headings'
+
+const route = createRoute<'/(app)/home/(tabs)/talks/[chatId]'>()
 
 export const ChatRoomPage = memo(() => {
   const { chatId } = useLocalSearchParams<{ chatId: string }>()
