@@ -9,8 +9,6 @@ import {
 } from 'tamagui'
 
 const StyledInput = styled(TamaguiInput, {
-  height: 50,
-  size: '$5',
   borderWidth: 0.5,
   placeholderTextColor: '$color8',
 
@@ -41,10 +39,10 @@ export type InputProps = GetProps<typeof StyledInput> & {
 }
 
 export const Input = forwardRef<TamaguiElement, InputProps>(
-  ({ error, ...props }, ref) => {
+  ({ error, flex, ...props }, ref) => {
     return (
-      <YStack gap="$2">
-        <StyledInput ref={ref} hasError={!!error} {...props} />
+      <YStack gap="$2" flex={flex} height="100%">
+        <StyledInput ref={ref} hasError={!!error} flex={1} {...props} />
         {error && (
           <SizableText size="$2" color="$red9">
             {error}
