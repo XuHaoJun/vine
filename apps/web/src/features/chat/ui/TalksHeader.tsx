@@ -16,89 +16,91 @@ type TalksHeaderProps = {
   pendingCount: number
 }
 
-export const TalksHeader = memo(({
-  activeTab,
-  onTabChange,
-  searchQuery,
-  onSearchChange,
-  pendingCount,
-}: TalksHeaderProps) => {
-  return (
-    <YStack bg="$background" pb="$2">
-      <XStack px="$3" py="$2" justify="space-between" items="center">
-        <XStack gap="$4">
-          <SizableText
-            size="$4"
-            fontWeight={activeTab === 'chats' ? '700' : '400'}
-            color={activeTab === 'chats' ? '$color12' : '$color10'}
-            cursor="pointer"
-            onPress={() => onTabChange('chats')}
-          >
-            聊天 ▾
-          </SizableText>
-          <XStack items="center" gap="$1">
+export const TalksHeader = memo(
+  ({
+    activeTab,
+    onTabChange,
+    searchQuery,
+    onSearchChange,
+    pendingCount,
+  }: TalksHeaderProps) => {
+    return (
+      <YStack bg="$background" pb="$2">
+        <XStack px="$3" py="$2" justify="space-between" items="center">
+          <XStack gap="$4">
             <SizableText
               size="$4"
-              fontWeight={activeTab === 'friends' ? '700' : '400'}
-              color={activeTab === 'friends' ? '$color12' : '$color10'}
+              fontWeight={activeTab === 'chats' ? '700' : '400'}
+              color={activeTab === 'chats' ? '$color12' : '$color10'}
               cursor="pointer"
-              onPress={() => onTabChange('friends')}
+              onPress={() => onTabChange('chats')}
             >
-              好友
+              聊天 ▾
             </SizableText>
-            {pendingCount > 0 && activeTab === 'friends' && (
-              <XStack
-                bg="$red9"
-                rounded="$10"
-                minW={16}
-                height={16}
-                items="center"
-                justify="center"
-                px="$1"
+            <XStack items="center" gap="$1">
+              <SizableText
+                size="$4"
+                fontWeight={activeTab === 'friends' ? '700' : '400'}
+                color={activeTab === 'friends' ? '$color12' : '$color10'}
+                cursor="pointer"
+                onPress={() => onTabChange('friends')}
               >
-                <SizableText size="$1" color="white" fontWeight="bold">
-                  {pendingCount}
-                </SizableText>
-              </XStack>
-            )}
+                好友
+              </SizableText>
+              {pendingCount > 0 && activeTab === 'friends' && (
+                <XStack
+                  bg="$red9"
+                  rounded="$10"
+                  minW={16}
+                  height={16}
+                  items="center"
+                  justify="center"
+                  px="$1"
+                >
+                  <SizableText size="$1" color="white" fontWeight="bold">
+                    {pendingCount}
+                  </SizableText>
+                </XStack>
+              )}
+            </XStack>
+          </XStack>
+
+          <XStack gap="$3" items="center">
+            <Button variant="transparent" cursor="pointer" p="$1">
+              <ClockIcon size={20} />
+            </Button>
+            <Button
+              variant="transparent"
+              cursor="pointer"
+              p="$1"
+              onPress={() => router.push('/home/talks/requests')}
+            >
+              <SizableText size="$4">＋</SizableText>
+            </Button>
+            <Button
+              variant="transparent"
+              cursor="pointer"
+              p="$1"
+              onPress={() => router.push('/home/settings')}
+            >
+              <GearIcon size={20} />
+            </Button>
           </XStack>
         </XStack>
 
-        <XStack gap="$3" items="center">
-          <Button variant="transparent" cursor="pointer" p="$1">
-            <ClockIcon size={20} />
-          </Button>
-          <Button
-            variant="transparent"
-            cursor="pointer"
-            p="$1"
-            onPress={() => router.push('/home/talks/requests')}
-          >
-            <SizableText size="$4">＋</SizableText>
-          </Button>
-          <Button
-            variant="transparent"
-            cursor="pointer"
-            p="$1"
-            onPress={() => router.push('/home/settings')}
-          >
-            <GearIcon size={20} />
-          </Button>
+        <XStack px="$3" gap="$2">
+          <XStack flex={1} bg="$color3" rounded="$2" items="center" px="$2" py="$1.5">
+            <SearchInput
+              flex={1}
+              placeholder={activeTab === 'chats' ? '搜尋聊天' : '搜尋好友'}
+              value={searchQuery}
+              onChangeText={onSearchChange}
+              placeholderTextColor="$color10"
+            />
+            <FunnelIcon size={18} color="$color10" />
+          </XStack>
         </XStack>
-      </XStack>
-
-      <XStack px="$3" gap="$2">
-        <XStack flex={1} bg="$color3" rounded="$2" items="center" px="$2" py="$1.5">
-          <SearchInput
-            flex={1}
-            placeholder={activeTab === 'chats' ? '搜尋聊天' : '搜尋好友'}
-            value={searchQuery}
-            onChangeText={onSearchChange}
-            placeholderTextColor="$color10"
-          />
-          <FunnelIcon size={18} color="$color10" />
-        </XStack>
-      </XStack>
-    </YStack>
-  )
-})
+      </YStack>
+    )
+  },
+)

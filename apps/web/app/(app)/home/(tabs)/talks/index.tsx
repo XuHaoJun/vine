@@ -41,11 +41,16 @@ export const TalksPage = memo(() => {
     router.push(`/home/talks/${chatId}`)
   }
 
-  const handleFriendPress = (friendship: { requesterId: string; addresseeId: string }) => {
-    const friendId = friendship.requesterId === userId ? friendship.addresseeId : friendship.requesterId
-    const chat = chats.find((c) =>
-      c.members?.some((m) => m.userId === friendId) &&
-      c.members?.some((m) => m.userId === userId)
+  const handleFriendPress = (friendship: {
+    requesterId: string
+    addresseeId: string
+  }) => {
+    const friendId =
+      friendship.requesterId === userId ? friendship.addresseeId : friendship.requesterId
+    const chat = chats.find(
+      (c) =>
+        c.members?.some((m) => m.userId === friendId) &&
+        c.members?.some((m) => m.userId === userId),
     )
     if (chat) {
       router.push(`/home/talks/${chat.id}`)
@@ -94,26 +99,24 @@ export const TalksPage = memo(() => {
               )
             })
           )
+        ) : filteredFriends.length === 0 ? (
+          <YStack p="$6" items="center" justify="center">
+            <H3 color="$color9">
+              {searchQuery ? '找不到符合的好友' : '還沒有好友，點 ＋ 新增！'}
+            </H3>
+          </YStack>
         ) : (
-          filteredFriends.length === 0 ? (
-            <YStack p="$6" items="center" justify="center">
-              <H3 color="$color9">
-                {searchQuery ? '找不到符合的好友' : '還沒有好友，點 ＋ 新增！'}
-              </H3>
-            </YStack>
-          ) : (
-            filteredFriends.map((f) => {
-              const otherUser = f.requesterId === userId ? f.addressee : f.requester
-              return (
-                <FriendListItem
-                  key={f.id}
-                  name={otherUser?.name ?? '未知用戶'}
-                  image={otherUser?.image}
-                  onPress={() => handleFriendPress(f)}
-                />
-              )
-            })
-          )
+          filteredFriends.map((f) => {
+            const otherUser = f.requesterId === userId ? f.addressee : f.requester
+            return (
+              <FriendListItem
+                key={f.id}
+                name={otherUser?.name ?? '未知用戶'}
+                image={otherUser?.image}
+                onPress={() => handleFriendPress(f)}
+              />
+            )
+          })
         )}
       </ScrollView>
     </YStack>

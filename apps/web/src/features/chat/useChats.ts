@@ -9,9 +9,13 @@ export function useChats() {
   const { user } = useAuth()
   const userId = user?.id ?? ''
 
-  const [chats, { type: chatsType }] = useZeroQuery(chatsByUserId, { userId }, {
-    enabled: Boolean(userId),
-  })
+  const [chats, { type: chatsType }] = useZeroQuery(
+    chatsByUserId,
+    { userId },
+    {
+      enabled: Boolean(userId),
+    },
+  )
 
   const [pendingRequests] = useZeroQuery(
     pendingRequestsByUserId,

@@ -32,11 +32,7 @@ export const BottomTabBar = memo(() => {
       }}
       pb={insets.bottom}
     >
-      <XStack
-        bg="$background"
-        borderTopWidth={1}
-        borderTopColor="$color5"
-      >
+      <XStack bg="$background" borderTopWidth={1} borderTopColor="$color5">
         {routes.map((route) => {
           const isActive = currentTab === route.name
           return (

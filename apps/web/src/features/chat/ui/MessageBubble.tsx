@@ -15,11 +15,7 @@ export const MessageBubble = memo(({ text, isMine, createdAt, isRead }: Props) =
   })
 
   return (
-    <XStack
-      justify={isMine ? 'flex-end' : 'flex-start'}
-      px="$3"
-      py="$1"
-    >
+    <XStack justify={isMine ? 'flex-end' : 'flex-start'} px="$3" py="$1">
       <YStack
         maxW="75%"
         bg={isMine ? '$green9' : '$color3'}
@@ -28,10 +24,7 @@ export const MessageBubble = memo(({ text, isMine, createdAt, isRead }: Props) =
         py="$2"
         gap="$1"
       >
-        <SizableText
-          size="$3"
-          color={isMine ? 'white' : '$color12'}
-        >
+        <SizableText size="$3" color={isMine ? 'white' : '$color12'}>
           {text}
         </SizableText>
         <XStack gap="$2" items="center" justify="flex-end">

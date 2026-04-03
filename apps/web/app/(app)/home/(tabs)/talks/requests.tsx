@@ -2,7 +2,11 @@ import { router } from 'one'
 import { memo, useState } from 'react'
 import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
 
-import { usePendingRequests, useFriendshipActions, useUserSearch } from '~/features/chat/useFriendship'
+import {
+  usePendingRequests,
+  useFriendshipActions,
+  useUserSearch,
+} from '~/features/chat/useFriendship'
 import { useAuth } from '~/features/auth/client/authClient'
 import { Avatar } from '~/interface/avatars/Avatar'
 import { Button } from '~/interface/buttons/Button'
@@ -61,24 +65,26 @@ export const RequestsPage = memo(() => {
                 autoFocus
               />
             </XStack>
-            {searchQuery.length >= 2 && searchResults.map((u) => {
-              if (u.id === userId) return null
-              return (
-                <XStack key={u.id} px="$4" py="$3" gap="$3" items="center">
-                  <Avatar size={48} image={u.image} name={u.name ?? u.username ?? ''} />
-                  <YStack flex={1}>
-                    <SizableText size="$4" fontWeight="600">{u.name}</SizableText>
-                    <SizableText size="$3" color="$color10">{u.username}</SizableText>
-                  </YStack>
-                  <Button
-                    size="$3"
-                    onPress={() => sendRequest(u.id)}
-                  >
-                    新增好友
-                  </Button>
-                </XStack>
-              )
-            })}
+            {searchQuery.length >= 2 &&
+              searchResults.map((u) => {
+                if (u.id === userId) return null
+                return (
+                  <XStack key={u.id} px="$4" py="$3" gap="$3" items="center">
+                    <Avatar size={48} image={u.image} name={u.name ?? u.username ?? ''} />
+                    <YStack flex={1}>
+                      <SizableText size="$4" fontWeight="600">
+                        {u.name}
+                      </SizableText>
+                      <SizableText size="$3" color="$color10">
+                        {u.username}
+                      </SizableText>
+                    </YStack>
+                    <Button size="$3" onPress={() => sendRequest(u.id)}>
+                      新增好友
+                    </Button>
+                  </XStack>
+                )
+              })}
             {searchQuery.length >= 2 && searchResults.length === 0 && (
               <YStack p="$6" items="center">
                 <H3 color="$color9">找不到用戶</H3>
@@ -96,9 +102,15 @@ export const RequestsPage = memo(() => {
                   const requester = req.requester
                   return (
                     <XStack key={req.id} px="$4" py="$3" gap="$3" items="center">
-                      <Avatar size={48} image={requester?.image} name={requester?.name ?? ''} />
+                      <Avatar
+                        size={48}
+                        image={requester?.image}
+                        name={requester?.name ?? ''}
+                      />
                       <YStack flex={1}>
-                        <SizableText size="$4" fontWeight="600">{requester?.name}</SizableText>
+                        <SizableText size="$4" fontWeight="600">
+                          {requester?.name}
+                        </SizableText>
                       </YStack>
                       <XStack gap="$2">
                         <Button
@@ -108,10 +120,7 @@ export const RequestsPage = memo(() => {
                         >
                           拒絕
                         </Button>
-                        <Button
-                          size="$3"
-                          onPress={() => acceptRequest(req)}
-                        >
+                        <Button size="$3" onPress={() => acceptRequest(req)}>
                           同意
                         </Button>
                       </XStack>
@@ -130,10 +139,18 @@ export const RequestsPage = memo(() => {
                   const addressee = req.addressee
                   return (
                     <XStack key={req.id} px="$4" py="$3" gap="$3" items="center">
-                      <Avatar size={48} image={addressee?.image} name={addressee?.name ?? ''} />
+                      <Avatar
+                        size={48}
+                        image={addressee?.image}
+                        name={addressee?.name ?? ''}
+                      />
                       <YStack flex={1}>
-                        <SizableText size="$4" fontWeight="600">{addressee?.name}</SizableText>
-                        <SizableText size="$2" color="$color9">等待回應</SizableText>
+                        <SizableText size="$4" fontWeight="600">
+                          {addressee?.name}
+                        </SizableText>
+                        <SizableText size="$2" color="$color9">
+                          等待回應
+                        </SizableText>
                       </YStack>
                     </XStack>
                   )

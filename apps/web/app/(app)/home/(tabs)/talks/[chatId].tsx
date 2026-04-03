@@ -48,7 +48,14 @@ export const ChatRoomPage = memo(() => {
 
   return (
     <YStack flex={1} bg="$background">
-      <XStack px="$3" py="$2" gap="$3" items="center" borderBottomWidth={1} borderBottomColor="$color4">
+      <XStack
+        px="$3"
+        py="$2"
+        gap="$3"
+        items="center"
+        borderBottomWidth={1}
+        borderBottomColor="$color4"
+      >
         <Button variant="transparent" onPress={() => window.history.back()} px="$2">
           ←
         </Button>

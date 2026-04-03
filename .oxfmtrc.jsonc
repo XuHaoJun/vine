@@ -22,6 +22,7 @@
     "newlinesBetween": false
   },
   "ignorePatterns": [
+    "learn-projects/**",
     "**/generated-new.ts",
     "**/generated-v2.ts",
     "**/.tamagui/**",

@@ -57,7 +57,10 @@ async function createFreshUser(request: APIRequestContext, label: string) {
   return { email, password }
 }
 
-async function loginWithCredentials(page: Page, credentials: { email: string; password: string }) {
+async function loginWithCredentials(
+  page: Page,
+  credentials: { email: string; password: string },
+) {
   await page.getByPlaceholder('Email').fill(credentials.email)
   await page.getByPlaceholder('Password').fill(credentials.password)
   await page.getByRole('button', { name: 'Log in' }).click()
@@ -89,7 +92,7 @@ async function startConsentFlow(
 }
 
 async function submitConsentViaPage(page: Page, accept: boolean) {
-  return await page.evaluate(async (shouldAccept) => {
+  return page.evaluate(async (shouldAccept) => {
     const params = new URLSearchParams(window.location.search)
     const response = await fetch(
       `http://localhost:3001/api/auth/oauth2/consent?${params.toString()}`,
@@ -104,9 +107,10 @@ async function submitConsentViaPage(page: Page, accept: boolean) {
       },
     )
 
-    const data = (await response.json().catch(() => null)) as
-      | { redirectURI?: string; redirectUrl?: string }
-      | null
+    const data = (await response.json().catch(() => null)) as {
+      redirectURI?: string
+      redirectUrl?: string
+    } | null
 
     return {
       ok: response.ok,
