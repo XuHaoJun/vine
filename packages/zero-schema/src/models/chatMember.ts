@@ -23,7 +23,7 @@ const chatMemberPermission = serverWhere('chatMember', (eb, auth) => {
   return eb.or(
     eb.cmp('userId', auth?.id || ''),
     eb.exists('chat', (q) =>
-      q.exists('members', (mq) => mq.where('userId', auth?.id || '')),
+      q.whereExists('members', (mq) => mq.where('userId', auth?.id || '')),
     ),
   )
 })
