@@ -91,6 +91,7 @@ export const TalksHeader = memo(({
         <XStack flex={1} bg="$color3" rounded="$2" items="center" px="$2" py="$1.5">
           <Input
             flex={1}
+            height={36}
             bg="transparent"
             borderWidth={0}
             placeholder={activeTab === 'chats' ? '搜尋聊天' : '搜尋好友'}
