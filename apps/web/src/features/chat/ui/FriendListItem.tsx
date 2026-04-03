@@ -15,13 +15,13 @@ export const FriendListItem = memo(({ name, image, statusMessage, onPress }: Pro
   return (
     <Pressable onPress={onPress}>
       <XStack px="$4" py="$3" gap="$3" items="center" hoverStyle={{ bg: '$color2' }}>
-        <Avatar size={48} image={image ?? null} name={name} />
+        <Avatar size={44} image={image ?? null} name={name} />
         <YStack flex={1} gap="$0.5">
-          <SizableText size="$4" fontWeight="600" numberOfLines={1}>
+          <SizableText fontSize={14} fontWeight="700" numberOfLines={1}>
             {name}
           </SizableText>
           {statusMessage && (
-            <SizableText size="$3" color="$color10" numberOfLines={1}>
+            <SizableText fontSize={11} color="$color10" numberOfLines={1}>
               {statusMessage}
             </SizableText>
           )}
