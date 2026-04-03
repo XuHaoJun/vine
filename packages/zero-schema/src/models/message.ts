@@ -25,5 +25,21 @@ export const messageReadPermission = serverWhere('message', (eb, auth) => {
 })
 
 export const mutate = mutations(schema, messageReadPermission, {
-  // send: defined in Task 9
+  send: async (
+    { authData, tx },
+    message: Message,
+  ) => {
+    if (!authData) throw new Error('Unauthorized')
+    if (message.senderId !== authData.id) throw new Error('Unauthorized')
+
+    // Insert the message
+    await tx.mutate.message.insert(message)
+
+    // Update the chat's last message pointer for sorting the chat list
+    await tx.mutate.chat.update({
+      id: message.chatId,
+      lastMessageId: message.id,
+      lastMessageAt: message.createdAt,
+    })
+  },
 })
