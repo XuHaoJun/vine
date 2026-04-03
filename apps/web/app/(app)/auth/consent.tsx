@@ -1,8 +1,8 @@
 import { router } from 'one'
-import { useRef, useState } from 'react'
 import { isWeb, SizableText, Spinner, XStack, YStack } from 'tamagui'
 
 import { useAuth } from '~/features/auth/client/authClient'
+import { useTanMutation, useTanQuery } from '~/query'
 import { Button } from '~/interface/buttons/Button'
 import { LineIcon } from '~/interface/icons/LineIcon'
 import { H2 } from '~/interface/text/Headings'
@@ -36,14 +36,69 @@ function getScopesFromUrl() {
   return scopeParam.split(' ').filter(Boolean)
 }
 
+type ConsentDetails = {
+  appName: string
+  scopes: string[]
+}
+
 export const ConsentPage = () => {
   const { state } = useAuth()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const isSubmittingRef = useRef(false)
 
   const consentCode = getConsentCode()
   const clientIdFromUrl = getClientIdFromUrl()
   const scopesFromUrl = getScopesFromUrl()
+
+  const { data: consentDetails } = useTanQuery<ConsentDetails | null>({
+    queryKey: ['consent-details', consentCode],
+    queryFn: async () => {
+      const res = await fetch(
+        `${SERVER_URL}/api/auth/oauth2/consent-details?consent_code=${encodeURIComponent(consentCode)}`,
+        { credentials: 'include' },
+      )
+      if (!res.ok) return null
+      const data = (await res.json()) as { appName?: string; scopes?: string[] }
+      if (!data?.appName) return null
+      return { appName: data.appName, scopes: data.scopes ?? [] }
+    },
+    enabled: isWeb && state === 'logged-in' && !!consentCode,
+  })
+
+  const consentMutation = useTanMutation({
+    mutationFn: async (accept: boolean) => {
+      const params = new URLSearchParams({
+        consent_code: consentCode,
+        client_id: clientIdFromUrl,
+        scope: (consentDetails?.scopes.length ? consentDetails.scopes : scopesFromUrl).join(' '),
+      })
+      const res = await fetch(
+        `${SERVER_URL}/api/auth/oauth2/consent?${params.toString()}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ accept, consent_code: consentCode }),
+        },
+      )
+      const data = (await res.json().catch(() => null)) as {
+        redirectURI?: string
+        redirectUrl?: string
+        error?: string
+      } | null
+      const redirectTarget = data?.redirectURI ?? data?.redirectUrl
+      if (res.ok && redirectTarget) {
+        window.location.replace(redirectTarget)
+        return
+      }
+      if (res.redirected && res.url) {
+        window.location.replace(res.url)
+        return
+      }
+      throw new Error(data?.error ?? 'Something went wrong')
+    },
+    onError: (err: Error) => {
+      showToast(err.message, { type: 'error' })
+    },
+  })
 
   if (!isWeb) return null
 
@@ -66,55 +121,9 @@ export const ConsentPage = () => {
     return null
   }
 
-  const displayAppName = clientIdFromUrl || 'Unknown App'
-  const scopes = scopesFromUrl
-
-  const postConsent = async (accept: boolean) => {
-    if (isSubmittingRef.current) return
-    isSubmittingRef.current = true
-    setIsSubmitting(true)
-    try {
-      const params = new URLSearchParams({
-        consent_code: consentCode,
-        client_id: clientIdFromUrl,
-        scope: scopes.join(' '),
-      })
-
-      const res = await fetch(
-        `${SERVER_URL}/api/auth/oauth2/consent?${params.toString()}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ accept, consent_code: consentCode }),
-        },
-      )
-
-      const data = (await res.json().catch(() => null)) as {
-        redirectURI?: string
-        redirectUrl?: string
-        error?: string
-      } | null
-
-      const redirectTarget = data?.redirectURI ?? data?.redirectUrl
-      if (res.ok && redirectTarget) {
-        window.location.replace(redirectTarget)
-        return
-      }
-
-      if (res.redirected && res.url) {
-        window.location.replace(res.url)
-        return
-      }
-
-      showToast(data?.error ?? 'Something went wrong', { type: 'error' })
-    } catch {
-      showToast('Network error', { type: 'error' })
-    } finally {
-      isSubmittingRef.current = false
-      setIsSubmitting(false)
-    }
-  }
+  const displayAppName = consentDetails?.appName || clientIdFromUrl || 'Unknown App'
+  const scopes = consentDetails?.scopes.length ? consentDetails.scopes : scopesFromUrl
+  const isSubmitting = consentMutation.isPending
 
   return (
     <YStack
@@ -185,7 +194,7 @@ export const ConsentPage = () => {
             size="$5"
             width="100%"
             disabled={isSubmitting}
-            onPress={() => postConsent(true)}
+            onPress={() => consentMutation.mutate(true)}
             bg={LINE_GREEN}
             hoverStyle={{ bg: LINE_GREEN, opacity: 0.9 }}
             pressStyle={{ bg: LINE_GREEN, opacity: 0.7 }}
@@ -198,7 +207,7 @@ export const ConsentPage = () => {
             size="$4"
             width="100%"
             disabled={isSubmitting}
-            onPress={() => postConsent(false)}
+            onPress={() => consentMutation.mutate(false)}
           >
             <SizableText size="$3" color="$color10">
               Cancel
