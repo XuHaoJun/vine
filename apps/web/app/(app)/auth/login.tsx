@@ -1,10 +1,11 @@
 import { router } from 'one'
-import { useState, useRef } from 'react'
+import { useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { isWeb, SizableText, Spinner, XStack, YStack } from 'tamagui'
 import * as v from 'valibot'
 
+import { useAuth } from '~/features/auth/client/authClient'
 import { passwordLogin } from '~/features/auth/client/passwordLogin'
 import { signInAsDemo } from '~/features/auth/client/signInAsDemo'
 import { isDemoMode } from '~/helpers/isDemoMode'
@@ -17,6 +18,7 @@ import { H2 } from '~/interface/text/Headings'
 import { showToast } from '~/interface/toast/helpers'
 
 const LINE_GREEN = '#06C755'
+const LOGIN_REDIRECT_KEY = 'auth.login.target'
 
 const schema = v.object({
   email: v.pipe(v.string(), v.nonEmpty('Required'), v.email('Invalid email')),
@@ -25,10 +27,95 @@ const schema = v.object({
 
 type FormData = v.InferInput<typeof schema>
 
+function getLoginTargetFromSearch(search: string) {
+  const params = new URLSearchParams(search)
+  const redirect = params.get('redirect')
+  if (redirect?.startsWith('/')) {
+    return redirect
+  }
+
+  const clientId = params.get('client_id')
+  const redirectUri = params.get('redirect_uri')
+  const responseType = params.get('response_type')
+  if (clientId && redirectUri && responseType === 'code') {
+    return `/oauth2/v2.1/authorize?${params.toString()}`
+  }
+
+  return null
+}
+
+function getLoginTargetFromNavigationEntry() {
+  if (!isWeb || typeof window === 'undefined') {
+    return null
+  }
+
+  const navigationEntry = window.performance
+    .getEntriesByType('navigation')
+    .find((entry) => 'name' in entry)
+
+  if (!navigationEntry || typeof navigationEntry.name !== 'string') {
+    return null
+  }
+
+  try {
+    const url = new URL(navigationEntry.name)
+    return getLoginTargetFromSearch(url.search)
+  } catch {
+    return null
+  }
+}
+
+function persistPostLoginRedirect() {
+  if (!isWeb) {
+    return
+  }
+
+  const target =
+    getLoginTargetFromSearch(window.location.search) ??
+    getLoginTargetFromNavigationEntry()
+  if (target) {
+    window.sessionStorage.setItem(LOGIN_REDIRECT_KEY, target)
+  }
+}
+
+if (typeof window !== 'undefined') {
+  persistPostLoginRedirect()
+}
+
+function getPostLoginRedirect() {
+  if (!isWeb) {
+    return '/home/feed'
+  }
+
+  const currentTarget = getLoginTargetFromSearch(window.location.search)
+  if (currentTarget) {
+    return currentTarget
+  }
+
+  const navigationTarget = getLoginTargetFromNavigationEntry()
+  if (navigationTarget) {
+    return navigationTarget
+  }
+
+  const persistedTarget = window.sessionStorage.getItem(LOGIN_REDIRECT_KEY)
+  return persistedTarget?.startsWith('/') ? persistedTarget : '/home/feed'
+}
+
+function redirectAfterLogin(target: string) {
+  if (isWeb) {
+    window.sessionStorage.removeItem(LOGIN_REDIRECT_KEY)
+    window.location.replace(target)
+    return
+  }
+
+  router.replace('/home/feed')
+}
+
 export const LoginPage = () => {
+  const { state } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [demoLoading, setDemoLoading] = useState(false)
-  const passwordInputRef = useRef<{ focus: () => void } | null>(null)
+  const postLoginRedirect = useRef(getPostLoginRedirect()).current
 
   const {
     control,
@@ -39,13 +126,22 @@ export const LoginPage = () => {
     defaultValues: { email: '', password: '' },
   })
 
+  if (state === 'loading') {
+    return null
+  }
+
+  if (state === 'logged-in') {
+    redirectAfterLogin(postLoginRedirect)
+    return null
+  }
+
   const onSubmit = async (data: FormData) => {
     const result = await passwordLogin(data.email, data.password)
     if (!result.success) {
       showToast(result.error.message, { type: 'error' })
       return
     }
-    router.replace('/home/feed')
+    redirectAfterLogin(postLoginRedirect)
   }
 
   return (
@@ -84,57 +180,56 @@ export const LoginPage = () => {
                 autoCorrect={false}
                 error={error?.message}
                 returnKeyType="next"
-                onSubmitEditing={() => passwordInputRef.current?.focus()}
+                onSubmitEditing={() => handleSubmit(onSubmit)()}
               />
             )}
           />
-
-          <XStack width="100%" items="flex-start">
-            <YStack flex={1}>
-              <Controller
-                control={control}
-                name="password"
-                render={({ field: { onChange, value }, fieldState: { error } }) => (
-                  <Input
-                    ref={passwordInputRef}
-                    value={value}
-                    onChangeText={onChange}
-                    placeholder="Password"
-                    secureTextEntry={!showPassword}
-                    error={error?.message}
-                    onSubmitEditing={() => handleSubmit(onSubmit)()}
-                  />
-                )}
-              />
-            </YStack>
-            <Pressable
-              mt={14}
-              ml="$2"
-              onPress={() => setShowPassword((prev) => !prev)}
-            >
-              <SizableText size="$3" color="$color9">
-                {showPassword ? 'Hide' : 'Show'}
-              </SizableText>
-            </Pressable>
-          </XStack>
-
-          <Button
-            size="$5"
-            width="100%"
-            disabled={isSubmitting}
-            onPress={handleSubmit(onSubmit)}
-            bg={LINE_GREEN}
-            color="white"
-            hoverStyle={{ bg: LINE_GREEN, opacity: 0.9 }}
-            pressStyle={{ bg: LINE_GREEN, opacity: 0.7 }}
-          >
-            {isSubmitting ? <Spinner size="small" color="white" /> : 'Log in'}
-          </Button>
-
-          <Link href="/auth/forgot-password" size="$3" color="$color9" textAlign="center">
-            Forgot password?
-          </Link>
         </YStack>
+
+        <XStack width="100%" items="flex-start">
+          <YStack flex={1}>
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, value }, fieldState: { error } }) => (
+                <Input
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="Password"
+                  secureTextEntry={!showPassword}
+                  error={error?.message}
+                  onSubmitEditing={() => handleSubmit(onSubmit)()}
+                />
+              )}
+            />
+          </YStack>
+          <Pressable mt={14} ml="$2" onPress={() => setShowPassword((prev) => !prev)}>
+            <SizableText size="$3" color="$color9">
+              {showPassword ? 'Hide' : 'Show'}
+            </SizableText>
+          </Pressable>
+        </XStack>
+
+        <Button
+          size="$5"
+          width="100%"
+          disabled={isSubmitting}
+          onPress={handleSubmit(onSubmit)}
+          bg={LINE_GREEN}
+          hoverStyle={{ bg: LINE_GREEN, opacity: 0.9 }}
+          pressStyle={{ bg: LINE_GREEN, opacity: 0.7 }}
+        >
+          {isSubmitting ? (
+            <Spinner size="small" color="white" />
+          ) : (
+            <SizableText color="white">Log in</SizableText>
+          )}
+        </Button>
+
+        {/* @ts-expect-error OneJS routing type mismatch */}
+        <Link href="/auth/forgot-password" size="$3" color="$color9" textAlign="center">
+          Forgot password?
+        </Link>
 
         {/* Demo mode — dev only */}
         {isDemoMode && (
@@ -151,7 +246,7 @@ export const LoginPage = () => {
                 showToast('Demo login failed', { type: 'error' })
                 return
               }
-              router.replace('/home/feed')
+              redirectAfterLogin(postLoginRedirect)
             }}
             data-testid="login-as-demo"
           >

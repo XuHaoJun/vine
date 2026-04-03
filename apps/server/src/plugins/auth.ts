@@ -1,9 +1,9 @@
 import { expo } from '@better-auth/expo'
 import { isValidJWT } from '@take-out/better-auth-utils/server'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { time } from '@take-out/helpers'
 import { betterAuth } from 'better-auth'
-import { admin, bearer, jwt, magicLink } from 'better-auth/plugins'
+import { admin, bearer, jwt, magicLink, oidcProvider } from 'better-auth/plugins'
 import type { FastifyInstance } from 'fastify'
 import type { Pool } from 'pg'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
@@ -112,6 +112,11 @@ function createAuthServer(deps: AuthDeps) {
         },
       }),
       admin(),
+      oidcProvider({
+        loginPage: '/auth/login',
+        consentPage: '/auth/consent',
+        scopes: ['openid', 'profile', 'email'],
+      }),
     ],
 
     logger: {
@@ -130,6 +135,7 @@ export type { AuthDeps }
 
 type AuthPluginDeps = {
   auth: ReturnType<typeof createAuthServer>
+  db: NodePgDatabase<typeof schema>
 }
 
 export async function authPlugin(fastify: FastifyInstance, deps: AuthPluginDeps) {
@@ -164,12 +170,137 @@ export async function authPlugin(fastify: FastifyInstance, deps: AuthPluginDeps)
     if (body && typeof body.token === 'string') {
       try {
         const valid = await isValidJWT(body.token, {})
-        reply.send({ valid })
+        return await reply.send({ valid })
       } catch (err) {
         console.error('[auth] validateToken error', err)
+        return reply.send({ valid: false })
       }
-      reply.send({ valid: false })
     }
-    reply.send({ valid: false })
+    return reply.send({ valid: false })
   })
+
+  fastify.get('/api/auth/oauth2/consent-details', async (request, reply) => {
+    const { consent_code, client_id, scope } = request.query as {
+      consent_code?: string
+      client_id?: string
+      scope?: string
+    }
+
+    let clientId = client_id ?? ''
+    let requestedScope = scope ?? ''
+
+    if ((!clientId || !requestedScope) && consent_code) {
+      try {
+        const parsed = Buffer.from(consent_code, 'base64url').toString('utf-8')
+        const consentData = JSON.parse(parsed) as {
+          clientId?: string
+          scope?: string
+        }
+        clientId ||= consentData.clientId ?? ''
+        requestedScope ||= consentData.scope ?? ''
+      } catch {
+        // Real consent codes are opaque strings, so decoding may fail.
+        // Fall back to the explicit query parameters that the web consent page already has.
+      }
+    }
+
+    if (!clientId) {
+      return reply.status(400).send({ error: 'Missing client_id' })
+    }
+
+    let appName = clientId
+    if (deps.db) {
+      const result = await deps.db.execute(
+        sql`SELECT name FROM "oauthApplication" WHERE "clientId" = ${clientId} LIMIT 1`,
+      )
+      if (result.rows.length > 0) {
+        appName = (result.rows[0] as { name?: string }).name || clientId
+      }
+    }
+
+    return await reply.send({
+      clientId,
+      appName,
+      scopes: requestedScope.split(' ').filter(Boolean),
+    })
+  })
+
+  const LINE_ALIAS_ROUTES: Array<{
+    lineUrl: string
+    authUrl: string
+    methods: ('GET' | 'POST')[]
+  }> = [
+    {
+      lineUrl: '/oauth2/v2.1/authorize',
+      authUrl: '/api/auth/oauth2/authorize',
+      methods: ['GET', 'POST'],
+    },
+    {
+      lineUrl: '/oauth2/v2.1/token',
+      authUrl: '/api/auth/oauth2/token',
+      methods: ['POST'],
+    },
+    {
+      lineUrl: '/oauth2/v2.1/userinfo',
+      authUrl: '/api/auth/oauth2/userinfo',
+      methods: ['GET'],
+    },
+  ]
+
+  for (const { lineUrl, authUrl, methods } of LINE_ALIAS_ROUTES) {
+    fastify.route({
+      method: methods,
+      url: lineUrl,
+      handler: async (request, reply) => {
+        try {
+          const contentType = (request.headers['content-type'] ?? '') as string
+          const isFormEncoded = contentType.includes('application/x-www-form-urlencoded')
+
+          let body: string | undefined
+          if (
+            request.method !== 'GET' &&
+            request.method !== 'HEAD' &&
+            request.body != null
+          ) {
+            body = isFormEncoded
+              ? new URLSearchParams(request.body as Record<string, string>).toString()
+              : JSON.stringify(request.body)
+          }
+
+          const url = new URL(authUrl, BETTER_AUTH_URL)
+          const originalUrl = new URL(request.url, BETTER_AUTH_URL)
+          originalUrl.searchParams.forEach((value, key) =>
+            url.searchParams.set(key, value),
+          )
+
+          const headers = new Headers()
+          for (const [key, value] of Object.entries(request.headers)) {
+            if (value !== undefined) {
+              headers.set(key, Array.isArray(value) ? value.join(', ') : value)
+            }
+          }
+          if (body !== undefined) {
+            headers.set(
+              'content-type',
+              isFormEncoded ? 'application/x-www-form-urlencoded' : 'application/json',
+            )
+          }
+
+          const webReq = new Request(url.toString(), {
+            method: request.method,
+            headers,
+            body,
+          })
+
+          const res = await deps.auth.handler(webReq)
+          reply.status(res.status)
+          res.headers.forEach((value, key) => void reply.header(key, value))
+          reply.send(await res.text())
+        } catch (err) {
+          console.error('[oauth-alias] handler error', err)
+          reply.status(500).send({ error: 'OAuth handler error' })
+        }
+      },
+    })
+  }
 }
