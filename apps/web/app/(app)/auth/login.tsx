@@ -1,11 +1,12 @@
 import { router } from 'one'
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { isWeb, SizableText, Spinner, XStack, YStack } from 'tamagui'
 import * as v from 'valibot'
 
 import { passwordLogin } from '~/features/auth/client/passwordLogin'
+import { useAuth } from '~/features/auth/client/authClient'
 import { signInAsDemo } from '~/features/auth/client/signInAsDemo'
 import { isDemoMode } from '~/helpers/isDemoMode'
 import { Link } from '~/interface/app/Link'
@@ -25,9 +26,38 @@ const schema = v.object({
 
 type FormData = v.InferInput<typeof schema>
 
+function getPostLoginRedirect() {
+  if (!isWeb) {
+    return '/home/feed'
+  }
+
+  const redirect = new URLSearchParams(window.location.search).get('redirect')
+  return redirect?.startsWith('/') ? redirect : '/home/feed'
+}
+
+function redirectAfterLogin(target: string) {
+  if (isWeb) {
+    window.location.replace(target)
+    return
+  }
+
+  router.replace('/home/feed')
+}
+
 export const LoginPage = () => {
+  const { state } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [demoLoading, setDemoLoading] = useState(false)
+  const postLoginRedirect = getPostLoginRedirect()
+
+  if (state === 'loading') {
+    return null
+  }
+
+  if (state === 'logged-in') {
+    redirectAfterLogin(postLoginRedirect)
+    return null
+  }
 
   const {
     control,
@@ -44,7 +74,7 @@ export const LoginPage = () => {
       showToast(result.error.message, { type: 'error' })
       return
     }
-    router.replace('/home/feed')
+    redirectAfterLogin(postLoginRedirect)
   }
 
   return (
@@ -149,7 +179,7 @@ export const LoginPage = () => {
                 showToast('Demo login failed', { type: 'error' })
                 return
               }
-              router.replace('/home/feed')
+              redirectAfterLogin(postLoginRedirect)
             }}
             data-testid="login-as-demo"
           >
