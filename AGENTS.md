@@ -15,22 +15,28 @@ bun run test                   # Run all tests (turbo test)
 
 ```bash
 # Unit tests (vitest)
-bun --cwd apps/web run test:unit
+bun run --cwd apps/web test:unit
 
 # Integration tests (playwright)
-bun --cwd apps/web run test:integration
+bun run --cwd apps/web test:integration
 
-# Specific test file
-bun --cwd apps/web run test:unit -- path/to/test.test.ts
+# Specific integration file (path relative to apps/web/src/test — see playwright.config.ts testDir)
+bun run --cwd apps/web test:integration -- integration/demo-login.test.ts
+
+# Integration: run tests whose title matches a regexp
+bun run --cwd apps/web test:integration -- -g "demo login"
+
+# Specific unit test file (path relative to apps/web)
+bun run --cwd apps/web test:unit -- src/test/unit/example.test.ts
 
 # Watch mode
-bun --cwd apps/web run test:unit -- --watch
+bun run --cwd apps/web test:unit -- --watch
 ```
 
 ### Zero Schema Workflow
 
 ```bash
-bun --cwd packages/zero-schema run zero:generate  # Generate types after schema changes
+bun run --cwd packages/zero-schema zero:generate  # Generate types after schema changes
 ```
 
 ---
@@ -262,7 +268,7 @@ Both `.oxlintrc.json` and `.oxfmtrc.jsonc` must ignore `learn-projects/**`:
 | Job | Purpose | Skip Condition |
 |-----|---------|----------------|
 | `check` | `bun check:all` (typecheck + lint) | Commit/PR title contains `docs:` |
-| `test-server` | Server unit tests (`bun --cwd apps/server run test`) | Commit/PR title contains `docs:` |
+| `test-server` | Server unit tests (`bun run --cwd apps/server test`) | Commit/PR title contains `docs:` |
 | `integration` | Full integration tests via `bun scripts/integration.ts` | Commit/PR title contains `docs:` |
 
 ### Install Action (`.github/actions/install/action.yml`)
@@ -467,9 +473,9 @@ await zeroPlugin(app, { auth, zero })
 
 | App | Runner | Command |
 |-----|--------|---------|
-| `apps/web/` | vitest + Playwright | `bun --cwd apps/web run test:unit` / `test:integration` |
-| `apps/server/` | vitest | `bun --cwd apps/server run test` |
-| Packages | vitest | `bun --cwd packages/<name> run test` (add when needed) |
+| `apps/web/` | vitest + Playwright | `bun run --cwd apps/web test:unit` / `test:integration` |
+| `apps/server/` | vitest | `bun run --cwd apps/server test` |
+| Packages | vitest | `bun run --cwd packages/<name> test` (add when needed) |
 
 Test files: `src/**/*.test.ts` (server), `src/test/unit/**/*.test.ts` (web)
 
