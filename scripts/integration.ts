@@ -131,8 +131,7 @@ async function cleanup() {
   try {
     proxyServer?.stop(true)
   } catch {}
-  await $('docker compose kill', { silent: true, timeout: 10_000 }).catch(() => {})
-  await $('docker compose down --timeout 30 -v', { silent: true, timeout: 60_000 }).catch(() => {})
+  await $('docker compose kill; docker compose down -v', { silent: true, timeout: 60_000 }).catch(() => {})
 }
 
 // --- main ---
