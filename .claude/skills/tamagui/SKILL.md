@@ -11,6 +11,95 @@ This project uses Tamagui v2 (tamagui v5 config) in a turborepo monorepo structu
 
 The `~/interface/` alias points to `apps/web/src/interface/` in the current setup.
 
+## Core Concept: All Components Inherit Stack Props
+
+**Tamagui is built on a stacking model.** Every component (`Stack`, `YStack`, `XStack`, `ListItem`, `Text`, `Button`, etc.) ultimately extends the base `Stack`/`Text` component and inherits these common props. This means `gap`, `flex`, `padding`, `hoverStyle`, etc. work on almost all components.
+
+## Common Props That Work on All Components
+
+### Layout (from Stack - flexbox)
+
+```tsx
+// Flex container
+<YStack flex={1} gap="$3">           // flex + gap works on ALL components
+<XStack alignItems="center" justifyContent="space-between" />
+
+// Individual items (inherits from StackStyleBase)
+<View flex={1} gap="$2" />           // gap is universal
+<Text fontWeight="700" numberOfLines={1} />
+<ListItem gap="$4" cursor="pointer" /> // gap works on ListItem too!
+```
+
+### Spacing Shorthands
+
+| Shorthand | Full Property |
+|-----------|---------------|
+| `p`, `px`, `py`, `pt`, `pb`, `pl`, `pr` | padding (and variants) |
+| `m`, `mx`, `my`, `mt`, `mb`, `ml`, `mr` | margin (and variants) |
+| `gap` | gap (universal - works on all components!) |
+| `rounded` | borderRadius |
+
+### Hover/Focus States (Universal)
+
+```tsx
+// hoverStyle, pressStyle, focusStyle work on ALL components
+<YStack hoverStyle={{ bg: '$backgroundHover' }} />
+<Text hoverStyle={{ opacity: 0.7 }} />
+<ListItem hoverStyle={{ bg: '$color2' }} cursor="pointer" />
+<Button hoverStyle={{ scale: 0.98 }} />
+```
+
+### Platform Variants
+
+```tsx
+// $platform-web is the CORRECT way to add web-specific styles
+<YStack 
+  $platform-web={{ cursor: 'pointer' }}
+  $platform-web={{ overflowY: 'auto' }}  // ScrollView alternative on web
+/>
+```
+
+### Size Tokens
+
+| Token | Value |
+|-------|-------|
+| `$1` | 20px |
+| `$2` | 28px |
+| `$4` | 44px |
+| `$5` | 56px |
+| `$6` | 64px |
+| `$8` | 84px |
+
+### Color Tokens
+
+| Token | Value |
+|-------|-------|
+| `$background` | Current theme background |
+| `$color` | Current theme text color |
+| `$color10` | Gray/muted text |
+| `$backgroundHover` | Hover state background |
+| `$borderColor` | Border color |
+| `$green9` | Success/unread badge color |
+
+## ListItem Specific
+
+`ListItem` extends Stack, so it supports ALL Stack props including `gap`, `flex`, `p`, `m`, `hoverStyle`, `cursor`, etc.
+
+```tsx
+// Basic ListItem with all common props
+<ListItem
+  title="Name"
+  subTitle="Status message"
+  icon={<Avatar ... />}
+  onPress={handlePress}
+  cursor="pointer"                    // ✅ works
+  gap="$3"                           // ✅ works  
+  px="$4"                            // ✅ works
+  py="$3"                            // ✅ works
+  hoverStyle={{ bg: '$backgroundHover' }}  // ✅ works
+/>
+```
+
 ## Critical Rules
 
 **You MUST enforce these rules — they will cause errors if violated:**
@@ -274,4 +363,4 @@ format.web.ts     // web only
 - Tamagui config: `apps/web/src/tamagui/tamagui.config.ts` (extends `@tamagui/config/v5`)
 - Animations: `apps/web/src/tamagui/animationsApp.ts`
 - Custom components: `apps/web/src/interface/`
-- Tamagui v5 source: `/learn-projects/tamagui/code/core/shorthands/src/v5.ts`
+- Tamagui v5 source: `learn-projects/tamagui/code/core/shorthands/src/v5.ts`
