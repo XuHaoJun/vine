@@ -15,14 +15,12 @@ export async function loginAsDemo(page: Page, pathname = '/') {
   await demoButton.waitFor({ state: 'visible', timeout: 10000 })
   await demoButton.click()
 
-  // wait for navigation away from login page (up to 30 seconds in CI)
+  // Wait for a successful authenticated redirect rather than merely leaving /auth/login.
   try {
-    await page.waitForURL((url) => !url.toString().includes('/auth/login'), {
-      timeout: 30000,
-    })
+    await page.waitForURL(/\/home(\/|$)/, { timeout: 30000 })
   } catch {
-    console.error(`❌ Still on login page after demo login (timeout)`)
-    throw new Error(`Demo login failed - still on login page`)
+    console.error(`❌ Demo login did not reach a /home route`)
+    throw new Error(`Demo login failed - did not reach authenticated route`)
   }
   await page.waitForLoadState('domcontentloaded').catch(() => {})
 
@@ -33,6 +31,7 @@ export async function loginAsDemo(page: Page, pathname = '/') {
   // this is more reliable for CI testing than trying to click skip buttons
   console.info('Navigating to /home/feed...')
   await page.goto(`${BASE_URL}/home/feed`, { waitUntil: 'domcontentloaded' })
+  await page.waitForURL(/\/home\/feed$/, { timeout: 10000 })
 
   // wait for page to stabilize
   await page.waitForTimeout(2000)
@@ -43,6 +42,12 @@ export async function loginAsDemo(page: Page, pathname = '/') {
       waitUntil: 'domcontentloaded',
       timeout: 15000,
     })
+    await page.waitForURL(
+      new RegExp(`${pathname.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`),
+      {
+        timeout: 10000,
+      },
+    )
   }
 }
 

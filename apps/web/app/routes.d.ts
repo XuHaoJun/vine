@@ -10,8 +10,10 @@ declare module 'one' {
         | `/`
         | `/(app)`
         | `/(app)/auth`
+        | `/(app)/auth/consent`
         | `/(app)/auth/login`
         | `/(app)/auth/login/password`
+        | `/(app)/auth/oauth-callback`
         | `/(app)/home`
         | `/(app)/home/(tabs)`
         | `/(app)/home/(tabs)/feed`
@@ -24,8 +26,10 @@ declare module 'one' {
         | `/(app)/home/settings/edit-profile`
         | `/_sitemap`
         | `/auth`
+        | `/auth/consent`
         | `/auth/login`
         | `/auth/login/password`
+        | `/auth/oauth-callback`
         | `/hello`
         | `/home`
         | `/home/(tabs)`

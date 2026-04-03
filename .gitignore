@@ -55,3 +55,4 @@ dist
 __pycache__
 
 packages/db/src/migrate-dist.js
+dev.log

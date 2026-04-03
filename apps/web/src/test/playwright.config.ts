@@ -8,8 +8,10 @@ export default defineConfig({
     timeout: 10000,
   },
   fullyParallel: false,
+  // These tests currently share a demo account and persisted OAuth state,
+  // so run them in a single worker to avoid cross-test interference.
+  workers: 1,
   retries: process.env.CI ? 1 : 0,
-  workers: process.env.CI ? 1 : undefined,
   reporter: 'list',
   use: {
     baseURL: 'http://localhost:8081',

@@ -25,6 +25,7 @@ export default {
     allowedHosts: ['host.docker.internal'],
     proxy: {
       '/api': 'http://localhost:3001',
+      '/oauth2': 'http://localhost:3001',
     },
   },
 

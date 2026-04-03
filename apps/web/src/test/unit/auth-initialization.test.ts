@@ -40,7 +40,7 @@ describe('auth initialization requirements', () => {
       const viteConfig = readFileSync(viteConfigPath, 'utf-8')
 
       // verify native setup file is configured
-      expect(viteConfig).toMatch(/native:\s*['"`]\.\/src\/setupClient\.ts['"`]/)
+      expect(viteConfig).toMatch(/native:\s*['"`]\.\/src\/setupNative\.ts['"`]/)
     })
   })
 

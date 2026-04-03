@@ -131,7 +131,7 @@ async function cleanup() {
   try {
     proxyServer?.stop(true)
   } catch {}
-  await $('docker compose down', { silent: true, timeout: 30_000 }).catch(() => {})
+  await $('docker compose kill; docker compose down -v', { silent: true, timeout: 60_000 }).catch(() => {})
 }
 
 // --- main ---
@@ -147,7 +147,7 @@ async function main() {
 
   try {
     // clean start
-    await $('docker compose down', { silent: true, timeout: 30_000 }).catch(() => {})
+  await $('docker compose down', { silent: true, timeout: 60_000 }).catch(() => {})
 
     // build migrations
     console.info('\nbuilding migrations...')
@@ -184,7 +184,8 @@ async function main() {
       port: FRONTEND_PORT,
       async fetch(req) {
         const url = new URL(req.url)
-        const isApi = url.pathname.startsWith('/api')
+        const isApi =
+          url.pathname.startsWith('/api') || url.pathname.startsWith('/oauth2')
         const targetPort = isApi ? BACKEND_PORT : STATIC_PORT
         const target = `http://localhost:${targetPort}${url.pathname}${url.search}`
 
@@ -196,7 +197,17 @@ async function main() {
           method: req.method,
           headers: reqHeaders,
           body: req.method !== 'GET' && req.method !== 'HEAD' ? req.body : undefined,
+          redirect: 'manual',
         })
+
+        // Pass through redirects directly to the browser
+        if (upstream.status >= 300 && upstream.status < 400) {
+          const resHeaders = new Headers(upstream.headers)
+          return new Response(null, {
+            status: upstream.status,
+            headers: resHeaders,
+          })
+        }
 
         // Buffer the full body to avoid chunked transfer encoding issues with Bun.serve
         const body = await upstream.arrayBuffer()
