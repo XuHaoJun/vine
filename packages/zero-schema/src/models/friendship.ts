@@ -36,5 +36,44 @@ export const mutate = mutations(schema, friendshipPermission, {
     await can(friendshipInsertPermission, authData.id)
     await tx.mutate.friendship.insert(friendship)
   },
-  // accept: cross-table operation — defined in Task 8
+  accept: async (
+    { authData, tx },
+    args: {
+      friendshipId: string
+      chatId: string
+      member1Id: string
+      member2Id: string
+      requesterId: string
+    },
+  ) => {
+    if (!authData) throw new Error('Unauthorized')
+
+    const now = Date.now()
+
+    await tx.mutate.friendship.update({
+      id: args.friendshipId,
+      status: 'accepted',
+      updatedAt: now,
+    })
+
+    await tx.mutate.chat.insert({
+      id: args.chatId,
+      type: 'direct',
+      createdAt: now,
+    })
+
+    await tx.mutate.chatMember.insert({
+      id: args.member1Id,
+      chatId: args.chatId,
+      userId: authData.id,
+      joinedAt: now,
+    })
+
+    await tx.mutate.chatMember.insert({
+      id: args.member2Id,
+      chatId: args.chatId,
+      userId: args.requesterId,
+      joinedAt: now,
+    })
+  },
 })
