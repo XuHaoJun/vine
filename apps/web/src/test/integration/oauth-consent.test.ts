@@ -236,10 +236,12 @@ test('authorization code exchanges for token and userinfo', async ({ page, reque
     access_token?: string
     token_type?: string
     scope?: string
+    id_token?: string
   }
   expect(tokenBody.access_token).toBeTruthy()
   expect(tokenBody.token_type).toBe('Bearer')
   expect(tokenBody.scope).toContain('openid')
+  expect(tokenBody.id_token).toBeTruthy()
 
   const userinfoResponse = await fetch(USERINFO_ENDPOINT, {
     headers: {
