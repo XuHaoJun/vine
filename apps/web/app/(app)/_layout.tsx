@@ -7,9 +7,35 @@ import { PlatformSpecificRootProvider } from '~/interface/platform/PlatformSpeci
 import { ToastProvider } from '~/interface/toast/Toast'
 import { ProvideZero } from '~/zero/client'
 
+const LOGIN_REDIRECT_KEY = 'auth.login.target'
+
+function getPendingRedirect() {
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  const params = new URLSearchParams(window.location.search)
+  const redirect = params.get('redirect')
+  if (redirect?.startsWith('/')) {
+    return redirect
+  }
+
+  if (
+    params.get('client_id') &&
+    params.get('redirect_uri') &&
+    params.get('response_type') === 'code'
+  ) {
+    return `/oauth2/v2.1/authorize?${params.toString()}`
+  }
+
+  const persistedTarget = window.sessionStorage.getItem(LOGIN_REDIRECT_KEY)
+  return persistedTarget?.startsWith('/') ? persistedTarget : null
+}
+
 export function AppLayout() {
   const { state } = useAuth()
   const pathname = usePathname()
+  const pendingRedirect = getPendingRedirect()
 
   if (state === 'loading') {
     return null
@@ -22,10 +48,15 @@ export function AppLayout() {
   }
 
   // redirect logged-in users away from auth routes (except consent and oauth-callback — require login)
-  const isAuthRoute =
-    pathname.startsWith('/auth') &&
-    !['/auth/consent', '/auth/oauth-callback'].some((path) => pathname === path)
-  if (state === 'logged-in' && isAuthRoute) {
+  const hasPendingAuthContinuation =
+    pathname === '/auth/login' &&
+    (pendingRedirect?.startsWith('/auth/consent') ||
+      pendingRedirect?.startsWith('/oauth2/v2.1/authorize'))
+  const isGuestOnlyAuthRoute =
+    ['/auth/login', '/auth/forgot-password'].includes(pathname) ||
+    pathname === '/auth/login/password' ||
+    pathname.startsWith('/auth/signup')
+  if (state === 'logged-in' && isGuestOnlyAuthRoute && !hasPendingAuthContinuation) {
     return <Redirect href="/home/feed" />
   }
 

@@ -1,10 +1,11 @@
 import { router } from 'one'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { isWeb, SizableText, Spinner, XStack, YStack } from 'tamagui'
 import * as v from 'valibot'
 
+import { useAuth } from '~/features/auth/client/authClient'
 import { passwordLogin } from '~/features/auth/client/passwordLogin'
 import { signInAsDemo } from '~/features/auth/client/signInAsDemo'
 import { isDemoMode } from '~/helpers/isDemoMode'
@@ -17,6 +18,7 @@ import { H2 } from '~/interface/text/Headings'
 import { showToast } from '~/interface/toast/helpers'
 
 const LINE_GREEN = '#06C755'
+const LOGIN_REDIRECT_KEY = 'auth.login.target'
 
 const schema = v.object({
   email: v.pipe(v.string(), v.nonEmpty('Required'), v.email('Invalid email')),
@@ -25,9 +27,102 @@ const schema = v.object({
 
 type FormData = v.InferInput<typeof schema>
 
+function getLoginTargetFromSearch(search: string) {
+  const params = new URLSearchParams(search)
+  const redirect = params.get('redirect')
+  if (redirect?.startsWith('/')) {
+    return redirect
+  }
+
+  const clientId = params.get('client_id')
+  const redirectUri = params.get('redirect_uri')
+  const responseType = params.get('response_type')
+  if (clientId && redirectUri && responseType === 'code') {
+    return `/oauth2/v2.1/authorize?${params.toString()}`
+  }
+
+  return null
+}
+
+function getLoginTargetFromNavigationEntry() {
+  if (!isWeb || typeof window === 'undefined') {
+    return null
+  }
+
+  const navigationEntry = window.performance
+    .getEntriesByType('navigation')
+    .find((entry) => 'name' in entry)
+
+  if (!navigationEntry || typeof navigationEntry.name !== 'string') {
+    return null
+  }
+
+  try {
+    const url = new URL(navigationEntry.name)
+    return getLoginTargetFromSearch(url.search)
+  } catch {
+    return null
+  }
+}
+
+function persistPostLoginRedirect() {
+  if (!isWeb) {
+    return
+  }
+
+  const target = getLoginTargetFromSearch(window.location.search) ?? getLoginTargetFromNavigationEntry()
+  if (target) {
+    window.sessionStorage.setItem(LOGIN_REDIRECT_KEY, target)
+  }
+}
+
+if (typeof window !== 'undefined') {
+  persistPostLoginRedirect()
+}
+
+function getPostLoginRedirect() {
+  if (!isWeb) {
+    return '/home/feed'
+  }
+
+  const currentTarget = getLoginTargetFromSearch(window.location.search)
+  if (currentTarget) {
+    return currentTarget
+  }
+
+  const navigationTarget = getLoginTargetFromNavigationEntry()
+  if (navigationTarget) {
+    return navigationTarget
+  }
+
+  const persistedTarget = window.sessionStorage.getItem(LOGIN_REDIRECT_KEY)
+  return persistedTarget?.startsWith('/') ? persistedTarget : '/home/feed'
+}
+
+function redirectAfterLogin(target: string) {
+  if (isWeb) {
+    window.sessionStorage.removeItem(LOGIN_REDIRECT_KEY)
+    window.location.replace(target)
+    return
+  }
+
+  router.replace('/home/feed')
+}
+
 export const LoginPage = () => {
+  const { state } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [demoLoading, setDemoLoading] = useState(false)
+  const postLoginRedirect = useRef(getPostLoginRedirect()).current
+
+  if (state === 'loading') {
+    return null
+  }
+
+  if (state === 'logged-in') {
+    redirectAfterLogin(postLoginRedirect)
+    return null
+  }
 
   const {
     control,
@@ -38,13 +133,14 @@ export const LoginPage = () => {
     defaultValues: { email: '', password: '' },
   })
 
+
   const onSubmit = async (data: FormData) => {
     const result = await passwordLogin(data.email, data.password)
     if (!result.success) {
       showToast(result.error.message, { type: 'error' })
       return
     }
-    router.replace('/home/feed')
+    redirectAfterLogin(postLoginRedirect)
   }
 
   return (
@@ -149,7 +245,7 @@ export const LoginPage = () => {
                 showToast('Demo login failed', { type: 'error' })
                 return
               }
-              router.replace('/home/feed')
+              redirectAfterLogin(postLoginRedirect)
             }}
             data-testid="login-as-demo"
           >

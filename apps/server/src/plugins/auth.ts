@@ -180,37 +180,49 @@ export async function authPlugin(fastify: FastifyInstance, deps: AuthPluginDeps)
   })
 
   fastify.get('/api/auth/oauth2/consent-details', async (request, reply) => {
-    const { consent_code } = request.query as { consent_code?: string }
-    if (!consent_code) {
-      return reply.status(400).send({ error: 'Missing consent_code' })
+    const { consent_code, client_id, scope } = request.query as {
+      consent_code?: string
+      client_id?: string
+      scope?: string
     }
-    try {
-      const parsed = Buffer.from(consent_code, 'base64url').toString('utf-8')
-      const consentData = JSON.parse(parsed) as {
-        clientId?: string
-        scope?: string
-        redirectUri?: string
-        codeChallenge?: string
-        state?: string
-      }
-      const { clientId = '', scope = '' } = consentData
-      let appName = clientId
-      if (clientId && deps.db) {
-        const result = await deps.db.execute(
-          sql`SELECT name FROM "oauthApplication" WHERE "clientId" = ${clientId} LIMIT 1`,
-        )
-        if (result.rows.length > 0) {
-          appName = (result.rows[0] as { name?: string }).name || clientId
+
+    let clientId = client_id ?? ''
+    let requestedScope = scope ?? ''
+
+    if ((!clientId || !requestedScope) && consent_code) {
+      try {
+        const parsed = Buffer.from(consent_code, 'base64url').toString('utf-8')
+        const consentData = JSON.parse(parsed) as {
+          clientId?: string
+          scope?: string
         }
+        clientId ||= consentData.clientId ?? ''
+        requestedScope ||= consentData.scope ?? ''
+      } catch {
+        // Real consent codes are opaque strings, so decoding may fail.
+        // Fall back to the explicit query parameters that the web consent page already has.
       }
-      return await reply.send({
-        clientId,
-        appName,
-        scopes: scope.split(' ').filter(Boolean),
-      })
-    } catch {
-      return reply.status(400).send({ error: 'Invalid consent_code' })
     }
+
+    if (!clientId) {
+      return reply.status(400).send({ error: 'Missing client_id' })
+    }
+
+    let appName = clientId
+    if (deps.db) {
+      const result = await deps.db.execute(
+        sql`SELECT name FROM "oauthApplication" WHERE "clientId" = ${clientId} LIMIT 1`,
+      )
+      if (result.rows.length > 0) {
+        appName = (result.rows[0] as { name?: string }).name || clientId
+      }
+    }
+
+    return await reply.send({
+      clientId,
+      appName,
+      scopes: requestedScope.split(' ').filter(Boolean),
+    })
   })
 
   const LINE_ALIAS_ROUTES: Array<{

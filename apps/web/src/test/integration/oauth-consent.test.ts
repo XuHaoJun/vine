@@ -5,6 +5,8 @@
 
 import { test, expect } from '@playwright/test'
 
+import type { APIRequestContext, Page } from '@playwright/test'
+
 function createAuthUrl({ scope, state }: { scope: string; state: string }) {
   return (
     'http://localhost:8081/oauth2/v2.1/authorize' +
@@ -23,6 +25,10 @@ const ALLOW_AUTH_URL = createAuthUrl({
   state: 'test-state-allow',
 })
 
+const TOKEN_ENDPOINT = 'http://localhost:3001/oauth2/v2.1/token'
+const USERINFO_ENDPOINT = 'http://localhost:3001/oauth2/v2.1/userinfo'
+const CODE_VERIFIER = 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk'
+
 const CANCEL_AUTH_URL = createAuthUrl({
   // Use a different scope set so this case still requires fresh consent
   // even after the "Allow" test persists consent for profile+openid.
@@ -30,11 +36,10 @@ const CANCEL_AUTH_URL = createAuthUrl({
   state: 'test-state-cancel',
 })
 
-async function loginWithFreshUser(page: import('@playwright/test').Page, label: string) {
+async function createFreshUser(request: APIRequestContext, label: string) {
   const timestamp = Date.now()
   const email = `oauth-${label}-${timestamp}@example.com`
   const password = 'test-password-123'
-  const request = page.context().request
 
   const signUpResponse = await request.post(
     'http://localhost:3001/api/auth/sign-up/email',
@@ -49,34 +54,65 @@ async function loginWithFreshUser(page: import('@playwright/test').Page, label: 
 
   expect(signUpResponse.ok()).toBeTruthy()
 
-  return request
+  return { email, password }
+}
+
+async function loginWithCredentials(page: Page, credentials: { email: string; password: string }) {
+  await page.getByPlaceholder('Email').fill(credentials.email)
+  await page.getByPlaceholder('Password').fill(credentials.password)
+  await page.getByRole('button', { name: 'Log in' }).click()
 }
 
 async function startConsentFlow(
-  request: import('@playwright/test').APIRequestContext,
+  page: Page,
+  request: APIRequestContext,
   authUrl: string,
+  label: string,
 ) {
-  const authorizeResponse = await request.get(authUrl, {
-    failOnStatusCode: false,
-    maxRedirects: 0,
-  })
+  const credentials = await createFreshUser(request, label)
 
-  expect(authorizeResponse.status()).toBe(302)
+  await page.goto(authUrl, { waitUntil: 'domcontentloaded', timeout: 10000 })
+  await expect(page).toHaveURL(/\/auth\/login/, { timeout: 8000 })
+  await loginWithCredentials(page, credentials)
 
-  const location = authorizeResponse.headers()['location']
-  expect(location).toBeTruthy()
-
-  const consentUrl = new URL(location ?? '', 'http://localhost:8081')
-  expect(consentUrl.pathname).toBe('/auth/consent')
-
-  const consentCode = consentUrl.searchParams.get('consent_code')
-  expect(consentCode).toBeTruthy()
+  try {
+    await expect(page).toHaveURL(/\/auth\/consent/, { timeout: 4000 })
+  } catch {
+    await page.goto(authUrl, { waitUntil: 'domcontentloaded', timeout: 10000 })
+    await expect(page).toHaveURL(/\/auth\/consent/, { timeout: 10000 })
+  }
 
   return {
-    consentCode: consentCode ?? '',
-    clientId: consentUrl.searchParams.get('client_id') ?? '',
-    scope: consentUrl.searchParams.get('scope') ?? '',
+    credentials,
+    consentUrl: new URL(page.url()),
   }
+}
+
+async function submitConsentViaPage(page: Page, accept: boolean) {
+  return await page.evaluate(async (shouldAccept) => {
+    const params = new URLSearchParams(window.location.search)
+    const response = await fetch(
+      `http://localhost:3001/api/auth/oauth2/consent?${params.toString()}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          accept: shouldAccept,
+          consent_code: params.get('consent_code'),
+        }),
+      },
+    )
+
+    const data = (await response.json().catch(() => null)) as
+      | { redirectURI?: string; redirectUrl?: string }
+      | null
+
+    return {
+      ok: response.ok,
+      redirectTarget: data?.redirectURI ?? data?.redirectUrl ?? null,
+    }
+  }, accept)
 }
 
 test.beforeEach(async ({ context }) => {
@@ -94,38 +130,58 @@ test('authorization endpoint redirects logged-out user to login page', async ({
   await expect(page).toHaveURL(/\/auth\/login/, { timeout: 8000 })
 })
 
-test('clicking Allow redirects to redirect_uri with authorization code', async ({
+test('logged-in user reaches consent page with expected params', async ({
   page,
+  request,
 }) => {
   test.setTimeout(30000)
 
-  const request = await loginWithFreshUser(page, 'allow')
-  const consent = await startConsentFlow(request, ALLOW_AUTH_URL)
-  const consentParams = new URLSearchParams({
-    consent_code: consent.consentCode,
-    client_id: consent.clientId,
-    scope: consent.scope,
-  })
+  const { consentUrl } = await startConsentFlow(page, request, ALLOW_AUTH_URL, 'render')
 
-  const consentResponse = await request.post(
-    `http://localhost:3001/api/auth/oauth2/consent?${consentParams.toString()}`,
+  expect(consentUrl.pathname).toBe('/auth/consent')
+  expect(consentUrl.searchParams.get('client_id')).toBe('vine-dev-client')
+  expect(consentUrl.searchParams.get('consent_code')).toBeTruthy()
+  expect(consentUrl.searchParams.get('scope')).toContain('profile')
+})
+
+test('login page preserves explicit redirect back to consent', async ({
+  page,
+  request,
+}) => {
+  test.setTimeout(30000)
+
+  const credentials = await createFreshUser(request, 'redirect')
+  const returnUrl =
+    '/auth/consent?consent_code=test-consent&client_id=vine-dev-client&scope=profile+openid'
+
+  await page.goto(
+    `http://localhost:8081/auth/login?redirect=${encodeURIComponent(returnUrl)}`,
     {
-      headers: { origin: 'http://localhost:8081' },
-      data: { accept: true, consent_code: consent.consentCode },
-      failOnStatusCode: false,
+      waitUntil: 'domcontentloaded',
+      timeout: 10000,
     },
   )
 
-  expect(consentResponse.ok()).toBeTruthy()
+  await loginWithCredentials(page, credentials)
 
-  const body = (await consentResponse.json()) as {
-    redirectURI?: string
-    redirectUrl?: string
-  }
-  const redirectTarget = body.redirectURI ?? body.redirectUrl
-  expect(redirectTarget).toBeTruthy()
+  await expect(page).toHaveURL(/\/auth\/consent/, { timeout: 10000 })
+  const consentUrl = new URL(page.url())
+  expect(consentUrl.searchParams.get('consent_code')).toBe('test-consent')
+})
 
-  const redirectUrl = new URL(redirectTarget ?? '')
+test('clicking Allow redirects to redirect_uri with authorization code', async ({
+  page,
+  request,
+}) => {
+  test.setTimeout(30000)
+
+  await startConsentFlow(page, request, ALLOW_AUTH_URL, 'allow')
+
+  const result = await submitConsentViaPage(page, true)
+  expect(result.ok).toBeTruthy()
+  expect(result.redirectTarget).toBeTruthy()
+
+  const redirectUrl = new URL(result.redirectTarget ?? '')
   expect(redirectUrl.pathname).toBe('/auth/oauth-callback')
   expect(redirectUrl.searchParams.get('code')).toBeTruthy()
   expect(redirectUrl.searchParams.get('state')).toBe('test-state-allow')
@@ -133,38 +189,72 @@ test('clicking Allow redirects to redirect_uri with authorization code', async (
 
 test('clicking Cancel redirects to redirect_uri with access_denied error', async ({
   page,
+  request,
 }) => {
   test.setTimeout(30000)
 
-  const request = await loginWithFreshUser(page, 'cancel')
-  const consent = await startConsentFlow(request, CANCEL_AUTH_URL)
-  const consentParams = new URLSearchParams({
-    consent_code: consent.consentCode,
-    client_id: consent.clientId,
-    scope: consent.scope,
-  })
+  await startConsentFlow(page, request, CANCEL_AUTH_URL, 'cancel')
 
-  const consentResponse = await request.post(
-    `http://localhost:3001/api/auth/oauth2/consent?${consentParams.toString()}`,
-    {
-      headers: { origin: 'http://localhost:8081' },
-      data: { accept: false, consent_code: consent.consentCode },
-      failOnStatusCode: false,
-    },
-  )
+  const result = await submitConsentViaPage(page, false)
+  expect(result.ok).toBeTruthy()
+  expect(result.redirectTarget).toBeTruthy()
 
-  expect(consentResponse.ok()).toBeTruthy()
-
-  const body = (await consentResponse.json()) as {
-    redirectURI?: string
-    redirectUrl?: string
-  }
-  const redirectTarget = body.redirectURI ?? body.redirectUrl
-  expect(redirectTarget).toBeTruthy()
-
-  const redirectUrl = new URL(redirectTarget ?? '')
+  const redirectUrl = new URL(result.redirectTarget ?? '')
   expect(redirectUrl.pathname).toBe('/auth/oauth-callback')
   expect(redirectUrl.searchParams.get('error')).toBe('access_denied')
+})
+
+test('authorization code exchanges for token and userinfo', async ({ page, request }) => {
+  test.setTimeout(30000)
+
+  await startConsentFlow(page, request, ALLOW_AUTH_URL, 'token')
+
+  const result = await submitConsentViaPage(page, true)
+  expect(result.ok).toBeTruthy()
+  expect(result.redirectTarget).toBeTruthy()
+
+  const redirectUrl = new URL(result.redirectTarget ?? '')
+  const code = redirectUrl.searchParams.get('code')
+  expect(code).toBeTruthy()
+
+  const tokenResponse = await fetch(TOKEN_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'authorization_code',
+      code: code ?? '',
+      redirect_uri: 'http://localhost:8081/auth/oauth-callback',
+      client_id: 'vine-dev-client',
+      client_secret: 'vine-dev-secret',
+      code_verifier: CODE_VERIFIER,
+    }),
+  })
+
+  expect(tokenResponse.ok).toBeTruthy()
+
+  const tokenBody = (await tokenResponse.json()) as {
+    access_token?: string
+    token_type?: string
+    scope?: string
+  }
+  expect(tokenBody.access_token).toBeTruthy()
+  expect(tokenBody.token_type).toBe('Bearer')
+  expect(tokenBody.scope).toContain('openid')
+
+  const userinfoResponse = await fetch(USERINFO_ENDPOINT, {
+    headers: {
+      Authorization: `Bearer ${tokenBody.access_token ?? ''}`,
+    },
+  })
+
+  expect(userinfoResponse.ok).toBeTruthy()
+
+  const userinfoBody = (await userinfoResponse.json()) as {
+    sub?: string
+    name?: string
+  }
+  expect(userinfoBody.sub).toBeTruthy()
+  expect(userinfoBody.name).toBeTruthy()
 })
 
 test('LINE discovery endpoint returns OIDC metadata', async ({ request }) => {

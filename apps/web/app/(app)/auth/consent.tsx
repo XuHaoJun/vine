@@ -1,8 +1,9 @@
 import { router } from 'one'
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import { isWeb, SizableText, Spinner, XStack, YStack } from 'tamagui'
 
 import { useAuth } from '~/features/auth/client/authClient'
+import { useTanMutation, useTanQuery } from '~/query'
 import { Button } from '~/interface/buttons/Button'
 import { LineIcon } from '~/interface/icons/LineIcon'
 import { H2 } from '~/interface/text/Headings'
@@ -10,6 +11,7 @@ import { showToast } from '~/interface/toast/helpers'
 import { SERVER_URL } from '~/constants/urls'
 
 const LINE_GREEN = '#06C755'
+const CONSENT_SEARCH_KEY = 'auth.consent.search'
 
 const SCOPE_LABELS: Record<string, string> = {
   profile: 'Main profile info',
@@ -17,67 +19,89 @@ const SCOPE_LABELS: Record<string, string> = {
   email: 'Email address',
 }
 
+function persistConsentSearch() {
+  if (!isWeb) return
+  if (window.location.search) {
+    window.sessionStorage.setItem(CONSENT_SEARCH_KEY, window.location.search)
+  }
+}
+
+function getConsentSearchParams() {
+  if (!isWeb) {
+    return new URLSearchParams()
+  }
+
+  const currentSearch = window.location.search
+  if (currentSearch) {
+    return new URLSearchParams(currentSearch)
+  }
+
+  const persistedSearch = window.sessionStorage.getItem(CONSENT_SEARCH_KEY) ?? ''
+  return new URLSearchParams(persistedSearch)
+}
+
+if (typeof window !== 'undefined') {
+  persistConsentSearch()
+}
+
 function getConsentCode() {
   if (!isWeb) return ''
-  const params = new URLSearchParams(window.location.search)
+  const params = getConsentSearchParams()
   return params.get('consent_code') ?? ''
 }
 
 function getClientIdFromUrl() {
   if (!isWeb) return ''
-  const params = new URLSearchParams(window.location.search)
+  const params = getConsentSearchParams()
   return params.get('client_id') ?? ''
 }
 
 function getScopesFromUrl() {
   if (!isWeb) return [] as string[]
-  const params = new URLSearchParams(window.location.search)
-  const scopeParam = params.get('scope') ?? 'openid profile'
+  const params = getConsentSearchParams()
+  const scopeParam = (params.get('scope') ?? 'openid profile').replaceAll('+', ' ')
   return scopeParam.split(' ').filter(Boolean)
+}
+
+type ConsentDetails = {
+  appName: string
+  scopes: string[]
 }
 
 export const ConsentPage = () => {
   const { state } = useAuth()
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const isSubmittingRef = useRef(false)
 
   const consentCode = getConsentCode()
   const clientIdFromUrl = getClientIdFromUrl()
   const scopesFromUrl = getScopesFromUrl()
 
-  if (!isWeb) return null
-
-  if (state === 'loading') {
-    return (
-      <YStack
-        flex={1}
-        justify="center"
-        items="center"
-        $platform-web={{ minHeight: '100vh' }}
-      >
-        <SizableText>Loading...</SizableText>
-      </YStack>
-    )
-  }
-
-  if (state === 'logged-out') {
-    const returnUrl = `/auth/consent${window.location.search}`
-    router.replace(`/auth/login?redirect=${encodeURIComponent(returnUrl)}`)
-    return null
-  }
-
-  const displayAppName = clientIdFromUrl || 'Unknown App'
-  const scopes = scopesFromUrl
-
-  const postConsent = async (accept: boolean) => {
-    if (isSubmittingRef.current) return
-    isSubmittingRef.current = true
-    setIsSubmitting(true)
-    try {
+  const { data: consentDetails } = useTanQuery<ConsentDetails | null>({
+    queryKey: ['consent-details', consentCode],
+    queryFn: async () => {
       const params = new URLSearchParams({
         consent_code: consentCode,
         client_id: clientIdFromUrl,
-        scope: scopes.join(' '),
+        scope: scopesFromUrl.join(' '),
+      })
+      const res = await fetch(
+        `${SERVER_URL}/api/auth/oauth2/consent-details?${params.toString()}`,
+        { credentials: 'include' },
+      )
+      if (!res.ok) return null
+      const data = (await res.json()) as { appName?: string; scopes?: string[] }
+      if (!data?.appName) return null
+      return { appName: data.appName, scopes: data.scopes ?? [] }
+    },
+    enabled: isWeb && state === 'logged-in' && !!consentCode,
+  })
+
+  const consentMutation = useTanMutation({
+    mutationFn: async (accept: boolean) => {
+      const params = new URLSearchParams({
+        consent_code: consentCode,
+        client_id: clientIdFromUrl,
+        scope: (consentDetails?.scopes.length ? consentDetails.scopes : scopesFromUrl).join(' '),
       })
 
       const res = await fetch(
@@ -98,22 +122,56 @@ export const ConsentPage = () => {
 
       const redirectTarget = data?.redirectURI ?? data?.redirectUrl
       if (res.ok && redirectTarget) {
+        window.sessionStorage.removeItem(CONSENT_SEARCH_KEY)
         window.location.replace(redirectTarget)
         return
       }
 
       if (res.redirected && res.url) {
+        window.sessionStorage.removeItem(CONSENT_SEARCH_KEY)
         window.location.replace(res.url)
         return
       }
 
-      showToast(data?.error ?? 'Something went wrong', { type: 'error' })
-    } catch {
-      showToast('Network error', { type: 'error' })
-    } finally {
+      throw new Error(data?.error ?? 'Something went wrong')
+    },
+    onError: (error: Error) => {
+      showToast(error.message, { type: 'error' })
+    },
+    onSettled: () => {
       isSubmittingRef.current = false
-      setIsSubmitting(false)
-    }
+    },
+  })
+
+  if (!isWeb) return null
+
+  if (state === 'loading') {
+    return (
+      <YStack
+        flex={1}
+        justify="center"
+        items="center"
+        $platform-web={{ minHeight: '100vh' }}
+      >
+        <SizableText>Loading...</SizableText>
+      </YStack>
+    )
+  }
+
+  if (state === 'logged-out') {
+    const returnUrl = `/auth/consent?${getConsentSearchParams().toString()}`
+    router.replace(`/auth/login?redirect=${encodeURIComponent(returnUrl)}`)
+    return null
+  }
+
+  const displayAppName = consentDetails?.appName || clientIdFromUrl || 'Unknown App'
+  const scopes = consentDetails?.scopes.length ? consentDetails.scopes : scopesFromUrl
+  const isSubmitting = consentMutation.isPending
+
+  const postConsent = async (accept: boolean) => {
+    if (isSubmittingRef.current) return
+    isSubmittingRef.current = true
+    consentMutation.mutate(accept)
   }
 
   return (

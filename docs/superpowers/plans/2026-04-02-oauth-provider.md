@@ -8,6 +8,8 @@
 
 **Tech Stack:** `better-auth/plugins` (`oidcProvider`), `@fastify/formbody`, Tamagui, `react-hook-form`, Playwright (integration tests)
 
+**Debug Notes:** See `docs/oauth-provider-debug-notes-2026-04-03.md` for the condensed debugging timeline, root causes, and test stabilization lessons from implementing this plan.
+
 ---
 
 ## File Map
