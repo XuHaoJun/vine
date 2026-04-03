@@ -35,6 +35,37 @@ function getPostLoginRedirect() {
   return redirect?.startsWith('/') ? redirect : '/home/feed'
 }
 
+// Better Auth's oidcProvider redirects unauthenticated users to
+// /auth/login?client_id=<id>&code=<consent_code>. Detect that pattern
+// and forward to the consent page after login.
+function hasOidcLoginPrompt() {
+  if (!isWeb) return false
+  const params = new URLSearchParams(window.location.search)
+  return Boolean(params.get('client_id') && params.get('code'))
+}
+
+function redirectAfterOidcLoginPrompt() {
+  if (!isWeb) {
+    router.replace('/home/feed')
+    return
+  }
+
+  const params = new URLSearchParams(window.location.search)
+  const clientId = params.get('client_id')
+  const consentCode = params.get('code')
+
+  if (!clientId || !consentCode) {
+    window.location.replace('/home/feed')
+    return
+  }
+
+  const consentParams = new URLSearchParams({
+    client_id: clientId,
+    consent_code: consentCode,
+  })
+  window.location.replace(`/auth/consent?${consentParams.toString()}`)
+}
+
 function redirectAfterLogin(target: string) {
   if (isWeb) {
     window.location.replace(target)
@@ -49,12 +80,17 @@ export const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [demoLoading, setDemoLoading] = useState(false)
   const postLoginRedirect = getPostLoginRedirect()
+  const isOidcLoginPrompt = hasOidcLoginPrompt()
 
   if (state === 'loading') {
     return null
   }
 
   if (state === 'logged-in') {
+    if (isOidcLoginPrompt) {
+      redirectAfterOidcLoginPrompt()
+      return null
+    }
     redirectAfterLogin(postLoginRedirect)
     return null
   }
@@ -72,6 +108,10 @@ export const LoginPage = () => {
     const result = await passwordLogin(data.email, data.password)
     if (!result.success) {
       showToast(result.error.message, { type: 'error' })
+      return
+    }
+    if (isOidcLoginPrompt) {
+      redirectAfterOidcLoginPrompt()
       return
     }
     redirectAfterLogin(postLoginRedirect)
@@ -177,6 +217,10 @@ export const LoginPage = () => {
               setDemoLoading(false)
               if (error) {
                 showToast('Demo login failed', { type: 'error' })
+                return
+              }
+              if (isOidcLoginPrompt) {
+                redirectAfterOidcLoginPrompt()
                 return
               }
               redirectAfterLogin(postLoginRedirect)
