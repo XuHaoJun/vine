@@ -70,7 +70,9 @@ function persistPostLoginRedirect() {
     return
   }
 
-  const target = getLoginTargetFromSearch(window.location.search) ?? getLoginTargetFromNavigationEntry()
+  const target =
+    getLoginTargetFromSearch(window.location.search) ??
+    getLoginTargetFromNavigationEntry()
   if (target) {
     window.sessionStorage.setItem(LOGIN_REDIRECT_KEY, target)
   }
@@ -115,15 +117,6 @@ export const LoginPage = () => {
   const [demoLoading, setDemoLoading] = useState(false)
   const postLoginRedirect = useRef(getPostLoginRedirect()).current
 
-  if (state === 'loading') {
-    return null
-  }
-
-  if (state === 'logged-in') {
-    redirectAfterLogin(postLoginRedirect)
-    return null
-  }
-
   const {
     control,
     handleSubmit,
@@ -133,6 +126,14 @@ export const LoginPage = () => {
     defaultValues: { email: '', password: '' },
   })
 
+  if (state === 'loading') {
+    return null
+  }
+
+  if (state === 'logged-in') {
+    redirectAfterLogin(postLoginRedirect)
+    return null
+  }
 
   const onSubmit = async (data: FormData) => {
     const result = await passwordLogin(data.email, data.password)
