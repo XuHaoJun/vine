@@ -20,3 +20,7 @@ export const chatReadPermission = serverWhere('chat', (eb, auth) => {
 // No client-side CRUD mutations for chat — only custom mutators in
 // friendship.ts (acceptFriendship) and message.ts (sendMessage) can write to chat
 // via tx.mutate.chat.* inside their server-side custom mutator context
+
+// Stub exports for createZeroClient compatibility (chat is read-only on client)
+export const permissions = chatReadPermission
+export const mutate = {}
