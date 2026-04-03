@@ -5,15 +5,15 @@ import { loginAsDemo } from './helpers'
 const BASE_URL = 'http://localhost:8081'
 
 test.describe('Chat System', () => {
-  test('talks page loads with pill toggle', async ({ page }) => {
+  test('talks page loads with LINE-style header tabs', async ({ page }) => {
     await loginAsDemo(page)
 
     await page.goto(`${BASE_URL}/home/talks`, { waitUntil: 'domcontentloaded' })
     await page.waitForURL(/\/home\/talks$/, { timeout: 10000 })
 
-    // Pill toggle buttons should be visible
-    await expect(page.getByRole('button', { name: '聊天' })).toBeVisible()
-    await expect(page.getByRole('button', { name: '好友' })).toBeVisible()
+    // LINE-style text tabs should be visible
+    await expect(page.getByText('聊天 ▾')).toBeVisible()
+    await expect(page.getByText('好友', { exact: true })).toBeVisible()
   })
 
   test('switching between chats and friends tabs', async ({ page }) => {
@@ -23,12 +23,12 @@ test.describe('Chat System', () => {
     await page.waitForURL(/\/home\/talks$/, { timeout: 10000 })
 
     // Click friends tab
-    await page.getByRole('button', { name: '好友' }).click()
-    await expect(page.getByRole('button', { name: '好友' })).toBeVisible()
+    await page.getByText('好友', { exact: true }).click()
+    await expect(page.getByText('好友', { exact: true })).toBeVisible()
 
     // Click back to chats tab
-    await page.getByRole('button', { name: '聊天' }).click()
-    await expect(page.getByRole('button', { name: '聊天' })).toBeVisible()
+    await page.getByText('聊天 ▾').click()
+    await expect(page.getByText('聊天 ▾')).toBeVisible()
   })
 
   test('friend requests page loads', async ({ page }) => {
