@@ -32,7 +32,7 @@ export const ChatListItem = memo(({ name, image, lastMessageText, lastMessageAt,
             </SizableText>
           </XStack>
           <XStack justify="space-between" items="center">
-            <SizableText size="$1" color="$color10" numberOfLines={1} flex={1}>
+            <SizableText size="$2" color="$color10" numberOfLines={1} flex={1}>
               {lastMessageText ?? ''}
             </SizableText>
             {(unreadCount ?? 0) > 0 && (
