@@ -1,9 +1,17 @@
 import { useEffect } from 'react'
 import { isWeb, SizableText, YStack } from 'tamagui'
 
+const isDev = process.env.NODE_ENV !== 'production'
+
 export const OAuthCallbackPage = () => {
   useEffect(() => {
     if (!isWeb) return
+
+    if (!isDev) {
+      window.location.replace('/home/feed')
+      return
+    }
+
     const params = new URLSearchParams(window.location.search)
     const code = params.get('code')
     const error = params.get('error')
@@ -15,6 +23,8 @@ export const OAuthCallbackPage = () => {
     }
   }, [])
 
+  if (!isDev) return null
+
   return (
     <YStack
       flex={1}
@@ -23,7 +33,7 @@ export const OAuthCallbackPage = () => {
       bg="$background"
       $platform-web={{ minHeight: '100vh' }}
     >
-      <SizableText>OAuth Callback</SizableText>
+      <SizableText>OAuth Callback (dev only)</SizableText>
       <SizableText size="$3" color="$color10" mt="$2">
         Check console for code/error
       </SizableText>
