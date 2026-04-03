@@ -1,4 +1,4 @@
-import { boolean, index, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { boolean, index, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
 
 export const userPublic = pgTable(
   'userPublic',
@@ -68,6 +68,7 @@ export const chatMember = pgTable(
   (table) => [
     index('chatMember_chatId_idx').on(table.chatId),
     index('chatMember_userId_idx').on(table.userId),
+    uniqueIndex('chatMember_chatId_userId_unique').on(table.chatId, table.userId),
   ],
 )
 
