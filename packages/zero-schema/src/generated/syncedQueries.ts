@@ -2,37 +2,36 @@
 // server-side query definitions with validators
 import { defineQuery, defineQueries } from '@rocicorp/zero'
 import * as v from 'valibot'
-
 import * as Queries from './groupedQueries'
 
 const todo = {
-  todosByUserId: defineQuery(
-    v.object({
-      userId: v.string(),
-      limit: v.optional(v.number()),
-    }),
-    ({ args }) => Queries.todo.todosByUserId(args),
-  ),
   todoById: defineQuery(
     v.object({
-      todoId: v.string(),
-    }),
-    ({ args }) => Queries.todo.todoById(args),
+        todoId: v.string(),
+      }),
+    ({ args }) => Queries.todo.todoById(args)
+  ),
+  todosByUserId: defineQuery(
+    v.object({
+        userId: v.string(),
+        limit: v.optional(v.number()),
+      }),
+    ({ args }) => Queries.todo.todosByUserId(args)
   ),
 }
 
 const user = {
   userById: defineQuery(
     v.object({
-      userId: v.string(),
-    }),
-    ({ args }) => Queries.user.userById(args),
+        userId: v.string(),
+      }),
+    ({ args }) => Queries.user.userById(args)
   ),
   userWithState: defineQuery(
     v.object({
-      userId: v.string(),
-    }),
-    ({ args }) => Queries.user.userWithState(args),
+        userId: v.string(),
+      }),
+    ({ args }) => Queries.user.userWithState(args)
   ),
 }
 

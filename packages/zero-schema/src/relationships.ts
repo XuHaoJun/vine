@@ -31,8 +31,67 @@ export const userStateRelationships = relationships(tables.userState, ({ one }) 
   }),
 }))
 
+export const friendshipRelationships = relationships(tables.friendship, ({ one }) => ({
+  requester: one({
+    sourceField: ['requesterId'],
+    destSchema: tables.userPublic,
+    destField: ['id'],
+  }),
+  addressee: one({
+    sourceField: ['addresseeId'],
+    destSchema: tables.userPublic,
+    destField: ['id'],
+  }),
+}))
+
+export const chatRelationships = relationships(tables.chat, ({ many, one }) => ({
+  // Used by chatReadPermission (eb.exists('members', ...))
+  members: many({
+    sourceField: ['id'],
+    destSchema: tables.chatMember,
+    destField: ['chatId'],
+  }),
+  lastMessage: one({
+    sourceField: ['lastMessageId'],
+    destSchema: tables.message,
+    destField: ['id'],
+  }),
+}))
+
+export const chatMemberRelationships = relationships(tables.chatMember, ({ one }) => ({
+  user: one({
+    sourceField: ['userId'],
+    destSchema: tables.userPublic,
+    destField: ['id'],
+  }),
+  chat: one({
+    sourceField: ['chatId'],
+    destSchema: tables.chat,
+    destField: ['id'],
+  }),
+}))
+
+export const messageRelationships = relationships(tables.message, ({ many, one }) => ({
+  sender: one({
+    sourceField: ['senderId'],
+    destSchema: tables.userPublic,
+    destField: ['id'],
+  }),
+  // Used by messageReadPermission (eb.exists('members', ...))
+  // Matches chatMember rows where chatMember.chatId = message.chatId
+  members: many({
+    sourceField: ['chatId'],
+    destSchema: tables.chatMember,
+    destField: ['chatId'],
+  }),
+}))
+
 export const allRelationships = [
   userRelationships,
   todoRelationships,
   userStateRelationships,
+  friendshipRelationships,
+  chatRelationships,
+  chatMemberRelationships,
+  messageRelationships,
 ]

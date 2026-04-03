@@ -3,12 +3,13 @@ import { Tabs } from 'one'
 export function TabsLayout() {
   return (
     <Tabs
-      initialRouteName="feed"
+      initialRouteName="talks"
       screenOptions={{
         headerShown: false,
       }}
     >
-      <Tabs.Screen name="feed" />
+      <Tabs.Screen name="talks" />
+      <Tabs.Screen name="settings" />
     </Tabs>
   )
 }

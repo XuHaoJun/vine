@@ -57,7 +57,7 @@ export function AppLayout() {
     pathname === '/auth/login/password' ||
     pathname.startsWith('/auth/signup')
   if (state === 'logged-in' && isGuestOnlyAuthRoute && !hasPendingAuthContinuation) {
-    return <Redirect href="/home/feed" />
+    return <Redirect href="/home/talks" />
   }
 
   return (
