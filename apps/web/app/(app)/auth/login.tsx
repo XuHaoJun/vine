@@ -6,7 +6,6 @@ import { isWeb, SizableText, Spinner, XStack, YStack } from 'tamagui'
 import * as v from 'valibot'
 
 import { passwordLogin } from '~/features/auth/client/passwordLogin'
-import { useAuth } from '~/features/auth/client/authClient'
 import { signInAsDemo } from '~/features/auth/client/signInAsDemo'
 import { isDemoMode } from '~/helpers/isDemoMode'
 import { Link } from '~/interface/app/Link'
@@ -26,74 +25,9 @@ const schema = v.object({
 
 type FormData = v.InferInput<typeof schema>
 
-function getPostLoginRedirect() {
-  if (!isWeb) {
-    return '/home/feed'
-  }
-
-  const redirect = new URLSearchParams(window.location.search).get('redirect')
-  return redirect?.startsWith('/') ? redirect : '/home/feed'
-}
-
-// Better Auth's oidcProvider redirects unauthenticated users to
-// /auth/login?client_id=<id>&code=<consent_code>. Detect that pattern
-// and forward to the consent page after login.
-function hasOidcLoginPrompt() {
-  if (!isWeb) return false
-  const params = new URLSearchParams(window.location.search)
-  return Boolean(params.get('client_id') && params.get('code'))
-}
-
-function redirectAfterOidcLoginPrompt() {
-  if (!isWeb) {
-    router.replace('/home/feed')
-    return
-  }
-
-  const params = new URLSearchParams(window.location.search)
-  const clientId = params.get('client_id')
-  const consentCode = params.get('code')
-
-  if (!clientId || !consentCode) {
-    window.location.replace('/home/feed')
-    return
-  }
-
-  const consentParams = new URLSearchParams({
-    client_id: clientId,
-    consent_code: consentCode,
-  })
-  window.location.replace(`/auth/consent?${consentParams.toString()}`)
-}
-
-function redirectAfterLogin(target: string) {
-  if (isWeb) {
-    window.location.replace(target)
-    return
-  }
-
-  router.replace('/home/feed')
-}
-
 export const LoginPage = () => {
-  const { state } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [demoLoading, setDemoLoading] = useState(false)
-  const postLoginRedirect = getPostLoginRedirect()
-  const isOidcLoginPrompt = hasOidcLoginPrompt()
-
-  if (state === 'loading') {
-    return null
-  }
-
-  if (state === 'logged-in') {
-    if (isOidcLoginPrompt) {
-      redirectAfterOidcLoginPrompt()
-      return null
-    }
-    redirectAfterLogin(postLoginRedirect)
-    return null
-  }
 
   const {
     control,
@@ -110,11 +44,7 @@ export const LoginPage = () => {
       showToast(result.error.message, { type: 'error' })
       return
     }
-    if (isOidcLoginPrompt) {
-      redirectAfterOidcLoginPrompt()
-      return
-    }
-    redirectAfterLogin(postLoginRedirect)
+    router.replace('/home/feed')
   }
 
   return (
@@ -219,11 +149,7 @@ export const LoginPage = () => {
                 showToast('Demo login failed', { type: 'error' })
                 return
               }
-              if (isOidcLoginPrompt) {
-                redirectAfterOidcLoginPrompt()
-                return
-              }
-              redirectAfterLogin(postLoginRedirect)
+              router.replace('/home/feed')
             }}
             data-testid="login-as-demo"
           >

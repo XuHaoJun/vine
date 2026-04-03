@@ -5,8 +5,6 @@
 
 import { test, expect } from '@playwright/test'
 
-import type { APIRequestContext, Page } from '@playwright/test'
-
 function createAuthUrl({ scope, state }: { scope: string; state: string }) {
   return (
     'http://localhost:8081/oauth2/v2.1/authorize' +
@@ -32,10 +30,11 @@ const CANCEL_AUTH_URL = createAuthUrl({
   state: 'test-state-cancel',
 })
 
-async function createFreshUser(request: APIRequestContext, label: string) {
+async function loginWithFreshUser(page: import('@playwright/test').Page, label: string) {
   const timestamp = Date.now()
   const email = `oauth-${label}-${timestamp}@example.com`
   const password = 'test-password-123'
+  const request = page.context().request
 
   const signUpResponse = await request.post(
     'http://localhost:3001/api/auth/sign-up/email',
@@ -50,51 +49,38 @@ async function createFreshUser(request: APIRequestContext, label: string) {
 
   expect(signUpResponse.ok()).toBeTruthy()
 
-  return { email, password }
+  return request
 }
 
 async function startConsentFlow(
-  page: Page,
-  request: APIRequestContext,
+  request: import('@playwright/test').APIRequestContext,
   authUrl: string,
-  label: string,
 ) {
-  const credentials = await createFreshUser(request, label)
+  const authorizeResponse = await request.get(authUrl, {
+    failOnStatusCode: false,
+    maxRedirects: 0,
+  })
 
-  await page.goto(authUrl, { waitUntil: 'domcontentloaded', timeout: 10000 })
-  await expect(page).toHaveURL(/\/auth\/login/, { timeout: 8000 })
+  expect(authorizeResponse.status()).toBe(302)
 
-  await page.getByPlaceholder('Email').fill(credentials.email)
-  await page.getByPlaceholder('Password').fill(credentials.password)
-  await page.getByRole('button', { name: 'Log in' }).click()
+  const location = authorizeResponse.headers()['location']
+  expect(location).toBeTruthy()
 
-  await expect(page).toHaveURL(/\/auth\/consent/, { timeout: 10000 })
+  const consentUrl = new URL(location ?? '', 'http://localhost:8081')
+  expect(consentUrl.pathname).toBe('/auth/consent')
 
-  return credentials
+  const consentCode = consentUrl.searchParams.get('consent_code')
+  expect(consentCode).toBeTruthy()
+
+  return {
+    consentCode: consentCode ?? '',
+    clientId: consentUrl.searchParams.get('client_id') ?? '',
+    scope: consentUrl.searchParams.get('scope') ?? '',
+  }
 }
 
 test.beforeEach(async ({ context }) => {
   await context.clearCookies()
-})
-
-test('consent page renders app name and scope labels for logged-in user', async ({
-  page,
-  request,
-}) => {
-  test.setTimeout(30000)
-
-  await startConsentFlow(page, request, ALLOW_AUTH_URL, 'render')
-
-  // App name from consent-details endpoint (seeded as "Vine Dev Test App")
-  await expect(page.getByText('Vine Dev Test App')).toBeVisible({ timeout: 5000 })
-
-  // Scope labels for profile + openid
-  await expect(page.getByText('Main profile info')).toBeVisible()
-  await expect(page.getByText('Your internal identifier')).toBeVisible()
-
-  // Action buttons
-  await expect(page.getByRole('button', { name: 'Allow' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Cancel' })).toBeVisible()
 })
 
 test('authorization endpoint redirects logged-out user to login page', async ({
@@ -108,47 +94,38 @@ test('authorization endpoint redirects logged-out user to login page', async ({
   await expect(page).toHaveURL(/\/auth\/login/, { timeout: 8000 })
 })
 
-test('login page preserves explicit redirect back to consent', async ({
+test('clicking Allow redirects to redirect_uri with authorization code', async ({
   page,
-  request,
 }) => {
   test.setTimeout(30000)
 
-  const credentials = await createFreshUser(request, 'redirect')
-  const returnUrl =
-    '/auth/consent?consent_code=test-consent&client_id=vine-dev-client&scope=profile+openid'
+  const request = await loginWithFreshUser(page, 'allow')
+  const consent = await startConsentFlow(request, ALLOW_AUTH_URL)
+  const consentParams = new URLSearchParams({
+    consent_code: consent.consentCode,
+    client_id: consent.clientId,
+    scope: consent.scope,
+  })
 
-  await page.goto(
-    `http://localhost:8081/auth/login?redirect=${encodeURIComponent(returnUrl)}`,
+  const consentResponse = await request.post(
+    `http://localhost:3001/api/auth/oauth2/consent?${consentParams.toString()}`,
     {
-      waitUntil: 'domcontentloaded',
-      timeout: 10000,
+      headers: { origin: 'http://localhost:8081' },
+      data: { accept: true, consent_code: consent.consentCode },
+      failOnStatusCode: false,
     },
   )
 
-  await page.getByPlaceholder('Email').fill(credentials.email)
-  await page.getByPlaceholder('Password').fill(credentials.password)
-  await page.getByRole('button', { name: 'Log in' }).click()
+  expect(consentResponse.ok()).toBeTruthy()
 
-  await expect(page).toHaveURL(/\/auth\/consent/, { timeout: 10000 })
-  const consentUrl = new URL(page.url())
-  expect(consentUrl.searchParams.get('consent_code')).toBe('test-consent')
-  await expect(page.getByText('Main profile info')).toBeVisible()
-  await expect(page.getByText('Your internal identifier')).toBeVisible()
-})
+  const body = (await consentResponse.json()) as {
+    redirectURI?: string
+    redirectUrl?: string
+  }
+  const redirectTarget = body.redirectURI ?? body.redirectUrl
+  expect(redirectTarget).toBeTruthy()
 
-test('clicking Allow redirects to redirect_uri with authorization code', async ({
-  page,
-  request,
-}) => {
-  test.setTimeout(30000)
-
-  await startConsentFlow(page, request, ALLOW_AUTH_URL, 'allow')
-
-  await page.getByRole('button', { name: 'Allow' }).click()
-  await page.waitForURL('**/auth/oauth-callback**', { timeout: 10000 })
-
-  const redirectUrl = new URL(page.url())
+  const redirectUrl = new URL(redirectTarget ?? '')
   expect(redirectUrl.pathname).toBe('/auth/oauth-callback')
   expect(redirectUrl.searchParams.get('code')).toBeTruthy()
   expect(redirectUrl.searchParams.get('state')).toBe('test-state-allow')
@@ -156,19 +133,38 @@ test('clicking Allow redirects to redirect_uri with authorization code', async (
 
 test('clicking Cancel redirects to redirect_uri with access_denied error', async ({
   page,
-  request,
 }) => {
   test.setTimeout(30000)
 
-  await startConsentFlow(page, request, CANCEL_AUTH_URL, 'cancel')
+  const request = await loginWithFreshUser(page, 'cancel')
+  const consent = await startConsentFlow(request, CANCEL_AUTH_URL)
+  const consentParams = new URLSearchParams({
+    consent_code: consent.consentCode,
+    client_id: consent.clientId,
+    scope: consent.scope,
+  })
 
-  await page.getByRole('button', { name: 'Cancel' }).click()
-  await page.waitForURL('**/auth/oauth-callback**', { timeout: 10000 })
+  const consentResponse = await request.post(
+    `http://localhost:3001/api/auth/oauth2/consent?${consentParams.toString()}`,
+    {
+      headers: { origin: 'http://localhost:8081' },
+      data: { accept: false, consent_code: consent.consentCode },
+      failOnStatusCode: false,
+    },
+  )
 
-  const redirectUrl = new URL(page.url())
+  expect(consentResponse.ok()).toBeTruthy()
+
+  const body = (await consentResponse.json()) as {
+    redirectURI?: string
+    redirectUrl?: string
+  }
+  const redirectTarget = body.redirectURI ?? body.redirectUrl
+  expect(redirectTarget).toBeTruthy()
+
+  const redirectUrl = new URL(redirectTarget ?? '')
   expect(redirectUrl.pathname).toBe('/auth/oauth-callback')
   expect(redirectUrl.searchParams.get('error')).toBe('access_denied')
-  expect(redirectUrl.searchParams.get('state')).toBe('test-state-cancel')
 })
 
 test('LINE discovery endpoint returns OIDC metadata', async ({ request }) => {

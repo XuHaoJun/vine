@@ -7,27 +7,9 @@ import { PlatformSpecificRootProvider } from '~/interface/platform/PlatformSpeci
 import { ToastProvider } from '~/interface/toast/Toast'
 import { ProvideZero } from '~/zero/client'
 
-function getPendingRedirect() {
-  if (typeof window === 'undefined') {
-    return null
-  }
-
-  return new URLSearchParams(window.location.search).get('redirect')
-}
-
-function hasOidcLoginPrompt() {
-  if (typeof window === 'undefined') {
-    return false
-  }
-
-  const params = new URLSearchParams(window.location.search)
-  return Boolean(params.get('client_id') && params.get('code'))
-}
-
 export function AppLayout() {
   const { state } = useAuth()
   const pathname = usePathname()
-  const pendingRedirect = getPendingRedirect()
 
   if (state === 'loading') {
     return null
@@ -40,15 +22,9 @@ export function AppLayout() {
   }
 
   // redirect logged-in users away from auth routes (except consent and oauth-callback — require login)
-  const hasPendingConsentRedirect =
-    pathname === '/auth/login' &&
-    (pendingRedirect?.startsWith('/auth/consent') || hasOidcLoginPrompt())
   const isAuthRoute =
     pathname.startsWith('/auth') &&
-    !['/auth/consent', '/auth/oauth-callback', '/auth/login'].some(
-      (path) => pathname === path,
-    ) &&
-    !hasPendingConsentRedirect
+    !['/auth/consent', '/auth/oauth-callback'].some((path) => pathname === path)
   if (state === 'logged-in' && isAuthRoute) {
     return <Redirect href="/home/feed" />
   }
