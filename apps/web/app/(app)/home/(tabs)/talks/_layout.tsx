@@ -1,5 +1,5 @@
 import { Slot } from 'one'
 
-export function HomeLayout() {
+export default function TalksLayout() {
   return <Slot />
 }

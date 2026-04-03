@@ -27,17 +27,17 @@ export async function loginAsDemo(page: Page, pathname = '/') {
   const currentUrl = page.url()
   console.info(`✅ Logged in as demo user, redirected to: ${currentUrl}`)
 
-  // always navigate directly to /home/feed to bypass any onboarding redirects
+  // always navigate directly to /home/talks to bypass any onboarding redirects
   // this is more reliable for CI testing than trying to click skip buttons
-  console.info('Navigating to /home/feed...')
-  await page.goto(`${BASE_URL}/home/feed`, { waitUntil: 'domcontentloaded' })
-  await page.waitForURL(/\/home\/feed$/, { timeout: 10000 })
+  console.info('Navigating to /home/talks...')
+  await page.goto(`${BASE_URL}/home/talks`, { waitUntil: 'domcontentloaded' })
+  await page.waitForURL(/\/home\/talks$/, { timeout: 10000 })
 
   // wait for page to stabilize
   await page.waitForTimeout(2000)
 
-  // navigate to desired pathname if different from home/feed
-  if (pathname !== '/' && pathname !== '/home' && pathname !== '/home/feed') {
+  // navigate to desired pathname if different from home/talks
+  if (pathname !== '/' && pathname !== '/home' && pathname !== '/home/talks') {
     await page.goto(`${BASE_URL}${pathname}`, {
       waitUntil: 'domcontentloaded',
       timeout: 15000,

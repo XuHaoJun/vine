@@ -1,3 +1,4 @@
+import type { ChatMember, Friendship, Message } from './generated/types'
 import type { Todo, User, UserState } from './generated/types'
 
 export type * from './generated/types'
@@ -19,4 +20,23 @@ export type UserWithRelations = User & {
 
 export type TodoWithUser = Todo & {
   user?: User
+}
+
+export type FriendshipWithUsers = Friendship & {
+  requester?: User
+  addressee?: User
+}
+
+export type ChatWithMembers = {
+  id: string
+  type: string
+  lastMessageId: string | null
+  lastMessageAt: number | null
+  createdAt: number
+  members?: readonly (ChatMember & { user?: User })[]
+  lastMessage?: Message | null
+}
+
+export type MessageWithSender = Message & {
+  sender?: User
 }

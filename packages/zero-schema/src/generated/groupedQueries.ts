@@ -7,3 +7,6 @@
  */
 export * as todo from '../queries/todo'
 export * as user from '../queries/user'
+export * as chat from '../queries/chat'
+export * as friendship from '../queries/friendship'
+export * as message from '../queries/message'
