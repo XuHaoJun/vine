@@ -63,7 +63,7 @@ export const ChatRoomPage = memo(() => {
         <H3 flex={1}>{otherName}</H3>
       </XStack>
 
-      <ScrollView ref={scrollRef} flex={1} pb={insets.bottom}>
+      <ScrollView ref={scrollRef} pb={insets.bottom}>
         {isLoading ? (
           <YStack p="$6" items="center">
             <SizableText color="$color9">載入中...</SizableText>
@@ -73,20 +73,22 @@ export const ChatRoomPage = memo(() => {
             <H3 color="$color9">還沒有訊息，傳送第一則吧！</H3>
           </YStack>
         ) : (
-          messages?.map((msg) => {
-            const isMine = msg.senderId === userId
-            const isRead = isMine && otherMember?.lastReadMessageId === msg.id
+          <YStack>
+            {messages?.map((msg) => {
+              const isMine = msg.senderId === userId
+              const isRead = isMine && otherMember?.lastReadMessageId === msg.id
 
-            return (
-              <MessageBubble
-                key={msg.id}
-                text={msg.text ?? ''}
-                isMine={isMine}
-                createdAt={msg.createdAt}
-                isRead={isRead}
-              />
-            )
-          })
+              return (
+                <MessageBubble
+                  key={msg.id}
+                  text={msg.text ?? ''}
+                  isMine={isMine}
+                  createdAt={msg.createdAt}
+                  isRead={isRead}
+                />
+              )
+            })}
+          </YStack>
         )}
       </ScrollView>
 
