@@ -21,18 +21,18 @@ export const ChatListItem = memo(({ name, image, lastMessageText, lastMessageAt,
   return (
     <Pressable onPress={onPress}>
       <XStack px="$4" py="$3" gap="$3" items="center" hoverStyle={{ bg: '$color2' }}>
-        <Avatar size={48} image={image ?? null} name={name} />
+        <Avatar size={44} image={image ?? null} name={name} />
         <YStack flex={1} gap="$1">
           <XStack justify="space-between" items="center">
-            <SizableText size="$4" fontWeight="600" numberOfLines={1}>
+            <SizableText size="$3" fontWeight="600" numberOfLines={1}>
               {name}
             </SizableText>
-            <SizableText size="$2" color="$color10">
+            <SizableText size="$1" color="$color10">
               {timeLabel}
             </SizableText>
           </XStack>
           <XStack justify="space-between" items="center">
-            <SizableText size="$3" color="$color10" numberOfLines={1} flex={1}>
+            <SizableText size="$1" color="$color10" numberOfLines={1} flex={1}>
               {lastMessageText ?? ''}
             </SizableText>
             {(unreadCount ?? 0) > 0 && (
