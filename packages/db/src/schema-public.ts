@@ -28,3 +28,64 @@ export const todo = pgTable(
   },
   (table) => [index('todo_userId_idx').on(table.userId)],
 )
+
+export const friendship = pgTable(
+  'friendship',
+  {
+    id: text('id').primaryKey(),
+    requesterId: text('requesterId').notNull(),
+    addresseeId: text('addresseeId').notNull(),
+    status: text('status')
+      .notNull()
+      .$type<'pending' | 'accepted' | 'rejected' | 'blocked'>(),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('friendship_requesterId_idx').on(table.requesterId),
+    index('friendship_addresseeId_idx').on(table.addresseeId),
+  ],
+)
+
+export const chat = pgTable('chat', {
+  id: text('id').primaryKey(),
+  type: text('type').notNull().$type<'direct' | 'group' | 'oa'>(),
+  lastMessageId: text('lastMessageId'),
+  lastMessageAt: timestamp('lastMessageAt', { mode: 'string' }),
+  createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+})
+
+export const chatMember = pgTable(
+  'chatMember',
+  {
+    id: text('id').primaryKey(),
+    chatId: text('chatId').notNull(),
+    userId: text('userId').notNull(),
+    lastReadMessageId: text('lastReadMessageId'),
+    lastReadAt: timestamp('lastReadAt', { mode: 'string' }),
+    joinedAt: timestamp('joinedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('chatMember_chatId_idx').on(table.chatId),
+    index('chatMember_userId_idx').on(table.userId),
+  ],
+)
+
+export const message = pgTable(
+  'message',
+  {
+    id: text('id').primaryKey(),
+    chatId: text('chatId').notNull(),
+    senderId: text('senderId').notNull(),
+    type: text('type')
+      .notNull()
+      .$type<'text' | 'image' | 'video' | 'audio' | 'sticker' | 'location' | 'flex' | 'template'>(),
+    text: text('text'),
+    metadata: text('metadata'),
+    replyToMessageId: text('replyToMessageId'),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('message_chatId_createdAt_idx').on(table.chatId, table.createdAt),
+  ],
+)
