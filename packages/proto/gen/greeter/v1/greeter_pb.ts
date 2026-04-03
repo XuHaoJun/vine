@@ -2,54 +2,49 @@
 // @generated from file greeter/v1/greeter.proto (package greeter.v1, syntax proto3)
 /* eslint-disable */
 
-import type { GenFile, GenMessage, GenService } from '@bufbuild/protobuf/codegenv2'
-import { fileDesc, messageDesc, serviceDesc } from '@bufbuild/protobuf/codegenv2'
-import type { Message } from '@bufbuild/protobuf'
+import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
+import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
+import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file greeter/v1/greeter.proto.
  */
-export const file_greeter_v1_greeter: GenFile =
-  /*@__PURE__*/
-  fileDesc(
-    'ChhncmVldGVyL3YxL2dyZWV0ZXIucHJvdG8SCmdyZWV0ZXIudjEiHwoPU2F5SGVsbG9SZXF1ZXN0EgwKBG5hbWUYASABKAkiIwoQU2F5SGVsbG9SZXNwb25zZRIPCgdtZXNzYWdlGAEgASgJMlcKDkdyZWV0ZXJTZXJ2aWNlEkUKCFNheUhlbGxvEhsuZ3JlZXRlci52MS5TYXlIZWxsb1JlcXVlc3QaHC5ncmVldGVyLnYxLlNheUhlbGxvUmVzcG9uc2ViBnByb3RvMw',
-  )
+export const file_greeter_v1_greeter: GenFile = /*@__PURE__*/
+  fileDesc("ChhncmVldGVyL3YxL2dyZWV0ZXIucHJvdG8SCmdyZWV0ZXIudjEiHwoPU2F5SGVsbG9SZXF1ZXN0EgwKBG5hbWUYASABKAkiIwoQU2F5SGVsbG9SZXNwb25zZRIPCgdtZXNzYWdlGAEgASgJMlcKDkdyZWV0ZXJTZXJ2aWNlEkUKCFNheUhlbGxvEhsuZ3JlZXRlci52MS5TYXlIZWxsb1JlcXVlc3QaHC5ncmVldGVyLnYxLlNheUhlbGxvUmVzcG9uc2ViBnByb3RvMw");
 
 /**
  * @generated from message greeter.v1.SayHelloRequest
  */
-export type SayHelloRequest = Message<'greeter.v1.SayHelloRequest'> & {
+export type SayHelloRequest = Message<"greeter.v1.SayHelloRequest"> & {
   /**
    * @generated from field: string name = 1;
    */
-  name: string
-}
+  name: string;
+};
 
 /**
  * Describes the message greeter.v1.SayHelloRequest.
  * Use `create(SayHelloRequestSchema)` to create a new message.
  */
-export const SayHelloRequestSchema: GenMessage<SayHelloRequest> =
-  /*@__PURE__*/
-  messageDesc(file_greeter_v1_greeter, 0)
+export const SayHelloRequestSchema: GenMessage<SayHelloRequest> = /*@__PURE__*/
+  messageDesc(file_greeter_v1_greeter, 0);
 
 /**
  * @generated from message greeter.v1.SayHelloResponse
  */
-export type SayHelloResponse = Message<'greeter.v1.SayHelloResponse'> & {
+export type SayHelloResponse = Message<"greeter.v1.SayHelloResponse"> & {
   /**
    * @generated from field: string message = 1;
    */
-  message: string
-}
+  message: string;
+};
 
 /**
  * Describes the message greeter.v1.SayHelloResponse.
  * Use `create(SayHelloResponseSchema)` to create a new message.
  */
-export const SayHelloResponseSchema: GenMessage<SayHelloResponse> =
-  /*@__PURE__*/
-  messageDesc(file_greeter_v1_greeter, 1)
+export const SayHelloResponseSchema: GenMessage<SayHelloResponse> = /*@__PURE__*/
+  messageDesc(file_greeter_v1_greeter, 1);
 
 /**
  * @generated from service greeter.v1.GreeterService
@@ -59,8 +54,10 @@ export const GreeterService: GenService<{
    * @generated from rpc greeter.v1.GreeterService.SayHello
    */
   sayHello: {
-    methodKind: 'unary'
-    input: typeof SayHelloRequestSchema
-    output: typeof SayHelloResponseSchema
-  }
-}> = /*@__PURE__*/ serviceDesc(file_greeter_v1_greeter, 0)
+    methodKind: "unary";
+    input: typeof SayHelloRequestSchema;
+    output: typeof SayHelloResponseSchema;
+  },
+}> = /*@__PURE__*/
+  serviceDesc(file_greeter_v1_greeter, 0);
+
