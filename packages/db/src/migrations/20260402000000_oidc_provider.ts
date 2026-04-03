@@ -19,7 +19,7 @@ CREATE TABLE "oauthApplication" (
 CREATE TABLE "oauthAccessToken" (
   "id" text PRIMARY KEY,
   "accessToken" text NOT NULL UNIQUE,
-  "refreshToken" text NOT NULL UNIQUE,
+  "refreshToken" text UNIQUE,
   "accessTokenExpiresAt" timestamp NOT NULL,
   "refreshTokenExpiresAt" timestamp NOT NULL,
   "clientId" text NOT NULL REFERENCES "oauthApplication"("clientId") ON DELETE CASCADE,
