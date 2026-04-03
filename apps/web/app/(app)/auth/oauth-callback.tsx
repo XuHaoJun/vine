@@ -8,7 +8,7 @@ export const OAuthCallbackPage = () => {
     if (!isWeb) return
 
     if (!isDev) {
-      window.location.replace('/home/feed')
+      window.location.replace('/home/talks')
       return
     }
 

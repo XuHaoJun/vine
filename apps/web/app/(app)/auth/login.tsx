@@ -84,7 +84,7 @@ if (typeof window !== 'undefined') {
 
 function getPostLoginRedirect() {
   if (!isWeb) {
-    return '/home/feed'
+    return '/home/talks'
   }
 
   const currentTarget = getLoginTargetFromSearch(window.location.search)
@@ -98,7 +98,7 @@ function getPostLoginRedirect() {
   }
 
   const persistedTarget = window.sessionStorage.getItem(LOGIN_REDIRECT_KEY)
-  return persistedTarget?.startsWith('/') ? persistedTarget : '/home/feed'
+  return persistedTarget?.startsWith('/') ? persistedTarget : '/home/talks'
 }
 
 function redirectAfterLogin(target: string) {
@@ -108,7 +108,7 @@ function redirectAfterLogin(target: string) {
     return
   }
 
-  router.replace('/home/feed')
+  router.replace('/home/talks')
 }
 
 export const LoginPage = () => {
