@@ -1,9 +1,9 @@
 import { Link, usePathname } from 'one'
-import { useMedia, XStack, View } from 'tamagui'
+import { useMedia, XStack } from 'tamagui'
 
 import { Pressable } from '~/interface/buttons/Pressable'
-import { HouseIcon } from '~/interface/icons/phosphor/HouseIcon'
-import { UserCircleIcon } from '~/interface/icons/phosphor/UserCircleIcon'
+import { ChatCircleIcon } from '~/interface/icons/phosphor/ChatCircleIcon'
+import { GearIcon } from '~/interface/icons/phosphor/GearIcon'
 
 import type { Href } from 'one'
 
@@ -14,8 +14,8 @@ type TabRoute = {
 }
 
 const routes: TabRoute[] = [
-  { name: 'home', href: '/home/feed', icon: HouseIcon },
-  { name: 'profile', href: '/home/settings', icon: UserCircleIcon },
+  { name: 'talks', href: '/home/talks', icon: ChatCircleIcon },
+  { name: 'settings', href: '/home/settings', icon: GearIcon },
 ]
 
 export function NavigationTabs() {
@@ -24,7 +24,7 @@ export function NavigationTabs() {
   const iconSize = media.sm ? 24 : 20
 
   const currentTab =
-    routes.find((r) => pathname.startsWith(r.href as string))?.name ?? 'home'
+    routes.find((r) => pathname.startsWith(r.href as string))?.name ?? 'talks'
 
   return (
     <XStack gap="$2">
