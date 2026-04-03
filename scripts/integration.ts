@@ -131,7 +131,7 @@ async function cleanup() {
   try {
     proxyServer?.stop(true)
   } catch {}
-  await $('docker compose down', { silent: true, timeout: 30_000 }).catch(() => {})
+  await $('docker compose down', { silent: true, timeout: 60_000 }).catch(() => {})
 }
 
 // --- main ---
@@ -147,7 +147,7 @@ async function main() {
 
   try {
     // clean start
-    await $('docker compose down', { silent: true, timeout: 30_000 }).catch(() => {})
+  await $('docker compose down', { silent: true, timeout: 60_000 }).catch(() => {})
 
     // build migrations
     console.info('\nbuilding migrations...')
