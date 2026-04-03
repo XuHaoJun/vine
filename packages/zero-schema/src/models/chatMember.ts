@@ -30,8 +30,11 @@ const chatMemberPermission = serverWhere('chatMember', (eb, auth) => {
 
 export const mutate = mutations(schema, chatMemberPermission, {
   // Custom update for read marker — only allows updating lastReadMessageId/lastReadAt
-  markRead: async ({ authData, tx }, data: { id: string; lastReadMessageId: string; lastReadAt: number }) => {
+  markRead: async ({ authData, can, tx }, data: { id: string; lastReadMessageId: string; lastReadAt: number }) => {
     if (!authData) throw new Error('Unauthorized')
+
+    // Verify the caller owns this chatMember record
+    await can(chatMemberPermission, authData.id)
 
     await tx.mutate.chatMember.update({
       id: data.id,

@@ -24,6 +24,17 @@ export const friendshipPermission = serverWhere('friendship', (eb, auth) => {
   )
 })
 
+// Insert permission: only the requester can create a friendship
+const friendshipInsertPermission = serverWhere('friendship', (eb, auth) => {
+  return eb.cmp('requesterId', auth?.id || '')
+})
+
 export const mutate = mutations(schema, friendshipPermission, {
+  insert: async ({ authData, can, tx }, friendship: Friendship) => {
+    if (!authData) throw new Error('Unauthorized')
+    if (friendship.requesterId !== authData.id) throw new Error('Unauthorized')
+    await can(friendshipInsertPermission, authData.id)
+    await tx.mutate.friendship.insert(friendship)
+  },
   // accept: cross-table operation — defined in Task 8
 })
