@@ -1,12 +1,11 @@
 import { router } from 'one'
 import { memo } from 'react'
-import { SizableText, XStack, YStack } from 'tamagui'
+import { Input, SizableText, XStack, YStack } from 'tamagui'
 
 import { Button } from '~/interface/buttons/Button'
 import { ClockIcon } from '~/interface/icons/phosphor/ClockIcon'
 import { FunnelIcon } from '~/interface/icons/phosphor/FunnelIcon'
 import { GearIcon } from '~/interface/icons/phosphor/GearIcon'
-import { Input } from '~/interface/forms/Input'
 
 type TalksHeaderProps = {
   activeTab: 'chats' | 'friends'
@@ -94,6 +93,7 @@ export const TalksHeader = memo(({
             height={36}
             bg="transparent"
             borderWidth={0}
+            size="$5"
             placeholder={activeTab === 'chats' ? '搜尋聊天' : '搜尋好友'}
             value={searchQuery}
             onChangeText={onSearchChange}
