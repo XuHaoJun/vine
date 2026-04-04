@@ -122,13 +122,13 @@ export const MessageInput = memo(({ onSend, disabled }: Props) => {
       {/* Text input with emoji icon */}
       <YStack flex={1} position="relative">
         <Input
+          bg="$gray3"
+          borderWidth={0}
+          px="$3"
+          pr="$8"
+          py="$2"
           style={{
-            backgroundColor: '#f0f0f0',
             borderRadius: 20,
-            borderWidth: 0,
-            paddingLeft: 12,
-            paddingRight: 32,
-            paddingVertical: 8,
           }}
           placeholder="Aa"
           value={text}
