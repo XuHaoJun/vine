@@ -81,7 +81,7 @@ export const TalksHeader = memo(
               variant="transparent"
               cursor="pointer"
               p="$1"
-              onPress={() => router.push('/home/settings')}
+              onPress={() => router.push('/home/main')}
             >
               <GearIcon size={20} />
             </Button>
