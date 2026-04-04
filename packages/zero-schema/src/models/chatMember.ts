@@ -13,6 +13,7 @@ export const schema = table('chatMember')
     lastReadMessageId: string().optional(),
     lastReadAt: number().optional(),
     joinedAt: number(),
+    oaId: string().optional(),
   })
   .primaryKey('id')
 

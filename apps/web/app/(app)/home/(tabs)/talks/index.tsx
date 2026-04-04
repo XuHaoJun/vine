@@ -10,6 +10,7 @@ import { FriendListItem } from '~/features/chat/ui/FriendListItem'
 import { TalksHeader } from '~/features/chat/ui/TalksHeader'
 import { useAuth } from '~/features/auth/client/authClient'
 import { H3 } from '~/interface/text/Headings'
+import { zero } from '~/zero/client'
 
 type Tab = 'chats' | 'friends'
 
@@ -43,19 +44,33 @@ export const TalksPage = memo(() => {
   }
 
   const handleFriendPress = (friendship: {
+    id: string
     requesterId: string
     addresseeId: string
   }) => {
     const friendId =
       friendship.requesterId === userId ? friendship.addresseeId : friendship.requesterId
-    const chat = chats.find(
+    const existingChat = chats.find(
       (c) =>
         c.members?.some((m) => m.userId === friendId) &&
         c.members?.some((m) => m.userId === userId),
     )
-    if (chat?.id) {
-      router.push(`/home/talks/${chat.id}`)
+
+    if (existingChat?.id) {
+      router.push(`/home/talks/${existingChat.id}`)
+      return
     }
+
+    const newChatId = crypto.randomUUID()
+    zero.mutate.friendship.accept({
+      friendshipId: friendship.id,
+      chatId: newChatId,
+      member1Id: crypto.randomUUID(),
+      member2Id: crypto.randomUUID(),
+      requesterId: friendId,
+    })
+
+    router.push(`/home/talks/${newChatId}`)
   }
 
   return (

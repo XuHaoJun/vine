@@ -12,6 +12,7 @@ export const mutationValidators = {
       lastReadMessageId: v.optional(v.nullable(v.string())),
       lastReadAt: v.optional(v.nullable(v.number())),
       joinedAt: v.number(),
+      oaId: v.optional(v.nullable(v.string())),
     }),
     update: v.object({
       id: v.string(),
@@ -20,6 +21,7 @@ export const mutationValidators = {
       lastReadMessageId: v.optional(v.nullable(v.string())),
       lastReadAt: v.optional(v.nullable(v.number())),
       joinedAt: v.optional(v.nullable(v.number())),
+      oaId: v.optional(v.nullable(v.string())),
     }),
     delete: v.object({
       id: v.string(),

@@ -32,13 +32,15 @@ describe('createOAService — Provider', () => {
     const mockDb = createMockDb()
     mockDb.insert.mockReturnValue({
       values: vi.fn().mockReturnValue({
-        returning: vi.fn().mockResolvedValue([{
-          id: 'test-provider-id',
-          name: 'Test Provider',
-          ownerId: 'user-123',
-          createdAt: '2026-04-04T00:00:00Z',
-          updatedAt: '2026-04-04T00:00:00Z',
-        }]),
+        returning: vi.fn().mockResolvedValue([
+          {
+            id: 'test-provider-id',
+            name: 'Test Provider',
+            ownerId: 'user-123',
+            createdAt: '2026-04-04T00:00:00Z',
+            updatedAt: '2026-04-04T00:00:00Z',
+          },
+        ]),
       }),
     })
 
@@ -59,13 +61,15 @@ describe('createOAService — Provider', () => {
     mockDb.select.mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
-          limit: vi.fn().mockResolvedValue([{
-            id: 'provider-1',
-            name: 'Test',
-            ownerId: 'user-123',
-            createdAt: '2026-04-04T00:00:00Z',
-            updatedAt: '2026-04-04T00:00:00Z',
-          }]),
+          limit: vi.fn().mockResolvedValue([
+            {
+              id: 'provider-1',
+              name: 'Test',
+              ownerId: 'user-123',
+              createdAt: '2026-04-04T00:00:00Z',
+              updatedAt: '2026-04-04T00:00:00Z',
+            },
+          ]),
         }),
       }),
     })
@@ -98,13 +102,15 @@ describe('createOAService — Provider', () => {
     mockDb.update.mockReturnValue({
       set: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
-          returning: vi.fn().mockResolvedValue([{
-            id: 'provider-1',
-            name: 'New Name',
-            ownerId: 'user-123',
-            createdAt: '2026-04-04T00:00:00Z',
-            updatedAt: '2026-04-04T00:00:00Z',
-          }]),
+          returning: vi.fn().mockResolvedValue([
+            {
+              id: 'provider-1',
+              name: 'New Name',
+              ownerId: 'user-123',
+              createdAt: '2026-04-04T00:00:00Z',
+              updatedAt: '2026-04-04T00:00:00Z',
+            },
+          ]),
         }),
       }),
     })
@@ -131,7 +137,9 @@ describe('createOAService — OfficialAccount', () => {
     const mockDb = createMockDb()
     mockDb.insert.mockReturnValueOnce({
       values: vi.fn().mockReturnValueOnce({
-        returning: vi.fn().mockResolvedValue([{ id: 'oa-1', name: 'Test OA', channelSecret: 'abc123' }]),
+        returning: vi
+          .fn()
+          .mockResolvedValue([{ id: 'oa-1', name: 'Test OA', channelSecret: 'abc123' }]),
       }),
     })
 
@@ -223,7 +231,9 @@ describe('createOAService — Webhook', () => {
     mockDb.select.mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
-          limit: vi.fn().mockResolvedValue([{ id: 'webhook-1', url: 'https://example.com' }]),
+          limit: vi
+            .fn()
+            .mockResolvedValue([{ id: 'webhook-1', url: 'https://example.com' }]),
         }),
       }),
     })
@@ -252,7 +262,9 @@ describe('createOAService — Webhook', () => {
 describe('createOAService — Access Tokens', () => {
   it('issues a short-lived access token', async () => {
     const mockDb = createMockDb()
-    mockDb.insert.mockReturnValueOnce({ values: vi.fn().mockResolvedValue([{ id: 'token-1' }]) })
+    mockDb.insert.mockReturnValueOnce({
+      values: vi.fn().mockResolvedValue([{ id: 'token-1' }]),
+    })
 
     const oa = createOAService({ db: mockDb as any, database: {} as any })
 
@@ -268,7 +280,9 @@ describe('createOAService — Access Tokens', () => {
 
   it('issues a JWT v2.1 access token with keyId', async () => {
     const mockDb = createMockDb()
-    mockDb.insert.mockReturnValueOnce({ values: vi.fn().mockResolvedValue([{ id: 'token-1' }]) })
+    mockDb.insert.mockReturnValueOnce({
+      values: vi.fn().mockResolvedValue([{ id: 'token-1' }]),
+    })
 
     const oa = createOAService({ db: mockDb as any, database: {} as any })
 
@@ -286,9 +300,11 @@ describe('createOAService — Access Tokens', () => {
     const mockDb = createMockDb()
     mockDb.select.mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([
-          { id: 'token-1', type: 'short_lived', createdAt: '2026-04-04' },
-        ]),
+        where: vi
+          .fn()
+          .mockResolvedValue([
+            { id: 'token-1', type: 'short_lived', createdAt: '2026-04-04' },
+          ]),
       }),
     })
 
@@ -311,7 +327,9 @@ describe('createOAService — Access Tokens', () => {
     const mockDb = createMockDb()
     mockDb.delete.mockReturnValueOnce({
       where: vi.fn().mockReturnValueOnce({
-        returning: vi.fn().mockResolvedValue([{ id: 'token-1' }, { id: 'token-2' }, { id: 'token-3' }]),
+        returning: vi
+          .fn()
+          .mockResolvedValue([{ id: 'token-1' }, { id: 'token-2' }, { id: 'token-3' }]),
       }),
     })
 
@@ -385,9 +403,17 @@ describe('createOAService — Search', () => {
     mockDb.select.mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
-          limit: vi.fn().mockResolvedValue([
-            { id: 'oa-1', name: 'Test Bot', oaId: '@testbot', description: 'A test bot', imageUrl: '' },
-          ]),
+          limit: vi
+            .fn()
+            .mockResolvedValue([
+              {
+                id: 'oa-1',
+                name: 'Test Bot',
+                oaId: '@testbot',
+                description: 'A test bot',
+                imageUrl: '',
+              },
+            ]),
         }),
       }),
     })
@@ -421,7 +447,13 @@ describe('createOAService — VerifyWebhook', () => {
     mockDb.select
       .mockReturnValueOnce({
         from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([{ id: 'webhook-1', url: 'https://example.com' }]) }),
+          where: vi
+            .fn()
+            .mockReturnValue({
+              limit: vi
+                .fn()
+                .mockResolvedValue([{ id: 'webhook-1', url: 'https://example.com' }]),
+            }),
         }),
       })
       .mockReturnValueOnce({

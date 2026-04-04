@@ -2,12 +2,7 @@ import { eq, ilike, or } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { Pool } from 'pg'
 import type { schema } from '@vine/db'
-import {
-  oaProvider,
-  officialAccount,
-  oaWebhook,
-  oaAccessToken,
-} from '@vine/db/schema-oa'
+import { oaProvider, officialAccount, oaWebhook, oaAccessToken } from '@vine/db/schema-oa'
 import { createHmac, randomBytes, randomUUID } from 'crypto'
 
 type OADeps = {
@@ -327,16 +322,10 @@ export function createOAService(deps: OADeps) {
         return { success: true, status: 'verified' as const }
       }
 
-      await db
-        .update(oaWebhook)
-        .set({ status: 'failed' })
-        .where(eq(oaWebhook.oaId, oaId))
+      await db.update(oaWebhook).set({ status: 'failed' }).where(eq(oaWebhook.oaId, oaId))
       return { success: false, status: 'failed' as const }
     } catch {
-      await db
-        .update(oaWebhook)
-        .set({ status: 'failed' })
-        .where(eq(oaWebhook.oaId, oaId))
+      await db.update(oaWebhook).set({ status: 'failed' }).where(eq(oaWebhook.oaId, oaId))
       return { success: false, status: 'failed' as const }
     }
   }

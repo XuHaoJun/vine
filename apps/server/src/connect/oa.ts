@@ -6,7 +6,9 @@ type OAHandlerDeps = {
   oa: ReturnType<typeof createOAService>
 }
 
-function toProtoProvider(db: Awaited<ReturnType<ReturnType<typeof createOAService>['getProvider']>>) {
+function toProtoProvider(
+  db: Awaited<ReturnType<ReturnType<typeof createOAService>['getProvider']>>,
+) {
   if (!db) return undefined
   return {
     id: db.id,
@@ -19,21 +21,29 @@ function toProtoProvider(db: Awaited<ReturnType<ReturnType<typeof createOAServic
 
 function dbStatusToProto(status: string): OAStatus {
   switch (status) {
-    case 'active': return OAStatus.OA_STATUS_ACTIVE
-    case 'disabled': return OAStatus.OA_STATUS_DISABLED
-    default: return OAStatus.OA_STATUS_UNSPECIFIED
+    case 'active':
+      return OAStatus.OA_STATUS_ACTIVE
+    case 'disabled':
+      return OAStatus.OA_STATUS_DISABLED
+    default:
+      return OAStatus.OA_STATUS_UNSPECIFIED
   }
 }
 
 function protoStatusToDb(status: OAStatus): string | undefined {
   switch (status) {
-    case OAStatus.OA_STATUS_ACTIVE: return 'active'
-    case OAStatus.OA_STATUS_DISABLED: return 'disabled'
-    default: return undefined
+    case OAStatus.OA_STATUS_ACTIVE:
+      return 'active'
+    case OAStatus.OA_STATUS_DISABLED:
+      return 'disabled'
+    default:
+      return undefined
   }
 }
 
-function toProtoOfficialAccount(db: Awaited<ReturnType<ReturnType<typeof createOAService>['getOfficialAccount']>>) {
+function toProtoOfficialAccount(
+  db: Awaited<ReturnType<ReturnType<typeof createOAService>['getOfficialAccount']>>,
+) {
   if (!db) return undefined
   return {
     id: db.id,
@@ -50,14 +60,20 @@ function toProtoOfficialAccount(db: Awaited<ReturnType<ReturnType<typeof createO
 
 function dbWebhookStatusToProto(status: string): WebhookStatus {
   switch (status) {
-    case 'pending': return WebhookStatus.PENDING
-    case 'verified': return WebhookStatus.VERIFIED
-    case 'failed': return WebhookStatus.FAILED
-    default: return WebhookStatus.UNSPECIFIED
+    case 'pending':
+      return WebhookStatus.PENDING
+    case 'verified':
+      return WebhookStatus.VERIFIED
+    case 'failed':
+      return WebhookStatus.FAILED
+    default:
+      return WebhookStatus.UNSPECIFIED
   }
 }
 
-function toProtoWebhook(db: Awaited<ReturnType<ReturnType<typeof createOAService>['getWebhook']>>) {
+function toProtoWebhook(
+  db: Awaited<ReturnType<ReturnType<typeof createOAService>['getWebhook']>>,
+) {
   if (!db) return undefined
   return {
     id: db.id,
@@ -71,17 +87,23 @@ function toProtoWebhook(db: Awaited<ReturnType<ReturnType<typeof createOAService
 
 function dbTokenTypeToProto(type: string): AccessTokenType {
   switch (type) {
-    case 'short_lived': return AccessTokenType.SHORT_LIVED
-    case 'jwt_v21': return AccessTokenType.JWT_V21
-    default: return AccessTokenType.UNSPECIFIED
+    case 'short_lived':
+      return AccessTokenType.SHORT_LIVED
+    case 'jwt_v21':
+      return AccessTokenType.JWT_V21
+    default:
+      return AccessTokenType.UNSPECIFIED
   }
 }
 
 function protoTokenTypeToDb(type: AccessTokenType): 'short_lived' | 'jwt_v21' {
   switch (type) {
-    case AccessTokenType.SHORT_LIVED: return 'short_lived'
-    case AccessTokenType.JWT_V21: return 'jwt_v21'
-    default: return 'short_lived'
+    case AccessTokenType.SHORT_LIVED:
+      return 'short_lived'
+    case AccessTokenType.JWT_V21:
+      return 'jwt_v21'
+    default:
+      return 'short_lived'
   }
 }
 
@@ -106,7 +128,11 @@ export function oaHandler(deps: OAHandlerDeps) {
       },
       async listProviderAccounts(req) {
         const accounts = await deps.oa.listProviderAccounts(req.providerId)
-        return { accounts: accounts.map(toProtoOfficialAccount).filter((a): a is NonNullable<typeof a> => a != null) }
+        return {
+          accounts: accounts
+            .map(toProtoOfficialAccount)
+            .filter((a): a is NonNullable<typeof a> => a != null),
+        }
       },
       async createOfficialAccount(req) {
         const account = await deps.oa.createOfficialAccount({
@@ -146,7 +172,13 @@ export function oaHandler(deps: OAHandlerDeps) {
       },
       async verifyWebhook(req) {
         const result = await deps.oa.verifyWebhook(req.oaId)
-        const statusMap: Record<string, number> = { pending: 1, verified: 2, failed: 3, no_webhook: 0, oa_not_found: 0 }
+        const statusMap: Record<string, number> = {
+          pending: 1,
+          verified: 2,
+          failed: 3,
+          no_webhook: 0,
+          oa_not_found: 0,
+        }
         return { status: statusMap[result.status] ?? 0 }
       },
       async getWebhook(req) {
@@ -188,10 +220,15 @@ export function oaHandler(deps: OAHandlerDeps) {
       },
       async searchOfficialAccounts(req) {
         const accounts = await deps.oa.searchOAs(req.query)
-        return { accounts: accounts.map((a) => ({
-          id: a.id, name: a.name, oaId: a.oaId,
-          description: a.description ?? '', imageUrl: a.imageUrl ?? '',
-        }))}
+        return {
+          accounts: accounts.map((a) => ({
+            id: a.id,
+            name: a.name,
+            oaId: a.oaId,
+            description: a.description ?? '',
+            imageUrl: a.imageUrl ?? '',
+          })),
+        }
       },
     })
   }
