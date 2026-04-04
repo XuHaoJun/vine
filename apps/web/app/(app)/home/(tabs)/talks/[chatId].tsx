@@ -1,4 +1,4 @@
-import { useParams, createRoute } from 'one'
+import { useParams, createRoute, usePathname } from 'one'
 import { memo, useEffect, useMemo, useRef } from 'react'
 import { Platform } from 'react-native'
 import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
@@ -12,10 +12,33 @@ import { Avatar } from '~/interface/avatars/Avatar'
 import { Button } from '~/interface/buttons/Button'
 import { H3 } from '~/interface/text/Headings'
 
+import {
+  getSyncPathnameForSlot,
+  parseDynamicRouteParam,
+} from '~/features/app/slot-initial-route'
+
+import {
+  TALKS_SLOT_BASE_PATH,
+  TALKS_STACK_SCREEN_NAMES,
+} from '~/features/chat/talks-config'
+
 const route = createRoute<'/(app)/home/(tabs)/talks/[chatId]'>()
 
 export const ChatRoomPage = memo(() => {
-  const { chatId } = useParams<{ chatId: string }>()
+  const { chatId: paramChatId } = useParams<{ chatId: string }>()
+  const pathnameFromNav = usePathname()
+  const chatId = useMemo(() => {
+    if (paramChatId) {
+      return paramChatId
+    }
+    const path =
+      Platform.OS === 'web' && typeof window !== 'undefined'
+        ? window.location.pathname
+        : getSyncPathnameForSlot() || pathnameFromNav
+    return parseDynamicRouteParam(path, TALKS_SLOT_BASE_PATH, [
+      ...TALKS_STACK_SCREEN_NAMES,
+    ])
+  }, [paramChatId, pathnameFromNav])
   const { user } = useAuth()
   const userId = user?.id ?? ''
   const scrollRef = useRef<ScrollView>(null)
