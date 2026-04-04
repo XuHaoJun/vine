@@ -10,8 +10,8 @@ type TabRoute = {
 }
 
 const routes: TabRoute[] = [
+  { name: 'main', label: '主頁', path: '/home/main' },
   { name: 'talks', label: '聊天', path: '/home/talks' },
-  { name: 'settings', label: '設定', path: '/home/settings' },
 ]
 
 /** `/home/talks/:chatId` — full-screen chat; tab bar would stack under MessageInput */

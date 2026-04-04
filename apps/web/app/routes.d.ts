@@ -16,13 +16,11 @@ declare module 'one' {
         | `/(app)/auth/oauth-callback`
         | `/(app)/home`
         | `/(app)/home/(tabs)`
+        | `/(app)/home/(tabs)/main`
         | `/(app)/home/(tabs)/talks`
         | `/(app)/home/(tabs)/talks/`
         | `/(app)/home/(tabs)/talks/requests`
-        | `/(app)/home/settings`
-        | `/(app)/home/settings/`
-        | `/(app)/home/settings/blocked-users`
-        | `/(app)/home/settings/edit-profile`
+        | `/(app)/home/main`
         | `/(app)/home/talks`
         | `/(app)/home/talks/`
         | `/(app)/home/talks/requests`
@@ -35,13 +33,11 @@ declare module 'one' {
         | `/hello`
         | `/home`
         | `/home/(tabs)`
+        | `/home/(tabs)/main`
         | `/home/(tabs)/talks`
         | `/home/(tabs)/talks/`
         | `/home/(tabs)/talks/requests`
-        | `/home/settings`
-        | `/home/settings/`
-        | `/home/settings/blocked-users`
-        | `/home/settings/edit-profile`
+        | `/home/main`
         | `/home/talks`
         | `/home/talks/`
         | `/home/talks/requests`

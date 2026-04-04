@@ -15,7 +15,7 @@ type TabRoute = {
 
 const routes: TabRoute[] = [
   { name: 'talks', href: '/home/talks', icon: ChatCircleIcon },
-  { name: 'settings', href: '/home/settings', icon: GearIcon },
+  { name: 'settings', href: '/home/main', icon: GearIcon },
 ]
 
 export function NavigationTabs() {

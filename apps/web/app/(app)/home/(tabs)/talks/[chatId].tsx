@@ -1,4 +1,4 @@
-import { useLocalSearchParams, createRoute } from 'one'
+import { useParams, createRoute } from 'one'
 import { memo, useEffect, useMemo, useRef } from 'react'
 import { Platform } from 'react-native'
 import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
@@ -15,7 +15,7 @@ import { H3 } from '~/interface/text/Headings'
 const route = createRoute<'/(app)/home/(tabs)/talks/[chatId]'>()
 
 export const ChatRoomPage = memo(() => {
-  const { chatId } = useLocalSearchParams<{ chatId: string }>()
+  const { chatId } = useParams<{ chatId: string }>()
   const { user } = useAuth()
   const userId = user?.id ?? ''
   const scrollRef = useRef<ScrollView>(null)

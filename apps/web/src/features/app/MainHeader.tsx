@@ -58,7 +58,7 @@ export const MainHeader = () => {
               <ThemeSwitch />
               <Button
                 circular
-                onPress={() => router.push('/home/settings')}
+                onPress={() => router.push('/home/main')}
                 icon={<GearIcon size={18} />}
                 aria-label="Settings"
               />
@@ -127,7 +127,7 @@ export const MainHeaderMenu = memo(() => {
                 cursor="pointer"
                 onPress={() => {
                   setOpen(false)
-                  router.push('/home/settings')
+                  router.push('/home/main')
                 }}
               >
                 <GearIcon />
