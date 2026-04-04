@@ -54,6 +54,12 @@ export default {
     ),
 
     one({
+      setupFile: {
+        client: './src/setupClient.ts',
+        server: './src/setupServer.ts',
+        native: './src/setupNative.ts',
+      },
+
       react: {
         compiler: process.env.NODE_ENV === 'production',
       },
