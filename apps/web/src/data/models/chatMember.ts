@@ -36,8 +36,8 @@ export const mutate = mutations(schema, chatMemberPermission, {
   ) => {
     if (!authData) throw new Error('Unauthorized')
 
-    // Verify the caller owns this chatMember record
-    await can(chatMemberPermission, authData.id)
+    // `can()` scopes the permission check to this row by primary key (`id`)
+    await can(chatMemberPermission, data.id)
 
     await tx.mutate.chatMember.update({
       id: data.id,
