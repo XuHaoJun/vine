@@ -16,9 +16,7 @@ export const FriendListItem = memo(({ name, image, statusMessage, onPress }: Pro
       gap="$3"
       title={name}
       subTitle={statusMessage ?? undefined}
-      icon={
-        <Avatar size={44} image={image ?? null} name={name} />
-      }
+      icon={<Avatar size={44} image={image ?? null} name={name} />}
       onPress={onPress}
       cursor="pointer"
     />
