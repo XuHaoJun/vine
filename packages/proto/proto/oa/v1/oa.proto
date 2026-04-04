@@ -1,0 +1,239 @@
+syntax = "proto3";
+
+package oa.v1;
+
+// ── Provider ──
+
+message Provider {
+  string id = 1;
+  string name = 2;
+  string owner_id = 3;
+  string created_at = 4;
+  string updated_at = 5;
+}
+
+message CreateProviderRequest {
+  string name = 1;
+}
+
+message CreateProviderResponse {
+  Provider provider = 1;
+}
+
+message GetProviderRequest {
+  string id = 1;
+}
+
+message GetProviderResponse {
+  Provider provider = 1;
+}
+
+message UpdateProviderRequest {
+  string id = 1;
+  optional string name = 2;
+}
+
+message UpdateProviderResponse {
+  Provider provider = 1;
+}
+
+message DeleteProviderRequest {
+  string id = 1;
+}
+
+message DeleteProviderResponse {}
+
+message ListProviderAccountsRequest {
+  string provider_id = 1;
+}
+
+message ListProviderAccountsResponse {
+  repeated OfficialAccount accounts = 1;
+}
+
+// ── Official Account ──
+
+message OfficialAccount {
+  string id = 1;
+  string provider_id = 2;
+  string name = 3;
+  string oa_id = 4;
+  string description = 5;
+  string image_url = 6;
+  string channel_secret = 7;
+  string status = 8;
+  string created_at = 9;
+  string updated_at = 10;
+}
+
+message CreateOfficialAccountRequest {
+  string provider_id = 1;
+  string name = 2;
+  string oa_id = 3;
+  optional string description = 4;
+  optional string image_url = 5;
+}
+
+message CreateOfficialAccountResponse {
+  OfficialAccount account = 1;
+}
+
+message GetOfficialAccountRequest {
+  string id = 1;
+}
+
+message GetOfficialAccountResponse {
+  OfficialAccount account = 1;
+}
+
+message UpdateOfficialAccountRequest {
+  string id = 1;
+  optional string name = 2;
+  optional string description = 3;
+  optional string image_url = 4;
+  optional string status = 5;
+}
+
+message UpdateOfficialAccountResponse {
+  OfficialAccount account = 1;
+}
+
+message DeleteOfficialAccountRequest {
+  string id = 1;
+}
+
+message DeleteOfficialAccountResponse {}
+
+// ── Webhook ──
+
+message Webhook {
+  string id = 1;
+  string oa_id = 2;
+  string url = 3;
+  string status = 4;
+  optional string last_verified_at = 5;
+  string created_at = 6;
+}
+
+message SetWebhookRequest {
+  string oa_id = 1;
+  string url = 2;
+}
+
+message SetWebhookResponse {
+  Webhook webhook = 1;
+}
+
+message VerifyWebhookRequest {
+  string oa_id = 1;
+}
+
+message VerifyWebhookResponse {
+  bool success = 1;
+  string status = 2;
+}
+
+message GetWebhookRequest {
+  string oa_id = 1;
+}
+
+message GetWebhookResponse {
+  optional Webhook webhook = 1;
+}
+
+// ── Access Token ──
+
+message AccessToken {
+  string id = 1;
+  string oa_id = 2;
+  string token = 3;
+  string type = 4;
+  optional string key_id = 5;
+  optional string expires_at = 6;
+  string created_at = 7;
+}
+
+message ListAccessTokensRequest {
+  string oa_id = 1;
+  optional string key_id = 2;
+}
+
+message ListAccessTokensResponse {
+  repeated AccessTokenSummary tokens = 1;
+}
+
+message AccessTokenSummary {
+  string id = 1;
+  string type = 2;
+  optional string key_id = 3;
+  optional string expires_at = 4;
+  string created_at = 5;
+}
+
+message IssueAccessTokenRequest {
+  string oa_id = 1;
+  string type = 2;
+  optional string public_key = 3;
+}
+
+message IssueAccessTokenResponse {
+  string access_token = 1;
+  int32 expires_in = 2;
+  string token_type = 3;
+  optional string key_id = 4;
+}
+
+message RevokeAccessTokenRequest {
+  string token_id = 1;
+}
+
+message RevokeAccessTokenResponse {}
+
+message RevokeAllAccessTokensRequest {
+  string oa_id = 1;
+  string key_id = 2;
+}
+
+message RevokeAllAccessTokensResponse {
+  int32 revoked_count = 1;
+}
+
+// ── Search ──
+
+message SearchOfficialAccountsRequest {
+  string query = 1;
+}
+
+message SearchOfficialAccountsResponse {
+  repeated OfficialAccountSummary accounts = 1;
+}
+
+message OfficialAccountSummary {
+  string id = 1;
+  string name = 2;
+  string oa_id = 3;
+  string description = 4;
+  string image_url = 5;
+}
+
+// ── Service ──
+
+service OAService {
+  rpc CreateProvider(CreateProviderRequest) returns (CreateProviderResponse);
+  rpc GetProvider(GetProviderRequest) returns (GetProviderResponse);
+  rpc UpdateProvider(UpdateProviderRequest) returns (UpdateProviderResponse);
+  rpc DeleteProvider(DeleteProviderRequest) returns (DeleteProviderResponse);
+  rpc ListProviderAccounts(ListProviderAccountsRequest) returns (ListProviderAccountsResponse);
+  rpc CreateOfficialAccount(CreateOfficialAccountRequest) returns (CreateOfficialAccountResponse);
+  rpc GetOfficialAccount(GetOfficialAccountRequest) returns (GetOfficialAccountResponse);
+  rpc UpdateOfficialAccount(UpdateOfficialAccountRequest) returns (UpdateOfficialAccountResponse);
+  rpc DeleteOfficialAccount(DeleteOfficialAccountRequest) returns (DeleteOfficialAccountResponse);
+  rpc SetWebhook(SetWebhookRequest) returns (SetWebhookResponse);
+  rpc VerifyWebhook(VerifyWebhookRequest) returns (VerifyWebhookResponse);
+  rpc GetWebhook(GetWebhookRequest) returns (GetWebhookResponse);
+  rpc IssueAccessToken(IssueAccessTokenRequest) returns (IssueAccessTokenResponse);
+  rpc ListAccessTokens(ListAccessTokensRequest) returns (ListAccessTokensResponse);
+  rpc RevokeAccessToken(RevokeAccessTokenRequest) returns (RevokeAccessTokenResponse);
+  rpc RevokeAllAccessTokens(RevokeAllAccessTokensRequest) returns (RevokeAllAccessTokensResponse);
+  rpc SearchOfficialAccounts(SearchOfficialAccountsRequest) returns (SearchOfficialAccountsResponse);
+}

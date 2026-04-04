@@ -13,3 +13,6 @@
 [submodule "learn-projects/connect-es"]
 	path = learn-projects/connect-es
 	url = https://github.com/connectrpc/connect-es.git
+[submodule "learn-projects/line-bot-sdk-nodejs"]
+	path = learn-projects/line-bot-sdk-nodejs
+	url = https://github.com/line/line-bot-sdk-nodejs.git
