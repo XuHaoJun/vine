@@ -14,9 +14,20 @@ const routes: TabRoute[] = [
   { name: 'settings', label: '設定', path: '/home/settings' },
 ]
 
+/** `/home/talks/:chatId` — full-screen chat; tab bar would stack under MessageInput */
+function isTalksChatRoomPath(pathname: string): boolean {
+  const path = pathname.split('?')[0]?.replace(/\/$/, '') ?? ''
+  const m = /^\/home\/talks\/([^/]+)$/.exec(path)
+  return m !== null && m[1] !== 'requests'
+}
+
 export const BottomTabBar = memo(() => {
   const pathname = usePathname()
   const insets = useSafeAreaInsets()
+
+  if (isTalksChatRoomPath(pathname)) {
+    return null
+  }
 
   const currentTab = routes.find((r) => pathname.startsWith(r.path))?.name ?? 'talks'
 

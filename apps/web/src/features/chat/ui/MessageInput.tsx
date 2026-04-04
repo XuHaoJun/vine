@@ -1,5 +1,6 @@
 import { memo, useState } from 'react'
 import { Pressable } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Svg, { Path } from 'react-native-svg'
 import { XStack, YStack } from 'tamagui'
 
@@ -77,6 +78,7 @@ function SendArrowIcon() {
 
 export const MessageInput = memo(({ onSend, disabled }: Props) => {
   const [text, setText] = useState('')
+  const insets = useSafeAreaInsets()
 
   const handleSend = () => {
     const trimmed = text.trim()
@@ -93,7 +95,8 @@ export const MessageInput = memo(({ onSend, disabled }: Props) => {
       gap="$2"
       bg="white"
       px="$3"
-      py="$2"
+      pt="$2"
+      pb={8 + insets.bottom}
       borderTopWidth={1}
       borderTopColor="$color4"
     >
