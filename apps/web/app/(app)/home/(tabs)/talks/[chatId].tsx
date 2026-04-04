@@ -27,7 +27,7 @@ export const ChatRoomPage = memo(() => {
   const memberMap = useMemo(() => {
     const map: Record<string, { name: string; index: number }> = {}
     members.forEach((m, i) => {
-      map[m.userId] = { name: (m as any).user?.name ?? '?', index: i }
+      map[m.userId] = { name: m.user?.name ?? '?', index: i }
     })
     return map
   }, [members])
@@ -57,7 +57,7 @@ export const ChatRoomPage = memo(() => {
   }
 
   return (
-    <YStack flex={1} style={{ backgroundColor: '#84A1C4' }}>
+    <YStack flex={1} bg="#84A1C4">
       {/* Header — unchanged */}
       <XStack
         px="$3"
