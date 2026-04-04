@@ -278,6 +278,51 @@ Bouncy: `bouncy`, `superBouncy`, `kindaBouncy`, `quickLessBouncy`, etc.
 ### Semantic
 `Article`, `Aside`, `Footer`, `Header`, `Main`, `Nav`, `Section`
 
+## ScrollView + `flex` (why it often breaks on web / RN Web)
+
+Investigation source: Tamagui reference tree under `learn-projects/tamagui/` (read-only; do not edit that folder). Relevant files:
+
+| Area | Path (under `learn-projects/tamagui/`) |
+|------|----------------------------------------|
+| Component definition | `code/ui/scroll-view/src/ScrollView.tsx` |
+| Web render / “passthrough” | `code/core/web/src/createComponent.tsx` (~L1445–1455) |
+| Style pipeline | `code/core/web/src/helpers/getSplitStyles.tsx` (~L178–180) |
+| Public demo (bounded size) | `code/demos/src/ScrollViewDemo.tsx` |
+| In-sheet usage (`flex: 1`) | `code/ui/sheet/src/SheetScrollView.tsx` |
+
+### What `ScrollView` is in Tamagui
+
+- It is a **`styled(ScrollViewNative)`** wrapper around React Native’s `ScrollView` (`ScrollView.tsx`), with `scrollEnabled: true`, optional **`fullscreen`** variant (reuses `fullscreenStyle` from stacks: `position: 'absolute'`, `inset: 0`), and `accept: { contentContainerStyle: 'style' }` for typed `contentContainerStyle`.
+- There is **no special-case layout fix** inside this file for `flex: 1`; sizing behaves like RN + react-native-web.
+
+### Cause 1: Flex column + default `min-height: auto` (most common)
+
+In a **column** flex layout, a child with `flex: 1` still has **`min-height: auto`** (CSS / RN Web). That prevents the flex item from shrinking below its content height, so the “scroll” region **grows with content** instead of getting a fixed band: the page scrolls, or the next sibling (e.g. input bar) **overlaps** content.
+
+**Fix:** Give the **flex child that wraps `ScrollView`** `minHeight: 0` (e.g. `style={{ minHeight: 0 }}` on `YStack`). Optionally lock document overflow on web only if you need “only the list scrolls.”
+
+This matches how this repo already documents the talks list: **`flex={1}` on the outer `YStack`, not on `ScrollView`** (`apps/web/app/(app)/home/(tabs)/talks/index.tsx`).
+
+### Cause 2: `passThrough` → `display: contents` (Tamagui web)
+
+In `getSplitStyles`, if **`props.passThrough`** is true, the function **returns `null`**. In `createComponent`, when **`splitStyles` is falsy** (`isPassthrough = !splitStyles`), the tree renders the base view with **`style: { display: 'contents' }`**, so that node **does not create a layout box**. Any `flex` / height on that pass-through layer will not behave like a normal scroll container.
+
+**Fix:** Do not set **`passThrough`** on `ScrollView` when you rely on layout. (Uncommon in app code, but explains “mysterious” zero-height / broken flex.)
+
+### Cause 3: Official demo uses explicit bounds, not “fill remaining” alone
+
+`ScrollViewDemo.tsx` constrains the list with **`maxH={250}`**, **`width="75%"`**, plus tokens — **not** “only `flex={1}` to fill the screen.” That pattern avoids ambiguous height when the parent chain is weak.
+
+### Cause 4: `flex: 1` on `ScrollView` where the parent already guarantees height
+
+`SheetScrollView.tsx` uses **`flex={1}`** / **`style={{ flex: 1 }}`** inside **Sheet**, where the sheet frame already establishes height. Same idea: **`flex: 1` on `ScrollView` is safe when an ancestor has a definite height and the flex column has `minHeight: 0` where needed.**
+
+### Practical checklist (this monorepo)
+
+1. Prefer **`YStack flex={1}` + `style={{ minHeight: 0 }}`** around **`ScrollView`**, and only then consider `style={{ flex: 1, minHeight: 0 }}` on `ScrollView` if needed.
+2. Avoid **`height: 100dvh` + `overflow: 'hidden'`** on the same outer wrapper as `ScrollView` without validating Tamagui/RN Web output — can clip or collapse if the chain is wrong.
+3. For full-viewport chat/list UIs on web, combine **wrapper `minHeight: 0`**, optional **`document.documentElement` / `body` overflow** while mounted, and tests in target browsers.
+
 ## Default Font
 
 Default font family is `body`. Available: `body`, `heading`, `mono` (JetBrains Mono).
@@ -364,3 +409,4 @@ format.web.ts     // web only
 - Animations: `apps/web/src/tamagui/animationsApp.ts`
 - Custom components: `apps/web/src/interface/`
 - Tamagui v5 source: `learn-projects/tamagui/code/core/shorthands/src/v5.ts`
+- ScrollView / flex behavior (reference only): `learn-projects/tamagui/code/ui/scroll-view/`, `learn-projects/tamagui/code/core/web/src/createComponent.tsx`, `learn-projects/tamagui/code/core/web/src/helpers/getSplitStyles.tsx` — see **ScrollView + flex** section above
