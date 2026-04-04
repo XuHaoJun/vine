@@ -62,6 +62,7 @@ export function useMessages(chatId: string) {
     isLoading,
     myMembership,
     otherMember,
+    members: members ?? [],
     sendMessage,
     markRead,
   }
