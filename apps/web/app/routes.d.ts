@@ -17,10 +17,14 @@ declare module 'one' {
         | `/(app)/home`
         | `/(app)/home/(tabs)`
         | `/(app)/home/(tabs)/main`
+        | `/(app)/home/(tabs)/main/`
+        | `/(app)/home/(tabs)/main/settings`
         | `/(app)/home/(tabs)/talks`
         | `/(app)/home/(tabs)/talks/`
         | `/(app)/home/(tabs)/talks/requests`
         | `/(app)/home/main`
+        | `/(app)/home/main/`
+        | `/(app)/home/main/settings`
         | `/(app)/home/talks`
         | `/(app)/home/talks/`
         | `/(app)/home/talks/requests`
@@ -34,10 +38,14 @@ declare module 'one' {
         | `/home`
         | `/home/(tabs)`
         | `/home/(tabs)/main`
+        | `/home/(tabs)/main/`
+        | `/home/(tabs)/main/settings`
         | `/home/(tabs)/talks`
         | `/home/(tabs)/talks/`
         | `/home/(tabs)/talks/requests`
         | `/home/main`
+        | `/home/main/`
+        | `/home/main/settings`
         | `/home/talks`
         | `/home/talks/`
         | `/home/talks/requests`
