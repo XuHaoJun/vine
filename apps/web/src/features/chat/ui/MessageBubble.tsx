@@ -35,7 +35,7 @@ export const MessageBubble = memo(
                 maxW="100%"
                 style={{ borderRadius: 18, borderBottomRightRadius: 4 }}
               >
-                <SizableText fontSize={15} color="$gray9" lineHeight={22}>
+                <SizableText fontSize={15} color="#000" lineHeight={22}>
                   {text}
                 </SizableText>
               </YStack>
