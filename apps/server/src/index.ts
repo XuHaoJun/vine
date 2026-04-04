@@ -6,9 +6,10 @@ import { getDatabase } from '@vine/db/database'
 import { createDb } from '@vine/db'
 import { ensureSeed } from '@vine/db/seed'
 
-import { greeterRoutes } from './connect/routes'
+import { connectRoutes } from './connect/routes'
 import { createAuthServer, authPlugin } from './plugins/auth'
 import { createZeroService, zeroPlugin } from './plugins/zero'
+import { createOAService } from './services/oa'
 
 const app = Fastify({ logger: true })
 
@@ -19,14 +20,16 @@ await app.register(cors, {
 
 await app.register(formbody)
 
-// ConnectRPC routes (GreeterService, etc.)
-await app.register(fastifyConnectPlugin, {
-  routes: greeterRoutes,
-})
-
 // Wire services with explicit dependencies
 const database = getDatabase()
 const db = createDb()
+
+const oa = createOAService({ db, database })
+
+// ConnectRPC routes (GreeterService, OAService, etc.)
+await app.register(fastifyConnectPlugin, {
+  routes: connectRoutes({ oa }),
+})
 
 // Seed test data (only in dev with VITE_DEMO_MODE=1)
 await ensureSeed(database, db)
