@@ -14,6 +14,7 @@
     "check:all": "tko check --all",
     "dev": "turbo dev",
     "build": "turbo build",
+    "clean": "turbo clean",
     "test": "turbo test",
     "lint": "turbo lint",
     "format": "oxfmt",
