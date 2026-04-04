@@ -34,7 +34,7 @@ export const MessageBubble = memo(({ text, isMine, createdAt, senderName, sender
               maxW="100%"
               style={{ borderRadius: 18, borderBottomRightRadius: 4 }}
             >
-              <SizableText fontSize={15} color="$gray9">
+              <SizableText fontSize={15} color="$gray9" lineHeight={22}>
                 {text}
               </SizableText>
             </YStack>
@@ -74,7 +74,7 @@ export const MessageBubble = memo(({ text, isMine, createdAt, senderName, sender
             maxW="100%"
             style={{ borderRadius: 18, borderTopLeftRadius: 4 }}
           >
-            <SizableText fontSize={15} color="$gray8">
+            <SizableText fontSize={15} color="$gray8" lineHeight={22}>
               {text}
             </SizableText>
           </YStack>
