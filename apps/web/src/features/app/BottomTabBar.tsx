@@ -3,15 +3,21 @@ import { memo } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SizableText, XStack, YStack } from 'tamagui'
 
+import { ChatCircleIcon } from '~/interface/icons/phosphor/ChatCircleIcon'
+import { HouseIcon } from '~/interface/icons/phosphor/HouseIcon'
+
+import type { IconProps } from '~/interface/icons/types'
+
 type TabRoute = {
   name: string
   label: string
   path: string
+  icon: React.FC<IconProps>
 }
 
 const routes: TabRoute[] = [
-  { name: 'main', label: '主頁', path: '/home/main' },
-  { name: 'talks', label: '聊天', path: '/home/talks' },
+  { name: 'main', label: '主頁', path: '/home/main', icon: HouseIcon },
+  { name: 'talks', label: '聊天', path: '/home/talks', icon: ChatCircleIcon },
 ]
 
 /** `/home/talks/:chatId` — full-screen chat; tab bar would stack under MessageInput */
@@ -53,9 +59,11 @@ export const BottomTabBar = memo(() => {
               py="$3"
               justify="center"
               items="center"
+              gap="$1.5"
               cursor="pointer"
               onPress={() => router.push(route.path as any)}
             >
+              <route.icon size={20} color={isActive ? '$color12' : '$color10'} />
               <SizableText
                 size="$4"
                 fontWeight={isActive ? '700' : '400'}

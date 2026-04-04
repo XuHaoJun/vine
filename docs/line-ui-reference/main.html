@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Line App Clone</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<style data-purpose="base-styles">
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background-color: #ffffff;
+      color: #000000;
+    }
+    /* Hide scrollbar for horizontal scroll areas */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-white flex flex-col h-screen overflow-hidden">
+<!-- BEGIN: Top Action Bar -->
+<header class="flex justify-end items-center px-4 py-3 space-x-5" data-purpose="top-action-bar">
+<button aria-label="Bookmarks" class="text-gray-800 focus:outline-none">
+<i class="fa-regular fa-bookmark text-xl"></i>
+</button>
+<button aria-label="Notifications" class="text-gray-800 focus:outline-none">
+<i class="fa-regular fa-bell text-xl"></i>
+</button>
+<button aria-label="Add Friend" class="text-gray-800 focus:outline-none">
+<i class="fa-solid fa-user-plus text-xl"></i>
+</button>
+<button aria-label="Settings" class="text-gray-800 focus:outline-none">
+<i class="fa-solid fa-gear text-xl"></i>
+</button>
+</header>
+<!-- END: Top Action Bar -->
+<!-- Main Scrollable Content -->
+<main class="flex-1 overflow-y-auto pb-20 no-scrollbar" data-purpose="main-content">
+<!-- BEGIN: User Profile Section -->
+<section class="px-4 py-2 flex items-center" data-purpose="user-profile">
+<!-- Avatar Placeholder -->
+<div class="w-16 h-16 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center overflow-hidden">
+<i class="fa-solid fa-user text-gray-400 text-3xl"></i>
+</div>
+<div class="ml-4 flex-1">
+<h1 class="text-xl font-bold text-gray-900">Alex Chen</h1>
+<p class="text-sm text-gray-500 mt-1">Add a status message</p>
+</div>
+</section>
+<!-- END: User Profile Section -->
+<!-- BEGIN: Search Bar -->
+<section class="px-4 py-3" data-purpose="search-bar">
+<div class="relative bg-gray-100 rounded-lg flex items-center px-3 py-2">
+<i class="fa-solid fa-magnifying-glass text-gray-400 mr-2"></i>
+<input class="bg-transparent border-none w-full text-base focus:ring-0 p-0 text-gray-800 placeholder-gray-400" placeholder="Search" type="text"/>
+<button aria-label="Scan QR Code" class="ml-2 text-gray-400 focus:outline-none">
+<i class="fa-solid fa-expand"></i>
+</button>
+</div>
+</section>
+<!-- END: Search Bar -->
+<!-- BEGIN: Friends & Groups Section -->
+<section class="px-4 py-4" data-purpose="friends-groups-list"><h2 class="text-[17px] font-bold text-black mb-2">Friends &amp; Groups</h2>
+<!-- Friends List Item -->
+<div class="flex items-center justify-between py-2">
+<div class="flex items-center flex-1">
+<!-- Multi-avatar Placeholder -->
+<div class="w-12 h-12 rounded-full bg-gray-200 overflow-hidden relative flex-shrink-0">
+<img alt="Friends" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDD_F3bN32Dhnffx49m0cQV_acL8Q4zKO-fxOudN2YHZFkmfNNyiSvKSlB5CTAQElyV6L_Dlo4aOB37FWxlrnBWZaUZWqQ28dCkkqiFQXkkBL3dcA_PCACPfKQwfGri36ZI5sM3iI1-wAysRj-SlR0OCzXx1GHWY-PiVtCO3KZh3ttHBTvYVNaTHp8eMjr0uQfaQIk4zYP--o_VEVCa_v30SzMpZ2teSBWSdqWkf9HpAWayUjxu33vOfAHFwFqFufZ9k1FPFmBWgQ"/>
+</div>
+<div class="ml-3">
+<h3 class="text-[17px] font-normal text-black">Friends</h3>
+<p class="text-[14px] text-gray-500 truncate w-56">Celine, Mark, Sarah, Dave...</p>
+</div>
+</div>
+<div class="flex items-center text-gray-400">
+<span class="text-[15px] mr-1">86</span>
+<i class="fa-solid fa-chevron-right text-sm"></i>
+</div>
+</div>
+<!-- Groups List Item -->
+<div class="flex items-center justify-between py-2">
+<div class="flex items-center flex-1">
+<!-- Multi-avatar Placeholder -->
+<div class="w-12 h-12 rounded-full bg-gray-200 overflow-hidden relative flex-shrink-0">
+<img alt="Groups" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNcF8-A3Qbo_402-FwRzhMXYgh8vY44_0c3B3lcmcJjWU_JmbFiWpVVsozJX-Hn_mQly6R7S-BoYC3p9dzidy_qd-sknNkPFAsuY-YZRbtFnkgzVFsV7WppU6aAroxC_KuVyVtLbAizqWhIospQUdRar4qSLSvS2oNPHW5mk9u4lL7E2gkHcNpfc3gBhDeCUxmhMeG4XyerO9zaf6XYjInQA_eDh15lAf5BS5Ro9xM_wYX2y17YG9E9SKVpvwuty1-U8flm2W1sA"/>
+</div>
+<div class="ml-3">
+<h3 class="text-[17px] font-normal text-black">Groups</h3>
+<p class="text-[14px] text-gray-500 truncate w-56">Project Team, Family Chat...</p>
+</div>
+</div>
+<div class="flex items-center text-gray-400">
+<span class="text-[15px] mr-1">29</span>
+<i class="fa-solid fa-chevron-right text-sm"></i>
+</div>
+</div></section>
+<!-- END: Friends & Groups Section -->
+<!-- BEGIN: Services Section -->
+<section class="px-4 py-2" data-purpose="services-grid">
+<h2 class="text-lg font-bold text-gray-900 mb-4">Services</h2>
+<div class="flex overflow-x-auto no-scrollbar justify-between pb-2 space-x-4 min-w-full pr-4">
+<!-- Service Item: Stickers -->
+<div class="flex flex-col items-center flex-shrink-0 w-16">
+<div class="w-10 h-10 flex items-center justify-center text-gray-800 mb-1">
+<i class="fa-regular fa-face-smile text-2xl"></i>
+</div>
+<span class="text-xs text-gray-800 text-center">Stickers</span>
+</div>
+<!-- Service Item: Themes -->
+<div class="flex flex-col items-center flex-shrink-0 w-16">
+<div class="w-10 h-10 flex items-center justify-center text-gray-800 mb-1">
+<i class="fa-solid fa-paint-roller text-2xl"></i>
+</div>
+<span class="text-xs text-gray-800 text-center">Themes</span>
+</div>
+<!-- Service Item: LINE GO -->
+<div class="flex flex-col items-center flex-shrink-0 w-16">
+<div class="w-10 h-10 flex items-center justify-center text-gray-800 mb-1">
+<i class="fa-solid fa-car text-2xl"></i>
+</div>
+<span class="text-xs text-gray-800 text-center">LINE GO</span>
+</div>
+<!-- Service Item: LINE TV -->
+<div class="flex flex-col items-center flex-shrink-0 w-16">
+<div class="w-10 h-10 flex items-center justify-center text-gray-800 mb-1">
+<i class="fa-solid fa-play text-2xl"></i>
+</div>
+<span class="text-xs text-gray-800 text-center">LINE TV</span>
+</div>
+<!-- Service Item: Ringtones -->
+<div class="flex flex-col items-center flex-shrink-0 w-16">
+<div class="w-10 h-10 flex items-center justify-center text-gray-800 mb-1">
+<i class="fa-solid fa-music text-2xl"></i>
+</div>
+<span class="text-xs text-gray-800 text-center">Ringtones</span>
+</div>
+<!-- Service Item: LINE GAME -->
+<div class="flex flex-col items-center flex-shrink-0 w-16">
+<div class="w-10 h-10 flex items-center justify-center text-gray-800 mb-1">
+<i class="fa-solid fa-gamepad text-2xl"></i>
+</div>
+<span class="text-xs text-gray-800 text-center">LINE GAME</span>
+</div>
+</div>
+</section>
+<!-- END: Services Section -->
+<!-- BEGIN: Promotional Banner Section -->
+<section class="px-4 py-4" data-purpose="promotional-banner">
+<div class="rounded-xl overflow-hidden relative shadow-sm">
+<!-- Main Banner Image Placeholder -->
+<div class="w-full h-48 bg-blue-900 relative">
+<!-- Text Content -->
+<div class="absolute top-4 left-4 z-10 w-2/3">
+<h3 class="text-white font-bold text-2xl leading-tight mb-1">DISCOVER<br/>NEW COMICS</h3>
+<p class="text-white text-xs opacity-80 leading-snug">Discover the with<br/>men:tinncors and new comics.</p>
+</div>
+<!-- Banner Image Cover -->
+<img alt="Discover New Comics" class="w-full h-full object-cover absolute top-0 left-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRpIkCdmruU4pOZQ52BTZEem2A1GhNfrFDadOeclhx_d4dsNJOGWkmJGQ7zY0TPi_JUrdyfn5fVeBkO85oYuK-RHeUmdW7HqnA8k-ShR5Ao5_4czEbnUQl_cjqrrseBV2KMqhZeq_hn18a3Fe9J0bk7Mt9frTfCxnbPcSLdt7r5MCtaLzX28YN2DzhNOGRwWeN6LJ678dBIR3cngUwZCPimAQlZ36Tjdtl_HF8PtemsQttujZPqFOlnAHhOmVPNFkvO4_RZ7K30g"/>
+</div>
+<!-- Bottom Banner Part -->
+<div class="w-full h-24 bg-blue-800 flex relative">
+<div class="w-1/2 bg-blue-800 p-4 flex items-center">
+<h4 class="text-white font-bold text-lg leading-tight">FEATURED<br/>SERIES</h4>
+</div>
+<div class="w-1/2 bg-yellow-400 relative">
+<!-- Featured Series Thumbnails Placeholder -->
+<div class="absolute bottom-0 right-0 w-full h-full flex justify-end items-end p-2 space-x-2">
+<img alt="Comic 1" class="w-16 h-20 object-cover rounded shadow-md" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAw2MndkKdljQEGKlL0q_uuRgTAtkjkmWeaVEu8iFrjk8LaiZYHUArQyQUoEK8i-bFD8_uBuFC75DBmq7ZBQRU8nB3Ai7qqEyi6v1vXcHgzhbZewzQVHI9ZaOQIXmLhc9g3SxX5yO_aXevV7xCuOQ08BYeufy3w2cfijalWNQrBqx2gu9kAUZ3XiVR2pPVJ_uBsLT71baRb6yZSHolaloyCLA031tdSgy6qxdfamVEtbEB1bGhWje3J3aF-ZG36mHtdb3wd78_DbQ"/>
+<img alt="Comic 2" class="w-16 h-20 object-cover rounded shadow-md" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0O94QGtCCZ6ddouO6FTx0snMYjRZzYbiIjd9BgWX7hMhZtxFYyJ_qmVoeWpKyD7ELPIUXob1DO7KUFuurYMFl07UEvwPH4wtY1BpgFuP3sUFWMSre4XxMPkADnEQfW5hG7MnO8F6XpXMpXs-YS5Y9g9G3M9nAYOosy5WItEkevLVZy8BHaQTBdkzmv-ZDyZ2RON8PgMJkTRwH5oD4GgpuS40G-AT-ROMkzHKsuXcSGNyMUuvAd2gTRXZ2oMUbJvgM20hUtP3Asw"/>
+<img alt="Comic 3" class="w-12 h-16 object-cover rounded shadow-md hidden sm:block" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAaJHdCRrCscUvUQxAJY6poHiqm1GraaHojz72mNYuFhwpoOTgpR9QdxxwCEbXvqw45mAs7H-rtn5QW1vkBE9BMjTSB_tXFd7l8IAqGl0xrVSNhYWii5XFq_0Hh8NLIspO5XHl4rsN-FCCBIl91dyEH_FwPL0HS-MnOAGhbjlfTvnDLoJMruz1icRef0U9vCLDklYB2aCZu-1hFqMTI2X5eydb6g8BmJlwTCoJ57LCws5Nb4Qg-_Ng3uvyIspGsxMlg8_yLy38iBQ"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Promotional Banner Section -->
+</main>
+<!-- BEGIN: Bottom Navigation Bar -->
+<footer class="bg-white border-t border-gray-200 flex justify-between items-center px-6 py-2 fixed bottom-0 w-full z-50 pb-safe" data-purpose="bottom-navigation">
+<button class="flex flex-col items-center text-black focus:outline-none w-16">
+<i class="fa-solid fa-house text-xl mb-1"></i>
+<span class="text-[10px] font-medium">Home</span>
+</button>
+<button class="flex flex-col items-center text-gray-400 focus:outline-none w-16">
+<i class="fa-regular fa-comment text-xl mb-1"></i>
+<span class="text-[10px] font-medium">Chats</span>
+</button>
+<button class="flex flex-col items-center text-gray-400 focus:outline-none w-16">
+<i class="fa-regular fa-compass text-xl mb-1"></i>
+<span class="text-[10px] font-medium">Explore</span>
+</button>
+<button class="flex flex-col items-center text-gray-400 focus:outline-none w-16">
+<i class="fa-regular fa-newspaper text-xl mb-1"></i>
+<span class="text-[10px] font-medium">News</span>
+</button>
+<button class="flex flex-col items-center text-gray-400 focus:outline-none w-16">
+<i class="fa-solid fa-wallet text-xl mb-1"></i>
+<span class="text-[10px] font-medium">Wallet</span>
+</button>
+</footer>
+<!-- END: Bottom Navigation Bar -->
+<style>
+    /* Safe area padding for newer iPhones */
+    .pb-safe {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  </style>
+</body></html>
