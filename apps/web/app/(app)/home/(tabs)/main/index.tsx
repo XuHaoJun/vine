@@ -66,7 +66,11 @@ export const MainPage = memo(() => {
         <TopBarButton icon={BookmarkIcon} label="Bookmarks" />
         <TopBarButton icon={BellIcon} label="Notifications" />
         <TopBarButton icon={UserPlusIcon} label="Add Friend" />
-        <TopBarButton icon={GearIcon} label="Settings" />
+        <TopBarButton
+          icon={GearIcon}
+          label="Settings"
+          onPress={() => router.push('/home/main/settings' as any)}
+        />
       </XStack>
 
       <ScrollView pb={insets.bottom}>
@@ -119,11 +123,7 @@ export const MainPage = memo(() => {
           </SizableText>
 
           {/* Friends */}
-          <ListItem
-            py="$2"
-            cursor="pointer"
-            onPress={() => router.push('/home/talks')}
-          >
+          <ListItem py="$2" cursor="pointer" onPress={() => router.push('/home/talks')}>
             <XStack flex={1} items="center">
               <YStack
                 width={48}
@@ -275,12 +275,13 @@ export const MainPage = memo(() => {
 type TopBarButtonProps = {
   icon: React.FC<IconProps>
   label: string
+  onPress?: () => void
 }
 
-const TopBarButton = memo(({ icon: Icon, label }: TopBarButtonProps) => {
+const TopBarButton = memo(({ icon: Icon, label, onPress }: TopBarButtonProps) => {
   return (
     <YStack
-      onPress={() => showToast(`${label} coming soon`, { type: 'info' })}
+      onPress={onPress ?? (() => showToast(`${label} coming soon`, { type: 'info' }))}
       cursor="pointer"
     >
       <Icon size={24} />
