@@ -71,6 +71,7 @@ export const chatMember = pgTable(
     lastReadMessageId: text('lastReadMessageId'),
     lastReadAt: timestamp('lastReadAt', { mode: 'string' }),
     joinedAt: timestamp('joinedAt', { mode: 'string' }).defaultNow().notNull(),
+    oaId: text('oaId'),
   },
   (table) => [
     index('chatMember_chatId_idx').on(table.chatId),
@@ -101,6 +102,7 @@ export const message = pgTable(
     metadata: text('metadata'),
     replyToMessageId: text('replyToMessageId'),
     createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    oaId: text('oaId'),
   },
   (table) => [index('message_chatId_createdAt_idx').on(table.chatId, table.createdAt)],
 )

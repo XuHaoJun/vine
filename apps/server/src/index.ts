@@ -9,6 +9,8 @@ import { ensureSeed } from '@vine/db/seed'
 import { connectRoutes } from './connect/routes'
 import { createAuthServer, authPlugin } from './plugins/auth'
 import { createZeroService, zeroPlugin } from './plugins/zero'
+import { oaMessagingPlugin } from './plugins/oa-messaging'
+import { oaWebhookPlugin } from './plugins/oa-webhook'
 import { createOAService } from './services/oa'
 
 const app = Fastify({ logger: true })
@@ -43,6 +45,8 @@ const zero = createZeroService({
 // Register plugins with injected dependencies
 await authPlugin(app, { auth, db })
 await zeroPlugin(app, { auth, zero })
+await oaMessagingPlugin(app, { oa, db })
+await oaWebhookPlugin(app, { oa, db })
 
 app.get('/healthz', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))
 

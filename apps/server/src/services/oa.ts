@@ -95,6 +95,15 @@ export function createOAService(deps: OADeps) {
     return account ?? null
   }
 
+  async function getOfficialAccountByOaId(oaId: string) {
+    const [account] = await db
+      .select()
+      .from(officialAccount)
+      .where(eq(officialAccount.oaId, oaId))
+      .limit(1)
+    return account ?? null
+  }
+
   async function updateOfficialAccount(
     id: string,
     input: { name?: string; description?: string; imageUrl?: string; status?: string },
@@ -340,6 +349,7 @@ export function createOAService(deps: OADeps) {
     listProviderAccounts,
     createOfficialAccount,
     getOfficialAccount,
+    getOfficialAccountByOaId,
     updateOfficialAccount,
     deleteOfficialAccount,
     setWebhook,
