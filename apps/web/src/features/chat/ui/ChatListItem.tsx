@@ -38,9 +38,7 @@ export const ChatListItem = memo(
     return (
       <ListItem
         gap="$3"
-        icon={
-          <Avatar size={44} image={image ?? null} name={name} />
-        }
+        icon={<Avatar size={44} image={image ?? null} name={name} />}
         onPress={onPress}
       >
         <YStack flex={1} gap="$1">
