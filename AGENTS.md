@@ -1,5 +1,7 @@
 # Vine Agents Guide
 
+Vine is LINE(a Instant Messaging) clone
+
 ## Essential Commands
 
 ```bash
@@ -9,6 +11,7 @@ bun run build                  # Build all packages (turbo build)
 bun run check:all              # Type check + lint (tko check)
 bun run format                 # Format all files (oxfmt)
 bun run test                   # Run all tests (turbo test)
+bun run backend -d             # Build migrate js and then docker compose up -d db, zero and exec migrate job
 ```
 
 ### Running Single Tests
