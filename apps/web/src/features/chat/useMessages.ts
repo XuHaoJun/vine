@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import { chatMembersByChatId } from '@vine/zero-schema/queries/chat'
 import { messagesByChatId } from '@vine/zero-schema/queries/message'
@@ -47,15 +47,18 @@ export function useMessages(chatId: string) {
     })
   }
 
-  const markRead = (latestMessageId: string) => {
-    if (!myMembership) return
-    // Only update if this message is newer than the last read
-    zero.mutate.chatMember.markRead({
-      id: myMembership.id,
-      lastReadMessageId: latestMessageId,
-      lastReadAt: Date.now(),
-    })
-  }
+  const markRead = useCallback(
+    (latestMessageId: string) => {
+      if (!myMembership) return
+      if (myMembership.lastReadMessageId === latestMessageId) return
+      zero.mutate.chatMember.markRead({
+        id: myMembership.id,
+        lastReadMessageId: latestMessageId,
+        lastReadAt: Date.now(),
+      })
+    },
+    [myMembership],
+  )
 
   return {
     messages: messages ?? [],
