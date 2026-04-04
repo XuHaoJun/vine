@@ -12,7 +12,6 @@ export function AppLayout() {
         // We need Stack here for transition animation to work on native
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="settings" />
         </Stack>
       )}
     </>
