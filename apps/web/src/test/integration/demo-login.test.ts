@@ -28,16 +28,16 @@ test('demo login flow completes successfully', async ({ page }) => {
   })
 })
 
-test('authenticated user can access settings', async ({ page }) => {
+test('authenticated user can access main', async ({ page }) => {
   test.setTimeout(45000)
 
-  // login and navigate to settings
-  await loginAsDemo(page, '/home/settings')
+  // login and navigate to main
+  await loginAsDemo(page, '/home/main')
 
-  // verify we're on settings page
-  expect(page.url()).toContain('/home/settings')
+  // verify we're on main page
+  expect(page.url()).toContain('/home/main')
 
-  // verify settings content is visible
+  // verify main content is visible
   await expect(page.locator('[data-testid="app-container"]')).toBeAttached({
     timeout: 10000,
   })
