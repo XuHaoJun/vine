@@ -144,9 +144,10 @@ export function oaHandler(deps: OAHandlerDeps) {
         const webhook = await deps.oa.setWebhook(req.oaId, req.url)
         return { webhook: toProtoWebhook(webhook) }
       },
-      async verifyWebhook(_req) {
-        // TODO: implemented in Task 10
-        return { status: 0 as any }
+      async verifyWebhook(req) {
+        const result = await deps.oa.verifyWebhook(req.oaId)
+        const statusMap: Record<string, number> = { pending: 1, verified: 2, failed: 3, no_webhook: 0, oa_not_found: 0 }
+        return { status: statusMap[result.status] ?? 0 }
       },
       async getWebhook(req) {
         const webhook = await deps.oa.getWebhook(req.oaId)
@@ -185,9 +186,12 @@ export function oaHandler(deps: OAHandlerDeps) {
         const result = await deps.oa.revokeAllAccessTokens(req.oaId, req.keyId)
         return { revokedCount: result.revoked_count }
       },
-      async searchOfficialAccounts(_req) {
-        // TODO: implemented in Task 10
-        return { accounts: [] }
+      async searchOfficialAccounts(req) {
+        const accounts = await deps.oa.searchOAs(req.query)
+        return { accounts: accounts.map((a) => ({
+          id: a.id, name: a.name, oaId: a.oaId,
+          description: a.description ?? '', imageUrl: a.imageUrl ?? '',
+        }))}
       },
     })
   }

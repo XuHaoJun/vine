@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { eq, ilike, or } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { Pool } from 'pg'
 import type { schema } from '@vine/db'
@@ -272,6 +272,66 @@ export function createOAService(deps: OADeps) {
     }
   }
 
+  async function searchOAs(query: string) {
+    const searchPattern = `%${query}%`
+    return db
+      .select({
+        id: officialAccount.id,
+        name: officialAccount.name,
+        oaId: officialAccount.oaId,
+        description: officialAccount.description,
+        imageUrl: officialAccount.imageUrl,
+      })
+      .from(officialAccount)
+      .where(
+        or(
+          ilike(officialAccount.name, searchPattern),
+          ilike(officialAccount.oaId, searchPattern),
+        ),
+      )
+      .limit(20)
+  }
+
+  async function verifyWebhook(oaId: string) {
+    const webhook = await getWebhook(oaId)
+    if (!webhook) return { success: false, status: 'no_webhook' as const }
+
+    const account = await getOfficialAccount(oaId)
+    if (!account) return { success: false, status: 'oa_not_found' as const }
+
+    try {
+      const response = await fetch(webhook.url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'x-line-signature': generateWebhookSignature('[]', account.channelSecret),
+        },
+        body: JSON.stringify({ destination: oaId, events: [] }),
+        signal: AbortSignal.timeout(10000),
+      })
+
+      if (response.ok) {
+        await db
+          .update(oaWebhook)
+          .set({ status: 'verified', lastVerifiedAt: new Date().toISOString() })
+          .where(eq(oaWebhook.oaId, oaId))
+        return { success: true, status: 'verified' as const }
+      }
+
+      await db
+        .update(oaWebhook)
+        .set({ status: 'failed' })
+        .where(eq(oaWebhook.oaId, oaId))
+      return { success: false, status: 'failed' as const }
+    } catch {
+      await db
+        .update(oaWebhook)
+        .set({ status: 'failed' })
+        .where(eq(oaWebhook.oaId, oaId))
+      return { success: false, status: 'failed' as const }
+    }
+  }
+
   return {
     createProvider,
     getProvider,
@@ -293,6 +353,8 @@ export function createOAService(deps: OADeps) {
     buildMessageEvent,
     buildFollowEvent,
     buildUnfollowEvent,
+    searchOAs,
+    verifyWebhook,
   }
 }
 

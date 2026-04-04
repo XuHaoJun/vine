@@ -378,3 +378,62 @@ describe('createOAService — Webhook Dispatch', () => {
     expect('replyToken' in payload.events[0]).toBe(false)
   })
 })
+
+describe('createOAService — Search', () => {
+  it('searches OAs by oaId or name', async () => {
+    const mockDb = createMockDb()
+    mockDb.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue([
+            { id: 'oa-1', name: 'Test Bot', oaId: '@testbot', description: 'A test bot', imageUrl: '' },
+          ]),
+        }),
+      }),
+    })
+
+    const oa = createOAService({ db: mockDb as any, database: {} as any })
+    const result = await oa.searchOAs('test')
+
+    expect(result).toHaveLength(1)
+    expect(result[0].name).toBe('Test Bot')
+  })
+})
+
+describe('createOAService — VerifyWebhook', () => {
+  it('returns no_webhook when webhook does not exist', async () => {
+    const mockDb = createMockDb()
+    mockDb.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([]) }),
+      }),
+    })
+
+    const oa = createOAService({ db: mockDb as any, database: {} as any })
+    const result = await oa.verifyWebhook('oa-1')
+
+    expect(result.success).toBe(false)
+    expect(result.status).toBe('no_webhook')
+  })
+
+  it('returns oa_not_found when account does not exist', async () => {
+    const mockDb = createMockDb()
+    mockDb.select
+      .mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([{ id: 'webhook-1', url: 'https://example.com' }]) }),
+        }),
+      })
+      .mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([]) }),
+        }),
+      })
+
+    const oa = createOAService({ db: mockDb as any, database: {} as any })
+    const result = await oa.verifyWebhook('oa-1')
+
+    expect(result.success).toBe(false)
+    expect(result.status).toBe('oa_not_found')
+  })
+})
