@@ -1,9 +1,10 @@
 import { useLocalSearchParams, createRoute } from 'one'
-import { memo, useEffect, useRef } from 'react'
+import { memo, useEffect, useMemo, useRef } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
 
 import { useMessages } from '~/features/chat/useMessages'
+import { DateSeparator } from '~/features/chat/ui/DateSeparator'
 import { MessageBubble } from '~/features/chat/ui/MessageBubble'
 import { MessageInput } from '~/features/chat/ui/MessageInput'
 import { useAuth } from '~/features/auth/client/authClient'
@@ -20,7 +21,16 @@ export const ChatRoomPage = memo(() => {
   const insets = useSafeAreaInsets()
   const scrollRef = useRef<ScrollView>(null)
 
-  const { messages, isLoading, otherMember, sendMessage, markRead } = useMessages(chatId!)
+  const { messages, isLoading, members, otherMember, sendMessage, markRead } = useMessages(chatId!)
+
+  // Build a lookup map: userId → { name, index } for sender display
+  const memberMap = useMemo(() => {
+    const map: Record<string, { name: string; index: number }> = {}
+    members.forEach((m, i) => {
+      map[m.userId] = { name: (m as any).user?.name ?? '?', index: i }
+    })
+    return map
+  }, [members])
 
   useEffect(() => {
     if (messages?.length) {
@@ -47,7 +57,8 @@ export const ChatRoomPage = memo(() => {
   }
 
   return (
-    <YStack flex={1} bg="$background">
+    <YStack flex={1} style={{ backgroundColor: '#84A1C4' }}>
+      {/* Header — unchanged */}
       <XStack
         px="$3"
         py="$2"
@@ -66,17 +77,18 @@ export const ChatRoomPage = memo(() => {
       <ScrollView ref={scrollRef} pb={insets.bottom}>
         {isLoading ? (
           <YStack p="$6" items="center">
-            <SizableText color="$color9">載入中...</SizableText>
+            <SizableText color="rgba(255,255,255,0.7)">載入中...</SizableText>
           </YStack>
         ) : messages?.length === 0 ? (
           <YStack p="$6" items="center">
-            <H3 color="$color9">還沒有訊息，傳送第一則吧！</H3>
+            <H3 color="rgba(255,255,255,0.7)">還沒有訊息，傳送第一則吧！</H3>
           </YStack>
         ) : (
-          <YStack>
+          <YStack py="$2">
+            <DateSeparator label="今天" />
             {messages?.map((msg) => {
               const isMine = msg.senderId === userId
-              const isRead = isMine && otherMember?.lastReadMessageId === msg.id
+              const senderInfo = memberMap[msg.senderId]
 
               return (
                 <MessageBubble
@@ -84,7 +96,8 @@ export const ChatRoomPage = memo(() => {
                   text={msg.text ?? ''}
                   isMine={isMine}
                   createdAt={msg.createdAt}
-                  isRead={isRead}
+                  senderName={isMine ? undefined : senderInfo?.name}
+                  senderIndex={isMine ? undefined : senderInfo?.index}
                 />
               )
             })}
