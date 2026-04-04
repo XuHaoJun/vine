@@ -2,6 +2,27 @@ syntax = "proto3";
 
 package oa.v1;
 
+// ── Enums ──
+
+enum OAStatus {
+  OA_STATUS_UNSPECIFIED = 0;
+  OA_STATUS_ACTIVE = 1;
+  OA_STATUS_DISABLED = 2;
+}
+
+enum WebhookStatus {
+  WEBHOOK_STATUS_UNSPECIFIED = 0;
+  WEBHOOK_STATUS_PENDING = 1;
+  WEBHOOK_STATUS_VERIFIED = 2;
+  WEBHOOK_STATUS_FAILED = 3;
+}
+
+enum AccessTokenType {
+  ACCESS_TOKEN_TYPE_UNSPECIFIED = 0;
+  ACCESS_TOKEN_TYPE_SHORT_LIVED = 1;
+  ACCESS_TOKEN_TYPE_JWT_V21 = 2;
+}
+
 // ── Provider ──
 
 message Provider {
@@ -60,10 +81,13 @@ message OfficialAccount {
   string oa_id = 4;
   string description = 5;
   string image_url = 6;
-  string channel_secret = 7;
-  string status = 8;
-  string created_at = 9;
-  string updated_at = 10;
+  OAStatus status = 7;
+  string created_at = 8;
+  string updated_at = 9;
+}
+
+message OfficialAccountSecret {
+  string channel_secret = 1;
 }
 
 message CreateOfficialAccountRequest {
@@ -86,12 +110,20 @@ message GetOfficialAccountResponse {
   OfficialAccount account = 1;
 }
 
+message GetOfficialAccountSecretRequest {
+  string id = 1;
+}
+
+message GetOfficialAccountSecretResponse {
+  OfficialAccountSecret secret = 1;
+}
+
 message UpdateOfficialAccountRequest {
   string id = 1;
   optional string name = 2;
   optional string description = 3;
   optional string image_url = 4;
-  optional string status = 5;
+  optional OAStatus status = 5;
 }
 
 message UpdateOfficialAccountResponse {
@@ -110,7 +142,7 @@ message Webhook {
   string id = 1;
   string oa_id = 2;
   string url = 3;
-  string status = 4;
+  WebhookStatus status = 4;
   optional string last_verified_at = 5;
   string created_at = 6;
 }
@@ -129,8 +161,7 @@ message VerifyWebhookRequest {
 }
 
 message VerifyWebhookResponse {
-  bool success = 1;
-  string status = 2;
+  WebhookStatus status = 1;
 }
 
 message GetWebhookRequest {
@@ -147,7 +178,7 @@ message AccessToken {
   string id = 1;
   string oa_id = 2;
   string token = 3;
-  string type = 4;
+  AccessTokenType type = 4;
   optional string key_id = 5;
   optional string expires_at = 6;
   string created_at = 7;
@@ -164,7 +195,7 @@ message ListAccessTokensResponse {
 
 message AccessTokenSummary {
   string id = 1;
-  string type = 2;
+  AccessTokenType type = 2;
   optional string key_id = 3;
   optional string expires_at = 4;
   string created_at = 5;
@@ -172,7 +203,7 @@ message AccessTokenSummary {
 
 message IssueAccessTokenRequest {
   string oa_id = 1;
-  string type = 2;
+  AccessTokenType type = 2;
   optional string public_key = 3;
 }
 
@@ -226,6 +257,7 @@ service OAService {
   rpc ListProviderAccounts(ListProviderAccountsRequest) returns (ListProviderAccountsResponse);
   rpc CreateOfficialAccount(CreateOfficialAccountRequest) returns (CreateOfficialAccountResponse);
   rpc GetOfficialAccount(GetOfficialAccountRequest) returns (GetOfficialAccountResponse);
+  rpc GetOfficialAccountSecret(GetOfficialAccountSecretRequest) returns (GetOfficialAccountSecretResponse);
   rpc UpdateOfficialAccount(UpdateOfficialAccountRequest) returns (UpdateOfficialAccountResponse);
   rpc DeleteOfficialAccount(DeleteOfficialAccountRequest) returns (DeleteOfficialAccountResponse);
   rpc SetWebhook(SetWebhookRequest) returns (SetWebhookResponse);

@@ -2,8 +2,18 @@
 // @generated from file oa/v1/oa.proto (package oa.v1, syntax proto3)
 /* eslint-disable */
 
-import type { GenFile, GenMessage, GenService } from '@bufbuild/protobuf/codegenv2'
-import { fileDesc, messageDesc, serviceDesc } from '@bufbuild/protobuf/codegenv2'
+import type {
+  GenEnum,
+  GenFile,
+  GenMessage,
+  GenService,
+} from '@bufbuild/protobuf/codegenv2'
+import {
+  enumDesc,
+  fileDesc,
+  messageDesc,
+  serviceDesc,
+} from '@bufbuild/protobuf/codegenv2'
 import type { Message } from '@bufbuild/protobuf'
 
 /**
@@ -12,7 +22,7 @@ import type { Message } from '@bufbuild/protobuf'
 export const file_oa_v1_oa: GenFile =
   /*@__PURE__*/
   fileDesc(
-    'Cg5vYS92MS9vYS5wcm90bxIFb2EudjEiXgoIUHJvdmlkZXISCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIQCghvd25lcl9pZBgDIAEoCRISCgpjcmVhdGVkX2F0GAQgASgJEhIKCnVwZGF0ZWRfYXQYBSABKAkiJQoVQ3JlYXRlUHJvdmlkZXJSZXF1ZXN0EgwKBG5hbWUYASABKAkiOwoWQ3JlYXRlUHJvdmlkZXJSZXNwb25zZRIhCghwcm92aWRlchgBIAEoCzIPLm9hLnYxLlByb3ZpZGVyIiAKEkdldFByb3ZpZGVyUmVxdWVzdBIKCgJpZBgBIAEoCSI4ChNHZXRQcm92aWRlclJlc3BvbnNlEiEKCHByb3ZpZGVyGAEgASgLMg8ub2EudjEuUHJvdmlkZXIiPwoVVXBkYXRlUHJvdmlkZXJSZXF1ZXN0EgoKAmlkGAEgASgJEhEKBG5hbWUYAiABKAlIAIgBAUIHCgVfbmFtZSI7ChZVcGRhdGVQcm92aWRlclJlc3BvbnNlEiEKCHByb3ZpZGVyGAEgASgLMg8ub2EudjEuUHJvdmlkZXIiIwoVRGVsZXRlUHJvdmlkZXJSZXF1ZXN0EgoKAmlkGAEgASgJIhgKFkRlbGV0ZVByb3ZpZGVyUmVzcG9uc2UiMgobTGlzdFByb3ZpZGVyQWNjb3VudHNSZXF1ZXN0EhMKC3Byb3ZpZGVyX2lkGAEgASgJIkgKHExpc3RQcm92aWRlckFjY291bnRzUmVzcG9uc2USKAoIYWNjb3VudHMYASADKAsyFi5vYS52MS5PZmZpY2lhbEFjY291bnQixwEKD09mZmljaWFsQWNjb3VudBIKCgJpZBgBIAEoCRITCgtwcm92aWRlcl9pZBgCIAEoCRIMCgRuYW1lGAMgASgJEg0KBW9hX2lkGAQgASgJEhMKC2Rlc2NyaXB0aW9uGAUgASgJEhEKCWltYWdlX3VybBgGIAEoCRIWCg5jaGFubmVsX3NlY3JldBgHIAEoCRIOCgZzdGF0dXMYCCABKAkSEgoKY3JlYXRlZF9hdBgJIAEoCRISCgp1cGRhdGVkX2F0GAogASgJIqABChxDcmVhdGVPZmZpY2lhbEFjY291bnRSZXF1ZXN0EhMKC3Byb3ZpZGVyX2lkGAEgASgJEgwKBG5hbWUYAiABKAkSDQoFb2FfaWQYAyABKAkSGAoLZGVzY3JpcHRpb24YBCABKAlIAIgBARIWCglpbWFnZV91cmwYBSABKAlIAYgBAUIOCgxfZGVzY3JpcHRpb25CDAoKX2ltYWdlX3VybCJICh1DcmVhdGVPZmZpY2lhbEFjY291bnRSZXNwb25zZRInCgdhY2NvdW50GAEgASgLMhYub2EudjEuT2ZmaWNpYWxBY2NvdW50IicKGUdldE9mZmljaWFsQWNjb3VudFJlcXVlc3QSCgoCaWQYASABKAkiRQoaR2V0T2ZmaWNpYWxBY2NvdW50UmVzcG9uc2USJwoHYWNjb3VudBgBIAEoCzIWLm9hLnYxLk9mZmljaWFsQWNjb3VudCK2AQocVXBkYXRlT2ZmaWNpYWxBY2NvdW50UmVxdWVzdBIKCgJpZBgBIAEoCRIRCgRuYW1lGAIgASgJSACIAQESGAoLZGVzY3JpcHRpb24YAyABKAlIAYgBARIWCglpbWFnZV91cmwYBCABKAlIAogBARITCgZzdGF0dXMYBSABKAlIA4gBAUIHCgVfbmFtZUIOCgxfZGVzY3JpcHRpb25CDAoKX2ltYWdlX3VybEIJCgdfc3RhdHVzIkgKHVVwZGF0ZU9mZmljaWFsQWNjb3VudFJlc3BvbnNlEicKB2FjY291bnQYASABKAsyFi5vYS52MS5PZmZpY2lhbEFjY291bnQiKgocRGVsZXRlT2ZmaWNpYWxBY2NvdW50UmVxdWVzdBIKCgJpZBgBIAEoCSIfCh1EZWxldGVPZmZpY2lhbEFjY291bnRSZXNwb25zZSKJAQoHV2ViaG9vaxIKCgJpZBgBIAEoCRINCgVvYV9pZBgCIAEoCRILCgN1cmwYAyABKAkSDgoGc3RhdHVzGAQgASgJEh0KEGxhc3RfdmVyaWZpZWRfYXQYBSABKAlIAIgBARISCgpjcmVhdGVkX2F0GAYgASgJQhMKEV9sYXN0X3ZlcmlmaWVkX2F0Ii8KEVNldFdlYmhvb2tSZXF1ZXN0Eg0KBW9hX2lkGAEgASgJEgsKA3VybBgCIAEoCSI1ChJTZXRXZWJob29rUmVzcG9uc2USHwoHd2ViaG9vaxgBIAEoCzIOLm9hLnYxLldlYmhvb2siJQoUVmVyaWZ5V2ViaG9va1JlcXVlc3QSDQoFb2FfaWQYASABKAkiOAoVVmVyaWZ5V2ViaG9va1Jlc3BvbnNlEg8KB3N1Y2Nlc3MYASABKAgSDgoGc3RhdHVzGAIgASgJIiIKEUdldFdlYmhvb2tSZXF1ZXN0Eg0KBW9hX2lkGAEgASgJIkYKEkdldFdlYmhvb2tSZXNwb25zZRIkCgd3ZWJob29rGAEgASgLMg4ub2EudjEuV2ViaG9va0gAiAEBQgoKCF93ZWJob29rIqEBCgtBY2Nlc3NUb2tlbhIKCgJpZBgBIAEoCRINCgVvYV9pZBgCIAEoCRINCgV0b2tlbhgDIAEoCRIMCgR0eXBlGAQgASgJEhMKBmtleV9pZBgFIAEoCUgAiAEBEhcKCmV4cGlyZXNfYXQYBiABKAlIAYgBARISCgpjcmVhdGVkX2F0GAcgASgJQgkKB19rZXlfaWRCDQoLX2V4cGlyZXNfYXQiSAoXTGlzdEFjY2Vzc1Rva2Vuc1JlcXVlc3QSDQoFb2FfaWQYASABKAkSEwoGa2V5X2lkGAIgASgJSACIAQFCCQoHX2tleV9pZCJFChhMaXN0QWNjZXNzVG9rZW5zUmVzcG9uc2USKQoGdG9rZW5zGAEgAygLMhkub2EudjEuQWNjZXNzVG9rZW5TdW1tYXJ5IooBChJBY2Nlc3NUb2tlblN1bW1hcnkSCgoCaWQYASABKAkSDAoEdHlwZRgCIAEoCRITCgZrZXlfaWQYAyABKAlIAIgBARIXCgpleHBpcmVzX2F0GAQgASgJSAGIAQESEgoKY3JlYXRlZF9hdBgFIAEoCUIJCgdfa2V5X2lkQg0KC19leHBpcmVzX2F0Il4KF0lzc3VlQWNjZXNzVG9rZW5SZXF1ZXN0Eg0KBW9hX2lkGAEgASgJEgwKBHR5cGUYAiABKAkSFwoKcHVibGljX2tleRgDIAEoCUgAiAEBQg0KC19wdWJsaWNfa2V5IngKGElzc3VlQWNjZXNzVG9rZW5SZXNwb25zZRIUCgxhY2Nlc3NfdG9rZW4YASABKAkSEgoKZXhwaXJlc19pbhgCIAEoBRISCgp0b2tlbl90eXBlGAMgASgJEhMKBmtleV9pZBgEIAEoCUgAiAEBQgkKB19rZXlfaWQiLAoYUmV2b2tlQWNjZXNzVG9rZW5SZXF1ZXN0EhAKCHRva2VuX2lkGAEgASgJIhsKGVJldm9rZUFjY2Vzc1Rva2VuUmVzcG9uc2UiPQocUmV2b2tlQWxsQWNjZXNzVG9rZW5zUmVxdWVzdBINCgVvYV9pZBgBIAEoCRIOCgZrZXlfaWQYAiABKAkiNgodUmV2b2tlQWxsQWNjZXNzVG9rZW5zUmVzcG9uc2USFQoNcmV2b2tlZF9jb3VudBgBIAEoBSIuCh1TZWFyY2hPZmZpY2lhbEFjY291bnRzUmVxdWVzdBINCgVxdWVyeRgBIAEoCSJRCh5TZWFyY2hPZmZpY2lhbEFjY291bnRzUmVzcG9uc2USLwoIYWNjb3VudHMYASADKAsyHS5vYS52MS5PZmZpY2lhbEFjY291bnRTdW1tYXJ5ImkKFk9mZmljaWFsQWNjb3VudFN1bW1hcnkSCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRINCgVvYV9pZBgDIAEoCRITCgtkZXNjcmlwdGlvbhgEIAEoCRIRCglpbWFnZV91cmwYBSABKAkyxQsKCU9BU2VydmljZRJNCg5DcmVhdGVQcm92aWRlchIcLm9hLnYxLkNyZWF0ZVByb3ZpZGVyUmVxdWVzdBodLm9hLnYxLkNyZWF0ZVByb3ZpZGVyUmVzcG9uc2USRAoLR2V0UHJvdmlkZXISGS5vYS52MS5HZXRQcm92aWRlclJlcXVlc3QaGi5vYS52MS5HZXRQcm92aWRlclJlc3BvbnNlEk0KDlVwZGF0ZVByb3ZpZGVyEhwub2EudjEuVXBkYXRlUHJvdmlkZXJSZXF1ZXN0Gh0ub2EudjEuVXBkYXRlUHJvdmlkZXJSZXNwb25zZRJNCg5EZWxldGVQcm92aWRlchIcLm9hLnYxLkRlbGV0ZVByb3ZpZGVyUmVxdWVzdBodLm9hLnYxLkRlbGV0ZVByb3ZpZGVyUmVzcG9uc2USXwoUTGlzdFByb3ZpZGVyQWNjb3VudHMSIi5vYS52MS5MaXN0UHJvdmlkZXJBY2NvdW50c1JlcXVlc3QaIy5vYS52MS5MaXN0UHJvdmlkZXJBY2NvdW50c1Jlc3BvbnNlEmIKFUNyZWF0ZU9mZmljaWFsQWNjb3VudBIjLm9hLnYxLkNyZWF0ZU9mZmljaWFsQWNjb3VudFJlcXVlc3QaJC5vYS52MS5DcmVhdGVPZmZpY2lhbEFjY291bnRSZXNwb25zZRJZChJHZXRPZmZpY2lhbEFjY291bnQSIC5vYS52MS5HZXRPZmZpY2lhbEFjY291bnRSZXF1ZXN0GiEub2EudjEuR2V0T2ZmaWNpYWxBY2NvdW50UmVzcG9uc2USYgoVVXBkYXRlT2ZmaWNpYWxBY2NvdW50EiMub2EudjEuVXBkYXRlT2ZmaWNpYWxBY2NvdW50UmVxdWVzdBokLm9hLnYxLlVwZGF0ZU9mZmljaWFsQWNjb3VudFJlc3BvbnNlEmIKFURlbGV0ZU9mZmljaWFsQWNjb3VudBIjLm9hLnYxLkRlbGV0ZU9mZmljaWFsQWNjb3VudFJlcXVlc3QaJC5vYS52MS5EZWxldGVPZmZpY2lhbEFjY291bnRSZXNwb25zZRJBCgpTZXRXZWJob29rEhgub2EudjEuU2V0V2ViaG9va1JlcXVlc3QaGS5vYS52MS5TZXRXZWJob29rUmVzcG9uc2USSgoNVmVyaWZ5V2ViaG9vaxIbLm9hLnYxLlZlcmlmeVdlYmhvb2tSZXF1ZXN0Ghwub2EudjEuVmVyaWZ5V2ViaG9va1Jlc3BvbnNlEkEKCkdldFdlYmhvb2sSGC5vYS52MS5HZXRXZWJob29rUmVxdWVzdBoZLm9hLnYxLkdldFdlYmhvb2tSZXNwb25zZRJTChBJc3N1ZUFjY2Vzc1Rva2VuEh4ub2EudjEuSXNzdWVBY2Nlc3NUb2tlblJlcXVlc3QaHy5vYS52MS5Jc3N1ZUFjY2Vzc1Rva2VuUmVzcG9uc2USUwoQTGlzdEFjY2Vzc1Rva2VucxIeLm9hLnYxLkxpc3RBY2Nlc3NUb2tlbnNSZXF1ZXN0Gh8ub2EudjEuTGlzdEFjY2Vzc1Rva2Vuc1Jlc3BvbnNlElYKEVJldm9rZUFjY2Vzc1Rva2VuEh8ub2EudjEuUmV2b2tlQWNjZXNzVG9rZW5SZXF1ZXN0GiAub2EudjEuUmV2b2tlQWNjZXNzVG9rZW5SZXNwb25zZRJiChVSZXZva2VBbGxBY2Nlc3NUb2tlbnMSIy5vYS52MS5SZXZva2VBbGxBY2Nlc3NUb2tlbnNSZXF1ZXN0GiQub2EudjEuUmV2b2tlQWxsQWNjZXNzVG9rZW5zUmVzcG9uc2USZQoWU2VhcmNoT2ZmaWNpYWxBY2NvdW50cxIkLm9hLnYxLlNlYXJjaE9mZmljaWFsQWNjb3VudHNSZXF1ZXN0GiUub2EudjEuU2VhcmNoT2ZmaWNpYWxBY2NvdW50c1Jlc3BvbnNlYgZwcm90bzM',
+    'Cg5vYS92MS9vYS5wcm90bxIFb2EudjEiXgoIUHJvdmlkZXISCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIQCghvd25lcl9pZBgDIAEoCRISCgpjcmVhdGVkX2F0GAQgASgJEhIKCnVwZGF0ZWRfYXQYBSABKAkiJQoVQ3JlYXRlUHJvdmlkZXJSZXF1ZXN0EgwKBG5hbWUYASABKAkiOwoWQ3JlYXRlUHJvdmlkZXJSZXNwb25zZRIhCghwcm92aWRlchgBIAEoCzIPLm9hLnYxLlByb3ZpZGVyIiAKEkdldFByb3ZpZGVyUmVxdWVzdBIKCgJpZBgBIAEoCSI4ChNHZXRQcm92aWRlclJlc3BvbnNlEiEKCHByb3ZpZGVyGAEgASgLMg8ub2EudjEuUHJvdmlkZXIiPwoVVXBkYXRlUHJvdmlkZXJSZXF1ZXN0EgoKAmlkGAEgASgJEhEKBG5hbWUYAiABKAlIAIgBAUIHCgVfbmFtZSI7ChZVcGRhdGVQcm92aWRlclJlc3BvbnNlEiEKCHByb3ZpZGVyGAEgASgLMg8ub2EudjEuUHJvdmlkZXIiIwoVRGVsZXRlUHJvdmlkZXJSZXF1ZXN0EgoKAmlkGAEgASgJIhgKFkRlbGV0ZVByb3ZpZGVyUmVzcG9uc2UiMgobTGlzdFByb3ZpZGVyQWNjb3VudHNSZXF1ZXN0EhMKC3Byb3ZpZGVyX2lkGAEgASgJIkgKHExpc3RQcm92aWRlckFjY291bnRzUmVzcG9uc2USKAoIYWNjb3VudHMYASADKAsyFi5vYS52MS5PZmZpY2lhbEFjY291bnQiwAEKD09mZmljaWFsQWNjb3VudBIKCgJpZBgBIAEoCRITCgtwcm92aWRlcl9pZBgCIAEoCRIMCgRuYW1lGAMgASgJEg0KBW9hX2lkGAQgASgJEhMKC2Rlc2NyaXB0aW9uGAUgASgJEhEKCWltYWdlX3VybBgGIAEoCRIfCgZzdGF0dXMYByABKA4yDy5vYS52MS5PQVN0YXR1cxISCgpjcmVhdGVkX2F0GAggASgJEhIKCnVwZGF0ZWRfYXQYCSABKAkiLwoVT2ZmaWNpYWxBY2NvdW50U2VjcmV0EhYKDmNoYW5uZWxfc2VjcmV0GAEgASgJIqABChxDcmVhdGVPZmZpY2lhbEFjY291bnRSZXF1ZXN0EhMKC3Byb3ZpZGVyX2lkGAEgASgJEgwKBG5hbWUYAiABKAkSDQoFb2FfaWQYAyABKAkSGAoLZGVzY3JpcHRpb24YBCABKAlIAIgBARIWCglpbWFnZV91cmwYBSABKAlIAYgBAUIOCgxfZGVzY3JpcHRpb25CDAoKX2ltYWdlX3VybCJICh1DcmVhdGVPZmZpY2lhbEFjY291bnRSZXNwb25zZRInCgdhY2NvdW50GAEgASgLMhYub2EudjEuT2ZmaWNpYWxBY2NvdW50IicKGUdldE9mZmljaWFsQWNjb3VudFJlcXVlc3QSCgoCaWQYASABKAkiRQoaR2V0T2ZmaWNpYWxBY2NvdW50UmVzcG9uc2USJwoHYWNjb3VudBgBIAEoCzIWLm9hLnYxLk9mZmljaWFsQWNjb3VudCItCh9HZXRPZmZpY2lhbEFjY291bnRTZWNyZXRSZXF1ZXN0EgoKAmlkGAEgASgJIlAKIEdldE9mZmljaWFsQWNjb3VudFNlY3JldFJlc3BvbnNlEiwKBnNlY3JldBgBIAEoCzIcLm9hLnYxLk9mZmljaWFsQWNjb3VudFNlY3JldCLHAQocVXBkYXRlT2ZmaWNpYWxBY2NvdW50UmVxdWVzdBIKCgJpZBgBIAEoCRIRCgRuYW1lGAIgASgJSACIAQESGAoLZGVzY3JpcHRpb24YAyABKAlIAYgBARIWCglpbWFnZV91cmwYBCABKAlIAogBARIkCgZzdGF0dXMYBSABKA4yDy5vYS52MS5PQVN0YXR1c0gDiAEBQgcKBV9uYW1lQg4KDF9kZXNjcmlwdGlvbkIMCgpfaW1hZ2VfdXJsQgkKB19zdGF0dXMiSAodVXBkYXRlT2ZmaWNpYWxBY2NvdW50UmVzcG9uc2USJwoHYWNjb3VudBgBIAEoCzIWLm9hLnYxLk9mZmljaWFsQWNjb3VudCIqChxEZWxldGVPZmZpY2lhbEFjY291bnRSZXF1ZXN0EgoKAmlkGAEgASgJIh8KHURlbGV0ZU9mZmljaWFsQWNjb3VudFJlc3BvbnNlIp8BCgdXZWJob29rEgoKAmlkGAEgASgJEg0KBW9hX2lkGAIgASgJEgsKA3VybBgDIAEoCRIkCgZzdGF0dXMYBCABKA4yFC5vYS52MS5XZWJob29rU3RhdHVzEh0KEGxhc3RfdmVyaWZpZWRfYXQYBSABKAlIAIgBARISCgpjcmVhdGVkX2F0GAYgASgJQhMKEV9sYXN0X3ZlcmlmaWVkX2F0Ii8KEVNldFdlYmhvb2tSZXF1ZXN0Eg0KBW9hX2lkGAEgASgJEgsKA3VybBgCIAEoCSI1ChJTZXRXZWJob29rUmVzcG9uc2USHwoHd2ViaG9vaxgBIAEoCzIOLm9hLnYxLldlYmhvb2siJQoUVmVyaWZ5V2ViaG9va1JlcXVlc3QSDQoFb2FfaWQYASABKAkiPQoVVmVyaWZ5V2ViaG9va1Jlc3BvbnNlEiQKBnN0YXR1cxgBIAEoDjIULm9hLnYxLldlYmhvb2tTdGF0dXMiIgoRR2V0V2ViaG9va1JlcXVlc3QSDQoFb2FfaWQYASABKAkiRgoSR2V0V2ViaG9va1Jlc3BvbnNlEiQKB3dlYmhvb2sYASABKAsyDi5vYS52MS5XZWJob29rSACIAQFCCgoIX3dlYmhvb2siuQEKC0FjY2Vzc1Rva2VuEgoKAmlkGAEgASgJEg0KBW9hX2lkGAIgASgJEg0KBXRva2VuGAMgASgJEiQKBHR5cGUYBCABKA4yFi5vYS52MS5BY2Nlc3NUb2tlblR5cGUSEwoGa2V5X2lkGAUgASgJSACIAQESFwoKZXhwaXJlc19hdBgGIAEoCUgBiAEBEhIKCmNyZWF0ZWRfYXQYByABKAlCCQoHX2tleV9pZEINCgtfZXhwaXJlc19hdCJIChdMaXN0QWNjZXNzVG9rZW5zUmVxdWVzdBINCgVvYV9pZBgBIAEoCRITCgZrZXlfaWQYAiABKAlIAIgBAUIJCgdfa2V5X2lkIkUKGExpc3RBY2Nlc3NUb2tlbnNSZXNwb25zZRIpCgZ0b2tlbnMYASADKAsyGS5vYS52MS5BY2Nlc3NUb2tlblN1bW1hcnkiogEKEkFjY2Vzc1Rva2VuU3VtbWFyeRIKCgJpZBgBIAEoCRIkCgR0eXBlGAIgASgOMhYub2EudjEuQWNjZXNzVG9rZW5UeXBlEhMKBmtleV9pZBgDIAEoCUgAiAEBEhcKCmV4cGlyZXNfYXQYBCABKAlIAYgBARISCgpjcmVhdGVkX2F0GAUgASgJQgkKB19rZXlfaWRCDQoLX2V4cGlyZXNfYXQidgoXSXNzdWVBY2Nlc3NUb2tlblJlcXVlc3QSDQoFb2FfaWQYASABKAkSJAoEdHlwZRgCIAEoDjIWLm9hLnYxLkFjY2Vzc1Rva2VuVHlwZRIXCgpwdWJsaWNfa2V5GAMgASgJSACIAQFCDQoLX3B1YmxpY19rZXkieAoYSXNzdWVBY2Nlc3NUb2tlblJlc3BvbnNlEhQKDGFjY2Vzc190b2tlbhgBIAEoCRISCgpleHBpcmVzX2luGAIgASgFEhIKCnRva2VuX3R5cGUYAyABKAkSEwoGa2V5X2lkGAQgASgJSACIAQFCCQoHX2tleV9pZCIsChhSZXZva2VBY2Nlc3NUb2tlblJlcXVlc3QSEAoIdG9rZW5faWQYASABKAkiGwoZUmV2b2tlQWNjZXNzVG9rZW5SZXNwb25zZSI9ChxSZXZva2VBbGxBY2Nlc3NUb2tlbnNSZXF1ZXN0Eg0KBW9hX2lkGAEgASgJEg4KBmtleV9pZBgCIAEoCSI2Ch1SZXZva2VBbGxBY2Nlc3NUb2tlbnNSZXNwb25zZRIVCg1yZXZva2VkX2NvdW50GAEgASgFIi4KHVNlYXJjaE9mZmljaWFsQWNjb3VudHNSZXF1ZXN0Eg0KBXF1ZXJ5GAEgASgJIlEKHlNlYXJjaE9mZmljaWFsQWNjb3VudHNSZXNwb25zZRIvCghhY2NvdW50cxgBIAMoCzIdLm9hLnYxLk9mZmljaWFsQWNjb3VudFN1bW1hcnkiaQoWT2ZmaWNpYWxBY2NvdW50U3VtbWFyeRIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEg0KBW9hX2lkGAMgASgJEhMKC2Rlc2NyaXB0aW9uGAQgASgJEhEKCWltYWdlX3VybBgFIAEoCSpTCghPQVN0YXR1cxIZChVPQV9TVEFUVVNfVU5TUEVDSUZJRUQQABIUChBPQV9TVEFUVVNfQUNUSVZFEAESFgoST0FfU1RBVFVTX0RJU0FCTEVEEAIqgwEKDVdlYmhvb2tTdGF0dXMSHgoaV0VCSE9PS19TVEFUVVNfVU5TUEVDSUZJRUQQABIaChZXRUJIT09LX1NUQVRVU19QRU5ESU5HEAESGwoXV0VCSE9PS19TVEFUVVNfVkVSSUZJRUQQAhIZChVXRUJIT09LX1NUQVRVU19GQUlMRUQQAyp2Cg9BY2Nlc3NUb2tlblR5cGUSIQodQUNDRVNTX1RPS0VOX1RZUEVfVU5TUEVDSUZJRUQQABIhCh1BQ0NFU1NfVE9LRU5fVFlQRV9TSE9SVF9MSVZFRBABEh0KGUFDQ0VTU19UT0tFTl9UWVBFX0pXVF9WMjEQAjKyDAoJT0FTZXJ2aWNlEk0KDkNyZWF0ZVByb3ZpZGVyEhwub2EudjEuQ3JlYXRlUHJvdmlkZXJSZXF1ZXN0Gh0ub2EudjEuQ3JlYXRlUHJvdmlkZXJSZXNwb25zZRJECgtHZXRQcm92aWRlchIZLm9hLnYxLkdldFByb3ZpZGVyUmVxdWVzdBoaLm9hLnYxLkdldFByb3ZpZGVyUmVzcG9uc2USTQoOVXBkYXRlUHJvdmlkZXISHC5vYS52MS5VcGRhdGVQcm92aWRlclJlcXVlc3QaHS5vYS52MS5VcGRhdGVQcm92aWRlclJlc3BvbnNlEk0KDkRlbGV0ZVByb3ZpZGVyEhwub2EudjEuRGVsZXRlUHJvdmlkZXJSZXF1ZXN0Gh0ub2EudjEuRGVsZXRlUHJvdmlkZXJSZXNwb25zZRJfChRMaXN0UHJvdmlkZXJBY2NvdW50cxIiLm9hLnYxLkxpc3RQcm92aWRlckFjY291bnRzUmVxdWVzdBojLm9hLnYxLkxpc3RQcm92aWRlckFjY291bnRzUmVzcG9uc2USYgoVQ3JlYXRlT2ZmaWNpYWxBY2NvdW50EiMub2EudjEuQ3JlYXRlT2ZmaWNpYWxBY2NvdW50UmVxdWVzdBokLm9hLnYxLkNyZWF0ZU9mZmljaWFsQWNjb3VudFJlc3BvbnNlElkKEkdldE9mZmljaWFsQWNjb3VudBIgLm9hLnYxLkdldE9mZmljaWFsQWNjb3VudFJlcXVlc3QaIS5vYS52MS5HZXRPZmZpY2lhbEFjY291bnRSZXNwb25zZRJrChhHZXRPZmZpY2lhbEFjY291bnRTZWNyZXQSJi5vYS52MS5HZXRPZmZpY2lhbEFjY291bnRTZWNyZXRSZXF1ZXN0Gicub2EudjEuR2V0T2ZmaWNpYWxBY2NvdW50U2VjcmV0UmVzcG9uc2USYgoVVXBkYXRlT2ZmaWNpYWxBY2NvdW50EiMub2EudjEuVXBkYXRlT2ZmaWNpYWxBY2NvdW50UmVxdWVzdBokLm9hLnYxLlVwZGF0ZU9mZmljaWFsQWNjb3VudFJlc3BvbnNlEmIKFURlbGV0ZU9mZmljaWFsQWNjb3VudBIjLm9hLnYxLkRlbGV0ZU9mZmljaWFsQWNjb3VudFJlcXVlc3QaJC5vYS52MS5EZWxldGVPZmZpY2lhbEFjY291bnRSZXNwb25zZRJBCgpTZXRXZWJob29rEhgub2EudjEuU2V0V2ViaG9va1JlcXVlc3QaGS5vYS52MS5TZXRXZWJob29rUmVzcG9uc2USSgoNVmVyaWZ5V2ViaG9vaxIbLm9hLnYxLlZlcmlmeVdlYmhvb2tSZXF1ZXN0Ghwub2EudjEuVmVyaWZ5V2ViaG9va1Jlc3BvbnNlEkEKCkdldFdlYmhvb2sSGC5vYS52MS5HZXRXZWJob29rUmVxdWVzdBoZLm9hLnYxLkdldFdlYmhvb2tSZXNwb25zZRJTChBJc3N1ZUFjY2Vzc1Rva2VuEh4ub2EudjEuSXNzdWVBY2Nlc3NUb2tlblJlcXVlc3QaHy5vYS52MS5Jc3N1ZUFjY2Vzc1Rva2VuUmVzcG9uc2USUwoQTGlzdEFjY2Vzc1Rva2VucxIeLm9hLnYxLkxpc3RBY2Nlc3NUb2tlbnNSZXF1ZXN0Gh8ub2EudjEuTGlzdEFjY2Vzc1Rva2Vuc1Jlc3BvbnNlElYKEVJldm9rZUFjY2Vzc1Rva2VuEh8ub2EudjEuUmV2b2tlQWNjZXNzVG9rZW5SZXF1ZXN0GiAub2EudjEuUmV2b2tlQWNjZXNzVG9rZW5SZXNwb25zZRJiChVSZXZva2VBbGxBY2Nlc3NUb2tlbnMSIy5vYS52MS5SZXZva2VBbGxBY2Nlc3NUb2tlbnNSZXF1ZXN0GiQub2EudjEuUmV2b2tlQWxsQWNjZXNzVG9rZW5zUmVzcG9uc2USZQoWU2VhcmNoT2ZmaWNpYWxBY2NvdW50cxIkLm9hLnYxLlNlYXJjaE9mZmljaWFsQWNjb3VudHNSZXF1ZXN0GiUub2EudjEuU2VhcmNoT2ZmaWNpYWxBY2NvdW50c1Jlc3BvbnNlYgZwcm90bzM',
   )
 
 /**
@@ -269,22 +279,17 @@ export type OfficialAccount = Message<'oa.v1.OfficialAccount'> & {
   imageUrl: string
 
   /**
-   * @generated from field: string channel_secret = 7;
+   * @generated from field: oa.v1.OAStatus status = 7;
    */
-  channelSecret: string
+  status: OAStatus
 
   /**
-   * @generated from field: string status = 8;
-   */
-  status: string
-
-  /**
-   * @generated from field: string created_at = 9;
+   * @generated from field: string created_at = 8;
    */
   createdAt: string
 
   /**
-   * @generated from field: string updated_at = 10;
+   * @generated from field: string updated_at = 9;
    */
   updatedAt: string
 }
@@ -296,6 +301,24 @@ export type OfficialAccount = Message<'oa.v1.OfficialAccount'> & {
 export const OfficialAccountSchema: GenMessage<OfficialAccount> =
   /*@__PURE__*/
   messageDesc(file_oa_v1_oa, 11)
+
+/**
+ * @generated from message oa.v1.OfficialAccountSecret
+ */
+export type OfficialAccountSecret = Message<'oa.v1.OfficialAccountSecret'> & {
+  /**
+   * @generated from field: string channel_secret = 1;
+   */
+  channelSecret: string
+}
+
+/**
+ * Describes the message oa.v1.OfficialAccountSecret.
+ * Use `create(OfficialAccountSecretSchema)` to create a new message.
+ */
+export const OfficialAccountSecretSchema: GenMessage<OfficialAccountSecret> =
+  /*@__PURE__*/
+  messageDesc(file_oa_v1_oa, 12)
 
 /**
  * @generated from message oa.v1.CreateOfficialAccountRequest
@@ -334,7 +357,7 @@ export type CreateOfficialAccountRequest =
  */
 export const CreateOfficialAccountRequestSchema: GenMessage<CreateOfficialAccountRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 12)
+  messageDesc(file_oa_v1_oa, 13)
 
 /**
  * @generated from message oa.v1.CreateOfficialAccountResponse
@@ -353,7 +376,7 @@ export type CreateOfficialAccountResponse =
  */
 export const CreateOfficialAccountResponseSchema: GenMessage<CreateOfficialAccountResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 13)
+  messageDesc(file_oa_v1_oa, 14)
 
 /**
  * @generated from message oa.v1.GetOfficialAccountRequest
@@ -371,7 +394,7 @@ export type GetOfficialAccountRequest = Message<'oa.v1.GetOfficialAccountRequest
  */
 export const GetOfficialAccountRequestSchema: GenMessage<GetOfficialAccountRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 14)
+  messageDesc(file_oa_v1_oa, 15)
 
 /**
  * @generated from message oa.v1.GetOfficialAccountResponse
@@ -389,7 +412,45 @@ export type GetOfficialAccountResponse = Message<'oa.v1.GetOfficialAccountRespon
  */
 export const GetOfficialAccountResponseSchema: GenMessage<GetOfficialAccountResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 15)
+  messageDesc(file_oa_v1_oa, 16)
+
+/**
+ * @generated from message oa.v1.GetOfficialAccountSecretRequest
+ */
+export type GetOfficialAccountSecretRequest =
+  Message<'oa.v1.GetOfficialAccountSecretRequest'> & {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string
+  }
+
+/**
+ * Describes the message oa.v1.GetOfficialAccountSecretRequest.
+ * Use `create(GetOfficialAccountSecretRequestSchema)` to create a new message.
+ */
+export const GetOfficialAccountSecretRequestSchema: GenMessage<GetOfficialAccountSecretRequest> =
+  /*@__PURE__*/
+  messageDesc(file_oa_v1_oa, 17)
+
+/**
+ * @generated from message oa.v1.GetOfficialAccountSecretResponse
+ */
+export type GetOfficialAccountSecretResponse =
+  Message<'oa.v1.GetOfficialAccountSecretResponse'> & {
+    /**
+     * @generated from field: oa.v1.OfficialAccountSecret secret = 1;
+     */
+    secret?: OfficialAccountSecret
+  }
+
+/**
+ * Describes the message oa.v1.GetOfficialAccountSecretResponse.
+ * Use `create(GetOfficialAccountSecretResponseSchema)` to create a new message.
+ */
+export const GetOfficialAccountSecretResponseSchema: GenMessage<GetOfficialAccountSecretResponse> =
+  /*@__PURE__*/
+  messageDesc(file_oa_v1_oa, 18)
 
 /**
  * @generated from message oa.v1.UpdateOfficialAccountRequest
@@ -417,9 +478,9 @@ export type UpdateOfficialAccountRequest =
     imageUrl?: string
 
     /**
-     * @generated from field: optional string status = 5;
+     * @generated from field: optional oa.v1.OAStatus status = 5;
      */
-    status?: string
+    status?: OAStatus
   }
 
 /**
@@ -428,7 +489,7 @@ export type UpdateOfficialAccountRequest =
  */
 export const UpdateOfficialAccountRequestSchema: GenMessage<UpdateOfficialAccountRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 16)
+  messageDesc(file_oa_v1_oa, 19)
 
 /**
  * @generated from message oa.v1.UpdateOfficialAccountResponse
@@ -447,7 +508,7 @@ export type UpdateOfficialAccountResponse =
  */
 export const UpdateOfficialAccountResponseSchema: GenMessage<UpdateOfficialAccountResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 17)
+  messageDesc(file_oa_v1_oa, 20)
 
 /**
  * @generated from message oa.v1.DeleteOfficialAccountRequest
@@ -466,7 +527,7 @@ export type DeleteOfficialAccountRequest =
  */
 export const DeleteOfficialAccountRequestSchema: GenMessage<DeleteOfficialAccountRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 18)
+  messageDesc(file_oa_v1_oa, 21)
 
 /**
  * @generated from message oa.v1.DeleteOfficialAccountResponse
@@ -480,7 +541,7 @@ export type DeleteOfficialAccountResponse =
  */
 export const DeleteOfficialAccountResponseSchema: GenMessage<DeleteOfficialAccountResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 19)
+  messageDesc(file_oa_v1_oa, 22)
 
 /**
  * @generated from message oa.v1.Webhook
@@ -502,9 +563,9 @@ export type Webhook = Message<'oa.v1.Webhook'> & {
   url: string
 
   /**
-   * @generated from field: string status = 4;
+   * @generated from field: oa.v1.WebhookStatus status = 4;
    */
-  status: string
+  status: WebhookStatus
 
   /**
    * @generated from field: optional string last_verified_at = 5;
@@ -523,7 +584,7 @@ export type Webhook = Message<'oa.v1.Webhook'> & {
  */
 export const WebhookSchema: GenMessage<Webhook> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 20)
+  messageDesc(file_oa_v1_oa, 23)
 
 /**
  * @generated from message oa.v1.SetWebhookRequest
@@ -546,7 +607,7 @@ export type SetWebhookRequest = Message<'oa.v1.SetWebhookRequest'> & {
  */
 export const SetWebhookRequestSchema: GenMessage<SetWebhookRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 21)
+  messageDesc(file_oa_v1_oa, 24)
 
 /**
  * @generated from message oa.v1.SetWebhookResponse
@@ -564,7 +625,7 @@ export type SetWebhookResponse = Message<'oa.v1.SetWebhookResponse'> & {
  */
 export const SetWebhookResponseSchema: GenMessage<SetWebhookResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 22)
+  messageDesc(file_oa_v1_oa, 25)
 
 /**
  * @generated from message oa.v1.VerifyWebhookRequest
@@ -582,21 +643,16 @@ export type VerifyWebhookRequest = Message<'oa.v1.VerifyWebhookRequest'> & {
  */
 export const VerifyWebhookRequestSchema: GenMessage<VerifyWebhookRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 23)
+  messageDesc(file_oa_v1_oa, 26)
 
 /**
  * @generated from message oa.v1.VerifyWebhookResponse
  */
 export type VerifyWebhookResponse = Message<'oa.v1.VerifyWebhookResponse'> & {
   /**
-   * @generated from field: bool success = 1;
+   * @generated from field: oa.v1.WebhookStatus status = 1;
    */
-  success: boolean
-
-  /**
-   * @generated from field: string status = 2;
-   */
-  status: string
+  status: WebhookStatus
 }
 
 /**
@@ -605,7 +661,7 @@ export type VerifyWebhookResponse = Message<'oa.v1.VerifyWebhookResponse'> & {
  */
 export const VerifyWebhookResponseSchema: GenMessage<VerifyWebhookResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 24)
+  messageDesc(file_oa_v1_oa, 27)
 
 /**
  * @generated from message oa.v1.GetWebhookRequest
@@ -623,7 +679,7 @@ export type GetWebhookRequest = Message<'oa.v1.GetWebhookRequest'> & {
  */
 export const GetWebhookRequestSchema: GenMessage<GetWebhookRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 25)
+  messageDesc(file_oa_v1_oa, 28)
 
 /**
  * @generated from message oa.v1.GetWebhookResponse
@@ -641,7 +697,7 @@ export type GetWebhookResponse = Message<'oa.v1.GetWebhookResponse'> & {
  */
 export const GetWebhookResponseSchema: GenMessage<GetWebhookResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 26)
+  messageDesc(file_oa_v1_oa, 29)
 
 /**
  * @generated from message oa.v1.AccessToken
@@ -663,9 +719,9 @@ export type AccessToken = Message<'oa.v1.AccessToken'> & {
   token: string
 
   /**
-   * @generated from field: string type = 4;
+   * @generated from field: oa.v1.AccessTokenType type = 4;
    */
-  type: string
+  type: AccessTokenType
 
   /**
    * @generated from field: optional string key_id = 5;
@@ -689,7 +745,7 @@ export type AccessToken = Message<'oa.v1.AccessToken'> & {
  */
 export const AccessTokenSchema: GenMessage<AccessToken> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 27)
+  messageDesc(file_oa_v1_oa, 30)
 
 /**
  * @generated from message oa.v1.ListAccessTokensRequest
@@ -712,7 +768,7 @@ export type ListAccessTokensRequest = Message<'oa.v1.ListAccessTokensRequest'> &
  */
 export const ListAccessTokensRequestSchema: GenMessage<ListAccessTokensRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 28)
+  messageDesc(file_oa_v1_oa, 31)
 
 /**
  * @generated from message oa.v1.ListAccessTokensResponse
@@ -730,7 +786,7 @@ export type ListAccessTokensResponse = Message<'oa.v1.ListAccessTokensResponse'>
  */
 export const ListAccessTokensResponseSchema: GenMessage<ListAccessTokensResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 29)
+  messageDesc(file_oa_v1_oa, 32)
 
 /**
  * @generated from message oa.v1.AccessTokenSummary
@@ -742,9 +798,9 @@ export type AccessTokenSummary = Message<'oa.v1.AccessTokenSummary'> & {
   id: string
 
   /**
-   * @generated from field: string type = 2;
+   * @generated from field: oa.v1.AccessTokenType type = 2;
    */
-  type: string
+  type: AccessTokenType
 
   /**
    * @generated from field: optional string key_id = 3;
@@ -768,7 +824,7 @@ export type AccessTokenSummary = Message<'oa.v1.AccessTokenSummary'> & {
  */
 export const AccessTokenSummarySchema: GenMessage<AccessTokenSummary> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 30)
+  messageDesc(file_oa_v1_oa, 33)
 
 /**
  * @generated from message oa.v1.IssueAccessTokenRequest
@@ -780,9 +836,9 @@ export type IssueAccessTokenRequest = Message<'oa.v1.IssueAccessTokenRequest'> &
   oaId: string
 
   /**
-   * @generated from field: string type = 2;
+   * @generated from field: oa.v1.AccessTokenType type = 2;
    */
-  type: string
+  type: AccessTokenType
 
   /**
    * @generated from field: optional string public_key = 3;
@@ -796,7 +852,7 @@ export type IssueAccessTokenRequest = Message<'oa.v1.IssueAccessTokenRequest'> &
  */
 export const IssueAccessTokenRequestSchema: GenMessage<IssueAccessTokenRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 31)
+  messageDesc(file_oa_v1_oa, 34)
 
 /**
  * @generated from message oa.v1.IssueAccessTokenResponse
@@ -829,7 +885,7 @@ export type IssueAccessTokenResponse = Message<'oa.v1.IssueAccessTokenResponse'>
  */
 export const IssueAccessTokenResponseSchema: GenMessage<IssueAccessTokenResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 32)
+  messageDesc(file_oa_v1_oa, 35)
 
 /**
  * @generated from message oa.v1.RevokeAccessTokenRequest
@@ -847,7 +903,7 @@ export type RevokeAccessTokenRequest = Message<'oa.v1.RevokeAccessTokenRequest'>
  */
 export const RevokeAccessTokenRequestSchema: GenMessage<RevokeAccessTokenRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 33)
+  messageDesc(file_oa_v1_oa, 36)
 
 /**
  * @generated from message oa.v1.RevokeAccessTokenResponse
@@ -860,7 +916,7 @@ export type RevokeAccessTokenResponse = Message<'oa.v1.RevokeAccessTokenResponse
  */
 export const RevokeAccessTokenResponseSchema: GenMessage<RevokeAccessTokenResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 34)
+  messageDesc(file_oa_v1_oa, 37)
 
 /**
  * @generated from message oa.v1.RevokeAllAccessTokensRequest
@@ -884,7 +940,7 @@ export type RevokeAllAccessTokensRequest =
  */
 export const RevokeAllAccessTokensRequestSchema: GenMessage<RevokeAllAccessTokensRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 35)
+  messageDesc(file_oa_v1_oa, 38)
 
 /**
  * @generated from message oa.v1.RevokeAllAccessTokensResponse
@@ -903,7 +959,7 @@ export type RevokeAllAccessTokensResponse =
  */
 export const RevokeAllAccessTokensResponseSchema: GenMessage<RevokeAllAccessTokensResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 36)
+  messageDesc(file_oa_v1_oa, 39)
 
 /**
  * @generated from message oa.v1.SearchOfficialAccountsRequest
@@ -922,7 +978,7 @@ export type SearchOfficialAccountsRequest =
  */
 export const SearchOfficialAccountsRequestSchema: GenMessage<SearchOfficialAccountsRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 37)
+  messageDesc(file_oa_v1_oa, 40)
 
 /**
  * @generated from message oa.v1.SearchOfficialAccountsResponse
@@ -941,7 +997,7 @@ export type SearchOfficialAccountsResponse =
  */
 export const SearchOfficialAccountsResponseSchema: GenMessage<SearchOfficialAccountsResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 38)
+  messageDesc(file_oa_v1_oa, 41)
 
 /**
  * @generated from message oa.v1.OfficialAccountSummary
@@ -979,7 +1035,91 @@ export type OfficialAccountSummary = Message<'oa.v1.OfficialAccountSummary'> & {
  */
 export const OfficialAccountSummarySchema: GenMessage<OfficialAccountSummary> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 39)
+  messageDesc(file_oa_v1_oa, 42)
+
+/**
+ * @generated from enum oa.v1.OAStatus
+ */
+export enum OAStatus {
+  /**
+   * @generated from enum value: OA_STATUS_UNSPECIFIED = 0;
+   */
+  OA_STATUS_UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: OA_STATUS_ACTIVE = 1;
+   */
+  OA_STATUS_ACTIVE = 1,
+
+  /**
+   * @generated from enum value: OA_STATUS_DISABLED = 2;
+   */
+  OA_STATUS_DISABLED = 2,
+}
+
+/**
+ * Describes the enum oa.v1.OAStatus.
+ */
+export const OAStatusSchema: GenEnum<OAStatus> = /*@__PURE__*/ enumDesc(file_oa_v1_oa, 0)
+
+/**
+ * @generated from enum oa.v1.WebhookStatus
+ */
+export enum WebhookStatus {
+  /**
+   * @generated from enum value: WEBHOOK_STATUS_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: WEBHOOK_STATUS_PENDING = 1;
+   */
+  PENDING = 1,
+
+  /**
+   * @generated from enum value: WEBHOOK_STATUS_VERIFIED = 2;
+   */
+  VERIFIED = 2,
+
+  /**
+   * @generated from enum value: WEBHOOK_STATUS_FAILED = 3;
+   */
+  FAILED = 3,
+}
+
+/**
+ * Describes the enum oa.v1.WebhookStatus.
+ */
+export const WebhookStatusSchema: GenEnum<WebhookStatus> =
+  /*@__PURE__*/
+  enumDesc(file_oa_v1_oa, 1)
+
+/**
+ * @generated from enum oa.v1.AccessTokenType
+ */
+export enum AccessTokenType {
+  /**
+   * @generated from enum value: ACCESS_TOKEN_TYPE_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: ACCESS_TOKEN_TYPE_SHORT_LIVED = 1;
+   */
+  SHORT_LIVED = 1,
+
+  /**
+   * @generated from enum value: ACCESS_TOKEN_TYPE_JWT_V21 = 2;
+   */
+  JWT_V21 = 2,
+}
+
+/**
+ * Describes the enum oa.v1.AccessTokenType.
+ */
+export const AccessTokenTypeSchema: GenEnum<AccessTokenType> =
+  /*@__PURE__*/
+  enumDesc(file_oa_v1_oa, 2)
 
 /**
  * @generated from service oa.v1.OAService
@@ -1040,6 +1180,14 @@ export const OAService: GenService<{
     methodKind: 'unary'
     input: typeof GetOfficialAccountRequestSchema
     output: typeof GetOfficialAccountResponseSchema
+  }
+  /**
+   * @generated from rpc oa.v1.OAService.GetOfficialAccountSecret
+   */
+  getOfficialAccountSecret: {
+    methodKind: 'unary'
+    input: typeof GetOfficialAccountSecretRequestSchema
+    output: typeof GetOfficialAccountSecretResponseSchema
   }
   /**
    * @generated from rpc oa.v1.OAService.UpdateOfficialAccount
