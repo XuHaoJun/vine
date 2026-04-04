@@ -38,6 +38,7 @@ export const TalksPage = memo(() => {
   })
 
   const handleChatPress = (chatId: string) => {
+    if (!chatId) return
     router.push(`/home/talks/${chatId}`)
   }
 
@@ -52,7 +53,7 @@ export const TalksPage = memo(() => {
         c.members?.some((m) => m.userId === friendId) &&
         c.members?.some((m) => m.userId === userId),
     )
-    if (chat) {
+    if (chat?.id) {
       router.push(`/home/talks/${chat.id}`)
     }
   }
