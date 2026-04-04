@@ -8,14 +8,16 @@
     "./greeter": "./gen/greeter/v1/greeter_pb.ts"
   },
   "scripts": {
-    "build": "buf generate",
-    "proto:generate": "buf generate"
+    "build": "buf generate && oxfmt gen",
+    "clean": "true",
+    "proto:generate": "buf generate && oxfmt gen"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.0.0"
   },
   "devDependencies": {
     "@bufbuild/buf": "^1.54.0",
-    "@bufbuild/protoc-gen-es": "^2.0.0"
+    "@bufbuild/protoc-gen-es": "^2.0.0",
+    "oxfmt": "^0.16.0"
   }
 }

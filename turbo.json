@@ -29,6 +29,9 @@
     },
     "proto:generate": {
       "cache": false
+    },
+    "clean": {
+      "cache": false
     }
   }
 }

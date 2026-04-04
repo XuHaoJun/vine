@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "bun --watch --env-file=../../.env src/index.ts",
     "build": "bun build src/index.ts --outdir dist --target bun",
+    "clean": "rm -rf dist",
     "start": "bun dist/index.js",
     "lint": "oxlint --import-plugin --type-aware",
     "typecheck": "tsc --noEmit",
