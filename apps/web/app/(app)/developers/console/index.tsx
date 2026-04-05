@@ -2,15 +2,18 @@ import { useRouter } from 'one'
 import { memo, useState } from 'react'
 import { ListItem, SizableText, Spinner, XStack, YStack } from 'tamagui'
 
-import { useTanMutation, useTanQuery } from '~/query'
+import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
 import { oaClient } from '~/features/oa/client'
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
 import { showToast } from '~/interface/toast/Toast'
+import { CreateProviderDialog } from '~/interface/dialogs/CreateProviderDialog'
 
 export const ProviderListPage = memo(() => {
   const router = useRouter()
   const [search, setSearch] = useState('')
+  const [createDialogOpen, setCreateDialogOpen] = useState(false)
+  const queryClient = useTanQueryClient()
 
   const { data, isLoading } = useTanQuery({
     queryKey: ['oa', 'providers'],
@@ -20,6 +23,7 @@ export const ProviderListPage = memo(() => {
   const createProvider = useTanMutation({
     mutationFn: (name: string) => oaClient.createProvider({ name }),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['oa', 'providers'] })
       showToast('Provider created', { type: 'success' })
     },
     onError: () => {
@@ -27,8 +31,7 @@ export const ProviderListPage = memo(() => {
     },
   })
 
-  const handleCreate = () => {
-    const name = search.trim() || 'My Provider'
+  const handleCreateProvider = (name: string) => {
     createProvider.mutate(name)
   }
 
@@ -54,7 +57,10 @@ export const ProviderListPage = memo(() => {
               placeholder="Search providers..."
             />
           </YStack>
-          <Button onPress={handleCreate} disabled={createProvider.isPending}>
+          <Button
+            onPress={() => setCreateDialogOpen(true)}
+            disabled={createProvider.isPending}
+          >
             Create Provider
           </Button>
         </XStack>
@@ -118,6 +124,11 @@ export const ProviderListPage = memo(() => {
           </YStack>
         </YStack>
       )}
+      <CreateProviderDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        onSubmit={handleCreateProvider}
+      />
     </YStack>
   )
 })
