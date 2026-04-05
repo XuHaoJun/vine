@@ -1,8 +1,8 @@
-import { useLocalSearchParams, useRouter, createRoute } from 'one'
+import { useActiveParams, useRouter, createRoute } from 'one'
 import { memo, useState } from 'react'
 import { SizableText, Spinner, XStack, YStack } from 'tamagui'
 
-import { useTanMutation, useTanQuery } from '~/query'
+import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
 import { oaClient } from '~/features/oa/client'
 import { Button } from '~/interface/buttons/Button'
 import { CaretLeftIcon } from '~/interface/icons/phosphor/CaretLeftIcon'
@@ -19,8 +19,9 @@ const CHANNEL_TYPE_LABELS: Record<string, string> = {
 }
 
 export const ChannelListPage = memo(() => {
-  const params = useLocalSearchParams<{ providerId: string }>()
+  const params = useActiveParams<{ providerId: string }>()
   const router = useRouter()
+  const queryClient = useTanQueryClient()
   const providerId = params.providerId
   const [showCreate, setShowCreate] = useState(false)
   const [newChannelName, setNewChannelName] = useState('')
@@ -45,6 +46,7 @@ export const ChannelListPage = memo(() => {
         oaId: input.oaId,
       }),
     onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['oa', 'channels', providerId] })
       showToast('Channel created', { type: 'success' })
       setShowCreate(false)
       setNewChannelName('')

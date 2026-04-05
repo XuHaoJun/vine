@@ -2,15 +2,10 @@ import { Link, Slot, usePathname, useRouter } from 'one'
 import { Linking } from 'react-native'
 import { SizableText, XStack, YStack } from 'tamagui'
 
-import { Button } from '~/interface/buttons/Button'
 import { Pressable } from '~/interface/buttons/Pressable'
 import { ArrowUpRightIcon } from '~/interface/icons/phosphor/ArrowUpRightIcon'
-import { CaretLeftIcon } from '~/interface/icons/phosphor/CaretLeftIcon'
 import { HouseIcon } from '~/interface/icons/phosphor/HouseIcon'
 import { ListIcon } from '~/interface/icons/phosphor/ListIcon'
-
-const LINE_DEVELOPERS_JA = 'https://developers.line.biz/ja/'
-const LINE_DEVELOPERS_EN = 'https://developers.line.biz/en/'
 
 function normalizePath(path: string) {
   const trimmed = path.replace(/\/$/, '')
@@ -18,23 +13,12 @@ function normalizePath(path: string) {
 }
 
 export default function DevelopersConsoleLayout() {
-  const router = useRouter()
   const pathname = usePathname()
   const path = normalizePath(pathname)
-
-  const handleBack = () => router.back()
 
   const isConsoleHome = path === '/developers/console'
   const isUnderProvider = path.includes('/developers/console/provider/')
   const isUnderChannel = path.includes('/developers/console/channel/')
-
-  const openLineDocs = () => {
-    void Linking.openURL(LINE_DEVELOPERS_JA)
-  }
-
-  const openLineDocsEn = () => {
-    void Linking.openURL(LINE_DEVELOPERS_EN)
-  }
 
   return (
     <YStack
@@ -53,40 +37,9 @@ export default function DevelopersConsoleLayout() {
         borderColor="$borderColor"
       >
         <XStack items="center" gap="$4">
-          <Button
-            variant="transparent"
-            circular
-            onPress={handleBack}
-            icon={<CaretLeftIcon size={20} />}
-            aria-label="Back"
-          />
           <SizableText size="$6" fontWeight="700" color="$color12">
             Vine Developers
           </SizableText>
-        </XStack>
-        <XStack items="center" gap="$3">
-          <Pressable
-            onPress={openLineDocs}
-            p="$2"
-            rounded="$2"
-            hoverStyle={{ bg: '$backgroundHover' }}
-            aria-label="LINE Developers documentation (Japanese)"
-          >
-            <SizableText size="$2" color="$color10">
-              日本語
-            </SizableText>
-          </Pressable>
-          <Pressable
-            onPress={openLineDocsEn}
-            p="$2"
-            rounded="$2"
-            hoverStyle={{ bg: '$backgroundHover' }}
-            aria-label="LINE Developers documentation (English)"
-          >
-            <SizableText size="$2" color="$color10">
-              English
-            </SizableText>
-          </Pressable>
         </XStack>
       </XStack>
 
@@ -181,23 +134,6 @@ export default function DevelopersConsoleLayout() {
               >
                 Resources
               </SizableText>
-              <Pressable
-                onPress={openLineDocs}
-                py="$2"
-                px="$3"
-                rounded="$3"
-                hoverStyle={{ bg: '$color2' }}
-              >
-                <XStack gap="$3" items="center" justify="space-between">
-                  <SizableText size="$3" fontWeight="600" color="$color11">
-                    LINE Developers
-                  </SizableText>
-                  <ArrowUpRightIcon size={16} color="$color10" />
-                </XStack>
-                <SizableText size="$2" color="$color10" mt="$1">
-                  Official API reference and console help
-                </SizableText>
-              </Pressable>
             </YStack>
           </YStack>
         </YStack>
