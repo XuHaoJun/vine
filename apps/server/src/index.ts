@@ -7,7 +7,6 @@ import { createDb } from '@vine/db'
 import { ensureSeed } from '@vine/db/seed'
 
 import { connectRoutes } from './connect/routes'
-import { createOaAuthInterceptor } from './connect/oa-auth-interceptor'
 import { createAuthServer, authPlugin } from './plugins/auth'
 import { createZeroService, zeroPlugin } from './plugins/zero'
 import { oaMessagingPlugin } from './plugins/oa-messaging'
@@ -32,8 +31,7 @@ const auth = createAuthServer({ database, db })
 
 // ConnectRPC routes (GreeterService, OAService, etc.)
 await app.register(fastifyConnectPlugin, {
-  routes: connectRoutes({ oa }),
-  interceptors: [createOaAuthInterceptor(auth)],
+  routes: connectRoutes({ oa, auth }),
 })
 
 // Seed test data (only in dev with VITE_DEMO_MODE=1)
