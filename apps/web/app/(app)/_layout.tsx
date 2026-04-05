@@ -67,13 +67,14 @@ export function AppLayout() {
         <ToastProvider>
           <DialogProvider>
             <PlatformSpecificRootProvider>
-              {process.env.VITE_PLATFORM === 'web' ? (
+              {process.env.VITE_NATIVE !== '1' ? (
                 <Slot />
               ) : (
                 // We need Stack here for transition animation to work on native
                 <Stack screenOptions={{ headerShown: false }}>
                   <Stack.Screen name="home" />
                   <Stack.Screen name="auth" />
+                  <Stack.Screen name="developers" />
                 </Stack>
               )}
             </PlatformSpecificRootProvider>

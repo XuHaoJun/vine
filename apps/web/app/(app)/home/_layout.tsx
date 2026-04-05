@@ -4,7 +4,7 @@ import { YStack } from 'tamagui'
 export function AppLayout() {
   return (
     <>
-      {process.env.VITE_PLATFORM === 'web' ? (
+      {!process.env.VITE_NATIVE ? (
         <YStack flex={1}>
           <Slot />
         </YStack>

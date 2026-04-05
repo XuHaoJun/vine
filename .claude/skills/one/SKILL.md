@@ -372,7 +372,7 @@ HomeLayout.native.tsx  # used on iOS / Android
 ### Environment variables
 
 ```ts
-process.env.VITE_PLATFORM     // 'web' | 'native'
+process.env.VITE_NATIVE       // '' | '1' — web (client/SSR) when not '1', native when '1'
 process.env.VITE_ENVIRONMENT  // 'ssr' | 'client' | 'ios' | 'android'
 process.env.ONE_SERVER_URL    // server URL for SSG/SSR calls
 ```
