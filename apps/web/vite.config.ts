@@ -18,6 +18,9 @@ export default {
     proxy: {
       '/api': 'http://localhost:3001',
       '/oauth2': 'http://localhost:3001',
+      // ConnectRPC (same origin as Vite in dev — see SERVER_URL in ~/constants/urls.ts)
+      '/oa.v1.OAService': 'http://localhost:3001',
+      '/greeter.v1.GreeterService': 'http://localhost:3001',
     },
   },
 
