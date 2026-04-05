@@ -37,10 +37,6 @@ export function AppLayout() {
   const pathname = usePathname()
   const pendingRedirect = getPendingRedirect()
 
-  if (state === 'loading') {
-    return null
-  }
-
   // redirect logged-out users away from protected routes
   const isLoggedInRoute =
     pathname.startsWith('/home') || pathname.startsWith('/developers')
