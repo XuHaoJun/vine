@@ -1,9 +1,40 @@
-import { ConnectRouter } from '@connectrpc/connect'
-import { OAService, OAStatus, WebhookStatus, AccessTokenType } from '@vine/proto/oa'
+import type { HandlerContext } from '@connectrpc/connect'
+import { Code, ConnectError, ConnectRouter } from '@connectrpc/connect'
+import { AccessTokenType, OAService, OAStatus, WebhookStatus } from '@vine/proto/oa'
 import type { createOAService } from '../services/oa'
+
+import { requireAuthData } from './auth-context'
 
 type OAHandlerDeps = {
   oa: ReturnType<typeof createOAService>
+}
+
+async function assertProviderOwnedByUser(
+  deps: OAHandlerDeps,
+  providerId: string,
+  userId: string,
+) {
+  const provider = await deps.oa.getProvider(providerId)
+  if (!provider) {
+    throw new ConnectError('Provider not found', Code.NotFound)
+  }
+  if (provider.ownerId !== userId) {
+    throw new ConnectError('Forbidden', Code.PermissionDenied)
+  }
+  return provider
+}
+
+async function assertOfficialAccountOwnedByUser(
+  deps: OAHandlerDeps,
+  officialAccountId: string,
+  userId: string,
+) {
+  const account = await deps.oa.getOfficialAccount(officialAccountId)
+  if (!account) {
+    throw new ConnectError('Official account not found', Code.NotFound)
+  }
+  await assertProviderOwnedByUser(deps, account.providerId, userId)
+  return account
 }
 
 function toProtoProvider(
@@ -110,31 +141,43 @@ function protoTokenTypeToDb(type: AccessTokenType): 'short_lived' | 'jwt_v21' {
 export function oaHandler(deps: OAHandlerDeps) {
   return (router: ConnectRouter) => {
     router.service(OAService, {
-      async listMyProviders() {
-        const providers = await deps.oa.listMyProviders('') // TODO: get from auth context
+      async listMyProviders(_req, ctx: HandlerContext) {
+        const auth = requireAuthData(ctx)
+        const providers = await deps.oa.listMyProviders(auth.id)
         return {
           providers: providers
             .map(toProtoProvider)
             .filter((p): p is NonNullable<typeof p> => p != null),
         }
       },
-      async createProvider(req) {
-        const provider = await deps.oa.createProvider({ name: req.name, ownerId: '' })
+      async createProvider(req, ctx: HandlerContext) {
+        const auth = requireAuthData(ctx)
+        const provider = await deps.oa.createProvider({
+          name: req.name,
+          ownerId: auth.id,
+        })
         return { provider: toProtoProvider(provider) }
       },
-      async getProvider(req) {
-        const provider = await deps.oa.getProvider(req.id)
+      async getProvider(req, ctx: HandlerContext) {
+        const auth = requireAuthData(ctx)
+        const provider = await assertProviderOwnedByUser(deps, req.id, auth.id)
         return { provider: toProtoProvider(provider) }
       },
-      async updateProvider(req) {
+      async updateProvider(req, ctx: HandlerContext) {
+        const auth = requireAuthData(ctx)
+        await assertProviderOwnedByUser(deps, req.id, auth.id)
         const provider = await deps.oa.updateProvider(req.id, { name: req.name })
         return { provider: toProtoProvider(provider) }
       },
-      async deleteProvider(req) {
+      async deleteProvider(req, ctx: HandlerContext) {
+        const auth = requireAuthData(ctx)
+        await assertProviderOwnedByUser(deps, req.id, auth.id)
         await deps.oa.deleteProvider(req.id)
         return {}
       },
-      async listProviderAccounts(req) {
+      async listProviderAccounts(req, ctx: HandlerContext) {
+        const auth = requireAuthData(ctx)
+        await assertProviderOwnedByUser(deps, req.providerId, auth.id)
         const accounts = await deps.oa.listProviderAccounts(req.providerId)
         return {
           accounts: accounts
@@ -142,7 +185,9 @@ export function oaHandler(deps: OAHandlerDeps) {
             .filter((a): a is NonNullable<typeof a> => a != null),
         }
       },
-      async createOfficialAccount(req) {
+      async createOfficialAccount(req, ctx: HandlerContext) {
+        const auth = requireAuthData(ctx)
+        await assertProviderOwnedByUser(deps, req.providerId, auth.id)
         const account = await deps.oa.createOfficialAccount({
           providerId: req.providerId,
           name: req.name,
@@ -152,16 +197,19 @@ export function oaHandler(deps: OAHandlerDeps) {
         })
         return { account: toProtoOfficialAccount(account) }
       },
-      async getOfficialAccount(req) {
-        const account = await deps.oa.getOfficialAccount(req.id)
+      async getOfficialAccount(req, ctx: HandlerContext) {
+        const auth = requireAuthData(ctx)
+        const account = await assertOfficialAccountOwnedByUser(deps, req.id, auth.id)
         return { account: toProtoOfficialAccount(account) }
       },
-      async getOfficialAccountSecret(req) {
-        const account = await deps.oa.getOfficialAccount(req.id)
-        if (!account) return { secret: { channelSecret: '' } }
+      async getOfficialAccountSecret(req, ctx: HandlerContext) {
+        const auth = requireAuthData(ctx)
+        const account = await assertOfficialAccountOwnedByUser(deps, req.id, auth.id)
         return { secret: { channelSecret: account.channelSecret } }
       },
-      async updateOfficialAccount(req) {
+      async updateOfficialAccount(req, ctx: HandlerContext) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.id, auth.id)
         const account = await deps.oa.updateOfficialAccount(req.id, {
           name: req.name,
           description: req.description,
@@ -170,15 +218,21 @@ export function oaHandler(deps: OAHandlerDeps) {
         })
         return { account: toProtoOfficialAccount(account) }
       },
-      async deleteOfficialAccount(req) {
+      async deleteOfficialAccount(req, ctx: HandlerContext) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.id, auth.id)
         await deps.oa.deleteOfficialAccount(req.id)
         return {}
       },
-      async setWebhook(req) {
+      async setWebhook(req, ctx: HandlerContext) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.oaId, auth.id)
         const webhook = await deps.oa.setWebhook(req.oaId, req.url)
         return { webhook: toProtoWebhook(webhook) }
       },
-      async verifyWebhook(req) {
+      async verifyWebhook(req, ctx: HandlerContext) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.oaId, auth.id)
         const result = await deps.oa.verifyWebhook(req.oaId)
         const statusMap: Record<string, number> = {
           pending: 1,
@@ -189,11 +243,15 @@ export function oaHandler(deps: OAHandlerDeps) {
         }
         return { status: statusMap[result.status] ?? 0 }
       },
-      async getWebhook(req) {
+      async getWebhook(req, ctx: HandlerContext) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.oaId, auth.id)
         const webhook = await deps.oa.getWebhook(req.oaId)
         return { webhook: toProtoWebhook(webhook) }
       },
-      async issueAccessToken(req) {
+      async issueAccessToken(req, ctx: HandlerContext) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.oaId, auth.id)
         const result = await deps.oa.issueAccessToken({
           oaId: req.oaId,
           type: protoTokenTypeToDb(req.type),
@@ -206,7 +264,9 @@ export function oaHandler(deps: OAHandlerDeps) {
           keyId: result.key_id,
         }
       },
-      async listAccessTokens(req) {
+      async listAccessTokens(req, ctx: HandlerContext) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.oaId, auth.id)
         const tokens = await deps.oa.listAccessTokens(req.oaId, req.keyId)
         return {
           tokens: tokens.map((t) => ({
@@ -218,16 +278,25 @@ export function oaHandler(deps: OAHandlerDeps) {
           })),
         }
       },
-      async revokeAccessToken(req) {
+      async revokeAccessToken(req, ctx: HandlerContext) {
+        const auth = requireAuthData(ctx)
+        const tokenRow = await deps.oa.getAccessTokenById(req.tokenId)
+        if (!tokenRow) {
+          throw new ConnectError('Access token not found', Code.NotFound)
+        }
+        await assertOfficialAccountOwnedByUser(deps, tokenRow.oaId, auth.id)
         await deps.oa.revokeAccessToken(req.tokenId)
         return {}
       },
-      async revokeAllAccessTokens(req) {
+      async revokeAllAccessTokens(req, ctx: HandlerContext) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.oaId, auth.id)
         const result = await deps.oa.revokeAllAccessTokens(req.oaId, req.keyId)
         return { revokedCount: result.revoked_count }
       },
-      async searchOfficialAccounts(req) {
-        const accounts = await deps.oa.searchOAs(req.query)
+      async searchOfficialAccounts(req, ctx: HandlerContext) {
+        const auth = requireAuthData(ctx)
+        const accounts = await deps.oa.searchOAsForOwner(auth.id, req.query)
         return {
           accounts: accounts.map((a) => ({
             id: a.id,

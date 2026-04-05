@@ -7,6 +7,7 @@ import { createDb } from '@vine/db'
 import { ensureSeed } from '@vine/db/seed'
 
 import { connectRoutes } from './connect/routes'
+import { createOaAuthInterceptor } from './connect/oa-auth-interceptor'
 import { createAuthServer, authPlugin } from './plugins/auth'
 import { createZeroService, zeroPlugin } from './plugins/zero'
 import { oaMessagingPlugin } from './plugins/oa-messaging'
@@ -27,16 +28,16 @@ const database = getDatabase()
 const db = createDb()
 
 const oa = createOAService({ db, database })
+const auth = createAuthServer({ database, db })
 
 // ConnectRPC routes (GreeterService, OAService, etc.)
 await app.register(fastifyConnectPlugin, {
   routes: connectRoutes({ oa }),
+  interceptors: [createOaAuthInterceptor(auth)],
 })
 
 // Seed test data (only in dev with VITE_DEMO_MODE=1)
 await ensureSeed(database, db)
-
-const auth = createAuthServer({ database, db })
 const zero = createZeroService({
   auth,
   zeroUpstreamDb: process.env['ZERO_UPSTREAM_DB'] ?? '',

@@ -1,4 +1,4 @@
-import { eq, ilike, or } from 'drizzle-orm'
+import { and, eq, ilike, or } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { Pool } from 'pg'
 import type { schema } from '@vine/db'
@@ -300,6 +300,39 @@ export function createOAService(deps: OADeps) {
       .limit(20)
   }
 
+  async function searchOAsForOwner(ownerId: string, query: string) {
+    const searchPattern = `%${query}%`
+    return db
+      .select({
+        id: officialAccount.id,
+        name: officialAccount.name,
+        oaId: officialAccount.oaId,
+        description: officialAccount.description,
+        imageUrl: officialAccount.imageUrl,
+      })
+      .from(officialAccount)
+      .innerJoin(oaProvider, eq(officialAccount.providerId, oaProvider.id))
+      .where(
+        and(
+          eq(oaProvider.ownerId, ownerId),
+          or(
+            ilike(officialAccount.name, searchPattern),
+            ilike(officialAccount.oaId, searchPattern),
+          ),
+        ),
+      )
+      .limit(20)
+  }
+
+  async function getAccessTokenById(id: string) {
+    const [row] = await db
+      .select()
+      .from(oaAccessToken)
+      .where(eq(oaAccessToken.id, id))
+      .limit(1)
+    return row ?? null
+  }
+
   async function verifyWebhook(oaId: string) {
     const webhook = await getWebhook(oaId)
     if (!webhook) return { success: false, status: 'no_webhook' as const }
@@ -358,6 +391,8 @@ export function createOAService(deps: OADeps) {
     buildFollowEvent,
     buildUnfollowEvent,
     searchOAs,
+    searchOAsForOwner,
+    getAccessTokenById,
     verifyWebhook,
   }
 }
