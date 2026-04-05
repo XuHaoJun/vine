@@ -1,6 +1,6 @@
 # Vine Agents Guide
 
-Vine is LINE(a Instant Messaging) clone
+Vine is a self-hostable instant-messaging product modeled after LINE. It is not the official LINE platform: avoid assuming LINE Developers Console, Messaging API, LINE Login with LY Corp app/channel IDs, or calling LINE’s hosted `api.line.me` as an external integration target. This codebase is the server and clients: it exposes LINE-style / `api.line.me`-compatible APIs you operate locally or on your own infra. Build features against this repo unless the user explicitly asks for real LINE cloud integration.
 
 ## Essential Commands
 
