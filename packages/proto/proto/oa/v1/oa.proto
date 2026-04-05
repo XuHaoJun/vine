@@ -64,6 +64,12 @@ message DeleteProviderRequest {
 
 message DeleteProviderResponse {}
 
+message ListMyProvidersRequest {}
+
+message ListMyProvidersResponse {
+  repeated Provider providers = 1;
+}
+
 message ListProviderAccountsRequest {
   string provider_id = 1;
 }
@@ -250,6 +256,7 @@ message OfficialAccountSummary {
 // ── Service ──
 
 service OAService {
+  rpc ListMyProviders(ListMyProvidersRequest) returns (ListMyProvidersResponse);
   rpc CreateProvider(CreateProviderRequest) returns (CreateProviderResponse);
   rpc GetProvider(GetProviderRequest) returns (GetProviderResponse);
   rpc UpdateProvider(UpdateProviderRequest) returns (UpdateProviderResponse);

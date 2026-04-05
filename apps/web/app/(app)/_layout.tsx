@@ -42,7 +42,8 @@ export function AppLayout() {
   }
 
   // redirect logged-out users away from protected routes
-  const isLoggedInRoute = pathname.startsWith('/home')
+  const isLoggedInRoute =
+    pathname.startsWith('/home') || pathname.startsWith('/developers')
   if (state === 'logged-out' && isLoggedInRoute) {
     return <Redirect href="/auth/login" />
   }

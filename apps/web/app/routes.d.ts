@@ -14,6 +14,8 @@ declare module 'one' {
         | `/(app)/auth/login`
         | `/(app)/auth/login/password`
         | `/(app)/auth/oauth-callback`
+        | `/(app)/developers/console`
+        | `/(app)/developers/console/`
         | `/(app)/home`
         | `/(app)/home/(tabs)`
         | `/(app)/home/(tabs)/main`
@@ -34,6 +36,8 @@ declare module 'one' {
         | `/auth/login`
         | `/auth/login/password`
         | `/auth/oauth-callback`
+        | `/developers/console`
+        | `/developers/console/`
         | `/hello`
         | `/home`
         | `/home/(tabs)`
@@ -51,24 +55,36 @@ declare module 'one' {
         | `/home/talks/requests`
       DynamicRoutes: 
         | `/(app)/auth/signup/${OneRouter.SingleRoutePart<T>}`
+        | `/(app)/developers/console/channel/${OneRouter.SingleRoutePart<T>}`
+        | `/(app)/developers/console/provider/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/home/(tabs)/talks/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/home/talks/${OneRouter.SingleRoutePart<T>}`
         | `/auth/signup/${OneRouter.SingleRoutePart<T>}`
+        | `/developers/console/channel/${OneRouter.SingleRoutePart<T>}`
+        | `/developers/console/provider/${OneRouter.SingleRoutePart<T>}`
         | `/home/(tabs)/talks/${OneRouter.SingleRoutePart<T>}`
         | `/home/talks/${OneRouter.SingleRoutePart<T>}`
       DynamicRouteTemplate: 
         | `/(app)/auth/signup/[method]`
+        | `/(app)/developers/console/channel/[channelId]`
+        | `/(app)/developers/console/provider/[providerId]`
         | `/(app)/home/(tabs)/talks/[chatId]`
         | `/(app)/home/talks/[chatId]`
         | `/auth/signup/[method]`
+        | `/developers/console/channel/[channelId]`
+        | `/developers/console/provider/[providerId]`
         | `/home/(tabs)/talks/[chatId]`
         | `/home/talks/[chatId]`
       IsTyped: true
       RouteTypes: {
         '/(app)/auth/signup/[method]': RouteInfo<{ method: string }>
+        '/(app)/developers/console/channel/[channelId]': RouteInfo<{ channelId: string }>
+        '/(app)/developers/console/provider/[providerId]': RouteInfo<{ providerId: string }>
         '/(app)/home/(tabs)/talks/[chatId]': RouteInfo<{ chatId: string }>
         '/(app)/home/talks/[chatId]': RouteInfo<{ chatId: string }>
         '/auth/signup/[method]': RouteInfo<{ method: string }>
+        '/developers/console/channel/[channelId]': RouteInfo<{ channelId: string }>
+        '/developers/console/provider/[providerId]': RouteInfo<{ providerId: string }>
         '/home/(tabs)/talks/[chatId]': RouteInfo<{ chatId: string }>
         '/home/talks/[chatId]': RouteInfo<{ chatId: string }>
       }

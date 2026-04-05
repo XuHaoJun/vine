@@ -56,6 +56,10 @@ export function createOAService(deps: OADeps) {
       .where(eq(officialAccount.providerId, providerId))
   }
 
+  async function listMyProviders(ownerId: string) {
+    return db.select().from(oaProvider).where(eq(oaProvider.ownerId, ownerId))
+  }
+
   function generateChannelSecret() {
     return randomBytes(32).toString('hex')
   }
@@ -335,6 +339,7 @@ export function createOAService(deps: OADeps) {
     getProvider,
     updateProvider,
     deleteProvider,
+    listMyProviders,
     listProviderAccounts,
     createOfficialAccount,
     getOfficialAccount,

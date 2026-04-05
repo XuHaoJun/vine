@@ -403,17 +403,15 @@ describe('createOAService — Search', () => {
     mockDb.select.mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
-          limit: vi
-            .fn()
-            .mockResolvedValue([
-              {
-                id: 'oa-1',
-                name: 'Test Bot',
-                oaId: '@testbot',
-                description: 'A test bot',
-                imageUrl: '',
-              },
-            ]),
+          limit: vi.fn().mockResolvedValue([
+            {
+              id: 'oa-1',
+              name: 'Test Bot',
+              oaId: '@testbot',
+              description: 'A test bot',
+              imageUrl: '',
+            },
+          ]),
         }),
       }),
     })
@@ -447,13 +445,11 @@ describe('createOAService — VerifyWebhook', () => {
     mockDb.select
       .mockReturnValueOnce({
         from: vi.fn().mockReturnValue({
-          where: vi
-            .fn()
-            .mockReturnValue({
-              limit: vi
-                .fn()
-                .mockResolvedValue([{ id: 'webhook-1', url: 'https://example.com' }]),
-            }),
+          where: vi.fn().mockReturnValue({
+            limit: vi
+              .fn()
+              .mockResolvedValue([{ id: 'webhook-1', url: 'https://example.com' }]),
+          }),
         }),
       })
       .mockReturnValueOnce({

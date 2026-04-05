@@ -22,7 +22,7 @@ import type { Message } from '@bufbuild/protobuf'
 export const file_oa_v1_oa: GenFile =
   /*@__PURE__*/
   fileDesc(
-    'Cg5vYS92MS9vYS5wcm90bxIFb2EudjEiXgoIUHJvdmlkZXISCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIQCghvd25lcl9pZBgDIAEoCRISCgpjcmVhdGVkX2F0GAQgASgJEhIKCnVwZGF0ZWRfYXQYBSABKAkiJQoVQ3JlYXRlUHJvdmlkZXJSZXF1ZXN0EgwKBG5hbWUYASABKAkiOwoWQ3JlYXRlUHJvdmlkZXJSZXNwb25zZRIhCghwcm92aWRlchgBIAEoCzIPLm9hLnYxLlByb3ZpZGVyIiAKEkdldFByb3ZpZGVyUmVxdWVzdBIKCgJpZBgBIAEoCSI4ChNHZXRQcm92aWRlclJlc3BvbnNlEiEKCHByb3ZpZGVyGAEgASgLMg8ub2EudjEuUHJvdmlkZXIiPwoVVXBkYXRlUHJvdmlkZXJSZXF1ZXN0EgoKAmlkGAEgASgJEhEKBG5hbWUYAiABKAlIAIgBAUIHCgVfbmFtZSI7ChZVcGRhdGVQcm92aWRlclJlc3BvbnNlEiEKCHByb3ZpZGVyGAEgASgLMg8ub2EudjEuUHJvdmlkZXIiIwoVRGVsZXRlUHJvdmlkZXJSZXF1ZXN0EgoKAmlkGAEgASgJIhgKFkRlbGV0ZVByb3ZpZGVyUmVzcG9uc2UiMgobTGlzdFByb3ZpZGVyQWNjb3VudHNSZXF1ZXN0EhMKC3Byb3ZpZGVyX2lkGAEgASgJIkgKHExpc3RQcm92aWRlckFjY291bnRzUmVzcG9uc2USKAoIYWNjb3VudHMYASADKAsyFi5vYS52MS5PZmZpY2lhbEFjY291bnQiwAEKD09mZmljaWFsQWNjb3VudBIKCgJpZBgBIAEoCRITCgtwcm92aWRlcl9pZBgCIAEoCRIMCgRuYW1lGAMgASgJEg0KBW9hX2lkGAQgASgJEhMKC2Rlc2NyaXB0aW9uGAUgASgJEhEKCWltYWdlX3VybBgGIAEoCRIfCgZzdGF0dXMYByABKA4yDy5vYS52MS5PQVN0YXR1cxISCgpjcmVhdGVkX2F0GAggASgJEhIKCnVwZGF0ZWRfYXQYCSABKAkiLwoVT2ZmaWNpYWxBY2NvdW50U2VjcmV0EhYKDmNoYW5uZWxfc2VjcmV0GAEgASgJIqABChxDcmVhdGVPZmZpY2lhbEFjY291bnRSZXF1ZXN0EhMKC3Byb3ZpZGVyX2lkGAEgASgJEgwKBG5hbWUYAiABKAkSDQoFb2FfaWQYAyABKAkSGAoLZGVzY3JpcHRpb24YBCABKAlIAIgBARIWCglpbWFnZV91cmwYBSABKAlIAYgBAUIOCgxfZGVzY3JpcHRpb25CDAoKX2ltYWdlX3VybCJICh1DcmVhdGVPZmZpY2lhbEFjY291bnRSZXNwb25zZRInCgdhY2NvdW50GAEgASgLMhYub2EudjEuT2ZmaWNpYWxBY2NvdW50IicKGUdldE9mZmljaWFsQWNjb3VudFJlcXVlc3QSCgoCaWQYASABKAkiRQoaR2V0T2ZmaWNpYWxBY2NvdW50UmVzcG9uc2USJwoHYWNjb3VudBgBIAEoCzIWLm9hLnYxLk9mZmljaWFsQWNjb3VudCItCh9HZXRPZmZpY2lhbEFjY291bnRTZWNyZXRSZXF1ZXN0EgoKAmlkGAEgASgJIlAKIEdldE9mZmljaWFsQWNjb3VudFNlY3JldFJlc3BvbnNlEiwKBnNlY3JldBgBIAEoCzIcLm9hLnYxLk9mZmljaWFsQWNjb3VudFNlY3JldCLHAQocVXBkYXRlT2ZmaWNpYWxBY2NvdW50UmVxdWVzdBIKCgJpZBgBIAEoCRIRCgRuYW1lGAIgASgJSACIAQESGAoLZGVzY3JpcHRpb24YAyABKAlIAYgBARIWCglpbWFnZV91cmwYBCABKAlIAogBARIkCgZzdGF0dXMYBSABKA4yDy5vYS52MS5PQVN0YXR1c0gDiAEBQgcKBV9uYW1lQg4KDF9kZXNjcmlwdGlvbkIMCgpfaW1hZ2VfdXJsQgkKB19zdGF0dXMiSAodVXBkYXRlT2ZmaWNpYWxBY2NvdW50UmVzcG9uc2USJwoHYWNjb3VudBgBIAEoCzIWLm9hLnYxLk9mZmljaWFsQWNjb3VudCIqChxEZWxldGVPZmZpY2lhbEFjY291bnRSZXF1ZXN0EgoKAmlkGAEgASgJIh8KHURlbGV0ZU9mZmljaWFsQWNjb3VudFJlc3BvbnNlIp8BCgdXZWJob29rEgoKAmlkGAEgASgJEg0KBW9hX2lkGAIgASgJEgsKA3VybBgDIAEoCRIkCgZzdGF0dXMYBCABKA4yFC5vYS52MS5XZWJob29rU3RhdHVzEh0KEGxhc3RfdmVyaWZpZWRfYXQYBSABKAlIAIgBARISCgpjcmVhdGVkX2F0GAYgASgJQhMKEV9sYXN0X3ZlcmlmaWVkX2F0Ii8KEVNldFdlYmhvb2tSZXF1ZXN0Eg0KBW9hX2lkGAEgASgJEgsKA3VybBgCIAEoCSI1ChJTZXRXZWJob29rUmVzcG9uc2USHwoHd2ViaG9vaxgBIAEoCzIOLm9hLnYxLldlYmhvb2siJQoUVmVyaWZ5V2ViaG9va1JlcXVlc3QSDQoFb2FfaWQYASABKAkiPQoVVmVyaWZ5V2ViaG9va1Jlc3BvbnNlEiQKBnN0YXR1cxgBIAEoDjIULm9hLnYxLldlYmhvb2tTdGF0dXMiIgoRR2V0V2ViaG9va1JlcXVlc3QSDQoFb2FfaWQYASABKAkiRgoSR2V0V2ViaG9va1Jlc3BvbnNlEiQKB3dlYmhvb2sYASABKAsyDi5vYS52MS5XZWJob29rSACIAQFCCgoIX3dlYmhvb2siuQEKC0FjY2Vzc1Rva2VuEgoKAmlkGAEgASgJEg0KBW9hX2lkGAIgASgJEg0KBXRva2VuGAMgASgJEiQKBHR5cGUYBCABKA4yFi5vYS52MS5BY2Nlc3NUb2tlblR5cGUSEwoGa2V5X2lkGAUgASgJSACIAQESFwoKZXhwaXJlc19hdBgGIAEoCUgBiAEBEhIKCmNyZWF0ZWRfYXQYByABKAlCCQoHX2tleV9pZEINCgtfZXhwaXJlc19hdCJIChdMaXN0QWNjZXNzVG9rZW5zUmVxdWVzdBINCgVvYV9pZBgBIAEoCRITCgZrZXlfaWQYAiABKAlIAIgBAUIJCgdfa2V5X2lkIkUKGExpc3RBY2Nlc3NUb2tlbnNSZXNwb25zZRIpCgZ0b2tlbnMYASADKAsyGS5vYS52MS5BY2Nlc3NUb2tlblN1bW1hcnkiogEKEkFjY2Vzc1Rva2VuU3VtbWFyeRIKCgJpZBgBIAEoCRIkCgR0eXBlGAIgASgOMhYub2EudjEuQWNjZXNzVG9rZW5UeXBlEhMKBmtleV9pZBgDIAEoCUgAiAEBEhcKCmV4cGlyZXNfYXQYBCABKAlIAYgBARISCgpjcmVhdGVkX2F0GAUgASgJQgkKB19rZXlfaWRCDQoLX2V4cGlyZXNfYXQidgoXSXNzdWVBY2Nlc3NUb2tlblJlcXVlc3QSDQoFb2FfaWQYASABKAkSJAoEdHlwZRgCIAEoDjIWLm9hLnYxLkFjY2Vzc1Rva2VuVHlwZRIXCgpwdWJsaWNfa2V5GAMgASgJSACIAQFCDQoLX3B1YmxpY19rZXkieAoYSXNzdWVBY2Nlc3NUb2tlblJlc3BvbnNlEhQKDGFjY2Vzc190b2tlbhgBIAEoCRISCgpleHBpcmVzX2luGAIgASgFEhIKCnRva2VuX3R5cGUYAyABKAkSEwoGa2V5X2lkGAQgASgJSACIAQFCCQoHX2tleV9pZCIsChhSZXZva2VBY2Nlc3NUb2tlblJlcXVlc3QSEAoIdG9rZW5faWQYASABKAkiGwoZUmV2b2tlQWNjZXNzVG9rZW5SZXNwb25zZSI9ChxSZXZva2VBbGxBY2Nlc3NUb2tlbnNSZXF1ZXN0Eg0KBW9hX2lkGAEgASgJEg4KBmtleV9pZBgCIAEoCSI2Ch1SZXZva2VBbGxBY2Nlc3NUb2tlbnNSZXNwb25zZRIVCg1yZXZva2VkX2NvdW50GAEgASgFIi4KHVNlYXJjaE9mZmljaWFsQWNjb3VudHNSZXF1ZXN0Eg0KBXF1ZXJ5GAEgASgJIlEKHlNlYXJjaE9mZmljaWFsQWNjb3VudHNSZXNwb25zZRIvCghhY2NvdW50cxgBIAMoCzIdLm9hLnYxLk9mZmljaWFsQWNjb3VudFN1bW1hcnkiaQoWT2ZmaWNpYWxBY2NvdW50U3VtbWFyeRIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEg0KBW9hX2lkGAMgASgJEhMKC2Rlc2NyaXB0aW9uGAQgASgJEhEKCWltYWdlX3VybBgFIAEoCSpTCghPQVN0YXR1cxIZChVPQV9TVEFUVVNfVU5TUEVDSUZJRUQQABIUChBPQV9TVEFUVVNfQUNUSVZFEAESFgoST0FfU1RBVFVTX0RJU0FCTEVEEAIqgwEKDVdlYmhvb2tTdGF0dXMSHgoaV0VCSE9PS19TVEFUVVNfVU5TUEVDSUZJRUQQABIaChZXRUJIT09LX1NUQVRVU19QRU5ESU5HEAESGwoXV0VCSE9PS19TVEFUVVNfVkVSSUZJRUQQAhIZChVXRUJIT09LX1NUQVRVU19GQUlMRUQQAyp2Cg9BY2Nlc3NUb2tlblR5cGUSIQodQUNDRVNTX1RPS0VOX1RZUEVfVU5TUEVDSUZJRUQQABIhCh1BQ0NFU1NfVE9LRU5fVFlQRV9TSE9SVF9MSVZFRBABEh0KGUFDQ0VTU19UT0tFTl9UWVBFX0pXVF9WMjEQAjKyDAoJT0FTZXJ2aWNlEk0KDkNyZWF0ZVByb3ZpZGVyEhwub2EudjEuQ3JlYXRlUHJvdmlkZXJSZXF1ZXN0Gh0ub2EudjEuQ3JlYXRlUHJvdmlkZXJSZXNwb25zZRJECgtHZXRQcm92aWRlchIZLm9hLnYxLkdldFByb3ZpZGVyUmVxdWVzdBoaLm9hLnYxLkdldFByb3ZpZGVyUmVzcG9uc2USTQoOVXBkYXRlUHJvdmlkZXISHC5vYS52MS5VcGRhdGVQcm92aWRlclJlcXVlc3QaHS5vYS52MS5VcGRhdGVQcm92aWRlclJlc3BvbnNlEk0KDkRlbGV0ZVByb3ZpZGVyEhwub2EudjEuRGVsZXRlUHJvdmlkZXJSZXF1ZXN0Gh0ub2EudjEuRGVsZXRlUHJvdmlkZXJSZXNwb25zZRJfChRMaXN0UHJvdmlkZXJBY2NvdW50cxIiLm9hLnYxLkxpc3RQcm92aWRlckFjY291bnRzUmVxdWVzdBojLm9hLnYxLkxpc3RQcm92aWRlckFjY291bnRzUmVzcG9uc2USYgoVQ3JlYXRlT2ZmaWNpYWxBY2NvdW50EiMub2EudjEuQ3JlYXRlT2ZmaWNpYWxBY2NvdW50UmVxdWVzdBokLm9hLnYxLkNyZWF0ZU9mZmljaWFsQWNjb3VudFJlc3BvbnNlElkKEkdldE9mZmljaWFsQWNjb3VudBIgLm9hLnYxLkdldE9mZmljaWFsQWNjb3VudFJlcXVlc3QaIS5vYS52MS5HZXRPZmZpY2lhbEFjY291bnRSZXNwb25zZRJrChhHZXRPZmZpY2lhbEFjY291bnRTZWNyZXQSJi5vYS52MS5HZXRPZmZpY2lhbEFjY291bnRTZWNyZXRSZXF1ZXN0Gicub2EudjEuR2V0T2ZmaWNpYWxBY2NvdW50U2VjcmV0UmVzcG9uc2USYgoVVXBkYXRlT2ZmaWNpYWxBY2NvdW50EiMub2EudjEuVXBkYXRlT2ZmaWNpYWxBY2NvdW50UmVxdWVzdBokLm9hLnYxLlVwZGF0ZU9mZmljaWFsQWNjb3VudFJlc3BvbnNlEmIKFURlbGV0ZU9mZmljaWFsQWNjb3VudBIjLm9hLnYxLkRlbGV0ZU9mZmljaWFsQWNjb3VudFJlcXVlc3QaJC5vYS52MS5EZWxldGVPZmZpY2lhbEFjY291bnRSZXNwb25zZRJBCgpTZXRXZWJob29rEhgub2EudjEuU2V0V2ViaG9va1JlcXVlc3QaGS5vYS52MS5TZXRXZWJob29rUmVzcG9uc2USSgoNVmVyaWZ5V2ViaG9vaxIbLm9hLnYxLlZlcmlmeVdlYmhvb2tSZXF1ZXN0Ghwub2EudjEuVmVyaWZ5V2ViaG9va1Jlc3BvbnNlEkEKCkdldFdlYmhvb2sSGC5vYS52MS5HZXRXZWJob29rUmVxdWVzdBoZLm9hLnYxLkdldFdlYmhvb2tSZXNwb25zZRJTChBJc3N1ZUFjY2Vzc1Rva2VuEh4ub2EudjEuSXNzdWVBY2Nlc3NUb2tlblJlcXVlc3QaHy5vYS52MS5Jc3N1ZUFjY2Vzc1Rva2VuUmVzcG9uc2USUwoQTGlzdEFjY2Vzc1Rva2VucxIeLm9hLnYxLkxpc3RBY2Nlc3NUb2tlbnNSZXF1ZXN0Gh8ub2EudjEuTGlzdEFjY2Vzc1Rva2Vuc1Jlc3BvbnNlElYKEVJldm9rZUFjY2Vzc1Rva2VuEh8ub2EudjEuUmV2b2tlQWNjZXNzVG9rZW5SZXF1ZXN0GiAub2EudjEuUmV2b2tlQWNjZXNzVG9rZW5SZXNwb25zZRJiChVSZXZva2VBbGxBY2Nlc3NUb2tlbnMSIy5vYS52MS5SZXZva2VBbGxBY2Nlc3NUb2tlbnNSZXF1ZXN0GiQub2EudjEuUmV2b2tlQWxsQWNjZXNzVG9rZW5zUmVzcG9uc2USZQoWU2VhcmNoT2ZmaWNpYWxBY2NvdW50cxIkLm9hLnYxLlNlYXJjaE9mZmljaWFsQWNjb3VudHNSZXF1ZXN0GiUub2EudjEuU2VhcmNoT2ZmaWNpYWxBY2NvdW50c1Jlc3BvbnNlYgZwcm90bzM',
+    'Cg5vYS92MS9vYS5wcm90bxIFb2EudjEiXgoIUHJvdmlkZXISCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIQCghvd25lcl9pZBgDIAEoCRISCgpjcmVhdGVkX2F0GAQgASgJEhIKCnVwZGF0ZWRfYXQYBSABKAkiJQoVQ3JlYXRlUHJvdmlkZXJSZXF1ZXN0EgwKBG5hbWUYASABKAkiOwoWQ3JlYXRlUHJvdmlkZXJSZXNwb25zZRIhCghwcm92aWRlchgBIAEoCzIPLm9hLnYxLlByb3ZpZGVyIiAKEkdldFByb3ZpZGVyUmVxdWVzdBIKCgJpZBgBIAEoCSI4ChNHZXRQcm92aWRlclJlc3BvbnNlEiEKCHByb3ZpZGVyGAEgASgLMg8ub2EudjEuUHJvdmlkZXIiPwoVVXBkYXRlUHJvdmlkZXJSZXF1ZXN0EgoKAmlkGAEgASgJEhEKBG5hbWUYAiABKAlIAIgBAUIHCgVfbmFtZSI7ChZVcGRhdGVQcm92aWRlclJlc3BvbnNlEiEKCHByb3ZpZGVyGAEgASgLMg8ub2EudjEuUHJvdmlkZXIiIwoVRGVsZXRlUHJvdmlkZXJSZXF1ZXN0EgoKAmlkGAEgASgJIhgKFkRlbGV0ZVByb3ZpZGVyUmVzcG9uc2UiGAoWTGlzdE15UHJvdmlkZXJzUmVxdWVzdCI9ChdMaXN0TXlQcm92aWRlcnNSZXNwb25zZRIiCglwcm92aWRlcnMYASADKAsyDy5vYS52MS5Qcm92aWRlciIyChtMaXN0UHJvdmlkZXJBY2NvdW50c1JlcXVlc3QSEwoLcHJvdmlkZXJfaWQYASABKAkiSAocTGlzdFByb3ZpZGVyQWNjb3VudHNSZXNwb25zZRIoCghhY2NvdW50cxgBIAMoCzIWLm9hLnYxLk9mZmljaWFsQWNjb3VudCLAAQoPT2ZmaWNpYWxBY2NvdW50EgoKAmlkGAEgASgJEhMKC3Byb3ZpZGVyX2lkGAIgASgJEgwKBG5hbWUYAyABKAkSDQoFb2FfaWQYBCABKAkSEwoLZGVzY3JpcHRpb24YBSABKAkSEQoJaW1hZ2VfdXJsGAYgASgJEh8KBnN0YXR1cxgHIAEoDjIPLm9hLnYxLk9BU3RhdHVzEhIKCmNyZWF0ZWRfYXQYCCABKAkSEgoKdXBkYXRlZF9hdBgJIAEoCSIvChVPZmZpY2lhbEFjY291bnRTZWNyZXQSFgoOY2hhbm5lbF9zZWNyZXQYASABKAkioAEKHENyZWF0ZU9mZmljaWFsQWNjb3VudFJlcXVlc3QSEwoLcHJvdmlkZXJfaWQYASABKAkSDAoEbmFtZRgCIAEoCRINCgVvYV9pZBgDIAEoCRIYCgtkZXNjcmlwdGlvbhgEIAEoCUgAiAEBEhYKCWltYWdlX3VybBgFIAEoCUgBiAEBQg4KDF9kZXNjcmlwdGlvbkIMCgpfaW1hZ2VfdXJsIkgKHUNyZWF0ZU9mZmljaWFsQWNjb3VudFJlc3BvbnNlEicKB2FjY291bnQYASABKAsyFi5vYS52MS5PZmZpY2lhbEFjY291bnQiJwoZR2V0T2ZmaWNpYWxBY2NvdW50UmVxdWVzdBIKCgJpZBgBIAEoCSJFChpHZXRPZmZpY2lhbEFjY291bnRSZXNwb25zZRInCgdhY2NvdW50GAEgASgLMhYub2EudjEuT2ZmaWNpYWxBY2NvdW50Ii0KH0dldE9mZmljaWFsQWNjb3VudFNlY3JldFJlcXVlc3QSCgoCaWQYASABKAkiUAogR2V0T2ZmaWNpYWxBY2NvdW50U2VjcmV0UmVzcG9uc2USLAoGc2VjcmV0GAEgASgLMhwub2EudjEuT2ZmaWNpYWxBY2NvdW50U2VjcmV0IscBChxVcGRhdGVPZmZpY2lhbEFjY291bnRSZXF1ZXN0EgoKAmlkGAEgASgJEhEKBG5hbWUYAiABKAlIAIgBARIYCgtkZXNjcmlwdGlvbhgDIAEoCUgBiAEBEhYKCWltYWdlX3VybBgEIAEoCUgCiAEBEiQKBnN0YXR1cxgFIAEoDjIPLm9hLnYxLk9BU3RhdHVzSAOIAQFCBwoFX25hbWVCDgoMX2Rlc2NyaXB0aW9uQgwKCl9pbWFnZV91cmxCCQoHX3N0YXR1cyJICh1VcGRhdGVPZmZpY2lhbEFjY291bnRSZXNwb25zZRInCgdhY2NvdW50GAEgASgLMhYub2EudjEuT2ZmaWNpYWxBY2NvdW50IioKHERlbGV0ZU9mZmljaWFsQWNjb3VudFJlcXVlc3QSCgoCaWQYASABKAkiHwodRGVsZXRlT2ZmaWNpYWxBY2NvdW50UmVzcG9uc2UinwEKB1dlYmhvb2sSCgoCaWQYASABKAkSDQoFb2FfaWQYAiABKAkSCwoDdXJsGAMgASgJEiQKBnN0YXR1cxgEIAEoDjIULm9hLnYxLldlYmhvb2tTdGF0dXMSHQoQbGFzdF92ZXJpZmllZF9hdBgFIAEoCUgAiAEBEhIKCmNyZWF0ZWRfYXQYBiABKAlCEwoRX2xhc3RfdmVyaWZpZWRfYXQiLwoRU2V0V2ViaG9va1JlcXVlc3QSDQoFb2FfaWQYASABKAkSCwoDdXJsGAIgASgJIjUKElNldFdlYmhvb2tSZXNwb25zZRIfCgd3ZWJob29rGAEgASgLMg4ub2EudjEuV2ViaG9vayIlChRWZXJpZnlXZWJob29rUmVxdWVzdBINCgVvYV9pZBgBIAEoCSI9ChVWZXJpZnlXZWJob29rUmVzcG9uc2USJAoGc3RhdHVzGAEgASgOMhQub2EudjEuV2ViaG9va1N0YXR1cyIiChFHZXRXZWJob29rUmVxdWVzdBINCgVvYV9pZBgBIAEoCSJGChJHZXRXZWJob29rUmVzcG9uc2USJAoHd2ViaG9vaxgBIAEoCzIOLm9hLnYxLldlYmhvb2tIAIgBAUIKCghfd2ViaG9vayK5AQoLQWNjZXNzVG9rZW4SCgoCaWQYASABKAkSDQoFb2FfaWQYAiABKAkSDQoFdG9rZW4YAyABKAkSJAoEdHlwZRgEIAEoDjIWLm9hLnYxLkFjY2Vzc1Rva2VuVHlwZRITCgZrZXlfaWQYBSABKAlIAIgBARIXCgpleHBpcmVzX2F0GAYgASgJSAGIAQESEgoKY3JlYXRlZF9hdBgHIAEoCUIJCgdfa2V5X2lkQg0KC19leHBpcmVzX2F0IkgKF0xpc3RBY2Nlc3NUb2tlbnNSZXF1ZXN0Eg0KBW9hX2lkGAEgASgJEhMKBmtleV9pZBgCIAEoCUgAiAEBQgkKB19rZXlfaWQiRQoYTGlzdEFjY2Vzc1Rva2Vuc1Jlc3BvbnNlEikKBnRva2VucxgBIAMoCzIZLm9hLnYxLkFjY2Vzc1Rva2VuU3VtbWFyeSKiAQoSQWNjZXNzVG9rZW5TdW1tYXJ5EgoKAmlkGAEgASgJEiQKBHR5cGUYAiABKA4yFi5vYS52MS5BY2Nlc3NUb2tlblR5cGUSEwoGa2V5X2lkGAMgASgJSACIAQESFwoKZXhwaXJlc19hdBgEIAEoCUgBiAEBEhIKCmNyZWF0ZWRfYXQYBSABKAlCCQoHX2tleV9pZEINCgtfZXhwaXJlc19hdCJ2ChdJc3N1ZUFjY2Vzc1Rva2VuUmVxdWVzdBINCgVvYV9pZBgBIAEoCRIkCgR0eXBlGAIgASgOMhYub2EudjEuQWNjZXNzVG9rZW5UeXBlEhcKCnB1YmxpY19rZXkYAyABKAlIAIgBAUINCgtfcHVibGljX2tleSJ4ChhJc3N1ZUFjY2Vzc1Rva2VuUmVzcG9uc2USFAoMYWNjZXNzX3Rva2VuGAEgASgJEhIKCmV4cGlyZXNfaW4YAiABKAUSEgoKdG9rZW5fdHlwZRgDIAEoCRITCgZrZXlfaWQYBCABKAlIAIgBAUIJCgdfa2V5X2lkIiwKGFJldm9rZUFjY2Vzc1Rva2VuUmVxdWVzdBIQCgh0b2tlbl9pZBgBIAEoCSIbChlSZXZva2VBY2Nlc3NUb2tlblJlc3BvbnNlIj0KHFJldm9rZUFsbEFjY2Vzc1Rva2Vuc1JlcXVlc3QSDQoFb2FfaWQYASABKAkSDgoGa2V5X2lkGAIgASgJIjYKHVJldm9rZUFsbEFjY2Vzc1Rva2Vuc1Jlc3BvbnNlEhUKDXJldm9rZWRfY291bnQYASABKAUiLgodU2VhcmNoT2ZmaWNpYWxBY2NvdW50c1JlcXVlc3QSDQoFcXVlcnkYASABKAkiUQoeU2VhcmNoT2ZmaWNpYWxBY2NvdW50c1Jlc3BvbnNlEi8KCGFjY291bnRzGAEgAygLMh0ub2EudjEuT2ZmaWNpYWxBY2NvdW50U3VtbWFyeSJpChZPZmZpY2lhbEFjY291bnRTdW1tYXJ5EgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSDQoFb2FfaWQYAyABKAkSEwoLZGVzY3JpcHRpb24YBCABKAkSEQoJaW1hZ2VfdXJsGAUgASgJKlMKCE9BU3RhdHVzEhkKFU9BX1NUQVRVU19VTlNQRUNJRklFRBAAEhQKEE9BX1NUQVRVU19BQ1RJVkUQARIWChJPQV9TVEFUVVNfRElTQUJMRUQQAiqDAQoNV2ViaG9va1N0YXR1cxIeChpXRUJIT09LX1NUQVRVU19VTlNQRUNJRklFRBAAEhoKFldFQkhPT0tfU1RBVFVTX1BFTkRJTkcQARIbChdXRUJIT09LX1NUQVRVU19WRVJJRklFRBACEhkKFVdFQkhPT0tfU1RBVFVTX0ZBSUxFRBADKnYKD0FjY2Vzc1Rva2VuVHlwZRIhCh1BQ0NFU1NfVE9LRU5fVFlQRV9VTlNQRUNJRklFRBAAEiEKHUFDQ0VTU19UT0tFTl9UWVBFX1NIT1JUX0xJVkVEEAESHQoZQUNDRVNTX1RPS0VOX1RZUEVfSldUX1YyMRACMoQNCglPQVNlcnZpY2USUAoPTGlzdE15UHJvdmlkZXJzEh0ub2EudjEuTGlzdE15UHJvdmlkZXJzUmVxdWVzdBoeLm9hLnYxLkxpc3RNeVByb3ZpZGVyc1Jlc3BvbnNlEk0KDkNyZWF0ZVByb3ZpZGVyEhwub2EudjEuQ3JlYXRlUHJvdmlkZXJSZXF1ZXN0Gh0ub2EudjEuQ3JlYXRlUHJvdmlkZXJSZXNwb25zZRJECgtHZXRQcm92aWRlchIZLm9hLnYxLkdldFByb3ZpZGVyUmVxdWVzdBoaLm9hLnYxLkdldFByb3ZpZGVyUmVzcG9uc2USTQoOVXBkYXRlUHJvdmlkZXISHC5vYS52MS5VcGRhdGVQcm92aWRlclJlcXVlc3QaHS5vYS52MS5VcGRhdGVQcm92aWRlclJlc3BvbnNlEk0KDkRlbGV0ZVByb3ZpZGVyEhwub2EudjEuRGVsZXRlUHJvdmlkZXJSZXF1ZXN0Gh0ub2EudjEuRGVsZXRlUHJvdmlkZXJSZXNwb25zZRJfChRMaXN0UHJvdmlkZXJBY2NvdW50cxIiLm9hLnYxLkxpc3RQcm92aWRlckFjY291bnRzUmVxdWVzdBojLm9hLnYxLkxpc3RQcm92aWRlckFjY291bnRzUmVzcG9uc2USYgoVQ3JlYXRlT2ZmaWNpYWxBY2NvdW50EiMub2EudjEuQ3JlYXRlT2ZmaWNpYWxBY2NvdW50UmVxdWVzdBokLm9hLnYxLkNyZWF0ZU9mZmljaWFsQWNjb3VudFJlc3BvbnNlElkKEkdldE9mZmljaWFsQWNjb3VudBIgLm9hLnYxLkdldE9mZmljaWFsQWNjb3VudFJlcXVlc3QaIS5vYS52MS5HZXRPZmZpY2lhbEFjY291bnRSZXNwb25zZRJrChhHZXRPZmZpY2lhbEFjY291bnRTZWNyZXQSJi5vYS52MS5HZXRPZmZpY2lhbEFjY291bnRTZWNyZXRSZXF1ZXN0Gicub2EudjEuR2V0T2ZmaWNpYWxBY2NvdW50U2VjcmV0UmVzcG9uc2USYgoVVXBkYXRlT2ZmaWNpYWxBY2NvdW50EiMub2EudjEuVXBkYXRlT2ZmaWNpYWxBY2NvdW50UmVxdWVzdBokLm9hLnYxLlVwZGF0ZU9mZmljaWFsQWNjb3VudFJlc3BvbnNlEmIKFURlbGV0ZU9mZmljaWFsQWNjb3VudBIjLm9hLnYxLkRlbGV0ZU9mZmljaWFsQWNjb3VudFJlcXVlc3QaJC5vYS52MS5EZWxldGVPZmZpY2lhbEFjY291bnRSZXNwb25zZRJBCgpTZXRXZWJob29rEhgub2EudjEuU2V0V2ViaG9va1JlcXVlc3QaGS5vYS52MS5TZXRXZWJob29rUmVzcG9uc2USSgoNVmVyaWZ5V2ViaG9vaxIbLm9hLnYxLlZlcmlmeVdlYmhvb2tSZXF1ZXN0Ghwub2EudjEuVmVyaWZ5V2ViaG9va1Jlc3BvbnNlEkEKCkdldFdlYmhvb2sSGC5vYS52MS5HZXRXZWJob29rUmVxdWVzdBoZLm9hLnYxLkdldFdlYmhvb2tSZXNwb25zZRJTChBJc3N1ZUFjY2Vzc1Rva2VuEh4ub2EudjEuSXNzdWVBY2Nlc3NUb2tlblJlcXVlc3QaHy5vYS52MS5Jc3N1ZUFjY2Vzc1Rva2VuUmVzcG9uc2USUwoQTGlzdEFjY2Vzc1Rva2VucxIeLm9hLnYxLkxpc3RBY2Nlc3NUb2tlbnNSZXF1ZXN0Gh8ub2EudjEuTGlzdEFjY2Vzc1Rva2Vuc1Jlc3BvbnNlElYKEVJldm9rZUFjY2Vzc1Rva2VuEh8ub2EudjEuUmV2b2tlQWNjZXNzVG9rZW5SZXF1ZXN0GiAub2EudjEuUmV2b2tlQWNjZXNzVG9rZW5SZXNwb25zZRJiChVSZXZva2VBbGxBY2Nlc3NUb2tlbnMSIy5vYS52MS5SZXZva2VBbGxBY2Nlc3NUb2tlbnNSZXF1ZXN0GiQub2EudjEuUmV2b2tlQWxsQWNjZXNzVG9rZW5zUmVzcG9uc2USZQoWU2VhcmNoT2ZmaWNpYWxBY2NvdW50cxIkLm9hLnYxLlNlYXJjaE9mZmljaWFsQWNjb3VudHNSZXF1ZXN0GiUub2EudjEuU2VhcmNoT2ZmaWNpYWxBY2NvdW50c1Jlc3BvbnNlYgZwcm90bzM',
   )
 
 /**
@@ -208,6 +208,37 @@ export const DeleteProviderResponseSchema: GenMessage<DeleteProviderResponse> =
   messageDesc(file_oa_v1_oa, 8)
 
 /**
+ * @generated from message oa.v1.ListMyProvidersRequest
+ */
+export type ListMyProvidersRequest = Message<'oa.v1.ListMyProvidersRequest'> & {}
+
+/**
+ * Describes the message oa.v1.ListMyProvidersRequest.
+ * Use `create(ListMyProvidersRequestSchema)` to create a new message.
+ */
+export const ListMyProvidersRequestSchema: GenMessage<ListMyProvidersRequest> =
+  /*@__PURE__*/
+  messageDesc(file_oa_v1_oa, 9)
+
+/**
+ * @generated from message oa.v1.ListMyProvidersResponse
+ */
+export type ListMyProvidersResponse = Message<'oa.v1.ListMyProvidersResponse'> & {
+  /**
+   * @generated from field: repeated oa.v1.Provider providers = 1;
+   */
+  providers: Provider[]
+}
+
+/**
+ * Describes the message oa.v1.ListMyProvidersResponse.
+ * Use `create(ListMyProvidersResponseSchema)` to create a new message.
+ */
+export const ListMyProvidersResponseSchema: GenMessage<ListMyProvidersResponse> =
+  /*@__PURE__*/
+  messageDesc(file_oa_v1_oa, 10)
+
+/**
  * @generated from message oa.v1.ListProviderAccountsRequest
  */
 export type ListProviderAccountsRequest = Message<'oa.v1.ListProviderAccountsRequest'> & {
@@ -223,7 +254,7 @@ export type ListProviderAccountsRequest = Message<'oa.v1.ListProviderAccountsReq
  */
 export const ListProviderAccountsRequestSchema: GenMessage<ListProviderAccountsRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 9)
+  messageDesc(file_oa_v1_oa, 11)
 
 /**
  * @generated from message oa.v1.ListProviderAccountsResponse
@@ -242,7 +273,7 @@ export type ListProviderAccountsResponse =
  */
 export const ListProviderAccountsResponseSchema: GenMessage<ListProviderAccountsResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 10)
+  messageDesc(file_oa_v1_oa, 12)
 
 /**
  * @generated from message oa.v1.OfficialAccount
@@ -300,7 +331,7 @@ export type OfficialAccount = Message<'oa.v1.OfficialAccount'> & {
  */
 export const OfficialAccountSchema: GenMessage<OfficialAccount> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 11)
+  messageDesc(file_oa_v1_oa, 13)
 
 /**
  * @generated from message oa.v1.OfficialAccountSecret
@@ -318,7 +349,7 @@ export type OfficialAccountSecret = Message<'oa.v1.OfficialAccountSecret'> & {
  */
 export const OfficialAccountSecretSchema: GenMessage<OfficialAccountSecret> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 12)
+  messageDesc(file_oa_v1_oa, 14)
 
 /**
  * @generated from message oa.v1.CreateOfficialAccountRequest
@@ -357,7 +388,7 @@ export type CreateOfficialAccountRequest =
  */
 export const CreateOfficialAccountRequestSchema: GenMessage<CreateOfficialAccountRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 13)
+  messageDesc(file_oa_v1_oa, 15)
 
 /**
  * @generated from message oa.v1.CreateOfficialAccountResponse
@@ -376,7 +407,7 @@ export type CreateOfficialAccountResponse =
  */
 export const CreateOfficialAccountResponseSchema: GenMessage<CreateOfficialAccountResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 14)
+  messageDesc(file_oa_v1_oa, 16)
 
 /**
  * @generated from message oa.v1.GetOfficialAccountRequest
@@ -394,7 +425,7 @@ export type GetOfficialAccountRequest = Message<'oa.v1.GetOfficialAccountRequest
  */
 export const GetOfficialAccountRequestSchema: GenMessage<GetOfficialAccountRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 15)
+  messageDesc(file_oa_v1_oa, 17)
 
 /**
  * @generated from message oa.v1.GetOfficialAccountResponse
@@ -412,7 +443,7 @@ export type GetOfficialAccountResponse = Message<'oa.v1.GetOfficialAccountRespon
  */
 export const GetOfficialAccountResponseSchema: GenMessage<GetOfficialAccountResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 16)
+  messageDesc(file_oa_v1_oa, 18)
 
 /**
  * @generated from message oa.v1.GetOfficialAccountSecretRequest
@@ -431,7 +462,7 @@ export type GetOfficialAccountSecretRequest =
  */
 export const GetOfficialAccountSecretRequestSchema: GenMessage<GetOfficialAccountSecretRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 17)
+  messageDesc(file_oa_v1_oa, 19)
 
 /**
  * @generated from message oa.v1.GetOfficialAccountSecretResponse
@@ -450,7 +481,7 @@ export type GetOfficialAccountSecretResponse =
  */
 export const GetOfficialAccountSecretResponseSchema: GenMessage<GetOfficialAccountSecretResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 18)
+  messageDesc(file_oa_v1_oa, 20)
 
 /**
  * @generated from message oa.v1.UpdateOfficialAccountRequest
@@ -489,7 +520,7 @@ export type UpdateOfficialAccountRequest =
  */
 export const UpdateOfficialAccountRequestSchema: GenMessage<UpdateOfficialAccountRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 19)
+  messageDesc(file_oa_v1_oa, 21)
 
 /**
  * @generated from message oa.v1.UpdateOfficialAccountResponse
@@ -508,7 +539,7 @@ export type UpdateOfficialAccountResponse =
  */
 export const UpdateOfficialAccountResponseSchema: GenMessage<UpdateOfficialAccountResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 20)
+  messageDesc(file_oa_v1_oa, 22)
 
 /**
  * @generated from message oa.v1.DeleteOfficialAccountRequest
@@ -527,7 +558,7 @@ export type DeleteOfficialAccountRequest =
  */
 export const DeleteOfficialAccountRequestSchema: GenMessage<DeleteOfficialAccountRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 21)
+  messageDesc(file_oa_v1_oa, 23)
 
 /**
  * @generated from message oa.v1.DeleteOfficialAccountResponse
@@ -541,7 +572,7 @@ export type DeleteOfficialAccountResponse =
  */
 export const DeleteOfficialAccountResponseSchema: GenMessage<DeleteOfficialAccountResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 22)
+  messageDesc(file_oa_v1_oa, 24)
 
 /**
  * @generated from message oa.v1.Webhook
@@ -584,7 +615,7 @@ export type Webhook = Message<'oa.v1.Webhook'> & {
  */
 export const WebhookSchema: GenMessage<Webhook> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 23)
+  messageDesc(file_oa_v1_oa, 25)
 
 /**
  * @generated from message oa.v1.SetWebhookRequest
@@ -607,7 +638,7 @@ export type SetWebhookRequest = Message<'oa.v1.SetWebhookRequest'> & {
  */
 export const SetWebhookRequestSchema: GenMessage<SetWebhookRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 24)
+  messageDesc(file_oa_v1_oa, 26)
 
 /**
  * @generated from message oa.v1.SetWebhookResponse
@@ -625,7 +656,7 @@ export type SetWebhookResponse = Message<'oa.v1.SetWebhookResponse'> & {
  */
 export const SetWebhookResponseSchema: GenMessage<SetWebhookResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 25)
+  messageDesc(file_oa_v1_oa, 27)
 
 /**
  * @generated from message oa.v1.VerifyWebhookRequest
@@ -643,7 +674,7 @@ export type VerifyWebhookRequest = Message<'oa.v1.VerifyWebhookRequest'> & {
  */
 export const VerifyWebhookRequestSchema: GenMessage<VerifyWebhookRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 26)
+  messageDesc(file_oa_v1_oa, 28)
 
 /**
  * @generated from message oa.v1.VerifyWebhookResponse
@@ -661,7 +692,7 @@ export type VerifyWebhookResponse = Message<'oa.v1.VerifyWebhookResponse'> & {
  */
 export const VerifyWebhookResponseSchema: GenMessage<VerifyWebhookResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 27)
+  messageDesc(file_oa_v1_oa, 29)
 
 /**
  * @generated from message oa.v1.GetWebhookRequest
@@ -679,7 +710,7 @@ export type GetWebhookRequest = Message<'oa.v1.GetWebhookRequest'> & {
  */
 export const GetWebhookRequestSchema: GenMessage<GetWebhookRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 28)
+  messageDesc(file_oa_v1_oa, 30)
 
 /**
  * @generated from message oa.v1.GetWebhookResponse
@@ -697,7 +728,7 @@ export type GetWebhookResponse = Message<'oa.v1.GetWebhookResponse'> & {
  */
 export const GetWebhookResponseSchema: GenMessage<GetWebhookResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 29)
+  messageDesc(file_oa_v1_oa, 31)
 
 /**
  * @generated from message oa.v1.AccessToken
@@ -745,7 +776,7 @@ export type AccessToken = Message<'oa.v1.AccessToken'> & {
  */
 export const AccessTokenSchema: GenMessage<AccessToken> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 30)
+  messageDesc(file_oa_v1_oa, 32)
 
 /**
  * @generated from message oa.v1.ListAccessTokensRequest
@@ -768,7 +799,7 @@ export type ListAccessTokensRequest = Message<'oa.v1.ListAccessTokensRequest'> &
  */
 export const ListAccessTokensRequestSchema: GenMessage<ListAccessTokensRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 31)
+  messageDesc(file_oa_v1_oa, 33)
 
 /**
  * @generated from message oa.v1.ListAccessTokensResponse
@@ -786,7 +817,7 @@ export type ListAccessTokensResponse = Message<'oa.v1.ListAccessTokensResponse'>
  */
 export const ListAccessTokensResponseSchema: GenMessage<ListAccessTokensResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 32)
+  messageDesc(file_oa_v1_oa, 34)
 
 /**
  * @generated from message oa.v1.AccessTokenSummary
@@ -824,7 +855,7 @@ export type AccessTokenSummary = Message<'oa.v1.AccessTokenSummary'> & {
  */
 export const AccessTokenSummarySchema: GenMessage<AccessTokenSummary> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 33)
+  messageDesc(file_oa_v1_oa, 35)
 
 /**
  * @generated from message oa.v1.IssueAccessTokenRequest
@@ -852,7 +883,7 @@ export type IssueAccessTokenRequest = Message<'oa.v1.IssueAccessTokenRequest'> &
  */
 export const IssueAccessTokenRequestSchema: GenMessage<IssueAccessTokenRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 34)
+  messageDesc(file_oa_v1_oa, 36)
 
 /**
  * @generated from message oa.v1.IssueAccessTokenResponse
@@ -885,7 +916,7 @@ export type IssueAccessTokenResponse = Message<'oa.v1.IssueAccessTokenResponse'>
  */
 export const IssueAccessTokenResponseSchema: GenMessage<IssueAccessTokenResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 35)
+  messageDesc(file_oa_v1_oa, 37)
 
 /**
  * @generated from message oa.v1.RevokeAccessTokenRequest
@@ -903,7 +934,7 @@ export type RevokeAccessTokenRequest = Message<'oa.v1.RevokeAccessTokenRequest'>
  */
 export const RevokeAccessTokenRequestSchema: GenMessage<RevokeAccessTokenRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 36)
+  messageDesc(file_oa_v1_oa, 38)
 
 /**
  * @generated from message oa.v1.RevokeAccessTokenResponse
@@ -916,7 +947,7 @@ export type RevokeAccessTokenResponse = Message<'oa.v1.RevokeAccessTokenResponse
  */
 export const RevokeAccessTokenResponseSchema: GenMessage<RevokeAccessTokenResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 37)
+  messageDesc(file_oa_v1_oa, 39)
 
 /**
  * @generated from message oa.v1.RevokeAllAccessTokensRequest
@@ -940,7 +971,7 @@ export type RevokeAllAccessTokensRequest =
  */
 export const RevokeAllAccessTokensRequestSchema: GenMessage<RevokeAllAccessTokensRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 38)
+  messageDesc(file_oa_v1_oa, 40)
 
 /**
  * @generated from message oa.v1.RevokeAllAccessTokensResponse
@@ -959,7 +990,7 @@ export type RevokeAllAccessTokensResponse =
  */
 export const RevokeAllAccessTokensResponseSchema: GenMessage<RevokeAllAccessTokensResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 39)
+  messageDesc(file_oa_v1_oa, 41)
 
 /**
  * @generated from message oa.v1.SearchOfficialAccountsRequest
@@ -978,7 +1009,7 @@ export type SearchOfficialAccountsRequest =
  */
 export const SearchOfficialAccountsRequestSchema: GenMessage<SearchOfficialAccountsRequest> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 40)
+  messageDesc(file_oa_v1_oa, 42)
 
 /**
  * @generated from message oa.v1.SearchOfficialAccountsResponse
@@ -997,7 +1028,7 @@ export type SearchOfficialAccountsResponse =
  */
 export const SearchOfficialAccountsResponseSchema: GenMessage<SearchOfficialAccountsResponse> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 41)
+  messageDesc(file_oa_v1_oa, 43)
 
 /**
  * @generated from message oa.v1.OfficialAccountSummary
@@ -1035,7 +1066,7 @@ export type OfficialAccountSummary = Message<'oa.v1.OfficialAccountSummary'> & {
  */
 export const OfficialAccountSummarySchema: GenMessage<OfficialAccountSummary> =
   /*@__PURE__*/
-  messageDesc(file_oa_v1_oa, 42)
+  messageDesc(file_oa_v1_oa, 44)
 
 /**
  * @generated from enum oa.v1.OAStatus
@@ -1125,6 +1156,14 @@ export const AccessTokenTypeSchema: GenEnum<AccessTokenType> =
  * @generated from service oa.v1.OAService
  */
 export const OAService: GenService<{
+  /**
+   * @generated from rpc oa.v1.OAService.ListMyProviders
+   */
+  listMyProviders: {
+    methodKind: 'unary'
+    input: typeof ListMyProvidersRequestSchema
+    output: typeof ListMyProvidersResponseSchema
+  }
   /**
    * @generated from rpc oa.v1.OAService.CreateProvider
    */

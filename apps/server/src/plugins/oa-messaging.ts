@@ -49,12 +49,10 @@ export async function oaMessagingPlugin(
         const body = request.body as { replyToken: string; messages: unknown[] }
 
         if (!body.replyToken || !body.messages?.length) {
-          return reply
-            .code(400)
-            .send({
-              message: 'replyToken and messages are required',
-              code: 'INVALID_REQUEST',
-            })
+          return reply.code(400).send({
+            message: 'replyToken and messages are required',
+            code: 'INVALID_REQUEST',
+          })
         }
 
         // MVP: return success without actual delivery

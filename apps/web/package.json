@@ -40,7 +40,6 @@
     "@better-fetch/fetch": "^1.1.18",
     "@bufbuild/protobuf": "^2.0.0",
     "@connectrpc/connect": "^2.0.0",
-    "@connectrpc/connect-query": "^2.2.0",
     "@connectrpc/connect-web": "^2.0.0",
     "@gorhom/bottom-sheet": "^5.2.6",
     "@hookform/resolvers": "^5.2.2",

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Demo Provider | LINE Developers</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "line-green": "#06C755",
+                        "line-bg": "#f9f9f9",
+                        "sidebar-bg": "#f0f0f0",
+                        "sidebar-text": "#333333",
+                        "nav-text": "#111111",
+                        "muted-text": "#666666",
+                        "border-light": "#eeeeee"
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+            font-size: 20px;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+        }
+        .active-tab {
+            border-bottom: 2px solid #06C755;
+            color: #111111 !important;
+            font-weight: 600;
+        }
+        .sidebar-item-active {
+            color: #06C755 !important;
+            font-weight: 600;
+            position: relative;
+        }
+        .sidebar-item-active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 16px;
+            background-color: #06C755;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="bg-white text-nav-text">
+<!-- TopNavBar -->
+<nav class="fixed top-0 z-50 bg-white border-b border-gray-100 flex justify-between items-center w-full px-8 h-16">
+<div class="flex items-center gap-12">
+<span class="text-xl font-bold tracking-tight text-black">LINE Developers</span>
+<div class="hidden lg:flex gap-6">
+<a class="text-sm font-semibold hover:text-line-green transition-colors" href="#">About</a>
+<a class="text-sm font-semibold hover:text-line-green transition-colors" href="#">News</a>
+<a class="text-sm font-semibold hover:text-line-green transition-colors" href="#">Products</a>
+<a class="text-sm font-semibold hover:text-line-green transition-colors" href="#">Documentation</a>
+<a class="text-sm font-semibold hover:text-line-green transition-colors" href="#">FAQ</a>
+<a class="text-sm font-semibold hover:text-line-green transition-colors" href="#">Glossary</a>
+<a class="text-sm font-semibold hover:text-line-green transition-colors" href="#">More</a>
+</div>
+</div>
+<div class="flex items-center gap-5">
+<div class="flex items-center gap-1 cursor-pointer hover:opacity-70">
+<span class="material-symbols-outlined text-[18px]">language</span>
+<span class="material-symbols-outlined text-[12px] -ml-1">arrow_drop_down</span>
+</div>
+<span class="material-symbols-outlined text-line-green relative cursor-pointer">
+                notifications
+                <span class="absolute top-0.5 right-0.5 w-2 h-2 bg-line-green border-2 border-white rounded-full"></span>
+</span>
+<div class="h-8 w-8 rounded-full bg-gray-200 overflow-hidden cursor-pointer">
+<img alt="User" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMfpZeN5ZkHlIUmKaTdtmHm9-7DjPrfHhmU7u3U1Tvum1jVpqVSQhPpO5lZ2TWjhaPE5pZr2JwISOxmfD0F0ZuGDw-Le9382vzdknwl_FDtlkRbXwcy3o4md4kZsKPwYhxVoSmvAKurtnnqUCbAISvGOY6ZuFOHg3lxMF8ztDwrA_9YTAeeBFHLWHVRY0vYxos3ytb_yYX4nVjoPR0aKeOW67sA4BePBIEYVWtGncAhhP28Qh7kbdcM6XcSxrBiEUgqoiKqvETTKg"/>
+</div>
+<span class="material-symbols-outlined cursor-pointer hover:text-line-green transition-colors">light_mode</span>
+</div>
+</nav>
+<!-- Main Wrapper -->
+<div class="flex min-h-screen pt-16">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-[#f4f4f4] border-r border-gray-200 flex flex-col z-40">
+<div class="py-4 px-5">
+<a class="text-[13px] font-semibold text-gray-700 hover:text-line-green flex items-center h-10" href="#">Console home</a>
+<div class="mt-4 flex items-center justify-between group cursor-pointer">
+<span class="text-[13px] sidebar-item-active pl-4">Providers</span>
+<span class="material-symbols-outlined text-gray-400 text-sm group-hover:text-line-green">arrow_drop_up</span>
+</div>
+<div class="mt-3 relative">
+<input class="w-full pl-3 pr-8 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:border-line-green" placeholder="Search..." type="text"/>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">search</span>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar px-5">
+<div class="flex items-center justify-between py-1 mt-2">
+<span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Admin</span>
+<span class="material-symbols-outlined text-gray-400 text-xs">arrow_drop_up</span>
+</div>
+<div class="space-y-0.5 ml-1">
+<a class="block py-1.5 text-[12px] text-gray-600 hover:text-line-green truncate" href="#">Demo Provider 1</a>
+<a class="block py-1.5 text-[12px] text-gray-600 hover:text-line-green truncate" href="#">Demo Provider 2</a>
+<a class="block py-1.5 text-[12px] text-gray-600 hover:text-line-green truncate" href="#">Demo Provider 3</a>
+<a class="block py-1.5 text-[12px] text-gray-600 hover:text-line-green truncate" href="#">Demo Provider 4</a>
+<a class="block py-1.5 text-[12px] text-gray-600 hover:text-line-green truncate" href="#">Demo Provider 5</a>
+<a class="block py-1.5 text-[12px] text-gray-600 hover:text-line-green truncate" href="#">Demo Provider 6</a>
+<a class="block py-1.5 text-[12px] text-gray-600 hover:text-line-green truncate" href="#">Demo Provider 7</a>
+<a class="block py-1.5 text-[12px] text-gray-600 hover:text-line-green truncate" href="#">Demo Provider 8</a>
+</div>
+<div class="flex items-center justify-between py-1 mt-4">
+<span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">No role</span>
+<span class="material-symbols-outlined text-gray-400 text-xs">arrow_drop_up</span>
+</div>
+<div class="space-y-0.5 ml-1">
+<a class="block py-1.5 text-[12px] text-gray-600 hover:text-line-green truncate" href="#">Sample Company Ltd.</a>
+</div>
+</div>
+<div class="p-5 border-t border-gray-200">
+<a class="text-[13px] font-semibold text-gray-700 hover:text-line-green flex items-center h-10" href="#">Tools</a>
+<a class="text-[13px] font-semibold text-gray-700 hover:text-line-green flex items-center h-10" href="#">Support</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="ml-64 flex-1 bg-white">
+<div class="max-w-6xl mx-auto px-10 py-8">
+<!-- Breadcrumb -->
+<nav class="flex items-center gap-2 mb-10 text-[11px] font-medium text-gray-500">
+<a class="hover:underline" href="#">TOP</a>
+<span class="material-symbols-outlined text-[10px]">chevron_right</span>
+<span class="text-gray-900 font-bold">Demo Provider</span>
+</nav>
+<!-- Page Header -->
+<header class="mb-8">
+<h1 class="text-[28px] font-bold text-gray-900 mb-8">Demo Provider</h1>
+<!-- Tabs -->
+<div class="flex gap-8 border-b border-gray-100">
+<button class="pb-3 text-sm active-tab">Channels</button>
+<button class="pb-3 text-sm text-line-green font-medium hover:opacity-80">Roles</button>
+<button class="pb-3 text-sm text-line-green font-medium hover:opacity-80">Settings</button>
+</div>
+<!-- Filters/Controls -->
+<div class="flex items-center justify-end gap-4 mt-6 mb-6">
+<label class="flex items-center gap-2 text-xs font-medium text-gray-700 cursor-pointer">
+<input checked="" class="w-4 h-4 rounded border-gray-300 text-line-green focus:ring-line-green" type="checkbox"/>
+                        Group by role
+                    </label>
+<div class="relative">
+<select class="pl-3 pr-8 py-2 text-xs border border-gray-300 rounded appearance-none focus:outline-none focus:border-line-green bg-white min-w-[120px]">
+<option>Sort by date</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none">expand_more</span>
+</div>
+</div>
+<!-- Grid Layout -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<!-- Create Channel Card -->
+<div class="border border-gray-200 rounded p-12 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors h-[280px]">
+<span class="material-symbols-outlined text-4xl text-gray-300 mb-4">add</span>
+<span class="text-xs text-gray-500 font-medium">Create a new channel</span>
+</div>
+<!-- Channel Card 1 (Messaging API) -->
+<div class="border border-gray-200 rounded p-6 relative hover:shadow-md transition-shadow h-[280px]">
+<span class="absolute top-3 right-3 px-2 py-0.5 bg-line-green text-[10px] text-white font-bold rounded">Admin</span>
+<div class="flex flex-col items-center mt-4">
+<div class="h-20 w-20 rounded-full overflow-hidden border-2 border-gray-50 mb-6 shadow-sm">
+<img alt="App Icon" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZPyJ5b6UmbcxKspufmYaoClAtyIRvlzC3l2cxpbRUafpElV9tleKxGkNgV4dJAlovovjDeL080rnZJolLD3O5T7K6BdbPiH6zP74r8g_9ZPvz3YNligGvsqibIjL2LoJT5JMM8bi3pRyXo-MONHaSTd4SVajJJPjTH5WU_nv1PWi1_XQVcWYjEZi_n1rrIobp_foHgHuuaOg0t-1H874ozTzBsF4yvrrTCrrfMrVXlCFEmpyBMwS1CUX47HWiH8RNFXkx_qs1EbI"/>
+</div>
+<h3 class="text-sm font-bold text-gray-900 mb-6">Demo App 1</h3>
+<div class="w-full flex items-center gap-2 text-gray-600">
+<span class="material-symbols-outlined text-sm text-line-green">chat_bubble</span>
+<span class="text-[11px] font-medium">Messaging API</span>
+</div>
+</div>
+</div>
+<!-- Channel Card 2 (LINE Login) -->
+<div class="border border-gray-200 rounded p-6 relative hover:shadow-md transition-shadow h-[280px]">
+<span class="absolute top-3 right-3 px-2 py-0.5 bg-line-green text-[10px] text-white font-bold rounded">Admin</span>
+<div class="flex flex-col items-center mt-4">
+<div class="h-20 w-20 rounded-lg bg-gray-100 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-3xl text-gray-300">image</span>
+</div>
+<h3 class="text-sm font-bold text-gray-900 mb-6">Demo App 2</h3>
+<div class="w-full space-y-2">
+<div class="flex items-center gap-2 text-gray-600">
+<span class="material-symbols-outlined text-sm text-line-green">login</span>
+<span class="text-[11px] font-medium">LINE Login</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="text-[10px] text-gray-400">Published</span>
+<div class="w-2 h-2 rounded-full bg-line-green"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination/Controls Bottom -->
+<div class="flex justify-end mt-8">
+<div class="flex flex-col items-center text-gray-400">
+<span class="material-symbols-outlined cursor-pointer hover:text-gray-600">keyboard_arrow_up</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-gray-600 -mt-2">keyboard_arrow_down</span>
+</div>
+</div>
+</header></div>
+<!-- Footer -->
+<footer class="mt-20 py-10 px-10 border-t border-gray-100 bg-white text-[11px] text-gray-500">
+<div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-end md:items-center gap-6">
+<div class="space-y-4">
+<div class="flex flex-wrap gap-x-6 gap-y-2">
+<a class="hover:underline" href="#">About LINE Developers site</a>
+<a class="hover:underline" href="#">Terms and policies</a>
+<a class="hover:underline" href="#">About trademarks</a>
+<a class="hover:underline flex items-center gap-1" href="#">Bug report form <span class="material-symbols-outlined text-[10px]">open_in_new</span></a>
+</div>
+<div class="text-gray-400">© LY Corporation</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-1 cursor-pointer hover:underline">
+<span>Family Sites</span>
+<span class="material-symbols-outlined text-[12px]">expand_more</span>
+</div>
+<div class="flex gap-4 items-center">
+<span class="material-symbols-outlined text-[18px] cursor-pointer hover:text-black">add_circle</span>
+<span class="material-symbols-outlined text-[18px] cursor-pointer hover:text-black">close</span>
+</div>
+</div>
+</div>
+</footer>
+</main>
+</div>
+</body></html>

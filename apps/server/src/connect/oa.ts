@@ -110,6 +110,14 @@ function protoTokenTypeToDb(type: AccessTokenType): 'short_lived' | 'jwt_v21' {
 export function oaHandler(deps: OAHandlerDeps) {
   return (router: ConnectRouter) => {
     router.service(OAService, {
+      async listMyProviders() {
+        const providers = await deps.oa.listMyProviders('') // TODO: get from auth context
+        return {
+          providers: providers
+            .map(toProtoProvider)
+            .filter((p): p is NonNullable<typeof p> => p != null),
+        }
+      },
       async createProvider(req) {
         const provider = await deps.oa.createProvider({ name: req.name, ownerId: '' })
         return { provider: toProtoProvider(provider) }
