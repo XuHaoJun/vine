@@ -245,6 +245,16 @@ message SearchOfficialAccountsResponse {
   repeated OfficialAccountSummary accounts = 1;
 }
 
+// ── Recommend ──
+
+message RecommendOfficialAccountsRequest {
+  int32 limit = 1;
+}
+
+message RecommendOfficialAccountsResponse {
+  repeated OfficialAccountSummary accounts = 1;
+}
+
 message OfficialAccountSummary {
   string id = 1;
   string name = 2;
@@ -275,4 +285,5 @@ service OAService {
   rpc RevokeAccessToken(RevokeAccessTokenRequest) returns (RevokeAccessTokenResponse);
   rpc RevokeAllAccessTokens(RevokeAllAccessTokensRequest) returns (RevokeAllAccessTokensResponse);
   rpc SearchOfficialAccounts(SearchOfficialAccountsRequest) returns (SearchOfficialAccountsResponse);
+  rpc RecommendOfficialAccounts(RecommendOfficialAccountsRequest) returns (RecommendOfficialAccountsResponse);
 }

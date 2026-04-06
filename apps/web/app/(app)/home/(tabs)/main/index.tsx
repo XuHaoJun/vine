@@ -5,6 +5,9 @@ import { ListItem, ScrollView, SizableText, XStack, YStack } from 'tamagui'
 
 import { useFriends } from '~/features/chat/useFriendship'
 import { useAuth } from '~/features/auth/client/authClient'
+import { oaClient } from '~/features/oa/client'
+import { useTanQuery } from '~/query'
+import { useOADetailSheet } from '~/interface/dialogs/OADetailSheet'
 import { Avatar } from '~/interface/avatars/Avatar'
 import { BellIcon } from '~/interface/icons/phosphor/BellIcon'
 import { BookmarkIcon } from '~/interface/icons/phosphor/BookmarkIcon'
@@ -42,6 +45,12 @@ export const MainPage = memo(() => {
   const { friends } = useFriends()
   const insets = useSafeAreaInsets()
   const [searchQuery, setSearchQuery] = useState('')
+  const { openDetail, DetailSheetComponent } = useOADetailSheet()
+
+  const { data: recommendedOAs } = useTanQuery({
+    queryKey: ['oa', 'recommended'],
+    queryFn: () => oaClient.recommendOfficialAccounts({ limit: 15 }),
+  })
 
   const friendCount = friends?.length ?? 0
   const groupCount = 0
@@ -267,7 +276,54 @@ export const MainPage = memo(() => {
             </XStack>
           </YStack>
         </YStack>
+
+        {/* Recommended Official Accounts */}
+        <YStack px="$4" py="$4">
+          <SizableText size="$5" fontWeight="700" color="$color12" mb="$3">
+            推薦官方帳號
+          </SizableText>
+          {recommendedOAs?.accounts && recommendedOAs.accounts.length > 0 ? (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <XStack gap="$4" pr="$4">
+                {recommendedOAs.accounts.map((oa) => (
+                  <YStack
+                    key={oa.id}
+                    width={80}
+                    items="center"
+                    shrink={0}
+                    cursor="pointer"
+                    onPress={() =>
+                      openDetail({
+                        id: oa.id,
+                        name: oa.name,
+                        oaId: oa.oaId,
+                        imageUrl: oa.imageUrl || undefined,
+                      })
+                    }
+                  >
+                    <Avatar size={64} image={oa.imageUrl || null} name={oa.name} />
+                    <SizableText
+                      size="$2"
+                      color="$color12"
+                      mt="$2"
+                      text="center"
+                      numberOfLines={2}
+                    >
+                      {oa.name}
+                    </SizableText>
+                  </YStack>
+                ))}
+              </XStack>
+            </ScrollView>
+          ) : (
+            <SizableText size="$3" color="$color10">
+              尚無推薦官方帳號
+            </SizableText>
+          )}
+        </YStack>
       </ScrollView>
+
+      {DetailSheetComponent}
     </YStack>
   )
 })

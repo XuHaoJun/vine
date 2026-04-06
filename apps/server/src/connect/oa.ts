@@ -309,6 +309,19 @@ export function oaHandler(deps: OAHandlerDeps) {
           })),
         }
       },
+      async recommendOfficialAccounts(req) {
+        const limit = req.limit > 0 ? req.limit : 15
+        const accounts = await deps.oa.recommendOfficialAccounts(limit)
+        return {
+          accounts: accounts.map((a) => ({
+            id: a.id,
+            name: a.name,
+            oaId: a.oaId,
+            description: a.description ?? '',
+            imageUrl: a.imageUrl ?? '',
+          })),
+        }
+      },
     }
 
     router.service(OAService, withAuthService(OAService, deps.auth, oaServiceImpl))

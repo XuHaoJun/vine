@@ -1,4 +1,4 @@
-import { and, eq, ilike, or } from 'drizzle-orm'
+import { and, eq, ilike, or, sql } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { Pool } from 'pg'
 import type { schema } from '@vine/db'
@@ -324,6 +324,21 @@ export function createOAService(deps: OADeps) {
       .limit(20)
   }
 
+  async function recommendOfficialAccounts(limit: number = 15) {
+    return db
+      .select({
+        id: officialAccount.id,
+        name: officialAccount.name,
+        oaId: officialAccount.oaId,
+        description: officialAccount.description,
+        imageUrl: officialAccount.imageUrl,
+      })
+      .from(officialAccount)
+      .where(eq(officialAccount.status, 'active'))
+      .orderBy(sql`RANDOM()`)
+      .limit(limit)
+  }
+
   async function getAccessTokenById(id: string) {
     const [row] = await db
       .select()
@@ -392,6 +407,7 @@ export function createOAService(deps: OADeps) {
     buildUnfollowEvent,
     searchOAs,
     searchOAsForOwner,
+    recommendOfficialAccounts,
     getAccessTokenById,
     verifyWebhook,
   }
