@@ -255,6 +255,45 @@ message RecommendOfficialAccountsResponse {
   repeated OfficialAccountSummary accounts = 1;
 }
 
+// ── OA Friendship ──
+
+message AddOAFriendRequest {
+  string oa_id = 1;
+}
+
+message AddOAFriendResponse {
+  OAFriendship friendship = 1;
+}
+
+message RemoveOAFriendRequest {
+  string oa_id = 1;
+}
+
+message RemoveOAFriendResponse {}
+
+message ListMyOAFriendsRequest {}
+
+message ListMyOAFriendsResponse {
+  repeated OAFriendship friendships = 1;
+}
+
+message IsOAFriendRequest {
+  string oa_id = 1;
+}
+
+message IsOAFriendResponse {
+  bool is_friend = 1;
+}
+
+message OAFriendship {
+  string id = 1;
+  string oa_id = 2;
+  string oa_name = 3;
+  string oa_image_url = 4;
+  string status = 5;
+  string created_at = 6;
+}
+
 message OfficialAccountSummary {
   string id = 1;
   string name = 2;
@@ -286,4 +325,8 @@ service OAService {
   rpc RevokeAllAccessTokens(RevokeAllAccessTokensRequest) returns (RevokeAllAccessTokensResponse);
   rpc SearchOfficialAccounts(SearchOfficialAccountsRequest) returns (SearchOfficialAccountsResponse);
   rpc RecommendOfficialAccounts(RecommendOfficialAccountsRequest) returns (RecommendOfficialAccountsResponse);
+  rpc AddOAFriend(AddOAFriendRequest) returns (AddOAFriendResponse);
+  rpc RemoveOAFriend(RemoveOAFriendRequest) returns (RemoveOAFriendResponse);
+  rpc ListMyOAFriends(ListMyOAFriendsRequest) returns (ListMyOAFriendsResponse);
+  rpc IsOAFriend(IsOAFriendRequest) returns (IsOAFriendResponse);
 }

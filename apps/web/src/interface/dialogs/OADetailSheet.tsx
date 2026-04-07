@@ -5,6 +5,8 @@ import { Avatar } from '~/interface/avatars/Avatar'
 import { Button } from '~/interface/buttons/Button'
 import { Image } from '~/interface/image/Image'
 import { showToast } from '~/interface/toast/Toast'
+import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
+import { oaClient } from '~/features/oa/client'
 
 // TODO: Once DB has these fields, remove mocks
 const MOCK_COVER_URL =
@@ -35,9 +37,55 @@ export function OADetailSheet({
   open,
   onOpenChange,
 }: OADetailSheetProps) {
+  const queryClient = useTanQueryClient()
+
+  const { data: isFriendData } = useTanQuery({
+    queryKey: ['oa', 'isFriend', oaId],
+    queryFn: () => oaClient.isOAFriend({ oaId }),
+    enabled: open,
+  })
+
+  const addFriend = useTanMutation({
+    mutationFn: () => oaClient.addOAFriend({ oaId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['oa', 'isFriend', oaId] })
+      queryClient.invalidateQueries({ queryKey: ['oa', 'myFriends'] })
+      showToast('已加入好友', { type: 'success' })
+      onOpenChange(false)
+    },
+    onError: () => {
+      showToast('加入好友失敗', { type: 'error' })
+    },
+  })
+
+  const removeFriend = useTanMutation({
+    mutationFn: () => oaClient.removeOAFriend({ oaId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['oa', 'isFriend', oaId] })
+      queryClient.invalidateQueries({ queryKey: ['oa', 'myFriends'] })
+      showToast('已移除好友', { type: 'success' })
+    },
+    onError: () => {
+      showToast('移除好友失敗', { type: 'error' })
+    },
+  })
+
+  const isFriend = isFriendData?.isFriend ?? false
+
+  const handleToggleFriend = () => {
+    if (isFriend) {
+      removeFriend.mutate()
+    } else {
+      addFriend.mutate()
+    }
+  }
+
   const handleAddFriend = () => {
-    showToast('加入好友功能即將上線', { type: 'info' })
-    onOpenChange(false)
+    if (isFriend) {
+      removeFriend.mutate()
+    } else {
+      addFriend.mutate()
+    }
   }
 
   return (
@@ -60,8 +108,12 @@ export function OADetailSheet({
           borderTopWidth={1}
           borderColor="$borderColor"
         >
-          <Button size="$5" onPress={handleAddFriend}>
-            加入好友
+          <Button
+            size="$5"
+            onPress={handleToggleFriend}
+            disabled={addFriend.isPending || removeFriend.isPending}
+          >
+            {isFriend ? '已加入好友' : '加入好友'}
           </Button>
         </YStack>
 
@@ -180,30 +232,30 @@ export function OADetailSheet({
               <YStack
                 flex={1}
                 p="$3"
-                bg="$color2"
+                bg={isFriend ? '$green3' : '$color2'}
                 rounded="$4"
                 borderWidth={1}
-                borderColor="$borderColor"
+                borderColor={isFriend ? '$green6' : '$borderColor'}
                 items="center"
                 gap="$1"
                 cursor="pointer"
                 onPress={handleAddFriend}
-                hoverStyle={{ bg: '$color3' }}
+                hoverStyle={{ bg: isFriend ? '$green4' : '$color3' }}
               >
                 <YStack
                   width={24}
                   height={24}
                   rounded={9999}
-                  bg="$green9"
+                  bg={isFriend ? '$green9' : '$green9'}
                   items="center"
                   justify="center"
                 >
                   <Text fontSize={14} color="$white" fontWeight="700">
-                    +
+                    {isFriend ? '✓' : '+'}
                   </Text>
                 </YStack>
                 <Text fontSize={12} fontWeight="600" color="$color12">
-                  加入好友
+                  {isFriend ? '已加入好友' : '加入好友'}
                 </Text>
               </YStack>
 

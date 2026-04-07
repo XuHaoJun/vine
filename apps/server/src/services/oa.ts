@@ -2,7 +2,13 @@ import { and, eq, ilike, or, sql } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { Pool } from 'pg'
 import type { schema } from '@vine/db'
-import { oaProvider, officialAccount, oaWebhook, oaAccessToken } from '@vine/db/schema-oa'
+import {
+  oaProvider,
+  officialAccount,
+  oaWebhook,
+  oaAccessToken,
+  oaFriendship,
+} from '@vine/db/schema-oa'
 import { createHmac, randomBytes, randomUUID } from 'crypto'
 
 type OADeps = {
@@ -339,6 +345,73 @@ export function createOAService(deps: OADeps) {
       .limit(limit)
   }
 
+  async function addOAFriend(userId: string, oaId: string) {
+    const account = await getOfficialAccountByOaId(oaId)
+    if (!account) return { success: false, reason: 'oa_not_found' as const }
+
+    const [existing] = await db
+      .select()
+      .from(oaFriendship)
+      .where(and(eq(oaFriendship.oaId, account.id), eq(oaFriendship.userId, userId)))
+      .limit(1)
+
+    if (existing) return { success: false, reason: 'already_friend' as const }
+
+    const [friendship] = await db
+      .insert(oaFriendship)
+      .values({
+        oaId: account.id,
+        userId,
+        status: 'friend',
+      })
+      .returning()
+
+    return {
+      success: true as const,
+      friendship,
+      account,
+    }
+  }
+
+  async function removeOAFriend(userId: string, oaId: string) {
+    const account = await getOfficialAccountByOaId(oaId)
+    if (!account) return { success: false, reason: 'oa_not_found' as const }
+
+    await db
+      .delete(oaFriendship)
+      .where(and(eq(oaFriendship.oaId, account.id), eq(oaFriendship.userId, userId)))
+
+    return { success: true as const }
+  }
+
+  async function listMyOAFriends(userId: string) {
+    return db
+      .select({
+        id: oaFriendship.id,
+        oaId: officialAccount.oaId,
+        name: officialAccount.name,
+        imageUrl: officialAccount.imageUrl,
+        status: oaFriendship.status,
+        createdAt: oaFriendship.createdAt,
+      })
+      .from(oaFriendship)
+      .innerJoin(officialAccount, eq(oaFriendship.oaId, officialAccount.id))
+      .where(eq(oaFriendship.userId, userId))
+  }
+
+  async function isOAFriend(userId: string, oaId: string) {
+    const account = await getOfficialAccountByOaId(oaId)
+    if (!account) return false
+
+    const [existing] = await db
+      .select()
+      .from(oaFriendship)
+      .where(and(eq(oaFriendship.oaId, account.id), eq(oaFriendship.userId, userId)))
+      .limit(1)
+
+    return !!existing
+  }
+
   async function getAccessTokenById(id: string) {
     const [row] = await db
       .select()
@@ -408,6 +481,10 @@ export function createOAService(deps: OADeps) {
     searchOAs,
     searchOAsForOwner,
     recommendOfficialAccounts,
+    addOAFriend,
+    removeOAFriend,
+    listMyOAFriends,
+    isOAFriend,
     getAccessTokenById,
     verifyWebhook,
   }

@@ -322,6 +322,54 @@ export function oaHandler(deps: OAHandlerDeps) {
           })),
         }
       },
+      async addOAFriend(req, ctx) {
+        const auth = requireAuthData(ctx)
+        const result = await deps.oa.addOAFriend(auth.id, req.oaId)
+        if (!result.success) {
+          if (result.reason === 'oa_not_found') {
+            throw new ConnectError('Official account not found', Code.NotFound)
+          }
+          if (result.reason === 'already_friend') {
+            throw new ConnectError('Already friends', Code.AlreadyExists)
+          }
+        }
+        const friendship = result.friendship!
+        const account = result.account!
+        return {
+          friendship: {
+            id: friendship.id,
+            oaId: account.oaId,
+            oaName: account.name,
+            oaImageUrl: account.imageUrl ?? '',
+            status: friendship.status,
+            createdAt: friendship.createdAt,
+          },
+        }
+      },
+      async removeOAFriend(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await deps.oa.removeOAFriend(auth.id, req.oaId)
+        return {}
+      },
+      async listMyOAFriends(_req, ctx) {
+        const auth = requireAuthData(ctx)
+        const friendships = await deps.oa.listMyOAFriends(auth.id)
+        return {
+          friendships: friendships.map((f) => ({
+            id: f.id,
+            oaId: f.oaId,
+            oaName: f.name,
+            oaImageUrl: f.imageUrl ?? '',
+            status: f.status,
+            createdAt: f.createdAt,
+          })),
+        }
+      },
+      async isOAFriend(req, ctx) {
+        const auth = requireAuthData(ctx)
+        const isFriend = await deps.oa.isOAFriend(auth.id, req.oaId)
+        return { isFriend }
+      },
     }
 
     router.service(OAService, withAuthService(OAService, deps.auth, oaServiceImpl))

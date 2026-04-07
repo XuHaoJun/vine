@@ -52,6 +52,11 @@ export const MainPage = memo(() => {
     queryFn: () => oaClient.recommendOfficialAccounts({ limit: 15 }),
   })
 
+  const { data: oaFriends } = useTanQuery({
+    queryKey: ['oa', 'myFriends'],
+    queryFn: () => oaClient.listMyOAFriends({}),
+  })
+
   const friendCount = friends?.length ?? 0
   const groupCount = 0
 
@@ -172,6 +177,47 @@ export const MainPage = memo(() => {
               </SizableText>
             </XStack>
           </ListItem>
+
+          {/* OA Friends */}
+          {oaFriends?.friendships && oaFriends.friendships.length > 0 && (
+            <ListItem
+              py="$2"
+              cursor="pointer"
+              onPress={() => router.push('/home/talks')}
+              hoverStyle={{ bg: '$backgroundHover' }}
+            >
+              <XStack flex={1} items="center">
+                <YStack
+                  width={48}
+                  height={48}
+                  rounded={100}
+                  bg="$color3"
+                  overflow="hidden"
+                  items="center"
+                  justify="center"
+                  shrink={0}
+                >
+                  <Avatar size={48} image={null} name="OA" />
+                </YStack>
+                <YStack ml="$3" flex={1}>
+                  <SizableText size="$4" color="$color12">
+                    官方帳號
+                  </SizableText>
+                  <SizableText size="$3" color="$color10" numberOfLines={1}>
+                    {oaFriends.friendships
+                      .slice(0, 4)
+                      .map((f) => f.oaName)
+                      .join(', ')}
+                  </SizableText>
+                </YStack>
+              </XStack>
+              <XStack items="center" gap="$1">
+                <SizableText size="$3" color="$color10">
+                  {oaFriends.friendships.length}
+                </SizableText>
+              </XStack>
+            </ListItem>
+          )}
 
           {/* Groups */}
           <ListItem

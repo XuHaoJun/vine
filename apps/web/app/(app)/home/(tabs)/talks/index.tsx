@@ -9,7 +9,10 @@ import { ChatListItem } from '~/features/chat/ui/ChatListItem'
 import { FriendListItem } from '~/features/chat/ui/FriendListItem'
 import { TalksHeader } from '~/features/chat/ui/TalksHeader'
 import { useAuth } from '~/features/auth/client/authClient'
+import { oaClient } from '~/features/oa/client'
+import { useTanQuery } from '~/query'
 import { H3 } from '~/interface/text/Headings'
+import { showToast } from '~/interface/toast/Toast'
 import { zero } from '~/zero/client'
 
 type Tab = 'chats' | 'friends'
@@ -23,6 +26,11 @@ export const TalksPage = memo(() => {
 
   const { chats, pendingCount } = useChats()
   const { friends } = useFriends()
+
+  const { data: oaFriendsData } = useTanQuery({
+    queryKey: ['oa', 'myFriends'],
+    queryFn: () => oaClient.listMyOAFriends({}),
+  })
 
   const filteredChats = chats.filter((chat) => {
     if (!searchQuery) return true
@@ -41,6 +49,10 @@ export const TalksPage = memo(() => {
   const handleChatPress = (chatId: string) => {
     if (!chatId) return
     router.push(`/home/talks/${chatId}`)
+  }
+
+  const handleOAFriendPress = (_oaId: string) => {
+    showToast('OA 聊天功能即將上線', { type: 'info' })
   }
 
   const handleFriendPress = (friendship: {
@@ -117,24 +129,43 @@ export const TalksPage = memo(() => {
                 )
               })
             )
-          ) : filteredFriends.length === 0 ? (
+          ) : filteredFriends.length === 0 &&
+            (!oaFriendsData?.friendships || oaFriendsData.friendships.length === 0) ? (
             <YStack p="$6" items="center" justify="center">
               <H3 color="$color9">
                 {searchQuery ? '找不到符合的好友' : '還沒有好友，點 ＋ 新增！'}
               </H3>
             </YStack>
           ) : (
-            filteredFriends.map((f) => {
-              const otherUser = f.requesterId === userId ? f.addressee : f.requester
-              return (
-                <FriendListItem
-                  key={f.id}
-                  name={otherUser?.name ?? '未知用戶'}
-                  image={otherUser?.image}
-                  onPress={() => handleFriendPress(f)}
-                />
-              )
-            })
+            <>
+              {/* OA Friends */}
+              {oaFriendsData?.friendships
+                ?.filter((oa) =>
+                  searchQuery
+                    ? oa.oaName.toLowerCase().includes(searchQuery.toLowerCase())
+                    : true,
+                )
+                .map((oa) => (
+                  <FriendListItem
+                    key={oa.id}
+                    name={oa.oaName}
+                    image={oa.oaImageUrl || undefined}
+                    onPress={() => handleOAFriendPress(oa.oaId)}
+                  />
+                ))}
+              {/* User Friends */}
+              {filteredFriends.map((f) => {
+                const otherUser = f.requesterId === userId ? f.addressee : f.requester
+                return (
+                  <FriendListItem
+                    key={f.id}
+                    name={otherUser?.name ?? '未知用戶'}
+                    image={otherUser?.image}
+                    onPress={() => handleFriendPress(f)}
+                  />
+                )
+              })}
+            </>
           )}
         </ScrollView>
       </YStack>
