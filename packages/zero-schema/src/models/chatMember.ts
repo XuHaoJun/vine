@@ -9,7 +9,7 @@ export const schema = table('chatMember')
   .columns({
     id: string(),
     chatId: string(),
-    userId: string(),
+    userId: string().optional(),
     lastReadMessageId: string().optional(),
     lastReadAt: number().optional(),
     joinedAt: number(),
@@ -18,7 +18,7 @@ export const schema = table('chatMember')
   .primaryKey('id')
 
 // A user can read chatMember records if:
-// - it's their own record, OR
+// - it's their own record (userId match), OR
 // - the record belongs to a chat they are also a member of (needed for read markers)
 const chatMemberPermission = serverWhere('chatMember', (eb, auth) => {
   return eb.or(

@@ -53,8 +53,31 @@ export const TalksPage = memo(() => {
     router.push(`/home/talks/${chatId}`)
   }
 
-  const handleOAFriendPress = (_oaId: string) => {
-    showToast('OA 聊天功能即將上線', { type: 'info' })
+  const handleOAFriendPress = (oaFriend: {
+    oaId: string
+    oaName: string
+    id: string
+  }) => {
+    const existingChat = chats.find(
+      (c) => c.type === 'oa' && c.members?.some((m) => m.oaId === oaFriend.id),
+    )
+
+    if (existingChat?.id) {
+      router.push(`/home/talks/${existingChat.id}`)
+      return
+    }
+
+    const chatId = crypto.randomUUID()
+    const now = Date.now()
+    zero.mutate.chat.insertOAChat({
+      chatId,
+      userId,
+      oaId: oaFriend.id,
+      member1Id: crypto.randomUUID(),
+      member2Id: crypto.randomUUID(),
+      createdAt: now,
+    })
+    router.push(`/home/talks/${chatId}`)
   }
 
   const handleFriendPress = (friendship: {
@@ -214,7 +237,7 @@ export const TalksPage = memo(() => {
                       key={oa.id}
                       name={oa.oaName}
                       image={oa.oaImageUrl || undefined}
-                      onPress={() => handleOAFriendPress(oa.oaId)}
+                      onPress={() => handleOAFriendPress(oa)}
                     />
                   ))
               )}

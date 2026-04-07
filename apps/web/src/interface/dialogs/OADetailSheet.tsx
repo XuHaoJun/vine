@@ -1,3 +1,4 @@
+import { router } from 'one'
 import { memo, useState } from 'react'
 import { ScrollView, Sheet, Text, XStack, YStack } from 'tamagui'
 
@@ -7,6 +8,8 @@ import { Image } from '~/interface/image/Image'
 import { showToast } from '~/interface/toast/Toast'
 import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
 import { oaClient } from '~/features/oa/client'
+import { useAuth } from '~/features/auth/client/authClient'
+import { zero } from '~/zero/client'
 
 // TODO: Once DB has these fields, remove mocks
 const MOCK_COVER_URL =
@@ -38,6 +41,8 @@ export function OADetailSheet({
   onOpenChange,
 }: OADetailSheetProps) {
   const queryClient = useTanQueryClient()
+  const { user } = useAuth()
+  const userId = user?.id ?? ''
 
   const { data: isFriendData } = useTanQuery({
     queryKey: ['oa', 'isFriend', oaId],
@@ -51,7 +56,6 @@ export function OADetailSheet({
       queryClient.invalidateQueries({ queryKey: ['oa', 'isFriend', oaId] })
       queryClient.invalidateQueries({ queryKey: ['oa', 'myFriends'] })
       showToast('已加入好友', { type: 'success' })
-      onOpenChange(false)
     },
     onError: () => {
       showToast('加入好友失敗', { type: 'error' })
@@ -72,6 +76,22 @@ export function OADetailSheet({
 
   const isFriend = isFriendData?.isFriend ?? false
 
+  const handleStartChat = () => {
+    if (!userId || !id) return
+    const chatId = crypto.randomUUID()
+    const now = Date.now()
+    zero.mutate.chat.insertOAChat({
+      chatId,
+      userId,
+      oaId: id,
+      member1Id: crypto.randomUUID(),
+      member2Id: crypto.randomUUID(),
+      createdAt: now,
+    })
+    onOpenChange(false)
+    router.push(`/home/talks/${chatId}`)
+  }
+
   const handleToggleFriend = () => {
     if (isFriend) {
       removeFriend.mutate()
@@ -82,7 +102,7 @@ export function OADetailSheet({
 
   const handleAddFriend = () => {
     if (isFriend) {
-      removeFriend.mutate()
+      handleStartChat()
     } else {
       addFriend.mutate()
     }

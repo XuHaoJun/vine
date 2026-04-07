@@ -36,11 +36,11 @@ export function useMessages(chatId: string) {
 
   const sendMessage = (text: string) => {
     if (!userId || !text.trim()) return
-    // Omit optional fields (metadata, replyToMessageId) — Zero maps undefined → NULL
     zero.mutate.message.send({
       id: crypto.randomUUID(),
       chatId,
       senderId: userId,
+      senderType: 'user',
       type: 'text',
       text: text.trim(),
       createdAt: Date.now(),

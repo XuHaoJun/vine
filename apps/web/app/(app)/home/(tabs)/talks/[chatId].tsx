@@ -27,7 +27,9 @@ export const ChatRoomPage = memo(() => {
   const memberMap = useMemo(() => {
     const map: Record<string, { name: string; index: number }> = {}
     members.forEach((m, i) => {
-      map[m.userId] = { name: m.user?.name ?? '?', index: i }
+      if (m.userId) {
+        map[m.userId] = { name: m.user?.name ?? '?', index: i }
+      }
     })
     return map
   }, [members])
@@ -64,7 +66,8 @@ export const ChatRoomPage = memo(() => {
     }
   }, [])
 
-  const otherName = otherMember?.user?.name ?? '未知用戶'
+  const otherName =
+    otherMember?.user?.name ?? (otherMember?.oaId ? '官方帳號' : '未知用戶')
   const otherImage = otherMember?.user?.image ?? null
 
   if (!chatId) {
@@ -104,7 +107,7 @@ export const ChatRoomPage = memo(() => {
               <DateSeparator label="今天" />
               {messages?.map((msg) => {
                 const isMine = msg.senderId === userId
-                const senderInfo = memberMap[msg.senderId]
+                const senderInfo = msg.senderId ? memberMap[msg.senderId] : undefined
 
                 return (
                   <MessageBubble
