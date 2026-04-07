@@ -59,12 +59,12 @@ export async function oaWebhookPlugin(fastify: FastifyInstance, deps: WebhookPlu
             .update(oaWebhook)
             .set({ status: 'failed' })
             .where(eq(oaWebhook.oaId, body.oaId))
-          return reply
+          return await reply
             .code(502)
             .send({ message: 'Webhook delivery failed', status: response.status })
         }
 
-        return reply.send({ success: true })
+        return await reply.send({ success: true })
       } catch {
         return reply.code(504).send({ message: 'Webhook delivery timeout' })
       }

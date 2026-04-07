@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter, createRoute } from 'one'
+import { useActiveParams, useRouter, createRoute } from 'one'
 import { memo, useState } from 'react'
 import { SizableText, Spinner, XStack, YStack } from 'tamagui'
 
@@ -11,7 +11,7 @@ import { showToast } from '~/interface/toast/Toast'
 const route = createRoute<'/(app)/developers/console/channel/[channelId]'>()
 
 export const ChannelSettingsPage = memo(() => {
-  const params = useLocalSearchParams<{ channelId: string }>()
+  const params = useActiveParams<{ channelId: string }>()
   const router = useRouter()
   const channelId = params.channelId
   const [isEditing, setIsEditing] = useState(false)

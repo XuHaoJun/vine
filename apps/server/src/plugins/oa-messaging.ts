@@ -49,7 +49,7 @@ export async function oaMessagingPlugin(
         const body = request.body as { replyToken: string; messages: unknown[] }
 
         if (!body.replyToken || !body.messages?.length) {
-          return reply.code(400).send({
+          return await reply.code(400).send({
             message: 'replyToken and messages are required',
             code: 'INVALID_REQUEST',
           })
@@ -57,7 +57,7 @@ export async function oaMessagingPlugin(
 
         // MVP: return success without actual delivery
         // Full delivery via Zero mutation will be implemented later
-        return reply.send({})
+        return await reply.send({})
       } catch (err) {
         if (err instanceof Error && err.message === 'Invalid access token') {
           return reply
@@ -83,12 +83,11 @@ export async function oaMessagingPlugin(
         const body = request.body as { to: string; messages: unknown[] }
 
         if (!body.to || !body.messages?.length) {
-          return reply
+          return await reply
             .code(400)
             .send({ message: 'to and messages are required', code: 'INVALID_REQUEST' })
         }
 
-        // Check if user is a friend
         const [friendship] = await db
           .select()
           .from(oaFriendship)
@@ -96,13 +95,12 @@ export async function oaMessagingPlugin(
           .limit(1)
 
         if (!friendship || friendship.status !== 'friend') {
-          return reply
+          return await reply
             .code(403)
             .send({ message: 'User is not a friend of this OA', code: 'NOT_FRIEND' })
         }
 
-        // MVP: return success without actual delivery
-        return reply.send({})
+        return await reply.send({})
       } catch (err) {
         if (err instanceof Error && err.message === 'Invalid access token') {
           return reply
@@ -122,8 +120,11 @@ export async function oaMessagingPlugin(
         await extractOaFromToken(request, db)
         const params = request.params as { userId: string }
 
-        // MVP: return placeholder profile
-        return reply.send({ userId: params.userId, displayName: 'User', pictureUrl: '' })
+        return await reply.send({
+          userId: params.userId,
+          displayName: 'User',
+          pictureUrl: '',
+        })
       } catch (err) {
         if (err instanceof Error && err.message === 'Invalid access token') {
           return reply
@@ -144,25 +145,27 @@ export async function oaMessagingPlugin(
 
         if (body.grant_type === 'client_credentials' && body.client_assertion_type) {
           // JWT v2.1 flow — MVP: return placeholder
-          return reply.code(501).send({ message: 'JWT v2.1 not yet implemented' })
+          return await reply.code(501).send({ message: 'JWT v2.1 not yet implemented' })
         }
 
         // Short-lived token flow
         const { client_id: oaId, client_secret: channelSecret } = body
         if (!oaId || !channelSecret) {
-          return reply.code(400).send({ message: 'client_id and client_secret required' })
+          return await reply
+            .code(400)
+            .send({ message: 'client_id and client_secret required' })
         }
 
         const account = await oa.getOfficialAccountByOaId(oaId)
         if (!account || account.channelSecret !== channelSecret) {
-          return reply.code(401).send({ message: 'Invalid credentials' })
+          return await reply.code(401).send({ message: 'Invalid credentials' })
         }
 
         const result = await oa.issueAccessToken({
           oaId: account.id,
           type: 'short_lived',
         })
-        return reply.send(result)
+        return await reply.send(result)
       } catch {
         return reply.code(500).send({ message: 'Internal server error' })
       }
@@ -175,7 +178,6 @@ export async function oaMessagingPlugin(
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const body = request.body as { access_token: string }
-        // Look up token by value and delete
         const [tokenRecord] = await db
           .select({ id: oaAccessToken.id })
           .from(oaAccessToken)
@@ -185,7 +187,7 @@ export async function oaMessagingPlugin(
         if (tokenRecord) {
           await oa.revokeAccessToken(tokenRecord.id)
         }
-        return reply.send({})
+        return await reply.send({})
       } catch {
         return reply.code(500).send({ message: 'Internal server error' })
       }

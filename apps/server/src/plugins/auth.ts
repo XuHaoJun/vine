@@ -223,7 +223,7 @@ export async function authPlugin(fastify: FastifyInstance, deps: AuthPluginDeps)
       }
     }
 
-    return await reply.send({
+    return reply.send({
       clientId,
       appName,
       scopes: requestedScope.split(' ').filter(Boolean),

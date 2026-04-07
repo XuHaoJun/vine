@@ -69,6 +69,7 @@ function protoStatusToDb(status: OAStatus): string | undefined {
       return 'active'
     case OAStatus.OA_STATUS_DISABLED:
       return 'disabled'
+    case OAStatus.OA_STATUS_UNSPECIFIED:
     default:
       return undefined
   }
@@ -135,6 +136,7 @@ function protoTokenTypeToDb(type: AccessTokenType): 'short_lived' | 'jwt_v21' {
       return 'short_lived'
     case AccessTokenType.JWT_V21:
       return 'jwt_v21'
+    case AccessTokenType.UNSPECIFIED:
     default:
       return 'short_lived'
   }
