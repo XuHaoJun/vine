@@ -23,8 +23,8 @@ test.describe('Chat System', () => {
     await page.waitForURL(/\/home\/talks$/, { timeout: 10000 })
 
     // Click friends tab
-    await page.getByText('好友', { exact: true }).click()
-    await expect(page.getByText('好友', { exact: true })).toBeVisible()
+    await page.getByText('好友', { exact: true }).first().click()
+    await expect(page.getByText('好友', { exact: true }).first()).toBeVisible()
 
     // Click back to chats tab
     await page.getByText('聊天 ▾').click()
