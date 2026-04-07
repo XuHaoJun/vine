@@ -16,11 +16,13 @@ import { showToast } from '~/interface/toast/Toast'
 import { zero } from '~/zero/client'
 
 type Tab = 'chats' | 'friends'
+type FriendsSubTab = 'personal' | 'official'
 
 export const TalksPage = memo(() => {
   const { user } = useAuth()
   const userId = user?.id ?? ''
   const [activeTab, setActiveTab] = useState<Tab>('chats')
+  const [friendsSubTab, setFriendsSubTab] = useState<FriendsSubTab>('personal')
   const [searchQuery, setSearchQuery] = useState('')
   const insets = useSafeAreaInsets()
 
@@ -129,42 +131,93 @@ export const TalksPage = memo(() => {
                 )
               })
             )
-          ) : filteredFriends.length === 0 &&
-            (!oaFriendsData?.friendships || oaFriendsData.friendships.length === 0) ? (
-            <YStack p="$6" items="center" justify="center">
-              <H3 color="$color9">
-                {searchQuery ? '找不到符合的好友' : '還沒有好友，點 ＋ 新增！'}
-              </H3>
-            </YStack>
           ) : (
             <>
-              {/* OA Friends */}
-              {oaFriendsData?.friendships
-                ?.filter((oa) =>
+              {/* Friends Sub-Tab Bar */}
+              <XStack px="$4" py="$3" gap="$2">
+                <YStack
+                  flex={1}
+                  py="$2"
+                  rounded="$2"
+                  bg={friendsSubTab === 'personal' ? '$color3' : 'transparent'}
+                  items="center"
+                  cursor="pointer"
+                  onPress={() => setFriendsSubTab('personal')}
+                >
+                  <SizableText
+                    size="$3"
+                    fontWeight={friendsSubTab === 'personal' ? '700' : '600'}
+                    color={friendsSubTab === 'personal' ? '$color12' : '$color10'}
+                  >
+                    好友
+                  </SizableText>
+                </YStack>
+                <YStack
+                  flex={1}
+                  py="$2"
+                  rounded="$2"
+                  bg={friendsSubTab === 'official' ? '$color3' : 'transparent'}
+                  items="center"
+                  cursor="pointer"
+                  onPress={() => setFriendsSubTab('official')}
+                >
+                  <SizableText
+                    size="$3"
+                    fontWeight={friendsSubTab === 'official' ? '700' : '600'}
+                    color={friendsSubTab === 'official' ? '$color12' : '$color10'}
+                  >
+                    官方帳號
+                  </SizableText>
+                </YStack>
+              </XStack>
+
+              {/* Friends Sub-Tab Content */}
+              {friendsSubTab === 'personal' ? (
+                filteredFriends.length === 0 ? (
+                  <YStack p="$6" items="center" justify="center">
+                    <H3 color="$color9">
+                      {searchQuery ? '找不到符合的好友' : '還沒有好友，點 ＋ 新增！'}
+                    </H3>
+                  </YStack>
+                ) : (
+                  filteredFriends.map((f) => {
+                    const otherUser = f.requesterId === userId ? f.addressee : f.requester
+                    return (
+                      <FriendListItem
+                        key={f.id}
+                        name={otherUser?.name ?? '未知用戶'}
+                        image={otherUser?.image}
+                        onPress={() => handleFriendPress(f)}
+                      />
+                    )
+                  })
+                )
+              ) : oaFriendsData?.friendships?.filter((oa) =>
                   searchQuery
                     ? oa.oaName.toLowerCase().includes(searchQuery.toLowerCase())
                     : true,
-                )
-                .map((oa) => (
-                  <FriendListItem
-                    key={oa.id}
-                    name={oa.oaName}
-                    image={oa.oaImageUrl || undefined}
-                    onPress={() => handleOAFriendPress(oa.oaId)}
-                  />
-                ))}
-              {/* User Friends */}
-              {filteredFriends.map((f) => {
-                const otherUser = f.requesterId === userId ? f.addressee : f.requester
-                return (
-                  <FriendListItem
-                    key={f.id}
-                    name={otherUser?.name ?? '未知用戶'}
-                    image={otherUser?.image}
-                    onPress={() => handleFriendPress(f)}
-                  />
-                )
-              })}
+                ).length === 0 ? (
+                <YStack p="$6" items="center" justify="center">
+                  <H3 color="$color9">
+                    {searchQuery ? '找不到符合的官方帳號' : '還沒有關注的官方帳號'}
+                  </H3>
+                </YStack>
+              ) : (
+                oaFriendsData?.friendships
+                  ?.filter((oa) =>
+                    searchQuery
+                      ? oa.oaName.toLowerCase().includes(searchQuery.toLowerCase())
+                      : true,
+                  )
+                  .map((oa) => (
+                    <FriendListItem
+                      key={oa.id}
+                      name={oa.oaName}
+                      image={oa.oaImageUrl || undefined}
+                      onPress={() => handleOAFriendPress(oa.oaId)}
+                    />
+                  ))
+              )}
             </>
           )}
         </ScrollView>
