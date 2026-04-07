@@ -39,11 +39,11 @@ export const ChannelListPage = memo(() => {
   })
 
   const createChannel = useTanMutation({
-    mutationFn: (input: { providerId: string; name: string; oaId: string }) =>
+    mutationFn: (input: { providerId: string; name: string; uniqueId: string }) =>
       oaClient.createOfficialAccount({
         providerId: input.providerId,
         name: input.name,
-        oaId: input.oaId,
+        uniqueId: input.uniqueId,
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['oa', 'channels', providerId] })
@@ -62,7 +62,7 @@ export const ChannelListPage = memo(() => {
     createChannel.mutate({
       providerId,
       name: newChannelName.trim(),
-      oaId: newChannelOaId.trim().startsWith('@')
+      uniqueId: newChannelOaId.trim().startsWith('@')
         ? newChannelOaId.trim()
         : `@${newChannelOaId.trim()}`,
     })

@@ -156,7 +156,7 @@ export async function oaMessagingPlugin(
             .send({ message: 'client_id and client_secret required' })
         }
 
-        const account = await oa.getOfficialAccountByOaId(oaId)
+        const account = await oa.getOfficialAccount(oaId)
         if (!account || account.channelSecret !== channelSecret) {
           return await reply.code(401).send({ message: 'Invalid credentials' })
         }

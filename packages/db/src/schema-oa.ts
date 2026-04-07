@@ -16,7 +16,7 @@ export const officialAccount = pgTable(
       .notNull()
       .references(() => oaProvider.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
-    oaId: text('oaId').notNull().unique(),
+    uniqueId: text('uniqueId').notNull().unique(),
     description: text('description'),
     imageUrl: text('imageUrl'),
     channelSecret: text('channelSecret').notNull(),
@@ -26,7 +26,7 @@ export const officialAccount = pgTable(
   },
   (table) => [
     index('officialAccount_providerId_idx').on(table.providerId),
-    index('officialAccount_oaId_idx').on(table.oaId),
+    index('officialAccount_uniqueId_idx').on(table.uniqueId),
   ],
 )
 

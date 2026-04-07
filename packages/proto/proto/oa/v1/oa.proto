@@ -84,7 +84,7 @@ message OfficialAccount {
   string id = 1;
   string provider_id = 2;
   string name = 3;
-  string oa_id = 4;
+  string unique_id = 4;
   string description = 5;
   string image_url = 6;
   OAStatus status = 7;
@@ -99,7 +99,7 @@ message OfficialAccountSecret {
 message CreateOfficialAccountRequest {
   string provider_id = 1;
   string name = 2;
-  string oa_id = 3;
+  string unique_id = 3;
   optional string description = 4;
   optional string image_url = 5;
 }
@@ -146,7 +146,7 @@ message DeleteOfficialAccountResponse {}
 
 message Webhook {
   string id = 1;
-  string oa_id = 2;
+  string official_account_id = 2;
   string url = 3;
   WebhookStatus status = 4;
   optional string last_verified_at = 5;
@@ -154,7 +154,7 @@ message Webhook {
 }
 
 message SetWebhookRequest {
-  string oa_id = 1;
+  string official_account_id = 1;
   string url = 2;
 }
 
@@ -163,7 +163,7 @@ message SetWebhookResponse {
 }
 
 message VerifyWebhookRequest {
-  string oa_id = 1;
+  string official_account_id = 1;
 }
 
 message VerifyWebhookResponse {
@@ -171,7 +171,7 @@ message VerifyWebhookResponse {
 }
 
 message GetWebhookRequest {
-  string oa_id = 1;
+  string official_account_id = 1;
 }
 
 message GetWebhookResponse {
@@ -182,7 +182,7 @@ message GetWebhookResponse {
 
 message AccessToken {
   string id = 1;
-  string oa_id = 2;
+  string official_account_id = 2;
   string token = 3;
   AccessTokenType type = 4;
   optional string key_id = 5;
@@ -191,7 +191,7 @@ message AccessToken {
 }
 
 message ListAccessTokensRequest {
-  string oa_id = 1;
+  string official_account_id = 1;
   optional string key_id = 2;
 }
 
@@ -208,7 +208,7 @@ message AccessTokenSummary {
 }
 
 message IssueAccessTokenRequest {
-  string oa_id = 1;
+  string official_account_id = 1;
   AccessTokenType type = 2;
   optional string public_key = 3;
 }
@@ -227,7 +227,7 @@ message RevokeAccessTokenRequest {
 message RevokeAccessTokenResponse {}
 
 message RevokeAllAccessTokensRequest {
-  string oa_id = 1;
+  string official_account_id = 1;
   string key_id = 2;
 }
 
@@ -258,7 +258,7 @@ message RecommendOfficialAccountsResponse {
 // ── OA Friendship ──
 
 message AddOAFriendRequest {
-  string oa_id = 1;
+  string official_account_id = 1;
 }
 
 message AddOAFriendResponse {
@@ -266,7 +266,7 @@ message AddOAFriendResponse {
 }
 
 message RemoveOAFriendRequest {
-  string oa_id = 1;
+  string official_account_id = 1;
 }
 
 message RemoveOAFriendResponse {}
@@ -278,7 +278,7 @@ message ListMyOAFriendsResponse {
 }
 
 message IsOAFriendRequest {
-  string oa_id = 1;
+  string official_account_id = 1;
 }
 
 message IsOAFriendResponse {
@@ -287,7 +287,7 @@ message IsOAFriendResponse {
 
 message OAFriendship {
   string id = 1;
-  string oa_id = 2;
+  string official_account_id = 2;
   string oa_name = 3;
   string oa_image_url = 4;
   string status = 5;
@@ -297,7 +297,7 @@ message OAFriendship {
 message OfficialAccountSummary {
   string id = 1;
   string name = 2;
-  string oa_id = 3;
+  string unique_id = 3;
   string description = 4;
   string image_url = 5;
 }

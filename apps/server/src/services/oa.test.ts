@@ -148,7 +148,7 @@ describe('createOAService — OfficialAccount', () => {
     const result = await oa.createOfficialAccount({
       providerId: 'provider-1',
       name: 'Test OA',
-      oaId: '@testbot',
+      uniqueId: '@testbot',
     })
 
     expect(mockDb.insert).toHaveBeenCalled()

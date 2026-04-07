@@ -47,12 +47,12 @@ export function OADetailSheet({
 
   const { data: isFriendData } = useTanQuery({
     queryKey: ['oa', 'isFriend', oaId],
-    queryFn: () => oaClient.isOAFriend({ oaId }),
+    queryFn: () => oaClient.isOAFriend({ officialAccountId: id }),
     enabled: open,
   })
 
   const addFriend = useTanMutation({
-    mutationFn: () => oaClient.addOAFriend({ oaId }),
+    mutationFn: () => oaClient.addOAFriend({ officialAccountId: id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['oa', 'isFriend', oaId] })
       queryClient.invalidateQueries({ queryKey: ['oa', 'myFriends'] })
@@ -64,7 +64,7 @@ export function OADetailSheet({
   })
 
   const removeFriend = useTanMutation({
-    mutationFn: () => oaClient.removeOAFriend({ oaId }),
+    mutationFn: () => oaClient.removeOAFriend({ officialAccountId: id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['oa', 'isFriend', oaId] })
       queryClient.invalidateQueries({ queryKey: ['oa', 'myFriends'] })

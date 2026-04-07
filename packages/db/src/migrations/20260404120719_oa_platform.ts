@@ -13,7 +13,7 @@ CREATE TABLE "officialAccount" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"providerId" uuid NOT NULL,
 	"name" text NOT NULL,
-	"oaId" text NOT NULL UNIQUE,
+	"uniqueId" text NOT NULL UNIQUE,
 	"description" text,
 	"imageUrl" text,
 	"channelSecret" text NOT NULL,
@@ -51,7 +51,7 @@ CREATE TABLE "oaAccessToken" (
 --> statement-breakpoint
 CREATE INDEX "officialAccount_providerId_idx" ON "officialAccount" ("providerId");
 --> statement-breakpoint
-CREATE INDEX "officialAccount_oaId_idx" ON "officialAccount" ("oaId");
+CREATE INDEX "officialAccount_uniqueId_idx" ON "officialAccount" ("uniqueId");
 --> statement-breakpoint
 CREATE INDEX "oaWebhook_oaId_idx" ON "oaWebhook" ("oaId");
 --> statement-breakpoint

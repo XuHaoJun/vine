@@ -73,7 +73,7 @@ export function createOAService(deps: OADeps) {
   async function createOfficialAccount(input: {
     providerId: string
     name: string
-    oaId: string
+    uniqueId: string
     description?: string
     imageUrl?: string
   }) {
@@ -82,7 +82,7 @@ export function createOAService(deps: OADeps) {
       .values({
         providerId: input.providerId,
         name: input.name,
-        oaId: input.oaId,
+        uniqueId: input.uniqueId,
         description: input.description,
         imageUrl: input.imageUrl,
         channelSecret: generateChannelSecret(),
@@ -96,15 +96,6 @@ export function createOAService(deps: OADeps) {
       .select()
       .from(officialAccount)
       .where(eq(officialAccount.id, id))
-      .limit(1)
-    return account ?? null
-  }
-
-  async function getOfficialAccountByOaId(oaId: string) {
-    const [account] = await db
-      .select()
-      .from(officialAccount)
-      .where(eq(officialAccount.oaId, oaId))
       .limit(1)
     return account ?? null
   }
@@ -190,7 +181,11 @@ export function createOAService(deps: OADeps) {
   }
 
   async function listAccessTokens(oaId: string, keyId?: string) {
-    const query = db
+    const conditions = [eq(oaAccessToken.oaId, oaId)]
+    if (keyId) {
+      conditions.push(eq(oaAccessToken.keyId, keyId))
+    }
+    return db
       .select({
         id: oaAccessToken.id,
         type: oaAccessToken.type,
@@ -199,9 +194,7 @@ export function createOAService(deps: OADeps) {
         createdAt: oaAccessToken.createdAt,
       })
       .from(oaAccessToken)
-      .where(eq(oaAccessToken.oaId, oaId))
-
-    return query
+      .where(and(...conditions))
   }
 
   async function revokeAccessToken(tokenId: string) {
@@ -211,7 +204,7 @@ export function createOAService(deps: OADeps) {
   async function revokeAllAccessTokens(oaId: string, keyId: string) {
     const result = await db
       .delete(oaAccessToken)
-      .where(eq(oaAccessToken.keyId, keyId))
+      .where(and(eq(oaAccessToken.oaId, oaId), eq(oaAccessToken.keyId, keyId)))
       .returning({ id: oaAccessToken.id })
     return { revoked_count: result.length }
   }
@@ -292,7 +285,7 @@ export function createOAService(deps: OADeps) {
       .select({
         id: officialAccount.id,
         name: officialAccount.name,
-        oaId: officialAccount.oaId,
+        uniqueId: officialAccount.uniqueId,
         description: officialAccount.description,
         imageUrl: officialAccount.imageUrl,
       })
@@ -300,7 +293,7 @@ export function createOAService(deps: OADeps) {
       .where(
         or(
           ilike(officialAccount.name, searchPattern),
-          ilike(officialAccount.oaId, searchPattern),
+          ilike(officialAccount.uniqueId, searchPattern),
         ),
       )
       .limit(20)
@@ -312,7 +305,7 @@ export function createOAService(deps: OADeps) {
       .select({
         id: officialAccount.id,
         name: officialAccount.name,
-        oaId: officialAccount.oaId,
+        uniqueId: officialAccount.uniqueId,
         description: officialAccount.description,
         imageUrl: officialAccount.imageUrl,
       })
@@ -323,7 +316,7 @@ export function createOAService(deps: OADeps) {
           eq(oaProvider.ownerId, ownerId),
           or(
             ilike(officialAccount.name, searchPattern),
-            ilike(officialAccount.oaId, searchPattern),
+            ilike(officialAccount.uniqueId, searchPattern),
           ),
         ),
       )
@@ -335,7 +328,7 @@ export function createOAService(deps: OADeps) {
       .select({
         id: officialAccount.id,
         name: officialAccount.name,
-        oaId: officialAccount.oaId,
+        uniqueId: officialAccount.uniqueId,
         description: officialAccount.description,
         imageUrl: officialAccount.imageUrl,
       })
@@ -346,7 +339,7 @@ export function createOAService(deps: OADeps) {
   }
 
   async function addOAFriend(userId: string, oaId: string) {
-    const account = await getOfficialAccountByOaId(oaId)
+    const account = await getOfficialAccount(oaId)
     if (!account) return { success: false, reason: 'oa_not_found' as const }
 
     const [existing] = await db
@@ -374,7 +367,7 @@ export function createOAService(deps: OADeps) {
   }
 
   async function removeOAFriend(userId: string, oaId: string) {
-    const account = await getOfficialAccountByOaId(oaId)
+    const account = await getOfficialAccount(oaId)
     if (!account) return { success: false, reason: 'oa_not_found' as const }
 
     await db
@@ -388,7 +381,8 @@ export function createOAService(deps: OADeps) {
     return db
       .select({
         id: oaFriendship.id,
-        oaId: officialAccount.oaId,
+        oaId: oaFriendship.oaId,
+        uniqueId: officialAccount.uniqueId,
         name: officialAccount.name,
         imageUrl: officialAccount.imageUrl,
         status: oaFriendship.status,
@@ -400,7 +394,7 @@ export function createOAService(deps: OADeps) {
   }
 
   async function isOAFriend(userId: string, oaId: string) {
-    const account = await getOfficialAccountByOaId(oaId)
+    const account = await getOfficialAccount(oaId)
     if (!account) return false
 
     const [existing] = await db
@@ -464,7 +458,6 @@ export function createOAService(deps: OADeps) {
     listProviderAccounts,
     createOfficialAccount,
     getOfficialAccount,
-    getOfficialAccountByOaId,
     updateOfficialAccount,
     deleteOfficialAccount,
     setWebhook,

@@ -342,7 +342,7 @@ export const MainPage = memo(() => {
                       openDetail({
                         id: oa.id,
                         name: oa.name,
-                        oaId: oa.oaId,
+                        oaId: oa.uniqueId,
                         imageUrl: oa.imageUrl || undefined,
                       })
                     }

@@ -54,12 +54,13 @@ export const TalksPage = memo(() => {
   }
 
   const handleOAFriendPress = (oaFriend: {
-    oaId: string
+    officialAccountId: string
     oaName: string
     id: string
   }) => {
     const existingChat = chats.find(
-      (c) => c.type === 'oa' && c.members?.some((m) => m.oaId === oaFriend.id),
+      (c) =>
+        c.type === 'oa' && c.members?.some((m) => m.oaId === oaFriend.officialAccountId),
     )
 
     if (existingChat?.id) {
@@ -72,7 +73,7 @@ export const TalksPage = memo(() => {
     zero.mutate.chat.insertOAChat({
       chatId,
       userId,
-      oaId: oaFriend.id,
+      oaId: oaFriend.officialAccountId,
       member1Id: crypto.randomUUID(),
       member2Id: crypto.randomUUID(),
       createdAt: now,

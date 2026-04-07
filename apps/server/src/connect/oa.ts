@@ -83,7 +83,7 @@ function toProtoOfficialAccount(
     id: db.id,
     providerId: db.providerId,
     name: db.name,
-    oaId: db.oaId,
+    uniqueId: db.uniqueId,
     description: db.description ?? '',
     imageUrl: db.imageUrl ?? '',
     status: dbStatusToProto(db.status),
@@ -195,7 +195,7 @@ export function oaHandler(deps: OAHandlerDeps) {
         const account = await deps.oa.createOfficialAccount({
           providerId: req.providerId,
           name: req.name,
-          oaId: req.oaId,
+          uniqueId: req.uniqueId,
           description: req.description,
           imageUrl: req.imageUrl,
         })
@@ -230,14 +230,14 @@ export function oaHandler(deps: OAHandlerDeps) {
       },
       async setWebhook(req, ctx) {
         const auth = requireAuthData(ctx)
-        await assertOfficialAccountOwnedByUser(deps, req.oaId, auth.id)
-        const webhook = await deps.oa.setWebhook(req.oaId, req.url)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const webhook = await deps.oa.setWebhook(req.officialAccountId, req.url)
         return { webhook: toProtoWebhook(webhook) }
       },
       async verifyWebhook(req, ctx) {
         const auth = requireAuthData(ctx)
-        await assertOfficialAccountOwnedByUser(deps, req.oaId, auth.id)
-        const result = await deps.oa.verifyWebhook(req.oaId)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const result = await deps.oa.verifyWebhook(req.officialAccountId)
         const statusMap: Record<string, number> = {
           pending: 1,
           verified: 2,
@@ -249,15 +249,15 @@ export function oaHandler(deps: OAHandlerDeps) {
       },
       async getWebhook(req, ctx) {
         const auth = requireAuthData(ctx)
-        await assertOfficialAccountOwnedByUser(deps, req.oaId, auth.id)
-        const webhook = await deps.oa.getWebhook(req.oaId)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const webhook = await deps.oa.getWebhook(req.officialAccountId)
         return { webhook: toProtoWebhook(webhook) }
       },
       async issueAccessToken(req, ctx) {
         const auth = requireAuthData(ctx)
-        await assertOfficialAccountOwnedByUser(deps, req.oaId, auth.id)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
         const result = await deps.oa.issueAccessToken({
-          oaId: req.oaId,
+          oaId: req.officialAccountId,
           type: protoTokenTypeToDb(req.type),
           publicKey: req.publicKey,
         })
@@ -270,8 +270,8 @@ export function oaHandler(deps: OAHandlerDeps) {
       },
       async listAccessTokens(req, ctx) {
         const auth = requireAuthData(ctx)
-        await assertOfficialAccountOwnedByUser(deps, req.oaId, auth.id)
-        const tokens = await deps.oa.listAccessTokens(req.oaId, req.keyId)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const tokens = await deps.oa.listAccessTokens(req.officialAccountId, req.keyId)
         return {
           tokens: tokens.map((t) => ({
             id: t.id,
@@ -294,8 +294,11 @@ export function oaHandler(deps: OAHandlerDeps) {
       },
       async revokeAllAccessTokens(req, ctx) {
         const auth = requireAuthData(ctx)
-        await assertOfficialAccountOwnedByUser(deps, req.oaId, auth.id)
-        const result = await deps.oa.revokeAllAccessTokens(req.oaId, req.keyId)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const result = await deps.oa.revokeAllAccessTokens(
+          req.officialAccountId,
+          req.keyId,
+        )
         return { revokedCount: result.revoked_count }
       },
       async searchOfficialAccounts(req, ctx) {
@@ -305,7 +308,7 @@ export function oaHandler(deps: OAHandlerDeps) {
           accounts: accounts.map((a) => ({
             id: a.id,
             name: a.name,
-            oaId: a.oaId,
+            uniqueId: a.uniqueId,
             description: a.description ?? '',
             imageUrl: a.imageUrl ?? '',
           })),
@@ -318,7 +321,7 @@ export function oaHandler(deps: OAHandlerDeps) {
           accounts: accounts.map((a) => ({
             id: a.id,
             name: a.name,
-            oaId: a.oaId,
+            uniqueId: a.uniqueId,
             description: a.description ?? '',
             imageUrl: a.imageUrl ?? '',
           })),
@@ -326,7 +329,7 @@ export function oaHandler(deps: OAHandlerDeps) {
       },
       async addOAFriend(req, ctx) {
         const auth = requireAuthData(ctx)
-        const result = await deps.oa.addOAFriend(auth.id, req.oaId)
+        const result = await deps.oa.addOAFriend(auth.id, req.officialAccountId)
         if (!result.success) {
           if (result.reason === 'oa_not_found') {
             throw new ConnectError('Official account not found', Code.NotFound)
@@ -340,7 +343,7 @@ export function oaHandler(deps: OAHandlerDeps) {
         return {
           friendship: {
             id: friendship.id,
-            oaId: account.oaId,
+            officialAccountId: account.id,
             oaName: account.name,
             oaImageUrl: account.imageUrl ?? '',
             status: friendship.status,
@@ -350,7 +353,7 @@ export function oaHandler(deps: OAHandlerDeps) {
       },
       async removeOAFriend(req, ctx) {
         const auth = requireAuthData(ctx)
-        await deps.oa.removeOAFriend(auth.id, req.oaId)
+        await deps.oa.removeOAFriend(auth.id, req.officialAccountId)
         return {}
       },
       async listMyOAFriends(_req, ctx) {
@@ -359,7 +362,7 @@ export function oaHandler(deps: OAHandlerDeps) {
         return {
           friendships: friendships.map((f) => ({
             id: f.id,
-            oaId: f.oaId,
+            officialAccountId: f.oaId,
             oaName: f.name,
             oaImageUrl: f.imageUrl ?? '',
             status: f.status,
@@ -369,7 +372,7 @@ export function oaHandler(deps: OAHandlerDeps) {
       },
       async isOAFriend(req, ctx) {
         const auth = requireAuthData(ctx)
-        const isFriend = await deps.oa.isOAFriend(auth.id, req.oaId)
+        const isFriend = await deps.oa.isOAFriend(auth.id, req.officialAccountId)
         return { isFriend }
       },
     }

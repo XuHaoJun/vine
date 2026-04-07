@@ -26,7 +26,7 @@ export const ChannelSettingsPage = memo(() => {
 
   const { data: webhook } = useTanQuery({
     queryKey: ['oa', 'webhook', channelId],
-    queryFn: () => oaClient.getWebhook({ oaId: channelId! }),
+    queryFn: () => oaClient.getWebhook({ officialAccountId: channelId! }),
     enabled: !!channelId,
   })
 

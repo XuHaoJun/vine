@@ -1,5 +1,14 @@
-import { boolean, check, index, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import {
+  boolean,
+  check,
+  index,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
+import { officialAccount } from './schema-oa'
 
 export const userPublic = pgTable(
   'userPublic',
@@ -65,7 +74,7 @@ export const chatMember = pgTable(
     lastReadMessageId: text('lastReadMessageId'),
     lastReadAt: timestamp('lastReadAt', { mode: 'string' }),
     joinedAt: timestamp('joinedAt', { mode: 'string' }).defaultNow().notNull(),
-    oaId: text('oaId'),
+    oaId: uuid('oaId').references(() => officialAccount.id),
   },
   (table) => [
     index('chatMember_chatId_idx').on(table.chatId),
@@ -105,7 +114,7 @@ export const message = pgTable(
     metadata: text('metadata'),
     replyToMessageId: text('replyToMessageId'),
     createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
-    oaId: text('oaId'),
+    oaId: uuid('oaId').references(() => officialAccount.id),
   },
   (table) => [
     index('message_chatId_createdAt_idx').on(table.chatId, table.createdAt),
