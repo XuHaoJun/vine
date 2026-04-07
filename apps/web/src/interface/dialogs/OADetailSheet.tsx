@@ -5,6 +5,7 @@ import { ScrollView, Sheet, Text, XStack, YStack } from 'tamagui'
 import { Avatar } from '~/interface/avatars/Avatar'
 import { Button } from '~/interface/buttons/Button'
 import { Image } from '~/interface/image/Image'
+import { ChatCircleIcon } from '~/interface/icons/phosphor/ChatCircleIcon'
 import { showToast } from '~/interface/toast/Toast'
 import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
 import { oaClient } from '~/features/oa/client'
@@ -130,10 +131,10 @@ export function OADetailSheet({
         >
           <Button
             size="$5"
-            onPress={handleToggleFriend}
+            onPress={isFriend ? handleStartChat : handleToggleFriend}
             disabled={addFriend.isPending || removeFriend.isPending}
           >
-            {isFriend ? '已加入好友' : '加入好友'}
+            {isFriend ? '開始聊天' : '加入好友'}
           </Button>
         </YStack>
 
@@ -248,7 +249,7 @@ export function OADetailSheet({
 
             {/* Action Buttons Row */}
             <XStack gap="$3" mb="$5">
-              {/* Add Friend Button */}
+              {/* Add Friend / Start Chat Button */}
               <YStack
                 flex={1}
                 p="$3"
@@ -266,16 +267,20 @@ export function OADetailSheet({
                   width={24}
                   height={24}
                   rounded={9999}
-                  bg={isFriend ? '$green9' : '$green9'}
+                  bg="$green9"
                   items="center"
                   justify="center"
                 >
-                  <Text fontSize={14} color="$white" fontWeight="700">
-                    {isFriend ? '✓' : '+'}
-                  </Text>
+                  {isFriend ? (
+                    <ChatCircleIcon size={14} color="white" />
+                  ) : (
+                    <Text fontSize={14} color="$white" fontWeight="700">
+                      +
+                    </Text>
+                  )}
                 </YStack>
                 <Text fontSize={12} fontWeight="600" color="$color12">
-                  {isFriend ? '已加入好友' : '加入好友'}
+                  {isFriend ? '開始聊天' : '加入好友'}
                 </Text>
               </YStack>
 
