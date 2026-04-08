@@ -3,7 +3,7 @@ import { Slot, Stack } from 'one'
 export function AuthAndOnboardingLayout() {
   return (
     <>
-      {process.env.VITE_PLATFORM === 'web' ? (
+      {process.env.VITE_NATIVE !== '1' ? (
         <Slot />
       ) : (
         <Stack screenOptions={{ headerShown: false }} initialRouteName="login">

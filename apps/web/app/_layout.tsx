@@ -30,7 +30,7 @@ export function Layout() {
           <PlatformSpecificRootProvider>
             <TamaguiRootProvider>
               <SafeAreaProvider>
-                {process.env.VITE_PLATFORM === 'web' ? (
+                {process.env.VITE_NATIVE !== '1' ? (
                   <YStack flex={1}>
                     <Slot />
                   </YStack>

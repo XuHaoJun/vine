@@ -1,0 +1,34 @@
++-------------------------------------------------------------------------------------------------------+
+| [ LOGO ]     About  News  Products  Documentation  FAQ  Glossary  More       (Lang) (Bell) (User) (O) |
++-------------------+-----------------------------------------------------------------------------------+
+|                   |                                                                                   |
+| Console home      | TOP  >  Demo Provider 1  >  Demo App 1                                            |
+|                   |                                                                                   |
+| Providers       ^ |  (Icon)  Demo App 1                                                               |
+| +---------------+ |          [Admin] [*] Messaging API                                                |
+| | Search...     | |                                                                                   |
+| +---------------+ |                                                                                   |
+|                   |  Basic settings    Messaging API    LIFF    Security    Roles                 (v) |
+| ---- Admin ------ |  ================================================================================ |
+| Demo Provider 1   |                                                                                   |
+| Demo Provider 2   |  Basic settings                                                                   |
+| Demo Provider 3   |                                                                                   |
+| Demo Provider 4   |  Basic information                                                                |
+| Demo Provider 5   |                                                                                   |
+| Demo Provider 6   |  You can change your app name and icon in LINE Official Account Manager [^] .     |
+| Demo Provider 7   |                                                                                   |
+| Demo Provider 8   |                                                                                   |
+|                   |  Channel ID (?)         1234567890 [copy]                                         |
+| ---- No role ---- |  -------------------------------------------------------------------------------- |
+|                   |  Channel icon             +-------+                                               |
+|                   |                           | Large |                                               |
+| Tools             |                           | Icon  |                                               |
+|                   |                           +-------+                                               |
+| Support           |  -------------------------------------------------------------------------------- |
+|                   |  Channel name             Demo App 1                                              |
+|                   |  -------------------------------------------------------------------------------- |
+|                   |  Channel description      Demo App Description 1                                  |
+|                   |                                                                                   |
+|                   |                           [ Edit ]                                                |
+|                   |                                                                                   |
++-------------------+-----------------------------------------------------------------------------------+

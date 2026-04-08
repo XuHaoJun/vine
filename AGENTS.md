@@ -1,6 +1,6 @@
 # Vine Agents Guide
 
-Vine is LINE(a Instant Messaging) clone
+Vine is a self-hostable instant-messaging product modeled after LINE. It is not the official LINE platform: avoid assuming LINE Developers Console, Messaging API, LINE Login with LY Corp app/channel IDs, or calling LINE’s hosted `api.line.me` as an external integration target. This codebase is the server and clients: it exposes LINE-style / `api.line.me`-compatible APIs you operate locally or on your own infra. Build features against this repo unless the user explicitly asks for real LINE cloud integration.
 
 ## Essential Commands
 
@@ -53,6 +53,8 @@ bun run --cwd packages/zero-schema zero:generate  # Generate types after schema 
 3. **ConnectRPC** — for ConnectRPC service calls:
    - **Unary RPC** (request-response): use `@connectrpc/connect-query` (`useConnectQuery` / `useConnectMutation`) for caching and React Query integration
    - **Streaming RPC** (server/client/bi-directional): use raw `@connectrpc/connect` / `@connectrpc/connect-web` directly for stream lifecycle control (`onMessage`, `onError`, `onComplete`)
+
+**React Query cache:** When a mutation changes data you also read with `useTanQuery`, invalidate the matching query keys on success (`useTanQueryClient().invalidateQueries({ queryKey: [...] })`) or update the cache so lists and detail views stay consistent.
 
 Raw `fetch()` bypasses caching, loading states, error handling, and sync.
 

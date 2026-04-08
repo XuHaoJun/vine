@@ -3,12 +3,14 @@ import { Pool } from 'pg'
 
 const ZERO_UPSTREAM_DB = process.env['ZERO_UPSTREAM_DB'] ?? ''
 
+import * as schemaOa from './schema-oa'
 import * as schemaPrivate from './schema-private'
 import * as schemaPublic from './schema-public'
 
 export const schema = {
   ...schemaPublic,
   ...schemaPrivate,
+  ...schemaOa,
 }
 
 export const createPool = (connectionString?: string) => {

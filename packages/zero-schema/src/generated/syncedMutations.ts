@@ -3,15 +3,42 @@
 import * as v from 'valibot'
 
 export const mutationValidators = {
-  chat: {},
+  chat: {
+    insert: v.object({
+      id: v.string(),
+      type: v.string(),
+      lastMessageId: v.optional(v.nullable(v.string())),
+      lastMessageAt: v.optional(v.nullable(v.number())),
+      createdAt: v.number(),
+    }),
+    update: v.object({
+      id: v.string(),
+      type: v.optional(v.nullable(v.string())),
+      lastMessageId: v.optional(v.nullable(v.string())),
+      lastMessageAt: v.optional(v.nullable(v.number())),
+      createdAt: v.optional(v.nullable(v.number())),
+    }),
+    delete: v.object({
+      id: v.string(),
+    }),
+    insertOAChat: v.object({
+      chatId: v.string(),
+      userId: v.string(),
+      oaId: v.string(),
+      member1Id: v.string(),
+      member2Id: v.string(),
+      createdAt: v.number(),
+    }),
+  },
   chatMember: {
     insert: v.object({
       id: v.string(),
       chatId: v.string(),
-      userId: v.string(),
+      userId: v.optional(v.nullable(v.string())),
       lastReadMessageId: v.optional(v.nullable(v.string())),
       lastReadAt: v.optional(v.nullable(v.number())),
       joinedAt: v.number(),
+      oaId: v.optional(v.nullable(v.string())),
     }),
     update: v.object({
       id: v.string(),
@@ -20,6 +47,7 @@ export const mutationValidators = {
       lastReadMessageId: v.optional(v.nullable(v.string())),
       lastReadAt: v.optional(v.nullable(v.number())),
       joinedAt: v.optional(v.nullable(v.number())),
+      oaId: v.optional(v.nullable(v.string())),
     }),
     delete: v.object({
       id: v.string(),
@@ -50,30 +78,53 @@ export const mutationValidators = {
     delete: v.object({
       id: v.string(),
     }),
+    accept: v.object({
+      friendshipId: v.string(),
+      chatId: v.string(),
+      member1Id: v.string(),
+      member2Id: v.string(),
+      requesterId: v.string(),
+    }),
   },
   message: {
     insert: v.object({
       id: v.string(),
       chatId: v.string(),
-      senderId: v.string(),
+      senderId: v.optional(v.nullable(v.string())),
+      senderType: v.string(),
       type: v.string(),
       text: v.optional(v.nullable(v.string())),
       metadata: v.optional(v.nullable(v.string())),
       replyToMessageId: v.optional(v.nullable(v.string())),
       createdAt: v.number(),
+      oaId: v.optional(v.nullable(v.string())),
     }),
     update: v.object({
       id: v.string(),
       chatId: v.optional(v.nullable(v.string())),
       senderId: v.optional(v.nullable(v.string())),
+      senderType: v.optional(v.nullable(v.string())),
       type: v.optional(v.nullable(v.string())),
       text: v.optional(v.nullable(v.string())),
       metadata: v.optional(v.nullable(v.string())),
       replyToMessageId: v.optional(v.nullable(v.string())),
       createdAt: v.optional(v.nullable(v.number())),
+      oaId: v.optional(v.nullable(v.string())),
     }),
     delete: v.object({
       id: v.string(),
+    }),
+    send: v.object({
+      senderId: v.optional(v.nullable(v.string())),
+      text: v.optional(v.nullable(v.string())),
+      metadata: v.optional(v.nullable(v.string())),
+      replyToMessageId: v.optional(v.nullable(v.string())),
+      oaId: v.optional(v.nullable(v.string())),
+      id: v.string(),
+      chatId: v.string(),
+      senderType: v.string(),
+      type: v.string(),
+      createdAt: v.number(),
     }),
   },
   todo: {
