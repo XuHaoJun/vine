@@ -5,13 +5,13 @@ import { getChildDefaultFlex } from '../utils/flex'
 import { spacingToTamagui, marginToTamagui, paddingToTamagui } from '../utils/spacing'
 import { handleAction } from '../utils/action'
 import { LfText, LFexTextProps } from './LfText'
+import { LfImage, LFexImageProps } from './LfImage'
 
 export type LFexBoxProps = LFexBox & {
   className?: string
   onAction?: (action: LFexAction) => void
 }
 
-const LfImage = (props: any) => null
 const LfButton = (props: any) => null
 const LfIcon = (props: any) => null
 const LfSeparator = (props: any) => null
@@ -35,7 +35,7 @@ function renderChild(
     case 'text':
       return <LfText key={key} {...childWithFlex as LFexTextProps} onAction={onAction} />
     case 'image':
-      return <LfImage key={key} {...childWithFlex} onAction={onAction} />
+      return <LfImage key={key} {...childWithFlex as LFexImageProps} onAction={onAction} />
     case 'button':
       return <LfButton key={key} {...childWithFlex} onAction={onAction} />
     case 'icon':
