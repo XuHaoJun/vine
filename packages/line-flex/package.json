@@ -1,0 +1,19 @@
+{
+  "name": "@vine/line-flex",
+  "version": "0.0.1",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "tamagui": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "tamagui": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}

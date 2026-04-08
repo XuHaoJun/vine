@@ -1,0 +1,11 @@
+{
+  "extends": "@vine/typescript-config/base.json",
+  "compilerOptions": {
+    "composite": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noEmit": true
+  },
+  "include": ["src/**/*"],
+  "references": []
+}
