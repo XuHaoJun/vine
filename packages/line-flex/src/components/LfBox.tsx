@@ -4,13 +4,13 @@ import type { LFexBox, LFexComponent, LFexAction, LFexLayout } from '../types'
 import { getChildDefaultFlex } from '../utils/flex'
 import { spacingToTamagui, marginToTamagui, paddingToTamagui } from '../utils/spacing'
 import { handleAction } from '../utils/action'
+import { LfText, LFexTextProps } from './LfText'
 
 export type LFexBoxProps = LFexBox & {
   className?: string
   onAction?: (action: LFexAction) => void
 }
 
-const LfText = ({ children, ...props }: any) => null
 const LfImage = (props: any) => null
 const LfButton = (props: any) => null
 const LfIcon = (props: any) => null
@@ -31,9 +31,9 @@ function renderChild(
 
   switch (child.type) {
     case 'box':
-      return <LfBox key={key} {...childWithFlex as any} onAction={onAction} />
+      return <LfBox key={key} {...childWithFlex as LFexBoxProps} onAction={onAction} />
     case 'text':
-      return <LfText key={key} {...childWithFlex} onAction={onAction} />
+      return <LfText key={key} {...childWithFlex as LFexTextProps} onAction={onAction} />
     case 'image':
       return <LfImage key={key} {...childWithFlex} onAction={onAction} />
     case 'button':
@@ -121,7 +121,7 @@ export function LfBox({
   }
 
   const renderedContents = contents.length > 0
-    ? contents.map((child, i) => renderChild(child, i, layout, onAction))
+    ? contents.map((child: LFexComponent, i: number) => renderChild(child, i, layout, onAction))
     : children
 
   if (layout === 'horizontal') {
