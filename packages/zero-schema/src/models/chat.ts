@@ -1,5 +1,9 @@
 import { number, string, table } from '@rocicorp/zero'
-import { serverWhere } from 'on-zero'
+import { mutations, serverWhere } from 'on-zero'
+
+import type { TableInsertRow } from 'on-zero'
+
+export type Chat = TableInsertRow<typeof schema>
 
 export const schema = table('chat')
   .columns({
@@ -17,10 +21,38 @@ export const chatReadPermission = serverWhere('chat', (eb, auth) => {
   return eb.exists('members', (q) => q.where('userId', auth?.id || ''))
 })
 
-// No client-side CRUD mutations for chat — only custom mutators in
-// friendship.ts (acceptFriendship) and message.ts (sendMessage) can write to chat
-// via tx.mutate.chat.* inside their server-side custom mutator context
+export const mutate = mutations(schema, chatReadPermission, {
+  insertOAChat: async (
+    { authData, tx },
+    args: {
+      chatId: string
+      userId: string
+      oaId: string
+      member1Id: string
+      member2Id: string
+      createdAt: number
+    },
+  ) => {
+    if (!authData) throw new Error('Unauthorized')
 
-// Stub exports for createZeroClient compatibility (chat is read-only on client)
-export const permissions = chatReadPermission
-export const mutate = {}
+    await tx.mutate.chat.insert({
+      id: args.chatId,
+      type: 'oa',
+      createdAt: args.createdAt,
+    })
+
+    await tx.mutate.chatMember.insert({
+      id: args.member1Id,
+      chatId: args.chatId,
+      userId: args.userId,
+      joinedAt: args.createdAt,
+    })
+
+    await tx.mutate.chatMember.insert({
+      id: args.member2Id,
+      chatId: args.chatId,
+      oaId: args.oaId,
+      joinedAt: args.createdAt,
+    })
+  },
+})

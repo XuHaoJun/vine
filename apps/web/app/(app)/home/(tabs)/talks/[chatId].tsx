@@ -1,4 +1,4 @@
-import { useParams, createRoute, usePathname } from 'one'
+import { createRoute, useActiveParams } from 'one'
 import { memo, useEffect, useMemo, useRef } from 'react'
 import { Platform } from 'react-native'
 import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
@@ -8,37 +8,16 @@ import { DateSeparator } from '~/features/chat/ui/DateSeparator'
 import { MessageBubble } from '~/features/chat/ui/MessageBubble'
 import { MessageInput } from '~/features/chat/ui/MessageInput'
 import { useAuth } from '~/features/auth/client/authClient'
+import { oaClient } from '~/features/oa/client'
 import { Avatar } from '~/interface/avatars/Avatar'
 import { Button } from '~/interface/buttons/Button'
 import { H3 } from '~/interface/text/Headings'
-
-import {
-  getSyncPathnameForSlot,
-  parseDynamicRouteParam,
-} from '~/features/app/slot-initial-route'
-
-import {
-  TALKS_SLOT_BASE_PATH,
-  TALKS_STACK_SCREEN_NAMES,
-} from '~/features/chat/talks-config'
+import { useTanQuery } from '~/query'
 
 const route = createRoute<'/(app)/home/(tabs)/talks/[chatId]'>()
 
 export const ChatRoomPage = memo(() => {
-  const { chatId: paramChatId } = useParams<{ chatId: string }>()
-  const pathnameFromNav = usePathname()
-  const chatId = useMemo(() => {
-    if (paramChatId) {
-      return paramChatId
-    }
-    const path =
-      Platform.OS === 'web' && typeof window !== 'undefined'
-        ? window.location.pathname
-        : getSyncPathnameForSlot() || pathnameFromNav
-    return parseDynamicRouteParam(path, TALKS_SLOT_BASE_PATH, [
-      ...TALKS_STACK_SCREEN_NAMES,
-    ])
-  }, [paramChatId, pathnameFromNav])
+  const { chatId } = useActiveParams<{ chatId: string }>()
   const { user } = useAuth()
   const userId = user?.id ?? ''
   const scrollRef = useRef<ScrollView>(null)
@@ -46,11 +25,25 @@ export const ChatRoomPage = memo(() => {
   const { messages, isLoading, members, otherMember, sendMessage, markRead } =
     useMessages(chatId!)
 
+  const { data: oaFriendsData } = useTanQuery({
+    queryKey: ['oa', 'myFriends'],
+    queryFn: () => oaClient.listMyOAFriends({}),
+  })
+
+  // Determine if this is an OA chat and get the otherMember's oaId
+  const otherMemberOaId = otherMember?.oaId
+  const isOAChat = !!otherMemberOaId
+  const oaFriend = isOAChat
+    ? oaFriendsData?.friendships?.find((f) => f.officialAccountId === otherMemberOaId)
+    : null
+
   // Build a lookup map: userId → { name, index } for sender display
   const memberMap = useMemo(() => {
     const map: Record<string, { name: string; index: number }> = {}
     members.forEach((m, i) => {
-      map[m.userId] = { name: m.user?.name ?? '?', index: i }
+      if (m.userId) {
+        map[m.userId] = { name: m.user?.name ?? '?', index: i }
+      }
     })
     return map
   }, [members])
@@ -87,8 +80,12 @@ export const ChatRoomPage = memo(() => {
     }
   }, [])
 
-  const otherName = otherMember?.user?.name ?? '未知用戶'
-  const otherImage = otherMember?.user?.image ?? null
+  const otherName = isOAChat
+    ? (oaFriend?.oaName ?? '官方帳號')
+    : (otherMember?.user?.name ?? '未知用戶')
+  const otherImage = isOAChat
+    ? oaFriend?.oaImageUrl || null
+    : (otherMember?.user?.image ?? null)
 
   if (!chatId) {
     return null
@@ -127,7 +124,7 @@ export const ChatRoomPage = memo(() => {
               <DateSeparator label="今天" />
               {messages?.map((msg) => {
                 const isMine = msg.senderId === userId
-                const senderInfo = memberMap[msg.senderId]
+                const senderInfo = msg.senderId ? memberMap[msg.senderId] : undefined
 
                 return (
                   <MessageBubble

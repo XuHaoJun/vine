@@ -37,12 +37,9 @@ export function AppLayout() {
   const pathname = usePathname()
   const pendingRedirect = getPendingRedirect()
 
-  if (state === 'loading') {
-    return null
-  }
-
   // redirect logged-out users away from protected routes
-  const isLoggedInRoute = pathname.startsWith('/home')
+  const isLoggedInRoute =
+    pathname.startsWith('/home') || pathname.startsWith('/developers')
   if (state === 'logged-out' && isLoggedInRoute) {
     return <Redirect href="/auth/login" />
   }
@@ -66,13 +63,14 @@ export function AppLayout() {
         <ToastProvider>
           <DialogProvider>
             <PlatformSpecificRootProvider>
-              {process.env.VITE_PLATFORM === 'web' ? (
+              {process.env.VITE_NATIVE !== '1' ? (
                 <Slot />
               ) : (
                 // We need Stack here for transition animation to work on native
                 <Stack screenOptions={{ headerShown: false }}>
                   <Stack.Screen name="home" />
                   <Stack.Screen name="auth" />
+                  <Stack.Screen name="developers" />
                 </Stack>
               )}
             </PlatformSpecificRootProvider>

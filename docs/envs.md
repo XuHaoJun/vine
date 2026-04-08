@@ -46,6 +46,8 @@
 | `ZERO_CHANGE_DB` | `postgresql://user:password@127.0.0.1:5533/zero_cdb` | ✅ | Zero Change 資料庫 |
 | `ALLOWED_ORIGIN` | 未設定（接受所有） | ✅ | 允許的前端 origin，例如 `https://app.yourdomain.com`，不設定則允許所有 |
 | `DEMO_EMAIL` | `demo@takeout.tamagui.dev` | 選填 | Demo 帳號 email，用於 afterCreateUser 自動設定 username |
+| `OA_BASE_URL` | `http://localhost:3001/api/oa` | 選填 | OA API 基礎 URL |
+| `OA_WEBHOOK_TIMEOUT_MS` | `10000` | 選填 | Webhook 發送逾時毫秒數 |
 
 ---
 

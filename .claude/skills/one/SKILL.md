@@ -243,57 +243,21 @@ These come from One’s integration with React Navigation (`node_modules/one/src
 ### 1. `usePathname()` in layouts vs the real URL
 Inside a `_layout.tsx`, `usePathname()` ultimately uses **root navigation state** (`useStoreRouteInfo()`), which can be **incomplete or out of sync** with the address bar during nested navigators’ first paint, refresh, or certain stacks. Leaf pages get more accurate info via `RouteInfoContext`.
 **Workaround (shell / guards):** For anything that must match the **browser URL** on web (tab bar visibility, auth redirects keyed to path), read `window.location.pathname` on web (e.g. a small `useResolvedPathname()` helper: web → `window.location.pathname`, native → `usePathname()`). Do not rely on layout `usePathname()` alone for those decisions.
-### 2. Late-mount `Slot` + dynamic segments → wrong screen on refresh
-When a parent layout **does not render children for a while** (e.g. auth `loading` → `null`), inner **`Slot`** navigators can mount **after** `NavigationContainer` has already consumed **linking `initialState`**. One then tries to infer `initialRouteName` from `initialPathname` / `window.location.pathname` using a **string heuristic** (see `QualifiedNavigator`’s `resolvedInitialRouteName` in `node_modules/one/src/views/Navigator.tsx`).
-That heuristic **does not match dynamic file segments** like `[chatId]`: the URL has a real id, not the literal string `[chatId]`, so **no screen matches** → `initialRouteName` is `undefined` → `StackRouter` falls back to the **first sorted child**, often `index` (e.g. refresh on `/home/talks/<uuid>` shows the **talks list** while the URL stays on the chat).
+### 2. Late-mount `Slot` and `initialRouteName`
+When nested navigators mount **late** (e.g. a parent layout gates on auth), One may resolve the wrong `initialRouteName` relative to the URL—especially for **dynamic segments**—because `QualifiedNavigator` infers the initial screen with a pathname heuristic. **See** `node_modules/one/src/views/Navigator.tsx` (`QualifiedNavigator`, `resolvedInitialRouteName`, `useSlot`).
 
-**Workaround (Vine shared helpers):**
+### 3. `useParams()` vs `useActiveParams()` (nested navigators)
+**`useParams()`** reads **`RouteParamsContext`** (React Navigation’s `route.params` on the screen wrapper in `node_modules/one/src/router/Route.tsx`). During nested `Slot`/stack updates or incomplete linking state, **`route.params` can be empty** while the browser URL is still correct → `if (!chatId) return null` yields a **blank screen**.
 
-| Module | Role |
-|--------|------|
-| `~/features/app/slot-initial-route.ts` | `getSyncPathnameForSlot()` — web: `window.location.pathname`; native: `expo-linking` `getLinkingURL()` + `parse()`. `matchSlotInitialRouteFromPathname(pathname, basePath, screenNames)` maps URL → screen `name` (`index`, static segments, first `[param]`). `parseDynamicRouteParam(...)` for param fallback on dynamic pages. |
-| `~/features/app/useSlotInitialRouteName.ts` | `useSlotInitialRouteName(basePath, screenNames)` — call from the stack `_layout.tsx` that wraps `Slot`. Pass a **stable** `screenNames` array (module-level `const`, same strings as file segments: `index`, `requests`, `[chatId]`, …). |
-
-**Per-stack constants** (public URL prefix + screen list) live **outside** `app/` — e.g. `~/features/chat/talks-config.ts` exporting `TALKS_SLOT_BASE_PATH` and `TALKS_STACK_SCREEN_NAMES`. **Do not** leave config-only `.ts` files inside `app/.../your-stack/` or One may register **`/home/.../talks-config`** as a real route in `routes.d.ts`.
-
-**Extra guard:** `useSlotInitialRouteName` will not choose a dynamic screen unless the pathname yields a **valid** segment (it treats literal `undefined` / `null` path segments as invalid and falls back to `index`), so React Navigation does not serialize URLs like `/home/talks/undefined`.
+**Prefer `useActiveParams()`** on dynamic pages when you see that: it uses **`useRouteInfo().params`** (derived from navigation state / path), which tends to stay aligned with the URL. **`useParams()`** is still fine when the screen `route` is stable.
 
 ```tsx
-// app/.../talks/_layout.tsx
-import { Slot } from 'one'
-import { useSlotInitialRouteName } from '~/features/app/useSlotInitialRouteName'
-import { TALKS_SLOT_BASE_PATH, TALKS_STACK_SCREEN_NAMES } from '~/features/chat/talks-config'
+import { useActiveParams } from 'one'
 
-export default function TalksLayout() {
-  const initialRouteName = useSlotInitialRouteName(TALKS_SLOT_BASE_PATH, TALKS_STACK_SCREEN_NAMES)
-  return <Slot {...(initialRouteName ? { initialRouteName } : {})} />
-}
+const { chatId } = useActiveParams<{ chatId: string }>()
 ```
 
-### 3. Forced `initialRouteName` without params → empty `useParams` / blank UI
-Supplying only `initialRouteName: '[chatId]'` does **not** restore full linking state; **route params** (e.g. `chatId`) may still be missing. **`useParams()`** then returns no `chatId` even though the URL is correct → conditional `return null` on the page causes a **blank screen**.
-
-**Workaround:** On the dynamic page, prefer **`useParams()`**, then fall back with **`parseDynamicRouteParam(path, basePath, screenNames)`** using the **same** `basePath` and `screenNames` as the stack config. For web, reading `window.location.pathname` for that fallback is fine; native can use `getSyncPathnameForSlot()` or `usePathname()` on a leaf page.
-
-```tsx
-// [chatId].tsx — pattern
-import { useParams, usePathname } from 'one'
-import { useMemo } from 'react'
-import { Platform } from 'react-native'
-import { getSyncPathnameForSlot, parseDynamicRouteParam } from '~/features/app/slot-initial-route'
-import { TALKS_SLOT_BASE_PATH, TALKS_STACK_SCREEN_NAMES } from '~/features/chat/talks-config'
-
-const { chatId: paramChatId } = useParams<{ chatId: string }>()
-const pathnameFromNav = usePathname()
-const chatId = useMemo(() => {
-  if (paramChatId) return paramChatId
-  const path =
-    Platform.OS === 'web' && typeof window !== 'undefined'
-      ? window.location.pathname
-      : getSyncPathnameForSlot() || pathnameFromNav
-  return parseDynamicRouteParam(path, TALKS_SLOT_BASE_PATH, [...TALKS_STACK_SCREEN_NAMES])
-}, [paramChatId, pathnameFromNav])
-```
+If both are wrong, fall back to parsing **`usePathname()`** or `window.location.pathname` (web) yourself.
 
 ## API Routes
 
@@ -372,7 +336,7 @@ HomeLayout.native.tsx  # used on iOS / Android
 ### Environment variables
 
 ```ts
-process.env.VITE_PLATFORM     // 'web' | 'native'
+process.env.VITE_NATIVE       // '' | '1' — web (client/SSR) when not '1', native when '1'
 process.env.VITE_ENVIRONMENT  // 'ssr' | 'client' | 'ios' | 'android'
 process.env.ONE_SERVER_URL    // server URL for SSG/SSR calls
 ```

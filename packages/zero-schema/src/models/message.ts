@@ -9,12 +9,14 @@ export const schema = table('message')
   .columns({
     id: string(),
     chatId: string(),
-    senderId: string(),
+    senderId: string().optional(),
+    senderType: string(),
     type: string(),
     text: string().optional(),
     metadata: string().optional(),
     replyToMessageId: string().optional(),
     createdAt: number(),
+    oaId: string().optional(),
   })
   .primaryKey('id')
 
@@ -27,7 +29,14 @@ export const messageReadPermission = serverWhere('message', (eb, auth) => {
 export const mutate = mutations(schema, messageReadPermission, {
   send: async ({ authData, tx }, message: Message) => {
     if (!authData) throw new Error('Unauthorized')
-    if (message.senderId !== authData.id) throw new Error('Unauthorized')
+
+    // Validate sender based on senderType
+    if (message.senderType === 'user' && message.senderId !== authData.id) {
+      throw new Error('Unauthorized')
+    }
+    if (message.senderType === 'oa' && !message.oaId) {
+      throw new Error('OA message requires oaId')
+    }
 
     // Insert the message
     await tx.mutate.message.insert(message)

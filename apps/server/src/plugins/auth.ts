@@ -79,6 +79,11 @@ function createAuthServer(deps: AuthDeps) {
     session: {
       freshAge: time.minute.days(2),
       storeSessionInDatabase: true,
+      // Faster get-session: validate from signed cookie cache before hitting DB (short eventual-consistency window)
+      cookieCache: {
+        enabled: true,
+        maxAge: 300,
+      },
     },
 
     emailAndPassword: { enabled: true },
@@ -218,7 +223,7 @@ export async function authPlugin(fastify: FastifyInstance, deps: AuthPluginDeps)
       }
     }
 
-    return await reply.send({
+    return reply.send({
       clientId,
       appName,
       scopes: requestedScope.split(' ').filter(Boolean),

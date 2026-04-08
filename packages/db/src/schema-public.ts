@@ -1,11 +1,14 @@
 import {
   boolean,
+  check,
   index,
   pgTable,
   text,
   timestamp,
-  uniqueIndex,
+  uuid,
 } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
+import { officialAccount } from './schema-oa'
 
 export const userPublic = pgTable(
   'userPublic',
@@ -67,15 +70,24 @@ export const chatMember = pgTable(
   {
     id: text('id').primaryKey(),
     chatId: text('chatId').notNull(),
-    userId: text('userId').notNull(),
+    userId: text('userId'),
     lastReadMessageId: text('lastReadMessageId'),
     lastReadAt: timestamp('lastReadAt', { mode: 'string' }),
     joinedAt: timestamp('joinedAt', { mode: 'string' }).defaultNow().notNull(),
+    oaId: uuid('oaId').references(() => officialAccount.id),
   },
   (table) => [
     index('chatMember_chatId_idx').on(table.chatId),
     index('chatMember_userId_idx').on(table.userId),
-    uniqueIndex('chatMember_chatId_userId_unique').on(table.chatId, table.userId),
+    index('chatMember_oaId_idx').on(table.oaId),
+    check(
+      'chatMember_user_or_oa_check',
+      sql`(${table.userId} IS NOT NULL OR ${table.oaId} IS NOT NULL)`,
+    ),
+    check(
+      'chatMember_user_oa_mutual_exclusion_check',
+      sql`(${table.userId} IS NULL OR ${table.oaId} IS NULL)`,
+    ),
   ],
 )
 
@@ -84,7 +96,8 @@ export const message = pgTable(
   {
     id: text('id').primaryKey(),
     chatId: text('chatId').notNull(),
-    senderId: text('senderId').notNull(),
+    senderId: text('senderId'),
+    senderType: text('senderType').$type<'user' | 'oa'>().notNull(),
     type: text('type')
       .notNull()
       .$type<
@@ -101,6 +114,14 @@ export const message = pgTable(
     metadata: text('metadata'),
     replyToMessageId: text('replyToMessageId'),
     createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    oaId: uuid('oaId').references(() => officialAccount.id),
   },
-  (table) => [index('message_chatId_createdAt_idx').on(table.chatId, table.createdAt)],
+  (table) => [
+    index('message_chatId_createdAt_idx').on(table.chatId, table.createdAt),
+    index('message_oaId_idx').on(table.oaId),
+    check(
+      'message_sender_user_check',
+      sql`(${table.senderType} = 'user' AND ${table.senderId} IS NOT NULL) OR (${table.senderType} = 'oa' AND ${table.oaId} IS NOT NULL)`,
+    ),
+  ],
 )
