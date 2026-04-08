@@ -102,10 +102,20 @@ export async function oaMessagingPlugin(
 
         return await reply.send({})
       } catch (err) {
+        if (err instanceof Error && err.message === 'Missing Bearer token') {
+          return reply
+            .code(401)
+            .send({ message: 'Missing Bearer token', code: 'INVALID_TOKEN' })
+        }
         if (err instanceof Error && err.message === 'Invalid access token') {
           return reply
             .code(401)
             .send({ message: 'Invalid access token', code: 'INVALID_TOKEN' })
+        }
+        if (err instanceof Error && err.message === 'Access token expired') {
+          return reply
+            .code(401)
+            .send({ message: 'Access token expired', code: 'TOKEN_EXPIRED' })
         }
         return reply.code(500).send({ message: 'Internal server error' })
       }
