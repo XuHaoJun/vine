@@ -1,4 +1,4 @@
-import { useParams, createRoute, usePathname, useActiveParams } from 'one'
+import { createRoute, useActiveParams } from 'one'
 import { memo, useEffect, useMemo, useRef } from 'react'
 import { Platform } from 'react-native'
 import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
@@ -8,9 +8,11 @@ import { DateSeparator } from '~/features/chat/ui/DateSeparator'
 import { MessageBubble } from '~/features/chat/ui/MessageBubble'
 import { MessageInput } from '~/features/chat/ui/MessageInput'
 import { useAuth } from '~/features/auth/client/authClient'
+import { oaClient } from '~/features/oa/client'
 import { Avatar } from '~/interface/avatars/Avatar'
 import { Button } from '~/interface/buttons/Button'
 import { H3 } from '~/interface/text/Headings'
+import { useTanQuery } from '~/query'
 
 const route = createRoute<'/(app)/home/(tabs)/talks/[chatId]'>()
 
@@ -22,6 +24,18 @@ export const ChatRoomPage = memo(() => {
 
   const { messages, isLoading, members, otherMember, sendMessage, markRead } =
     useMessages(chatId!)
+
+  const { data: oaFriendsData } = useTanQuery({
+    queryKey: ['oa', 'myFriends'],
+    queryFn: () => oaClient.listMyOAFriends({}),
+  })
+
+  // Determine if this is an OA chat and get the otherMember's oaId
+  const otherMemberOaId = otherMember?.oaId
+  const isOAChat = !!otherMemberOaId
+  const oaFriend = isOAChat
+    ? oaFriendsData?.friendships?.find((f) => f.officialAccountId === otherMemberOaId)
+    : null
 
   // Build a lookup map: userId → { name, index } for sender display
   const memberMap = useMemo(() => {
@@ -66,9 +80,12 @@ export const ChatRoomPage = memo(() => {
     }
   }, [])
 
-  const otherName =
-    otherMember?.user?.name ?? (otherMember?.oaId ? '官方帳號' : '未知用戶')
-  const otherImage = otherMember?.user?.image ?? null
+  const otherName = isOAChat
+    ? (oaFriend?.oaName ?? '官方帳號')
+    : (otherMember?.user?.name ?? '未知用戶')
+  const otherImage = isOAChat
+    ? oaFriend?.oaImageUrl || null
+    : (otherMember?.user?.image ?? null)
 
   if (!chatId) {
     return null

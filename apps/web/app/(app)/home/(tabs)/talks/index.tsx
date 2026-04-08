@@ -36,6 +36,13 @@ export const TalksPage = memo(() => {
 
   const filteredChats = chats.filter((chat) => {
     if (!searchQuery) return true
+    if (chat.type === 'oa') {
+      const oaMember = chat.members?.find((m) => m.oaId)
+      const oaFriend = oaFriendsData?.friendships?.find(
+        (f) => f.officialAccountId === oaMember?.oaId,
+      )
+      return (oaFriend?.oaName ?? '').toLowerCase().includes(searchQuery.toLowerCase())
+    }
     const otherMember = chat.members?.find((m) => m.userId !== userId)
     const name = otherMember?.user?.name ?? ''
     return name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -133,8 +140,7 @@ export const TalksPage = memo(() => {
               </YStack>
             ) : (
               filteredChats.map((chat) => {
-                const otherMember = chat.members?.find((m) => m.userId !== userId)
-                const myMembership = chat.members?.find((m) => m.userId === userId)
+                const myMembership = chat.members?.find((m) => m.userId !== userId)
                 const lastMsg = chat.lastMessage
 
                 const hasUnread =
@@ -142,11 +148,27 @@ export const TalksPage = memo(() => {
                   myMembership?.lastReadMessageId !== lastMsg.id &&
                   lastMsg.senderId !== userId
 
+                let name = '未知用戶'
+                let image: string | undefined | null = undefined
+
+                if (chat.type === 'oa') {
+                  const oaMember = chat.members?.find((m) => m.oaId)
+                  const oaFriend = oaFriendsData?.friendships?.find(
+                    (f) => f.officialAccountId === oaMember?.oaId,
+                  )
+                  name = oaFriend?.oaName ?? '官方帳號'
+                  image = oaFriend?.oaImageUrl || undefined
+                } else {
+                  const otherMember = chat.members?.find((m) => m.userId !== userId)
+                  name = otherMember?.user?.name ?? '未知用戶'
+                  image = otherMember?.user?.image
+                }
+
                 return (
                   <ChatListItem
                     key={chat.id}
-                    name={otherMember?.user?.name ?? '未知用戶'}
-                    image={otherMember?.user?.image}
+                    name={name}
+                    image={image}
                     lastMessageText={lastMsg?.text ?? null}
                     lastMessageAt={chat.lastMessageAt}
                     unreadCount={hasUnread ? 1 : 0}
