@@ -1,11 +1,18 @@
 {
-  "extends": "@vine/typescript-config/base.json",
   "compilerOptions": {
-    "composite": true,
-    "jsx": "react-jsx",
+    "rootDir": "src",
+    "outDir": "dist",
+    "target": "ES2022",
+    "module": "Preserve",
+    "moduleResolution": "Bundler",
     "strict": true,
-    "noEmit": true
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "types": ["node"],
+    "lib": ["esnext"]
   },
-  "include": ["src/**/*"],
-  "references": []
+  "include": ["src/**/*"]
 }
