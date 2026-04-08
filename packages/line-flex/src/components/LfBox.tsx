@@ -7,16 +7,16 @@ import { handleAction } from '../utils/action'
 import { LfText, LFexTextProps } from './LfText'
 import { LfImage, LFexImageProps } from './LfImage'
 import { LfButton, LFexButtonProps } from './LfButton'
+import { LfIcon, LFexIconProps } from './LfIcon'
+import { LfSeparator, LFexSeparatorProps } from './LfSeparator'
+import { LfSpacer, LFexSpacerProps } from './LfSpacer'
+import { LfFiller, LFexFillerProps } from './LfFiller'
+import { LfVideo, LFexVideoProps } from './LfVideo'
 
 export type LFexBoxProps = LFexBox & {
   className?: string
   onAction?: (action: LFexAction) => void
 }
-const LfIcon = (props: any) => null
-const LfSeparator = (props: any) => null
-const LfSpacer = (props: any) => null
-const LfFiller = (props: any) => null
-const LfVideo = (props: any) => null
 
 function renderChild(
   child: LFexComponent,
@@ -38,15 +38,15 @@ function renderChild(
     case 'button':
       return <LfButton key={key} {...childWithFlex as LFexButtonProps} onAction={onAction} />
     case 'icon':
-      return <LfIcon key={key} {...childWithFlex} />
+      return <LfIcon key={key} {...childWithFlex as LFexIconProps} />
     case 'separator':
-      return <LfSeparator key={key} {...childWithFlex} />
+      return <LfSeparator key={key} {...childWithFlex as LFexSeparatorProps} />
     case 'spacer':
-      return <LfSpacer key={key} {...childWithFlex} />
+      return <LfSpacer key={key} {...childWithFlex as LFexSpacerProps} />
     case 'filler':
-      return <LfFiller key={key} {...childWithFlex} />
+      return <LfFiller key={key} {...childWithFlex as LFexFillerProps} />
     case 'video':
-      return <LfVideo key={key} {...childWithFlex} />
+      return <LfVideo key={key} {...childWithFlex as LFexVideoProps} />
     default:
       return null
   }
