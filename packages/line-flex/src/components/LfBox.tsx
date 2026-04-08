@@ -6,13 +6,12 @@ import { spacingToTamagui, marginToTamagui, paddingToTamagui } from '../utils/sp
 import { handleAction } from '../utils/action'
 import { LfText, LFexTextProps } from './LfText'
 import { LfImage, LFexImageProps } from './LfImage'
+import { LfButton, LFexButtonProps } from './LfButton'
 
 export type LFexBoxProps = LFexBox & {
   className?: string
   onAction?: (action: LFexAction) => void
 }
-
-const LfButton = (props: any) => null
 const LfIcon = (props: any) => null
 const LfSeparator = (props: any) => null
 const LfSpacer = (props: any) => null
@@ -37,7 +36,7 @@ function renderChild(
     case 'image':
       return <LfImage key={key} {...childWithFlex as LFexImageProps} onAction={onAction} />
     case 'button':
-      return <LfButton key={key} {...childWithFlex} onAction={onAction} />
+      return <LfButton key={key} {...childWithFlex as LFexButtonProps} onAction={onAction} />
     case 'icon':
       return <LfIcon key={key} {...childWithFlex} />
     case 'separator':
