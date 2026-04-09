@@ -76,7 +76,7 @@ function renderChild(
         />
       )
     case 'icon':
-      return <LfIcon key={key} {...child} />
+      return <LfIcon key={key} {...child} layout={parentLayout} />
     case 'separator':
       return <LfSeparator key={key} {...child} layout={parentLayout} />
     case 'spacer':

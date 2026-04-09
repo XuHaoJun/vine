@@ -1,14 +1,17 @@
 import { Image } from 'tamagui'
-import type { LFexIcon } from '../types'
+import type { LFexIcon, LFexLayout } from '../types'
 import { marginToTamagui } from '../utils/spacing'
 
-export type LFexIconProps = LFexIcon
+export type LFexIconProps = LFexIcon & {
+  layout?: LFexLayout
+}
 
 export function LfIcon({
   url,
   size = 'md',
   aspectRatio = '1:1',
   margin,
+  layout = 'baseline',
   position,
   offsetTop,
   offsetBottom,
@@ -16,6 +19,7 @@ export function LfIcon({
   offsetEnd,
 }: LFexIconProps) {
   const marginValue = margin ? marginToTamagui(margin) : undefined
+  const isHorizontalParent = layout === 'horizontal' || layout === 'baseline'
 
   const positionStyle = position === 'absolute' ? { position: 'absolute' as const } : {}
   const offsetStyle = {
@@ -25,7 +29,7 @@ export function LfIcon({
     ...(offsetEnd && { right: offsetEnd }),
   }
 
-  const width =
+  const baseSize =
     size === 'xxs'
       ? 14
       : size === 'xs'
@@ -48,14 +52,29 @@ export function LfIcon({
                         ? 56
                         : 24
 
-  return (
-    // @ts-ignore - TamaguiImage type incompatibility with JSX
-    <Image
-      width={width}
-      source={{ uri: url }}
-      objectFit="contain"
-      {...positionStyle}
-      {...offsetStyle}
-    />
-  )
+  // aspectRatio "w:h" → compute width from height (baseSize is height)
+  const aspectParts = aspectRatio.split(':')
+  const aw = parseFloat(aspectParts[0] ?? '1')
+  const ah = parseFloat(aspectParts[1] ?? '1')
+  const width = ah > 0 ? Math.round((baseSize * aw) / ah) : baseSize
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const iconProps: any = {
+    src: url,
+    width,
+    height: baseSize,
+    objectFit: 'contain',
+    flexShrink: 0,
+    flexGrow: 0,
+    flexBasis: 'auto',
+    ...positionStyle,
+    ...offsetStyle,
+  }
+
+  if (marginValue) {
+    iconProps[isHorizontalParent ? 'marginLeft' : 'marginTop'] = marginValue
+  }
+
+  // @ts-ignore - Tamagui Image type incompatibilities
+  return <Image {...iconProps} />
 }
