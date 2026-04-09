@@ -22,7 +22,7 @@ function renderChild(
   child: LFexComponent,
   index: number,
   parentLayout: LFexLayout,
-  onAction?: (action: LFexAction) => void
+  onAction?: (action: LFexAction) => void,
 ): React.ReactNode {
   const key = `${child.type}-${index}`
   const defaultFlex = getChildDefaultFlex((child as any).flex, parentLayout)
@@ -30,23 +30,29 @@ function renderChild(
 
   switch (child.type) {
     case 'box':
-      return <LfBox key={key} {...childWithFlex as LFexBoxProps} onAction={onAction} />
+      return <LfBox key={key} {...(childWithFlex as LFexBoxProps)} onAction={onAction} />
     case 'text':
-      return <LfText key={key} {...childWithFlex as LFexTextProps} onAction={onAction} />
+      return (
+        <LfText key={key} {...(childWithFlex as LFexTextProps)} onAction={onAction} />
+      )
     case 'image':
-      return <LfImage key={key} {...childWithFlex as LFexImageProps} onAction={onAction} />
+      return (
+        <LfImage key={key} {...(childWithFlex as LFexImageProps)} onAction={onAction} />
+      )
     case 'button':
-      return <LfButton key={key} {...childWithFlex as LFexButtonProps} onAction={onAction} />
+      return (
+        <LfButton key={key} {...(childWithFlex as LFexButtonProps)} onAction={onAction} />
+      )
     case 'icon':
-      return <LfIcon key={key} {...childWithFlex as LFexIconProps} />
+      return <LfIcon key={key} {...(childWithFlex as LFexIconProps)} />
     case 'separator':
-      return <LfSeparator key={key} {...childWithFlex as LFexSeparatorProps} />
+      return <LfSeparator key={key} {...(childWithFlex as LFexSeparatorProps)} />
     case 'spacer':
-      return <LfSpacer key={key} {...childWithFlex as LFexSpacerProps} />
+      return <LfSpacer key={key} {...(childWithFlex as LFexSpacerProps)} />
     case 'filler':
-      return <LfFiller key={key} {...childWithFlex as LFexFillerProps} />
+      return <LfFiller key={key} {...(childWithFlex as LFexFillerProps)} />
     case 'video':
-      return <LfVideo key={key} {...childWithFlex as LFexVideoProps} />
+      return <LfVideo key={key} {...(childWithFlex as LFexVideoProps)} />
     default:
       return null
   }
@@ -119,16 +125,15 @@ export function LfBox({
     onClick: clickHandler,
   }
 
-  const renderedContents = contents.length > 0
-    ? contents.map((child: LFexComponent, i: number) => renderChild(child, i, layout, onAction))
-    : children
+  const renderedContents =
+    contents.length > 0
+      ? contents.map((child: LFexComponent, i: number) =>
+          renderChild(child, i, layout, onAction),
+        )
+      : children
 
   if (layout === 'horizontal') {
-    return (
-      <XStack {...containerProps}>
-        {renderedContents}
-      </XStack>
-    )
+    return <XStack {...containerProps}>{renderedContents}</XStack>
   }
 
   if (layout === 'baseline') {
@@ -139,9 +144,5 @@ export function LfBox({
     )
   }
 
-  return (
-    <YStack {...containerProps}>
-      {renderedContents}
-    </YStack>
-  )
+  return <YStack {...containerProps}>{renderedContents}</YStack>
 }

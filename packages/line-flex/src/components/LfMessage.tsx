@@ -7,11 +7,7 @@ export type LFexMessageProps = LFexMessage & {
   onAction?: (action: LFexAction) => void
 }
 
-export function LfMessage({
-  contents,
-  onAction,
-  className,
-}: LFexMessageProps) {
+export function LfMessage({ contents, onAction, className }: LFexMessageProps) {
   if (contents.type === 'carousel') {
     return <LfCarousel {...contents} onAction={onAction} className={className} />
   }

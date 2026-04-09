@@ -56,12 +56,10 @@ function makeMockDb(
       }
     } else {
       return {
-        from: vi
-          .fn()
-          .mockReturnValue({
-            where: vi.fn().mockReturnValue({ limit: mockLimit3 }),
-            innerJoin: mockInnerJoin,
-          }),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({ limit: mockLimit3 }),
+          innerJoin: mockInnerJoin,
+        }),
       }
     }
   })

@@ -43,15 +43,20 @@ export function LfButton({
 
   const heightValue = height === 'sm' ? 40 : 52
 
-  const backgroundColor = color ?? (
-    style === 'primary' ? LINE_BUTTON_COLORS.primary :
-    style === 'secondary' ? LINE_BUTTON_COLORS.secondary :
-    'transparent'
-  )
+  const backgroundColor =
+    color ??
+    (style === 'primary'
+      ? LINE_BUTTON_COLORS.primary
+      : style === 'secondary'
+        ? LINE_BUTTON_COLORS.secondary
+        : 'transparent')
 
-  const textColor = style === 'primary' ? '#ffffff' :
-                    style === 'secondary' ? '#111111' :
-                    color ?? LINE_BUTTON_COLORS.link
+  const textColor =
+    style === 'primary'
+      ? '#ffffff'
+      : style === 'secondary'
+        ? '#111111'
+        : (color ?? LINE_BUTTON_COLORS.link)
 
   return (
     <Button
@@ -64,11 +69,7 @@ export function LfButton({
       onPress={clickHandler}
       className={className}
     >
-      <Text
-        color={textColor}
-        fontWeight="600"
-        fontSize="$3"
-      >
+      <Text color={textColor} fontWeight="600" fontSize="$3">
         {action.label ?? 'Button'}
       </Text>
     </Button>

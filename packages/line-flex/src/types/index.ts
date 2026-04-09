@@ -1,8 +1,17 @@
 // ============ Spacing & Sizing ============
 
 export type LFexSize =
-  | 'xxs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl'
-  | '3xl' | '4xl' | '5xl' | 'full'
+  | 'xxs'
+  | 'xs'
+  | 'sm'
+  | 'md'
+  | 'lg'
+  | 'xl'
+  | 'xxl'
+  | '3xl'
+  | '4xl'
+  | '5xl'
+  | 'full'
 
 export type LFexSpacing = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl'
 export type LFexMargin = LFexSpacing
@@ -14,13 +23,36 @@ export type LFexStyle = 'normal' | 'italic'
 export type LFexPosition = 'relative' | 'absolute'
 export type LFexLayout = 'horizontal' | 'vertical' | 'baseline'
 export type LFexAspectRatio =
-  | '1:1' | '1.51:1' | '1.91:1' | '4:3' | '16:9'
-  | '20:13' | '2:1' | '3:1' | '3:4' | '9:16' | '1:2' | '1:3'
+  | '1:1'
+  | '1.51:1'
+  | '1.91:1'
+  | '4:3'
+  | '16:9'
+  | '20:13'
+  | '2:1'
+  | '3:1'
+  | '3:4'
+  | '9:16'
+  | '1:2'
+  | '1:3'
 export type LFexAspectMode = 'cover' | 'fit'
-export type LFexBubbleSize = 'nano' | 'micro' | 'deca' | 'hecto' | 'kilo' | 'mega' | 'giga'
+export type LFexBubbleSize =
+  | 'nano'
+  | 'micro'
+  | 'deca'
+  | 'hecto'
+  | 'kilo'
+  | 'mega'
+  | 'giga'
 export type LFexButtonStyle = 'link' | 'primary' | 'secondary'
 export type LFexButtonHeight = 'sm' | 'md'
-export type LFexBorderWidth = 'none' | 'light' | 'normal' | 'medium' | 'semi-bold' | 'bold'
+export type LFexBorderWidth =
+  | 'none'
+  | 'light'
+  | 'normal'
+  | 'medium'
+  | 'semi-bold'
+  | 'bold'
 
 // ============ Actions ============
 
@@ -244,7 +276,11 @@ export interface LFexMessage {
 // ============ Layout ============
 
 export type LFexJustifyContent =
-  | 'flex-start' | 'flex-end' | 'center'
-  | 'space-between' | 'space-around' | 'space-evenly'
+  | 'flex-start'
+  | 'flex-end'
+  | 'center'
+  | 'space-between'
+  | 'space-around'
+  | 'space-evenly'
 
 export type LFexAlignItems = 'flex-start' | 'flex-end' | 'center' | 'baseline' | 'stretch'

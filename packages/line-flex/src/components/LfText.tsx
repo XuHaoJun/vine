@@ -38,7 +38,7 @@ export function LfText({
   className,
 }: LFexTextProps) {
   const marginValue = margin ? marginToTamagui(margin) : undefined
-  
+
   const positionStyle = position === 'absolute' ? { position: 'absolute' as const } : {}
   const offsetStyle = {
     ...(offsetTop && { top: offsetTop }),
@@ -49,50 +49,66 @@ export function LfText({
 
   const clickHandler = handleAction(action, onAction)
 
-  const fontSize = size === 'xxs' ? 10 :
-                   size === 'xs' ? 11 :
-                   size === 'sm' ? 12 :
-                   size === 'md' ? 14 :
-                   size === 'lg' ? 16 :
-                   size === 'xl' ? 18 :
-                   size === 'xxl' ? 20 :
-                   size === '3xl' ? 24 :
-                   size === '4xl' ? 30 :
-                   size === '5xl' ? 36 : 14
+  const fontSize =
+    size === 'xxs'
+      ? 10
+      : size === 'xs'
+        ? 11
+        : size === 'sm'
+          ? 12
+          : size === 'md'
+            ? 14
+            : size === 'lg'
+              ? 16
+              : size === 'xl'
+                ? 18
+                : size === 'xxl'
+                  ? 20
+                  : size === '3xl'
+                    ? 24
+                    : size === '4xl'
+                      ? 30
+                      : size === '5xl'
+                        ? 36
+                        : 14
 
   const textAlign = align === 'start' ? 'left' : align === 'end' ? 'right' : align
 
-  const lineHeight = lineSpacing 
+  const lineHeight = lineSpacing
     ? `${parseInt(lineSpacing.replace('px', '')) + 15}px`
     : undefined
 
-  const clickableProps = action ? { cursor: 'pointer' as const, onClick: clickHandler } : {}
+  const clickableProps = action
+    ? { cursor: 'pointer' as const, onClick: clickHandler }
+    : {}
 
   return (
-    <Paragraph
-      flex={flex ?? 1}
-      margin={marginValue}
-      {...positionStyle}
-      {...offsetStyle}
-    >
+    <Paragraph flex={flex ?? 1} margin={marginValue} {...positionStyle} {...offsetStyle}>
       <Text
         fontSize={fontSize}
         color={color}
         fontWeight={weight === 'bold' ? '700' : '400'}
         fontStyle={style === 'italic' ? 'italic' : 'normal'}
-        textDecorationLine={decoration === 'underline' ? 'underline' : 
-                            decoration === 'line-through' ? 'line-through' : 'none'}
+        textDecorationLine={
+          decoration === 'underline'
+            ? 'underline'
+            : decoration === 'line-through'
+              ? 'line-through'
+              : 'none'
+        }
         textAlign={textAlign}
         lineHeight={lineHeight}
-        {...(isWeb && maxLines && !wrap ? {
-          style: {
-            display: '-webkit-box',
-            WebkitLineClamp: maxLines,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }
-        } : {})}
+        {...(isWeb && maxLines && !wrap
+          ? {
+              style: {
+                display: '-webkit-box',
+                WebkitLineClamp: maxLines,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              },
+            }
+          : {})}
         {...(!isWeb && maxLines ? { numberOfLines: maxLines } : {})}
         {...clickableProps}
         className={className}

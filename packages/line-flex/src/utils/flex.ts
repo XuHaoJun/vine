@@ -10,7 +10,7 @@ import type { LFexLayout } from '../types'
  */
 export function getChildDefaultFlex(
   childFlex: number | undefined,
-  parentLayout: LFexLayout
+  parentLayout: LFexLayout,
 ): number | 'none' {
   if (childFlex !== undefined) return childFlex
   if (parentLayout === 'horizontal' || parentLayout === 'baseline') {

@@ -7,11 +7,7 @@ export type LFexCarouselProps = LFexCarousel & {
   onAction?: (action: LFexAction) => void
 }
 
-export function LfCarousel({
-  contents = [],
-  onAction,
-  className,
-}: LFexCarouselProps) {
+export function LfCarousel({ contents = [], onAction, className }: LFexCarouselProps) {
   return (
     <ScrollView
       horizontal

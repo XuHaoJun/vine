@@ -25,16 +25,28 @@ export function LfIcon({
     ...(offsetEnd && { right: offsetEnd }),
   }
 
-  const width = size === 'xxs' ? 14 :
-                size === 'xs' ? 16 :
-                size === 'sm' ? 20 :
-                size === 'md' ? 24 :
-                size === 'lg' ? 28 :
-                size === 'xl' ? 32 :
-                size === 'xxl' ? 36 :
-                size === '3xl' ? 42 :
-                size === '4xl' ? 48 :
-                size === '5xl' ? 56 : 24
+  const width =
+    size === 'xxs'
+      ? 14
+      : size === 'xs'
+        ? 16
+        : size === 'sm'
+          ? 20
+          : size === 'md'
+            ? 24
+            : size === 'lg'
+              ? 28
+              : size === 'xl'
+                ? 32
+                : size === 'xxl'
+                  ? 36
+                  : size === '3xl'
+                    ? 42
+                    : size === '4xl'
+                      ? 48
+                      : size === '5xl'
+                        ? 56
+                        : 24
 
   return (
     <Image

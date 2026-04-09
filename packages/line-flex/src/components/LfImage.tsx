@@ -39,25 +39,40 @@ export function LfImage({
 
   const clickHandler = handleAction(action, onAction)
 
-  const width = size === 'xxs' ? 26 :
-                size === 'xs' ? 34 :
-                size === 'sm' ? 42 :
-                size === 'md' ? 52 :
-                size === 'lg' ? 62 :
-                size === 'xl' ? 76 :
-                size === 'xxl' ? 92 :
-                size === '3xl' ? 102 :
-                size === '4xl' ? 120 :
-                size === '5xl' ? 136 :
-                size === 'full' ? '100%' : 52
+  const width =
+    size === 'xxs'
+      ? 26
+      : size === 'xs'
+        ? 34
+        : size === 'sm'
+          ? 42
+          : size === 'md'
+            ? 52
+            : size === 'lg'
+              ? 62
+              : size === 'xl'
+                ? 76
+                : size === 'xxl'
+                  ? 92
+                  : size === '3xl'
+                    ? 102
+                    : size === '4xl'
+                      ? 120
+                      : size === '5xl'
+                        ? 136
+                        : size === 'full'
+                          ? '100%'
+                          : 52
 
-  const aspectRatioStyle = aspectRatio 
+  const aspectRatioStyle = aspectRatio
     ? { aspectRatio: aspectRatio.replace(':', ' / ') }
     : undefined
 
   const objectFit = aspectMode === 'cover' ? 'cover' : 'contain'
 
-  const clickableProps = action ? { cursor: 'pointer' as const, onClick: clickHandler } : {}
+  const clickableProps = action
+    ? { cursor: 'pointer' as const, onClick: clickHandler }
+    : {}
 
   return (
     <Image
