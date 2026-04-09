@@ -23,7 +23,12 @@ export function FlexSimulatorPreview({ json }: FlexSimulatorPreviewProps) {
 
   if (error) {
     return (
-      <YStack flex={1} p="$4" items="center" justify="center">
+      <YStack
+        style={{ flexGrow: 1, flexShrink: 1, flexBasis: 'auto' }}
+        p="$4"
+        items="center"
+        justify="center"
+      >
         <Text color="$red10" fontSize="$3">
           {error}
         </Text>
@@ -33,7 +38,12 @@ export function FlexSimulatorPreview({ json }: FlexSimulatorPreviewProps) {
 
   if (!contents) {
     return (
-      <YStack flex={1} p="$4" items="center" justify="center">
+      <YStack
+        style={{ flexGrow: 1, flexShrink: 1, flexBasis: 'auto' }}
+        p="$4"
+        items="center"
+        justify="center"
+      >
         <Text color="$color10">No message to preview</Text>
       </YStack>
     )
@@ -41,14 +51,24 @@ export function FlexSimulatorPreview({ json }: FlexSimulatorPreviewProps) {
 
   if (contents.type === 'carousel') {
     return (
-      <YStack flex={1} overflow="hidden" bg="$color2" p="$4">
+      <YStack
+        style={{ flexGrow: 1, flexShrink: 1, flexBasis: 'auto' }}
+        overflow="hidden"
+        bg="$color2"
+        p="$4"
+      >
         <LfCarousel {...contents} />
       </YStack>
     )
   }
 
   return (
-    <YStack flex={1} overflow="hidden" bg="$color2" p="$4">
+    <YStack
+      style={{ flexGrow: 1, flexShrink: 1, flexBasis: 'auto' }}
+      overflow="hidden"
+      bg="$color2"
+      p="$4"
+    >
       <LfBubble {...contents} />
     </YStack>
   )

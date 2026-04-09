@@ -11,13 +11,13 @@ export type LFexBubbleProps = LFexBubble & {
 }
 
 const BUBBLE_SIZES = {
-  nano: 120,
-  micro: 160,
-  deca: 200,
-  hecto: 240,
-  kilo: 260,
-  mega: 300,
-  giga: 500,
+  nano: { width: 120, height: 120 },
+  micro: { width: 160, height: 160 },
+  deca: { width: 200, height: 200 },
+  hecto: { width: 240, height: 240 },
+  kilo: { width: 260, height: 260 },
+  mega: { width: 300, height: 300 },
+  giga: { width: 500, height: 500 },
 } as const
 
 export function LfBubble({
@@ -32,12 +32,8 @@ export function LfBubble({
   onAction,
   className,
 }: LFexBubbleProps) {
-  const width = BUBBLE_SIZES[size] ?? 300
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const props: any = {
-    width,
-    maxWidth: width,
     background: styles?.body?.backgroundColor ?? '#ffffff',
     overflow: 'hidden',
     borderRadius: '$4',

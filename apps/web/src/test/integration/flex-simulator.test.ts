@@ -72,4 +72,60 @@ test.describe('Flex Simulator', () => {
 
     await expect(page.locator('text=Custom Text')).toBeVisible()
   })
+
+  test('bubble preview has proper dimensions (height visible above threshold)', async ({
+    page,
+  }) => {
+    const jsonInput = page.getByRole('textbox').first()
+    const validJson = JSON.stringify({
+      type: 'flex',
+      altText: 'Test Message',
+      contents: {
+        type: 'bubble',
+        size: 'mega',
+        body: {
+          type: 'box',
+          layout: 'vertical',
+          contents: [
+            {
+              type: 'text',
+              text: 'Tall Content',
+              size: 'lg',
+            },
+            {
+              type: 'text',
+              text: 'More Content',
+              size: 'lg',
+            },
+            {
+              type: 'text',
+              text: 'Even More Content',
+              size: 'lg',
+            },
+            {
+              type: 'text',
+              text: 'Final Content',
+              size: 'lg',
+            },
+          ],
+        },
+      },
+    })
+
+    await jsonInput.fill(validJson)
+
+    await page.waitForTimeout(500)
+
+    const bubbleElement = page.locator('[data-one-source*="LfBubble.tsx"]').first()
+    const bubbleBB = await bubbleElement.boundingBox()
+    expect(bubbleBB).not.toBeNull()
+    expect(bubbleBB!.width).toBeGreaterThan(0)
+    expect(bubbleBB!.height).toBeGreaterThan(0)
+
+    const previewWrapper = page
+      .locator('[data-one-source*="flex-simulator/index.tsx:102"]')
+      .first()
+    const wrapperBB = await previewWrapper.boundingBox()
+    expect(wrapperBB!.height).toBeGreaterThan(200)
+  })
 })

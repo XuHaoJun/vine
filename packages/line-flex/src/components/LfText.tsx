@@ -51,32 +51,32 @@ export function LfText({
 
   const fontSize =
     size === 'xxs'
-      ? 10
+      ? 11
       : size === 'xs'
-        ? 11
+        ? 13
         : size === 'sm'
-          ? 12
+          ? 14
           : size === 'md'
-            ? 14
+            ? 16
             : size === 'lg'
-              ? 16
+              ? 19
               : size === 'xl'
-                ? 18
+                ? 22
                 : size === 'xxl'
-                  ? 20
+                  ? 29
                   : size === '3xl'
-                    ? 24
+                    ? 35
                     : size === '4xl'
-                      ? 30
+                      ? 48
                       : size === '5xl'
-                        ? 36
-                        : 14
+                        ? 74
+                        : 16
 
   const textAlign = align === 'start' ? 'left' : align === 'end' ? 'right' : align
 
-  const lineHeight: any = lineSpacing
-    ? `${fontSize + parseInt(lineSpacing.replace('px', ''))}px`
-    : undefined
+  const lineHeightValue = lineSpacing
+    ? parseInt(lineSpacing.replace('px', '')) + 15
+    : fontSize * 1.4
 
   const clickableProps = action
     ? { cursor: 'pointer' as const, onClick: clickHandler }
@@ -95,25 +95,37 @@ export function LfText({
           ? 'line-through'
           : 'none',
     textAlign,
-    lineHeight,
-    ...(isWeb && maxLines
-      ? {
-          style: {
-            display: '-webkit-box',
-            WebkitLineClamp: maxLines,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          },
-        }
-      : {}),
+    ...(isWeb && {
+      style: {
+        lineHeight: `${lineHeightValue}px`,
+        ...(maxLines && {
+          display: '-webkit-box',
+          WebkitLineClamp: maxLines,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }),
+        ...(flex === undefined || flex === 0
+          ? { flexGrow: 0, flexShrink: 0, flexBasis: 'auto' }
+          : flex === 1
+            ? { flexGrow: 1, flexShrink: 0, flexBasis: 0 }
+            : undefined),
+      },
+    }),
     ...(!isWeb && maxLines ? { numberOfLines: maxLines } : {}),
+    ...(!isWeb && {
+      ...(flex === undefined || flex === 0
+        ? { flexGrow: 0, flexShrink: 0, flexBasis: 'auto' }
+        : { flex }),
+    }),
     ...clickableProps,
     className,
+    ...positionStyle,
+    ...offsetStyle,
   }
 
   return (
-    <Paragraph flex={flex ?? 1} {...positionStyle} {...offsetStyle}>
+    <Paragraph {...textProps}>
       <Text {...textProps}>
         {text}
         {contents?.map((span: LFexSpan, i: number) => (

@@ -10,7 +10,7 @@ export type LFexFooterProps = {
 export function LfFooter({ footer, onAction }: LFexFooterProps) {
   if (!footer) return null
   return (
-    <YStack flex={0}>
+    <YStack style={{ flexGrow: 0, flexShrink: 0, flexBasis: 'auto' }}>
       <LfBox {...footer} onAction={onAction} />
     </YStack>
   )

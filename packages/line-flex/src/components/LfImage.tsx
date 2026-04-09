@@ -77,7 +77,11 @@ export function LfImage({
   return (
     // @ts-ignore - TamaguiImage type incompatibility with JSX
     <Image
-      flex={flex ?? 1}
+      {...(flex === undefined || flex === 0
+        ? { style: { flexGrow: 0, flexShrink: 0, flexBasis: 'auto' } }
+        : flex === 1
+          ? { style: { flexGrow: 1, flexShrink: 0, flexBasis: 0 } }
+          : { flex: flex ?? 1 })}
       width={width}
       source={{ uri: url }}
       objectFit={objectFit}

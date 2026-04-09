@@ -34,33 +34,27 @@ function renderChild(
 ): React.ReactNode {
   const key = `${child.type}-${index}`
   const defaultFlex = getChildDefaultFlex((child as any).flex, parentLayout)
-  const childWithFlex = { ...child, flex: (child as any).flex ?? defaultFlex }
+  const childFlex = (child as any).flex ?? defaultFlex
 
   switch (child.type) {
     case 'box':
-      return <LfBox key={key} {...(childWithFlex as LFexBoxProps)} onAction={onAction} />
+      return <LfBox key={key} {...child} onAction={onAction} />
     case 'text':
-      return (
-        <LfText key={key} {...(childWithFlex as LFexTextProps)} onAction={onAction} />
-      )
+      return <LfText key={key} {...child} onAction={onAction} />
     case 'image':
-      return (
-        <LfImage key={key} {...(childWithFlex as LFexImageProps)} onAction={onAction} />
-      )
+      return <LfImage key={key} {...child} onAction={onAction} />
     case 'button':
-      return (
-        <LfButton key={key} {...(childWithFlex as LFexButtonProps)} onAction={onAction} />
-      )
+      return <LfButton key={key} {...child} onAction={onAction} />
     case 'icon':
-      return <LfIcon key={key} {...(childWithFlex as LFexIconProps)} />
+      return <LfIcon key={key} {...child} />
     case 'separator':
-      return <LfSeparator key={key} {...(childWithFlex as LFexSeparatorProps)} />
+      return <LfSeparator key={key} {...child} />
     case 'spacer':
-      return <LfSpacer key={key} {...(childWithFlex as LFexSpacerProps)} />
+      return <LfSpacer key={key} {...child} />
     case 'filler':
-      return <LfFiller key={key} {...(childWithFlex as LFexFillerProps)} />
+      return <LfFiller key={key} {...child} />
     case 'video':
-      return <LfVideo key={key} {...(childWithFlex as LFexVideoProps)} />
+      return <LfVideo key={key} {...child} />
     default:
       return null
   }
@@ -114,7 +108,11 @@ export function LfBox({
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const containerProps: any = {
-    flex: flex ?? 1,
+    ...(flex === undefined || flex === 0
+      ? { style: { flexGrow: 0, flexShrink: 0, flexBasis: 'auto' } }
+      : flex === 1
+        ? { style: { flexGrow: 1, flexShrink: 0, flexBasis: 0 } }
+        : { flex }),
     gap,
     padding,
     ...positionStyle,
@@ -145,12 +143,16 @@ export function LfBox({
       : children
 
   if (layout === 'horizontal') {
-    return <XStack {...containerProps}>{renderedContents}</XStack>
+    return (
+      <XStack overflow="hidden" {...containerProps}>
+        {renderedContents}
+      </XStack>
+    )
   }
 
   if (layout === 'baseline') {
     return (
-      <XStack alignItems="baseline" {...containerProps}>
+      <XStack alignItems="baseline" overflow="hidden" {...containerProps}>
         {renderedContents}
       </XStack>
     )
