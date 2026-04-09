@@ -17,7 +17,7 @@ export function LfCarousel({ contents = [], onAction, className }: LFexCarouselP
       className={className}
     >
       {contents.map((bubble, index) => (
-        <XStack key={index} marginRight="$2">
+        <XStack key={index}>
           <LfBubble {...bubble} onAction={onAction} />
         </XStack>
       ))}

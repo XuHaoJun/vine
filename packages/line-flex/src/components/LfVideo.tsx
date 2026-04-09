@@ -21,24 +21,26 @@ export function LfVideo({
   if (altContent?.type === 'image') {
     const img = altContent as LFexImage
     return (
+      // @ts-ignore - TamaguiImage type incompatibility with JSX
       <Image
         flex={1}
         source={{ uri: img.url }}
         objectFit="cover"
         aspectRatio={aspectRatio.replace(':', ' / ')}
-        onClick={clickHandler}
+        onPress={clickHandler}
         className={className}
       />
     )
   }
 
   return (
+    // @ts-ignore - TamaguiImage type incompatibility with JSX
     <Image
       flex={1}
       source={{ uri: previewUrl }}
       objectFit="cover"
       aspectRatio={aspectRatio.replace(':', ' / ')}
-      onClick={clickHandler}
+      onPress={clickHandler}
       className={className}
     />
   )

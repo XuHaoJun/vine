@@ -75,15 +75,15 @@ export function LfImage({
     : {}
 
   return (
+    // @ts-ignore - TamaguiImage type incompatibility with JSX
     <Image
       flex={flex ?? 1}
       width={width}
       source={{ uri: url }}
       objectFit={objectFit}
-      margin={marginValue}
       {...positionStyle}
       {...offsetStyle}
-      backgroundColor={backgroundColor}
+      background={backgroundColor}
       {...aspectRatioStyle}
       {...clickableProps}
       className={className}

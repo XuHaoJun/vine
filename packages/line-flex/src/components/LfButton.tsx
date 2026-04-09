@@ -60,18 +60,22 @@ export function LfButton({
         ? '#111111'
         : (color ?? LINE_BUTTON_COLORS.link)
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const buttonProps: any = {
+    flex: flex ?? 1,
+    height: heightValue,
+    background: backgroundColor,
+    ...positionStyle,
+    ...offsetStyle,
+  }
+
+  if (marginValue) {
+    buttonProps.margin = marginValue
+  }
+
   return (
-    <Button
-      flex={flex ?? 1}
-      height={heightValue}
-      backgroundColor={backgroundColor}
-      margin={marginValue}
-      {...positionStyle}
-      {...offsetStyle}
-      onPress={clickHandler}
-      className={className}
-    >
-      <Text color={textColor} fontWeight="600" fontSize={textFontSize}>
+    <Button {...buttonProps} onPress={clickHandler} className={className}>
+      <Text color={textColor as any} fontWeight="600" fontSize={textFontSize}>
         {action.label ?? 'Button'}
       </Text>
     </Button>

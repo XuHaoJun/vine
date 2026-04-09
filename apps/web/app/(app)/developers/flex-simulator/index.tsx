@@ -1,5 +1,7 @@
 import { memo, useState } from 'react'
-import { Button, Input, XStack, YStack, Text, ScrollView } from 'tamagui'
+import { XStack, YStack, Text, ScrollView } from 'tamagui'
+import { Button } from '~/interface/buttons/Button'
+import { Input } from '~/interface/forms/Input'
 
 import { FlexSimulatorPreview } from './FlexSimulatorPreview'
 

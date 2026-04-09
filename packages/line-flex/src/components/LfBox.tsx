@@ -1,17 +1,25 @@
 import { XStack, YStack } from 'tamagui'
 import React from 'react'
 import type { LFexBox, LFexComponent, LFexAction, LFexLayout } from '../types'
+import type { LFexTextProps } from './LfText'
+import type { LFexImageProps } from './LfImage'
+import type { LFexButtonProps } from './LfButton'
+import type { LFexIconProps } from './LfIcon'
+import type { LFexSeparatorProps } from './LfSeparator'
+import type { LFexSpacerProps } from './LfSpacer'
+import type { LFexFillerProps } from './LfFiller'
+import type { LFexVideoProps } from './LfVideo'
 import { getChildDefaultFlex } from '../utils/flex'
 import { spacingToTamagui, marginToTamagui, paddingToTamagui } from '../utils/spacing'
 import { handleAction } from '../utils/action'
-import { LfText, LFexTextProps } from './LfText'
-import { LfImage, LFexImageProps } from './LfImage'
-import { LfButton, LFexButtonProps } from './LfButton'
-import { LfIcon, LFexIconProps } from './LfIcon'
-import { LfSeparator, LFexSeparatorProps } from './LfSeparator'
-import { LfSpacer, LFexSpacerProps } from './LfSpacer'
-import { LfFiller, LFexFillerProps } from './LfFiller'
-import { LfVideo, LFexVideoProps } from './LfVideo'
+import { LfText } from './LfText'
+import { LfImage } from './LfImage'
+import { LfButton } from './LfButton'
+import { LfIcon } from './LfIcon'
+import { LfSeparator } from './LfSeparator'
+import { LfSpacer } from './LfSpacer'
+import { LfFiller } from './LfFiller'
+import { LfVideo } from './LfVideo'
 
 export type LFexBoxProps = LFexBox & {
   className?: string
@@ -104,14 +112,14 @@ export function LfBox({
 
   const clickHandler = handleAction(action, onAction)
 
-  const containerProps = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const containerProps: any = {
     flex: flex ?? 1,
     gap,
     padding,
-    margin: marginValue,
     ...positionStyle,
     ...offsetStyle,
-    ...(backgroundColor && { backgroundColor }),
+    ...(backgroundColor && { background: backgroundColor }),
     ...(borderColor && { borderColor }),
     ...(cornerRadius && { borderRadius: cornerRadius }),
     ...(width && { width }),
@@ -123,6 +131,10 @@ export function LfBox({
     ...(action && { cursor: 'pointer' as const }),
     ...(className && { className }),
     onClick: clickHandler,
+  }
+
+  if (marginValue) {
+    containerProps.margin = marginValue
   }
 
   const renderedContents =

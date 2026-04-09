@@ -29,7 +29,7 @@ export function LfSpan({ text, size, color, weight, style, decoration }: LFexSpa
                             ? 36
                             : 14
       }
-      color={color}
+      color={color as any}
       fontWeight={weight === 'bold' ? '700' : '400'}
       fontStyle={style === 'italic' ? 'italic' : 'normal'}
       textDecorationLine={

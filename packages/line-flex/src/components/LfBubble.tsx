@@ -34,15 +34,18 @@ export function LfBubble({
 }: LFexBubbleProps) {
   const width = BUBBLE_SIZES[size] ?? 300
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const props: any = {
+    width,
+    maxWidth: width,
+    background: styles?.body?.backgroundColor ?? '#ffffff',
+    overflow: 'hidden',
+    borderRadius: '$4',
+    className,
+  }
+
   return (
-    <YStack
-      width={width}
-      maxWidth={width}
-      backgroundColor={styles?.body?.backgroundColor ?? '#ffffff'}
-      overflow="hidden"
-      borderRadius="$4"
-      className={className}
-    >
+    <YStack {...props}>
       <LfHeader header={header} onAction={onAction} />
       <LfHero hero={hero} onAction={onAction} />
       <LfBody body={body} onAction={onAction} />

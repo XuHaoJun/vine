@@ -7,5 +7,9 @@ export type LFexSeparatorProps = LFexSeparator
 export function LfSeparator({ margin, color }: LFexSeparatorProps) {
   const marginValue = margin ? marginToTamagui(margin) : undefined
 
-  return <YStack height={1} backgroundColor={color ?? '#cccccc'} margin={marginValue} />
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const props: any = { height: 1, background: color ?? '#cccccc' }
+  if (marginValue) props.margin = marginValue
+
+  return <YStack {...props} />
 }

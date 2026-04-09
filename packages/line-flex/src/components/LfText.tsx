@@ -74,7 +74,7 @@ export function LfText({
 
   const textAlign = align === 'start' ? 'left' : align === 'end' ? 'right' : align
 
-  const lineHeight = lineSpacing
+  const lineHeight: any = lineSpacing
     ? `${fontSize + parseInt(lineSpacing.replace('px', ''))}px`
     : undefined
 
@@ -82,37 +82,39 @@ export function LfText({
     ? { cursor: 'pointer' as const, onClick: clickHandler }
     : {}
 
-  return (
-    <Paragraph flex={flex ?? 1} margin={marginValue} {...positionStyle} {...offsetStyle}>
-      <Text
-        fontSize={fontSize}
-        color={color}
-        fontWeight={weight === 'bold' ? '700' : '400'}
-        fontStyle={style === 'italic' ? 'italic' : 'normal'}
-        textDecorationLine={
-          decoration === 'underline'
-            ? 'underline'
-            : decoration === 'line-through'
-              ? 'line-through'
-              : 'none'
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const textProps: any = {
+    fontSize,
+    color,
+    fontWeight: weight === 'bold' ? '700' : '400',
+    fontStyle: style === 'italic' ? 'italic' : 'normal',
+    textDecorationLine:
+      decoration === 'underline'
+        ? 'underline'
+        : decoration === 'line-through'
+          ? 'line-through'
+          : 'none',
+    textAlign,
+    lineHeight,
+    ...(isWeb && maxLines
+      ? {
+          style: {
+            display: '-webkit-box',
+            WebkitLineClamp: maxLines,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          },
         }
-        textAlign={textAlign}
-        lineHeight={lineHeight}
-        {...(isWeb && maxLines
-          ? {
-              style: {
-                display: '-webkit-box',
-                WebkitLineClamp: maxLines,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              },
-            }
-          : {})}
-        {...(!isWeb && maxLines ? { numberOfLines: maxLines } : {})}
-        {...clickableProps}
-        className={className}
-      >
+      : {}),
+    ...(!isWeb && maxLines ? { numberOfLines: maxLines } : {}),
+    ...clickableProps,
+    className,
+  }
+
+  return (
+    <Paragraph flex={flex ?? 1} {...positionStyle} {...offsetStyle}>
+      <Text {...textProps}>
         {text}
         {contents?.map((span: LFexSpan, i: number) => (
           <LfSpan key={i} {...span} />

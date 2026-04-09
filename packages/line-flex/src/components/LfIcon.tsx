@@ -49,11 +49,11 @@ export function LfIcon({
                         : 24
 
   return (
+    // @ts-ignore - TamaguiImage type incompatibility with JSX
     <Image
       width={width}
       source={{ uri: url }}
       objectFit="contain"
-      margin={marginValue}
       {...positionStyle}
       {...offsetStyle}
     />
