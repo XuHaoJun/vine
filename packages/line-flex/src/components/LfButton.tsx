@@ -1,10 +1,11 @@
 import { Button, Text } from 'tamagui'
-import type { LFexButton, LFexAction } from '../types'
+import type { LFexButton, LFexAction, LFexLayout } from '../types'
 import { handleAction } from '../utils/action'
 import { marginToTamagui } from '../utils/spacing'
 
 export type LFexButtonProps = LFexButton & {
   className?: string
+  layout?: LFexLayout
   onAction?: (action: LFexAction) => void
 }
 
@@ -18,6 +19,7 @@ export function LfButton({
   action,
   flex,
   margin,
+  layout = 'vertical',
   position,
   offsetTop,
   offsetBottom,
@@ -60,9 +62,21 @@ export function LfButton({
         ? '#111111'
         : (color ?? LINE_BUTTON_COLORS.link)
 
+  // flex=undefined → no explicit flex (natural sizing)
+  // flex=0 → flex-none
+  // flex>=1 → fill available space
+  const flexProps =
+    flex === undefined
+      ? {}
+      : flex === 0
+        ? { flexGrow: 0, flexShrink: 0, flexBasis: 'auto' }
+        : { flex }
+
+  const isHorizontalParent = layout === 'horizontal' || layout === 'baseline'
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const buttonProps: any = {
-    flex: flex ?? 1,
+    ...flexProps,
     height: heightValue,
     background: backgroundColor,
     ...positionStyle,
@@ -70,7 +84,7 @@ export function LfButton({
   }
 
   if (marginValue) {
-    buttonProps.margin = marginValue
+    buttonProps[isHorizontalParent ? 'marginLeft' : 'marginTop'] = marginValue
   }
 
   return (

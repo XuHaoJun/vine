@@ -56,9 +56,25 @@ function renderChild(
         />
       )
     case 'image':
-      return <LfImage key={key} {...child} onAction={onAction} />
+      return (
+        <LfImage
+          key={key}
+          {...child}
+          flex={effectiveFlex}
+          layout={parentLayout}
+          onAction={onAction}
+        />
+      )
     case 'button':
-      return <LfButton key={key} {...child} onAction={onAction} />
+      return (
+        <LfButton
+          key={key}
+          {...child}
+          flex={effectiveFlex}
+          layout={parentLayout}
+          onAction={onAction}
+        />
+      )
     case 'icon':
       return <LfIcon key={key} {...child} />
     case 'separator':

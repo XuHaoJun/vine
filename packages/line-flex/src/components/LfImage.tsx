@@ -1,10 +1,11 @@
 import { Image } from 'tamagui'
-import type { LFexImage, LFexAction } from '../types'
+import type { LFexImage, LFexAction, LFexLayout } from '../types'
 import { handleAction } from '../utils/action'
 import { marginToTamagui } from '../utils/spacing'
 
 export type LFexImageProps = LFexImage & {
   className?: string
+  layout?: LFexLayout
   onAction?: (action: LFexAction) => void
 }
 
@@ -12,6 +13,7 @@ export function LfImage({
   url,
   flex,
   margin,
+  layout = 'vertical',
   position,
   offsetTop,
   offsetBottom,
@@ -28,6 +30,7 @@ export function LfImage({
   className,
 }: LFexImageProps) {
   const marginValue = margin ? marginToTamagui(margin) : undefined
+  const isHorizontalParent = layout === 'horizontal' || layout === 'baseline'
 
   const positionStyle = position === 'absolute' ? { position: 'absolute' as const } : {}
   const offsetStyle = {
@@ -64,33 +67,48 @@ export function LfImage({
                           ? '100%'
                           : 52
 
-  const aspectRatioStyle = aspectRatio
-    ? { aspectRatio: aspectRatio.replace(':', ' / ') }
+  const aspectRatioValue = aspectRatio
+    ? (() => {
+        const parts = aspectRatio.split(':')
+        if (parts.length === 2) {
+          const w = parseFloat(parts[0] ?? '1')
+          const h = parseFloat(parts[1] ?? '1')
+          return h > 0 ? w / h : undefined
+        }
+        return undefined
+      })()
     : undefined
 
   const objectFit = aspectMode === 'cover' ? 'cover' : 'contain'
 
-  const clickableProps = action
-    ? { cursor: 'pointer' as const, onClick: clickHandler }
-    : {}
+  // flex=undefined → no explicit flex (natural sizing)
+  // flex=0 → flex-none
+  // flex>=1 → fill available space
+  const flexProps =
+    flex === undefined
+      ? {}
+      : flex === 0
+        ? { flexGrow: 0, flexShrink: 0, flexBasis: 'auto' }
+        : { flex }
 
-  return (
-    // @ts-ignore - TamaguiImage type incompatibility with JSX
-    <Image
-      {...(flex === undefined || flex === 0
-        ? { style: { flexGrow: 0, flexShrink: 0, flexBasis: 'auto' } }
-        : flex === 1
-          ? { style: { flexGrow: 1, flexShrink: 0, flexBasis: 0 } }
-          : { flex: flex ?? 1 })}
-      width={width}
-      source={{ uri: url }}
-      objectFit={objectFit}
-      {...positionStyle}
-      {...offsetStyle}
-      background={backgroundColor}
-      {...aspectRatioStyle}
-      {...clickableProps}
-      className={className}
-    />
-  )
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const imageProps: any = {
+    ...flexProps,
+    src: url,
+    width,
+    objectFit,
+    ...positionStyle,
+    ...offsetStyle,
+    ...(backgroundColor && { background: backgroundColor }),
+    ...(aspectRatioValue !== undefined && { aspectRatio: aspectRatioValue }),
+    ...(action && { cursor: 'pointer' as const, onPress: clickHandler }),
+    ...(className && { className }),
+  }
+
+  if (marginValue) {
+    imageProps[isHorizontalParent ? 'marginLeft' : 'marginTop'] = marginValue
+  }
+
+  // @ts-ignore - Tamagui Image type incompatibilities
+  return <Image {...imageProps} />
 }

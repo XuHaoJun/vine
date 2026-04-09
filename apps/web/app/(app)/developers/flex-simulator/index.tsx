@@ -98,7 +98,10 @@ const FlexSimulatorPage = memo(() => {
           <Text fontSize="$3" fontWeight="600" color="$color11">
             Preview
           </Text>
-          <YStack flex={1} style={{ minHeight: 300, overflow: 'hidden', borderRadius: 8 }}>
+          <YStack
+            flex={1}
+            style={{ minHeight: 800, overflow: 'hidden', borderRadius: 8 }}
+          >
             <ScrollView>
               <FlexSimulatorPreview json={json} />
             </ScrollView>
