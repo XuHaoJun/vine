@@ -43,6 +43,8 @@ export function LfButton({
 
   const heightValue = height === 'sm' ? 40 : 52
 
+  const textFontSize = height === 'sm' ? 13 : 14
+
   const backgroundColor =
     color ??
     (style === 'primary'
@@ -69,7 +71,7 @@ export function LfButton({
       onPress={clickHandler}
       className={className}
     >
-      <Text color={textColor} fontWeight="600" fontSize="$3">
+      <Text color={textColor} fontWeight="600" fontSize={textFontSize}>
         {action.label ?? 'Button'}
       </Text>
     </Button>

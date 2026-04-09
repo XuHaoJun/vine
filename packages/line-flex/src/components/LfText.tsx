@@ -75,7 +75,7 @@ export function LfText({
   const textAlign = align === 'start' ? 'left' : align === 'end' ? 'right' : align
 
   const lineHeight = lineSpacing
-    ? `${parseInt(lineSpacing.replace('px', '')) + 15}px`
+    ? `${fontSize + parseInt(lineSpacing.replace('px', ''))}px`
     : undefined
 
   const clickableProps = action
@@ -98,7 +98,7 @@ export function LfText({
         }
         textAlign={textAlign}
         lineHeight={lineHeight}
-        {...(isWeb && maxLines && !wrap
+        {...(isWeb && maxLines
           ? {
               style: {
                 display: '-webkit-box',
