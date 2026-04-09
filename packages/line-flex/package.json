@@ -9,11 +9,11 @@
   },
   "peerDependencies": {
     "react": "*",
-    "tamagui": "tamagui@2.0.0-rc.34"
+    "tamagui": "2.0.0-rc.34"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",
-    "tamagui": "^5.0.0",
+    "tamagui": "2.0.0-rc.34",
     "vitest": "^1.0.0"
   }
 }
