@@ -2,6 +2,9 @@ import { Text, YStack } from 'tamagui'
 import { LfBubble, LfCarousel } from '@vine/line-flex'
 import type { LFexCarousel, LFexBubble } from '@vine/line-flex'
 
+// LINE chat background color
+const CHAT_BG = '#6E89A6'
+
 interface FlexSimulatorPreviewProps {
   json: string
 }
@@ -24,7 +27,8 @@ export function FlexSimulatorPreview({ json }: FlexSimulatorPreviewProps) {
   if (error) {
     return (
       <YStack
-        style={{ flexGrow: 1, flexShrink: 1, flexBasis: 'auto' }}
+        style={{ flexGrow: 1, flexShrink: 1, flexBasis: 'auto', minHeight: 400 }}
+        bg={CHAT_BG}
         p="$4"
         items="center"
         justify="center"
@@ -39,12 +43,15 @@ export function FlexSimulatorPreview({ json }: FlexSimulatorPreviewProps) {
   if (!contents) {
     return (
       <YStack
-        style={{ flexGrow: 1, flexShrink: 1, flexBasis: 'auto' }}
+        style={{ flexGrow: 1, flexShrink: 1, flexBasis: 'auto', minHeight: 400 }}
+        bg={CHAT_BG}
         p="$4"
         items="center"
         justify="center"
       >
-        <Text color="$color10">No message to preview</Text>
+        <Text color="white" opacity={0.7} fontSize="$3">
+          No message to preview
+        </Text>
       </YStack>
     )
   }
@@ -52,10 +59,10 @@ export function FlexSimulatorPreview({ json }: FlexSimulatorPreviewProps) {
   if (contents.type === 'carousel') {
     return (
       <YStack
-        style={{ flexGrow: 1, flexShrink: 1, flexBasis: 'auto' }}
-        overflow="hidden"
-        bg="$color2"
+        style={{ flexGrow: 1, flexShrink: 1, flexBasis: 'auto', minHeight: 400 }}
+        bg={CHAT_BG}
         p="$4"
+        items="flex-start"
       >
         <LfCarousel {...contents} />
       </YStack>
@@ -64,10 +71,10 @@ export function FlexSimulatorPreview({ json }: FlexSimulatorPreviewProps) {
 
   return (
     <YStack
-      style={{ flexGrow: 1, flexShrink: 1, flexBasis: 'auto' }}
-      overflow="hidden"
-      bg="$color2"
+      style={{ flexGrow: 1, flexShrink: 1, flexBasis: 'auto', minHeight: 400 }}
+      bg={CHAT_BG}
       p="$4"
+      items="flex-start"
     >
       <LfBubble {...contents} />
     </YStack>

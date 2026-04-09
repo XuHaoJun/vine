@@ -10,17 +10,29 @@ export type LFexBubbleProps = LFexBubble & {
   onAction?: (action: LFexAction) => void
 }
 
-const BUBBLE_SIZES = {
-  nano: { width: 120, height: 120 },
-  micro: { width: 160, height: 160 },
-  deca: { width: 200, height: 200 },
-  hecto: { width: 240, height: 240 },
-  kilo: { width: 260, height: 260 },
-  mega: { width: 300, height: 300 },
-  giga: { width: 500, height: 500 },
+const BUBBLE_MAX_WIDTHS = {
+  nano: 120,
+  micro: 160,
+  deca: 220,
+  hecto: 241,
+  kilo: 260,
+  mega: 300,
+  giga: 500,
 } as const
 
-function getDefaultBodyPadding(size: keyof typeof BUBBLE_SIZES) {
+const BUBBLE_BORDER_RADII = {
+  nano: 10,
+  micro: 10,
+  deca: 10,
+  hecto: 10,
+  kilo: 10,
+  mega: 17,
+  giga: 5,
+} as const
+
+type BubbleSize = keyof typeof BUBBLE_MAX_WIDTHS
+
+function getDefaultBodyPadding(size: BubbleSize) {
   if (size === 'mega' || size === 'giga') {
     return {
       paddingAll: '20px',
@@ -36,7 +48,7 @@ function getDefaultBodyPadding(size: keyof typeof BUBBLE_SIZES) {
   return { paddingAll: '11px' }
 }
 
-function getDefaultHeaderFooterPadding(size: keyof typeof BUBBLE_SIZES) {
+function getDefaultHeaderFooterPadding(size: BubbleSize) {
   if (size === 'nano' || size === 'micro') {
     return { paddingAll: '10px' }
   }
@@ -45,7 +57,7 @@ function getDefaultHeaderFooterPadding(size: keyof typeof BUBBLE_SIZES) {
 
 function mergeBodyProps(
   body: LFexBox | undefined,
-  size: keyof typeof BUBBLE_SIZES,
+  size: BubbleSize,
 ): LFexBox | undefined {
   if (!body) return undefined
   const hasPadding =
@@ -58,7 +70,7 @@ function mergeBodyProps(
 
 function mergeHeaderProps(
   header: LFexBox | undefined,
-  size: keyof typeof BUBBLE_SIZES,
+  size: BubbleSize,
 ): LFexBox | undefined {
   if (!header) return undefined
   const hasPadding =
@@ -71,7 +83,7 @@ function mergeHeaderProps(
 
 function mergeFooterProps(
   footer: LFexBox | undefined,
-  size: keyof typeof BUBBLE_SIZES,
+  size: BubbleSize,
 ): LFexBox | undefined {
   if (!footer) return undefined
   const hasPadding =
@@ -102,7 +114,8 @@ export function LfBubble({
   const props: any = {
     background: styles?.body?.backgroundColor ?? '#ffffff',
     overflow: 'hidden',
-    borderRadius: '$4',
+    maxWidth: BUBBLE_MAX_WIDTHS[size],
+    borderRadius: BUBBLE_BORDER_RADII[size],
     className,
   }
 
