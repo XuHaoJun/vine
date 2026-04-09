@@ -29,14 +29,14 @@ test.describe('Flex Simulator', () => {
   })
 
   test('invalid JSON shows error message', async ({ page }) => {
-    const jsonInput = page.locator('textarea').first()
+    const jsonInput = page.getByRole('textbox').first()
     await jsonInput.fill('{ invalid json }')
 
     await expect(page.locator('text=JSON parse error')).toBeVisible()
   })
 
   test('reset button restores default JSON', async ({ page }) => {
-    const jsonInput = page.locator('textarea').first()
+    const jsonInput = page.getByRole('textbox').first()
     await jsonInput.fill('{ "test": true }')
 
     await page.locator('text=Reset').click()
@@ -47,7 +47,7 @@ test.describe('Flex Simulator', () => {
   })
 
   test('valid LINE Flex Message JSON renders correctly', async ({ page }) => {
-    const jsonInput = page.locator('textarea').first()
+    const jsonInput = page.getByRole('textbox').first()
     const validJson = JSON.stringify({
       type: 'flex',
       altText: 'Test Message',

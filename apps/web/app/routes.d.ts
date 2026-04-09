@@ -16,6 +16,9 @@ declare module 'one' {
         | `/(app)/auth/oauth-callback`
         | `/(app)/developers/console`
         | `/(app)/developers/console/`
+        | `/(app)/developers/flex-simulator`
+        | `/(app)/developers/flex-simulator/`
+        | `/(app)/developers/flex-simulator/FlexSimulatorPreview`
         | `/(app)/home`
         | `/(app)/home/(tabs)`
         | `/(app)/home/(tabs)/main`
@@ -38,6 +41,9 @@ declare module 'one' {
         | `/auth/oauth-callback`
         | `/developers/console`
         | `/developers/console/`
+        | `/developers/flex-simulator`
+        | `/developers/flex-simulator/`
+        | `/developers/flex-simulator/FlexSimulatorPreview`
         | `/hello`
         | `/home`
         | `/home/(tabs)`
