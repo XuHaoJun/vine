@@ -33,14 +33,28 @@ function renderChild(
   onAction?: (action: LFexAction) => void,
 ): React.ReactNode {
   const key = `${child.type}-${index}`
+
+  // Compute effective flex based on parent layout direction:
+  // - horizontal/baseline parent: undefined flex → 1 (fill remaining width)
+  // - vertical parent: undefined flex → 'none' → pass undefined (natural sizing, safe on native)
   const defaultFlex = getChildDefaultFlex((child as any).flex, parentLayout)
-  const childFlex = (child as any).flex ?? defaultFlex
+  const effectiveFlex = defaultFlex === 'none' ? undefined : (defaultFlex as number)
 
   switch (child.type) {
     case 'box':
-      return <LfBox key={key} {...child} onAction={onAction} />
+      // Override child's undefined flex with parent-layout default
+      return <LfBox key={key} {...child} flex={effectiveFlex} onAction={onAction} />
     case 'text':
-      return <LfText key={key} {...child} onAction={onAction} />
+      // Pass both effectiveFlex and parentLayout (for direction-aware margin)
+      return (
+        <LfText
+          key={key}
+          {...child}
+          flex={effectiveFlex}
+          layout={parentLayout}
+          onAction={onAction}
+        />
+      )
     case 'image':
       return <LfImage key={key} {...child} onAction={onAction} />
     case 'button':
@@ -48,7 +62,7 @@ function renderChild(
     case 'icon':
       return <LfIcon key={key} {...child} />
     case 'separator':
-      return <LfSeparator key={key} {...child} />
+      return <LfSeparator key={key} {...child} layout={parentLayout} />
     case 'spacer':
       return <LfSpacer key={key} {...child} />
     case 'filler':
@@ -106,13 +120,20 @@ export function LfBox({
 
   const clickHandler = handleAction(action, onAction)
 
+  // flex=undefined → no explicit flex (natural sizing, safe for native vertical containers)
+  // flex=0 → flex-none (0 0 auto)
+  // flex>=1 → Tamagui flex prop via expandStyle
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const flexProps: any =
+    flex === undefined
+      ? {}
+      : flex === 0
+        ? { flexGrow: 0, flexShrink: 0, flexBasis: 'auto' }
+        : { flex }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const containerProps: any = {
-    ...(flex === undefined || flex === 0
-      ? { style: { flexGrow: 0, flexShrink: 0, flexBasis: 'auto' } }
-      : flex === 1
-        ? { style: { flexGrow: 1, flexShrink: 0, flexBasis: 0 } }
-        : { flex }),
+    ...flexProps,
     gap,
     padding,
     ...positionStyle,
@@ -131,8 +152,9 @@ export function LfBox({
     onClick: clickHandler,
   }
 
+  // Boxes with margin are typically children of vertical boxes → marginTop only
   if (marginValue) {
-    containerProps.margin = marginValue
+    containerProps.marginTop = marginValue
   }
 
   const renderedContents =

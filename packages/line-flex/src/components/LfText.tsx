@@ -1,5 +1,4 @@
-import { Text, Paragraph } from 'tamagui'
-import { isWeb } from 'tamagui'
+import { Paragraph } from 'tamagui'
 import React from 'react'
 import type { LFexText, LFexSpan, LFexAction } from '../types'
 import { handleAction } from '../utils/action'
@@ -38,6 +37,7 @@ export function LfText({
   className,
 }: LFexTextProps) {
   const marginValue = margin ? marginToTamagui(margin) : undefined
+  const isHorizontalParent = layout === 'horizontal' || layout === 'baseline'
 
   const positionStyle = position === 'absolute' ? { position: 'absolute' as const } : {}
   const offsetStyle = {
@@ -74,17 +74,38 @@ export function LfText({
 
   const textAlign = align === 'start' ? 'left' : align === 'end' ? 'right' : align
 
+  // Absolute line height (number) — Tamagui adds px on web, passes as-is on native
   const lineHeightValue = lineSpacing
     ? parseInt(lineSpacing.replace('px', '')) + 15
     : fontSize * 1.4
 
-  const clickableProps = action
-    ? { cursor: 'pointer' as const, onClick: clickHandler }
-    : {}
+  // flex=undefined → no explicit flex (caller/renderChild provides the correct value)
+  // flex=0 → flex-none (0 0 auto), flex>=1 → Tamagui flex prop via expandStyle (N 1 0)
+  const flexProps: any =
+    flex === undefined
+      ? {}
+      : flex === 0
+        ? { flexGrow: 0, flexShrink: 0, flexBasis: 'auto' }
+        : { flex }
+
+  // Direction-aware margin: marginLeft for horizontal/baseline parent, marginTop for vertical
+  const marginProps =
+    marginValue !== undefined
+      ? isHorizontalParent
+        ? { marginLeft: marginValue }
+        : { marginTop: marginValue }
+      : {}
+
+  // numberOfLines: Tamagui handles web (webkit-box / ellipsis) and native (numberOfLines prop)
+  const numberOfLines = maxLines || (!wrap ? 1 : undefined)
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const textProps: any = {
+  const paragraphProps: any = {
+    ...flexProps,
+    // min-width:0 prevents content from overflowing flex containers
+    minWidth: 0,
     fontSize,
+    lineHeight: lineHeightValue,
     color,
     fontWeight: weight === 'bold' ? '700' : '400',
     fontStyle: style === 'italic' ? 'italic' : 'normal',
@@ -95,43 +116,23 @@ export function LfText({
           ? 'line-through'
           : 'none',
     textAlign,
-    ...(isWeb && {
-      style: {
-        lineHeight: `${lineHeightValue}px`,
-        ...(maxLines && {
-          display: '-webkit-box',
-          WebkitLineClamp: maxLines,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-        }),
-        ...(flex === undefined || flex === 0
-          ? { flexGrow: 0, flexShrink: 0, flexBasis: 'auto' }
-          : flex === 1
-            ? { flexGrow: 1, flexShrink: 0, flexBasis: 0 }
-            : undefined),
-      },
-    }),
-    ...(!isWeb && maxLines ? { numberOfLines: maxLines } : {}),
-    ...(!isWeb && {
-      ...(flex === undefined || flex === 0
-        ? { flexGrow: 0, flexShrink: 0, flexBasis: 'auto' }
-        : { flex }),
-    }),
-    ...clickableProps,
-    className,
+    // Reset browser default <p> margin
+    margin: 0,
     ...positionStyle,
     ...offsetStyle,
+    ...marginProps,
+    ...(numberOfLines !== undefined && { numberOfLines }),
+    ...(action && { cursor: 'pointer' as const }),
+    ...(className && { className }),
+    onClick: clickHandler,
   }
 
   return (
-    <Paragraph {...textProps}>
-      <Text {...textProps}>
-        {text}
-        {contents?.map((span: LFexSpan, i: number) => (
-          <LfSpan key={i} {...span} />
-        ))}
-      </Text>
+    <Paragraph {...paragraphProps}>
+      {text}
+      {contents?.map((span: LFexSpan, i: number) => (
+        <LfSpan key={i} {...span} />
+      ))}
     </Paragraph>
   )
 }
