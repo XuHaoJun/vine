@@ -29,7 +29,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
         right={0}
         mx="auto"
       />
-      {children}
+      {children as any}
     </TamaguiToastProvider>
   )
 }

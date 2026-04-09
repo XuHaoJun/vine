@@ -108,6 +108,14 @@
       "rules": {
         "no-restricted-imports": "off"
       }
+    },
+    {
+      "files": [
+        "packages/line-flex/**"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
     }
   ],
   "ignorePatterns": [

@@ -20,7 +20,7 @@ const TamaguiInnerProvider = ({ children }: { children: ReactNode }) => {
   return (
     <TamaguiProvider disableInjectCSS config={config} defaultTheme={userScheme.value}>
       {isWeb && <ThemeMetaTag />}
-      {children}
+      {children as any}
     </TamaguiProvider>
   )
 }
