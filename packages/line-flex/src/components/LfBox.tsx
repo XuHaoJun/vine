@@ -10,7 +10,11 @@ import type { LFexSeparatorProps } from './LfSeparator'
 import type { LFexSpacerProps } from './LfSpacer'
 import type { LFexFillerProps } from './LfFiller'
 import type { LFexVideoProps } from './LfVideo'
-import { expandFlexForChild, getChildDefaultFlex, normalizeFlexValue } from '../utils/flex'
+import {
+  expandFlexForChild,
+  getChildDefaultFlex,
+  normalizeFlexValue,
+} from '../utils/flex'
 import {
   spacingToTamagui,
   marginToTamagui,
@@ -18,6 +22,7 @@ import {
   tamaguiSpaceTokenToPx,
 } from '../utils/spacing'
 import { handleAction } from '../utils/action'
+import { lineBorderWidthToCssValue } from '../utils/border'
 import { LfText } from './LfText'
 import { LfImage } from './LfImage'
 import { LfButton } from './LfButton'
@@ -53,7 +58,9 @@ function renderChild(
       // When a box has explicit width/height, those dimensions are fixed —
       // don't let the parent's default flex override them (e.g. flex:1 in a horizontal box).
       const hasExplicitDimensions = !!(child as any).width || !!(child as any).height
-      const { parentLayout: _ignorePl, ...boxRest } = child as LFexBox & { parentLayout?: unknown }
+      const { parentLayout: _ignorePl, ...boxRest } = child as LFexBox & {
+        parentLayout?: unknown
+      }
       return (
         <LfBox
           key={key}
@@ -163,12 +170,14 @@ export function LfBox({
 
   const clickHandler = handleAction(action, onAction)
 
+  const borderWidthCss = lineBorderWidthToCssValue(borderWidth)
+
   const flexNum = normalizeFlexValue(flex)
 
-  // Horizontal/baseline row that is a flex child of a vertical parent: passing flex* as Tamagui
-  // props still compiles to atomic classes like _fb-0px (flex-basis 0) which wins over partial
-  // inline style. Put the full flex triplet only in `style` and default alignItems so text height
-  // is not stretch-collapsed when the row's used height is still resolving.
+  // Horizontal row that is a flex child of a vertical parent: passing flex* as Tamagui props
+  // still compiles to atomic classes like _fb-0px (flex-basis 0) which wins over partial inline
+  // style. Put the full flex triplet only in `style`. Align cross-axis with stretch so empty
+  // boxes (e.g. 2px transit lines) fill row height; LfText uses alignSelf from gravity or flex-start.
   const flexInColumnRow =
     (layout === 'horizontal' || layout === 'baseline') &&
     flexNum !== undefined &&
@@ -200,22 +209,29 @@ export function LfBox({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const containerProps: any = {
     ...flexProps,
+    // react-line-flex lf-box: min-w-0 so LINE flex 1 0 0 rows share width across siblings
+    minWidth: 0,
+    ...(layout === 'horizontal' && parentLayout === 'vertical' ? { width: '100%' } : {}),
     gap,
     padding,
     ...positionStyle,
     ...offsetStyle,
     ...(backgroundColor && { background: backgroundColor }),
     ...(borderColor && { borderColor }),
+    ...(borderWidthCss && {
+      borderWidth: borderWidthCss,
+      borderStyle: 'solid' as const,
+    }),
     ...(cornerRadius && { borderRadius: cornerRadius }),
-    ...(width && { width }),
+    ...(width && { width, maxWidth: width }),
     ...(maxWidth && { maxWidth }),
     ...(height && { height }),
     ...(maxHeight && { maxHeight }),
     ...(justifyContent && { justifyContent }),
     ...(alignItems !== undefined
       ? { alignItems }
-      : flexInColumnRow && layout === 'horizontal'
-        ? { alignItems: 'flex-start' }
+      : layout === 'horizontal'
+        ? { alignItems: 'stretch' }
         : {}),
     ...(action && { cursor: 'pointer' as const }),
     ...(className && { className }),
@@ -245,7 +261,8 @@ export function LfBox({
   // still collapse row height. Plain div + inline CSS bypasses the compiler entirely.
   // vxrn / some bundles leave Platform.OS !== 'web' in the browser — also gate on document.
   const isWeb =
-    Platform.OS === 'web' || (typeof document !== 'undefined' && typeof window !== 'undefined')
+    Platform.OS === 'web' ||
+    (typeof document !== 'undefined' && typeof window !== 'undefined')
 
   if (layout === 'horizontal' && flexInColumnRow && isWeb) {
     const gapPx = tamaguiSpaceTokenToPx(gap)
@@ -258,15 +275,21 @@ export function LfBox({
       overflow: 'hidden',
       flex: `${flexNum} 1 auto`,
       minHeight: 'min-content',
-      alignItems: alignItems ?? 'flex-start',
+      minWidth: 0,
+      ...(parentLayout === 'vertical' ? { width: '100%' } : {}),
+      alignItems: alignItems ?? 'stretch',
       ...(gapPx !== undefined && { gap: gapPx as number }),
       ...(paddingPx !== undefined && { padding: paddingPx as number }),
       ...positionStyle,
       ...offsetStyle,
       ...(backgroundColor && { backgroundColor }),
       ...(borderColor && { borderColor }),
+      ...(borderWidthCss && {
+        borderWidth: borderWidthCss,
+        borderStyle: 'solid',
+      }),
       ...(cornerRadius && { borderRadius: cornerRadius }),
-      ...(width && { width }),
+      ...(width && { width, maxWidth: width }),
       ...(maxWidth && { maxWidth }),
       ...(height && { height }),
       ...(maxHeight && { maxHeight }),

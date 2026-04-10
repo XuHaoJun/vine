@@ -116,6 +116,7 @@ export function LfBubble({
   const props: any = {
     background: styles?.body?.backgroundColor ?? '#ffffff',
     overflow: 'hidden',
+    width: '100%',
     maxWidth: BUBBLE_MAX_WIDTHS[size],
     borderRadius: BUBBLE_BORDER_RADII[size],
     className,

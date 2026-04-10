@@ -10,7 +10,7 @@ export type LFexBodyProps = {
 export function LfBody({ body, onAction }: LFexBodyProps) {
   if (!body) return null
   return (
-    <YStack flex={1} flexBasis="auto">
+    <YStack flex={1} flexBasis="auto" width="100%" style={{ minWidth: 0 }}>
       <LfBox {...body} parentLayout="vertical" onAction={onAction} />
     </YStack>
   )

@@ -87,20 +87,26 @@ export function LfText({
   // In a horizontal row, LINE uses flex 1 0 0 on children, but Tamagui emits flex-basis 0
   // (_fb-0px) which collapses text line-box height on web. Text uses basis auto + alignSelf.
   // Vertical parent: same basis rules as LfBox (expandFlexForChild).
+  const crossAlignFromGravity: 'flex-start' | 'center' | 'flex-end' =
+    gravity === 'center' ? 'center' : gravity === 'bottom' ? 'flex-end' : 'flex-start'
+
   const flexProps: any =
     flexNum === undefined
       ? {}
       : flexNum === 0
-        ? { flexGrow: 0, flexShrink: 0, flexBasis: 'auto' }
+        ? {
+            flexGrow: 0,
+            flexShrink: 0,
+            flexBasis: 'auto',
+            ...(isHorizontalParent ? { alignSelf: crossAlignFromGravity } : {}),
+          }
         : isHorizontalParent
           ? {
-              flexGrow: flexNum,
-              // LINE default is shrink 0; with wrap:true the item must shrink horizontally
-              // or the flex min-width stays one-line wide and height never grows.
-              flexShrink: wrap ? 1 : 0,
-              flexBasis: 'auto',
-              minWidth: 0,
-              alignSelf: 'flex-start',
+              // LINE horizontal flex is 1 0 0 — must match LfBox (basis 0), not basis:auto,
+              // or each row sizes columns from min-content and the timeline column misaligns.
+              ...expandFlexForChild(flexNum, 'horizontal'),
+              ...(wrap ? { flexShrink: 1 } : {}),
+              alignSelf: crossAlignFromGravity,
             }
           : expandFlexForChild(flexNum, layout ?? 'vertical')
 
@@ -118,8 +124,8 @@ export function LfText({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const paragraphProps: any = {
     ...flexProps,
-    // min-width:0 prevents content from overflowing flex containers
-    minWidth: 0,
+    // Same as react-line-flex min-w-0 on .lf-box / text: lets flex-basis:0 distribute width
+    ...(isHorizontalParent ? { minWidth: 0 } : {}),
     fontSize,
     lineHeight: lineHeightValue,
     color,

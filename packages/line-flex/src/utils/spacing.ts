@@ -57,14 +57,14 @@ export function tamaguiSpaceTokenToPx(
   const TOKENS: Record<string, number> = {
     '$0.25': 2,
     '$0.5': 4,
-    '$1': 4,
-    '$2': 8,
-    '$3': 12,
-    '$4': 16,
-    '$5': 20,
-    '$6': 24,
-    '$8': 32,
-    '$10': 40,
+    $1: 4,
+    $2: 8,
+    $3: 12,
+    $4: 16,
+    $5: 20,
+    $6: 24,
+    $8: 32,
+    $10: 40,
   }
   if (TOKENS[value] !== undefined) return TOKENS[value]
   return value
