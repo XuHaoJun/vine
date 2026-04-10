@@ -41,9 +41,19 @@ function renderChild(
   const effectiveFlex = defaultFlex === 'none' ? undefined : (defaultFlex as number)
 
   switch (child.type) {
-    case 'box':
-      // Override child's undefined flex with parent-layout default
-      return <LfBox key={key} {...child} flex={effectiveFlex} onAction={onAction} />
+    case 'box': {
+      // When a box has explicit width/height, those dimensions are fixed —
+      // don't let the parent's default flex override them (e.g. flex:1 in a horizontal box).
+      const hasExplicitDimensions = !!(child as any).width || !!(child as any).height
+      return (
+        <LfBox
+          key={key}
+          {...child}
+          flex={hasExplicitDimensions ? 0 : effectiveFlex}
+          onAction={onAction}
+        />
+      )
+    }
     case 'text':
       // Pass both effectiveFlex and parentLayout (for direction-aware margin)
       return (
@@ -202,5 +212,9 @@ export function LfBox({
     )
   }
 
-  return <YStack {...containerProps}>{renderedContents}</YStack>
+  return (
+    <YStack overflow="hidden" {...containerProps}>
+      {renderedContents}
+    </YStack>
+  )
 }

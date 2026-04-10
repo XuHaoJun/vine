@@ -67,6 +67,9 @@ export function LfImage({
                           ? '100%'
                           : 52
 
+  // size="full" with no aspectRatio: fill container height too (e.g. avatar in fixed-height box)
+  const fillHeight = size === 'full' && !aspectRatio
+
   const aspectRatioValue = aspectRatio
     ? (() => {
         const parts = aspectRatio.split(':')
@@ -96,6 +99,7 @@ export function LfImage({
     ...flexProps,
     src: url,
     width,
+    ...(fillHeight && { height: '100%' }),
     objectFit,
     ...positionStyle,
     ...offsetStyle,
