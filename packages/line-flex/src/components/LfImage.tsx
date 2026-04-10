@@ -43,30 +43,31 @@ export function LfImage({
 
   const clickHandler = handleAction(action, onAction)
 
+  // Pixel widths aligned with learn-projects/react-line-flex `imageSizeVariants` (Tailwind v4 preview)
   const width =
     size === 'xxs'
-      ? 26
+      ? 40
       : size === 'xs'
-        ? 34
+        ? 60
         : size === 'sm'
-          ? 42
+          ? 80
           : size === 'md'
-            ? 52
+            ? 100
             : size === 'lg'
-              ? 62
+              ? 120
               : size === 'xl'
-                ? 76
+                ? 140
                 : size === 'xxl'
-                  ? 92
+                  ? 160
                   : size === '3xl'
-                    ? 102
+                    ? 180
                     : size === '4xl'
-                      ? 120
+                      ? 200
                       : size === '5xl'
-                        ? 136
+                        ? 220
                         : size === 'full'
                           ? '100%'
-                          : 52
+                          : 100
 
   // size="full" with no aspectRatio: fill container height too (e.g. avatar in fixed-height box)
   const fillHeight = size === 'full' && !aspectRatio
@@ -97,9 +98,15 @@ export function LfImage({
         ? { flexGrow: 0, flexShrink: 0, flexBasis: 'auto' }
         : expandFlexForChild(flexNum, layout)
 
+  // react-line-flex lf-image: default cross-axis alignment is center (`items-center`) when align is omitted
+  const alignSelf =
+    align === 'start' ? 'flex-start' : align === 'end' ? 'flex-end' : 'center'
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const imageProps: any = {
     ...flexProps,
+    alignSelf,
+    maxWidth: size === 'full' ? undefined : '100%',
     src: url,
     width,
     ...(fillHeight && { height: '100%' }),
