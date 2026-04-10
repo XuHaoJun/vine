@@ -116,15 +116,14 @@ test.describe('Flex Simulator', () => {
 
     await page.waitForTimeout(500)
 
-    const bubbleElement = page.locator('[data-one-source*="LfBubble.tsx"]').first()
+    // Production CI serves a static build — dev-only `data-one-source` is absent; use stable test ids.
+    const bubbleElement = page.getByTestId('lf-bubble-root')
     const bubbleBB = await bubbleElement.boundingBox()
     expect(bubbleBB).not.toBeNull()
     expect(bubbleBB!.width).toBeGreaterThan(0)
     expect(bubbleBB!.height).toBeGreaterThan(0)
 
-    const previewWrapper = page
-      .locator('[data-one-source*="flex-simulator/index.tsx:102"]')
-      .first()
+    const previewWrapper = page.getByTestId('flex-simulator-preview-frame')
     const wrapperBB = await previewWrapper.boundingBox()
     expect(wrapperBB!.height).toBeGreaterThan(200)
   })

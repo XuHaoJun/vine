@@ -124,7 +124,7 @@ export function LfBubble({
   }
 
   return (
-    <YStack {...props}>
+    <YStack {...props} data-testid="lf-bubble-root">
       <LfHeader header={mergedHeader} onAction={onAction} />
       <LfHero hero={hero} onAction={onAction} />
       <LfBody body={mergedBody} onAction={onAction} />

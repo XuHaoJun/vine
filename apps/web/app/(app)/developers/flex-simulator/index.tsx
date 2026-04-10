@@ -100,6 +100,7 @@ const FlexSimulatorPage = memo(() => {
           </Text>
           <YStack
             flex={1}
+            data-testid="flex-simulator-preview-frame"
             style={{ minHeight: 800, overflow: 'hidden', borderRadius: 8 }}
           >
             <ScrollView>
