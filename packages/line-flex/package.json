@@ -12,6 +12,7 @@
     "tamagui": "2.0.0-rc.34"
   },
   "devDependencies": {
+    "@tamagui/config": "2.0.0-rc.34",
     "@types/react": "^18.2.0",
     "tamagui": "2.0.0-rc.34",
     "vitest": "^1.0.0"
