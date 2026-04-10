@@ -1,6 +1,7 @@
 import { Paragraph } from 'tamagui'
 import React from 'react'
 import type { LFexText, LFexSpan, LFexAction } from '../types'
+import { expandFlexForChild, normalizeFlexValue } from '../utils/flex'
 import { handleAction } from '../utils/action'
 import { marginToTamagui } from '../utils/spacing'
 import { LfSpan } from './LfSpan'
@@ -79,14 +80,29 @@ export function LfText({
     ? parseInt(lineSpacing.replace('px', '')) + 15
     : fontSize * 1.4
 
+  const flexNum = normalizeFlexValue(flex)
+
   // flex=undefined → no explicit flex (caller/renderChild provides the correct value)
-  // flex=0 → flex-none (0 0 auto), flex>=1 → Tamagui flex prop via expandStyle (N 1 0)
+  // flex=0 → flex-none
+  // In a horizontal row, LINE uses flex 1 0 0 on children, but Tamagui emits flex-basis 0
+  // (_fb-0px) which collapses text line-box height on web. Text uses basis auto + alignSelf.
+  // Vertical parent: same basis rules as LfBox (expandFlexForChild).
   const flexProps: any =
-    flex === undefined
+    flexNum === undefined
       ? {}
-      : flex === 0
+      : flexNum === 0
         ? { flexGrow: 0, flexShrink: 0, flexBasis: 'auto' }
-        : { flex }
+        : isHorizontalParent
+          ? {
+              flexGrow: flexNum,
+              // LINE default is shrink 0; with wrap:true the item must shrink horizontally
+              // or the flex min-width stays one-line wide and height never grows.
+              flexShrink: wrap ? 1 : 0,
+              flexBasis: 'auto',
+              minWidth: 0,
+              alignSelf: 'flex-start',
+            }
+          : expandFlexForChild(flexNum, layout ?? 'vertical')
 
   // Direction-aware margin: marginLeft for horizontal/baseline parent, marginTop for vertical
   const marginProps =
@@ -122,6 +138,11 @@ export function LfText({
     ...offsetStyle,
     ...marginProps,
     ...(numberOfLines !== undefined && { numberOfLines }),
+    ...(wrap && {
+      whiteSpace: 'normal',
+      wordWrap: 'break-word',
+      overflowWrap: 'break-word',
+    }),
     ...(action && { cursor: 'pointer' as const }),
     ...(className && { className }),
     onClick: clickHandler,

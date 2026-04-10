@@ -19,5 +19,5 @@ export function LfHero({ hero, onAction }: LFexHeroProps) {
     return <LfImage {...hero} onAction={onAction} />
   }
 
-  return <LfBox {...hero} onAction={onAction} />
+  return <LfBox {...hero} parentLayout="vertical" onAction={onAction} />
 }

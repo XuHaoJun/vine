@@ -11,7 +11,7 @@ export function LfBody({ body, onAction }: LFexBodyProps) {
   if (!body) return null
   return (
     <YStack flex={1} flexBasis="auto">
-      <LfBox {...body} onAction={onAction} />
+      <LfBox {...body} parentLayout="vertical" onAction={onAction} />
     </YStack>
   )
 }

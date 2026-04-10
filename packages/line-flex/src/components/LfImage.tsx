@@ -1,5 +1,6 @@
 import { Image } from 'tamagui'
 import type { LFexImage, LFexAction, LFexLayout } from '../types'
+import { expandFlexForChild, normalizeFlexValue } from '../utils/flex'
 import { handleAction } from '../utils/action'
 import { marginToTamagui } from '../utils/spacing'
 
@@ -87,12 +88,14 @@ export function LfImage({
   // flex=undefined → no explicit flex (natural sizing)
   // flex=0 → flex-none
   // flex>=1 → fill available space
+  const flexNum = normalizeFlexValue(flex)
+
   const flexProps =
-    flex === undefined
+    flexNum === undefined
       ? {}
-      : flex === 0
+      : flexNum === 0
         ? { flexGrow: 0, flexShrink: 0, flexBasis: 'auto' }
-        : { flex }
+        : expandFlexForChild(flexNum, layout)
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const imageProps: any = {

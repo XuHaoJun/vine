@@ -11,7 +11,7 @@ export function LfFooter({ footer, onAction }: LFexFooterProps) {
   if (!footer) return null
   return (
     <YStack style={{ flexGrow: 0, flexShrink: 0, flexBasis: 'auto' }}>
-      <LfBox {...footer} onAction={onAction} />
+      <LfBox {...footer} parentLayout="vertical" onAction={onAction} />
     </YStack>
   )
 }

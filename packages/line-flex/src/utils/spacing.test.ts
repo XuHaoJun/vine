@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { spacingToTamagui, marginToTamagui, paddingToTamagui } from './spacing'
+import {
+  spacingToTamagui,
+  marginToTamagui,
+  paddingToTamagui,
+  tamaguiSpaceTokenToPx,
+} from './spacing'
 
 describe('spacing utilities', () => {
   it('converts LINE spacing keywords to tamagui tokens', () => {
@@ -23,5 +28,10 @@ describe('spacing utilities', () => {
 
   it('paddingToTamagui works same as spacingToTamagui', () => {
     expect(paddingToTamagui('lg')).toBe('$3')
+  })
+
+  it('tamaguiSpaceTokenToPx maps default space tokens to px for plain DOM', () => {
+    expect(tamaguiSpaceTokenToPx('$2')).toBe(8)
+    expect(tamaguiSpaceTokenToPx('$3')).toBe(12)
   })
 })

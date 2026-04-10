@@ -1,5 +1,6 @@
 import { XStack, YStack } from 'tamagui'
 import React from 'react'
+import { Platform } from 'react-native'
 import type { LFexBox, LFexComponent, LFexAction, LFexLayout } from '../types'
 import type { LFexTextProps } from './LfText'
 import type { LFexImageProps } from './LfImage'
@@ -9,8 +10,13 @@ import type { LFexSeparatorProps } from './LfSeparator'
 import type { LFexSpacerProps } from './LfSpacer'
 import type { LFexFillerProps } from './LfFiller'
 import type { LFexVideoProps } from './LfVideo'
-import { getChildDefaultFlex } from '../utils/flex'
-import { spacingToTamagui, marginToTamagui, paddingToTamagui } from '../utils/spacing'
+import { expandFlexForChild, getChildDefaultFlex, normalizeFlexValue } from '../utils/flex'
+import {
+  spacingToTamagui,
+  marginToTamagui,
+  paddingToTamagui,
+  tamaguiSpaceTokenToPx,
+} from '../utils/spacing'
 import { handleAction } from '../utils/action'
 import { LfText } from './LfText'
 import { LfImage } from './LfImage'
@@ -24,6 +30,8 @@ import { LfVideo } from './LfVideo'
 export type LFexBoxProps = LFexBox & {
   className?: string
   onAction?: (action: LFexAction) => void
+  /** Parent flex direction; controls how numeric flex maps to basis (avoids 0-height rows in columns). */
+  parentLayout?: LFexLayout
 }
 
 function renderChild(
@@ -45,10 +53,12 @@ function renderChild(
       // When a box has explicit width/height, those dimensions are fixed —
       // don't let the parent's default flex override them (e.g. flex:1 in a horizontal box).
       const hasExplicitDimensions = !!(child as any).width || !!(child as any).height
+      const { parentLayout: _ignorePl, ...boxRest } = child as LFexBox & { parentLayout?: unknown }
       return (
         <LfBox
           key={key}
-          {...child}
+          {...boxRest}
+          parentLayout={parentLayout}
           flex={hasExplicitDimensions ? 0 : effectiveFlex}
           onAction={onAction}
         />
@@ -131,6 +141,7 @@ export function LfBox({
   onAction,
   className,
   children,
+  parentLayout,
 }: LFexBoxProps & { children?: React.ReactNode }) {
   const gap = spacing ? spacingToTamagui(spacing) : undefined
   const padding = paddingAll ? paddingToTamagui(paddingAll) : undefined
@@ -152,16 +163,39 @@ export function LfBox({
 
   const clickHandler = handleAction(action, onAction)
 
+  const flexNum = normalizeFlexValue(flex)
+
+  // Horizontal/baseline row that is a flex child of a vertical parent: passing flex* as Tamagui
+  // props still compiles to atomic classes like _fb-0px (flex-basis 0) which wins over partial
+  // inline style. Put the full flex triplet only in `style` and default alignItems so text height
+  // is not stretch-collapsed when the row's used height is still resolving.
+  const flexInColumnRow =
+    (layout === 'horizontal' || layout === 'baseline') &&
+    flexNum !== undefined &&
+    flexNum !== 0 &&
+    (parentLayout === 'vertical' || parentLayout === undefined)
+
   // flex=undefined → no explicit flex (natural sizing, safe for native vertical containers)
   // flex=0 → flex-none (0 0 auto)
-  // flex>=1 → Tamagui flex prop via expandStyle
+  // flex>=1 → parent-aware basis (see expandFlexForChild), except flexInColumnRow (see style)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const flexProps: any =
-    flex === undefined
+    flexNum === undefined
       ? {}
-      : flex === 0
+      : flexNum === 0
         ? { flexGrow: 0, flexShrink: 0, flexBasis: 'auto' }
-        : { flex }
+        : flexInColumnRow
+          ? {}
+          : expandFlexForChild(flexNum, parentLayout)
+
+  const rowInColumnFlexStyle = flexInColumnRow
+    ? ({
+        flexGrow: flexNum,
+        flexShrink: 1,
+        flexBasis: 'auto',
+        minHeight: 'min-content',
+      } as const)
+    : undefined
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const containerProps: any = {
@@ -178,10 +212,21 @@ export function LfBox({
     ...(height && { height }),
     ...(maxHeight && { maxHeight }),
     ...(justifyContent && { justifyContent }),
-    ...(alignItems && { alignItems }),
+    ...(alignItems !== undefined
+      ? { alignItems }
+      : flexInColumnRow && layout === 'horizontal'
+        ? { alignItems: 'flex-start' }
+        : {}),
     ...(action && { cursor: 'pointer' as const }),
     ...(className && { className }),
     onClick: clickHandler,
+    // overflow:hidden makes flex items' automatic min cross-size 0 (CSS flexbox), collapsing
+    // nested text in horizontal rows / scroll areas. min-content restores intrinsic height.
+    ...(height === undefined &&
+      maxHeight === undefined && {
+        '$platform-web': { minHeight: 'min-content' },
+      }),
+    ...(rowInColumnFlexStyle && { style: rowInColumnFlexStyle }),
   }
 
   // Boxes with margin are typically children of vertical boxes → marginTop only
@@ -195,6 +240,47 @@ export function LfBox({
           renderChild(child, i, layout, onAction),
         )
       : children
+
+  // Web: Tamagui styled XStack turns style.flex* into atomic classes (_grow-1 _fb-0px) that
+  // still collapse row height. Plain div + inline CSS bypasses the compiler entirely.
+  // vxrn / some bundles leave Platform.OS !== 'web' in the browser — also gate on document.
+  const isWeb =
+    Platform.OS === 'web' || (typeof document !== 'undefined' && typeof window !== 'undefined')
+
+  if (layout === 'horizontal' && flexInColumnRow && isWeb) {
+    const gapPx = tamaguiSpaceTokenToPx(gap)
+    const paddingPx = tamaguiSpaceTokenToPx(padding)
+    const marginTopPx = tamaguiSpaceTokenToPx(marginValue)
+
+    const webStyle: React.CSSProperties = {
+      display: 'flex',
+      flexDirection: 'row',
+      overflow: 'hidden',
+      flex: `${flexNum} 1 auto`,
+      minHeight: 'min-content',
+      alignItems: alignItems ?? 'flex-start',
+      ...(gapPx !== undefined && { gap: gapPx as number }),
+      ...(paddingPx !== undefined && { padding: paddingPx as number }),
+      ...positionStyle,
+      ...offsetStyle,
+      ...(backgroundColor && { backgroundColor }),
+      ...(borderColor && { borderColor }),
+      ...(cornerRadius && { borderRadius: cornerRadius }),
+      ...(width && { width }),
+      ...(maxWidth && { maxWidth }),
+      ...(height && { height }),
+      ...(maxHeight && { maxHeight }),
+      ...(justifyContent && { justifyContent }),
+      ...(marginTopPx !== undefined && { marginTop: marginTopPx as number }),
+      ...(action && { cursor: 'pointer' }),
+    }
+
+    return (
+      <div style={webStyle} className={className} onClick={clickHandler}>
+        {renderedContents}
+      </div>
+    )
+  }
 
   if (layout === 'horizontal') {
     return (
