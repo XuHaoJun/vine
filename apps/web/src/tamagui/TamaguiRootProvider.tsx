@@ -8,7 +8,7 @@ import { config } from './tamagui.config'
 
 export const TamaguiRootProvider = ({ children }: { children: ReactNode }) => {
   return (
-    <SchemeProvider>
+    <SchemeProvider forceScheme="light">
       <TamaguiInnerProvider>{children}</TamaguiInnerProvider>
     </SchemeProvider>
   )
