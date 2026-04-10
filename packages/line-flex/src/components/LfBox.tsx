@@ -126,7 +126,13 @@ export function LfBox({
   const padding = paddingAll ? paddingToTamagui(paddingAll) : undefined
   const marginValue = margin ? marginToTamagui(margin) : undefined
 
-  const positionStyle = position === 'absolute' ? { position: 'absolute' as const } : {}
+  const hasAbsoluteChildren = contents.some((c) => (c as any).position === 'absolute')
+  const positionStyle =
+    position === 'absolute'
+      ? { position: 'absolute' as const }
+      : hasAbsoluteChildren
+        ? { position: 'relative' as const }
+        : {}
   const offsetStyle = {
     ...(offsetTop && { top: offsetTop }),
     ...(offsetBottom && { bottom: offsetBottom }),
