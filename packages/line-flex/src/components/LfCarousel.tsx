@@ -1,4 +1,4 @@
-import { ScrollView, XStack, YStack } from 'tamagui'
+import { ScrollView, XStack } from 'tamagui'
 import type { LFexCarousel, LFexAction } from '../types'
 import { LfBubble } from './LfBubble'
 
@@ -17,9 +17,7 @@ export function LfCarousel({ contents = [], onAction, className }: LFexCarouselP
     >
       <XStack gap={9} pl={7} pr={7} shrink={0}>
         {contents.map((bubble, index) => (
-          <YStack key={index} shrink={0}>
-            <LfBubble {...bubble} onAction={onAction} />
-          </YStack>
+          <LfBubble key={index} {...bubble} onAction={onAction} shrink={0} />
         ))}
       </XStack>
     </ScrollView>

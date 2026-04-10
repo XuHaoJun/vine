@@ -8,6 +8,7 @@ import { LfFooter } from './LfFooter'
 export type LFexBubbleProps = LFexBubble & {
   className?: string
   onAction?: (action: LFexAction) => void
+  shrink?: number
 }
 
 const BUBBLE_MAX_WIDTHS = {
@@ -105,6 +106,7 @@ export function LfBubble({
   action,
   onAction,
   className,
+  shrink,
 }: LFexBubbleProps) {
   const mergedHeader = mergeHeaderProps(header, size)
   const mergedBody = mergeBodyProps(body, size)
@@ -117,6 +119,7 @@ export function LfBubble({
     maxWidth: BUBBLE_MAX_WIDTHS[size],
     borderRadius: BUBBLE_BORDER_RADII[size],
     className,
+    ...(shrink !== undefined && { shrink }),
   }
 
   return (
