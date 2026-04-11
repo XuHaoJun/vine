@@ -3,11 +3,15 @@
  * Tests the Flex Message simulator with JSON editing and preview
  */
 
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 
 import { loginAsDemo } from './helpers'
 
 const BASE_URL = 'http://localhost:8081'
+
+function flexPreview(page: Page) {
+  return page.getByTestId('flex-simulator-preview-frame')
+}
 
 test.describe('Flex Simulator', () => {
   test.beforeEach(async ({ page }) => {
@@ -24,8 +28,9 @@ test.describe('Flex Simulator', () => {
   })
 
   test('default JSON renders in preview', async ({ page }) => {
-    await expect(page.locator('text=Hello World')).toBeVisible()
-    await expect(page.locator('text=This is a sample Flex Message.')).toBeVisible()
+    const preview = flexPreview(page)
+    await expect(preview.getByText('Hello World')).toBeVisible()
+    await expect(preview.getByText('This is a sample Flex Message.')).toBeVisible()
   })
 
   test('invalid JSON shows error message', async ({ page }) => {
@@ -70,7 +75,7 @@ test.describe('Flex Simulator', () => {
 
     await jsonInput.fill(validJson)
 
-    await expect(page.locator('text=Custom Text')).toBeVisible()
+    await expect(flexPreview(page).getByText('Custom Text')).toBeVisible()
   })
 
   test('bubble preview has proper dimensions (height visible above threshold)', async ({
