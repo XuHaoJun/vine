@@ -23,6 +23,7 @@
     "@take-out/better-auth-utils": "^0.2.10",
     "@take-out/helpers": "^0.2.10",
     "@vine/db": "workspace:*",
+    "@vine/drive": "workspace:*",
     "@vine/flex-schema": "workspace:*",
     "@vine/proto": "workspace:*",
     "@vine/zero-schema": "workspace:*",

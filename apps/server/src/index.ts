@@ -12,6 +12,7 @@ import { createZeroService, zeroPlugin } from './plugins/zero'
 import { oaMessagingPlugin } from './plugins/oa-messaging'
 import { oaWebhookPlugin } from './plugins/oa-webhook'
 import { createOAService } from './services/oa'
+import { createFsDriveService } from '@vine/drive'
 
 const app = Fastify({ logger: true })
 
@@ -28,6 +29,10 @@ const db = createDb()
 
 const oa = createOAService({ db, database })
 const auth = createAuthServer({ database, db })
+const drive = createFsDriveService({
+  basePath: process.env['DRIVE_BASE_PATH'] ?? './uploads',
+  baseUrl: process.env['DRIVE_BASE_URL'] ?? 'http://localhost:3001/uploads',
+})
 
 // ConnectRPC routes (GreeterService, OAService, etc.)
 await app.register(fastifyConnectPlugin, {
@@ -44,7 +49,7 @@ const zero = createZeroService({
 // Register plugins with injected dependencies
 await authPlugin(app, { auth, db })
 await zeroPlugin(app, { auth, zero })
-await oaMessagingPlugin(app, { oa, db })
+await oaMessagingPlugin(app, { oa, db, drive })
 await oaWebhookPlugin(app, { oa, db })
 
 app.get('/healthz', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))

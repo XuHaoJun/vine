@@ -32,8 +32,15 @@ function createTestApp(
         messageId: 'msg-id',
       }),
   }
+  const mockDrive = {
+    put: vi.fn().mockResolvedValue(undefined),
+    get: vi.fn().mockResolvedValue({ content: Buffer.from(''), mimeType: null, size: 0 }),
+    exists: vi.fn().mockResolvedValue(false),
+    delete: vi.fn().mockResolvedValue(undefined),
+    getUrl: vi.fn().mockResolvedValue('http://localhost/uploads/test'),
+  }
   const app = Fastify()
-  app.register(oaMessagingPlugin, { oa: mockOa as any, db })
+  app.register(oaMessagingPlugin, { oa: mockOa as any, db, drive: mockDrive })
   return app
 }
 
