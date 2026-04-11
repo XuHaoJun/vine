@@ -6,6 +6,8 @@ import { randomUUID } from 'crypto'
 
 import { user, account } from '../schema-private'
 import { friendship, userPublic, userState, chat, chatMember } from '../schema-public'
+import { oaProvider, officialAccount } from '../schema-oa'
+import { FLEX_SIMULATOR_OA_UNIQUE_ID } from '../constants'
 
 const TEST_USERS = [
   { email: 'test1@example.com', name: 'Test One', username: 'test1' },
@@ -187,6 +189,40 @@ export async function ensureSeed(pool: Pool, db: any) {
     } else {
       console.info('[seed] Friendship test1 <-> test2 already exists')
     }
+  }
+
+  const existingFlexOA = await db
+    .select()
+    .from(officialAccount)
+    .where(eq(officialAccount.uniqueId, FLEX_SIMULATOR_OA_UNIQUE_ID))
+    .limit(1)
+
+  if (existingFlexOA.length === 0) {
+    const providerId = randomUUID()
+
+    await db.insert(oaProvider).values({
+      id: providerId,
+      name: 'Vine Developers',
+      ownerId: 'system',
+      createdAt: now,
+      updatedAt: now,
+    })
+
+    await db.insert(officialAccount).values({
+      id: randomUUID(),
+      providerId: providerId,
+      name: 'Flex Message sim',
+      uniqueId: FLEX_SIMULATOR_OA_UNIQUE_ID,
+      description: 'Send Flex Messages to yourself for testing',
+      channelSecret: bytesToHex(randomBytes(16)),
+      status: 'active',
+      createdAt: now,
+      updatedAt: now,
+    })
+
+    console.info('[seed] Created Flex Message sim Official Account')
+  } else {
+    console.info('[seed] Flex Message sim Official Account already exists')
   }
 
   console.info('[seed] Seed data initialization complete')

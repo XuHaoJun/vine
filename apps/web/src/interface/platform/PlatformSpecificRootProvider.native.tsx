@@ -19,7 +19,9 @@ export function PlatformSpecificRootProvider({ children }: { children: ReactNode
   return (
     <QueryClientProvider client={queryClient}>
       <KeyboardProvider>
-        <GestureHandlerRootView style={{ flex: 1 }}>{children}</GestureHandlerRootView>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          {children as any}
+        </GestureHandlerRootView>
       </KeyboardProvider>
     </QueryClientProvider>
   )

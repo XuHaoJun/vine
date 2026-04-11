@@ -8,7 +8,7 @@ import { config } from './tamagui.config'
 
 export const TamaguiRootProvider = ({ children }: { children: ReactNode }) => {
   return (
-    <SchemeProvider>
+    <SchemeProvider forceScheme="light">
       <TamaguiInnerProvider>{children}</TamaguiInnerProvider>
     </SchemeProvider>
   )
@@ -20,7 +20,7 @@ const TamaguiInnerProvider = ({ children }: { children: ReactNode }) => {
   return (
     <TamaguiProvider disableInjectCSS config={config} defaultTheme={userScheme.value}>
       {isWeb && <ThemeMetaTag />}
-      {children}
+      {children as any}
     </TamaguiProvider>
   )
 }
