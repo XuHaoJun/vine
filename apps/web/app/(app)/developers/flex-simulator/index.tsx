@@ -1,8 +1,9 @@
-import { memo, useState } from 'react'
-import { XStack, YStack, Text, ScrollView } from 'tamagui'
-import { Button } from '~/interface/buttons/Button'
-import { Input } from '~/interface/forms/Input'
+import { memo, useCallback, useEffect, useState } from 'react'
+import { ScrollView, Text, XStack, YStack } from 'tamagui'
 
+import { TextArea } from '~/interface/forms/TextArea'
+
+import { useFlexSimulatorHeader } from './FlexSimulatorHeaderContext'
 import { FlexSimulatorPreview } from './FlexSimulatorPreview'
 
 const DEFAULT_JSON = JSON.stringify(
@@ -38,9 +39,21 @@ const DEFAULT_JSON = JSON.stringify(
 )
 
 const FlexSimulatorPage = memo(() => {
+  const { setResetHandler } = useFlexSimulatorHeader()
   const [json, setJson] = useState(DEFAULT_JSON)
   const [isValid, setIsValid] = useState(true)
   const [errorMsg, setErrorMsg] = useState('')
+
+  const handleReset = useCallback(() => {
+    setJson(DEFAULT_JSON)
+    setIsValid(true)
+    setErrorMsg('')
+  }, [])
+
+  useEffect(() => {
+    setResetHandler(() => handleReset)
+    return () => setResetHandler(null)
+  }, [handleReset, setResetHandler])
 
   const handleJsonChange = (value: string) => {
     setJson(value)
@@ -54,25 +67,8 @@ const FlexSimulatorPage = memo(() => {
     }
   }
 
-  const handleReset = () => {
-    setJson(DEFAULT_JSON)
-    setIsValid(true)
-    setErrorMsg('')
-  }
-
   return (
-    <YStack flex={1} gap="$4">
-      <XStack items="center" justify="space-between">
-        <Text fontSize="$6" fontWeight="700" color="$color12">
-          Flex Simulator
-        </Text>
-        <XStack gap="$2">
-          <Button size="$2" onPress={handleReset}>
-            Reset
-          </Button>
-        </XStack>
-      </XStack>
-
+    <YStack flex={1} gap="$4" style={{ minHeight: 0 }}>
       <XStack flex={1} gap="$4" style={{ minHeight: 0 }}>
         <YStack flex={1} gap="$2">
           <Text fontSize="$3" fontWeight="600" color="$color11">
@@ -83,14 +79,12 @@ const FlexSimulatorPage = memo(() => {
               {errorMsg}
             </Text>
           )}
-          <Input
+          <TextArea
             flex={1}
-            multiline
             value={json}
             onChangeText={handleJsonChange}
-            textAlignVertical="top"
             p="$3"
-            borderColor={isValid ? '$borderColor' : '$red10'}
+            hasError={!isValid}
           />
         </YStack>
 

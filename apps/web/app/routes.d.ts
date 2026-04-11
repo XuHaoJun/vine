@@ -18,6 +18,7 @@ declare module 'one' {
         | `/(app)/developers/console/`
         | `/(app)/developers/flex-simulator`
         | `/(app)/developers/flex-simulator/`
+        | `/(app)/developers/flex-simulator/FlexSimulatorHeaderContext`
         | `/(app)/developers/flex-simulator/FlexSimulatorPreview`
         | `/(app)/home`
         | `/(app)/home/(tabs)`
@@ -43,6 +44,7 @@ declare module 'one' {
         | `/developers/console/`
         | `/developers/flex-simulator`
         | `/developers/flex-simulator/`
+        | `/developers/flex-simulator/FlexSimulatorHeaderContext`
         | `/developers/flex-simulator/FlexSimulatorPreview`
         | `/hello`
         | `/home`
