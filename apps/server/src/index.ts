@@ -37,7 +37,7 @@ const drive = createFsDriveService({
 
 // ConnectRPC routes (GreeterService, OAService, etc.)
 await app.register(fastifyConnectPlugin, {
-  routes: connectRoutes({ oa, auth }),
+  routes: connectRoutes({ oa, auth, drive }),
 })
 
 // Seed test data (only in dev with VITE_DEMO_MODE=1)

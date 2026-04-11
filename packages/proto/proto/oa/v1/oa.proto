@@ -320,6 +320,49 @@ message SimulatorSendFlexMessageRequest {
 
 message SimulatorSendFlexMessageResponse {}
 
+// ── Rich Menu (user-facing) ──
+
+message RichMenuArea {
+  message Bounds {
+    int32 x = 1;
+    int32 y = 2;
+    int32 width = 3;
+    int32 height = 4;
+  }
+  message Action {
+    string type = 1;
+    optional string label = 2;
+    optional string uri = 3;
+    optional string data = 4;
+    optional string text = 5;
+    optional string rich_menu_alias_id = 6;
+    optional string input_option = 7;
+    optional string display_text = 8;
+  }
+  Bounds bounds = 1;
+  Action action = 2;
+}
+
+message RichMenuData {
+  string rich_menu_id = 1;
+  string name = 2;
+  string chat_bar_text = 3;
+  bool selected = 4;
+  int32 size_width = 5;
+  int32 size_height = 6;
+  repeated RichMenuArea areas = 7;
+}
+
+message GetActiveRichMenuRequest {
+  string official_account_id = 1;
+}
+
+message GetActiveRichMenuResponse {
+  optional RichMenuData rich_menu = 1;
+  optional bytes image = 2;
+  optional string image_content_type = 3;
+}
+
 // ── Service ──
 
 service OAService {
@@ -349,4 +392,5 @@ service OAService {
   rpc IsOAFriend(IsOAFriendRequest) returns (IsOAFriendResponse);
   rpc ResolveOfficialAccount(ResolveOfficialAccountRequest) returns (ResolveOfficialAccountResponse);
   rpc SimulatorSendFlexMessage(SimulatorSendFlexMessageRequest) returns (SimulatorSendFlexMessageResponse);
+  rpc GetActiveRichMenu(GetActiveRichMenuRequest) returns (GetActiveRichMenuResponse);
 }

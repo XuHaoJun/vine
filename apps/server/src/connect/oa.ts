@@ -3,12 +3,14 @@ import { Code, ConnectError, ConnectRouter } from '@connectrpc/connect'
 import type { AuthServer } from '@take-out/better-auth-utils/server'
 import { AccessTokenType, OAService, OAStatus, WebhookStatus } from '@vine/proto/oa'
 import type { createOAService } from '../services/oa'
+import type { DriveService } from '@vine/drive'
 
 import { requireAuthData, withAuthService } from './auth-context'
 
 type OAHandlerDeps = {
   oa: ReturnType<typeof createOAService>
   auth: AuthServer
+  drive: DriveService
 }
 
 async function assertProviderOwnedByUser(
@@ -406,6 +408,84 @@ export function oaHandler(deps: OAHandlerDeps) {
           throw new ConnectError('Unknown error', Code.Internal)
         }
         return {}
+      },
+      async getActiveRichMenu(
+        req,
+        ctx,
+      ) {
+        const auth = requireAuthData(ctx)
+        const userId = auth.id
+        const oaId = req.officialAccountId
+
+        const userLink = await deps.oa.getRichMenuIdOfUser(oaId, userId)
+        let richMenuId: string | null = null
+        if (userLink) {
+          richMenuId = userLink.richMenuId
+        }
+
+        if (!richMenuId) {
+          const defaultMenu = await deps.oa.getDefaultRichMenu(oaId)
+          if (defaultMenu) {
+            richMenuId = defaultMenu.richMenuId
+          }
+        }
+
+        if (!richMenuId) {
+          return {}
+        }
+
+        const menu = await deps.oa.getRichMenu(oaId, richMenuId)
+        if (!menu) {
+          return {}
+        }
+
+        const areas = JSON.parse(menu.areas) as Array<{
+          bounds: { x: number; y: number; width: number; height: number }
+          action: Record<string, string | undefined>
+        }>
+
+        let imageBytes: Uint8Array | undefined
+        let imageContentType: string | undefined
+        if (menu.hasImage === 'true') {
+          const key = `richmenu/${oaId}/${richMenuId}.jpg`
+          const exists = await deps.drive.exists(key)
+          if (exists) {
+            const file = await deps.drive.get(key)
+            imageBytes = new Uint8Array(file.content)
+            imageContentType = file.mimeType ?? 'image/jpeg'
+          }
+        }
+
+        return {
+          richMenu: {
+            richMenuId: menu.richMenuId,
+            name: menu.name,
+            chatBarText: menu.chatBarText,
+            selected: menu.selected === 'true',
+            sizeWidth: parseInt(menu.sizeWidth, 10),
+            sizeHeight: parseInt(menu.sizeHeight, 10),
+            areas: areas.map((a) => ({
+              bounds: {
+                x: a.bounds.x,
+                y: a.bounds.y,
+                width: a.bounds.width,
+                height: a.bounds.height,
+              },
+              action: {
+                type: a.action.type ?? '',
+                label: a.action.label,
+                uri: a.action.uri,
+                data: a.action.data,
+                text: a.action.text,
+                richMenuAliasId: a.action.richMenuAliasId,
+                inputOption: a.action.inputOption,
+                displayText: a.action.displayText,
+              },
+            })),
+          },
+          image: imageBytes,
+          imageContentType,
+        }
       },
     }
 
