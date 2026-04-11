@@ -1,6 +1,6 @@
 import { createRoute, useActiveParams } from 'one'
-import { memo, useEffect, useMemo, useRef } from 'react'
-import { Platform } from 'react-native'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Linking, Platform } from 'react-native'
 import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
 
 import { useMessages } from '~/features/chat/useMessages'
@@ -13,6 +13,10 @@ import { Avatar } from '~/interface/avatars/Avatar'
 import { Button } from '~/interface/buttons/Button'
 import { H3 } from '~/interface/text/Headings'
 import { useTanQuery } from '~/query'
+import { showToast } from '~/interface/toast/Toast'
+import { useRichMenu } from '~/features/chat/useRichMenu'
+import { RichMenu } from '~/features/chat/ui/RichMenu'
+import { RichMenuBar } from '~/features/chat/ui/RichMenuBar'
 
 const AVATAR_COLORS = ['#7a9cbf', '#c4aed0', '#a0c4a0', '#e0b98a']
 
@@ -38,6 +42,23 @@ export const ChatRoomPage = memo(() => {
   const oaFriend = isOAChat
     ? oaFriendsData?.friendships?.find((f) => f.officialAccountId === otherMemberOaId)
     : null
+
+  const { richMenu, imageUrl } = useRichMenu(otherMemberOaId ?? undefined)
+  const hasRichMenu = !!richMenu && !!imageUrl
+
+  const [inputMode, setInputMode] = useState<'normal' | 'richmenu'>(
+    hasRichMenu ? 'richmenu' : 'normal',
+  )
+  const [richMenuExpanded, setRichMenuExpanded] = useState(richMenu?.selected ?? false)
+
+  useEffect(() => {
+    if (hasRichMenu) {
+      setInputMode('richmenu')
+      setRichMenuExpanded(richMenu?.selected ?? false)
+    } else {
+      setInputMode('normal')
+    }
+  }, [hasRichMenu, richMenu?.selected])
 
   // Build a lookup map: userId → { name, index } for sender display
   const memberMap = useMemo(() => {
@@ -88,6 +109,30 @@ export const ChatRoomPage = memo(() => {
   const otherImage = isOAChat
     ? oaFriend?.oaImageUrl || null
     : (otherMember?.user?.image ?? null)
+
+  const handleRichMenuAreaTap = useCallback(
+    (area: { action: { type: string; uri?: string; data?: string; text?: string } }) => {
+      const { action } = area
+      switch (action.type) {
+        case 'uri':
+          if (action.uri) {
+            Linking.openURL(action.uri)
+          }
+          break
+        case 'message':
+          if (action.text) {
+            sendMessage(action.text)
+          }
+          break
+        case 'postback':
+          showToast('Postback action', { type: 'info' })
+          break
+        default:
+          showToast(`Action: ${action.type}`, { type: 'info' })
+      }
+    },
+    [sendMessage],
+  )
 
   if (!chatId) {
     return null
@@ -213,8 +258,39 @@ export const ChatRoomPage = memo(() => {
         </ScrollView>
       </YStack>
 
+      {inputMode === 'richmenu' && hasRichMenu && richMenuExpanded && imageUrl && (
+        <YStack shrink={0}>
+          <RichMenu
+            imageUrl={imageUrl}
+            sizeWidth={richMenu.sizeWidth}
+            sizeHeight={richMenu.sizeHeight}
+            areas={richMenu.areas}
+            onAreaTap={handleRichMenuAreaTap}
+          />
+        </YStack>
+      )}
+
       <YStack shrink={0}>
-        <MessageInput onSend={sendMessage} />
+        {inputMode === 'richmenu' && hasRichMenu ? (
+          <RichMenuBar
+            chatBarText={richMenu.chatBarText}
+            isExpanded={richMenuExpanded}
+            onToggleExpand={() => setRichMenuExpanded((prev) => !prev)}
+            onSwitchToKeyboard={() => {
+              setInputMode('normal')
+              setRichMenuExpanded(false)
+            }}
+          />
+        ) : (
+          <MessageInput
+            onSend={sendMessage}
+            hasRichMenu={hasRichMenu}
+            onSwitchToRichMenu={() => {
+              setInputMode('richmenu')
+              setRichMenuExpanded(false)
+            }}
+          />
+        )}
       </YStack>
     </YStack>
   )
