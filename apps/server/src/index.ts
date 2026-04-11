@@ -10,6 +10,7 @@ import { connectRoutes } from './connect/routes'
 import { createAuthServer, authPlugin } from './plugins/auth'
 import { createZeroService, zeroPlugin } from './plugins/zero'
 import { oaMessagingPlugin } from './plugins/oa-messaging'
+import { oaRichMenuPlugin } from './plugins/oa-richmenu'
 import { oaWebhookPlugin } from './plugins/oa-webhook'
 import { createOAService } from './services/oa'
 import { createFsDriveService } from '@vine/drive'
@@ -50,6 +51,7 @@ const zero = createZeroService({
 await authPlugin(app, { auth, db })
 await zeroPlugin(app, { auth, zero })
 await oaMessagingPlugin(app, { oa, db, drive })
+await oaRichMenuPlugin(app, { oa, db, drive })
 await oaWebhookPlugin(app, { oa, db })
 
 app.get('/healthz', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))

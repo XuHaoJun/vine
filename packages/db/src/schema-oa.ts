@@ -80,3 +80,67 @@ export const oaAccessToken = pgTable(
     index('oaAccessToken_keyId_idx').on(table.keyId),
   ],
 )
+
+export const oaRichMenu = pgTable(
+  'oaRichMenu',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    oaId: uuid('oaId')
+      .notNull()
+      .references(() => officialAccount.id, { onDelete: 'cascade' }),
+    richMenuId: text('richMenuId').notNull(),
+    name: text('name').notNull(),
+    chatBarText: text('chatBarText').notNull(),
+    selected: text('selected').notNull().default('false'),
+    sizeWidth: text('sizeWidth').notNull(),
+    sizeHeight: text('sizeHeight').notNull(),
+    areas: text('areas').notNull().default('[]'),
+    hasImage: text('hasImage').notNull().default('false'),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('oaRichMenu_oaId_idx').on(table.oaId),
+    index('oaRichMenu_richMenuId_idx').on(table.richMenuId),
+  ],
+)
+
+export const oaRichMenuAlias = pgTable(
+  'oaRichMenuAlias',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    oaId: uuid('oaId')
+      .notNull()
+      .references(() => officialAccount.id, { onDelete: 'cascade' }),
+    richMenuAliasId: text('richMenuAliasId').notNull(),
+    richMenuId: text('richMenuId').notNull(),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [index('oaRichMenuAlias_oaId_idx').on(table.oaId)],
+)
+
+export const oaRichMenuUserLink = pgTable(
+  'oaRichMenuUserLink',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    oaId: uuid('oaId')
+      .notNull()
+      .references(() => officialAccount.id, { onDelete: 'cascade' }),
+    userId: text('userId').notNull(),
+    richMenuId: text('richMenuId').notNull(),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('oaRichMenuUserLink_oaId_idx').on(table.oaId),
+    index('oaRichMenuUserLink_userId_idx').on(table.userId),
+  ],
+)
+
+export const oaDefaultRichMenu = pgTable('oaDefaultRichMenu', {
+  oaId: uuid('oaId')
+    .primaryKey()
+    .references(() => officialAccount.id, { onDelete: 'cascade' }),
+  richMenuId: text('richMenuId').notNull(),
+  updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+})
