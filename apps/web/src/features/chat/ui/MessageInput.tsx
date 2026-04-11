@@ -2,13 +2,15 @@ import { memo, useState } from 'react'
 import { Pressable } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Svg, { Path } from 'react-native-svg'
-import { XStack, YStack } from 'tamagui'
+import { XStack, YStack, SizableText } from 'tamagui'
 
 import { Input } from '~/interface/forms/Input'
 
 type Props = {
   onSend: (text: string) => void
   disabled?: boolean
+  hasRichMenu?: boolean
+  onSwitchToRichMenu?: () => void
 }
 
 function CameraIcon() {
@@ -111,7 +113,7 @@ function SendArrowIcon() {
   )
 }
 
-export const MessageInput = memo(({ onSend, disabled }: Props) => {
+export const MessageInput = memo(({ onSend, disabled, hasRichMenu, onSwitchToRichMenu }: Props) => {
   const [text, setText] = useState('')
   const insets = useSafeAreaInsets()
 
@@ -135,24 +137,37 @@ export const MessageInput = memo(({ onSend, disabled }: Props) => {
       borderTopWidth={1}
       borderTopColor="$color4"
     >
-      {/* + button */}
-      <XStack
-        style={{ width: 30, height: 30, borderRadius: 999, flexShrink: 0 }}
-        bg="$gray3"
-        items="center"
-        justify="center"
-      >
-        <Svg
-          width={18}
-          height={18}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#555"
-          strokeWidth={2}
+      {/* + button or Rich Menu toggle */}
+      {hasRichMenu && onSwitchToRichMenu ? (
+        <Pressable onPress={onSwitchToRichMenu}>
+          <XStack
+            style={{ width: 30, height: 30, borderRadius: 999, flexShrink: 0 }}
+            bg="$gray3"
+            items="center"
+            justify="center"
+          >
+            <SizableText fontSize={14}>📋</SizableText>
+          </XStack>
+        </Pressable>
+      ) : (
+        <XStack
+          style={{ width: 30, height: 30, borderRadius: 999, flexShrink: 0 }}
+          bg="$gray3"
+          items="center"
+          justify="center"
         >
-          <Path d="M12 4.5v15m7.5-7.5h-15" strokeLinecap="round" strokeLinejoin="round" />
-        </Svg>
-      </XStack>
+          <Svg
+            width={18}
+            height={18}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#555"
+            strokeWidth={2}
+          >
+            <Path d="M12 4.5v15m7.5-7.5h-15" strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        </XStack>
+      )}
 
       {/* Camera */}
       <XStack style={{ flexShrink: 0 }} items="center" justify="center">
