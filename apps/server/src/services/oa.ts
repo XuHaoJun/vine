@@ -100,6 +100,21 @@ export function createOAService(deps: OADeps) {
     return account ?? null
   }
 
+  async function findOfficialAccountByUniqueId(uniqueId: string) {
+    const [account] = await db
+      .select({
+        id: officialAccount.id,
+        name: officialAccount.name,
+        uniqueId: officialAccount.uniqueId,
+        description: officialAccount.description,
+        imageUrl: officialAccount.imageUrl,
+      })
+      .from(officialAccount)
+      .where(eq(officialAccount.uniqueId, uniqueId))
+      .limit(1)
+    return account ?? null
+  }
+
   async function updateOfficialAccount(
     id: string,
     input: { name?: string; description?: string; imageUrl?: string; status?: string },
@@ -480,6 +495,7 @@ export function createOAService(deps: OADeps) {
     isOAFriend,
     getAccessTokenById,
     verifyWebhook,
+    findOfficialAccountByUniqueId,
   }
 }
 

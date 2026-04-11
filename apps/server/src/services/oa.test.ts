@@ -424,6 +424,44 @@ describe('createOAService — Search', () => {
   })
 })
 
+describe('createOAService — findOfficialAccountByUniqueId', () => {
+  it('returns account when found by uniqueId', async () => {
+    const mockDb = createMockDb()
+    mockDb.select.mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue([
+            {
+              id: 'oa-uuid',
+              name: 'Flex Message sim',
+              uniqueId: 'flexmessagesim',
+              description: null,
+              imageUrl: null,
+            },
+          ]),
+        }),
+      }),
+    })
+
+    const oa = createOAService({ db: mockDb as any, database: {} as any })
+    const result = await oa.findOfficialAccountByUniqueId('flexmessagesim')
+
+    expect(result).not.toBeNull()
+    expect(result?.id).toBe('oa-uuid')
+    expect(result?.uniqueId).toBe('flexmessagesim')
+  })
+
+  it('returns null when OA not found', async () => {
+    const mockDb = createMockDb()
+    // default createMockDb returns [] for selects
+
+    const oa = createOAService({ db: mockDb as any, database: {} as any })
+    const result = await oa.findOfficialAccountByUniqueId('nonexistent')
+
+    expect(result).toBeNull()
+  })
+})
+
 describe('createOAService — VerifyWebhook', () => {
   it('returns no_webhook when webhook does not exist', async () => {
     const mockDb = createMockDb()
