@@ -1,11 +1,12 @@
 ---
-name: takeout-tamagui
-description: Tamagui UI framework guide for this project. Use when working with Tamagui components (Stack, XStack, YStack, Text, Button, Input, etc.), styling with tokens ($color, $size, $space, $radius, $z), themes (light/dark mode), media queries, breakpoints, shorthand properties (p, m, bg, ai, jc), or any UI component work in this codebase. Trigger especially when user mentions tamagui, $token syntax, Stack/YStack/XStack, Theme, useTheme, or asks about spacing/colors in the UI.
+name: tamagui
+description: Tamagui UI framework guide for this project. Use when working with Tamagui components (Stack, XStack, YStack, Text, Button, Input, etc.), styling with tokens ($color, $size, $space, $radius, $z), themes (light/dark mode), media queries, breakpoints, shorthand properties (p, m, bg, ai, jc), flex layout (RN-first defaults vs web CSS, flexShrink, minWidth/minHeight), or any UI component work in this codebase. Trigger especially when user mentions tamagui, $token syntax, Stack/YStack/XStack, Theme, useTheme, or asks about spacing/colors in the UI.
 ---
 
 # Tamagui UI Framework Skill
 
 This project uses Tamagui v2 (tamagui v5 config) in a turborepo monorepo structure:
+
 - `apps/web/` - Main web application
 - `packages/ui/` - Future: shared UI components (not yet created)
 
@@ -14,6 +15,73 @@ The `~/interface/` alias points to `apps/web/src/interface/` in the current setu
 ## Core Concept: All Components Inherit Stack Props
 
 **Tamagui is built on a stacking model.** Every component (`Stack`, `YStack`, `XStack`, `ListItem`, `Text`, `Button`, etc.) ultimately extends the base `Stack`/`Text` component and inherits these common props. This means `gap`, `flex`, `padding`, `hoverStyle`, etc. work on almost all components.
+
+## Flex layout: RN-first defaults (not “normal web” CSS)
+
+Tamagui targets **the same layout on web and native**. Primitives go through **React Native’s `View` / `Text`** (on web: react-native-web or the Tamagui tree’s `react-native-web-lite`). That layer applies **Yoga-style defaults** to every view. If you assume **block layout + browser defaults** (`<div>`, flex-direction `row`, flex-shrink `1`, etc.), layouts will feel “wrong” compared to plain HTML/CSS.
+
+**Reference implementation (read-only):** `learn-projects/tamagui/code/packages/react-native-web-lite/src/View/index.tsx` — base `styles.view` applied to every `View`.
+
+### View defaults that differ from typical web habits
+
+| Behavior                 | Tamagui / RN `View` (web + native) | Typical unstyled web `div`     | Notes                                                                                                                                                                           |
+| ------------------------ | ---------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Display**              | `display: flex`                    | `block` (not a flex container) | Every `View` is a **flex container**; you are rarely in “block flow”.                                                                                                           |
+| **Main axis**            | `flexDirection: 'column'`          | N/A                            | Matches RN. **CSS flex’s default is `row`** — easy source of “it stacks vertically in Tamagui but I expected a row” bugs if you use raw `View` without `XStack`.                |
+| **Cross-axis alignment** | `alignItems: 'stretch'`            | N/A                            | Same name as CSS flex, but you’re always in a column flex container by default.                                                                                                 |
+| **As a flex item**       | `flexShrink: 0` (set on the view)  | N/A                            | **CSS flex items default to `flex-shrink: 1`.** Here children **do not shrink** to make room unless you set `shrink` / `flexShrink` or constrain with `minWidth` / `minHeight`. |
+| **Basis**                | `flexBasis: 'auto'`                | —                              | Aligned with RN; combine with shrink behavior above for overflow.                                                                                                               |
+| **Box model**            | `boxSizing: 'border-box'`          | `content-box` in older CSS     | Closer to common CSS resets; width/height include padding/border.                                                                                                               |
+
+The **`flexShrink: 0`** row describes the **RN web `View` base layer** only. Once you assign **`flex` / `shrink` / longhands**, those override the base (see **Tamagui `flex` shorthand vs base `View`** below).
+
+### Tamagui `flex` shorthand vs base `View` (style pipeline)
+
+Tamagui does **not** only apply the RN `View` stylesheet. Props go through **`propMapper`** → **`expandStyle`** (and **`normalizeStyle`** uses the same expansion, then **`fixStyles`**). Relevant files (reference tree):
+
+| File                                                                 | Role                                                                                                                                                          |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `learn-projects/tamagui/code/core/web/src/helpers/expandStyle.ts`    | Expands a single style key into multiple longhands (e.g. **`flex`** on **web**, shorthands like `margin`, logical props on native).                           |
+| `learn-projects/tamagui/code/core/web/src/helpers/expandStyles.ts`   | **`fixStyles`**: after merge, fixes shadows (`normalizeShadow`), border **style** defaults (`solid` when width set), native `elevationAndroid` → `elevation`. |
+| `learn-projects/tamagui/code/core/web/src/helpers/normalizeStyle.ts` | Loops style keys → **`expandStyle`** → **`fixStyles`** (used when normalizing a style object).                                                                |
+| `learn-projects/tamagui/code/core/web/src/helpers/propMapper.ts`     | Main prop → style path: resolves tokens, then **`expandStyle(key, value)`** unless `noExpand`.                                                                |
+
+**`flex` prop on web** (`expandStyle.ts`, `TAMAGUI_TARGET === 'web'` only):
+
+- `flex={-1}` → `flexGrow: 0`, **`flexShrink: 1`**, `flexBasis: 'auto'`.
+- `flex={n}` (number, `n !== -1`) → `flexGrow: n`, **`flexShrink: 1`**, `flexBasis: 0` **or** `'auto'` if `getSetting('styleCompat') === 'legacy'`.
+
+So on **web**, writing **`flex={1}`** intentionally sets **`flexShrink: 1`** via expansion — it **overrides** the base `View`’s `flexShrink: 0` for that node. The earlier “children don’t shrink” warning applies to nodes that **only** inherit the base and never get `flex` / `shrink` / `flexShrink`.
+
+**Native:** the **`flex`** branch in **`expandStyle` is web-only**. The `flex` prop is passed through to **React Native / Yoga**, which interprets `flex` natively (so you are not duplicating the web longhand path on iOS/Android).
+
+**Does this break native/web parity?** No — that split is **implementation**, not two different design systems. Web has no single `flex` prop with **Yoga-identical** behavior, so Tamagui (like react-native-web) **expands `flex` to longhands** that target the **same shrink/grow/basis intent** Yoga applies on native. Different pipelines, **same RN-first layout model**; remaining gaps are edge cases (e.g. `styleCompat`, measurement timing), not “web uses CSS defaults”.
+
+**`fixStyles`** (from **`expandStyles.ts`**) does **not** change flex; it handles shadows, border style defaults, and native elevation mapping.
+
+**Stacks** only pin the main axis; they still inherit the same RN `View` base:
+
+- `YStack` → `flexDirection: 'column'` (`learn-projects/tamagui/code/ui/stacks/src/Stacks.tsx`)
+- `XStack` → `flexDirection: 'row'`
+- `ZStack` → `YStack` + `position: 'relative'` (layered children)
+
+### Text defaults (different from inline HTML)
+
+RN `Text` on web (same reference tree: `react-native-web-lite/src/Text/index.tsx`) uses styles such as **`display: 'inline'`**, **`whiteSpace: 'pre-wrap'`**, **`margin: 0`** — not the same as a loose `<span>` or `<p>` in a document. Typography and wrapping can diverge from “browser default” text until you set props explicitly.
+
+### Practical pitfalls (and fixes)
+
+1. **Row + long content overflows instead of shrinking / ellipsis**  
+   **If** the child never receives **`flex`**, **`shrink`**, or **`flexShrink`**, it keeps the base **`flexShrink: 0`** (see **Tamagui `flex` shorthand vs base `View`**). Use **`shrink={1}`** (or `minWidth={0}`) so the item can shrink; pair with **`numberOfLines`** / width constraints on `Text` as needed. **`flex={1}` on web** already expands to **`flexShrink: 1`** — overflow then is usually **`minWidth` / `minHeight`**, text measurement, or parent constraints, not “missing shrink”.
+
+2. **Column + `flex={1}` + scroll doesn’t constrain height**  
+   Same family of issues as **`min-height: auto`** in CSS: flex children won’t shrink below content. Use **`minHeight: 0`** (and/or the patterns in **ScrollView + `flex`** below). This is the RN-aligned model, not a Tamagui bug.
+
+3. **Expecting block layout**  
+   There is no default “block stack of full-width blocks” unless you rely on stretch + column; widths are still flex rules, not document flow.
+
+4. **Mental model**  
+   Think **React Native layout** first; **CSS spec trivia second**. For edge cases, `$platform-web` is available, but the default cross-platform path is RN defaults.
 
 ## Common Props That Work on All Components
 
@@ -32,12 +100,12 @@ The `~/interface/` alias points to `apps/web/src/interface/` in the current setu
 
 ### Spacing Shorthands
 
-| Shorthand | Full Property |
-|-----------|---------------|
-| `p`, `px`, `py`, `pt`, `pb`, `pl`, `pr` | padding (and variants) |
-| `m`, `mx`, `my`, `mt`, `mb`, `ml`, `mr` | margin (and variants) |
-| `gap` | gap (universal - works on all components!) |
-| `rounded` | borderRadius |
+| Shorthand                               | Full Property                              |
+| --------------------------------------- | ------------------------------------------ |
+| `p`, `px`, `py`, `pt`, `pb`, `pl`, `pr` | padding (and variants)                     |
+| `m`, `mx`, `my`, `mt`, `mb`, `ml`, `mr` | margin (and variants)                      |
+| `gap`                                   | gap (universal - works on all components!) |
+| `rounded`                               | borderRadius                               |
 
 ### Hover/Focus States (Universal)
 
@@ -53,33 +121,33 @@ The `~/interface/` alias points to `apps/web/src/interface/` in the current setu
 
 ```tsx
 // $platform-web is the CORRECT way to add web-specific styles
-<YStack 
-  $platform-web={{ cursor: 'pointer' }}
-  $platform-web={{ overflowY: 'auto' }}  // ScrollView alternative on web
+<YStack
+  $platform-web={{ cursor: "pointer" }}
+  $platform-web={{ overflowY: "auto" }} // ScrollView alternative on web
 />
 ```
 
 ### Size Tokens
 
 | Token | Value |
-|-------|-------|
-| `$1` | 20px |
-| `$2` | 28px |
-| `$4` | 44px |
-| `$5` | 56px |
-| `$6` | 64px |
-| `$8` | 84px |
+| ----- | ----- |
+| `$1`  | 20px  |
+| `$2`  | 28px  |
+| `$4`  | 44px  |
+| `$5`  | 56px  |
+| `$6`  | 64px  |
+| `$8`  | 84px  |
 
 ### Color Tokens
 
-| Token | Value |
-|-------|-------|
-| `$background` | Current theme background |
-| `$color` | Current theme text color |
-| `$color10` | Gray/muted text |
-| `$backgroundHover` | Hover state background |
-| `$borderColor` | Border color |
-| `$green9` | Success/unread badge color |
+| Token              | Value                      |
+| ------------------ | -------------------------- |
+| `$background`      | Current theme background   |
+| `$color`           | Current theme text color   |
+| `$color10`         | Gray/muted text            |
+| `$backgroundHover` | Hover state background     |
+| `$borderColor`     | Border color               |
+| `$green9`          | Success/unread badge color |
 
 ## ListItem Specific
 
@@ -93,7 +161,7 @@ The `~/interface/` alias points to `apps/web/src/interface/` in the current setu
   icon={<Avatar ... />}
   onPress={handlePress}
   cursor="pointer"                    // ✅ works
-  gap="$3"                           // ✅ works  
+  gap="$3"                           // ✅ works
   px="$4"                            // ✅ works
   py="$3"                            // ✅ works
   hoverStyle={{ bg: '$backgroundHover' }}  // ✅ works
@@ -108,24 +176,24 @@ The `~/interface/` alias points to `apps/web/src/interface/` in the current setu
 
 `onlyAllowShorthands: true` is enabled. Use ONLY these v5 shorthand properties:
 
-| Shorthand | Full Property |
-|-----------|---------------|
-| `p` | padding |
-| `pb`, `pl`, `pr`, `pt`, `px`, `py` | paddingBottom/Left/Right/Top/Horizontal/Vertical |
-| `m`, `mb`, `ml`, `mr`, `mt`, `mx`, `my` | margin (same pattern) |
-| `bg` | backgroundColor |
-| `rounded` | borderRadius |
-| `z` | zIndex |
-| `b`, `l`, `r`, `t` | bottom, left, right, top |
-| `items` | alignItems |
-| `justify` | justifyContent |
-| `grow` | flexGrow |
-| `shrink` | flexShrink |
-| `self` | alignSelf |
-| `content` | alignContent |
-| `maxH`, `maxW`, `minH`, `minW` | maxHeight, maxWidth, minHeight, minWidth |
-| `select` | userSelect |
-| `text` | textAlign |
+| Shorthand                               | Full Property                                    |
+| --------------------------------------- | ------------------------------------------------ |
+| `p`                                     | padding                                          |
+| `pb`, `pl`, `pr`, `pt`, `px`, `py`      | paddingBottom/Left/Right/Top/Horizontal/Vertical |
+| `m`, `mb`, `ml`, `mr`, `mt`, `mx`, `my` | margin (same pattern)                            |
+| `bg`                                    | backgroundColor                                  |
+| `rounded`                               | borderRadius                                     |
+| `z`                                     | zIndex                                           |
+| `b`, `l`, `r`, `t`                      | bottom, left, right, top                         |
+| `items`                                 | alignItems                                       |
+| `justify`                               | justifyContent                                   |
+| `grow`                                  | flexGrow                                         |
+| `shrink`                                | flexShrink                                       |
+| `self`                                  | alignSelf                                        |
+| `content`                               | alignContent                                     |
+| `maxH`, `maxW`, `minH`, `minW`          | maxHeight, maxWidth, minHeight, minWidth         |
+| `select`                                | userSelect                                       |
+| `text`                                  | textAlign                                        |
 
 **NOT available in v5:** `w` (width), `h` (height), `f` (flex), `zi` (zIndex). Use full property names for these: `width`, `height`, `flex`, `zIndex`.
 
@@ -143,17 +211,17 @@ The `~/interface/` alias points to `apps/web/src/interface/` in the current setu
 
 When building UI, check `~/interface/` first for custom implementations:
 
-| Component | Path | Usage |
-|-----------|------|-------|
-| **Button** | `~/interface/buttons/Button` | Primary button with variants: `default`, `outlined`, `transparent`, `floating` |
-| **Input** | `~/interface/forms/Input` | Text input |
-| **Headings** | `~/interface/text/Headings` | H1-H6 components with heading font |
-| **Image** | `~/interface/image/Image` | Web-aligned image |
-| **Avatar** | `~/interface/avatars/Avatar` | Avatar component |
-| **Dialog** | `~/interface/dialogs/Dialog` | Modal dialog |
-| **Toast** | `~/interface/toast/Toast` | Toast notifications |
-| **Link** | `~/interface/app/Link` | Link component |
-| **ThemeSwitch** | `~/interface/theme/ThemeSwitch` | Dark/light mode toggle |
+| Component       | Path                            | Usage                                                                          |
+| --------------- | ------------------------------- | ------------------------------------------------------------------------------ |
+| **Button**      | `~/interface/buttons/Button`    | Primary button with variants: `default`, `outlined`, `transparent`, `floating` |
+| **Input**       | `~/interface/forms/Input`       | Text input                                                                     |
+| **Headings**    | `~/interface/text/Headings`     | H1-H6 components with heading font                                             |
+| **Image**       | `~/interface/image/Image`       | Web-aligned image                                                              |
+| **Avatar**      | `~/interface/avatars/Avatar`    | Avatar component                                                               |
+| **Dialog**      | `~/interface/dialogs/Dialog`    | Modal dialog                                                                   |
+| **Toast**       | `~/interface/toast/Toast`       | Toast notifications                                                            |
+| **Link**        | `~/interface/app/Link`          | Link component                                                                 |
+| **ThemeSwitch** | `~/interface/theme/ThemeSwitch` | Dark/light mode toggle                                                         |
 
 **Note:** The custom Button uses `boxShadow` (not `shadowColor`/`shadowRadius` props) for shadows.
 
@@ -163,21 +231,21 @@ Design system values use `$` prefix.
 
 ### Space Tokens (margin, padding, gap)
 
-| Token | Value |
-|-------|-------|
-| `$0.25` through `$20` | Positive spacing |
-| `$0` | Zero |
+| Token                   | Value            |
+| ----------------------- | ---------------- |
+| `$0.25` through `$20`   | Positive spacing |
+| `$0`                    | Zero             |
 | `$-0.25` through `$-20` | Negative spacing |
-| `$true` | 18px (fallback) |
+| `$true`                 | 18px (fallback)  |
 
 Common: `$1`=2px, `$2`=7px, `$3`=13px, `$4`=18px, `$5`=24px, `$6`=32px, `$8`=46px, `$10`=60px
 
 ### Size Tokens (width, height)
 
-| Token | Value |
-|-------|-------|
-| `$0` through `$20` | Size values |
-| `$true` | 44px (fallback) |
+| Token              | Value           |
+| ------------------ | --------------- |
+| `$0` through `$20` | Size values     |
+| `$true`            | 44px (fallback) |
 
 Common: `$1`=20px, `$2`=28px, `$4`=44px, `$6`=64px, `$8`=84px, `$10`=104px, `$12`=144px
 
@@ -198,11 +266,13 @@ Color scale: `$color0`, `$color02`, `$color04`, `$color06`, `$color08`, `$color1
 ## Themes
 
 ### Theme Levels
+
 1. **Base:** `dark`, `light`
 2. **Color Schemes:** `accent`, `blue`, `green`, `orange`, `pink`, `purple`, `red`, `teal`, `yellow`
 3. **Component:** `Button`, `Card`, `Input`, `Checkbox`, `Switch`, `Tooltip`, etc.
 
 ### Theme Usage
+
 ```tsx
 <Theme name="dark">
   <Button>Dark button</Button>
@@ -221,34 +291,41 @@ Color scale: `$color0`, `$color02`, `$color04`, `$color06`, `$color08`, `$color1
 ## Media Queries
 
 ### Breakpoints (mobile-first, min-width)
-| Breakpoint | Size |
-|------------|------|
-| `xxxs` | 260px |
-| `xxs` | 340px |
-| `xs` | 460px |
-| `sm` | 640px |
-| `md` | 768px |
-| `lg` | 1024px |
-| `xl` | 1280px |
-| `xxl` | 1536px |
+
+| Breakpoint | Size   |
+| ---------- | ------ |
+| `xxxs`     | 260px  |
+| `xxs`      | 340px  |
+| `xs`       | 460px  |
+| `sm`       | 640px  |
+| `md`       | 768px  |
+| `lg`       | 1024px |
+| `xl`       | 1280px |
+| `xxl`      | 1536px |
 
 ### Max-Width Breakpoints (desktop-first)
+
 `max-xxxl`, `max-xxs`, `max-xs`, `max-sm`, `max-md`, `max-lg`, `max-xl`, `max-xxl`
 
 ### Height Breakpoints
+
 `height-sm` (640px), `height-md` (768px), `height-lg` (1024px)
 `max-height-lg`, `max-height-md`, `max-height-sm`, etc.
 
 ### Other
+
 `touchable` - Touch devices (`pointer: coarse`)
 `hoverable` - Hover-capable devices (`hover: hover`)
 
 ### Usage
-```tsx
-<Stack width="100%" $md={{ width: "50%" }} $lg={{ width: "33%" }} />
 
-const media = useMedia()
-if (media.lg) { /* large screens */ }
+```tsx
+<Stack width="100%" $md={{ width: "50%" }} $lg={{ width: "33%" }} />;
+
+const media = useMedia();
+if (media.lg) {
+  /* large screens */
+}
 ```
 
 ## Animations
@@ -261,34 +338,40 @@ Bouncy: `bouncy`, `superBouncy`, `kindaBouncy`, `quickLessBouncy`, etc.
 ## Components Reference
 
 ### Core Layout
+
 `Stack`, `XStack`, `YStack`, `ZStack`, `View`, `ScrollView`, `Spacer`, `Group`
 
 ### Typography
+
 `Text`, `Paragraph`, `Heading`, `H1`-`H6`
 
 ### Form
+
 `Input`, `TextArea`, `Button`, `Checkbox`, `RadioGroup`, `Switch`, `Slider`, `Label`, `Fieldset`, `Form`
 
 ### Display
+
 `Card`, `ListItem`, `Image`, `Avatar`, `Progress`, `Spinner`, `Separator`
 
 ### Overlays
+
 `Dialog`, `AlertDialog`, `Popover`, `Tooltip`, `Sheet`, `Overlay`
 
 ### Semantic
+
 `Article`, `Aside`, `Footer`, `Header`, `Main`, `Nav`, `Section`
 
 ## ScrollView + `flex` (why it often breaks on web / RN Web)
 
 Investigation source: Tamagui reference tree under `learn-projects/tamagui/` (read-only; do not edit that folder). Relevant files:
 
-| Area | Path (under `learn-projects/tamagui/`) |
-|------|----------------------------------------|
-| Component definition | `code/ui/scroll-view/src/ScrollView.tsx` |
-| Web render / “passthrough” | `code/core/web/src/createComponent.tsx` (~L1445–1455) |
-| Style pipeline | `code/core/web/src/helpers/getSplitStyles.tsx` (~L178–180) |
-| Public demo (bounded size) | `code/demos/src/ScrollViewDemo.tsx` |
-| In-sheet usage (`flex: 1`) | `code/ui/sheet/src/SheetScrollView.tsx` |
+| Area                       | Path (under `learn-projects/tamagui/`)                     |
+| -------------------------- | ---------------------------------------------------------- |
+| Component definition       | `code/ui/scroll-view/src/ScrollView.tsx`                   |
+| Web render / “passthrough” | `code/core/web/src/createComponent.tsx` (~L1445–1455)      |
+| Style pipeline             | `code/core/web/src/helpers/getSplitStyles.tsx` (~L178–180) |
+| Public demo (bounded size) | `code/demos/src/ScrollViewDemo.tsx`                        |
+| In-sheet usage (`flex: 1`) | `code/ui/sheet/src/SheetScrollView.tsx`                    |
 
 ### What `ScrollView` is in Tamagui
 
@@ -331,11 +414,11 @@ Default font family is `body`. Available: `body`, `heading`, `mono` (JetBrains M
 
 Before installing any npm package, check if it supports React Native:
 
-| Package Type | Action Required |
-|--------------|-----------------|
-| Pure JS / TypeScript | ✅ Usually works on both |
-| Has native code (iOS/Android) | ❌ Do NOT install directly |
-| Web-only (DOM APIs) | ⚠️ Use platform detection or fallback |
+| Package Type                  | Action Required                       |
+| ----------------------------- | ------------------------------------- |
+| Pure JS / TypeScript          | ✅ Usually works on both              |
+| Has native code (iOS/Android) | ❌ Do NOT install directly            |
+| Web-only (DOM APIs)           | ⚠️ Use platform detection or fallback |
 
 ### Red Flags (web-only, avoid)
 
@@ -345,16 +428,16 @@ Before installing any npm package, check if it supports React Native:
 
 ### Safe Alternatives
 
-| Web-only | Use Instead |
-|----------|-------------|
-| `localStorage` | `@react-native-async-storage/async-storage` or `react-native-mmkv` |
-| `IntersectionObserver` | `react-native-reanimated` + `useAnimatedReaction` |
-| `fetch` (advanced) | `@tanstack/react-query` |
+| Web-only               | Use Instead                                                        |
+| ---------------------- | ------------------------------------------------------------------ |
+| `localStorage`         | `@react-native-async-storage/async-storage` or `react-native-mmkv` |
+| `IntersectionObserver` | `react-native-reanimated` + `useAnimatedReaction`                  |
+| `fetch` (advanced)     | `@tanstack/react-query`                                            |
 
 ### Platform Detection
 
 ```ts
-import { isWeb, isNative } from 'tamagui'
+import { isWeb, isNative } from "tamagui";
 
 if (isWeb) {
   // Web-only code
@@ -367,13 +450,13 @@ if (isWeb) {
 
 Tamagui uses file extensions for platform-specific code:
 
-| Extension | Platform | Behavior |
-|-----------|----------|----------|
-| `File.ts` | Shared | Base file, used if no platform-specific version exists |
-| `File.native.ts` | Native only | Replaces base file on iOS/Android |
-| `File.web.ts` | Web only | Replaces base file on web |
-| `File.ios.ts` | iOS only | Replaces base file on iOS only |
-| `File.android.ts` | Android only | Replaces base file on Android only |
+| Extension         | Platform     | Behavior                                               |
+| ----------------- | ------------ | ------------------------------------------------------ |
+| `File.ts`         | Shared       | Base file, used if no platform-specific version exists |
+| `File.native.ts`  | Native only  | Replaces base file on iOS/Android                      |
+| `File.web.ts`     | Web only     | Replaces base file on web                              |
+| `File.ios.ts`     | iOS only     | Replaces base file on iOS only                         |
+| `File.android.ts` | Android only | Replaces base file on Android only                     |
 
 **Important:** When both `.native.ts` and `.web.ts` exist, the base `.ts` file is **skipped**.
 
@@ -409,4 +492,6 @@ format.web.ts     // web only
 - Animations: `apps/web/src/tamagui/animationsApp.ts`
 - Custom components: `apps/web/src/interface/`
 - Tamagui v5 source: `learn-projects/tamagui/code/core/shorthands/src/v5.ts`
-- ScrollView / flex behavior (reference only): `learn-projects/tamagui/code/ui/scroll-view/`, `learn-projects/tamagui/code/core/web/src/createComponent.tsx`, `learn-projects/tamagui/code/core/web/src/helpers/getSplitStyles.tsx` — see **ScrollView + flex** section above
+- **RN-first flex defaults on web:** `learn-projects/tamagui/code/packages/react-native-web-lite/src/View/index.tsx` (base `View` styles), `learn-projects/tamagui/code/ui/stacks/src/Stacks.tsx` (`XStack` / `YStack` / `ZStack`) — see **Flex layout: RN-first defaults** above
+- **`flex` expansion + post-fixes:** `learn-projects/tamagui/code/core/web/src/helpers/expandStyle.ts`, `expandStyles.ts` (`fixStyles`), `normalizeStyle.ts`, `propMapper.ts` — see **Tamagui `flex` shorthand vs base `View`** above
+- ScrollView / flex behavior (reference only): `learn-projects/tamagui/code/ui/scroll-view/`, `learn-projects/tamagui/code/core/web/src/createComponent.tsx`, `learn-projects/tamagui/code/core/web/src/helpers/getSplitStyles.tsx` — see **ScrollView + `flex`** section above
