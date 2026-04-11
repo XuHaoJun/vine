@@ -9,8 +9,9 @@ import { loginAsDemo } from './helpers'
 
 const BASE_URL = 'http://localhost:8081'
 
-function flexPreview(page: Page) {
-  return page.getByTestId('flex-simulator-preview-frame')
+/** Flex bubble render root — scoped so JSON in the editor textarea never matches these locators. */
+function flexBubble(page: Page) {
+  return page.getByTestId('lf-bubble-root')
 }
 
 test.describe('Flex Simulator', () => {
@@ -28,9 +29,10 @@ test.describe('Flex Simulator', () => {
   })
 
   test('default JSON renders in preview', async ({ page }) => {
-    const preview = flexPreview(page)
-    await expect(preview.getByText('Hello World')).toBeVisible()
-    await expect(preview.getByText('This is a sample Flex Message.')).toBeVisible()
+    await expect(flexBubble(page).getByText('Hello World')).toBeVisible()
+    await expect(
+      flexBubble(page).getByText('This is a sample Flex Message.'),
+    ).toBeVisible()
   })
 
   test('invalid JSON shows error message', async ({ page }) => {
@@ -75,7 +77,7 @@ test.describe('Flex Simulator', () => {
 
     await jsonInput.fill(validJson)
 
-    await expect(flexPreview(page).getByText('Custom Text')).toBeVisible()
+    await expect(flexBubble(page).getByText('Custom Text')).toBeVisible()
   })
 
   test('bubble preview has proper dimensions (height visible above threshold)', async ({
