@@ -12,7 +12,6 @@ import { DoorIcon } from '~/interface/icons/phosphor/DoorIcon'
 import { GearIcon } from '~/interface/icons/phosphor/GearIcon'
 import { ListIcon } from '~/interface/icons/phosphor/ListIcon'
 import { PageContainer } from '~/interface/layout/PageContainer'
-import { ThemeSwitch } from '~/interface/theme/ThemeSwitch'
 
 import { NavigationTabs } from './NavigationTabs'
 
@@ -55,7 +54,6 @@ export const MainHeader = () => {
                 </Button>
               )}
 
-              <ThemeSwitch />
               <Button
                 circular
                 onPress={() => router.push('/home/main')}
@@ -111,7 +109,6 @@ export const MainHeaderMenu = memo(() => {
               <XStack gap="$3" items="center">
                 <Logo height={32} />
               </XStack>
-              <ThemeSwitch />
             </XStack>
 
             <Separator />

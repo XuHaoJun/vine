@@ -1,0 +1,82 @@
+import { Text, YStack } from 'tamagui'
+import { LfBubble, LfCarousel } from '@vine/line-flex'
+import type { LFexCarousel, LFexBubble } from '@vine/line-flex'
+
+// LINE chat background color
+const CHAT_BG = '#6E89A6'
+
+interface FlexSimulatorPreviewProps {
+  json: string
+}
+
+export function FlexSimulatorPreview({ json }: FlexSimulatorPreviewProps) {
+  let contents: LFexBubble | LFexCarousel | null = null
+  let error: string | null = null
+
+  try {
+    const parsed = JSON.parse(json)
+    if (parsed.type === 'flex') {
+      contents = parsed.contents
+    } else {
+      error = 'Invalid flex message: root type must be "flex"'
+    }
+  } catch (e) {
+    error = `JSON parse error: ${e instanceof Error ? e.message : 'Unknown error'}`
+  }
+
+  if (error) {
+    return (
+      <YStack
+        style={{ flexGrow: 1, flexShrink: 1, flexBasis: 'auto', minHeight: 400 }}
+        bg={CHAT_BG}
+        p="$4"
+        items="center"
+        justify="center"
+      >
+        <Text color="$red10" fontSize="$3">
+          {error}
+        </Text>
+      </YStack>
+    )
+  }
+
+  if (!contents) {
+    return (
+      <YStack
+        style={{ flexGrow: 1, flexShrink: 1, flexBasis: 'auto', minHeight: 400 }}
+        bg={CHAT_BG}
+        p="$4"
+        items="center"
+        justify="center"
+      >
+        <Text color="white" opacity={0.7} fontSize="$3">
+          No message to preview
+        </Text>
+      </YStack>
+    )
+  }
+
+  if (contents.type === 'carousel') {
+    return (
+      <YStack
+        style={{ flexGrow: 1, flexShrink: 1, flexBasis: 'auto', minHeight: 400 }}
+        bg={CHAT_BG}
+        p="$4"
+        items="flex-start"
+      >
+        <LfCarousel {...contents} />
+      </YStack>
+    )
+  }
+
+  return (
+    <YStack
+      style={{ flexGrow: 1, flexShrink: 1, flexBasis: 'auto', minHeight: 400 }}
+      bg={CHAT_BG}
+      p="$4"
+      items="flex-start"
+    >
+      <LfBubble {...contents} />
+    </YStack>
+  )
+}

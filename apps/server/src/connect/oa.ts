@@ -375,6 +375,38 @@ export function oaHandler(deps: OAHandlerDeps) {
         const isFriend = await deps.oa.isOAFriend(auth.id, req.officialAccountId)
         return { isFriend }
       },
+      async resolveOfficialAccount(req) {
+        const account = await deps.oa.findOfficialAccountByUniqueId(req.uniqueId)
+        if (!account) {
+          throw new ConnectError('Official account not found', Code.NotFound)
+        }
+        return {
+          account: {
+            id: account.id,
+            name: account.name,
+            uniqueId: account.uniqueId,
+            description: account.description ?? '',
+            imageUrl: account.imageUrl ?? '',
+          },
+        }
+      },
+      async simulatorSendFlexMessage(req, ctx) {
+        const auth = requireAuthData(ctx)
+        const result = await deps.oa.simulatorSendFlexMessage(auth.id, req.flexJson)
+        if (!result.success) {
+          if (result.reason === 'not_friend') {
+            throw new ConnectError(
+              '請先加入 Flex Message sim 為好友',
+              Code.FailedPrecondition,
+            )
+          }
+          if (result.reason === 'oa_not_found') {
+            throw new ConnectError('Flex Simulator OA not found', Code.Internal)
+          }
+          throw new ConnectError('Unknown error', Code.Internal)
+        }
+        return {}
+      },
     }
 
     router.service(OAService, withAuthService(OAService, deps.auth, oaServiceImpl))

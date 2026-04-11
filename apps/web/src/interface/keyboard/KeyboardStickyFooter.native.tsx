@@ -12,7 +12,7 @@ export const KeyboardStickyFooter = ({
 
   return (
     <KeyboardStickyView offset={{ closed: offset || -bottom, opened: openedOffset || 0 }}>
-      {children}
+      {children as any}
     </KeyboardStickyView>
   )
 }

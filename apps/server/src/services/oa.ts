@@ -1,4 +1,4 @@
-import { and, eq, ilike, or, sql } from 'drizzle-orm'
+import { and, eq, ilike, inArray, or, sql } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { Pool } from 'pg'
 import type { schema } from '@vine/db'
@@ -10,6 +10,8 @@ import {
   oaFriendship,
 } from '@vine/db/schema-oa'
 import { createHmac, randomBytes, randomUUID } from 'crypto'
+import { chat, chatMember, message } from '@vine/db/schema-public'
+import { FLEX_SIMULATOR_OA_UNIQUE_ID } from '@vine/db/constants'
 
 type OADeps = {
   db: NodePgDatabase<typeof schema>
@@ -96,6 +98,21 @@ export function createOAService(deps: OADeps) {
       .select()
       .from(officialAccount)
       .where(eq(officialAccount.id, id))
+      .limit(1)
+    return account ?? null
+  }
+
+  async function findOfficialAccountByUniqueId(uniqueId: string) {
+    const [account] = await db
+      .select({
+        id: officialAccount.id,
+        name: officialAccount.name,
+        uniqueId: officialAccount.uniqueId,
+        description: officialAccount.description,
+        imageUrl: officialAccount.imageUrl,
+      })
+      .from(officialAccount)
+      .where(eq(officialAccount.uniqueId, uniqueId))
       .limit(1)
     return account ?? null
   }
@@ -406,6 +423,142 @@ export function createOAService(deps: OADeps) {
     return !!existing
   }
 
+  async function simulatorSendFlexMessage(userId: string, flexJson: string) {
+    const flexSimOA = await findOfficialAccountByUniqueId(FLEX_SIMULATOR_OA_UNIQUE_ID)
+    if (!flexSimOA) {
+      return { success: false, reason: 'oa_not_found' as const }
+    }
+
+    const [existingFriendship] = await db
+      .select()
+      .from(oaFriendship)
+      .where(and(eq(oaFriendship.oaId, flexSimOA.id), eq(oaFriendship.userId, userId)))
+      .limit(1)
+
+    if (!existingFriendship) {
+      return { success: false, reason: 'not_friend' as const }
+    }
+
+    const messageId = randomUUID()
+    const sentAt = new Date().toISOString()
+
+    const chatId = await db.transaction(async (tx) => {
+      const userChatSubquery = tx
+        .select({ chatId: chatMember.chatId })
+        .from(chatMember)
+        .where(eq(chatMember.userId, userId))
+
+      const [existingChat] = await tx
+        .select({ id: chat.id })
+        .from(chat)
+        .innerJoin(chatMember, eq(chatMember.chatId, chat.id))
+        .where(
+          and(
+            eq(chat.type, 'oa'),
+            inArray(chat.id, userChatSubquery),
+            eq(chatMember.oaId, flexSimOA.id),
+          ),
+        )
+        .limit(1)
+
+      if (existingChat) {
+        return existingChat.id
+      }
+
+      const newChatId = randomUUID()
+      const now = new Date().toISOString()
+      await tx.insert(chat).values({ id: newChatId, type: 'oa', createdAt: now })
+      await tx.insert(chatMember).values([
+        { id: randomUUID(), chatId: newChatId, userId, joinedAt: now },
+        { id: randomUUID(), chatId: newChatId, oaId: flexSimOA.id, joinedAt: now },
+      ])
+
+      return newChatId
+    })
+
+    await db.insert(message).values({
+      id: messageId,
+      chatId,
+      senderType: 'oa',
+      oaId: flexSimOA.id,
+      type: 'flex',
+      metadata: flexJson,
+      createdAt: sentAt,
+    })
+
+    await db
+      .update(chat)
+      .set({ lastMessageId: messageId, lastMessageAt: sentAt })
+      .where(eq(chat.id, chatId))
+
+    return { success: true as const, chatId }
+  }
+
+  async function sendOAMessage(
+    oaId: string,
+    userId: string,
+    msg: {
+      type: string
+      text?: string | null
+      metadata?: string | null
+    },
+  ) {
+    const messageId = randomUUID()
+    const sentAt = new Date().toISOString()
+
+    const chatId = await db.transaction(async (tx) => {
+      const userChatSubquery = tx
+        .select({ chatId: chatMember.chatId })
+        .from(chatMember)
+        .where(eq(chatMember.userId, userId))
+
+      const [existingChat] = await tx
+        .select({ id: chat.id })
+        .from(chat)
+        .innerJoin(chatMember, eq(chatMember.chatId, chat.id))
+        .where(
+          and(
+            eq(chat.type, 'oa'),
+            inArray(chat.id, userChatSubquery),
+            eq(chatMember.oaId, oaId),
+          ),
+        )
+        .limit(1)
+
+      if (existingChat) {
+        return existingChat.id
+      }
+
+      const newChatId = randomUUID()
+      const now = new Date().toISOString()
+      await tx.insert(chat).values({ id: newChatId, type: 'oa', createdAt: now })
+      await tx.insert(chatMember).values([
+        { id: randomUUID(), chatId: newChatId, userId, joinedAt: now },
+        { id: randomUUID(), chatId: newChatId, oaId, joinedAt: now },
+      ])
+
+      return newChatId
+    })
+
+    await db.insert(message).values({
+      id: messageId,
+      chatId,
+      senderType: 'oa',
+      oaId,
+      type: msg.type as typeof message.$inferInsert.type,
+      text: msg.text,
+      metadata: msg.metadata,
+      createdAt: sentAt,
+    })
+
+    await db
+      .update(chat)
+      .set({ lastMessageId: messageId, lastMessageAt: sentAt })
+      .where(eq(chat.id, chatId))
+
+    return { success: true as const, chatId, messageId }
+  }
+
   async function getAccessTokenById(id: string) {
     const [row] = await db
       .select()
@@ -480,6 +633,9 @@ export function createOAService(deps: OADeps) {
     isOAFriend,
     getAccessTokenById,
     verifyWebhook,
+    findOfficialAccountByUniqueId,
+    simulatorSendFlexMessage,
+    sendOAMessage,
   }
 }
 

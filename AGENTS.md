@@ -340,6 +340,8 @@ settings.set('theme', 'dark')
 - **Auth**: better-auth
 - **RPC**: ConnectRPC (protobuf)
 
+**Frontend development:** Anyone working on web/native UI (`apps/web`, `~/interface/`, or other Tamagui-based surfaces) **must** read the Tamagui skill first: `.claude/skills/tamagui/SKILL.md`. It documents this repo’s layout conventions, token styling, and RN-first flex behavior that differs from plain HTML/CSS—skipping it leads to avoidable layout and styling mistakes.
+
 ---
 
 ## Project Structure

@@ -124,7 +124,7 @@ const ProvideZeroImpl = ({ children }: { children: ReactNode }) => {
         })
       }, [])}
     >
-      {children}
+      {children as any}
       <ZeroDebug />
       <ZeroConnectionMonitor />
     </ProvideZeroWithoutAuth>
