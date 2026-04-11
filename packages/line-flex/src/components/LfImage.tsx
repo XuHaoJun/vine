@@ -2,12 +2,14 @@ import { Image } from 'tamagui'
 import type { LFexImage, LFexAction, LFexLayout } from '../types'
 import { expandFlexForChild, normalizeFlexValue } from '../utils/flex'
 import { handleAction } from '../utils/action'
-import { marginToTamagui } from '../utils/spacing'
+import { mergeLineMarginWithParentSpacing } from '../utils/spacing'
 
 export type LFexImageProps = LFexImage & {
   className?: string
   layout?: LFexLayout
   onAction?: (action: LFexAction) => void
+  parentSpacing?: string
+  childIndex?: number
 }
 
 export function LfImage({
@@ -29,9 +31,16 @@ export function LfImage({
   action,
   onAction,
   className,
+  parentSpacing,
+  childIndex,
 }: LFexImageProps) {
-  const marginValue = margin ? marginToTamagui(margin) : undefined
-  const isHorizontalParent = layout === 'horizontal' || layout === 'baseline'
+  const mergedMargin = mergeLineMarginWithParentSpacing(
+    layout,
+    childIndex,
+    parentSpacing,
+    'image',
+    margin,
+  )
 
   const positionStyle = position === 'absolute' ? { position: 'absolute' as const } : {}
   const offsetStyle = {
@@ -119,8 +128,11 @@ export function LfImage({
     ...(className && { className }),
   }
 
-  if (marginValue) {
-    imageProps[isHorizontalParent ? 'marginLeft' : 'marginTop'] = marginValue
+  if (mergedMargin.marginTop !== undefined) {
+    imageProps.marginTop = mergedMargin.marginTop
+  }
+  if (mergedMargin.marginLeft !== undefined) {
+    imageProps.marginLeft = mergedMargin.marginLeft
   }
 
   // @ts-ignore - Tamagui Image type incompatibilities

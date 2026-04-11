@@ -2,12 +2,14 @@ import { Button, Text } from 'tamagui'
 import type { LFexButton, LFexAction, LFexLayout } from '../types'
 import { expandFlexForChild, normalizeFlexValue } from '../utils/flex'
 import { handleAction } from '../utils/action'
-import { marginToTamagui } from '../utils/spacing'
+import { mergeLineMarginWithParentSpacing } from '../utils/spacing'
 
 export type LFexButtonProps = LFexButton & {
   className?: string
   layout?: LFexLayout
   onAction?: (action: LFexAction) => void
+  parentSpacing?: string
+  childIndex?: number
 }
 
 const LINE_BUTTON_COLORS = {
@@ -31,8 +33,16 @@ export function LfButton({
   color,
   onAction,
   className,
+  parentSpacing,
+  childIndex,
 }: LFexButtonProps) {
-  const marginValue = margin ? marginToTamagui(margin) : undefined
+  const mergedMargin = mergeLineMarginWithParentSpacing(
+    layout,
+    childIndex,
+    parentSpacing,
+    'button',
+    margin,
+  )
 
   const positionStyle = position === 'absolute' ? { position: 'absolute' as const } : {}
   const offsetStyle = {
@@ -75,8 +85,6 @@ export function LfButton({
         ? { flexGrow: 0, flexShrink: 0, flexBasis: 'auto' }
         : expandFlexForChild(flexNum, layout)
 
-  const isHorizontalParent = layout === 'horizontal' || layout === 'baseline'
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const buttonProps: any = {
     ...flexProps,
@@ -86,8 +94,11 @@ export function LfButton({
     ...offsetStyle,
   }
 
-  if (marginValue) {
-    buttonProps[isHorizontalParent ? 'marginLeft' : 'marginTop'] = marginValue
+  if (mergedMargin.marginTop !== undefined) {
+    buttonProps.marginTop = mergedMargin.marginTop
+  }
+  if (mergedMargin.marginLeft !== undefined) {
+    buttonProps.marginLeft = mergedMargin.marginLeft
   }
 
   return (

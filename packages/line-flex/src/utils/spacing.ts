@@ -36,6 +36,58 @@ export function marginToTamagui(margin: string | undefined): number | string | u
   return spacingToTamagui(margin)
 }
 
+/** Parent box layout — same meaning as `LfBox` `parentLayout` (the flex direction of the parent). */
+export type LineFlexParentLayout = 'horizontal' | 'vertical' | 'baseline' | undefined
+
+/**
+ * LINE `spacing` on a box is applied as margin-top (vertical parent) or margin-left
+ * (horizontal/baseline) on each child after the first, except filler/spacer.
+ * This matches learn-projects/react-line-flex `getChildSpacingClass` — not CSS `gap`, which would
+ * stack with each child's `margin` and double the gap.
+ *
+ * When both parent spacing and the child's own `margin` apply to the same edge, spacing wins
+ * (react-line-flex applies spacing classes after margin in `cn()`).
+ */
+export function mergeLineMarginWithParentSpacing(
+  parentLayout: LineFlexParentLayout,
+  childIndex: number | undefined,
+  parentSpacing: string | undefined,
+  childType: string,
+  componentMargin: string | undefined,
+): { marginTop?: number | string; marginLeft?: number | string } {
+  const spacingMargin = parentSpacingMarginForChild(
+    parentLayout,
+    childIndex,
+    parentSpacing,
+    childType,
+  )
+  if (spacingMargin !== undefined) {
+    return spacingMargin
+  }
+  const marginVal = componentMargin ? marginToTamagui(componentMargin) : undefined
+  if (marginVal === undefined) return {}
+  const isHorizontal = parentLayout === 'horizontal' || parentLayout === 'baseline'
+  return isHorizontal ? { marginLeft: marginVal } : { marginTop: marginVal }
+}
+
+function parentSpacingMarginForChild(
+  parentLayout: LineFlexParentLayout,
+  childIndex: number | undefined,
+  parentSpacing: string | undefined,
+  childType: string,
+): { marginTop?: number | string; marginLeft?: number | string } | undefined {
+  if (parentSpacing === undefined || childIndex === undefined || childIndex === 0) {
+    return undefined
+  }
+  if (childType === 'filler' || childType === 'spacer') {
+    return undefined
+  }
+  const value = marginToTamagui(parentSpacing)
+  if (value === undefined) return undefined
+  const isHorizontal = parentLayout === 'horizontal' || parentLayout === 'baseline'
+  return isHorizontal ? { marginLeft: value } : { marginTop: value }
+}
+
 export function paddingToTamagui(
   padding: string | undefined,
 ): number | string | undefined {

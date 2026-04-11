@@ -3,13 +3,15 @@ import React from 'react'
 import type { LFexText, LFexSpan, LFexAction } from '../types'
 import { expandFlexForChild, normalizeFlexValue } from '../utils/flex'
 import { handleAction } from '../utils/action'
-import { marginToTamagui } from '../utils/spacing'
+import { mergeLineMarginWithParentSpacing } from '../utils/spacing'
 import { LfSpan } from './LfSpan'
 
 export type LFexTextProps = LFexText & {
   className?: string
   layout?: 'horizontal' | 'vertical' | 'baseline'
   onAction?: (action: LFexAction) => void
+  parentSpacing?: string
+  childIndex?: number
 }
 
 export function LfText({
@@ -36,9 +38,17 @@ export function LfText({
   layout,
   onAction,
   className,
+  parentSpacing,
+  childIndex,
 }: LFexTextProps) {
-  const marginValue = margin ? marginToTamagui(margin) : undefined
   const isHorizontalParent = layout === 'horizontal' || layout === 'baseline'
+  const marginProps = mergeLineMarginWithParentSpacing(
+    layout,
+    childIndex,
+    parentSpacing,
+    'text',
+    margin,
+  )
 
   const positionStyle = position === 'absolute' ? { position: 'absolute' as const } : {}
   const offsetStyle = {
@@ -109,14 +119,6 @@ export function LfText({
               alignSelf: crossAlignFromGravity,
             }
           : expandFlexForChild(flexNum, layout ?? 'vertical')
-
-  // Direction-aware margin: marginLeft for horizontal/baseline parent, marginTop for vertical
-  const marginProps =
-    marginValue !== undefined
-      ? isHorizontalParent
-        ? { marginLeft: marginValue }
-        : { marginTop: marginValue }
-      : {}
 
   // numberOfLines: Tamagui handles web (webkit-box / ellipsis) and native (numberOfLines prop)
   const numberOfLines = maxLines || (!wrap ? 1 : undefined)

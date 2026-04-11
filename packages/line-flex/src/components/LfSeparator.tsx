@@ -1,22 +1,28 @@
 import { YStack, XStack } from 'tamagui'
 import type { LFexSeparator } from '../types'
-import { marginToTamagui } from '../utils/spacing'
+import { mergeLineMarginWithParentSpacing } from '../utils/spacing'
 
 export type LFexSeparatorProps = LFexSeparator & {
   layout?: 'horizontal' | 'vertical' | 'baseline'
+  parentSpacing?: string
+  childIndex?: number
 }
 
-export function LfSeparator({ margin, color, layout = 'vertical' }: LFexSeparatorProps) {
-  const marginValue = margin ? marginToTamagui(margin) : undefined
+export function LfSeparator({
+  margin,
+  color,
+  layout = 'vertical',
+  parentSpacing,
+  childIndex,
+}: LFexSeparatorProps) {
+  const marginProps = mergeLineMarginWithParentSpacing(
+    layout,
+    childIndex,
+    parentSpacing,
+    'separator',
+    margin,
+  )
   const isHorizontalParent = layout === 'horizontal' || layout === 'baseline'
-
-  // Direction-aware margin: marginLeft for horizontal/baseline parent, marginTop for vertical
-  const marginProps =
-    marginValue !== undefined
-      ? isHorizontalParent
-        ? { marginLeft: marginValue }
-        : { marginTop: marginValue }
-      : {}
 
   const separatorColor = color ?? '#d4d6da'
 

@@ -1,9 +1,11 @@
 import { Image } from 'tamagui'
 import type { LFexIcon, LFexLayout } from '../types'
-import { marginToTamagui } from '../utils/spacing'
+import { mergeLineMarginWithParentSpacing } from '../utils/spacing'
 
 export type LFexIconProps = LFexIcon & {
   layout?: LFexLayout
+  parentSpacing?: string
+  childIndex?: number
 }
 
 export function LfIcon({
@@ -17,9 +19,16 @@ export function LfIcon({
   offsetBottom,
   offsetStart,
   offsetEnd,
+  parentSpacing,
+  childIndex,
 }: LFexIconProps) {
-  const marginValue = margin ? marginToTamagui(margin) : undefined
-  const isHorizontalParent = layout === 'horizontal' || layout === 'baseline'
+  const mergedMargin = mergeLineMarginWithParentSpacing(
+    layout,
+    childIndex,
+    parentSpacing,
+    'icon',
+    margin,
+  )
 
   const positionStyle = position === 'absolute' ? { position: 'absolute' as const } : {}
   const offsetStyle = {
@@ -71,8 +80,11 @@ export function LfIcon({
     ...offsetStyle,
   }
 
-  if (marginValue) {
-    iconProps[isHorizontalParent ? 'marginLeft' : 'marginTop'] = marginValue
+  if (mergedMargin.marginTop !== undefined) {
+    iconProps.marginTop = mergedMargin.marginTop
+  }
+  if (mergedMargin.marginLeft !== undefined) {
+    iconProps.marginLeft = mergedMargin.marginLeft
   }
 
   // @ts-ignore - Tamagui Image type incompatibilities

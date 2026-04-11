@@ -16,8 +16,7 @@ import {
   normalizeFlexValue,
 } from '../utils/flex'
 import {
-  spacingToTamagui,
-  marginToTamagui,
+  mergeLineMarginWithParentSpacing,
   paddingToTamagui,
   tamaguiSpaceTokenToPx,
 } from '../utils/spacing'
@@ -37,6 +36,10 @@ export type LFexBoxProps = LFexBox & {
   onAction?: (action: LFexAction) => void
   /** Parent flex direction; controls how numeric flex maps to basis (avoids 0-height rows in columns). */
   parentLayout?: LFexLayout
+  /** Parent box `spacing` — applied as per-child margin (not CSS gap); see `mergeLineMarginWithParentSpacing`. */
+  parentSpacing?: string
+  /** Index of this box in the parent's `contents`. */
+  childIndex?: number
 }
 
 function renderChild(
@@ -44,6 +47,7 @@ function renderChild(
   index: number,
   parentLayout: LFexLayout,
   onAction?: (action: LFexAction) => void,
+  parentSpacing?: string,
 ): React.ReactNode {
   const key = `${child.type}-${index}`
 
@@ -66,6 +70,8 @@ function renderChild(
           key={key}
           {...boxRest}
           parentLayout={parentLayout}
+          parentSpacing={parentSpacing}
+          childIndex={index}
           flex={hasExplicitDimensions ? 0 : effectiveFlex}
           onAction={onAction}
         />
@@ -79,6 +85,8 @@ function renderChild(
           {...child}
           flex={effectiveFlex}
           layout={parentLayout}
+          parentSpacing={parentSpacing}
+          childIndex={index}
           onAction={onAction}
         />
       )
@@ -89,6 +97,8 @@ function renderChild(
           {...child}
           flex={effectiveFlex}
           layout={parentLayout}
+          parentSpacing={parentSpacing}
+          childIndex={index}
           onAction={onAction}
         />
       )
@@ -99,13 +109,31 @@ function renderChild(
           {...child}
           flex={effectiveFlex}
           layout={parentLayout}
+          parentSpacing={parentSpacing}
+          childIndex={index}
           onAction={onAction}
         />
       )
     case 'icon':
-      return <LfIcon key={key} {...child} layout={parentLayout} />
+      return (
+        <LfIcon
+          key={key}
+          {...child}
+          layout={parentLayout}
+          parentSpacing={parentSpacing}
+          childIndex={index}
+        />
+      )
     case 'separator':
-      return <LfSeparator key={key} {...child} layout={parentLayout} />
+      return (
+        <LfSeparator
+          key={key}
+          {...child}
+          layout={parentLayout}
+          parentSpacing={parentSpacing}
+          childIndex={index}
+        />
+      )
     case 'spacer':
       return <LfSpacer key={key} {...child} />
     case 'filler':
@@ -149,10 +177,17 @@ export function LfBox({
   className,
   children,
   parentLayout,
+  parentSpacing,
+  childIndex,
 }: LFexBoxProps & { children?: React.ReactNode }) {
-  const gap = spacing ? spacingToTamagui(spacing) : undefined
   const padding = paddingAll ? paddingToTamagui(paddingAll) : undefined
-  const marginValue = margin ? marginToTamagui(margin) : undefined
+  const mergedForBox = mergeLineMarginWithParentSpacing(
+    parentLayout,
+    childIndex,
+    parentSpacing,
+    'box',
+    margin,
+  )
 
   const hasAbsoluteChildren = contents.some((c) => (c as any).position === 'absolute')
   const positionStyle =
@@ -212,7 +247,6 @@ export function LfBox({
     // react-line-flex lf-box: min-w-0 so LINE flex 1 0 0 rows share width across siblings
     minWidth: 0,
     ...(layout === 'horizontal' && parentLayout === 'vertical' ? { width: '100%' } : {}),
-    gap,
     padding,
     ...positionStyle,
     ...offsetStyle,
@@ -245,15 +279,17 @@ export function LfBox({
     ...(rowInColumnFlexStyle && { style: rowInColumnFlexStyle }),
   }
 
-  // Boxes with margin are typically children of vertical boxes → marginTop only
-  if (marginValue) {
-    containerProps.marginTop = marginValue
+  if (mergedForBox.marginTop !== undefined) {
+    containerProps.marginTop = mergedForBox.marginTop
+  }
+  if (mergedForBox.marginLeft !== undefined) {
+    containerProps.marginLeft = mergedForBox.marginLeft
   }
 
   const renderedContents =
     contents.length > 0
       ? contents.map((child: LFexComponent, i: number) =>
-          renderChild(child, i, layout, onAction),
+          renderChild(child, i, layout, onAction, spacing),
         )
       : children
 
@@ -265,9 +301,9 @@ export function LfBox({
     (typeof document !== 'undefined' && typeof window !== 'undefined')
 
   if (layout === 'horizontal' && flexInColumnRow && isWeb) {
-    const gapPx = tamaguiSpaceTokenToPx(gap)
     const paddingPx = tamaguiSpaceTokenToPx(padding)
-    const marginTopPx = tamaguiSpaceTokenToPx(marginValue)
+    const marginTopPx = tamaguiSpaceTokenToPx(mergedForBox.marginTop)
+    const marginLeftPx = tamaguiSpaceTokenToPx(mergedForBox.marginLeft)
 
     const webStyle: React.CSSProperties = {
       display: 'flex',
@@ -278,7 +314,6 @@ export function LfBox({
       minWidth: 0,
       ...(parentLayout === 'vertical' ? { width: '100%' } : {}),
       alignItems: alignItems ?? 'stretch',
-      ...(gapPx !== undefined && { gap: gapPx as number }),
       ...(paddingPx !== undefined && { padding: paddingPx as number }),
       ...positionStyle,
       ...offsetStyle,
@@ -295,6 +330,7 @@ export function LfBox({
       ...(maxHeight && { maxHeight }),
       ...(justifyContent && { justifyContent }),
       ...(marginTopPx !== undefined && { marginTop: marginTopPx as number }),
+      ...(marginLeftPx !== undefined && { marginLeft: marginLeftPx as number }),
       ...(action && { cursor: 'pointer' }),
     }
 
