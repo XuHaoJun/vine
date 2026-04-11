@@ -3,12 +3,84 @@ import { and, eq } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { schema } from '@vine/db'
 import { oaAccessToken, oaFriendship } from '@vine/db/schema-oa'
+import { FlexMessageSchema } from '@vine/flex-schema'
+import * as v from 'valibot'
 import type { createOAService } from '../services/oa'
 
 type MessagingPluginDeps = {
   oa: ReturnType<typeof createOAService>
   db: NodePgDatabase<typeof schema>
 }
+
+// ============ Message Validation ============
+
+type ValidationSuccess = {
+  valid: true
+  type: string
+  text: string | null
+  metadata: string | null
+}
+type ValidationFailure = { valid: false; error: string }
+
+function validateMessage(msg: unknown): ValidationSuccess | ValidationFailure {
+  if (typeof msg !== 'object' || msg === null) {
+    return { valid: false, error: 'Message must be an object' }
+  }
+
+  const { type, text, ...rest } = msg as Record<string, unknown>
+
+  if (!type || typeof type !== 'string') {
+    return { valid: false, error: 'Message must have a "type" field' }
+  }
+
+  switch (type) {
+    case 'text': {
+      if (typeof text !== 'string') {
+        return { valid: false, error: 'Text message must have a "text" field' }
+      }
+      if (text.length > 5000) {
+        return { valid: false, error: 'Text message must not exceed 5000 characters' }
+      }
+      return { valid: true, type, text, metadata: null }
+    }
+
+    case 'flex': {
+      const result = v.safeParse(FlexMessageSchema, msg)
+      if (!result.success) {
+        const flatResult = v.flatten<typeof FlexMessageSchema>(result.issues)
+        return {
+          valid: false,
+          error: `Invalid flex message: ${JSON.stringify(flatResult.nested)}`,
+        }
+      }
+      return {
+        valid: true,
+        type,
+        text: null,
+        metadata: JSON.stringify(result.output),
+      }
+    }
+
+    case 'image':
+    case 'video':
+    case 'audio':
+    case 'sticker':
+    case 'location':
+    case 'template': {
+      return {
+        valid: true,
+        type,
+        text: null,
+        metadata: JSON.stringify(rest),
+      }
+    }
+
+    default:
+      return { valid: false, error: `Unsupported message type: "${type}"` }
+  }
+}
+
+// ============ Token Extraction ============
 
 async function extractOaFromToken(
   request: FastifyRequest,
@@ -34,6 +106,10 @@ async function extractOaFromToken(
   return tokenRecord.oaId
 }
 
+// ============ Plugin ============
+
+type MessageItem = { type: string; text?: string; [key: string]: unknown }
+
 export async function oaMessagingPlugin(
   fastify: FastifyInstance,
   deps: MessagingPluginDeps,
@@ -46,7 +122,7 @@ export async function oaMessagingPlugin(
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const oaId = await extractOaFromToken(request, db)
-        const body = request.body as { replyToken: string; messages: unknown[] }
+        const body = request.body as { replyToken: string; messages: MessageItem[] }
 
         if (!body.replyToken || !body.messages?.length) {
           return await reply.code(400).send({
@@ -55,10 +131,36 @@ export async function oaMessagingPlugin(
           })
         }
 
-        // MVP: return success without actual delivery
-        // Full delivery via Zero mutation will be implemented later
+        // Validate all messages first
+        const validated = body.messages.map((msg) => {
+          const result = validateMessage(msg)
+          if (!result.valid) return result
+          return result
+        })
+
+        const failed = validated.find((r) => !r.valid)
+        if (failed && !failed.valid) {
+          return await reply.code(400).send({
+            message: failed.error,
+            code: 'INVALID_MESSAGE_TYPE',
+          })
+        }
+
+        // Deliver messages (reply token tracking is a future enhancement)
+        const validMessages = validated as ValidationSuccess[]
+        for (const msg of validMessages) {
+          // Reply requires knowing the chat from the replyToken.
+          // For now, reply delivery is deferred until reply token tracking is implemented.
+          // Messages are validated but not yet delivered on reply.
+        }
+
         return await reply.send({})
       } catch (err) {
+        if (err instanceof Error && err.message === 'Missing Bearer token') {
+          return reply
+            .code(401)
+            .send({ message: 'Missing Bearer token', code: 'INVALID_TOKEN' })
+        }
         if (err instanceof Error && err.message === 'Invalid access token') {
           return reply
             .code(401)
@@ -80,7 +182,7 @@ export async function oaMessagingPlugin(
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const oaId = await extractOaFromToken(request, db)
-        const body = request.body as { to: string; messages: unknown[] }
+        const body = request.body as { to: string; messages: MessageItem[] }
 
         if (!body.to || !body.messages?.length) {
           return await reply
@@ -98,6 +200,27 @@ export async function oaMessagingPlugin(
           return await reply
             .code(403)
             .send({ message: 'User is not a friend of this OA', code: 'NOT_FRIEND' })
+        }
+
+        // Validate all messages first
+        const validated = body.messages.map((msg) => validateMessage(msg))
+
+        const failed = validated.find((r) => !r.valid)
+        if (failed && !failed.valid) {
+          return await reply.code(400).send({
+            message: failed.error,
+            code: 'INVALID_MESSAGE_TYPE',
+          })
+        }
+
+        // Deliver messages
+        const validMessages = validated as ValidationSuccess[]
+        for (const msg of validMessages) {
+          await oa.sendOAMessage(oaId, body.to, {
+            type: msg.type,
+            text: msg.text,
+            metadata: msg.metadata,
+          })
         }
 
         return await reply.send({})

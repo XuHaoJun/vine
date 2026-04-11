@@ -494,6 +494,71 @@ export function createOAService(deps: OADeps) {
     return { success: true as const, chatId }
   }
 
+  async function sendOAMessage(
+    oaId: string,
+    userId: string,
+    msg: {
+      type: string
+      text?: string | null
+      metadata?: string | null
+    },
+  ) {
+    const messageId = randomUUID()
+    const sentAt = new Date().toISOString()
+
+    const chatId = await db.transaction(async (tx) => {
+      const userChatSubquery = tx
+        .select({ chatId: chatMember.chatId })
+        .from(chatMember)
+        .where(eq(chatMember.userId, userId))
+
+      const [existingChat] = await tx
+        .select({ id: chat.id })
+        .from(chat)
+        .innerJoin(chatMember, eq(chatMember.chatId, chat.id))
+        .where(
+          and(
+            eq(chat.type, 'oa'),
+            inArray(chat.id, userChatSubquery),
+            eq(chatMember.oaId, oaId),
+          ),
+        )
+        .limit(1)
+
+      if (existingChat) {
+        return existingChat.id
+      }
+
+      const newChatId = randomUUID()
+      const now = new Date().toISOString()
+      await tx.insert(chat).values({ id: newChatId, type: 'oa', createdAt: now })
+      await tx.insert(chatMember).values([
+        { id: randomUUID(), chatId: newChatId, userId, joinedAt: now },
+        { id: randomUUID(), chatId: newChatId, oaId, joinedAt: now },
+      ])
+
+      return newChatId
+    })
+
+    await db.insert(message).values({
+      id: messageId,
+      chatId,
+      senderType: 'oa',
+      oaId,
+      type: msg.type as typeof message.$inferInsert.type,
+      text: msg.text,
+      metadata: msg.metadata,
+      createdAt: sentAt,
+    })
+
+    await db
+      .update(chat)
+      .set({ lastMessageId: messageId, lastMessageAt: sentAt })
+      .where(eq(chat.id, chatId))
+
+    return { success: true as const, chatId, messageId }
+  }
+
   async function getAccessTokenById(id: string) {
     const [row] = await db
       .select()
@@ -570,6 +635,7 @@ export function createOAService(deps: OADeps) {
     verifyWebhook,
     findOfficialAccountByUniqueId,
     simulatorSendFlexMessage,
+    sendOAMessage,
   }
 }
 

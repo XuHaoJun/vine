@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "target": "ES2022",
+    "module": "Preserve",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "types": ["node"],
+    "lib": ["esnext"]
+  },
+  "include": ["src/**/*"]
+}

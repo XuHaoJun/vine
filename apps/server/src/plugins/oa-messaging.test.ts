@@ -1,16 +1,19 @@
-import { describe, expect, it, beforeAll, afterAll, vi } from 'vitest'
-import Fastify, { type FastifyInstance } from 'fastify'
+import { describe, expect, it, afterAll, vi } from 'vitest'
+import Fastify from 'fastify'
 import { oaMessagingPlugin } from './oa-messaging'
 
 const validToken = 'valid-test-token'
 const oaId = '550e8400-e29b-41d4-a716-446655440000'
 const userId = 'user-123'
 
-function createTestApp(mockDb: {
-  mockSelect: ReturnType<typeof vi.fn>
-  mockInsert: ReturnType<typeof vi.fn>
-  mockUpdate: ReturnType<typeof vi.fn>
-}) {
+function createTestApp(
+  mockDb: {
+    mockSelect: ReturnType<typeof vi.fn>
+    mockInsert: ReturnType<typeof vi.fn>
+    mockUpdate: ReturnType<typeof vi.fn>
+  },
+  mockSendOAMessage?: ReturnType<typeof vi.fn>,
+) {
   const { mockSelect, mockInsert, mockUpdate } = mockDb
   const db = { select: mockSelect, insert: mockInsert, update: mockUpdate } as any
   const mockOa = {
@@ -21,54 +24,47 @@ function createTestApp(mockDb: {
       token_type: 'Bearer',
     }),
     revokeAccessToken: vi.fn(),
+    sendOAMessage:
+      mockSendOAMessage ??
+      vi.fn().mockResolvedValue({
+        success: true,
+        chatId: 'chat-id',
+        messageId: 'msg-id',
+      }),
   }
   const app = Fastify()
-  app.register(oaMessagingPlugin, { oa: mockOa as any, db: db })
+  app.register(oaMessagingPlugin, { oa: mockOa as any, db })
   return app
 }
 
-function makeMockDb(
-  tokenResult: unknown[],
-  friendshipResult: unknown[],
-  innerJoinResult: unknown[],
-) {
-  let callCount = 0
+function makeMockDb(tokenResult: unknown[], friendshipResult: unknown[]) {
   const mockLimit1 = vi.fn().mockResolvedValue(tokenResult)
   const mockLimit2 = vi.fn().mockResolvedValue(friendshipResult)
-  const mockLimit3 = vi.fn().mockResolvedValue(innerJoinResult)
   const mockWhere1 = vi.fn().mockReturnValue({ limit: mockLimit1 })
   const mockWhere2 = vi.fn().mockReturnValue({ limit: mockLimit2 })
-  const mockInnerJoinWhere = vi.fn().mockReturnValue({ limit: mockLimit3 })
-  const mockInnerJoin = vi.fn().mockReturnValue({ where: mockInnerJoinWhere })
-  const mockFrom = vi
-    .fn()
-    .mockReturnValue({ where: mockWhere1, innerJoin: mockInnerJoin })
+  let selectCallCount = 0
   const mockSelect = vi.fn().mockImplementation(() => {
-    callCount++
-    const currentCall = callCount
-    if (currentCall === 1) {
-      return {
-        from: vi.fn().mockReturnValue({ where: mockWhere1, innerJoin: mockInnerJoin }),
-      }
-    } else if (currentCall === 2) {
-      return {
-        from: vi.fn().mockReturnValue({ where: mockWhere2, innerJoin: mockInnerJoin }),
-      }
-    } else {
+    selectCallCount++
+    if (selectCallCount <= 2) {
       return {
         from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({ limit: mockLimit3 }),
-          innerJoin: mockInnerJoin,
+          where: selectCallCount === 1 ? mockWhere1 : mockWhere2,
         }),
       }
     }
+    // friendship select
+    return {
+      from: vi.fn().mockReturnValue({
+        where: vi
+          .fn()
+          .mockReturnValue({ limit: vi.fn().mockResolvedValue(friendshipResult) }),
+      }),
+    }
   })
   const mockInsert = vi.fn().mockReturnValue({ values: vi.fn().mockReturnThis() })
-  const mockUpdateSet = vi.fn().mockReturnThis()
-  const mockUpdateWhere = vi.fn().mockReturnThis()
   const mockUpdate = vi
     .fn()
-    .mockReturnValue({ set: mockUpdateSet, where: mockUpdateWhere })
+    .mockReturnValue({ set: vi.fn().mockReturnThis(), where: vi.fn().mockReturnThis() })
   return { mockSelect, mockInsert, mockUpdate }
 }
 
@@ -77,7 +73,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
   describe('auth', () => {
     it('returns 401 when no Bearer token', async () => {
-      const mockDb = makeMockDb([], [], [])
+      const mockDb = makeMockDb([], [])
       const app = createTestApp(mockDb)
       await app.ready()
 
@@ -95,7 +91,7 @@ describe('oaMessagingPlugin — Push Message', () => {
     })
 
     it('returns 401 when token not found', async () => {
-      const mockDb = makeMockDb([], [], [])
+      const mockDb = makeMockDb([], [])
       const app = createTestApp(mockDb)
       await app.ready()
 
@@ -116,7 +112,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
   describe('validation', () => {
     it('returns 400 when missing to', async () => {
-      const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [], [])
+      const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
       const app = createTestApp(mockDb)
       await app.ready()
 
@@ -134,7 +130,7 @@ describe('oaMessagingPlugin — Push Message', () => {
     })
 
     it('returns 400 when missing messages', async () => {
-      const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [], [])
+      const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
       const app = createTestApp(mockDb)
       await app.ready()
 
@@ -151,37 +147,10 @@ describe('oaMessagingPlugin — Push Message', () => {
       expect(body.code).toBe('INVALID_REQUEST')
     })
 
-    it('returns 400 when message type is not text', async () => {
-      const mockDb = makeMockDb(
-        [{ oaId, token: validToken, expiresAt: null }],
-        [{ oaId, userId, status: 'friend' }],
-        [],
-      )
-      const app = createTestApp(mockDb)
-      await app.ready()
-
-      const res = await app.inject({
-        method: 'POST',
-        url: '/api/oa/v2/bot/message/push',
-        headers: { authorization: `Bearer ${validToken}` },
-        payload: {
-          to: userId,
-          messages: [{ type: 'image', url: 'http://example.com/img.png' }],
-        },
-      })
-
-      await app.close()
-      // MVP returns 200 - message type validation not yet implemented
-      expect(res.statusCode).toBe(200)
-      const body = JSON.parse(res.body)
-      expect(body).toEqual({})
-    })
-
     it('returns 400 when text is missing in text message', async () => {
       const mockDb = makeMockDb(
         [{ oaId, token: validToken, expiresAt: null }],
         [{ oaId, userId, status: 'friend' }],
-        [],
       )
       const app = createTestApp(mockDb)
       await app.ready()
@@ -194,16 +163,71 @@ describe('oaMessagingPlugin — Push Message', () => {
       })
 
       await app.close()
-      // MVP returns 200 - text validation not yet implemented
-      expect(res.statusCode).toBe(200)
+      expect(res.statusCode).toBe(400)
       const body = JSON.parse(res.body)
-      expect(body).toEqual({})
+      expect(body.code).toBe('INVALID_MESSAGE_TYPE')
+      expect(body.message).toContain('text')
+    })
+
+    it('returns 400 when flex message is invalid', async () => {
+      const mockDb = makeMockDb(
+        [{ oaId, token: validToken, expiresAt: null }],
+        [{ oaId, userId, status: 'friend' }],
+      )
+      const app = createTestApp(mockDb)
+      await app.ready()
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/oa/v2/bot/message/push',
+        headers: { authorization: `Bearer ${validToken}` },
+        payload: {
+          to: userId,
+          messages: [
+            {
+              type: 'flex',
+              altText: 'test',
+              contents: {
+                type: 'bubble',
+                body: { type: 'box', layout: 'sideways', contents: [] },
+              },
+            },
+          ],
+        },
+      })
+
+      await app.close()
+      expect(res.statusCode).toBe(400)
+      const body = JSON.parse(res.body)
+      expect(body.code).toBe('INVALID_MESSAGE_TYPE')
+    })
+
+    it('returns 400 when unsupported message type', async () => {
+      const mockDb = makeMockDb(
+        [{ oaId, token: validToken, expiresAt: null }],
+        [{ oaId, userId, status: 'friend' }],
+      )
+      const app = createTestApp(mockDb)
+      await app.ready()
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/oa/v2/bot/message/push',
+        headers: { authorization: `Bearer ${validToken}` },
+        payload: { to: userId, messages: [{ type: 'custom' }] },
+      })
+
+      await app.close()
+      expect(res.statusCode).toBe(400)
+      const body = JSON.parse(res.body)
+      expect(body.code).toBe('INVALID_MESSAGE_TYPE')
+      expect(body.message).toContain('custom')
     })
   })
 
   describe('friendship check', () => {
     it('returns 403 when user is not a friend', async () => {
-      const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [], [])
+      const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
       const app = createTestApp(mockDb)
       await app.ready()
 
@@ -224,7 +248,6 @@ describe('oaMessagingPlugin — Push Message', () => {
       const mockDb = makeMockDb(
         [{ oaId, token: validToken, expiresAt: null }],
         [{ oaId, userId, status: 'pending' }],
-        [],
       )
       const app = createTestApp(mockDb)
       await app.ready()
@@ -243,14 +266,16 @@ describe('oaMessagingPlugin — Push Message', () => {
     })
   })
 
-  describe('push message', () => {
-    it('creates new chat when no existing chat', async () => {
+  describe('push message delivery', () => {
+    it('sends text message successfully', async () => {
       const mockDb = makeMockDb(
         [{ oaId, token: validToken, expiresAt: null }],
         [{ oaId, userId, status: 'friend' }],
-        [],
       )
-      const app = createTestApp(mockDb)
+      const mockSend = vi
+        .fn()
+        .mockResolvedValue({ success: true, chatId: 'chat-1', messageId: 'msg-1' })
+      const app = createTestApp(mockDb, mockSend)
       await app.ready()
 
       const res = await app.inject({
@@ -261,56 +286,233 @@ describe('oaMessagingPlugin — Push Message', () => {
       })
 
       await app.close()
-      // MVP returns 200 with empty object - chat creation not yet implemented
       expect(res.statusCode).toBe(200)
-      const body = JSON.parse(res.body)
-      expect(body).toEqual({})
+      expect(mockSend).toHaveBeenCalledWith(oaId, userId, {
+        type: 'text',
+        text: 'hello world',
+        metadata: null,
+      })
     })
 
-    it('reuses existing chat when chat already exists', async () => {
+    it('sends flex message successfully', async () => {
       const mockDb = makeMockDb(
         [{ oaId, token: validToken, expiresAt: null }],
         [{ oaId, userId, status: 'friend' }],
-        [{ chatId: 'chat-uuid-123' }],
       )
-      const app = createTestApp(mockDb)
+      const mockSend = vi
+        .fn()
+        .mockResolvedValue({ success: true, chatId: 'chat-1', messageId: 'msg-1' })
+      const app = createTestApp(mockDb, mockSend)
+      await app.ready()
+
+      const flexMessage = {
+        type: 'flex',
+        altText: 'Hello',
+        contents: {
+          type: 'bubble',
+          body: {
+            type: 'box',
+            layout: 'vertical',
+            contents: [{ type: 'text', text: 'Hello' }],
+          },
+        },
+      }
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/oa/v2/bot/message/push',
+        headers: { authorization: `Bearer ${validToken}` },
+        payload: { to: userId, messages: [flexMessage] },
+      })
+
+      await app.close()
+      expect(res.statusCode).toBe(200)
+      expect(mockSend).toHaveBeenCalledOnce()
+      const call = mockSend.mock.calls[0]
+      expect(call[0]).toBe(oaId)
+      expect(call[1]).toBe(userId)
+      expect(call[2].type).toBe('flex')
+      expect(call[2].text).toBeNull()
+      expect(JSON.parse(call[2].metadata)).toEqual(flexMessage)
+    })
+
+    it('sends multiple messages in order', async () => {
+      const mockDb = makeMockDb(
+        [{ oaId, token: validToken, expiresAt: null }],
+        [{ oaId, userId, status: 'friend' }],
+      )
+      const mockSend = vi
+        .fn()
+        .mockResolvedValue({ success: true, chatId: 'chat-1', messageId: 'msg-1' })
+      const app = createTestApp(mockDb, mockSend)
       await app.ready()
 
       const res = await app.inject({
         method: 'POST',
         url: '/api/oa/v2/bot/message/push',
         headers: { authorization: `Bearer ${validToken}` },
-        payload: { to: userId, messages: [{ type: 'text', text: 'hello again' }] },
+        payload: {
+          to: userId,
+          messages: [
+            { type: 'text', text: 'first' },
+            { type: 'text', text: 'second' },
+          ],
+        },
       })
 
       await app.close()
-      // MVP returns 200 with empty object - chat reuse not yet implemented
       expect(res.statusCode).toBe(200)
-      const body = JSON.parse(res.body)
-      expect(body).toEqual({})
+      expect(mockSend).toHaveBeenCalledTimes(2)
+      expect(mockSend.mock.calls[0][2].text).toBe('first')
+      expect(mockSend.mock.calls[1][2].text).toBe('second')
     })
+  })
+})
 
-    it('returns messageId in response', async () => {
-      const mockDb = makeMockDb(
-        [{ oaId, token: validToken, expiresAt: null }],
-        [{ oaId, userId, status: 'friend' }],
-        [],
-      )
+describe('oaMessagingPlugin — Reply Message', () => {
+  describe('auth', () => {
+    it('returns 401 when no Bearer token', async () => {
+      const mockDb = makeMockDb([], [])
       const app = createTestApp(mockDb)
       await app.ready()
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/push',
-        headers: { authorization: `Bearer ${validToken}` },
-        payload: { to: userId, messages: [{ type: 'text', text: 'test' }] },
+        url: '/api/oa/v2/bot/message/reply',
+        payload: { replyToken: 'reply-1', messages: [{ type: 'text', text: 'hello' }] },
       })
 
       await app.close()
-      // MVP returns 200 with empty object - messageId not yet implemented
-      expect(res.statusCode).toBe(200)
+      expect(res.statusCode).toBe(401)
+    })
+  })
+
+  describe('validation', () => {
+    it('returns 400 when missing replyToken', async () => {
+      const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+      const app = createTestApp(mockDb)
+      await app.ready()
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/oa/v2/bot/message/reply',
+        headers: { authorization: `Bearer ${validToken}` },
+        payload: { messages: [{ type: 'text', text: 'hello' }] },
+      })
+
+      await app.close()
+      expect(res.statusCode).toBe(400)
       const body = JSON.parse(res.body)
-      expect(body).toEqual({})
+      expect(body.code).toBe('INVALID_REQUEST')
+    })
+
+    it('returns 400 when missing messages', async () => {
+      const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+      const app = createTestApp(mockDb)
+      await app.ready()
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/oa/v2/bot/message/reply',
+        headers: { authorization: `Bearer ${validToken}` },
+        payload: { replyToken: 'reply-1' },
+      })
+
+      await app.close()
+      expect(res.statusCode).toBe(400)
+      const body = JSON.parse(res.body)
+      expect(body.code).toBe('INVALID_REQUEST')
+    })
+
+    it('returns 400 when text is missing in text message', async () => {
+      const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+      const app = createTestApp(mockDb)
+      await app.ready()
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/oa/v2/bot/message/reply',
+        headers: { authorization: `Bearer ${validToken}` },
+        payload: { replyToken: 'reply-1', messages: [{ type: 'text' }] },
+      })
+
+      await app.close()
+      expect(res.statusCode).toBe(400)
+      const body = JSON.parse(res.body)
+      expect(body.code).toBe('INVALID_MESSAGE_TYPE')
+    })
+
+    it('returns 400 when unsupported message type', async () => {
+      const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+      const app = createTestApp(mockDb)
+      await app.ready()
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/oa/v2/bot/message/reply',
+        headers: { authorization: `Bearer ${validToken}` },
+        payload: {
+          replyToken: 'reply-1',
+          messages: [{ type: 'sticker', stickerId: '1', packageId: '1' }],
+        },
+      })
+
+      await app.close()
+      // sticker is a supported type, should pass validation
+      expect(res.statusCode).toBe(200)
+    })
+  })
+
+  describe('reply message', () => {
+    it('accepts valid text reply', async () => {
+      const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+      const app = createTestApp(mockDb)
+      await app.ready()
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/oa/v2/bot/message/reply',
+        headers: { authorization: `Bearer ${validToken}` },
+        payload: {
+          replyToken: 'reply-1',
+          messages: [{ type: 'text', text: 'hello back' }],
+        },
+      })
+
+      await app.close()
+      expect(res.statusCode).toBe(200)
+    })
+
+    it('accepts valid flex reply', async () => {
+      const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+      const app = createTestApp(mockDb)
+      await app.ready()
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/oa/v2/bot/message/reply',
+        headers: { authorization: `Bearer ${validToken}` },
+        payload: {
+          replyToken: 'reply-1',
+          messages: [
+            {
+              type: 'flex',
+              altText: 'reply',
+              contents: {
+                type: 'bubble',
+                body: {
+                  type: 'box',
+                  layout: 'vertical',
+                  contents: [{ type: 'text', text: 'replied' }],
+                },
+              },
+            },
+          ],
+        },
+      })
+
+      await app.close()
+      expect(res.statusCode).toBe(200)
     })
   })
 })
