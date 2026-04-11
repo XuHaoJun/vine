@@ -503,3 +503,133 @@ describe('createOAService — VerifyWebhook', () => {
     expect(result.status).toBe('oa_not_found')
   })
 })
+
+describe('createOAService — sendOAMessage', () => {
+  function createMockTransaction(existingChatId?: string) {
+    return vi.fn().mockImplementation(async (cb: (tx: any) => Promise<any>) => {
+      const mockTx = {
+        select: vi
+          .fn()
+          .mockReturnValueOnce({
+            // userChatSubquery: tx.select({ chatId }).from(chatMember).where(...)
+            from: vi.fn().mockReturnValue({
+              where: vi.fn().mockReturnValue({
+                // subquery — not awaited directly, used as inArray arg
+              }),
+            }),
+          })
+          .mockReturnValueOnce({
+            // existingChat: tx.select({ id }).from(chat).innerJoin(...).where(...).limit(1)
+            from: vi.fn().mockReturnValue({
+              innerJoin: vi.fn().mockReturnValue({
+                where: vi.fn().mockReturnValue({
+                  limit: vi
+                    .fn()
+                    .mockResolvedValue(existingChatId ? [{ id: existingChatId }] : []),
+                }),
+              }),
+            }),
+          }),
+        insert: vi.fn().mockReturnValue({
+          values: vi.fn().mockResolvedValue(undefined),
+        }),
+      }
+      return cb(mockTx)
+    })
+  }
+
+  it('sends message to existing chat', async () => {
+    const mockDb = {
+      ...createMockDb(),
+      transaction: createMockTransaction('existing-chat-id'),
+      insert: vi.fn().mockReturnValue({ values: vi.fn().mockResolvedValue(undefined) }),
+      update: vi.fn().mockReturnValue({
+        set: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) }),
+      }),
+    }
+
+    const oa = createOAService({ db: mockDb as any, database: {} as any })
+    const result = await oa.sendOAMessage('oa-id', 'user-id', {
+      type: 'text',
+      text: 'hello',
+      metadata: null,
+    })
+
+    expect(result.success).toBe(true)
+    expect(result.chatId).toBe('existing-chat-id')
+    expect(result.messageId).toBeDefined()
+  })
+
+  it('creates new chat when none exists', async () => {
+    const mockDb = {
+      ...createMockDb(),
+      transaction: createMockTransaction(), // no existing chat
+      insert: vi.fn().mockReturnValue({ values: vi.fn().mockResolvedValue(undefined) }),
+      update: vi.fn().mockReturnValue({
+        set: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) }),
+      }),
+    }
+
+    const oa = createOAService({ db: mockDb as any, database: {} as any })
+    const result = await oa.sendOAMessage('oa-id', 'user-id', {
+      type: 'flex',
+      text: null,
+      metadata: JSON.stringify({
+        type: 'flex',
+        altText: 'test',
+        contents: { type: 'bubble' },
+      }),
+    })
+
+    expect(result.success).toBe(true)
+    expect(result.chatId).toBeDefined()
+    expect(result.messageId).toBeDefined()
+  })
+
+  it('stores flex message metadata', async () => {
+    const mockInsertValues = vi.fn().mockResolvedValue(undefined)
+    const mockDb = {
+      ...createMockDb(),
+      transaction: createMockTransaction('chat-1'),
+      insert: vi.fn().mockReturnValue({ values: mockInsertValues }),
+      update: vi.fn().mockReturnValue({
+        set: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) }),
+      }),
+    }
+
+    const oa = createOAService({ db: mockDb as any, database: {} as any })
+    await oa.sendOAMessage('oa-id', 'user-id', {
+      type: 'flex',
+      text: null,
+      metadata: '{"type":"flex"}',
+    })
+
+    const insertCall = mockInsertValues.mock.calls[0][0]
+    expect(insertCall.type).toBe('flex')
+    expect(insertCall.text).toBeNull()
+    expect(insertCall.metadata).toBe('{"type":"flex"}')
+    expect(insertCall.oaId).toBe('oa-id')
+    expect(insertCall.senderType).toBe('oa')
+  })
+
+  it('updates chat lastMessageId and lastMessageAt', async () => {
+    const mockUpdateSet = vi.fn().mockReturnValue({
+      where: vi.fn().mockResolvedValue(undefined),
+    })
+    const mockDb = {
+      ...createMockDb(),
+      transaction: createMockTransaction('chat-1'),
+      insert: vi.fn().mockReturnValue({ values: vi.fn().mockResolvedValue(undefined) }),
+      update: vi.fn().mockReturnValue({ set: mockUpdateSet }),
+    }
+
+    const oa = createOAService({ db: mockDb as any, database: {} as any })
+    await oa.sendOAMessage('oa-id', 'user-id', {
+      type: 'text',
+      text: 'hello',
+      metadata: null,
+    })
+
+    expect(mockUpdateSet).toHaveBeenCalledOnce()
+  })
+})

@@ -14,15 +14,15 @@ type MessagingPluginDeps = {
 
 // ============ Message Validation ============
 
-type ValidationSuccess = {
+export type ValidationSuccess = {
   valid: true
   type: string
   text: string | null
   metadata: string | null
 }
-type ValidationFailure = { valid: false; error: string }
+export type ValidationFailure = { valid: false; error: string }
 
-function validateMessage(msg: unknown): ValidationSuccess | ValidationFailure {
+export function validateMessage(msg: unknown): ValidationSuccess | ValidationFailure {
   if (typeof msg !== 'object' || msg === null) {
     return { valid: false, error: 'Message must be an object' }
   }
