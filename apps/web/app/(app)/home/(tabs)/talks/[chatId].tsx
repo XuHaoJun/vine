@@ -5,7 +5,7 @@ import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
 
 import { useMessages } from '~/features/chat/useMessages'
 import { DateSeparator } from '~/features/chat/ui/DateSeparator'
-import { MessageBubble } from '~/features/chat/ui/MessageBubble'
+import { MessageBubbleFactory } from '~/interface/message/MessageBubbleFactory'
 import { MessageInput } from '~/features/chat/ui/MessageInput'
 import { useAuth } from '~/features/auth/client/authClient'
 import { oaClient } from '~/features/oa/client'
@@ -13,6 +13,8 @@ import { Avatar } from '~/interface/avatars/Avatar'
 import { Button } from '~/interface/buttons/Button'
 import { H3 } from '~/interface/text/Headings'
 import { useTanQuery } from '~/query'
+
+const AVATAR_COLORS = ['#7a9cbf', '#c4aed0', '#a0c4a0', '#e0b98a']
 
 const route = createRoute<'/(app)/home/(tabs)/talks/[chatId]'>()
 
@@ -124,17 +126,55 @@ export const ChatRoomPage = memo(() => {
               <DateSeparator label="今天" />
               {messages?.map((msg) => {
                 const isMine = msg.senderId === userId
+                const senderType = msg.senderType as 'user' | 'oa'
                 const senderInfo = msg.senderId ? memberMap[msg.senderId] : undefined
 
                 return (
-                  <MessageBubble
+                  <XStack
                     key={msg.id}
-                    text={msg.text ?? ''}
-                    isMine={isMine}
-                    createdAt={msg.createdAt}
-                    senderName={isMine ? undefined : senderInfo?.name}
-                    senderIndex={isMine ? undefined : senderInfo?.index}
-                  />
+                    justify={isMine ? 'flex-end' : 'flex-start'}
+                    px="$3"
+                    py="$1"
+                  >
+                    {!isMine && (
+                      senderType === 'oa' ? (
+                        <XStack width={38} height={38} mt={4} shrink={0} items="center" justify="center" style={{ borderRadius: 999, backgroundColor: '$color4' }}>
+                          <SizableText fontSize={14} fontWeight="600" color="white">
+                            {(otherName ?? '?')[0]?.toUpperCase() ?? '?'}
+                          </SizableText>
+                        </XStack>
+                      ) : (
+                        <XStack width={38} height={38} mt={4} shrink={0} items="center" justify="center" style={{ borderRadius: 999, backgroundColor: AVATAR_COLORS[(senderInfo?.index ?? 0) % AVATAR_COLORS.length] }}>
+                          <SizableText fontSize={14} fontWeight="600" color="white">
+                            {(senderInfo?.name ?? '?')[0]?.toUpperCase() ?? '?'}
+                          </SizableText>
+                        </XStack>
+                      )
+                    )}
+
+                    <YStack maxW="75%">
+                      {!isMine && (
+                        <SizableText fontSize={12} color="rgba(255,255,255,0.85)" mb={4} ml={2}>
+                          {senderType === 'oa' ? otherName ?? '官方帳號' : senderInfo?.name ?? ''}
+                        </SizableText>
+                      )}
+
+                      <XStack items="flex-end" gap="$1.5">
+                        <YStack shrink={0} mb={2}>
+                          <SizableText fontSize={10} color="rgba(255,255,255,0.85)">
+                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </SizableText>
+                        </YStack>
+
+                        <MessageBubbleFactory
+                          type={msg.type}
+                          text={msg.text ?? undefined}
+                          metadata={msg.metadata ?? undefined}
+                          isMine={isMine}
+                        />
+                      </XStack>
+                    </YStack>
+                  </XStack>
                 )
               })}
             </YStack>
