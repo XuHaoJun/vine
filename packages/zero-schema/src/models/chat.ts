@@ -35,6 +35,23 @@ export const mutate = mutations(schema, chatReadPermission, {
   ) => {
     if (!authData) throw new Error('Unauthorized')
 
+    // Check for existing OA chat between this user and OA (dedup)
+    const query = tx.query as Record<string, any> | undefined
+    if (query?.chatMember) {
+      const userMemberships = await query.chatMember.where('userId', args.userId).run()
+
+      for (const userMember of userMemberships) {
+        const oasInChat = await query.chatMember
+          .where('chatId', userMember.chatId)
+          .where('oaId', args.oaId)
+          .run()
+        if (oasInChat.length > 0) {
+          // Chat already exists between this user and OA — skip creation
+          return
+        }
+      }
+    }
+
     await tx.mutate.chat.insert({
       id: args.chatId,
       type: 'oa',

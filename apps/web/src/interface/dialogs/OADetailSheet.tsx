@@ -10,6 +10,7 @@ import { showToast } from '~/interface/toast/Toast'
 import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
 import { oaClient } from '~/features/oa/client'
 import { useAuth } from '~/features/auth/client/authClient'
+import { useChats } from '~/features/chat/useChats'
 import { zero } from '~/zero/client'
 
 // TODO: Once DB has these fields, remove mocks
@@ -44,6 +45,7 @@ export function OADetailSheet({
   const queryClient = useTanQueryClient()
   const { user } = useAuth()
   const userId = user?.id ?? ''
+  const { chats } = useChats()
 
   const { data: isFriendData } = useTanQuery({
     queryKey: ['oa', 'isFriend', oaId],
@@ -79,6 +81,17 @@ export function OADetailSheet({
 
   const handleStartChat = () => {
     if (!userId || !id) return
+
+    const existingChat = chats.find(
+      (c) => c.type === 'oa' && c.members?.some((m) => m.oaId === id),
+    )
+
+    if (existingChat?.id) {
+      onOpenChange(false)
+      router.push(`/home/talks/${existingChat.id}`)
+      return
+    }
+
     const chatId = crypto.randomUUID()
     const now = Date.now()
     zero.mutate.chat.insertOAChat({
