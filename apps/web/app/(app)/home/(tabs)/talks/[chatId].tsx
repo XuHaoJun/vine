@@ -136,33 +136,64 @@ export const ChatRoomPage = memo(() => {
                     px="$3"
                     py="$1"
                   >
-                    {!isMine && (
-                      senderType === 'oa' ? (
-                        <XStack width={38} height={38} mt={4} shrink={0} items="center" justify="center" style={{ borderRadius: 999, backgroundColor: '$color4' }}>
+                    {!isMine &&
+                      (senderType === 'oa' ? (
+                        <XStack
+                          width={38}
+                          height={38}
+                          mt={4}
+                          shrink={0}
+                          items="center"
+                          justify="center"
+                          style={{ borderRadius: 999, backgroundColor: '$color4' }}
+                        >
                           <SizableText fontSize={14} fontWeight="600" color="white">
                             {(otherName ?? '?')[0]?.toUpperCase() ?? '?'}
                           </SizableText>
                         </XStack>
                       ) : (
-                        <XStack width={38} height={38} mt={4} shrink={0} items="center" justify="center" style={{ borderRadius: 999, backgroundColor: AVATAR_COLORS[(senderInfo?.index ?? 0) % AVATAR_COLORS.length] }}>
+                        <XStack
+                          width={38}
+                          height={38}
+                          mt={4}
+                          shrink={0}
+                          items="center"
+                          justify="center"
+                          style={{
+                            borderRadius: 999,
+                            backgroundColor:
+                              AVATAR_COLORS[
+                                (senderInfo?.index ?? 0) % AVATAR_COLORS.length
+                              ],
+                          }}
+                        >
                           <SizableText fontSize={14} fontWeight="600" color="white">
                             {(senderInfo?.name ?? '?')[0]?.toUpperCase() ?? '?'}
                           </SizableText>
                         </XStack>
-                      )
-                    )}
+                      ))}
 
                     <YStack maxW="75%">
                       {!isMine && (
-                        <SizableText fontSize={12} color="rgba(255,255,255,0.85)" mb={4} ml={2}>
-                          {senderType === 'oa' ? otherName ?? '官方帳號' : senderInfo?.name ?? ''}
+                        <SizableText
+                          fontSize={12}
+                          color="rgba(255,255,255,0.85)"
+                          mb={4}
+                          ml={2}
+                        >
+                          {senderType === 'oa'
+                            ? (otherName ?? '官方帳號')
+                            : (senderInfo?.name ?? '')}
                         </SizableText>
                       )}
 
                       <XStack items="flex-end" gap="$1.5">
                         <YStack shrink={0} mb={2}>
                           <SizableText fontSize={10} color="rgba(255,255,255,0.85)">
-                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {new Date(msg.createdAt).toLocaleTimeString([], {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
                           </SizableText>
                         </YStack>
 

@@ -395,7 +395,10 @@ export function oaHandler(deps: OAHandlerDeps) {
         const result = await deps.oa.simulatorSendFlexMessage(auth.id, req.flexJson)
         if (!result.success) {
           if (result.reason === 'not_friend') {
-            throw new ConnectError('請先加入 Flex Message sim 為好友', Code.FailedPrecondition)
+            throw new ConnectError(
+              '請先加入 Flex Message sim 為好友',
+              Code.FailedPrecondition,
+            )
           }
           if (result.reason === 'oa_not_found') {
             throw new ConnectError('Flex Simulator OA not found', Code.Internal)

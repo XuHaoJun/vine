@@ -27,7 +27,8 @@ export function FlexSimulatorSendDialog({
 
   const { data: oaData } = useTanQuery({
     queryKey: ['oa', 'resolve', FLEX_SIMULATOR_OA_UNIQUE_ID],
-    queryFn: () => oaClient.resolveOfficialAccount({ uniqueId: FLEX_SIMULATOR_OA_UNIQUE_ID }),
+    queryFn: () =>
+      oaClient.resolveOfficialAccount({ uniqueId: FLEX_SIMULATOR_OA_UNIQUE_ID }),
     enabled: open,
   })
 
