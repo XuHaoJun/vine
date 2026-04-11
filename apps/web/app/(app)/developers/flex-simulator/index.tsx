@@ -2,9 +2,11 @@ import { memo, useCallback, useEffect, useState } from 'react'
 import { ScrollView, Text, XStack, YStack } from 'tamagui'
 
 import { TextArea } from '~/interface/forms/TextArea'
+import { useOADetailSheet } from '~/interface/dialogs/OADetailSheet'
 
 import { useFlexSimulatorHeader } from './FlexSimulatorHeaderContext'
 import { FlexSimulatorPreview } from './FlexSimulatorPreview'
+import { FlexSimulatorSendDialog } from './FlexSimulatorSendDialog'
 
 const DEFAULT_JSON = JSON.stringify(
   {
@@ -39,10 +41,12 @@ const DEFAULT_JSON = JSON.stringify(
 )
 
 const FlexSimulatorPage = memo(() => {
-  const { setResetHandler } = useFlexSimulatorHeader()
+  const { setResetHandler, setSendHandler } = useFlexSimulatorHeader()
   const [json, setJson] = useState(DEFAULT_JSON)
   const [isValid, setIsValid] = useState(true)
   const [errorMsg, setErrorMsg] = useState('')
+  const [sendDialogOpen, setSendDialogOpen] = useState(false)
+  const { openDetail, DetailSheetComponent } = useOADetailSheet()
 
   const handleReset = useCallback(() => {
     setJson(DEFAULT_JSON)
@@ -54,6 +58,11 @@ const FlexSimulatorPage = memo(() => {
     setResetHandler(() => handleReset)
     return () => setResetHandler(null)
   }, [handleReset, setResetHandler])
+
+  useEffect(() => {
+    setSendHandler(() => () => setSendDialogOpen(true))
+    return () => setSendHandler(null)
+  }, [setSendHandler])
 
   const handleJsonChange = (value: string) => {
     setJson(value)
@@ -103,6 +112,13 @@ const FlexSimulatorPage = memo(() => {
           </YStack>
         </YStack>
       </XStack>
+      <FlexSimulatorSendDialog
+        open={sendDialogOpen}
+        onOpenChange={setSendDialogOpen}
+        flexJson={json}
+        openOADetail={openDetail}
+      />
+      {DetailSheetComponent}
     </YStack>
   )
 })

@@ -9,7 +9,7 @@ import {
 } from './FlexSimulatorHeaderContext'
 
 function FlexSimulatorLayoutInner() {
-  const { resetHandler } = useFlexSimulatorHeader()
+  const { resetHandler, sendHandler } = useFlexSimulatorHeader()
 
   return (
     <YStack
@@ -50,9 +50,14 @@ function FlexSimulatorLayoutInner() {
         <SizableText size="$5" fontWeight="700" color="$color12">
           Flex Simulator
         </SizableText>
-        <Button size="$2" onPress={() => resetHandler?.()} disabled={!resetHandler}>
-          Reset
-        </Button>
+        <XStack gap="$2">
+          <Button size="$2" onPress={() => resetHandler?.()} disabled={!resetHandler}>
+            Reset
+          </Button>
+          <Button size="$2" onPress={() => sendHandler?.()} disabled={!sendHandler}>
+            Send...
+          </Button>
+        </XStack>
       </XStack>
 
       <YStack flex={1} style={{ minHeight: 0 }} $platform-web={{ overflowY: 'auto' }}>
