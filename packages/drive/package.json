@@ -1,0 +1,21 @@
+{
+  "name": "@vine/drive",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts"
+  },
+  "scripts": {
+    "build": "echo 'drive package - no build step'",
+    "dev": "echo 'drive package - no dev step'"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.700.0",
+    "flydrive": "^2.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

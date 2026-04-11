@@ -5,11 +5,13 @@ import type { schema } from '@vine/db'
 import { oaAccessToken, oaFriendship } from '@vine/db/schema-oa'
 import { FlexMessageSchema } from '@vine/flex-schema'
 import * as v from 'valibot'
+import type { DriveService } from '@vine/drive'
 import type { createOAService } from '../services/oa'
 
 type MessagingPluginDeps = {
   oa: ReturnType<typeof createOAService>
   db: NodePgDatabase<typeof schema>
+  drive: DriveService
 }
 
 // ============ Message Validation ============
