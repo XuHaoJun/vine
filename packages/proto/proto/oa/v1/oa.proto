@@ -302,6 +302,24 @@ message OfficialAccountSummary {
   string image_url = 5;
 }
 
+// ── Resolve by uniqueId ──
+
+message ResolveOfficialAccountRequest {
+  string unique_id = 1;
+}
+
+message ResolveOfficialAccountResponse {
+  OfficialAccountSummary account = 1;
+}
+
+// ── Flex Simulator ──
+
+message SimulatorSendFlexMessageRequest {
+  string flex_json = 1;
+}
+
+message SimulatorSendFlexMessageResponse {}
+
 // ── Service ──
 
 service OAService {
@@ -329,4 +347,6 @@ service OAService {
   rpc RemoveOAFriend(RemoveOAFriendRequest) returns (RemoveOAFriendResponse);
   rpc ListMyOAFriends(ListMyOAFriendsRequest) returns (ListMyOAFriendsResponse);
   rpc IsOAFriend(IsOAFriendRequest) returns (IsOAFriendResponse);
+  rpc ResolveOfficialAccount(ResolveOfficialAccountRequest) returns (ResolveOfficialAccountResponse);
+  rpc SimulatorSendFlexMessage(SimulatorSendFlexMessageRequest) returns (SimulatorSendFlexMessageResponse);
 }
