@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useTanQuery } from '~/query'
 import { oaClient } from '~/features/oa/client'
 
@@ -33,6 +33,8 @@ type UseRichMenuResult = {
 }
 
 export function useRichMenu(oaId: string | undefined): UseRichMenuResult {
+  const prevImageUrlRef = useRef<string | null>(null)
+
   const { data, isLoading } = useTanQuery({
     queryKey: ['oa', 'richMenu', 'active', oaId],
     queryFn: async () => {
@@ -43,7 +45,7 @@ export function useRichMenu(oaId: string | undefined): UseRichMenuResult {
       if (!res.richMenu) return null
 
       let imageUrl: string | null = null
-      if (res.image && res.image.length > 0) {
+      if (res.image && res.image.length > 0 && typeof window !== 'undefined') {
         const blob = new Blob([res.image as BlobPart], {
           type: res.imageContentType ?? 'image/jpeg',
         })
@@ -84,9 +86,17 @@ export function useRichMenu(oaId: string | undefined): UseRichMenuResult {
   })
 
   useEffect(() => {
+    const prevUrl = prevImageUrlRef.current
+    if (prevUrl && prevUrl !== data?.imageUrl) {
+      URL.revokeObjectURL(prevUrl)
+    }
+    prevImageUrlRef.current = data?.imageUrl ?? null
+
     return () => {
-      if (data?.imageUrl) {
-        URL.revokeObjectURL(data.imageUrl)
+      const finalUrl = prevImageUrlRef.current
+      if (finalUrl) {
+        URL.revokeObjectURL(finalUrl)
+        prevImageUrlRef.current = null
       }
     }
   }, [data?.imageUrl])
