@@ -18,16 +18,44 @@ test('OA chat shows RichMenuBar for OA with rich menu', async ({ page }) => {
 
   await loginAsTest1(page)
 
+  console.log('DEBUG: Navigating to /oa/testbot...')
   await page.goto(`${BASE_URL}/oa/testbot`, { waitUntil: 'domcontentloaded' })
+  console.log('DEBUG: Goto done, URL:', page.url())
+
+  console.log('DEBUG: Waiting for /oa/testbot URL...')
   await page.waitForURL(/\/oa\/testbot$/, { timeout: 10000 })
-  await page.waitForLoadState('networkidle')
+  console.log('DEBUG: URL matched, URL:', page.url())
 
+  console.log('DEBUG: Waiting for networkidle...')
+  await page.waitForLoadState('networkidle')
+  console.log('DEBUG: networkidle reached')
+
+  console.log('DEBUG: Looking for addFriendBtn...')
   const addFriendBtn = page.getByRole('button', { name: /加入好友|開始聊天/ })
-  await addFriendBtn.waitFor({ state: 'attached', timeout: 20000 })
-  await addFriendBtn.click()
 
+  // Debug: check what's on the page
+  const bodyHTML = await page.locator('body').innerHTML()
+  console.log('DEBUG: Body HTML (first 1000):', bodyHTML.substring(0, 1000))
+
+  const buttonCount = await page.getByRole('button').count()
+  console.log('DEBUG: Total button count:', buttonCount)
+
+  const allButtonTexts = await page.getByRole('button').allInnerTexts()
+  console.log('DEBUG: All button texts:', JSON.stringify(allButtonTexts))
+
+  console.log('DEBUG: Waiting for addFriendBtn to be attached...')
+  await addFriendBtn.waitFor({ state: 'attached', timeout: 20000 })
+  console.log('DEBUG: addFriendBtn attached, clicking...')
+  await addFriendBtn.click()
+  console.log('DEBUG: Clicked, URL:', page.url())
+
+  console.log('DEBUG: Waiting for /home/talks/... URL...')
   await page.waitForURL(/\/home\/talks\/.+/, { timeout: 15000 })
+  console.log('DEBUG: URL matched, URL:', page.url())
+
+  console.log('DEBUG: Waiting for networkidle...')
   await page.waitForLoadState('networkidle')
+  console.log('DEBUG: networkidle reached')
 
   const inputPlaceholder = page.locator('[placeholder="Aa"]')
   await expect(inputPlaceholder).toBeHidden({ timeout: 15000 })
@@ -38,16 +66,44 @@ test('RichMenuBar expand/collapse toggle works', async ({ page }) => {
 
   await loginAsTest1(page)
 
+  console.log('DEBUG: Navigating to /oa/testbot...')
   await page.goto(`${BASE_URL}/oa/testbot`, { waitUntil: 'domcontentloaded' })
+  console.log('DEBUG: Goto done, URL:', page.url())
+
+  console.log('DEBUG: Waiting for /oa/testbot URL...')
   await page.waitForURL(/\/oa\/testbot$/, { timeout: 10000 })
-  await page.waitForLoadState('networkidle')
+  console.log('DEBUG: URL matched, URL:', page.url())
 
+  console.log('DEBUG: Waiting for networkidle...')
+  await page.waitForLoadState('networkidle')
+  console.log('DEBUG: networkidle reached')
+
+  console.log('DEBUG: Looking for addFriendBtn...')
   const addFriendBtn = page.getByRole('button', { name: /加入好友|開始聊天/ })
-  await addFriendBtn.waitFor({ state: 'attached', timeout: 20000 })
-  await addFriendBtn.click()
 
+  // Debug: check what's on the page
+  const bodyHTML = await page.locator('body').innerHTML()
+  console.log('DEBUG: Body HTML (first 1000):', bodyHTML.substring(0, 1000))
+
+  const buttonCount = await page.getByRole('button').count()
+  console.log('DEBUG: Total button count:', buttonCount)
+
+  const allButtonTexts = await page.getByRole('button').allInnerTexts()
+  console.log('DEBUG: All button texts:', JSON.stringify(allButtonTexts))
+
+  console.log('DEBUG: Waiting for addFriendBtn to be attached...')
+  await addFriendBtn.waitFor({ state: 'attached', timeout: 20000 })
+  console.log('DEBUG: addFriendBtn attached, clicking...')
+  await addFriendBtn.click()
+  console.log('DEBUG: Clicked, URL:', page.url())
+
+  console.log('DEBUG: Waiting for /home/talks/... URL...')
   await page.waitForURL(/\/home\/talks\/.+/, { timeout: 15000 })
+  console.log('DEBUG: URL matched, URL:', page.url())
+
+  console.log('DEBUG: Waiting for networkidle...')
   await page.waitForLoadState('networkidle')
+  console.log('DEBUG: networkidle reached')
 
   const inputPlaceholder = page.locator('[placeholder="Aa"]')
   await expect(inputPlaceholder).toBeHidden({ timeout: 15000 })
