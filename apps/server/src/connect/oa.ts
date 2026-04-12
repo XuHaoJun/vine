@@ -409,10 +409,7 @@ export function oaHandler(deps: OAHandlerDeps) {
         }
         return {}
       },
-      async getActiveRichMenu(
-        req,
-        ctx,
-      ) {
+      async getActiveRichMenu(req, ctx) {
         const auth = requireAuthData(ctx)
         const userId = auth.id
         const oaId = req.officialAccountId

@@ -113,118 +113,124 @@ function SendArrowIcon() {
   )
 }
 
-export const MessageInput = memo(({ onSend, disabled, hasRichMenu, onSwitchToRichMenu }: Props) => {
-  const [text, setText] = useState('')
-  const insets = useSafeAreaInsets()
+export const MessageInput = memo(
+  ({ onSend, disabled, hasRichMenu, onSwitchToRichMenu }: Props) => {
+    const [text, setText] = useState('')
+    const insets = useSafeAreaInsets()
 
-  const handleSend = () => {
-    const trimmed = text.trim()
-    if (!trimmed) return
-    onSend(trimmed)
-    setText('')
-  }
+    const handleSend = () => {
+      const trimmed = text.trim()
+      if (!trimmed) return
+      onSend(trimmed)
+      setText('')
+    }
 
-  const hasText = text.trim().length > 0
+    const hasText = text.trim().length > 0
 
-  return (
-    <XStack
-      items="center"
-      gap="$2"
-      bg="white"
-      px="$3"
-      pt="$2"
-      pb={8 + insets.bottom}
-      borderTopWidth={1}
-      borderTopColor="$color4"
-    >
-      {/* + button or Rich Menu toggle */}
-      {hasRichMenu && onSwitchToRichMenu ? (
-        <Pressable onPress={onSwitchToRichMenu}>
+    return (
+      <XStack
+        items="center"
+        gap="$2"
+        bg="white"
+        px="$3"
+        pt="$2"
+        pb={8 + insets.bottom}
+        borderTopWidth={1}
+        borderTopColor="$color4"
+      >
+        {/* + button or Rich Menu toggle */}
+        {hasRichMenu && onSwitchToRichMenu ? (
+          <Pressable onPress={onSwitchToRichMenu}>
+            <XStack
+              style={{ width: 30, height: 30, borderRadius: 999, flexShrink: 0 }}
+              bg="$gray3"
+              items="center"
+              justify="center"
+            >
+              <SizableText fontSize={14}>📋</SizableText>
+            </XStack>
+          </Pressable>
+        ) : (
           <XStack
             style={{ width: 30, height: 30, borderRadius: 999, flexShrink: 0 }}
             bg="$gray3"
             items="center"
             justify="center"
           >
-            <SizableText fontSize={14}>📋</SizableText>
+            <Svg
+              width={18}
+              height={18}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#555"
+              strokeWidth={2}
+            >
+              <Path
+                d="M12 4.5v15m7.5-7.5h-15"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </Svg>
           </XStack>
-        </Pressable>
-      ) : (
-        <XStack
-          style={{ width: 30, height: 30, borderRadius: 999, flexShrink: 0 }}
-          bg="$gray3"
-          items="center"
-          justify="center"
-        >
-          <Svg
-            width={18}
-            height={18}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#555"
-            strokeWidth={2}
-          >
-            <Path d="M12 4.5v15m7.5-7.5h-15" strokeLinecap="round" strokeLinejoin="round" />
-          </Svg>
+        )}
+
+        {/* Camera */}
+        <XStack style={{ flexShrink: 0 }} items="center" justify="center">
+          <CameraIcon />
         </XStack>
-      )}
 
-      {/* Camera */}
-      <XStack style={{ flexShrink: 0 }} items="center" justify="center">
-        <CameraIcon />
-      </XStack>
-
-      {/* Photo */}
-      <XStack style={{ flexShrink: 0 }} items="center" justify="center">
-        <PhotoIcon />
-      </XStack>
-
-      {/* Text input with emoji icon */}
-      <YStack flex={1} position="relative">
-        <Input
-          bg="$gray3"
-          borderWidth={0}
-          px="$3"
-          pr="$8"
-          py="$2"
-          style={{
-            borderRadius: 20,
-          }}
-          placeholder="Aa"
-          value={text}
-          onChangeText={setText}
-          onSubmitEditing={handleSend}
-          returnKeyType="send"
-          multiline={false}
-        />
-        <XStack
-          position="absolute"
-          style={{ right: 10, top: 0, bottom: 0 }}
-          items="center"
-          justify="center"
-          pointerEvents="none"
-        >
-          <EmojiIcon />
+        {/* Photo */}
+        <XStack style={{ flexShrink: 0 }} items="center" justify="center">
+          <PhotoIcon />
         </XStack>
-      </YStack>
 
-      {/* Mic or Send */}
-      {hasText ? (
-        <Pressable onPress={handleSend} disabled={disabled}>
+        {/* Text input with emoji icon */}
+        <YStack flex={1} position="relative">
+          <Input
+            bg="$gray3"
+            borderWidth={0}
+            px="$3"
+            pr="$8"
+            py="$2"
+            style={{
+              borderRadius: 20,
+            }}
+            placeholder="Aa"
+            value={text}
+            onChangeText={setText}
+            onSubmitEditing={handleSend}
+            returnKeyType="send"
+            multiline={false}
+          />
           <XStack
-            style={{ width: 36, height: 36, borderRadius: 999, flexShrink: 0 }}
-            bg="#8be872"
+            position="absolute"
+            style={{ right: 10, top: 0, bottom: 0 }}
             items="center"
             justify="center"
+            pointerEvents="none"
           >
-            <SendArrowIcon />
+            <EmojiIcon />
           </XStack>
-        </Pressable>
-      ) : (
-        <XStack style={{ flexShrink: 0 }} items="center" justify="center">
-          <MicIcon />
-        </XStack>
-      )}
-    </XStack>
-  )
-})
+        </YStack>
+
+        {/* Mic or Send */}
+        {hasText ? (
+          <Pressable onPress={handleSend} disabled={disabled}>
+            <XStack
+              style={{ width: 36, height: 36, borderRadius: 999, flexShrink: 0 }}
+              bg="#8be872"
+              items="center"
+              justify="center"
+            >
+              <SendArrowIcon />
+            </XStack>
+          </Pressable>
+        ) : (
+          <XStack style={{ flexShrink: 0 }} items="center" justify="center">
+            <MicIcon />
+          </XStack>
+        )}
+      </XStack>
+    )
+  },
+)
