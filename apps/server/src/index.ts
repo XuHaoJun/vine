@@ -41,7 +41,7 @@ await app.register(fastifyConnectPlugin, {
 })
 
 // Seed test data (only in dev with VITE_DEMO_MODE=1)
-await ensureSeed(database, db)
+await ensureSeed(database, db, drive)
 const zero = createZeroService({
   auth,
   zeroUpstreamDb: process.env['ZERO_UPSTREAM_DB'] ?? '',

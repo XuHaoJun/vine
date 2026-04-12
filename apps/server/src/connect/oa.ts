@@ -436,14 +436,37 @@ export function oaHandler(deps: OAHandlerDeps) {
           return {}
         }
 
-        const areas = JSON.parse(menu.areas) as Array<{
-          bounds: { x: number; y: number; width: number; height: number }
-          action: Record<string, string | undefined>
-        }>
+        const areas =
+          typeof menu.areas === 'string'
+            ? (JSON.parse(menu.areas) as Array<{
+                bounds: { x: number; y: number; width: number; height: number }
+                action: Record<string, string | undefined>
+              }>)
+            : (menu.areas as Array<{
+                bounds: { x: number; y: number; width: number; height: number }
+                action: Record<string, string | undefined>
+              }>)
+
+        const hasImage =
+          typeof menu.hasImage === 'string'
+            ? menu.hasImage === 'true'
+            : Boolean(menu.hasImage)
+        const selected =
+          typeof menu.selected === 'string'
+            ? menu.selected === 'true'
+            : Boolean(menu.selected)
+        const sizeWidth =
+          typeof menu.sizeWidth === 'string'
+            ? parseInt(menu.sizeWidth, 10)
+            : menu.sizeWidth
+        const sizeHeight =
+          typeof menu.sizeHeight === 'string'
+            ? parseInt(menu.sizeHeight, 10)
+            : menu.sizeHeight
 
         let imageBytes: Uint8Array | undefined
         let imageContentType: string | undefined
-        if (menu.hasImage === 'true') {
+        if (hasImage) {
           const key = `richmenu/${oaId}/${richMenuId}.jpg`
           const exists = await deps.drive.exists(key)
           if (exists) {
@@ -458,9 +481,9 @@ export function oaHandler(deps: OAHandlerDeps) {
             richMenuId: menu.richMenuId,
             name: menu.name,
             chatBarText: menu.chatBarText,
-            selected: menu.selected === 'true',
-            sizeWidth: parseInt(menu.sizeWidth, 10),
-            sizeHeight: parseInt(menu.sizeHeight, 10),
+            selected,
+            sizeWidth,
+            sizeHeight,
             areas: areas.map((a) => ({
               bounds: {
                 x: a.bounds.x,

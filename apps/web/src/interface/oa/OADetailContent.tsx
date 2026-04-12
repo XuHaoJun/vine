@@ -109,7 +109,7 @@ export function OADetailContent({
   }
 
   return (
-    <>
+    <YStack flex={1} bg="$background" style={{ minHeight: 0 }}>
       <YStack
         position="absolute"
         b={0}
@@ -130,255 +130,264 @@ export function OADetailContent({
         </Button>
       </YStack>
 
-      <ScrollView flex={1} pb="$20">
-        {showCloseButton && onClose && (
-          <XStack position="absolute" t="$3" r="$3" z={10} gap="$2">
-            <YStack
-              width={36}
-              height={36}
-              rounded={9999}
-              bg="$color4"
-              items="center"
-              justify="center"
-              cursor="pointer"
-              onPress={() => showToast('功能選單即將上線', { type: 'info' })}
-              hoverStyle={{ bg: '$color5' }}
-            >
-              <XStack gap="$0.5">
-                <YStack width={4} height={4} rounded={9999} bg="$color11" />
-                <YStack width={4} height={4} rounded={9999} bg="$color11" />
-                <YStack width={4} height={4} rounded={9999} bg="$color11" />
-              </XStack>
-            </YStack>
-            <YStack
-              width={36}
-              height={36}
-              rounded={9999}
-              bg="$color4"
-              items="center"
-              justify="center"
-              cursor="pointer"
-              onPress={onClose}
-              hoverStyle={{ bg: '$color5' }}
-            >
-              <Text fontSize={20} color="$color11" fontWeight="300" mt={-2}>
-                ×
-              </Text>
-            </YStack>
-          </XStack>
-        )}
-
-        <YStack height={180} bg="$color5" position="relative">
-          <Image
-            src={MOCK_COVER_URL}
-            alt="Cover"
-            width="100%"
-            height={180}
-            objectFit="cover"
-          />
-        </YStack>
-
-        <YStack px="$4" mt={-40} position="relative" z={5}>
-          <XStack items="flex-end" gap="$3" mb="$2">
-            <YStack
-              rounded={9999}
-              borderWidth={4}
-              borderColor="$background"
-              overflow="hidden"
-            >
-              <Avatar size={72} image={imageUrl || null} name={name} />
-            </YStack>
-          </XStack>
-
-          <XStack items="center" gap="$2" mb="$1" flexWrap="wrap">
-            <Text fontSize={20} fontWeight="700" color="$color12">
-              {name}
-            </Text>
-            <XStack bg="$blue10" px="$2" py="$0.5" rounded={9999} items="center" gap="$1">
-              <Text fontSize={10} fontWeight="700" color="$white">
-                ✓
-              </Text>
-              <Text fontSize={10} fontWeight="700" color="$white">
-                官方帳號
-              </Text>
-            </XStack>
-          </XStack>
-
-          <Text fontSize={12} color="$color10" mt="$1" mb="$3">
-            好友人數{' '}
-            {MOCK_FRIEND_COUNT.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-          </Text>
-
-          <YStack
-            p="$3"
-            bg="$color2"
-            rounded="$4"
-            borderWidth={1}
-            borderColor="$borderColor"
-            mb="$4"
-          >
-            <Text fontSize={14} color="$color11" lineHeight={20}>
-              {MOCK_DESCRIPTION}
-            </Text>
-          </YStack>
-
-          <XStack gap="$3" mb="$5">
-            <YStack
-              flex={1}
-              p="$3"
-              bg={isFriend ? '$green3' : '$color2'}
-              rounded="$4"
-              borderWidth={1}
-              borderColor={isFriend ? '$green6' : '$borderColor'}
-              items="center"
-              gap="$1"
-              cursor="pointer"
-              onPress={handleAddFriend}
-              hoverStyle={{ bg: isFriend ? '$green4' : '$color3' }}
-            >
+      <YStack flex={1} style={{ minHeight: 0 }}>
+        <ScrollView pb="$20">
+          {showCloseButton && onClose && (
+            <XStack position="absolute" t="$3" r="$3" z={10} gap="$2">
               <YStack
-                width={24}
-                height={24}
+                width={36}
+                height={36}
                 rounded={9999}
-                bg="$green9"
+                bg="$color4"
                 items="center"
                 justify="center"
+                cursor="pointer"
+                onPress={() => showToast('功能選單即將上線', { type: 'info' })}
+                hoverStyle={{ bg: '$color5' }}
               >
-                {isFriend ? (
-                  <ChatCircleIcon size={14} color="white" />
-                ) : (
-                  <Text fontSize={14} color="$white" fontWeight="700">
-                    +
-                  </Text>
-                )}
+                <XStack gap="$0.5">
+                  <YStack width={4} height={4} rounded={9999} bg="$color11" />
+                  <YStack width={4} height={4} rounded={9999} bg="$color11" />
+                  <YStack width={4} height={4} rounded={9999} bg="$color11" />
+                </XStack>
               </YStack>
-              <Text fontSize={12} fontWeight="600" color="$color12">
-                {isFriend ? '開始聊天' : '加入好友'}
-              </Text>
-            </YStack>
-
-            <YStack
-              flex={1}
-              p="$3"
-              bg="$color2"
-              rounded="$4"
-              borderWidth={1}
-              borderColor="$borderColor"
-              items="center"
-              gap="$1"
-              cursor="pointer"
-              onPress={() => showToast('貼文功能即將上線', { type: 'info' })}
-              hoverStyle={{ bg: '$color3' }}
-            >
-              <XStack
-                flexWrap="wrap"
-                gap={3}
-                width={24}
-                height={24}
-                items="center"
-                justify="center"
-              >
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <YStack key={i} width={10} height={10} rounded={3} bg="$color10" />
-                ))}
-              </XStack>
-              <Text fontSize={12} fontWeight="600" color="$color12">
-                {MOCK_POST_COUNT} 貼文
-              </Text>
-            </YStack>
-
-            <YStack
-              flex={1}
-              p="$3"
-              bg="$color2"
-              rounded="$4"
-              borderWidth={1}
-              borderColor="$borderColor"
-              items="center"
-              gap="$1"
-              cursor="pointer"
-              onPress={() => showToast('通話功能即將上線', { type: 'info' })}
-              hoverStyle={{ bg: '$color3' }}
-            >
               <YStack
-                width={24}
-                height={24}
+                width={36}
+                height={36}
                 rounded={9999}
-                bg="$color10"
+                bg="$color4"
                 items="center"
                 justify="center"
+                cursor="pointer"
+                onPress={onClose}
+                hoverStyle={{ bg: '$color5' }}
               >
-                <Text fontSize={10} color="$white" fontWeight="700">
-                  📞
+                <Text fontSize={20} color="$color11" fontWeight="300" mt={-2}>
+                  ×
                 </Text>
               </YStack>
-              <Text fontSize={12} fontWeight="600" color="$color12">
-                通話
-              </Text>
-            </YStack>
-          </XStack>
+            </XStack>
+          )}
 
-          <YStack gap="$2" mb="$4">
-            <Text
-              fontSize={12}
-              fontWeight="600"
-              color="$color10"
-              textTransform="uppercase"
-            >
-              社群平台
+          <YStack height={180} bg="$color5" position="relative">
+            <Image
+              src={MOCK_COVER_URL}
+              alt="Cover"
+              width="100%"
+              height={180}
+              objectFit="cover"
+            />
+          </YStack>
+
+          <YStack px="$4" mt={-40} position="relative" z={5}>
+            <XStack items="flex-end" gap="$3" mb="$2">
+              <YStack
+                rounded={9999}
+                borderWidth={4}
+                borderColor="$background"
+                overflow="hidden"
+              >
+                <Avatar size={72} image={imageUrl || null} name={name} />
+              </YStack>
+            </XStack>
+
+            <XStack items="center" gap="$2" mb="$1" flexWrap="wrap">
+              <Text fontSize={20} fontWeight="700" color="$color12">
+                {name}
+              </Text>
+              <XStack
+                bg="$blue10"
+                px="$2"
+                py="$0.5"
+                rounded={9999}
+                items="center"
+                gap="$1"
+              >
+                <Text fontSize={10} fontWeight="700" color="$white">
+                  ✓
+                </Text>
+                <Text fontSize={10} fontWeight="700" color="$white">
+                  官方帳號
+                </Text>
+              </XStack>
+            </XStack>
+
+            <Text fontSize={12} color="$color10" mt="$1" mb="$3">
+              好友人數{' '}
+              {MOCK_FRIEND_COUNT.toLocaleString('en-US', { maximumFractionDigits: 0 })}
             </Text>
+
             <YStack
               p="$3"
               bg="$color2"
               rounded="$4"
               borderWidth={1}
               borderColor="$borderColor"
+              mb="$4"
             >
-              <Text fontSize={13} color="$color10" mb="$2">
-                您也可透過其他社群平台確認資訊。
+              <Text fontSize={14} color="$color11" lineHeight={20}>
+                {MOCK_DESCRIPTION}
               </Text>
-              <XStack gap="$3">
+            </YStack>
+
+            <XStack gap="$3" mb="$5">
+              <YStack
+                flex={1}
+                p="$3"
+                bg={isFriend ? '$green3' : '$color2'}
+                rounded="$4"
+                borderWidth={1}
+                borderColor={isFriend ? '$green6' : '$borderColor'}
+                items="center"
+                gap="$1"
+                cursor="pointer"
+                onPress={handleAddFriend}
+                hoverStyle={{ bg: isFriend ? '$green4' : '$color3' }}
+              >
                 <YStack
-                  width={32}
-                  height={32}
-                  rounded="$2"
-                  bg="$color5"
+                  width={24}
+                  height={24}
+                  rounded={9999}
+                  bg="$green9"
                   items="center"
                   justify="center"
                 >
-                  <Text fontSize={14} fontWeight="700" color="$color11">
-                    f
-                  </Text>
+                  {isFriend ? (
+                    <ChatCircleIcon size={14} color="white" />
+                  ) : (
+                    <Text fontSize={14} color="$white" fontWeight="700">
+                      +
+                    </Text>
+                  )}
                 </YStack>
-                <YStack
-                  width={32}
-                  height={32}
-                  rounded="$2"
-                  bg="$color5"
+                <Text fontSize={12} fontWeight="600" color="$color12">
+                  {isFriend ? '開始聊天' : '加入好友'}
+                </Text>
+              </YStack>
+
+              <YStack
+                flex={1}
+                p="$3"
+                bg="$color2"
+                rounded="$4"
+                borderWidth={1}
+                borderColor="$borderColor"
+                items="center"
+                gap="$1"
+                cursor="pointer"
+                onPress={() => showToast('貼文功能即將上線', { type: 'info' })}
+                hoverStyle={{ bg: '$color3' }}
+              >
+                <XStack
+                  flexWrap="wrap"
+                  gap={3}
+                  width={24}
+                  height={24}
                   items="center"
                   justify="center"
                 >
-                  <Text fontSize={14} fontWeight="700" color="$color11">
-                    ig
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <YStack key={i} width={10} height={10} rounded={3} bg="$color10" />
+                  ))}
+                </XStack>
+                <Text fontSize={12} fontWeight="600" color="$color12">
+                  {MOCK_POST_COUNT} 貼文
+                </Text>
+              </YStack>
+
+              <YStack
+                flex={1}
+                p="$3"
+                bg="$color2"
+                rounded="$4"
+                borderWidth={1}
+                borderColor="$borderColor"
+                items="center"
+                gap="$1"
+                cursor="pointer"
+                onPress={() => showToast('通話功能即將上線', { type: 'info' })}
+                hoverStyle={{ bg: '$color3' }}
+              >
+                <YStack
+                  width={24}
+                  height={24}
+                  rounded={9999}
+                  bg="$color10"
+                  items="center"
+                  justify="center"
+                >
+                  <Text fontSize={10} color="$white" fontWeight="700">
+                    📞
                   </Text>
                 </YStack>
-              </XStack>
+                <Text fontSize={12} fontWeight="600" color="$color12">
+                  通話
+                </Text>
+              </YStack>
+            </XStack>
+
+            <YStack gap="$2" mb="$4">
+              <Text
+                fontSize={12}
+                fontWeight="600"
+                color="$color10"
+                textTransform="uppercase"
+              >
+                社群平台
+              </Text>
+              <YStack
+                p="$3"
+                bg="$color2"
+                rounded="$4"
+                borderWidth={1}
+                borderColor="$borderColor"
+              >
+                <Text fontSize={13} color="$color10" mb="$2">
+                  您也可透過其他社群平台確認資訊。
+                </Text>
+                <XStack gap="$3">
+                  <YStack
+                    width={32}
+                    height={32}
+                    rounded="$2"
+                    bg="$color5"
+                    items="center"
+                    justify="center"
+                  >
+                    <Text fontSize={14} fontWeight="700" color="$color11">
+                      f
+                    </Text>
+                  </YStack>
+                  <YStack
+                    width={32}
+                    height={32}
+                    rounded="$2"
+                    bg="$color5"
+                    items="center"
+                    justify="center"
+                  >
+                    <Text fontSize={14} fontWeight="700" color="$color11">
+                      ig
+                    </Text>
+                  </YStack>
+                </XStack>
+              </YStack>
+            </YStack>
+
+            <YStack items="center" py="$4">
+              <Text fontSize={14} color="$color10">
+                @{oaId}
+              </Text>
+            </YStack>
+
+            <YStack items="flex-end" pb="$4">
+              <Text fontSize={12} color="$color10">
+                所在國家或地區：{MOCK_LOCATION}
+              </Text>
             </YStack>
           </YStack>
-
-          <YStack items="center" py="$4">
-            <Text fontSize={14} color="$color10">
-              @{oaId}
-            </Text>
-          </YStack>
-
-          <YStack items="flex-end" pb="$4">
-            <Text fontSize={12} color="$color10">
-              所在國家或地區：{MOCK_LOCATION}
-            </Text>
-          </YStack>
-        </YStack>
-      </ScrollView>
-    </>
+        </ScrollView>
+      </YStack>
+    </YStack>
   )
 }
