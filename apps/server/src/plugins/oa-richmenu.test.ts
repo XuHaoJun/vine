@@ -77,7 +77,7 @@ function createTestApp(
   dbOverrides?: Record<string, ReturnType<typeof vi.fn>>,
   oaOverrides?: Record<string, ReturnType<typeof vi.fn>>,
 ) {
-  const tokenResult = dbOverrides?.tokenResult ?? [
+  const tokenResult: unknown[] = (dbOverrides?.tokenResult as unknown as unknown[]) ?? [
     { oaId, token: validToken, expiresAt: null },
   ]
   const mockDb = createMockDb(tokenResult)
@@ -182,7 +182,7 @@ describe('oaRichMenuPlugin — Auth', () => {
   })
 
   it('returns 401 when token is invalid', async () => {
-    const app = createTestApp({ tokenResult: [] })
+    const app = createTestApp({ tokenResult: [] } as any)
     await app.ready()
 
     const res = await app.inject({
