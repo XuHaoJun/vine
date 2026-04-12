@@ -10,7 +10,7 @@
     "start": "bun dist/index.js",
     "lint": "oxlint --import-plugin --type-aware",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test:unit": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
