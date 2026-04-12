@@ -18,10 +18,19 @@ test('OA chat shows RichMenuBar for OA with rich menu', async ({ page }) => {
 
   await loginAsTest1(page)
 
+  console.log('Navigating to /oa/testbot...')
   await page.goto(`${BASE_URL}/oa/testbot`, { waitUntil: 'domcontentloaded' })
-  await page.waitForURL(/\/oa\/testbot$/, { timeout: 10000 })
-  await page.waitForTimeout(3000)
+  console.log('Goto done, current URL:', page.url())
 
+  console.log('Waiting for /oa/testbot URL...')
+  await page.waitForURL(/\/oa\/testbot$/, { timeout: 10000 })
+  console.log('URL matched, current URL:', page.url())
+
+  console.log('Waiting 3s...')
+  await page.waitForTimeout(3000)
+  console.log('3s wait done, current URL:', page.url())
+
+  console.log('Looking for addFriendBtn...')
   const addFriendBtn = page.getByRole('button', { name: /加入好友|開始聊天/ })
   await addFriendBtn.waitFor({ state: 'visible', timeout: 15000 })
   console.log('Clicking addFriendBtn...')
@@ -48,10 +57,19 @@ test('RichMenuBar expand/collapse toggle works', async ({ page }) => {
 
   await loginAsTest1(page)
 
+  console.log('Navigating to /oa/testbot...')
   await page.goto(`${BASE_URL}/oa/testbot`, { waitUntil: 'domcontentloaded' })
-  await page.waitForURL(/\/oa\/testbot$/, { timeout: 10000 })
-  await page.waitForTimeout(3000)
+  console.log('Goto done, current URL:', page.url())
 
+  console.log('Waiting for /oa/testbot URL...')
+  await page.waitForURL(/\/oa\/testbot$/, { timeout: 10000 })
+  console.log('URL matched, current URL:', page.url())
+
+  console.log('Waiting 3s...')
+  await page.waitForTimeout(3000)
+  console.log('3s wait done, current URL:', page.url())
+
+  console.log('Looking for addFriendBtn...')
   const addFriendBtn = page.getByRole('button', { name: /加入好友|開始聊天/ })
   await addFriendBtn.waitFor({ state: 'visible', timeout: 15000 })
   console.log('Clicking addFriendBtn...')
