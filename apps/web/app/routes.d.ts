@@ -69,22 +69,26 @@ declare module 'one' {
         | `/(app)/developers/console/provider/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/home/(tabs)/talks/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/home/talks/${OneRouter.SingleRoutePart<T>}`
+        | `/(app)/oa/${OneRouter.SingleRoutePart<T>}`
         | `/auth/signup/${OneRouter.SingleRoutePart<T>}`
         | `/developers/console/channel/${OneRouter.SingleRoutePart<T>}`
         | `/developers/console/provider/${OneRouter.SingleRoutePart<T>}`
         | `/home/(tabs)/talks/${OneRouter.SingleRoutePart<T>}`
         | `/home/talks/${OneRouter.SingleRoutePart<T>}`
+        | `/oa/${OneRouter.SingleRoutePart<T>}`
       DynamicRouteTemplate: 
         | `/(app)/auth/signup/[method]`
         | `/(app)/developers/console/channel/[channelId]`
         | `/(app)/developers/console/provider/[providerId]`
         | `/(app)/home/(tabs)/talks/[chatId]`
         | `/(app)/home/talks/[chatId]`
+        | `/(app)/oa/[oaId]`
         | `/auth/signup/[method]`
         | `/developers/console/channel/[channelId]`
         | `/developers/console/provider/[providerId]`
         | `/home/(tabs)/talks/[chatId]`
         | `/home/talks/[chatId]`
+        | `/oa/[oaId]`
       IsTyped: true
       RouteTypes: {
         '/(app)/auth/signup/[method]': RouteInfo<{ method: string }>
@@ -92,11 +96,13 @@ declare module 'one' {
         '/(app)/developers/console/provider/[providerId]': RouteInfo<{ providerId: string }>
         '/(app)/home/(tabs)/talks/[chatId]': RouteInfo<{ chatId: string }>
         '/(app)/home/talks/[chatId]': RouteInfo<{ chatId: string }>
+        '/(app)/oa/[oaId]': RouteInfo<{ oaId: string }>
         '/auth/signup/[method]': RouteInfo<{ method: string }>
         '/developers/console/channel/[channelId]': RouteInfo<{ channelId: string }>
         '/developers/console/provider/[providerId]': RouteInfo<{ providerId: string }>
         '/home/(tabs)/talks/[chatId]': RouteInfo<{ chatId: string }>
         '/home/talks/[chatId]': RouteInfo<{ chatId: string }>
+        '/oa/[oaId]': RouteInfo<{ oaId: string }>
       }
     }
   }

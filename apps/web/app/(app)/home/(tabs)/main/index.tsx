@@ -8,6 +8,7 @@ import { useAuth } from '~/features/auth/client/authClient'
 import { oaClient } from '~/features/oa/client'
 import { useTanQuery } from '~/query'
 import { useOADetailSheet } from '~/interface/dialogs/OADetailSheet'
+import { useOAScannerSheet } from '~/interface/dialogs/OAScannerSheet'
 import { Avatar } from '~/interface/avatars/Avatar'
 import { BellIcon } from '~/interface/icons/phosphor/BellIcon'
 import { BookmarkIcon } from '~/interface/icons/phosphor/BookmarkIcon'
@@ -46,6 +47,7 @@ export const MainPage = memo(() => {
   const insets = useSafeAreaInsets()
   const [searchQuery, setSearchQuery] = useState('')
   const { openDetail, DetailSheetComponent } = useOADetailSheet()
+  const { openScanner, ScannerSheetComponent } = useOAScannerSheet()
 
   const { data: recommendedOAs } = useTanQuery({
     queryKey: ['oa', 'recommended'],
@@ -122,7 +124,7 @@ export const MainPage = memo(() => {
             />
             <YStack
               ml="$2"
-              onPress={() => showToast('QR Code scanner', { type: 'info' })}
+              onPress={() => openScanner((oa) => openDetail(oa))}
               cursor="pointer"
             >
               <QrCodeIcon size={18} color="$color10" />
@@ -369,6 +371,7 @@ export const MainPage = memo(() => {
         </YStack>
       </ScrollView>
 
+      {ScannerSheetComponent}
       {DetailSheetComponent}
     </YStack>
   )
