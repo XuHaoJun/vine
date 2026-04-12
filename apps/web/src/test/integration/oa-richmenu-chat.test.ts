@@ -24,10 +24,19 @@ test('OA chat shows RichMenuBar for OA with rich menu', async ({ page }) => {
 
   const addFriendBtn = page.getByRole('button', { name: /加入好友|開始聊天/ })
   await addFriendBtn.waitFor({ state: 'visible', timeout: 15000 })
+  console.log('Clicking addFriendBtn...')
   await addFriendBtn.click()
+  console.log('Clicked, current URL:', page.url())
 
   await page.waitForURL(/\/home\/talks\/.+/, { timeout: 15000 })
+  console.log('Navigated to:', page.url())
   await page.waitForTimeout(5000)
+
+  const inputVisible = await page.locator('[placeholder="Aa"]').isVisible()
+  console.log('Input placeholder visible:', inputVisible)
+
+  const richMenuBarExists = await page.locator('text=⌨️').count()
+  console.log('RichMenuBar toggle count:', richMenuBarExists)
 
   // In rich menu mode, the normal text input should be hidden
   const inputPlaceholder = page.locator('[placeholder="Aa"]')
@@ -45,10 +54,19 @@ test('RichMenuBar expand/collapse toggle works', async ({ page }) => {
 
   const addFriendBtn = page.getByRole('button', { name: /加入好友|開始聊天/ })
   await addFriendBtn.waitFor({ state: 'visible', timeout: 15000 })
+  console.log('Clicking addFriendBtn...')
   await addFriendBtn.click()
+  console.log('Clicked, current URL:', page.url())
 
   await page.waitForURL(/\/home\/talks\/.+/, { timeout: 15000 })
+  console.log('Navigated to:', page.url())
   await page.waitForTimeout(5000)
+
+  const inputVisible = await page.locator('[placeholder="Aa"]').isVisible()
+  console.log('Input placeholder visible:', inputVisible)
+
+  const richMenuBarExists = await page.locator('text=⌨️').count()
+  console.log('RichMenuBar toggle count:', richMenuBarExists)
 
   // In rich menu mode, the normal text input should be hidden
   const inputPlaceholder = page.locator('[placeholder="Aa"]')
