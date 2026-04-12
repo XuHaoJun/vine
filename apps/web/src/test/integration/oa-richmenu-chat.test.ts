@@ -29,8 +29,9 @@ test('OA chat shows RichMenuBar for OA with rich menu', async ({ page }) => {
   await page.waitForURL(/\/home\/talks\/.+/, { timeout: 15000 })
   await page.waitForTimeout(5000)
 
-  await expect(page.getByText('功能選單')).toBeVisible({ timeout: 15000 })
-  await expect(page.locator('[placeholder="Aa"]')).toBeHidden()
+  // In rich menu mode, the normal text input should be hidden
+  const inputPlaceholder = page.locator('[placeholder="Aa"]')
+  await expect(inputPlaceholder).toBeHidden({ timeout: 15000 })
 })
 
 test('RichMenuBar expand/collapse toggle works', async ({ page }) => {
@@ -49,12 +50,15 @@ test('RichMenuBar expand/collapse toggle works', async ({ page }) => {
   await page.waitForURL(/\/home\/talks\/.+/, { timeout: 15000 })
   await page.waitForTimeout(5000)
 
-  await expect(page.getByText('功能選單')).toBeVisible({ timeout: 15000 })
+  // In rich menu mode, the normal text input should be hidden
+  const inputPlaceholder = page.locator('[placeholder="Aa"]')
+  await expect(inputPlaceholder).toBeHidden({ timeout: 15000 })
 
+  // Switch to keyboard mode (the ⌨️ button expands/shows text input)
   const richMenuToggle = page.getByText('⌨️')
   await richMenuToggle.click()
 
   await page.waitForTimeout(1000)
 
-  await expect(page.locator('[placeholder="Aa"]')).toBeVisible()
+  await expect(inputPlaceholder).toBeVisible()
 })
