@@ -32,6 +32,17 @@ test('OA chat shows RichMenuBar for OA with rich menu', async ({ page }) => {
 
   console.log('Looking for addFriendBtn...')
   const addFriendBtn = page.getByRole('button', { name: /加入好友|開始聊天/ })
+
+  // Debug: check what's on the page
+  const bodyHTML = await page.locator('body').innerHTML()
+  console.log('Body HTML (first 1000 chars):', bodyHTML.substring(0, 1000))
+
+  const buttonCount = await page.getByRole('button').count()
+  console.log('Total button count on page:', buttonCount)
+
+  const allButtonTexts = await page.getByRole('button').allInnerTexts()
+  console.log('All button texts:', allButtonTexts)
+
   await addFriendBtn.waitFor({ state: 'visible', timeout: 15000 })
   console.log('Clicking addFriendBtn...')
   await addFriendBtn.click()
@@ -71,6 +82,17 @@ test('RichMenuBar expand/collapse toggle works', async ({ page }) => {
 
   console.log('Looking for addFriendBtn...')
   const addFriendBtn = page.getByRole('button', { name: /加入好友|開始聊天/ })
+
+  // Debug: check what's on the page
+  const bodyHTML = await page.locator('body').innerHTML()
+  console.log('Body HTML (first 1000 chars):', bodyHTML.substring(0, 1000))
+
+  const buttonCount = await page.getByRole('button').count()
+  console.log('Total button count on page:', buttonCount)
+
+  const allButtonTexts = await page.getByRole('button').allInnerTexts()
+  console.log('All button texts:', allButtonTexts)
+
   await addFriendBtn.waitFor({ state: 'visible', timeout: 15000 })
   console.log('Clicking addFriendBtn...')
   await addFriendBtn.click()
