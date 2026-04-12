@@ -8,11 +8,14 @@
 
 import { Socket } from 'node:net'
 import { getTestEnv } from './helpers/get-test-env'
+import {
+  BACKEND_PORT,
+  FRONTEND_PORT,
+  STATIC_PORT,
+  getProxyTargetPort,
+} from './integration-proxy.ts'
 
 // --- config ---
-const FRONTEND_PORT = 8081
-const STATIC_PORT = 9090
-const BACKEND_PORT = 3001
 const DOCKER_TIMEOUT = 120_000 // 2 min
 const BUILD_TIMEOUT = 300_000 // 5 min
 const TEST_TIMEOUT = 120_000 // 2 min
@@ -187,9 +190,7 @@ async function main() {
       port: FRONTEND_PORT,
       async fetch(req) {
         const url = new URL(req.url)
-        const isApi =
-          url.pathname.startsWith('/api') || url.pathname.startsWith('/oauth2')
-        const targetPort = isApi ? BACKEND_PORT : STATIC_PORT
+        const targetPort = getProxyTargetPort(url.pathname)
         const target = `http://localhost:${targetPort}${url.pathname}${url.search}`
 
         // Disable compression so we can buffer and forward the body without re-encoding issues
