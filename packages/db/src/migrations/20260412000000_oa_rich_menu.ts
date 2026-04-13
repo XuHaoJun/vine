@@ -7,11 +7,11 @@ CREATE TABLE "oaRichMenu" (
 	"richMenuId" text NOT NULL,
 	"name" text NOT NULL,
 	"chatBarText" text NOT NULL,
-	"selected" boolean DEFAULT false NOT NULL,
-	"sizeWidth" integer NOT NULL,
-	"sizeHeight" integer NOT NULL,
+	"selected" text DEFAULT 'false' NOT NULL,
+	"sizeWidth" text NOT NULL,
+	"sizeHeight" text NOT NULL,
 	"areas" jsonb DEFAULT '[]' NOT NULL,
-	"hasImage" boolean DEFAULT false NOT NULL,
+	"hasImage" text DEFAULT 'false' NOT NULL,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now() NOT NULL
 );
