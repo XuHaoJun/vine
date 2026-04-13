@@ -1,6 +1,7 @@
 import { tamaguiPlugin } from '@tamagui/vite-plugin'
 import { one } from 'one/vite'
 import { visualizer } from 'rollup-plugin-visualizer'
+import strip from '@rollup/plugin-strip'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 
@@ -24,7 +25,7 @@ export default {
   },
 
   optimizeDeps: {
-    include: ['async-retry'],
+    include: ['async-retry', 'pino', 'quick-format-unescaped'],
     exclude: ['oxc-parser'],
   },
 
@@ -88,6 +89,14 @@ export default {
         },
       },
     }),
+    ...(process.env.NODE_ENV === 'production'
+      ? [
+          strip({
+            functions: ['logger.debug', 'logger.trace'],
+            include: ['**/*.{ts,tsx}'],
+          }),
+        ]
+      : []),
     ...(process.env.ANALYZE
       ? [
           visualizer({

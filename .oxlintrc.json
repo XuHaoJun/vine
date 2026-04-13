@@ -117,14 +117,6 @@
           "no-restricted-imports": "off"
         }
       },
-      {
-        "files": [
-          "apps/web/src/lib/pino-browser.js"
-        ],
-        "rules": {
-          "react/no-this-in-sfc": "off"
-        }
-      }
     ],
   "ignorePatterns": [
     "learn-projects/**",

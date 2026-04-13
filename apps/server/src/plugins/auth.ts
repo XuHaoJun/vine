@@ -128,7 +128,11 @@ function createAuthServer(deps: AuthDeps) {
     logger: {
       level: 'warn',
       log(level, message, ...args) {
-        logger.warn({ extra: args }, message)
+        const entry = args.length > 0 ? { extra: args } : {}
+        if (level === 'error') logger.error(entry, message)
+        else if (level === 'info') logger.info(entry, message)
+        else if (level === 'debug') logger.debug(entry, message)
+        else logger.warn(entry, message)
       },
     },
 
