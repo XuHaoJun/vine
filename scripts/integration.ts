@@ -134,10 +134,12 @@ async function cleanup() {
   try {
     proxyServer?.stop(true)
   } catch {}
-  await $('docker compose kill; docker compose down -v', {
-    silent: true,
-    timeout: 60_000,
-  }).catch(() => {})
+  try {
+    Bun.spawn(['bash', '-c', 'docker compose kill; docker compose down -v'], {
+      stdout: 'inherit',
+      stderr: 'inherit',
+    })
+  } catch {}
 }
 
 // --- main ---
