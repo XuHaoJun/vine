@@ -712,6 +712,10 @@ export function createOAService(deps: OADeps) {
       )
   }
 
+  async function unlinkAllRichMenuFromUsers(oaId: string) {
+    await db.delete(oaRichMenuUserLink).where(eq(oaRichMenuUserLink.oaId, oaId))
+  }
+
   async function getRichMenuIdOfUser(oaId: string, userId: string) {
     const [result] = await db
       .select()
@@ -830,6 +834,7 @@ export function createOAService(deps: OADeps) {
     clearDefaultRichMenu,
     linkRichMenuToUser,
     unlinkRichMenuFromUser,
+    unlinkAllRichMenuFromUsers,
     getRichMenuIdOfUser,
     createRichMenuAlias,
     updateRichMenuAlias,

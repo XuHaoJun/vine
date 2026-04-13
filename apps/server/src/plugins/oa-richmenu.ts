@@ -349,14 +349,18 @@ export async function oaRichMenuPlugin(
           return reply.code(404).send({ message: 'Not found' })
         }
 
-        const ext = 'jpg'
-        const key = `richmenu/${oaId}/${richMenuId}.${ext}`
-        const exists = await drive.exists(key)
-        if (!exists) {
+        const exts = ['jpg', 'png']
+        let file = null
+        for (const ext of exts) {
+          const key = `richmenu/${oaId}/${richMenuId}.${ext}`
+          if (await drive.exists(key)) {
+            file = await drive.get(key)
+            break
+          }
+        }
+        if (!file) {
           return reply.code(404).send({ message: 'Not found' })
         }
-
-        const file = await drive.get(key)
         return reply
           .header('Content-Type', file.mimeType ?? 'image/jpeg')
           .header('Content-Length', file.size)
@@ -700,8 +704,12 @@ export async function oaRichMenuPlugin(
           return reply.code(404).send({ message: 'richmenu not found', details: [] })
         }
 
-        for (const userId of body.userIds) {
-          await oa.linkRichMenuToUser(oaId, userId, body.richMenuId)
+        const batchSize = 50
+        for (let i = 0; i < body.userIds.length; i += batchSize) {
+          const batch = body.userIds.slice(i, i + batchSize)
+          await Promise.all(
+            batch.map((userId) => oa.linkRichMenuToUser(oaId, userId, body.richMenuId)),
+          )
         }
 
         return reply.code(202).send({})
@@ -1009,6 +1017,18 @@ export async function oaRichMenuPlugin(
                 },
               ],
             })
+          }
+        }
+
+        if (hasUnlinkAll) {
+          await oa.unlinkAllRichMenuFromUsers(oaId)
+        } else {
+          for (const op of body.operations) {
+            if (op.type === 'link' && op.to) {
+              await oa.linkRichMenuToUser(oaId, op.to, op.from!)
+            } else if (op.type === 'unlink') {
+              await oa.unlinkRichMenuFromUser(oaId, op.from!)
+            }
           }
         }
 
