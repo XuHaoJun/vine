@@ -5,11 +5,21 @@ import type { schema } from '@vine/db'
 import { oaAccessToken } from '@vine/db/schema-oa'
 import type { DriveService } from '@vine/drive'
 import type { createOAService } from '../services/oa'
+import { validateRichMenu } from '@vine/richmenu-schema'
+import type { RichMenuArea } from '@vine/richmenu-schema'
 
 type RichMenuPluginDeps = {
   oa: ReturnType<typeof createOAService>
   db: NodePgDatabase<typeof schema>
   drive: DriveService
+}
+
+type RichMenuObjectResponse = {
+  size: { width: number; height: number }
+  selected: boolean
+  name: string
+  chatBarText: string
+  areas: RichMenuArea[]
 }
 
 async function extractOaFromToken(
@@ -36,146 +46,6 @@ async function extractOaFromToken(
   return tokenRecord.oaId
 }
 
-type RichMenuArea = {
-  bounds: { x: number; y: number; width: number; height: number }
-  action: {
-    type: string
-    label?: string
-    uri?: string
-    data?: string
-    richMenuAliasId?: string
-    text?: string
-    inputOption?: string
-    displayText?: string
-  }
-}
-
-type RichMenuObject = {
-  size: { width: number; height: number }
-  selected: boolean
-  name: string
-  chatBarText: string
-  areas: RichMenuArea[]
-}
-
-function validateRichMenuObject(
-  obj: unknown,
-): { valid: true } | { valid: false; error: string } {
-  if (typeof obj !== 'object' || obj === null) {
-    return { valid: false, error: 'Rich menu object must be an object' }
-  }
-
-  const rm = obj as Record<string, unknown>
-
-  if (!rm.size || typeof rm.size !== 'object') {
-    return { valid: false, error: 'size is required' }
-  }
-  const size = rm.size as Record<string, unknown>
-  if (typeof size.width !== 'number' || typeof size.height !== 'number') {
-    return { valid: false, error: 'size.width and size.height must be numbers' }
-  }
-  if (size.width < 800 || size.width > 2500) {
-    return { valid: false, error: 'size.width must be between 800 and 2500' }
-  }
-  if (size.height < 250) {
-    return { valid: false, error: 'size.height must be at least 250' }
-  }
-  const aspectRatio = size.width / size.height
-  if (aspectRatio < 1.45) {
-    return {
-      valid: false,
-      error: 'size aspect ratio (width/height) must be at least 1.45',
-    }
-  }
-
-  if (typeof rm.name !== 'string' || rm.name.length > 300) {
-    return { valid: false, error: 'name is required and must be at most 300 characters' }
-  }
-
-  if (typeof rm.chatBarText !== 'string' || rm.chatBarText.length > 14) {
-    return {
-      valid: false,
-      error: 'chatBarText is required and must be at most 14 characters',
-    }
-  }
-
-  if (typeof rm.selected !== 'boolean') {
-    return { valid: false, error: 'selected must be a boolean' }
-  }
-
-  if (!Array.isArray(rm.areas)) {
-    return { valid: false, error: 'areas must be an array' }
-  }
-  if (rm.areas.length > 20) {
-    return { valid: false, error: 'areas must have at most 20 objects' }
-  }
-
-  for (let i = 0; i < rm.areas.length; i++) {
-    const area = rm.areas[i] as Record<string, unknown>
-    if (!area.bounds || typeof area.bounds !== 'object') {
-      return { valid: false, error: `areas[${i}].bounds is required` }
-    }
-    const bounds = area.bounds as Record<string, unknown>
-    if (
-      typeof bounds.x !== 'number' ||
-      typeof bounds.y !== 'number' ||
-      typeof bounds.width !== 'number' ||
-      typeof bounds.height !== 'number'
-    ) {
-      return {
-        valid: false,
-        error: `areas[${i}].bounds must have numeric x, y, width, height`,
-      }
-    }
-    if (bounds.x < 0 || bounds.y < 0 || bounds.width <= 0 || bounds.height <= 0) {
-      return { valid: false, error: `areas[${i}].bounds values must be non-negative` }
-    }
-
-    if (!area.action || typeof area.action !== 'object') {
-      return { valid: false, error: `areas[${i}].action is required` }
-    }
-    const action = area.action as Record<string, unknown>
-    if (typeof action.type !== 'string') {
-      return { valid: false, error: `areas[${i}].action.type is required` }
-    }
-    const validActionTypes = [
-      'postback',
-      'message',
-      'uri',
-      'datetimepicker',
-      'richmenuswitch',
-      'camera',
-      'cameraRoll',
-      'location',
-    ]
-    if (!validActionTypes.includes(action.type)) {
-      return { valid: false, error: `areas[${i}].action.type is invalid` }
-    }
-
-    if (action.type === 'uri' && action.uri) {
-      if (typeof action.uri !== 'string') {
-        return { valid: false, error: `areas[${i}].action.uri must be a string` }
-      }
-      try {
-        new URL(action.uri)
-      } catch {
-        return { valid: false, error: `areas[${i}].action.uri is invalid URI` }
-      }
-    }
-
-    if (action.type === 'richmenuswitch') {
-      if (!action.richMenuAliasId || typeof action.richMenuAliasId !== 'string') {
-        return {
-          valid: false,
-          error: `areas[${i}].action.richMenuAliasId is required for richmenuswitch`,
-        }
-      }
-    }
-  }
-
-  return { valid: true }
-}
-
 function buildRichMenuResponse(rm: {
   richMenuId: string
   name: string
@@ -184,13 +54,13 @@ function buildRichMenuResponse(rm: {
   sizeWidth: string
   sizeHeight: string
   areas: string
-}): RichMenuObject {
+}): RichMenuObjectResponse {
   return {
     size: { width: Number(rm.sizeWidth), height: Number(rm.sizeHeight) },
     selected: rm.selected === 'true',
     name: rm.name,
     chatBarText: rm.chatBarText,
-    areas: JSON.parse(rm.areas) as RichMenuArea[],
+    areas: JSON.parse(rm.areas),
   }
 }
 
@@ -205,21 +75,22 @@ export async function oaRichMenuPlugin(
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const oaId = await extractOaFromToken(request, db)
-        const body = request.body as RichMenuObject
+        const body = request.body
 
-        const validation = validateRichMenuObject(body)
-        if (!validation.valid) {
-          return reply.code(400).send({ message: validation.error })
+        const validation = validateRichMenu(body)
+        if (!validation.success) {
+          const firstError = validation.errors[0]
+          return reply.code(400).send({ message: firstError.message })
         }
 
         const menu = await oa.createRichMenu({
           oaId,
-          name: body.name,
-          chatBarText: body.chatBarText,
-          selected: body.selected,
-          sizeWidth: body.size.width,
-          sizeHeight: body.size.height,
-          areas: body.areas,
+          name: validation.data.name,
+          chatBarText: validation.data.chatBarText,
+          selected: validation.data.selected,
+          sizeWidth: validation.data.size.width,
+          sizeHeight: validation.data.size.height,
+          areas: validation.data.areas,
         })
 
         return reply.send({ richMenuId: menu.richMenuId })
@@ -249,13 +120,14 @@ export async function oaRichMenuPlugin(
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         await extractOaFromToken(request, db)
-        const body = request.body as RichMenuObject
+        const body = request.body
 
-        const validation = validateRichMenuObject(body)
-        if (!validation.valid) {
+        const validation = validateRichMenu(body)
+        if (!validation.success) {
+          const firstError = validation.errors[0]
           return reply.code(400).send({
             message: 'The request body has 1 error(s)',
-            details: [{ message: validation.error, property: '' }],
+            details: [{ message: firstError.message, property: firstError.path }],
           })
         }
 

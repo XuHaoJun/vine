@@ -26,6 +26,7 @@
     "@vine/drive": "workspace:*",
     "@vine/flex-schema": "workspace:*",
     "@vine/proto": "workspace:*",
+    "@vine/richmenu-schema": "workspace:*",
     "@vine/zero-schema": "workspace:*",
     "better-auth": "^1.3.32",
     "drizzle-orm": "1.0.0-beta.9-e89174b",
