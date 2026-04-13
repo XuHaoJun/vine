@@ -121,6 +121,77 @@ function toProtoWebhook(
   }
 }
 
+type DbRichMenuRow = {
+  richMenuId: string
+  name: string
+  chatBarText: string
+  selected: string
+  sizeWidth: string
+  sizeHeight: string
+  areas: string
+  hasImage: string
+}
+
+function toRichMenuItem(m: DbRichMenuRow) {
+  const areas = (
+    JSON.parse(m.areas) as Array<{
+      bounds: { x: number; y: number; width: number; height: number }
+      action: Record<string, string | undefined>
+    }>
+  ).map((a) => ({
+    bounds: {
+      x: a.bounds.x,
+      y: a.bounds.y,
+      width: a.bounds.width,
+      height: a.bounds.height,
+    },
+    action: {
+      type: a.action['type'] ?? '',
+      label: a.action['label'],
+      uri: a.action['uri'],
+      data: a.action['data'],
+      text: a.action['text'],
+      richMenuAliasId: a.action['richMenuAliasId'],
+      inputOption: a.action['inputOption'],
+      displayText: a.action['displayText'],
+    },
+  }))
+  return {
+    richMenuId: m.richMenuId,
+    name: m.name,
+    chatBarText: m.chatBarText,
+    selected: m.selected === 'true',
+    sizeWidth: Number(m.sizeWidth),
+    sizeHeight: Number(m.sizeHeight),
+    areas,
+    hasImage: m.hasImage === 'true',
+  }
+}
+
+function areaToDb(area: {
+  bounds?: { x: number; y: number; width: number; height: number }
+  action?: {
+    type: string
+    label?: string
+    uri?: string
+    data?: string
+    text?: string
+    richMenuAliasId?: string
+    inputOption?: string
+    displayText?: string
+  }
+}) {
+  const action: Record<string, string> = { type: area.action?.type ?? '' }
+  if (area.action?.label) action['label'] = area.action.label
+  if (area.action?.uri) action['uri'] = area.action.uri
+  if (area.action?.data) action['data'] = area.action.data
+  if (area.action?.text) action['text'] = area.action.text
+  if (area.action?.richMenuAliasId) action['richMenuAliasId'] = area.action.richMenuAliasId
+  if (area.action?.inputOption) action['inputOption'] = area.action.inputOption
+  if (area.action?.displayText) action['displayText'] = area.action.displayText
+  return { bounds: area.bounds ?? { x: 0, y: 0, width: 0, height: 0 }, action }
+}
+
 function dbTokenTypeToProto(type: string): AccessTokenType {
   switch (type) {
     case 'short_lived':
@@ -506,6 +577,91 @@ export function oaHandler(deps: OAHandlerDeps) {
           image: imageBytes,
           imageContentType,
         }
+      },
+      async listRichMenus(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const menus = await deps.oa.getRichMenuList(req.officialAccountId)
+        const defaultMenu = await deps.oa.getDefaultRichMenu(req.officialAccountId)
+        return {
+          menus: menus.map(toRichMenuItem),
+          defaultRichMenuId: defaultMenu?.richMenuId,
+        }
+      },
+      async getRichMenu(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const menu = await deps.oa.getRichMenu(req.officialAccountId, req.richMenuId)
+        if (!menu) throw new ConnectError('Rich menu not found', Code.NotFound)
+        let imageBytes: Uint8Array | undefined
+        let imageContentType: string | undefined
+        if (menu.hasImage === 'true') {
+          const key = `richmenu/${req.officialAccountId}/${req.richMenuId}.jpg`
+          const exists = await deps.drive.exists(key)
+          if (exists) {
+            const file = await deps.drive.get(key)
+            imageBytes = new Uint8Array(file.content)
+            imageContentType = file.mimeType ?? 'image/jpeg'
+          }
+        }
+        return { menu: toRichMenuItem(menu), image: imageBytes, imageContentType }
+      },
+      async createRichMenu(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const menu = await deps.oa.createRichMenu({
+          oaId: req.officialAccountId,
+          name: req.name,
+          chatBarText: req.chatBarText,
+          selected: req.selected,
+          sizeWidth: req.sizeWidth,
+          sizeHeight: req.sizeHeight,
+          areas: req.areas.map(areaToDb),
+        })
+        return { richMenuId: menu.richMenuId }
+      },
+      async updateRichMenu(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        await deps.oa.updateRichMenu(req.officialAccountId, req.richMenuId, {
+          name: req.name,
+          chatBarText: req.chatBarText,
+          selected: req.selected,
+          sizeWidth: req.sizeWidth,
+          sizeHeight: req.sizeHeight,
+          areas: req.areas.map(areaToDb),
+        })
+        return {}
+      },
+      async deleteRichMenu(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        await deps.oa.deleteRichMenu(req.officialAccountId, req.richMenuId)
+        const key = `richmenu/${req.officialAccountId}/${req.richMenuId}.jpg`
+        const exists = await deps.drive.exists(key)
+        if (exists) await deps.drive.delete(key)
+        return {}
+      },
+      async setDefaultRichMenu(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        await deps.oa.setDefaultRichMenu(req.officialAccountId, req.richMenuId)
+        return {}
+      },
+      async clearDefaultRichMenu(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        await deps.oa.clearDefaultRichMenu(req.officialAccountId)
+        return {}
+      },
+      async uploadRichMenuImage(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const key = `richmenu/${req.officialAccountId}/${req.richMenuId}.jpg`
+        const buffer = Buffer.from(req.image)
+        await deps.drive.put(key, buffer, req.contentType)
+        await deps.oa.setRichMenuImage(req.officialAccountId, req.richMenuId, true)
+        return {}
       },
     }
 
