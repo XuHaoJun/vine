@@ -35,16 +35,21 @@ async function $(cmd: string, opts?: { silent?: boolean; timeout?: number }) {
   processes.push(proc)
 
   const timeoutMs = opts?.timeout || 60_000
+  let timerId: ReturnType<typeof setTimeout>
   const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(() => {
+    timerId = setTimeout(() => {
       proc.kill()
       reject(new Error(`command timed out after ${timeoutMs}ms: ${cmd}`))
     }, timeoutMs)
   })
 
-  const exitCode = await Promise.race([proc.exited, timeoutPromise])
-  if (exitCode !== 0) {
-    throw new Error(`command failed with exit ${exitCode}: ${cmd}`)
+  try {
+    const exitCode = await Promise.race([proc.exited, timeoutPromise])
+    if (exitCode !== 0) {
+      throw new Error(`command failed with exit ${exitCode}: ${cmd}`)
+    }
+  } finally {
+    clearTimeout(timerId!)
   }
 }
 
