@@ -117,8 +117,8 @@ export const AreaOverlay = memo(
         >
           <YStack
             position="absolute"
-            top={2}
-            right={2}
+            t={2}
+            r={2}
             width={16}
             height={16}
             rounded="$10"
@@ -127,7 +127,7 @@ export const AreaOverlay = memo(
             justify="center"
             onPress={() => onDelete(area.id)}
             cursor="pointer"
-            zIndex={10}
+            z={10}
           >
             <SizableText size="$1" color="white" lineHeight={16}>
               ×
@@ -143,8 +143,8 @@ export const AreaOverlay = memo(
           <GestureDetector gesture={resizeGesture}>
             <YStack
               position="absolute"
-              bottom={0}
-              right={0}
+              b={0}
+              r={0}
               width={12}
               height={12}
               bg={borderColor}
