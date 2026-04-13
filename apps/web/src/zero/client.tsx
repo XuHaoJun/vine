@@ -62,11 +62,10 @@ const ProvideZeroImpl = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
-      logger.info(`[zero] ${disable ? 'disabled' : 'enabled'}`, {
-        userId,
-        ZERO_SERVER_URL,
-        kvStore,
-      })
+      logger.info(
+        { userId, ZERO_SERVER_URL, kvStore },
+        `[zero] ${disable ? 'disabled' : 'enabled'}`,
+      )
     }
   }, [disable, userId, kvStore])
 
@@ -226,7 +225,7 @@ const ZeroConnectionMonitor = () => {
     })
 
     const unsub2 = zeroEvents.listen((event) => {
-      logger.warn('zero event', event)
+      logger.warn({ event }, 'zero event')
     })
 
     return () => {
