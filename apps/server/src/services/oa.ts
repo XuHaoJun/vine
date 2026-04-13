@@ -637,6 +637,32 @@ export function createOAService(deps: OADeps) {
     return menu
   }
 
+  async function updateRichMenu(
+    oaId: string,
+    richMenuId: string,
+    input: {
+      name: string
+      chatBarText: string
+      selected: boolean
+      sizeWidth: number
+      sizeHeight: number
+      areas: unknown[]
+    },
+  ) {
+    await db
+      .update(oaRichMenu)
+      .set({
+        name: input.name,
+        chatBarText: input.chatBarText,
+        selected: input.selected ? 'true' : 'false',
+        sizeWidth: String(input.sizeWidth),
+        sizeHeight: String(input.sizeHeight),
+        areas: JSON.stringify(input.areas),
+        updatedAt: new Date().toISOString(),
+      })
+      .where(and(eq(oaRichMenu.oaId, oaId), eq(oaRichMenu.richMenuId, richMenuId)))
+  }
+
   async function getRichMenu(oaId: string, richMenuId: string) {
     const [menu] = await db
       .select()
@@ -825,6 +851,7 @@ export function createOAService(deps: OADeps) {
     simulatorSendFlexMessage,
     sendOAMessage,
     createRichMenu,
+    updateRichMenu,
     getRichMenu,
     getRichMenuList,
     deleteRichMenu,
