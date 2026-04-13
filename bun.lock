@@ -202,6 +202,16 @@
         "oxfmt": "^0.16.0",
       },
     },
+    "packages/richmenu-schema": {
+      "name": "@vine/richmenu-schema",
+      "version": "0.0.1",
+      "dependencies": {
+        "valibot": "^1.1.0",
+      },
+      "devDependencies": {
+        "vitest": "^1.0.0",
+      },
+    },
     "packages/zero-schema": {
       "name": "@vine/zero-schema",
       "version": "0.0.1",
@@ -1861,6 +1871,8 @@
     "@vine/line-flex": ["@vine/line-flex@workspace:packages/line-flex"],
 
     "@vine/proto": ["@vine/proto@workspace:packages/proto"],
+
+    "@vine/richmenu-schema": ["@vine/richmenu-schema@workspace:packages/richmenu-schema"],
 
     "@vine/server": ["@vine/server@workspace:apps/server"],
 
