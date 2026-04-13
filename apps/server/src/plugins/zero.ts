@@ -5,6 +5,7 @@ import { createZeroServer } from 'on-zero/server'
 
 import { models, queries, schema, createServerActions } from '@vine/zero-schema'
 import { toWebRequest } from '../utils'
+import { logger } from '../lib/logger'
 import { createAuthServer } from './auth'
 
 const ZERO_UPSTREAM_DB = process.env['ZERO_UPSTREAM_DB']
@@ -40,7 +41,7 @@ export async function zeroPlugin(fastify: FastifyInstance, deps: ZeroPluginDeps)
       const { response } = await zero.handleQueryRequest({ authData, request: webReq })
       reply.send(response)
     } catch (err) {
-      console.error('[zero] pull error', err)
+      logger.error({ err }, '[zero] pull error')
       reply.status(500).send({ err: String(err) })
     }
   })
@@ -52,7 +53,7 @@ export async function zeroPlugin(fastify: FastifyInstance, deps: ZeroPluginDeps)
       const { response } = await zero.handleMutationRequest({ authData, request: webReq })
       reply.send(response)
     } catch (err) {
-      console.error('[zero] push error', err)
+      logger.error({ err }, '[zero] push error')
       reply.status(500).send({ err: String(err) })
     }
   })

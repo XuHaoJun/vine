@@ -25,6 +25,7 @@ import {
   showClientDataErrorOnce,
 } from './helpers/showClientDataError'
 import { createKVStore } from './storage'
+import { logger } from '~/lib/logger'
 
 export const {
   usePermission,
@@ -61,7 +62,7 @@ const ProvideZeroImpl = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
-      console.info(`[zero] ${disable ? 'disabled' : 'enabled'}`, {
+      logger.info(`[zero] ${disable ? 'disabled' : 'enabled'}`, {
         userId,
         ZERO_SERVER_URL,
         kvStore,
@@ -100,7 +101,7 @@ const ProvideZeroImpl = ({ children }: { children: ReactNode }) => {
         const description =
           reason ||
           'The local data needed to keep this page in sync is no longer available.'
-        console.error('[zero] client state not found', { reason: description })
+        logger.error({ reason: description }, '[zero] client state not found')
         setZeroDisabledByError(true)
         showClientDataErrorOnce({
           key: 'zero-client-state-not-found',
@@ -115,7 +116,7 @@ const ProvideZeroImpl = ({ children }: { children: ReactNode }) => {
         ]
           .filter(Boolean)
           .join(' ')
-        console.error('[zero] update needed', reason)
+        logger.error({ reason }, '[zero] update needed')
         setZeroDisabledByError(true)
         showClientDataErrorOnce({
           key: 'zero-update-needed',
@@ -142,7 +143,10 @@ class ZeroErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, info: any) {
-    console.error('[zero] error boundary caught:', error.message, info?.componentStack)
+    logger.error(
+      { err: error, componentStack: info?.componentStack },
+      '[zero] error boundary caught',
+    )
   }
 
   render() {
@@ -222,7 +226,7 @@ const ZeroConnectionMonitor = () => {
     })
 
     const unsub2 = zeroEvents.listen((event) => {
-      console.warn('zero event', event)
+      logger.warn('zero event', event)
     })
 
     return () => {

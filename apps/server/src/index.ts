@@ -1,3 +1,4 @@
+import { logger } from './lib/logger'
 import cors from '@fastify/cors'
 import formbody from '@fastify/formbody'
 import { fastifyConnectPlugin } from '@connectrpc/connect-fastify'
@@ -58,4 +59,4 @@ app.get('/healthz', async () => ({ status: 'ok', timestamp: new Date().toISOStri
 
 const port = Number(process.env['PORT'] ?? 3001)
 await app.listen({ port, host: '0.0.0.0' })
-console.info(`[server] listening on http://localhost:${port}`)
+logger.info(`[server] listening on http://localhost:${port}`)
