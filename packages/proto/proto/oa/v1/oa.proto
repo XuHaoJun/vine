@@ -320,6 +320,138 @@ message SimulatorSendFlexMessageRequest {
 
 message SimulatorSendFlexMessageResponse {}
 
+// ── Rich Menu (user-facing) ──
+
+message RichMenuArea {
+  message Bounds {
+    int32 x = 1;
+    int32 y = 2;
+    int32 width = 3;
+    int32 height = 4;
+  }
+  message Action {
+    string type = 1;
+    optional string label = 2;
+    optional string uri = 3;
+    optional string data = 4;
+    optional string text = 5;
+    optional string rich_menu_alias_id = 6;
+    optional string input_option = 7;
+    optional string display_text = 8;
+  }
+  Bounds bounds = 1;
+  Action action = 2;
+}
+
+message RichMenuData {
+  string rich_menu_id = 1;
+  string name = 2;
+  string chat_bar_text = 3;
+  bool selected = 4;
+  int32 size_width = 5;
+  int32 size_height = 6;
+  repeated RichMenuArea areas = 7;
+}
+
+message GetActiveRichMenuRequest {
+  string official_account_id = 1;
+}
+
+message GetActiveRichMenuResponse {
+  optional RichMenuData rich_menu = 1;
+  optional bytes image = 2;
+  optional string image_content_type = 3;
+}
+
+// ── Rich Menu (admin) ──
+
+message RichMenuItem {
+  string rich_menu_id = 1;
+  string name = 2;
+  string chat_bar_text = 3;
+  bool selected = 4;
+  int32 size_width = 5;
+  int32 size_height = 6;
+  repeated RichMenuArea areas = 7;
+  bool has_image = 8;
+}
+
+message ListRichMenusRequest {
+  string official_account_id = 1;
+}
+
+message ListRichMenusResponse {
+  repeated RichMenuItem menus = 1;
+  optional string default_rich_menu_id = 2;
+}
+
+message GetRichMenuRequest {
+  string official_account_id = 1;
+  string rich_menu_id = 2;
+}
+
+message GetRichMenuResponse {
+  RichMenuItem menu = 1;
+  optional bytes image = 2;
+  optional string image_content_type = 3;
+}
+
+message CreateRichMenuRequest {
+  string official_account_id = 1;
+  string name = 2;
+  string chat_bar_text = 3;
+  bool selected = 4;
+  int32 size_width = 5;
+  int32 size_height = 6;
+  repeated RichMenuArea areas = 7;
+}
+
+message CreateRichMenuResponse {
+  string rich_menu_id = 1;
+}
+
+message UpdateRichMenuRequest {
+  string official_account_id = 1;
+  string rich_menu_id = 2;
+  string name = 3;
+  string chat_bar_text = 4;
+  bool selected = 5;
+  int32 size_width = 6;
+  int32 size_height = 7;
+  repeated RichMenuArea areas = 8;
+}
+
+message UpdateRichMenuResponse {}
+
+message DeleteRichMenuRequest {
+  string official_account_id = 1;
+  string rich_menu_id = 2;
+}
+
+message DeleteRichMenuResponse {}
+
+message SetDefaultRichMenuRequest {
+  string official_account_id = 1;
+  string rich_menu_id = 2;
+}
+
+message SetDefaultRichMenuResponse {}
+
+message ClearDefaultRichMenuRequest {
+  string official_account_id = 1;
+}
+
+message ClearDefaultRichMenuResponse {}
+
+message UploadRichMenuImageRequest {
+  string official_account_id = 1;
+  string rich_menu_id = 2;
+  bytes image = 3;
+  string content_type = 4;
+}
+
+message UploadRichMenuImageResponse {}
+
 // ── Service ──
 
 service OAService {
@@ -349,4 +481,13 @@ service OAService {
   rpc IsOAFriend(IsOAFriendRequest) returns (IsOAFriendResponse);
   rpc ResolveOfficialAccount(ResolveOfficialAccountRequest) returns (ResolveOfficialAccountResponse);
   rpc SimulatorSendFlexMessage(SimulatorSendFlexMessageRequest) returns (SimulatorSendFlexMessageResponse);
+  rpc GetActiveRichMenu(GetActiveRichMenuRequest) returns (GetActiveRichMenuResponse);
+  rpc ListRichMenus(ListRichMenusRequest) returns (ListRichMenusResponse);
+  rpc GetRichMenu(GetRichMenuRequest) returns (GetRichMenuResponse);
+  rpc CreateRichMenu(CreateRichMenuRequest) returns (CreateRichMenuResponse);
+  rpc UpdateRichMenu(UpdateRichMenuRequest) returns (UpdateRichMenuResponse);
+  rpc DeleteRichMenu(DeleteRichMenuRequest) returns (DeleteRichMenuResponse);
+  rpc SetDefaultRichMenu(SetDefaultRichMenuRequest) returns (SetDefaultRichMenuResponse);
+  rpc ClearDefaultRichMenu(ClearDefaultRichMenuRequest) returns (ClearDefaultRichMenuResponse);
+  rpc UploadRichMenuImage(UploadRichMenuImageRequest) returns (UploadRichMenuImageResponse);
 }

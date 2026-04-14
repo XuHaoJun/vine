@@ -1,5 +1,6 @@
 import { useState, useEffect, type ReactNode } from 'react'
 import { AlertDialog, Button, XStack, YStack } from 'tamagui'
+import { logger } from '~/lib/logger'
 
 type DialogState = {
   type: 'error' | 'confirm' | null
@@ -115,7 +116,7 @@ export const showError = (error: unknown, title = 'Error') => {
   if (globalShowDialog) {
     globalShowDialog({ type: 'error', title, description })
   } else {
-    console.error(`${title}: ${description}`)
+    logger.error(`${title}: ${description}`)
   }
 }
 
@@ -126,7 +127,7 @@ export const dialogConfirm = async (props: {
   const { title = 'Confirm', description = 'Are you sure?' } = props
 
   if (!globalShowDialog) {
-    console.warn('DialogProvider not mounted, returning false')
+    logger.warn('DialogProvider not mounted, returning false')
     return false
   }
 

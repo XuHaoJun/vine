@@ -24,6 +24,8 @@
     "test": {
       "dependsOn": ["^build"]
     },
+    "test:unit": {},
+    "test:integration": {},
     "typecheck": {
       "dependsOn": ["^build"]
     },

@@ -1,3 +1,4 @@
+import { logger } from './lib/logger'
 import cors from '@fastify/cors'
 import formbody from '@fastify/formbody'
 import { fastifyConnectPlugin } from '@connectrpc/connect-fastify'
@@ -10,6 +11,7 @@ import { connectRoutes } from './connect/routes'
 import { createAuthServer, authPlugin } from './plugins/auth'
 import { createZeroService, zeroPlugin } from './plugins/zero'
 import { oaMessagingPlugin } from './plugins/oa-messaging'
+import { oaRichMenuPlugin } from './plugins/oa-richmenu'
 import { oaWebhookPlugin } from './plugins/oa-webhook'
 import { createOAService } from './services/oa'
 import { createFsDriveService } from '@vine/drive'
@@ -36,11 +38,11 @@ const drive = createFsDriveService({
 
 // ConnectRPC routes (GreeterService, OAService, etc.)
 await app.register(fastifyConnectPlugin, {
-  routes: connectRoutes({ oa, auth }),
+  routes: connectRoutes({ oa, auth, drive }),
 })
 
 // Seed test data (only in dev with VITE_DEMO_MODE=1)
-await ensureSeed(database, db)
+await ensureSeed(database, db, drive)
 const zero = createZeroService({
   auth,
   zeroUpstreamDb: process.env['ZERO_UPSTREAM_DB'] ?? '',
@@ -50,10 +52,11 @@ const zero = createZeroService({
 await authPlugin(app, { auth, db })
 await zeroPlugin(app, { auth, zero })
 await oaMessagingPlugin(app, { oa, db, drive })
+await oaRichMenuPlugin(app, { oa, db, drive })
 await oaWebhookPlugin(app, { oa, db })
 
 app.get('/healthz', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))
 
 const port = Number(process.env['PORT'] ?? 3001)
 await app.listen({ port, host: '0.0.0.0' })
-console.info(`[server] listening on http://localhost:${port}`)
+logger.info(`[server] listening on http://localhost:${port}`)

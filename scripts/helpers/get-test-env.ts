@@ -12,6 +12,7 @@ export async function getTestEnv() {
   return {
     CI: 'true',
     DO_NOT_TRACK: '1',
+    NODE_ENV: 'development',
     ZERO_LOG_LEVEL: process.env.DEBUG_BACKEND ? 'info' : 'warn',
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET || 'test-secret',
     BETTER_AUTH_URL: 'http://localhost:8081',

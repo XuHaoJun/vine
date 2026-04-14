@@ -10,8 +10,9 @@ import '~/features/storage/setupStorage'
 import '~/helpers/crypto/polyfill'
 
 import { setupDev } from 'tamagui'
+import { logger } from '~/lib/logger'
 
-console.info(`[native] start (SHA: ${process.env.GIT_SHA})`)
+logger.info(`[native] start (SHA: ${process.env.GIT_SHA})`)
 
 if (process.env.NODE_ENV === 'development') {
   setupDev({

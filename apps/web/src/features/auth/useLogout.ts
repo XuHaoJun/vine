@@ -1,6 +1,7 @@
 import { authClient, clearAuthClientToken } from '~/features/auth/client/authClient'
 import { dialogConfirm, showError } from '~/interface/dialogs/actions'
 import { queryClient } from '~/query'
+import { logger } from '~/lib/logger'
 
 export const useLogout = () => {
   const logout = async (options?: { skipConfirm?: boolean }) => {
@@ -21,7 +22,7 @@ export const useLogout = () => {
       // manual navigation causes double navigation on native
       return true
     } catch (error) {
-      console.error('logout error:', error)
+      logger.error({ err: error }, 'logout error')
       showError(error, 'Logout')
       return false
     }

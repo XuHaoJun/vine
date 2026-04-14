@@ -10,10 +10,7 @@ import { authState } from './authClient'
  * breaks `@connectrpc/connect-web` (validateResponse calls `headers.get`).
  */
 const connectFetch = Object.assign(
-  (
-    input: Parameters<typeof fetch>[0],
-    init?: Parameters<typeof fetch>[1],
-  ): Promise<Response> => {
+  (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     const headers = new Headers(init?.headers)
     // Opaque session id from Better Auth (`session` table), not a JWT. The server
     // `bearer()` plugin accepts `Authorization: Bearer <sessionToken>` and maps it
@@ -26,7 +23,7 @@ const connectFetch = Object.assign(
     return fetch(input, { ...init, headers })
   },
   globalThis.fetch,
-) satisfies typeof fetch
+)
 
 export const connectTransport = createConnectTransport({
   baseUrl: SERVER_URL,
