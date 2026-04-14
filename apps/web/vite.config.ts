@@ -32,6 +32,7 @@ export default {
   ssr: {
     noExternal: true,
     external: [
+      'pino',
       'on-zero',
       '@vxrn/mdx',
       '@rocicorp/zero',
