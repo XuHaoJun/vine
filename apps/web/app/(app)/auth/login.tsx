@@ -196,7 +196,7 @@ export const LoginPage = () => {
                   value={value}
                   onChangeText={onChange}
                   placeholder="Password"
-                  secureTextEntry={!showPassword}
+                  type={!showPassword ? 'password' : 'text'}
                   error={error?.message}
                   onSubmitEditing={() => handleSubmit(onSubmit)()}
                 />
