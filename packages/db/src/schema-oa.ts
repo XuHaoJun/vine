@@ -1,4 +1,13 @@
-import { index, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import {
+  boolean,
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core'
 
 export const oaProvider = pgTable('oaProvider', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -91,11 +100,11 @@ export const oaRichMenu = pgTable(
     richMenuId: text('richMenuId').notNull(),
     name: text('name').notNull(),
     chatBarText: text('chatBarText').notNull(),
-    selected: text('selected').notNull().default('false'),
-    sizeWidth: text('sizeWidth').notNull(),
-    sizeHeight: text('sizeHeight').notNull(),
-    areas: text('areas').notNull().default('[]'),
-    hasImage: text('hasImage').notNull().default('false'),
+    selected: boolean('selected').notNull().default(false),
+    sizeWidth: integer('sizeWidth').notNull(),
+    sizeHeight: integer('sizeHeight').notNull(),
+    areas: jsonb('areas').notNull().default([]),
+    hasImage: boolean('hasImage').notNull().default(false),
     createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
     updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
   },

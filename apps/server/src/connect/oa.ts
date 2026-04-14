@@ -125,16 +125,16 @@ type DbRichMenuRow = {
   richMenuId: string
   name: string
   chatBarText: string
-  selected: string
-  sizeWidth: string
-  sizeHeight: string
-  areas: string
-  hasImage: string
+  selected: boolean
+  sizeWidth: number
+  sizeHeight: number
+  areas: unknown
+  hasImage: boolean
 }
 
 function toRichMenuItem(m: DbRichMenuRow) {
   const areas = (
-    JSON.parse(m.areas) as Array<{
+    m.areas as Array<{
       bounds: { x: number; y: number; width: number; height: number }
       action: Record<string, string | undefined>
     }>
@@ -160,11 +160,11 @@ function toRichMenuItem(m: DbRichMenuRow) {
     richMenuId: m.richMenuId,
     name: m.name,
     chatBarText: m.chatBarText,
-    selected: m.selected === 'true',
-    sizeWidth: Number(m.sizeWidth),
-    sizeHeight: Number(m.sizeHeight),
+    selected: m.selected,
+    sizeWidth: m.sizeWidth,
+    sizeHeight: m.sizeHeight,
     areas,
-    hasImage: m.hasImage === 'true',
+    hasImage: m.hasImage,
   }
 }
 
@@ -186,7 +186,8 @@ function areaToDb(area: {
   if (area.action?.uri) action['uri'] = area.action.uri
   if (area.action?.data) action['data'] = area.action.data
   if (area.action?.text) action['text'] = area.action.text
-  if (area.action?.richMenuAliasId) action['richMenuAliasId'] = area.action.richMenuAliasId
+  if (area.action?.richMenuAliasId)
+    action['richMenuAliasId'] = area.action.richMenuAliasId
   if (area.action?.inputOption) action['inputOption'] = area.action.inputOption
   if (area.action?.displayText) action['displayText'] = area.action.displayText
   return { bounds: area.bounds ?? { x: 0, y: 0, width: 0, height: 0 }, action }
@@ -507,37 +508,14 @@ export function oaHandler(deps: OAHandlerDeps) {
           return {}
         }
 
-        const areas =
-          typeof menu.areas === 'string'
-            ? (JSON.parse(menu.areas) as Array<{
-                bounds: { x: number; y: number; width: number; height: number }
-                action: Record<string, string | undefined>
-              }>)
-            : (menu.areas as Array<{
-                bounds: { x: number; y: number; width: number; height: number }
-                action: Record<string, string | undefined>
-              }>)
-
-        const hasImage =
-          typeof menu.hasImage === 'string'
-            ? menu.hasImage === 'true'
-            : Boolean(menu.hasImage)
-        const selected =
-          typeof menu.selected === 'string'
-            ? menu.selected === 'true'
-            : Boolean(menu.selected)
-        const sizeWidth =
-          typeof menu.sizeWidth === 'string'
-            ? parseInt(menu.sizeWidth, 10)
-            : menu.sizeWidth
-        const sizeHeight =
-          typeof menu.sizeHeight === 'string'
-            ? parseInt(menu.sizeHeight, 10)
-            : menu.sizeHeight
+        const areas = menu.areas as Array<{
+          bounds: { x: number; y: number; width: number; height: number }
+          action: Record<string, string | undefined>
+        }>
 
         let imageBytes: Uint8Array | undefined
         let imageContentType: string | undefined
-        if (hasImage) {
+        if (menu.hasImage) {
           const key = `richmenu/${oaId}/${richMenuId}.jpg`
           const exists = await deps.drive.exists(key)
           if (exists) {
@@ -552,9 +530,9 @@ export function oaHandler(deps: OAHandlerDeps) {
             richMenuId: menu.richMenuId,
             name: menu.name,
             chatBarText: menu.chatBarText,
-            selected,
-            sizeWidth,
-            sizeHeight,
+            selected: menu.selected,
+            sizeWidth: menu.sizeWidth,
+            sizeHeight: menu.sizeHeight,
             areas: areas.map((a) => ({
               bounds: {
                 x: a.bounds.x,
@@ -595,7 +573,7 @@ export function oaHandler(deps: OAHandlerDeps) {
         if (!menu) throw new ConnectError('Rich menu not found', Code.NotFound)
         let imageBytes: Uint8Array | undefined
         let imageContentType: string | undefined
-        if (menu.hasImage === 'true') {
+        if (menu.hasImage) {
           const key = `richmenu/${req.officialAccountId}/${req.richMenuId}.jpg`
           const exists = await deps.drive.exists(key)
           if (exists) {

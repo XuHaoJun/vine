@@ -627,11 +627,11 @@ export function createOAService(deps: OADeps) {
         richMenuId,
         name: input.name,
         chatBarText: input.chatBarText,
-        selected: input.selected ? 'true' : 'false',
-        sizeWidth: String(input.sizeWidth),
-        sizeHeight: String(input.sizeHeight),
-        areas: JSON.stringify(input.areas),
-        hasImage: 'false',
+        selected: input.selected,
+        sizeWidth: input.sizeWidth,
+        sizeHeight: input.sizeHeight,
+        areas: input.areas,
+        hasImage: false,
       })
       .returning()
     return menu
@@ -654,10 +654,10 @@ export function createOAService(deps: OADeps) {
       .set({
         name: input.name,
         chatBarText: input.chatBarText,
-        selected: input.selected ? 'true' : 'false',
-        sizeWidth: String(input.sizeWidth),
-        sizeHeight: String(input.sizeHeight),
-        areas: JSON.stringify(input.areas),
+        selected: input.selected,
+        sizeWidth: input.sizeWidth,
+        sizeHeight: input.sizeHeight,
+        areas: input.areas,
         updatedAt: new Date().toISOString(),
       })
       .where(and(eq(oaRichMenu.oaId, oaId), eq(oaRichMenu.richMenuId, richMenuId)))
@@ -685,7 +685,7 @@ export function createOAService(deps: OADeps) {
   async function setRichMenuImage(oaId: string, richMenuId: string, hasImage: boolean) {
     await db
       .update(oaRichMenu)
-      .set({ hasImage: hasImage ? 'true' : 'false', updatedAt: new Date().toISOString() })
+      .set({ hasImage, updatedAt: new Date().toISOString() })
       .where(and(eq(oaRichMenu.oaId, oaId), eq(oaRichMenu.richMenuId, richMenuId)))
   }
 

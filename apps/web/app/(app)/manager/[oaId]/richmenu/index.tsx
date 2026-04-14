@@ -46,12 +46,23 @@ const RichMenuThumbnail = memo(
       )
     }
 
-    const base64 = btoa(Array.from(data.image).map((b) => String.fromCharCode(b)).join(''))
+    const base64 = btoa(
+      Array.from(data.image)
+        .map((b) => String.fromCharCode(b))
+        .join(''),
+    )
     const mimeType = data.imageContentType || 'image/jpeg'
     const uri = `data:${mimeType};base64,${base64}`
 
     return (
-      <YStack width={80} height={46} rounded="$2" overflow="hidden" bg="$color3" shrink={0}>
+      <YStack
+        width={80}
+        height={46}
+        rounded="$2"
+        overflow="hidden"
+        bg="$color3"
+        shrink={0}
+      >
         <Image source={{ uri }} style={{ width: 80, height: 46 }} resizeMode="cover" />
       </YStack>
     )
@@ -108,7 +119,9 @@ export const RichMenuListPage = memo(() => {
 
   const menus = data?.menus ?? []
   const defaultId = data?.defaultRichMenuId
-  const defaultMenu = defaultId ? menus.find((m) => m.richMenuId === defaultId) : undefined
+  const defaultMenu = defaultId
+    ? menus.find((m) => m.richMenuId === defaultId)
+    : undefined
   const otherMenus = menus.filter((m) => m.richMenuId !== defaultId)
 
   return (
@@ -123,7 +136,9 @@ export const RichMenuListPage = memo(() => {
             Create custom menus shown in the chat screen
           </SizableText>
         </YStack>
-        <Button onPress={() => router.navigate(`/manager/${oaId}/richmenu/create` as any)}>
+        <Button
+          onPress={() => router.navigate(`/manager/${oaId}/richmenu/create` as any)}
+        >
           + Create
         </Button>
       </XStack>
@@ -150,7 +165,12 @@ export const RichMenuListPage = memo(() => {
       {/* Default menu */}
       {defaultMenu && (
         <YStack gap="$2">
-          <SizableText size="$1" fontWeight="700" color="$color9" textTransform="uppercase">
+          <SizableText
+            size="$1"
+            fontWeight="700"
+            color="$color9"
+            textTransform="uppercase"
+          >
             Default menu
           </SizableText>
           <MenuCard
@@ -158,7 +178,9 @@ export const RichMenuListPage = memo(() => {
             oaId={oaId}
             isDefault
             onEdit={() =>
-              router.navigate(`/manager/${oaId}/richmenu/${defaultMenu.richMenuId}` as any)
+              router.navigate(
+                `/manager/${oaId}/richmenu/${defaultMenu.richMenuId}` as any,
+              )
             }
             onDelete={() => handleDelete(defaultMenu.richMenuId, defaultMenu.name)}
           />
@@ -168,7 +190,12 @@ export const RichMenuListPage = memo(() => {
       {/* Other menus */}
       {otherMenus.length > 0 && (
         <YStack gap="$2">
-          <SizableText size="$1" fontWeight="700" color="$color9" textTransform="uppercase">
+          <SizableText
+            size="$1"
+            fontWeight="700"
+            color="$color9"
+            textTransform="uppercase"
+          >
             Other menus
           </SizableText>
           {otherMenus.map((menu) => (
@@ -191,7 +218,15 @@ export const RichMenuListPage = memo(() => {
 })
 
 type MenuCardProps = {
-  menu: { richMenuId: string; name: string; areas: unknown[]; sizeWidth: number; sizeHeight: number; chatBarText: string; hasImage: boolean }
+  menu: {
+    richMenuId: string
+    name: string
+    areas: unknown[]
+    sizeWidth: number
+    sizeHeight: number
+    chatBarText: string
+    hasImage: boolean
+  }
   oaId: string
   isDefault: boolean
   onSetDefault?: () => void
@@ -210,25 +245,25 @@ const MenuCard = memo(
       items="center"
       bg={isDefault ? '$green1' : '$background'}
     >
-      <RichMenuThumbnail oaId={oaId} richMenuId={menu.richMenuId} hasImage={menu.hasImage} />
+      <RichMenuThumbnail
+        oaId={oaId}
+        richMenuId={menu.richMenuId}
+        hasImage={menu.hasImage}
+      />
 
       <YStack flex={1} gap="$1">
         <SizableText size="$3" fontWeight="600" color="$color12">
           {menu.name}
         </SizableText>
         <SizableText size="$1" color="$color10">
-          {menu.areas.length} areas · {menu.sizeWidth}×{menu.sizeHeight} · "{menu.chatBarText}"
+          {menu.areas.length} areas · {menu.sizeWidth}×{menu.sizeHeight} · "
+          {menu.chatBarText}"
         </SizableText>
       </YStack>
 
       <XStack gap="$2" items="center">
         {isDefault && (
-          <YStack
-            px="$2"
-            py="$1"
-            rounded="$2"
-            bg="$green3"
-          >
+          <YStack px="$2" py="$1" rounded="$2" bg="$green3">
             <SizableText size="$1" fontWeight="700" color="$green10">
               DEFAULT
             </SizableText>

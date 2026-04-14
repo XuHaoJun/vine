@@ -54,17 +54,17 @@ function buildRichMenuResponse(rm: {
   richMenuId: string
   name: string
   chatBarText: string
-  selected: string
-  sizeWidth: string
-  sizeHeight: string
-  areas: string
+  selected: boolean
+  sizeWidth: number
+  sizeHeight: number
+  areas: unknown
 }): RichMenuObjectResponse {
   return {
-    size: { width: Number(rm.sizeWidth), height: Number(rm.sizeHeight) },
-    selected: rm.selected === 'true',
+    size: { width: rm.sizeWidth, height: rm.sizeHeight },
+    selected: rm.selected,
     name: rm.name,
     chatBarText: rm.chatBarText,
-    areas: JSON.parse(rm.areas),
+    areas: rm.areas as RichMenuArea[],
   }
 }
 
@@ -182,7 +182,7 @@ export async function oaRichMenuPlugin(
         return reply.code(404).send({ message: 'Not found' })
       }
 
-      if (!menu.hasImage || menu.hasImage === 'false') {
+      if (!menu.hasImage) {
         return reply.code(404).send({ message: 'Not found' })
       }
 
@@ -270,7 +270,7 @@ export async function oaRichMenuPlugin(
         return reply.code(404).send({ message: 'Not found' })
       }
 
-      if (menu.hasImage === 'false') {
+      if (!menu.hasImage) {
         return reply.code(400).send({
           message: 'must upload richmenu image before applying it to user',
           details: [],
@@ -327,7 +327,7 @@ export async function oaRichMenuPlugin(
         return reply.code(404).send({ message: 'Not found' })
       }
 
-      if (menu.hasImage === 'false') {
+      if (!menu.hasImage) {
         return reply.code(400).send({
           message: 'must upload richmenu image before applying it to user',
           details: [],
@@ -457,7 +457,7 @@ export async function oaRichMenuPlugin(
         return reply.code(400).send({ message: 'richmenu not found', details: [] })
       }
 
-      if (menu.hasImage === 'false') {
+      if (!menu.hasImage) {
         return reply.code(400).send({ message: 'richmenu not found', details: [] })
       }
 
@@ -484,7 +484,7 @@ export async function oaRichMenuPlugin(
       }
 
       const menu = await oa.getRichMenu(oaId, body.richMenuId)
-      if (!menu || menu.hasImage === 'false') {
+      if (!menu || !menu.hasImage) {
         return reply.code(400).send({ message: 'richmenu not found', details: [] })
       }
 

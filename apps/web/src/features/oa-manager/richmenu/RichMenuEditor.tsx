@@ -71,7 +71,9 @@ export const RichMenuEditor = memo((props: Props) => {
 
   const [areas, setAreas] = useState<Area[]>(initialState.areas)
   const [selectedAreaId, setSelectedAreaId] = useState<string | null>(null)
-  const [imageDataUrl, setImageDataUrl] = useState<string | null>(initialState.imageDataUrl)
+  const [imageDataUrl, setImageDataUrl] = useState<string | null>(
+    initialState.imageDataUrl,
+  )
   const [imageChanged, setImageChanged] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -117,9 +119,7 @@ export const RichMenuEditor = memo((props: Props) => {
         displayText: actionDisplayText || undefined,
       }
     }
-    setAreas((prev) =>
-      prev.map((a) => (a.id === selectedAreaId ? { ...a, action } : a)),
-    )
+    setAreas((prev) => prev.map((a) => (a.id === selectedAreaId ? { ...a, action } : a)))
   }, [selectedAreaId, actionType, actionText, actionUri, actionData, actionDisplayText])
 
   const handleUpdateBounds = useCallback((id: string, bounds: AreaBounds) => {
@@ -188,7 +188,10 @@ export const RichMenuEditor = memo((props: Props) => {
       })),
     })
     if (!validation.success) {
-      showError(new Error(validation.errors.map((e) => e.message).join(', ')), 'Validation failed')
+      showError(
+        new Error(validation.errors.map((e) => e.message).join(', ')),
+        'Validation failed',
+      )
       return
     }
 
@@ -198,11 +201,12 @@ export const RichMenuEditor = memo((props: Props) => {
         bounds: boundsToProto(a.bounds),
         action: {
           type: a.action.type,
-          label: ('label' in a.action ? a.action.label : undefined),
-          uri: ('uri' in a.action ? a.action.uri : undefined),
-          data: ('data' in a.action ? a.action.data : undefined),
-          text: ('text' in a.action ? a.action.text : undefined),
-          displayText: ('displayText' in a.action ? (a.action as any).displayText : undefined),
+          label: 'label' in a.action ? a.action.label : undefined,
+          uri: 'uri' in a.action ? a.action.uri : undefined,
+          data: 'data' in a.action ? a.action.data : undefined,
+          text: 'text' in a.action ? a.action.text : undefined,
+          displayText:
+            'displayText' in a.action ? (a.action as any).displayText : undefined,
         },
       }))
 
@@ -358,7 +362,11 @@ export const RichMenuEditor = memo((props: Props) => {
             <Button size="$2" onPress={handleImagePick}>
               Upload image
             </Button>
-            <Button size="$2" variant="outlined" onPress={() => setShowTemplates((v) => !v)}>
+            <Button
+              size="$2"
+              variant="outlined"
+              onPress={() => setShowTemplates((v) => !v)}
+            >
               Template
             </Button>
             <Button size="$2" variant="outlined" onPress={handleAddArea}>
@@ -406,7 +414,13 @@ export const RichMenuEditor = memo((props: Props) => {
             {imageDataUrl ? (
               <Image
                 source={{ uri: imageDataUrl }}
-                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                }}
                 resizeMode="cover"
               />
             ) : (
@@ -456,7 +470,8 @@ export const RichMenuEditor = memo((props: Props) => {
             p="$3"
           >
             <SizableText size="$3" fontWeight="700" color="$color12">
-              Area {AREA_LABELS[areas.findIndex((a) => a.id === selectedAreaId)] ?? '?'} (selected)
+              Area {AREA_LABELS[areas.findIndex((a) => a.id === selectedAreaId)] ?? '?'}{' '}
+              (selected)
             </SizableText>
 
             <YStack gap="$1">
@@ -482,7 +497,11 @@ export const RichMenuEditor = memo((props: Props) => {
                 <SizableText size="$1" color="$color10">
                   Text
                 </SizableText>
-                <Input value={actionText} onChangeText={setActionText} placeholder="Hello!" />
+                <Input
+                  value={actionText}
+                  onChangeText={setActionText}
+                  placeholder="Hello!"
+                />
               </YStack>
             )}
 
@@ -505,7 +524,11 @@ export const RichMenuEditor = memo((props: Props) => {
                   <SizableText size="$1" color="$color10">
                     Data
                   </SizableText>
-                  <Input value={actionData} onChangeText={setActionData} placeholder="action=buy" />
+                  <Input
+                    value={actionData}
+                    onChangeText={setActionData}
+                    placeholder="action=buy"
+                  />
                 </YStack>
                 <YStack gap="$1">
                   <SizableText size="$1" color="$color10">

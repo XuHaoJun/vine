@@ -43,7 +43,11 @@ export const EditRichMenuPage = memo(() => {
 
   let imageDataUrl: string | null = null
   if (data.image?.length) {
-    const base64 = btoa(Array.from(data.image).map((b) => String.fromCharCode(b)).join(''))
+    const base64 = btoa(
+      Array.from(data.image)
+        .map((b) => String.fromCharCode(b))
+        .join(''),
+    )
     const mime = data.imageContentType || 'image/jpeg'
     imageDataUrl = `data:${mime};base64,${base64}`
   }

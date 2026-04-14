@@ -656,15 +656,13 @@ describe('createOAService — updateRichMenu', () => {
     expect(mockDb.update).toHaveBeenCalled()
     const setCall = mockDb.update.mock.results[0].value.set.mock.calls[0][0]
     expect(setCall.name).toBe('Updated')
-    expect(setCall.selected).toBe('true')
-    expect(setCall.sizeWidth).toBe('2500')
-    expect(setCall.areas).toBe(
-      JSON.stringify([
-        {
-          bounds: { x: 0, y: 0, width: 2500, height: 1686 },
-          action: { type: 'message', text: 'Hello' },
-        },
-      ]),
-    )
+    expect(setCall.selected).toBe(true)
+    expect(setCall.sizeWidth).toBe(2500)
+    expect(setCall.areas).toEqual([
+      {
+        bounds: { x: 0, y: 0, width: 2500, height: 1686 },
+        action: { type: 'message', text: 'Hello' },
+      },
+    ])
   })
 })

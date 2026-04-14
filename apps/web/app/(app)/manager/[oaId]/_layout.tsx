@@ -18,7 +18,11 @@ export default function ManagerLayout() {
   const pathname = usePathname()
   const path = normalizePath(pathname)
 
-  const { data: accountData, isLoading, isError } = useTanQuery({
+  const {
+    data: accountData,
+    isLoading,
+    isError,
+  } = useTanQuery({
     queryKey: ['oa', 'account', oaId],
     queryFn: () => oaClient.getOfficialAccount({ id: oaId! }),
     enabled: !!oaId,
@@ -43,7 +47,11 @@ export default function ManagerLayout() {
   const isRichMenuActive = path.includes('/richmenu')
 
   return (
-    <YStack flex={1} bg="$background" $platform-web={{ height: '100vh', minHeight: '100vh' }}>
+    <YStack
+      flex={1}
+      bg="$background"
+      $platform-web={{ height: '100vh', minHeight: '100vh' }}
+    >
       {/* Header */}
       <XStack
         height="$6"

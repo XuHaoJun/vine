@@ -32,6 +32,11 @@ export function boundsToProto(b: AreaBounds) {
   return { x: b.x, y: b.y, width: b.w, height: b.h }
 }
 
-export function boundsFromProto(b: { x: number; y: number; width: number; height: number }): AreaBounds {
+export function boundsFromProto(b: {
+  x: number
+  y: number
+  width: number
+  height: number
+}): AreaBounds {
   return { x: b.x, y: b.y, w: b.width, h: b.height }
 }

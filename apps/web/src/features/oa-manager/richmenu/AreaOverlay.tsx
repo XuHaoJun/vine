@@ -77,8 +77,14 @@ export const AreaOverlay = memo(
         startY.value = ty.value
       })
       .onUpdate((e) => {
-        tx.value = Math.max(0, Math.min(startX.value + e.translationX, canvasW - tw.value))
-        ty.value = Math.max(0, Math.min(startY.value + e.translationY, canvasH - th.value))
+        tx.value = Math.max(
+          0,
+          Math.min(startX.value + e.translationX, canvasW - tw.value),
+        )
+        ty.value = Math.max(
+          0,
+          Math.min(startY.value + e.translationY, canvasH - th.value),
+        )
       })
       .onEnd(() => {
         runOnJS(commitUpdate)(tx.value, ty.value, tw.value, th.value)
@@ -90,8 +96,14 @@ export const AreaOverlay = memo(
         startH.value = th.value
       })
       .onUpdate((e) => {
-        tw.value = Math.max(20, Math.min(startW.value + e.translationX, canvasW - tx.value))
-        th.value = Math.max(20, Math.min(startH.value + e.translationY, canvasH - ty.value))
+        tw.value = Math.max(
+          20,
+          Math.min(startW.value + e.translationX, canvasW - tx.value),
+        )
+        th.value = Math.max(
+          20,
+          Math.min(startH.value + e.translationY, canvasH - ty.value),
+        )
       })
       .onEnd(() => {
         runOnJS(commitUpdate)(tx.value, ty.value, tw.value, th.value)

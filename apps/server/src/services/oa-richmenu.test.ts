@@ -41,11 +41,11 @@ describe('createOAService — RichMenu', () => {
             richMenuId: 'richmenu-abc123',
             name: 'Test Menu',
             chatBarText: 'Open',
-            selected: 'false',
-            sizeWidth: '2500',
-            sizeHeight: '1686',
-            areas: '[]',
-            hasImage: 'false',
+            selected: false,
+            sizeWidth: 2500,
+            sizeHeight: 1686,
+            areas: [],
+            hasImage: false,
           },
         ]),
       }),
@@ -65,7 +65,7 @@ describe('createOAService — RichMenu', () => {
     expect(mockDb.insert).toHaveBeenCalled()
     expect(result.richMenuId).toMatch(/^richmenu-/)
     expect(result.name).toBe('Test Menu')
-    expect(result.hasImage).toBe('false')
+    expect(result.hasImage).toBe(false)
   })
 
   it('creates a rich menu with selected=true', async () => {
@@ -79,11 +79,11 @@ describe('createOAService — RichMenu', () => {
             richMenuId: 'richmenu-abc',
             name: 'Auto-open Menu',
             chatBarText: 'Tap',
-            selected: 'true',
-            sizeWidth: '2500',
-            sizeHeight: '1686',
-            areas: '[]',
-            hasImage: 'false',
+            selected: true,
+            sizeWidth: 2500,
+            sizeHeight: 1686,
+            areas: [],
+            hasImage: false,
           },
         ]),
       }),
@@ -100,7 +100,7 @@ describe('createOAService — RichMenu', () => {
       areas: [],
     })
 
-    expect(result.selected).toBe('true')
+    expect(result.selected).toBe(true)
   })
 
   it('gets a rich menu by ID', async () => {
