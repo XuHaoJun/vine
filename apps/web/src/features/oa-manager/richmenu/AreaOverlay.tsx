@@ -43,7 +43,7 @@ export const AreaOverlay = memo(
       ty.value = bounds.y * scaleFactor
       tw.value = bounds.w * scaleFactor
       th.value = bounds.h * scaleFactor
-    }, [bounds.x, bounds.y, bounds.w, bounds.h, scaleFactor])
+    }, [bounds.x, bounds.y, bounds.w, bounds.h, scaleFactor, tx, ty, tw, th])
 
     const canvasW = 2500 * scaleFactor
     const canvasH = canvasHeightPx * scaleFactor
