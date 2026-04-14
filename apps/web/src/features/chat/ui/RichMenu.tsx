@@ -1,7 +1,8 @@
 import { memo } from 'react'
-import { Pressable } from 'react-native'
+import { Pressable, useWindowDimensions } from 'react-native'
 import { YStack } from 'tamagui'
 import { Image } from '~/interface/image/Image'
+import { getRichMenuDisplaySize } from './richMenuLayout'
 
 type RichMenuArea = {
   bounds: { x: number; y: number; width: number; height: number }
@@ -24,10 +25,21 @@ type Props = {
 
 export const RichMenu = memo(
   ({ imageUrl, sizeWidth, sizeHeight, areas, onAreaTap }: Props) => {
-    const aspectRatio = sizeWidth / sizeHeight
+    const { width: viewportWidth, height: viewportHeight } = useWindowDimensions()
+    const displaySize = getRichMenuDisplaySize({
+      viewportWidth,
+      viewportHeight,
+      sizeWidth,
+      sizeHeight,
+    })
 
     return (
-      <YStack position="relative" width="100%" style={{ aspectRatio }}>
+      <YStack
+        position="relative"
+        width={displaySize.width}
+        height={displaySize.height}
+        self="center"
+      >
         <Image
           src={imageUrl}
           style={{
