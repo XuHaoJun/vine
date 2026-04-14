@@ -18,6 +18,8 @@ import { FLEX_SIMULATOR_OA_UNIQUE_ID } from '../constants'
 
 const TEST_OA_UNIQUE_ID = 'testbot'
 const TEST_OA_NAME = 'Test Bot'
+const TEST_RICH_MENU_IMAGE_URL =
+  'https://i.im.ge/en5Toh/Gemini_Generated_Image_puffhnpuffhnpuff-edited.jpg'
 
 const TEST_OA_RICH_MENU = {
   richMenuId: 'richmenu-testbot-default',
@@ -39,11 +41,39 @@ const TEST_OA_RICH_MENU = {
   hasImage: false,
 }
 
-const TEST_RICH_MENU_IMAGE_BASE64 =
-  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4////fwAJ+wP9KobjigAAAABJRU5ErkJggg=='
-
 type SeedDrive = {
   put(key: string, data: Buffer, mimeType?: string): Promise<void>
+}
+
+type RichMenuImageSource = {
+  buffer: Buffer
+  mimeType: string
+  extension: 'jpg' | 'png'
+}
+
+export async function resolveTestRichMenuImageSource(
+  fetchImpl: typeof fetch = fetch,
+): Promise<RichMenuImageSource> {
+  const response = await fetchImpl(TEST_RICH_MENU_IMAGE_URL)
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch rich menu image: ${response.status} ${response.statusText}`,
+    )
+  }
+
+  const mimeType =
+    response.headers.get('content-type')?.split(';')[0]?.trim() ?? 'image/jpeg'
+  if (mimeType !== 'image/jpeg' && mimeType !== 'image/png') {
+    throw new Error(`Unsupported rich menu image type: ${mimeType}`)
+  }
+
+  const extension = mimeType === 'image/png' ? 'png' : 'jpg'
+
+  return {
+    buffer: Buffer.from(await response.arrayBuffer()),
+    mimeType,
+    extension,
+  }
 }
 
 const TEST_USERS = [
@@ -348,22 +378,25 @@ export async function ensureSeed(pool: Pool, db: any, drive?: SeedDrive) {
       })
 
     if (drive) {
-      const richMenuKey = `richmenu/${testOaId}/${TEST_OA_RICH_MENU.richMenuId}.jpg`
-      await drive.put(
-        richMenuKey,
-        Buffer.from(TEST_RICH_MENU_IMAGE_BASE64, 'base64'),
-        'image/png',
-      )
-      await db
-        .update(oaRichMenu)
-        .set({ hasImage: true, updatedAt: now })
-        .where(
-          and(
-            eq(oaRichMenu.oaId, testOaId),
-            eq(oaRichMenu.richMenuId, TEST_OA_RICH_MENU.richMenuId),
-          ),
+      try {
+        const image = await resolveTestRichMenuImageSource()
+        const richMenuKey = `richmenu/${testOaId}/${TEST_OA_RICH_MENU.richMenuId}.${image.extension}`
+        await drive.put(richMenuKey, image.buffer, image.mimeType)
+        await db
+          .update(oaRichMenu)
+          .set({ hasImage: true, updatedAt: now })
+          .where(
+            and(
+              eq(oaRichMenu.oaId, testOaId),
+              eq(oaRichMenu.richMenuId, TEST_OA_RICH_MENU.richMenuId),
+            ),
+          )
+        console.info(
+          `[seed] Ensured ${TEST_OA_NAME} rich menu image is available from ${TEST_RICH_MENU_IMAGE_URL}`,
         )
-      console.info(`[seed] Ensured ${TEST_OA_NAME} rich menu image is available`)
+      } catch (error) {
+        console.warn(`[seed] Failed to fetch ${TEST_OA_NAME} rich menu image`, error)
+      }
     }
   }
 
