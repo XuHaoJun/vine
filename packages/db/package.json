@@ -22,7 +22,7 @@
   "dependencies": {
     "@take-out/postgres": "^0.2.10",
     "drizzle-orm": "1.0.0-beta.9-e89174b",
-    "pg": "8.18.0"
+    "pg": "8.20.0"
   },
   "devDependencies": {
     "@noble/hashes": "^2.0.0",

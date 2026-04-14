@@ -27,7 +27,7 @@
   "devDependencies": {
     "oxfmt": "^0.16.0",
     "oxlint": "^1.31.0",
-    "turbo": "^2"
+    "turbo": "^2.9.6"
   },
   "overrides": {
     "@expo/fingerprint": "0.15.3",
