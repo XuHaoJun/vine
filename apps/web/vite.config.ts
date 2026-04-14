@@ -1,6 +1,7 @@
 import { tamaguiPlugin } from '@tamagui/vite-plugin'
 import { one } from 'one/vite'
 import { visualizer } from 'rollup-plugin-visualizer'
+import strip from '@rollup/plugin-strip'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 
@@ -18,24 +19,20 @@ export default {
     proxy: {
       '/api': 'http://localhost:3001',
       '/oauth2': 'http://localhost:3001',
-      // ConnectRPC (same origin as Vite in dev — see SERVER_URL in ~/constants/urls.ts)
       '/oa.v1.OAService': 'http://localhost:3001',
       '/greeter.v1.GreeterService': 'http://localhost:3001',
     },
   },
 
   optimizeDeps: {
-    include: ['async-retry'],
+    include: ['async-retry', 'pino', 'quick-format-unescaped'],
     exclude: ['oxc-parser'],
   },
 
   ssr: {
-    // we set this as it generally improves compatability by optimizing all deps for node
     noExternal: true,
-    // @rocicorp/zero must be external to prevent Symbol mismatch between
-    // @rocicorp/zero and @rocicorp/zero/server - they share queryInternalsTag
-    // Symbol that must be the same instance for query transforms to work
     external: [
+      'pino',
       'on-zero',
       '@vxrn/mdx',
       '@rocicorp/zero',
@@ -51,32 +48,31 @@ export default {
     ],
   },
 
-  plugins: [
-    tamaguiPlugin(
-      // see tamagui.build.ts for configuration
+  define: {
+    'process.env.LOG_LEVEL': JSON.stringify(
+      process.env.LOG_LEVEL ?? (process.env.NODE_ENV === 'production' ? 'warn' : 'debug'),
     ),
+  },
 
+  plugins: [
+    tamaguiPlugin(),
     one({
       setupFile: {
         client: './src/setupClient.ts',
         server: './src/setupServer.ts',
         native: './src/setupNative.ts',
       },
-
       react: {
         compiler: process.env.NODE_ENV === 'production',
       },
-
       native: {
         bundler: 'rolldown',
       },
-
       router: {
         experimental: {
           typedRoutesGeneration: 'runtime',
         },
       },
-
       web: {
         experimental_scriptLoading: 'after-lcp-aggressive',
         inlineLayoutCSS: true,
@@ -94,7 +90,14 @@ export default {
         },
       },
     }),
-
+    ...(process.env.NODE_ENV === 'production'
+      ? [
+          strip({
+            functions: ['logger.debug', 'logger.trace'],
+            include: ['**/*.{ts,tsx}'],
+          }),
+        ]
+      : []),
     ...(process.env.ANALYZE
       ? [
           visualizer({

@@ -2,6 +2,7 @@ import { createFetch } from '@better-fetch/fetch'
 
 import { SERVER_URL } from '~/constants/urls'
 import { authState } from './authClient'
+import { logger } from '~/lib/logger'
 
 export const authFetch = createFetch({
   baseURL: SERVER_URL,
@@ -10,7 +11,7 @@ export const authFetch = createFetch({
     token: () => {
       const sessionToken = authState.value?.session?.token
       if (!sessionToken) {
-        console.warn(`No session token, authFetch will fail`)
+        logger.warn('No session token, authFetch will fail')
       }
       return sessionToken
     },

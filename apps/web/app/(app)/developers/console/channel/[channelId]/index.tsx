@@ -283,7 +283,13 @@ export const ChannelSettingsPage = memo(() => {
             </Button>
           </XStack>
         ) : (
-          <XStack justify="flex-end">
+          <XStack gap="$3" justify="flex-end">
+            <Button
+              variant="outlined"
+              onPress={() => router.navigate(`/manager/${oa.id}/richmenu` as any)}
+            >
+              Manage →
+            </Button>
             <Button onPress={handleEdit}>Edit</Button>
           </XStack>
         )}

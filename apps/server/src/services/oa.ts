@@ -8,6 +8,10 @@ import {
   oaWebhook,
   oaAccessToken,
   oaFriendship,
+  oaRichMenu,
+  oaRichMenuAlias,
+  oaRichMenuUserLink,
+  oaDefaultRichMenu,
 } from '@vine/db/schema-oa'
 import { createHmac, randomBytes, randomUUID } from 'crypto'
 import { chat, chatMember, message } from '@vine/db/schema-public'
@@ -602,6 +606,216 @@ export function createOAService(deps: OADeps) {
     }
   }
 
+  function generateRichMenuId() {
+    return 'richmenu-' + randomUUID().replace(/-/g, '').substring(0, 32)
+  }
+
+  async function createRichMenu(input: {
+    oaId: string
+    name: string
+    chatBarText: string
+    selected: boolean
+    sizeWidth: number
+    sizeHeight: number
+    areas: unknown[]
+  }) {
+    const richMenuId = generateRichMenuId()
+    const [menu] = await db
+      .insert(oaRichMenu)
+      .values({
+        oaId: input.oaId,
+        richMenuId,
+        name: input.name,
+        chatBarText: input.chatBarText,
+        selected: input.selected,
+        sizeWidth: input.sizeWidth,
+        sizeHeight: input.sizeHeight,
+        areas: input.areas,
+        hasImage: false,
+      })
+      .returning()
+    return menu
+  }
+
+  async function updateRichMenu(
+    oaId: string,
+    richMenuId: string,
+    input: {
+      name: string
+      chatBarText: string
+      selected: boolean
+      sizeWidth: number
+      sizeHeight: number
+      areas: unknown[]
+    },
+  ) {
+    await db
+      .update(oaRichMenu)
+      .set({
+        name: input.name,
+        chatBarText: input.chatBarText,
+        selected: input.selected,
+        sizeWidth: input.sizeWidth,
+        sizeHeight: input.sizeHeight,
+        areas: input.areas,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(and(eq(oaRichMenu.oaId, oaId), eq(oaRichMenu.richMenuId, richMenuId)))
+  }
+
+  async function getRichMenu(oaId: string, richMenuId: string) {
+    const [menu] = await db
+      .select()
+      .from(oaRichMenu)
+      .where(and(eq(oaRichMenu.oaId, oaId), eq(oaRichMenu.richMenuId, richMenuId)))
+      .limit(1)
+    return menu ?? null
+  }
+
+  async function getRichMenuList(oaId: string) {
+    return db.select().from(oaRichMenu).where(eq(oaRichMenu.oaId, oaId))
+  }
+
+  async function deleteRichMenu(oaId: string, richMenuId: string) {
+    await db
+      .delete(oaRichMenu)
+      .where(and(eq(oaRichMenu.oaId, oaId), eq(oaRichMenu.richMenuId, richMenuId)))
+  }
+
+  async function setRichMenuImage(oaId: string, richMenuId: string, hasImage: boolean) {
+    await db
+      .update(oaRichMenu)
+      .set({ hasImage, updatedAt: new Date().toISOString() })
+      .where(and(eq(oaRichMenu.oaId, oaId), eq(oaRichMenu.richMenuId, richMenuId)))
+  }
+
+  async function setDefaultRichMenu(oaId: string, richMenuId: string) {
+    await db
+      .insert(oaDefaultRichMenu)
+      .values({
+        oaId,
+        richMenuId,
+        updatedAt: new Date().toISOString(),
+      })
+      .onConflictDoUpdate({
+        target: oaDefaultRichMenu.oaId,
+        set: { richMenuId, updatedAt: new Date().toISOString() },
+      })
+  }
+
+  async function getDefaultRichMenu(oaId: string) {
+    const [result] = await db
+      .select()
+      .from(oaDefaultRichMenu)
+      .where(eq(oaDefaultRichMenu.oaId, oaId))
+      .limit(1)
+    return result ?? null
+  }
+
+  async function clearDefaultRichMenu(oaId: string) {
+    await db.delete(oaDefaultRichMenu).where(eq(oaDefaultRichMenu.oaId, oaId))
+  }
+
+  async function linkRichMenuToUser(oaId: string, userId: string, richMenuId: string) {
+    await db
+      .insert(oaRichMenuUserLink)
+      .values({
+        oaId,
+        userId,
+        richMenuId,
+      })
+      .onConflictDoUpdate({
+        target: [oaRichMenuUserLink.userId, oaRichMenuUserLink.oaId],
+        set: { richMenuId, createdAt: new Date().toISOString() },
+      })
+  }
+
+  async function unlinkRichMenuFromUser(oaId: string, userId: string) {
+    await db
+      .delete(oaRichMenuUserLink)
+      .where(
+        and(eq(oaRichMenuUserLink.oaId, oaId), eq(oaRichMenuUserLink.userId, userId)),
+      )
+  }
+
+  async function unlinkAllRichMenuFromUsers(oaId: string) {
+    await db.delete(oaRichMenuUserLink).where(eq(oaRichMenuUserLink.oaId, oaId))
+  }
+
+  async function getRichMenuIdOfUser(oaId: string, userId: string) {
+    const [result] = await db
+      .select()
+      .from(oaRichMenuUserLink)
+      .where(
+        and(eq(oaRichMenuUserLink.oaId, oaId), eq(oaRichMenuUserLink.userId, userId)),
+      )
+      .limit(1)
+    return result ?? null
+  }
+
+  async function createRichMenuAlias(input: {
+    oaId: string
+    richMenuAliasId: string
+    richMenuId: string
+  }) {
+    const [alias] = await db
+      .insert(oaRichMenuAlias)
+      .values({
+        oaId: input.oaId,
+        richMenuAliasId: input.richMenuAliasId,
+        richMenuId: input.richMenuId,
+      })
+      .returning()
+    return alias
+  }
+
+  async function updateRichMenuAlias(input: {
+    oaId: string
+    richMenuAliasId: string
+    richMenuId: string
+  }) {
+    const [alias] = await db
+      .update(oaRichMenuAlias)
+      .set({ richMenuId: input.richMenuId, updatedAt: new Date().toISOString() })
+      .where(
+        and(
+          eq(oaRichMenuAlias.oaId, input.oaId),
+          eq(oaRichMenuAlias.richMenuAliasId, input.richMenuAliasId),
+        ),
+      )
+      .returning()
+    return alias ?? null
+  }
+
+  async function deleteRichMenuAlias(oaId: string, richMenuAliasId: string) {
+    await db
+      .delete(oaRichMenuAlias)
+      .where(
+        and(
+          eq(oaRichMenuAlias.oaId, oaId),
+          eq(oaRichMenuAlias.richMenuAliasId, richMenuAliasId),
+        ),
+      )
+  }
+
+  async function getRichMenuAlias(oaId: string, richMenuAliasId: string) {
+    const [alias] = await db
+      .select()
+      .from(oaRichMenuAlias)
+      .where(
+        and(
+          eq(oaRichMenuAlias.oaId, oaId),
+          eq(oaRichMenuAlias.richMenuAliasId, richMenuAliasId),
+        ),
+      )
+      .limit(1)
+    return alias ?? null
+  }
+
+  async function getRichMenuAliasList(oaId: string) {
+    return db.select().from(oaRichMenuAlias).where(eq(oaRichMenuAlias.oaId, oaId))
+  }
+
   return {
     createProvider,
     getProvider,
@@ -636,6 +850,24 @@ export function createOAService(deps: OADeps) {
     findOfficialAccountByUniqueId,
     simulatorSendFlexMessage,
     sendOAMessage,
+    createRichMenu,
+    updateRichMenu,
+    getRichMenu,
+    getRichMenuList,
+    deleteRichMenu,
+    setRichMenuImage,
+    setDefaultRichMenu,
+    getDefaultRichMenu,
+    clearDefaultRichMenu,
+    linkRichMenuToUser,
+    unlinkRichMenuFromUser,
+    unlinkAllRichMenuFromUsers,
+    getRichMenuIdOfUser,
+    createRichMenuAlias,
+    updateRichMenuAlias,
+    deleteRichMenuAlias,
+    getRichMenuAlias,
+    getRichMenuAliasList,
   }
 }
 

@@ -11,6 +11,7 @@ import type { schema } from '@vine/db'
 import { user as userTable } from '@vine/db/schema-private'
 import { userPublic, userState } from '@vine/db/schema-public'
 import { toWebRequest } from '../utils'
+import { logger } from '../lib/logger'
 
 const DOMAIN = 'takeout.tamagui.dev'
 const APP_SCHEME = 'takeout'
@@ -68,7 +69,7 @@ function createAuthServer(deps: AuthDeps) {
           : new Date().toISOString(),
       })
     } catch (error) {
-      console.error(`[afterCreateUser] error`, error)
+      logger.error({ err: error }, `[afterCreateUser] error`)
       throw error
     }
   }
@@ -113,7 +114,7 @@ function createAuthServer(deps: AuthDeps) {
       expo(),
       magicLink({
         sendMagicLink: async ({ email, url }) => {
-          console.info('Magic link would be sent to:', email, url)
+          logger.info({ email, url }, 'Magic link would be sent to')
         },
       }),
       admin(),
@@ -127,7 +128,11 @@ function createAuthServer(deps: AuthDeps) {
     logger: {
       level: 'warn',
       log(level, message, ...args) {
-        console.info(level, message, ...args)
+        const entry = args.length > 0 ? { extra: args } : {}
+        if (level === 'error') logger.error(entry, message)
+        else if (level === 'info') logger.info(entry, message)
+        else if (level === 'debug') logger.debug(entry, message)
+        else logger.warn(entry, message)
       },
     },
 
@@ -164,7 +169,7 @@ export async function authPlugin(fastify: FastifyInstance, deps: AuthPluginDeps)
         const body = await res.text()
         reply.send(body)
       } catch (err) {
-        console.error('[auth] handler error', err)
+        logger.error({ err }, '[auth] handler error')
         reply.status(500).send({ error: 'Auth handler error' })
       }
     },
@@ -177,7 +182,7 @@ export async function authPlugin(fastify: FastifyInstance, deps: AuthPluginDeps)
         const valid = await isValidJWT(body.token, {})
         return await reply.send({ valid })
       } catch (err) {
-        console.error('[auth] validateToken error', err)
+        logger.error({ err }, '[auth] validateToken error')
         return reply.send({ valid: false })
       }
     }
@@ -302,7 +307,7 @@ export async function authPlugin(fastify: FastifyInstance, deps: AuthPluginDeps)
           res.headers.forEach((value, key) => void reply.header(key, value))
           reply.send(await res.text())
         } catch (err) {
-          console.error('[oauth-alias] handler error', err)
+          logger.error({ err }, '[oauth-alias] handler error')
           reply.status(500).send({ error: 'OAuth handler error' })
         }
       },

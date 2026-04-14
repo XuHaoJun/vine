@@ -8,11 +8,14 @@
 
 import { Socket } from 'node:net'
 import { getTestEnv } from './helpers/get-test-env'
+import {
+  BACKEND_PORT,
+  FRONTEND_PORT,
+  STATIC_PORT,
+  getProxyTargetPort,
+} from './integration-proxy.ts'
 
 // --- config ---
-const FRONTEND_PORT = 8081
-const STATIC_PORT = 9090
-const BACKEND_PORT = 3001
 const DOCKER_TIMEOUT = 120_000 // 2 min
 const BUILD_TIMEOUT = 300_000 // 5 min
 const TEST_TIMEOUT = 120_000 // 2 min
@@ -32,16 +35,21 @@ async function $(cmd: string, opts?: { silent?: boolean; timeout?: number }) {
   processes.push(proc)
 
   const timeoutMs = opts?.timeout || 60_000
+  let timerId: ReturnType<typeof setTimeout>
   const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(() => {
+    timerId = setTimeout(() => {
       proc.kill()
       reject(new Error(`command timed out after ${timeoutMs}ms: ${cmd}`))
     }, timeoutMs)
   })
 
-  const exitCode = await Promise.race([proc.exited, timeoutPromise])
-  if (exitCode !== 0) {
-    throw new Error(`command failed with exit ${exitCode}: ${cmd}`)
+  try {
+    const exitCode = await Promise.race([proc.exited, timeoutPromise])
+    if (exitCode !== 0) {
+      throw new Error(`command failed with exit ${exitCode}: ${cmd}`)
+    }
+  } finally {
+    clearTimeout(timerId!)
   }
 }
 
@@ -131,10 +139,12 @@ async function cleanup() {
   try {
     proxyServer?.stop(true)
   } catch {}
-  await $('docker compose kill; docker compose down -v', {
-    silent: true,
-    timeout: 60_000,
-  }).catch(() => {})
+  try {
+    Bun.spawn(['bash', '-c', 'docker compose kill; docker compose down -v'], {
+      stdout: 'inherit',
+      stderr: 'inherit',
+    })
+  } catch {}
 }
 
 // --- main ---
@@ -187,9 +197,7 @@ async function main() {
       port: FRONTEND_PORT,
       async fetch(req) {
         const url = new URL(req.url)
-        const isApi =
-          url.pathname.startsWith('/api') || url.pathname.startsWith('/oauth2')
-        const targetPort = isApi ? BACKEND_PORT : STATIC_PORT
+        const targetPort = getProxyTargetPort(url.pathname)
         const target = `http://localhost:${targetPort}${url.pathname}${url.search}`
 
         // Disable compression so we can buffer and forward the body without re-encoding issues

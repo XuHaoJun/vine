@@ -95,3 +95,46 @@ export async function waitForZeroSync(page: Page, timeout = 5000) {
       console.info('Zero status element not found, continuing anyway')
     })
 }
+
+const TEST1_EMAIL = 'test1@example.com'
+const TEST1_PASSWORD = 'test@1234'
+
+export async function loginAsTest1(page: Page, pathname = '/') {
+  console.info('Navigating to login page...')
+  await page.goto(`${BASE_URL}/auth/login`, {
+    waitUntil: 'domcontentloaded',
+  })
+
+  console.info('Logging in as test1...')
+
+  await page.getByPlaceholder('Email').fill(TEST1_EMAIL)
+  await page.getByPlaceholder('Password').fill(TEST1_PASSWORD)
+  await page.getByRole('button', { name: 'Log in' }).click()
+
+  try {
+    await page.waitForURL(/\/home(\/|$)/, { timeout: 30000 })
+  } catch {
+    console.error(`❌ test1 login did not reach a /home route`)
+    throw new Error(`test1 login failed - did not reach authenticated route`)
+  }
+  await page.waitForLoadState('domcontentloaded').catch(() => {})
+
+  const currentUrl = page.url()
+  console.info(`✅ Logged in as test1, redirected to: ${currentUrl}`)
+
+  console.info('Navigating to /home/talks...')
+  await page.goto(`${BASE_URL}/home/talks`, { waitUntil: 'domcontentloaded' })
+  await page.waitForURL(/\/home\/talks$/, { timeout: 10000 })
+  await page.waitForTimeout(2000)
+
+  if (pathname !== '/' && pathname !== '/home' && pathname !== '/home/talks') {
+    await page.goto(`${BASE_URL}${pathname}`, {
+      waitUntil: 'domcontentloaded',
+      timeout: 15000,
+    })
+    await page.waitForURL(
+      new RegExp(`${pathname.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`),
+      { timeout: 10000 },
+    )
+  }
+}

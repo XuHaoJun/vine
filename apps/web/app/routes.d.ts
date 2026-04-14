@@ -35,6 +35,8 @@ declare module 'one' {
         | `/(app)/home/talks`
         | `/(app)/home/talks/`
         | `/(app)/home/talks/requests`
+        | `/(app)/manager/[oaId]/richmenu`
+        | `/(app)/manager/[oaId]/richmenu/create`
         | `/_sitemap`
         | `/auth`
         | `/auth/consent`
@@ -63,28 +65,42 @@ declare module 'one' {
         | `/home/talks`
         | `/home/talks/`
         | `/home/talks/requests`
+        | `/manager/[oaId]/richmenu`
+        | `/manager/[oaId]/richmenu/create`
       DynamicRoutes: 
         | `/(app)/auth/signup/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/developers/console/channel/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/developers/console/provider/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/home/(tabs)/talks/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/home/talks/${OneRouter.SingleRoutePart<T>}`
+        | `/(app)/manager/${OneRouter.SingleRoutePart<T>}`
+        | `/(app)/manager/${OneRouter.SingleRoutePart<T>}/richmenu/${OneRouter.SingleRoutePart<T>}`
+        | `/(app)/oa/${OneRouter.SingleRoutePart<T>}`
         | `/auth/signup/${OneRouter.SingleRoutePart<T>}`
         | `/developers/console/channel/${OneRouter.SingleRoutePart<T>}`
         | `/developers/console/provider/${OneRouter.SingleRoutePart<T>}`
         | `/home/(tabs)/talks/${OneRouter.SingleRoutePart<T>}`
         | `/home/talks/${OneRouter.SingleRoutePart<T>}`
+        | `/manager/${OneRouter.SingleRoutePart<T>}`
+        | `/manager/${OneRouter.SingleRoutePart<T>}/richmenu/${OneRouter.SingleRoutePart<T>}`
+        | `/oa/${OneRouter.SingleRoutePart<T>}`
       DynamicRouteTemplate: 
         | `/(app)/auth/signup/[method]`
         | `/(app)/developers/console/channel/[channelId]`
         | `/(app)/developers/console/provider/[providerId]`
         | `/(app)/home/(tabs)/talks/[chatId]`
         | `/(app)/home/talks/[chatId]`
+        | `/(app)/manager/[oaId]`
+        | `/(app)/manager/[oaId]/richmenu/[richMenuId]`
+        | `/(app)/oa/[oaId]`
         | `/auth/signup/[method]`
         | `/developers/console/channel/[channelId]`
         | `/developers/console/provider/[providerId]`
         | `/home/(tabs)/talks/[chatId]`
         | `/home/talks/[chatId]`
+        | `/manager/[oaId]`
+        | `/manager/[oaId]/richmenu/[richMenuId]`
+        | `/oa/[oaId]`
       IsTyped: true
       RouteTypes: {
         '/(app)/auth/signup/[method]': RouteInfo<{ method: string }>
@@ -92,11 +108,17 @@ declare module 'one' {
         '/(app)/developers/console/provider/[providerId]': RouteInfo<{ providerId: string }>
         '/(app)/home/(tabs)/talks/[chatId]': RouteInfo<{ chatId: string }>
         '/(app)/home/talks/[chatId]': RouteInfo<{ chatId: string }>
+        '/(app)/manager/[oaId]': RouteInfo<{ oaId: string }>
+        '/(app)/manager/[oaId]/richmenu/[richMenuId]': RouteInfo<{ oaId: string; richMenuId: string }>
+        '/(app)/oa/[oaId]': RouteInfo<{ oaId: string }>
         '/auth/signup/[method]': RouteInfo<{ method: string }>
         '/developers/console/channel/[channelId]': RouteInfo<{ channelId: string }>
         '/developers/console/provider/[providerId]': RouteInfo<{ providerId: string }>
         '/home/(tabs)/talks/[chatId]': RouteInfo<{ chatId: string }>
         '/home/talks/[chatId]': RouteInfo<{ chatId: string }>
+        '/manager/[oaId]': RouteInfo<{ oaId: string }>
+        '/manager/[oaId]/richmenu/[richMenuId]': RouteInfo<{ oaId: string; richMenuId: string }>
+        '/oa/[oaId]': RouteInfo<{ oaId: string }>
       }
     }
   }

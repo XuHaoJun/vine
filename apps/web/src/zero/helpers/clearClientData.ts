@@ -1,4 +1,5 @@
 import { showToast } from '~/interface/toast/Toast'
+import { logger } from '~/lib/logger'
 
 export const clearClientData = async () => {
   try {
@@ -63,7 +64,7 @@ export const clearClientData = async () => {
       window.location.reload()
     }, 1000)
   } catch (error) {
-    console.error('Error clearing Zero database:', error)
+    logger.error({ err: error }, 'Error clearing Zero database')
     showToast('Error clearing Zero database')
   }
 }
