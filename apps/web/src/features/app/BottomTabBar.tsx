@@ -44,9 +44,7 @@ export const BottomTabBar = memo(() => {
       l={0}
       r={0}
       z={50}
-      $platform-web={{
-        position: 'fixed',
-      }}
+      style={{ position: 'fixed' }}
       pb={insets.bottom}
     >
       <XStack bg="$background" borderTopWidth={1} borderTopColor="$color5">

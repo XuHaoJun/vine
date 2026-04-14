@@ -27,10 +27,7 @@ export const ScrollHeader = ({ children }: { children: ReactNode }) => {
       items="center"
       justify="center"
       width="100%"
-      $platform-web={{
-        position: 'fixed',
-        maxW: '100vw',
-      }}
+      style={{ position: 'fixed', maxWidth: '100vw' }}
     >
       <XStack width="100%" position="relative" maxW={1200}>
         <XStack
