@@ -23,9 +23,9 @@ const TEST_OA_RICH_MENU = {
   richMenuId: 'richmenu-testbot-default',
   name: 'Test Bot Menu',
   chatBarText: '功能選單',
-  selected: 'false',
-  sizeWidth: '2500',
-  sizeHeight: '1686',
+  selected: false,
+  sizeWidth: 2500,
+  sizeHeight: 1686,
   areas: JSON.stringify([
     {
       bounds: { x: 0, y: 0, width: 1250, height: 1686 },
@@ -36,7 +36,7 @@ const TEST_OA_RICH_MENU = {
       action: { type: 'message', text: 'hello' },
     },
   ]),
-  hasImage: 'false',
+  hasImage: false,
 }
 
 const TEST_RICH_MENU_IMAGE_BASE64 =
@@ -356,7 +356,7 @@ export async function ensureSeed(pool: Pool, db: any, drive?: SeedDrive) {
       )
       await db
         .update(oaRichMenu)
-        .set({ hasImage: 'true', updatedAt: now })
+        .set({ hasImage: true, updatedAt: now })
         .where(
           and(
             eq(oaRichMenu.oaId, testOaId),

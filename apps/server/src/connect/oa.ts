@@ -516,12 +516,17 @@ export function oaHandler(deps: OAHandlerDeps) {
         let imageBytes: Uint8Array | undefined
         let imageContentType: string | undefined
         if (menu.hasImage) {
-          const key = `richmenu/${oaId}/${richMenuId}.jpg`
-          const exists = await deps.drive.exists(key)
-          if (exists) {
-            const file = await deps.drive.get(key)
-            imageBytes = new Uint8Array(file.content)
-            imageContentType = file.mimeType ?? 'image/jpeg'
+          const exts = ['jpg', 'png']
+          let found = false
+          for (const ext of exts) {
+            const key = `richmenu/${oaId}/${richMenuId}.${ext}`
+            if (await deps.drive.exists(key)) {
+              const file = await deps.drive.get(key)
+              imageBytes = new Uint8Array(file.content)
+              imageContentType = file.mimeType ?? 'image/jpeg'
+              found = true
+              break
+            }
           }
         }
 

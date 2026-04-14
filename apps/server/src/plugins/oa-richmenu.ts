@@ -617,9 +617,9 @@ export async function oaRichMenuPlugin(
       } else {
         for (const op of body.operations) {
           if (op.type === 'link' && op.to) {
-            await oa.linkRichMenuToUser(oaId, op.to, op.from!)
+            await oa.linkRichMenuToUser(oaId, op.from!, op.to)
           } else if (op.type === 'unlink') {
-            await oa.unlinkRichMenuFromUser(oaId, op.from!)
+            await oa.unlinkRichMenuFromUser(oaId, op.to!)
           }
         }
       }
