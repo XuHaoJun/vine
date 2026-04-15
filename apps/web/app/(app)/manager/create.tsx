@@ -161,7 +161,11 @@ export const CreateOAPage = memo(() => {
   }
 
   return (
-    <YStack flex={1} bg="$background" $platform-web={{ height: '100vh', minHeight: '100vh' }}>
+    <YStack
+      flex={1}
+      bg="$background"
+      $platform-web={{ height: '100vh', minHeight: '100vh' }}
+    >
       {/* Header */}
       <XStack
         height="$6"
@@ -294,6 +298,7 @@ export const CreateOAPage = memo(() => {
                         onChangeText={onChange}
                         placeholder="e.g. Brown Coffee Shop"
                         error={error?.message}
+                        data-testid="input-name"
                       />
                       <SizableText size="$1" color="$color9" text="right">
                         {value.length}/20
@@ -316,13 +321,15 @@ export const CreateOAPage = memo(() => {
                         </SizableText>
                       </XStack>
                       <SizableText size="$1" color="$color9">
-                        A unique identifier for your account (alphanumeric, hyphens, underscores).
+                        A unique identifier for your account (alphanumeric, hyphens,
+                        underscores).
                       </SizableText>
                       <Input
                         value={value}
                         onChangeText={onChange}
                         placeholder="e.g. brown-coffee"
                         error={error?.message}
+                        data-testid="input-uniqueId"
                       />
                     </YStack>
                   )}
@@ -366,6 +373,7 @@ export const CreateOAPage = memo(() => {
                         placeholder="e.g. contact@example.com"
                         error={error?.message}
                         keyboardType="email-address"
+                        data-testid="input-email"
                       />
                       <SizableText size="$1" color="$color9" text="right">
                         {value.length}/240
@@ -392,6 +400,7 @@ export const CreateOAPage = memo(() => {
                         onChangeText={onChange}
                         placeholder="e.g. Taiwan"
                         error={error?.message}
+                        data-testid="input-country"
                       />
                     </YStack>
                   )}
@@ -410,6 +419,7 @@ export const CreateOAPage = memo(() => {
                         onChangeText={onChange}
                         placeholder="e.g. Brown Coffee Co., Ltd."
                         error={error?.message}
+                        data-testid="input-company"
                       />
                       <SizableText size="$1" color="$color9" text="right">
                         {value.length}/100
@@ -455,6 +465,7 @@ export const CreateOAPage = memo(() => {
                         onChangeText={onChange}
                         placeholder="e.g. Food & Beverage"
                         error={error?.message}
+                        data-testid="input-industry"
                       />
                     </YStack>
                   )}
@@ -464,15 +475,13 @@ export const CreateOAPage = memo(() => {
 
             {/* Submit */}
             <XStack gap="$3" justify="flex-end">
-              <Button
-                variant="outlined"
-                onPress={() => router.push('/manager' as never)}
-              >
+              <Button variant="outlined" onPress={() => router.push('/manager' as never)}>
                 Cancel
               </Button>
               <Button
                 onPress={handleSubmit(onSubmit)}
                 disabled={isSubmitting || createMutation.isPending}
+                data-testid="btn-create-account"
               >
                 {createMutation.isPending ? <Spinner /> : 'Create account'}
               </Button>

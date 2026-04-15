@@ -45,7 +45,11 @@ export const ManagerIndexPage = memo(() => {
   )
 
   return (
-    <YStack flex={1} bg="$background" $platform-web={{ height: '100vh', minHeight: '100vh' }}>
+    <YStack
+      flex={1}
+      bg="$background"
+      $platform-web={{ height: '100vh', minHeight: '100vh' }}
+    >
       {/* Header */}
       <XStack
         height="$6"
@@ -76,7 +80,12 @@ export const ManagerIndexPage = memo(() => {
           gap="$4"
         >
           <YStack gap="$1">
-            <SizableText size="$1" fontWeight="700" color="$color9" textTransform="uppercase">
+            <SizableText
+              size="$1"
+              fontWeight="700"
+              color="$color9"
+              textTransform="uppercase"
+            >
               Menu
             </SizableText>
             <Pressable py="$2" px="$3" rounded="$3" bg="$color3">
@@ -100,7 +109,10 @@ export const ManagerIndexPage = memo(() => {
                   Manage your LINE Official Accounts
                 </SizableText>
               </YStack>
-              <Button onPress={() => router.push('/manager/create' as never)}>
+              <Button
+                onPress={() => router.push('/manager/create' as never)}
+                data-testid="btn-create-new"
+              >
                 + Create new
               </Button>
             </XStack>
@@ -139,10 +151,7 @@ export const ManagerIndexPage = memo(() => {
                     : 'Create your first LINE Official Account to get started'}
                 </SizableText>
                 {!search && (
-                  <Button
-                    mt="$2"
-                    onPress={() => router.push('/manager/create' as never)}
-                  >
+                  <Button mt="$2" onPress={() => router.push('/manager/create' as never)}>
                     Create new account
                   </Button>
                 )}
