@@ -11,6 +11,7 @@
     "./schema-private": "./src/schema-private.ts",
     "./schema-oa": "./src/schema-oa.ts",
     "./schema-public": "./src/schema-public.ts",
+    "./schema-login": "./src/schema-login.ts",
     "./helpers": "./src/helpers.ts",
     "./migrate": "./src/migrate.ts",
     "./seed": "./src/seed/ensureSeed.ts"
