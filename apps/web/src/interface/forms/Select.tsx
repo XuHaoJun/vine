@@ -53,7 +53,7 @@ export const Select = memo(
             >
               <TamaguiSelect.Group>
                 {options.map((option, i) => (
-                  <TamaguiSelect.Item key={option.value} value={option.value} index={i}>
+                  <TamaguiSelect.Item key={option.value} value={option.value} index={i} data-testid={`${dataTestid}-${option.value}`}>
                     <TamaguiSelect.ItemText>{option.label}</TamaguiSelect.ItemText>
                     <TamaguiSelect.ItemIndicator />
                   </TamaguiSelect.Item>
