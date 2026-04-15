@@ -27,13 +27,17 @@ test('create OA account flow', async ({ page }) => {
   await page.locator('[data-testid="input-name"]').fill('Test OA Account')
   await page.locator('[data-testid="input-uniqueId"]').fill(uniqueId)
   await page.locator('[data-testid="input-email"]').fill('test@example.com')
-  // Tamagui Select: click trigger to open dropdown, click option by data-testid
-  await page.locator('[data-testid="input-country"]').click()
-  await page.locator('[data-testid="input-country-Taiwan"]').click()
+  // Tamagui Select: Space opens dropdown, ArrowDown focuses first item, Enter selects
+  await page.locator('[data-testid="input-country"]').press('Space')
+  await page.waitForSelector('[role="option"]', { state: 'attached', timeout: 5000 })
+  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('Enter')
   await page.locator('[data-testid="input-company"]').fill('Test Company')
-  // Industry dropdown
-  await page.locator('[data-testid="input-industry"]').click()
-  await page.locator('[data-testid="input-industry-Electronics & IT"]').click()
+  // Industry dropdown: Space opens, Electronics & IT is at index 7 (0-indexed)
+  await page.locator('[data-testid="input-industry"]').press('Space')
+  await page.waitForSelector('[role="option"]', { state: 'attached', timeout: 5000 })
+  for (let i = 0; i < 7; i++) await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('Enter')
 
   // submit the form
   await page.locator('[data-testid="btn-create-account"]').click()
