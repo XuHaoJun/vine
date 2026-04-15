@@ -9,6 +9,7 @@ import { oaClient } from '~/features/oa/client'
 import { Button } from '~/interface/buttons/Button'
 import { Pressable } from '~/interface/buttons/Pressable'
 import { Input } from '~/interface/forms/Input'
+import { Select } from '~/interface/forms/Select'
 import { showToast } from '~/interface/toast/Toast'
 import { showError } from '~/interface/dialogs/actions'
 import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
@@ -30,12 +31,20 @@ const schema = v.object({
     v.email('Invalid email address'),
     v.maxLength(240, 'Email must be 240 characters or less'),
   ),
-  country: v.pipe(v.string(), v.nonEmpty('Country is required')),
+  country: v.pipe(
+    v.string(),
+    v.nonEmpty('Country is required'),
+    v.maxLength(50, 'Country must be 50 characters or less'),
+  ),
   company: v.pipe(
     v.string(),
     v.maxLength(100, 'Company name must be 100 characters or less'),
   ),
-  industry: v.pipe(v.string(), v.nonEmpty('Industry is required')),
+  industry: v.pipe(
+    v.string(),
+    v.nonEmpty('Industry is required'),
+    v.maxLength(50, 'Industry must be 50 characters or less'),
+  ),
 })
 
 type FormData = v.InferInput<typeof schema>
@@ -395,10 +404,11 @@ export const CreateOAPage = memo(() => {
                           ●
                         </SizableText>
                       </XStack>
-                      <Input
+                      <Select
                         value={value}
-                        onChangeText={onChange}
-                        placeholder="e.g. Taiwan"
+                        onValueChange={onChange}
+                        options={COUNTRIES.map((c) => ({ label: c, value: c }))}
+                        placeholder="Select a country"
                         error={error?.message}
                         data-testid="input-country"
                       />
@@ -460,10 +470,11 @@ export const CreateOAPage = memo(() => {
                           ●
                         </SizableText>
                       </XStack>
-                      <Input
+                      <Select
                         value={value}
-                        onChangeText={onChange}
-                        placeholder="e.g. Food & Beverage"
+                        onValueChange={onChange}
+                        options={INDUSTRIES.map((i) => ({ label: i, value: i }))}
+                        placeholder="Select an industry"
                         error={error?.message}
                         data-testid="input-industry"
                       />

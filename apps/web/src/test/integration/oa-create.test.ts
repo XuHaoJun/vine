@@ -27,9 +27,9 @@ test('create OA account flow', async ({ page }) => {
   await page.locator('[data-testid="input-name"]').fill('Test OA Account')
   await page.locator('[data-testid="input-uniqueId"]').fill(uniqueId)
   await page.locator('[data-testid="input-email"]').fill('test@example.com')
-  await page.locator('[data-testid="input-country"]').fill('Taiwan')
+  await page.locator('[data-testid="input-country"]').selectOption('Taiwan')
   await page.locator('[data-testid="input-company"]').fill('Test Company')
-  await page.locator('[data-testid="input-industry"]').fill('Technology')
+  await page.locator('[data-testid="input-industry"]').selectOption('Electronics & IT')
 
   // submit the form
   await page.locator('[data-testid="btn-create-account"]').click()
