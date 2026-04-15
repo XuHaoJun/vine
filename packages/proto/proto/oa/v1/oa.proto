@@ -78,6 +78,12 @@ message ListProviderAccountsResponse {
   repeated OfficialAccount accounts = 1;
 }
 
+message ListMyOfficialAccountsRequest {}
+
+message ListMyOfficialAccountsResponse {
+  repeated OfficialAccount accounts = 1;
+}
+
 // ── Official Account ──
 
 message OfficialAccount {
@@ -90,6 +96,10 @@ message OfficialAccount {
   OAStatus status = 7;
   string created_at = 8;
   string updated_at = 9;
+  string email = 10;
+  string country = 11;
+  string company = 12;
+  string industry = 13;
 }
 
 message OfficialAccountSecret {
@@ -102,6 +112,10 @@ message CreateOfficialAccountRequest {
   string unique_id = 3;
   optional string description = 4;
   optional string image_url = 5;
+  optional string email = 6;
+  optional string country = 7;
+  optional string company = 8;
+  optional string industry = 9;
 }
 
 message CreateOfficialAccountResponse {
@@ -461,6 +475,7 @@ service OAService {
   rpc UpdateProvider(UpdateProviderRequest) returns (UpdateProviderResponse);
   rpc DeleteProvider(DeleteProviderRequest) returns (DeleteProviderResponse);
   rpc ListProviderAccounts(ListProviderAccountsRequest) returns (ListProviderAccountsResponse);
+  rpc ListMyOfficialAccounts(ListMyOfficialAccountsRequest) returns (ListMyOfficialAccountsResponse);
   rpc CreateOfficialAccount(CreateOfficialAccountRequest) returns (CreateOfficialAccountResponse);
   rpc GetOfficialAccount(GetOfficialAccountRequest) returns (GetOfficialAccountResponse);
   rpc GetOfficialAccountSecret(GetOfficialAccountSecretRequest) returns (GetOfficialAccountSecretResponse);
