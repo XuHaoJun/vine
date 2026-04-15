@@ -35,8 +35,10 @@ declare module 'one' {
         | `/(app)/home/talks`
         | `/(app)/home/talks/`
         | `/(app)/home/talks/requests`
+        | `/(app)/manager`
         | `/(app)/manager/[oaId]/richmenu`
         | `/(app)/manager/[oaId]/richmenu/create`
+        | `/(app)/manager/create`
         | `/_sitemap`
         | `/auth`
         | `/auth/consent`
@@ -65,8 +67,10 @@ declare module 'one' {
         | `/home/talks`
         | `/home/talks/`
         | `/home/talks/requests`
+        | `/manager`
         | `/manager/[oaId]/richmenu`
         | `/manager/[oaId]/richmenu/create`
+        | `/manager/create`
       DynamicRoutes: 
         | `/(app)/auth/signup/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/developers/console/channel/${OneRouter.SingleRoutePart<T>}`
