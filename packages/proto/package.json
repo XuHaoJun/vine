@@ -6,6 +6,7 @@
   "exports": {
     ".": "./gen/greeter/v1/greeter_pb.ts",
     "./greeter": "./gen/greeter/v1/greeter_pb.ts",
+    "./liff": "./gen/liff/v1/liff_pb.ts",
     "./oa": "./gen/oa/v1/oa_pb.ts"
   },
   "scripts": {
