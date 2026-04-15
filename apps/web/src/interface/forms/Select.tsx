@@ -46,14 +46,14 @@ export const Select = memo(
           </TamaguiSelect.Trigger>
 
           <TamaguiSelect.Content>
-            <TamaguiSelect.Viewport borderWidth={1} borderColor="$borderColor" bg="$background">
+            <TamaguiSelect.Viewport
+              borderWidth={1}
+              borderColor="$borderColor"
+              bg="$background"
+            >
               <TamaguiSelect.Group>
                 {options.map((option, i) => (
-                  <TamaguiSelect.Item
-                    key={option.value}
-                    value={option.value}
-                    index={i}
-                  >
+                  <TamaguiSelect.Item key={option.value} value={option.value} index={i}>
                     <TamaguiSelect.ItemText />
                     <TamaguiSelect.ItemIndicator />
                   </TamaguiSelect.Item>

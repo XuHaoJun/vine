@@ -27,9 +27,15 @@ test('create OA account flow', async ({ page }) => {
   await page.locator('[data-testid="input-name"]').fill('Test OA Account')
   await page.locator('[data-testid="input-uniqueId"]').fill(uniqueId)
   await page.locator('[data-testid="input-email"]').fill('test@example.com')
-  await page.locator('[data-testid="input-country"]').selectOption('Taiwan')
+  // Tamagui Select: click trigger to open dropdown, then click option by text
+  await page.locator('[data-testid="input-country"]').click()
+  await page.waitForTimeout(100)
+  await page.getByText('Taiwan').first().click()
   await page.locator('[data-testid="input-company"]').fill('Test Company')
-  await page.locator('[data-testid="input-industry"]').selectOption('Electronics & IT')
+  // Industry dropdown
+  await page.locator('[data-testid="input-industry"]').click()
+  await page.waitForTimeout(100)
+  await page.getByText('Electronics & IT').first().click()
 
   // submit the form
   await page.locator('[data-testid="btn-create-account"]').click()
