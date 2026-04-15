@@ -91,6 +91,10 @@ function toProtoOfficialAccount(
     status: dbStatusToProto(db.status),
     createdAt: db.createdAt,
     updatedAt: db.updatedAt,
+    email: db.email ?? '',
+    country: db.country ?? '',
+    company: db.company ?? '',
+    industry: db.industry ?? '',
   }
 }
 
@@ -263,6 +267,27 @@ export function oaHandler(deps: OAHandlerDeps) {
             .filter((a): a is NonNullable<typeof a> => a != null),
         }
       },
+      async listMyOfficialAccounts(_req, ctx) {
+        const auth = requireAuthData(ctx)
+        const accounts = await deps.oa.listMyOfficialAccounts(auth.id)
+        return {
+          accounts: accounts.map((a) => ({
+            id: a.id,
+            providerId: a.providerId,
+            name: a.name,
+            uniqueId: a.uniqueId,
+            description: a.description ?? '',
+            imageUrl: a.imageUrl ?? '',
+            status: dbStatusToProto(a.status),
+            createdAt: a.createdAt,
+            updatedAt: a.updatedAt,
+            email: a.email ?? '',
+            country: a.country ?? '',
+            company: a.company ?? '',
+            industry: a.industry ?? '',
+          })),
+        }
+      },
       async createOfficialAccount(req, ctx) {
         const auth = requireAuthData(ctx)
         await assertProviderOwnedByUser(deps, req.providerId, auth.id)
@@ -272,6 +297,10 @@ export function oaHandler(deps: OAHandlerDeps) {
           uniqueId: req.uniqueId,
           description: req.description,
           imageUrl: req.imageUrl,
+          email: req.email,
+          country: req.country,
+          company: req.company,
+          industry: req.industry,
         })
         return { account: toProtoOfficialAccount(account) }
       },
