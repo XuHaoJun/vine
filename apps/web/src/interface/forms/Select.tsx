@@ -24,12 +24,9 @@ export const Select = memo(
   }: SelectComponentProps) => {
     return (
       <YStack gap="$2" width="100%">
-        <TamaguiSelect
-          value={value}
-          onValueChange={onValueChange}
-          data-testid={dataTestid}
-        >
+        <TamaguiSelect value={value} onValueChange={onValueChange}>
           <TamaguiSelect.Trigger
+            data-testid={dataTestid}
             borderWidth={0.5}
             borderColor={error ? '$red7' : '$borderColor'}
             bg="$background"
