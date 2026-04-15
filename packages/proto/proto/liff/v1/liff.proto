@@ -1,0 +1,164 @@
+// packages/proto/proto/liff/v1/liff.proto
+syntax = "proto3";
+
+package liff.v1;
+
+// ── Enums ──
+
+enum ViewType {
+  VIEW_TYPE_UNSPECIFIED = 0;
+  VIEW_TYPE_COMPACT = 1;
+  VIEW_TYPE_TALL = 2;
+  VIEW_TYPE_FULL = 3;
+}
+
+enum BotPrompt {
+  BOT_PROMPT_UNSPECIFIED = 0;
+  BOT_PROMPT_NONE = 1;
+  BOT_PROMPT_NORMAL = 2;
+  BOT_PROMPT_AGGRESSIVE = 3;
+}
+
+// ── LoginChannel ──
+
+message LoginChannel {
+  string id = 1;
+  string provider_id = 2;
+  string name = 3;
+  string channel_id = 4;
+  optional string description = 5;
+  string created_at = 6;
+  string updated_at = 7;
+}
+
+message LoginChannelSecret {
+  string channel_secret = 1;
+  string channel_id = 2;
+}
+
+message CreateLoginChannelRequest {
+  string provider_id = 1;
+  string name = 2;
+  optional string description = 3;
+}
+
+message CreateLoginChannelResponse {
+  LoginChannel channel = 1;
+}
+
+message GetLoginChannelRequest {
+  string id = 1;
+}
+
+message GetLoginChannelResponse {
+  LoginChannel channel = 1;
+}
+
+message GetLoginChannelSecretRequest {
+  string id = 1;
+}
+
+message GetLoginChannelSecretResponse {
+  LoginChannelSecret secret = 1;
+}
+
+message ListLoginChannelsRequest {
+  string provider_id = 1;
+}
+
+message ListLoginChannelsResponse {
+  repeated LoginChannel channels = 1;
+}
+
+message DeleteLoginChannelRequest {
+  string id = 1;
+}
+
+message DeleteLoginChannelResponse {}
+
+// ── LiffApp ──
+
+message LiffApp {
+  string id = 1;
+  string login_channel_id = 2;
+  string liff_id = 3;
+  ViewType view_type = 4;
+  string endpoint_url = 5;
+  bool module_mode = 6;
+  optional string description = 7;
+  repeated string scopes = 8;
+  BotPrompt bot_prompt = 9;
+  bool qr_code = 10;
+  string created_at = 11;
+  string updated_at = 12;
+}
+
+message CreateLiffAppRequest {
+  string login_channel_id = 1;
+  ViewType view_type = 2;
+  string endpoint_url = 3;
+  optional bool module_mode = 4;
+  optional string description = 5;
+  repeated string scopes = 6;
+  optional BotPrompt bot_prompt = 7;
+  optional bool qr_code = 8;
+}
+
+message CreateLiffAppResponse {
+  LiffApp app = 1;
+}
+
+message UpdateLiffAppRequest {
+  string liff_id = 1;
+  optional ViewType view_type = 2;
+  optional string endpoint_url = 3;
+  optional bool module_mode = 4;
+  optional string description = 5;
+  repeated string scopes = 6;
+  optional BotPrompt bot_prompt = 7;
+  optional bool qr_code = 8;
+}
+
+message UpdateLiffAppResponse {
+  LiffApp app = 1;
+}
+
+message GetLiffAppRequest {
+  string liff_id = 1;
+}
+
+message GetLiffAppResponse {
+  LiffApp app = 1;
+}
+
+message ListLiffAppsRequest {
+  string login_channel_id = 1;
+}
+
+message ListLiffAppsResponse {
+  repeated LiffApp apps = 1;
+}
+
+message DeleteLiffAppRequest {
+  string liff_id = 1;
+}
+
+message DeleteLiffAppResponse {}
+
+// ── Services ──
+
+service LoginChannelService {
+  rpc CreateLoginChannel(CreateLoginChannelRequest) returns (CreateLoginChannelResponse);
+  rpc GetLoginChannel(GetLoginChannelRequest) returns (GetLoginChannelResponse);
+  rpc GetLoginChannelSecret(GetLoginChannelSecretRequest) returns (GetLoginChannelSecretResponse);
+  rpc ListLoginChannels(ListLoginChannelsRequest) returns (ListLoginChannelsResponse);
+  rpc DeleteLoginChannel(DeleteLoginChannelRequest) returns (DeleteLoginChannelResponse);
+}
+
+service LIFFService {
+  rpc CreateLiffApp(CreateLiffAppRequest) returns (CreateLiffAppResponse);
+  rpc UpdateLiffApp(UpdateLiffAppRequest) returns (UpdateLiffAppResponse);
+  rpc GetLiffApp(GetLiffAppRequest) returns (GetLiffAppResponse);
+  rpc ListLiffApps(ListLiffAppsRequest) returns (ListLiffAppsResponse);
+  rpc DeleteLiffApp(DeleteLiffAppRequest) returns (DeleteLiffAppResponse);
+}
