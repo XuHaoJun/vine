@@ -39,8 +39,13 @@ export function AppLayout() {
 
   // redirect logged-out users away from protected routes
   const isLoggedInRoute =
-    pathname.startsWith('/home') || pathname.startsWith('/developers')
+    pathname.startsWith('/home') ||
+    pathname.startsWith('/developers') ||
+    pathname.startsWith('/manager')
   if (state === 'logged-out' && isLoggedInRoute) {
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.setItem(LOGIN_REDIRECT_KEY, pathname)
+    }
     return <Redirect href="/auth/login" />
   }
 
@@ -54,7 +59,8 @@ export function AppLayout() {
     pathname === '/auth/login/password' ||
     pathname.startsWith('/auth/signup')
   if (state === 'logged-in' && isGuestOnlyAuthRoute && !hasPendingAuthContinuation) {
-    return <Redirect href="/home/talks" />
+    const saved = (pendingRedirect ?? '/home/talks') as any
+    return <Redirect href={saved} />
   }
 
   return (
