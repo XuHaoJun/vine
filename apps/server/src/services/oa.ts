@@ -68,6 +68,28 @@ export function createOAService(deps: OADeps) {
       .where(eq(officialAccount.providerId, providerId))
   }
 
+  async function listMyOfficialAccounts(ownerId: string) {
+    return db
+      .select({
+        id: officialAccount.id,
+        providerId: officialAccount.providerId,
+        name: officialAccount.name,
+        uniqueId: officialAccount.uniqueId,
+        description: officialAccount.description,
+        imageUrl: officialAccount.imageUrl,
+        status: officialAccount.status,
+        email: officialAccount.email,
+        country: officialAccount.country,
+        company: officialAccount.company,
+        industry: officialAccount.industry,
+        createdAt: officialAccount.createdAt,
+        updatedAt: officialAccount.updatedAt,
+      })
+      .from(officialAccount)
+      .innerJoin(oaProvider, eq(officialAccount.providerId, oaProvider.id))
+      .where(eq(oaProvider.ownerId, ownerId))
+  }
+
   async function listMyProviders(ownerId: string) {
     return db.select().from(oaProvider).where(eq(oaProvider.ownerId, ownerId))
   }
@@ -82,6 +104,10 @@ export function createOAService(deps: OADeps) {
     uniqueId: string
     description?: string
     imageUrl?: string
+    email?: string
+    country?: string
+    company?: string
+    industry?: string
   }) {
     const [account] = await db
       .insert(officialAccount)
@@ -91,6 +117,10 @@ export function createOAService(deps: OADeps) {
         uniqueId: input.uniqueId,
         description: input.description,
         imageUrl: input.imageUrl,
+        email: input.email,
+        country: input.country,
+        company: input.company,
+        industry: input.industry,
         channelSecret: generateChannelSecret(),
       })
       .returning()
@@ -823,6 +853,7 @@ export function createOAService(deps: OADeps) {
     deleteProvider,
     listMyProviders,
     listProviderAccounts,
+    listMyOfficialAccounts,
     createOfficialAccount,
     getOfficialAccount,
     updateOfficialAccount,
