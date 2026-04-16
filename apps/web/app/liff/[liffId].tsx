@@ -2,6 +2,8 @@ import { useActiveParams, createRoute } from 'one'
 import { memo, useEffect, useState } from 'react'
 import { SizableText, Spinner, YStack } from 'tamagui'
 import { useAuth } from '~/features/auth/client/authClient'
+import { LiffBrowser } from '~/interface/liff/LiffBrowser'
+import { ShareTargetPicker } from '~/features/liff/ShareTargetPicker'
 
 const route = createRoute<'/liff/[liffId]'>()
 
@@ -15,11 +17,23 @@ type LiffAppConfig = {
   qrCode: boolean
 }
 
+type ShareTargetPickerState = {
+  visible: boolean
+  messages: { type: string; text?: string }[]
+  isMultiple: boolean
+}
+
 export const LiffPage = memo(() => {
   const params = useActiveParams<{ liffId: string }>()
   const { liffId } = params
   const { state } = useAuth()
   const [error, setError] = useState<string | null>(null)
+  const [config, setConfig] = useState<LiffAppConfig | null>(null)
+  const [pickerState, setPickerState] = useState<ShareTargetPickerState>({
+    visible: false,
+    messages: [],
+    isMultiple: true,
+  })
 
   useEffect(() => {
     if (!liffId || state === 'loading') return
@@ -30,20 +44,8 @@ export const LiffPage = memo(() => {
         setError(`LIFF app "${liffId}" not found`)
         return
       }
-      const config = (await res.json()) as LiffAppConfig
-
-      if (state === 'logged-out') {
-        const channelId = liffId.split('-')[0] ?? liffId
-        const authUrl = new URL('/oauth2/v2.1/authorize', window.location.origin)
-        authUrl.searchParams.set('response_type', 'token')
-        authUrl.searchParams.set('client_id', channelId)
-        authUrl.searchParams.set('redirect_uri', config.endpointUrl)
-        authUrl.searchParams.set('scope', config.scopes.join(' ') || 'profile openid')
-        authUrl.searchParams.set('state', liffId)
-        window.location.href = authUrl.toString()
-      } else {
-        window.location.href = config.endpointUrl
-      }
+      const cfg = (await res.json()) as LiffAppConfig
+      setConfig(cfg)
     }
 
     void run().catch((e: unknown) => {
@@ -51,6 +53,30 @@ export const LiffPage = memo(() => {
       setError(msg)
     })
   }, [liffId, state])
+
+  const handleShareTargetPicker = (payload: {
+    type: 'liff:shareTargetPicker'
+    messages: { type: string; text?: string }[]
+    options: { isMultiple: boolean }
+  }) => {
+    setPickerState({
+      visible: true,
+      messages: payload.messages,
+      isMultiple: payload.options.isMultiple,
+    })
+  }
+
+  const handlePickerDone = (result: { status: 'sent' } | false) => {
+    setPickerState({ visible: false, messages: [], isMultiple: true })
+    // Post result back to iframe
+    const iframe = document.querySelector('iframe')
+    if (iframe?.contentWindow) {
+      iframe.contentWindow.postMessage(
+        { type: 'liff:shareTargetPicker:done', ...result },
+        '*',
+      )
+    }
+  }
 
   if (error) {
     return (
@@ -65,12 +91,31 @@ export const LiffPage = memo(() => {
     )
   }
 
+  if (!config) {
+    return (
+      <YStack flex={1} items="center" justify="center" gap="$4">
+        <Spinner size="large" />
+        <SizableText size="$3" color="$color10">
+          Opening LIFF app…
+        </SizableText>
+      </YStack>
+    )
+  }
+
   return (
-    <YStack flex={1} items="center" justify="center" gap="$4">
-      <Spinner size="large" />
-      <SizableText size="$3" color="$color10">
-        Opening LIFF app…
-      </SizableText>
+    <YStack flex={1}>
+      <LiffBrowser
+        endpointUrl={config.endpointUrl}
+        liffId={liffId ?? ''}
+        onShareTargetPicker={handleShareTargetPicker}
+      />
+      {pickerState.visible && (
+        <ShareTargetPicker
+          messages={pickerState.messages}
+          isMultiple={pickerState.isMultiple}
+          onDone={handlePickerDone}
+        />
+      )}
     </YStack>
   )
 })

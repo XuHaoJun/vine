@@ -236,6 +236,32 @@ class LiffImpl {
       }
     },
   }
+
+  async shareTargetPicker(
+    messages: { type: string; text?: string }[],
+    options?: { isMultiple?: boolean },
+  ): Promise<{ status: 'sent' } | false> {
+    if (typeof window === 'undefined') return false
+
+    return new Promise((resolve) => {
+      const handler = (event: MessageEvent) => {
+        if (event.data?.type === 'liff:shareTargetPicker:done') {
+          window.removeEventListener('message', handler)
+          const result = event.data as { status: 'sent' } | false
+          resolve(result)
+        }
+      }
+      window.addEventListener('message', handler)
+      window.parent?.postMessage(
+        {
+          type: 'liff:shareTargetPicker',
+          messages,
+          options: { isMultiple: options?.isMultiple ?? true },
+        },
+        '*',
+      )
+    })
+  }
 }
 
 export const liff = new LiffImpl()
