@@ -15,6 +15,7 @@ import { oaRichMenuPlugin } from './plugins/oa-richmenu'
 import { oaWebhookPlugin } from './plugins/oa-webhook'
 import { createOAService } from './services/oa'
 import { createLiffService } from './services/liff'
+import { liffFixturesPublicPlugin } from './plugins/liff-fixtures-public'
 import { liffPublicPlugin } from './plugins/liff-public'
 import { createFsDriveService } from '@vine/drive'
 
@@ -57,6 +58,7 @@ await zeroPlugin(app, { auth, zero })
 await oaMessagingPlugin(app, { oa, db, drive })
 await oaRichMenuPlugin(app, { oa, db, drive })
 await oaWebhookPlugin(app, { oa, db })
+await liffFixturesPublicPlugin(app)
 await liffPublicPlugin(app, { liff })
 
 app.get('/healthz', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))

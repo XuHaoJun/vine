@@ -25,6 +25,7 @@
         "@vine/db": "workspace:*",
         "@vine/drive": "workspace:*",
         "@vine/flex-schema": "workspace:*",
+        "@vine/liff-fixtures": "workspace:*",
         "@vine/proto": "workspace:*",
         "@vine/richmenu-schema": "workspace:*",
         "@vine/zero-schema": "workspace:*",
@@ -185,6 +186,16 @@
     "packages/liff": {
       "name": "@vine/liff",
       "version": "0.0.1",
+    },
+    "packages/liff-fixtures": {
+      "name": "@vine/liff-fixtures",
+      "version": "0.0.1",
+      "dependencies": {
+        "@vine/liff": "workspace:*",
+      },
+      "devDependencies": {
+        "typescript": "^5.9.3",
+      },
     },
     "packages/line-flex": {
       "name": "@vine/line-flex",
@@ -1891,6 +1902,8 @@
     "@vine/flex-schema": ["@vine/flex-schema@workspace:packages/flex-schema"],
 
     "@vine/liff": ["@vine/liff@workspace:packages/liff"],
+
+    "@vine/liff-fixtures": ["@vine/liff-fixtures@workspace:packages/liff-fixtures"],
 
     "@vine/line-flex": ["@vine/line-flex@workspace:packages/line-flex"],
 

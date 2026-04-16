@@ -65,6 +65,7 @@ apps/server/           Fastify + ConnectRPC server
 packages/zero-schema/  Zero models, queries, mutations
 packages/db/           Drizzle database schema
 packages/proto/        Protobuf definitions
+packages/liff-fixtures/  Static LIFF integration-test fixtures (served by apps/server)
 ```
 
 ## Global Code Style

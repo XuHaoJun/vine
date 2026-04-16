@@ -1,0 +1,20 @@
+{
+  "name": "@vine/liff-fixtures",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./paths": "./src/paths.ts"
+  },
+  "scripts": {
+    "build": "bun build src/mock-share-target-picker.ts --outfile=dist/mock-share-target-picker.js --target=browser --minify && cp src/mock-share-target-picker.html dist/",
+    "dev": "echo 'liff-fixtures - use bun run build'"
+  },
+  "dependencies": {
+    "@vine/liff": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
