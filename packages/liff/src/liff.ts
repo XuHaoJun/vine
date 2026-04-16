@@ -46,10 +46,7 @@ class LiffImpl {
   async init(config: LiffConfig): Promise<void> {
     this._liffId = config.liffId
 
-    const apiBase =
-      typeof window !== 'undefined'
-        ? window.location.origin
-        : ''
+    const apiBase = typeof window !== 'undefined' ? window.location.origin : ''
     const res = await fetch(`${apiBase}/liff/v1/apps/${config.liffId}`)
     if (!res.ok) {
       throw new Error(`LIFF init failed: liffId "${config.liffId}" not found`)
@@ -60,7 +57,11 @@ class LiffImpl {
       const token = hash.get('access_token')
       if (token) {
         this._accessToken = token
-        window.history.replaceState(null, '', window.location.pathname + window.location.search)
+        window.history.replaceState(
+          null,
+          '',
+          window.location.pathname + window.location.search,
+        )
       }
       if (!this._accessToken) {
         const stored = sessionStorage.getItem(`vine_liff_token_${config.liffId}`)
@@ -164,7 +165,8 @@ class LiffImpl {
   }
 
   async sendMessages(messages: unknown[]): Promise<void> {
-    if (!this.isInClient()) throw new Error('sendMessages is only available in LIFF browser')
+    if (!this.isInClient())
+      throw new Error('sendMessages is only available in LIFF browser')
     if (typeof window === 'undefined') return
     window.parent?.postMessage({ type: 'liff:sendMessages', messages }, '*')
   }
@@ -196,7 +198,8 @@ class LiffImpl {
   }
 
   async scanCodeV2(): Promise<{ value: string }> {
-    if (!this.isInClient()) throw new Error('scanCodeV2 is only available in LIFF browser')
+    if (!this.isInClient())
+      throw new Error('scanCodeV2 is only available in LIFF browser')
     return new Promise((resolve, reject) => {
       const handler = (event: MessageEvent) => {
         if (event.data?.type === 'liff:scanCodeResult') {

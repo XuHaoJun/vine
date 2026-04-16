@@ -55,8 +55,12 @@ export const LiffPage = memo(() => {
   if (error) {
     return (
       <YStack flex={1} items="center" justify="center" gap="$4" p="$6">
-        <SizableText size="$5" color="$color12" fontWeight="700">LIFF Error</SizableText>
-        <SizableText size="$3" color="$red10" text="center">{error}</SizableText>
+        <SizableText size="$5" color="$color12" fontWeight="700">
+          LIFF Error
+        </SizableText>
+        <SizableText size="$3" color="$red10" text="center">
+          {error}
+        </SizableText>
       </YStack>
     )
   }
@@ -64,7 +68,9 @@ export const LiffPage = memo(() => {
   return (
     <YStack flex={1} items="center" justify="center" gap="$4">
       <Spinner size="large" />
-      <SizableText size="$3" color="$color10">Opening LIFF app…</SizableText>
+      <SizableText size="$3" color="$color10">
+        Opening LIFF app…
+      </SizableText>
     </YStack>
   )
 })

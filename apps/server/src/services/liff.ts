@@ -42,7 +42,10 @@ export function createLiffService(deps: LiffDeps) {
 
   async function getLoginChannelSecret(id: string) {
     const [channel] = await db
-      .select({ channelSecret: loginChannel.channelSecret, channelId: loginChannel.channelId })
+      .select({
+        channelSecret: loginChannel.channelSecret,
+        channelId: loginChannel.channelId,
+      })
       .from(loginChannel)
       .where(eq(loginChannel.id, id))
       .limit(1)

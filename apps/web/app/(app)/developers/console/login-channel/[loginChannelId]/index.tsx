@@ -51,7 +51,9 @@ export const LoginChannelSettingsPage = memo(() => {
         <SizableText size="$2" color="$color10" fontWeight="500">
           Provider
         </SizableText>
-        <SizableText size="$2" color="$color10">›</SizableText>
+        <SizableText size="$2" color="$color10">
+          ›
+        </SizableText>
         <SizableText size="$2" color="$color12" fontWeight="700">
           {chan?.name ?? 'Login Channel'}
         </SizableText>
@@ -63,7 +65,9 @@ export const LoginChannelSettingsPage = memo(() => {
           {chan?.name ?? 'Login Channel'}
         </SizableText>
         <XStack px="$2" py="$0.5" bg="$blue9" rounded="$1" self="flex-start">
-          <SizableText size="$1" color="white" fontWeight="700">LINE Login</SizableText>
+          <SizableText size="$1" color="white" fontWeight="700">
+            LINE Login
+          </SizableText>
         </XStack>
       </YStack>
 
@@ -83,7 +87,11 @@ export const LoginChannelSettingsPage = memo(() => {
           fontWeight={activeTab === 'liff' ? '700' : '400'}
           color={activeTab === 'liff' ? '$color12' : '$color10'}
           cursor="pointer"
-          onPress={() => router.push(`/developers/console/login-channel/${loginChannelId}/liff` as never)}
+          onPress={() =>
+            router.push(
+              `/developers/console/login-channel/${loginChannelId}/liff` as never,
+            )
+          }
         >
           LIFF
         </SizableText>
@@ -92,21 +100,27 @@ export const LoginChannelSettingsPage = memo(() => {
       {/* Settings Tab Content */}
       <YStack gap="$4">
         <YStack gap="$1">
-          <SizableText size="$2" color="$color10" fontWeight="500">Channel ID</SizableText>
+          <SizableText size="$2" color="$color10" fontWeight="500">
+            Channel ID
+          </SizableText>
           <SizableText size="$3" color="$color12" fontFamily="$mono">
             {secret?.secret?.channelId ?? chan?.channelId ?? '—'}
           </SizableText>
         </YStack>
 
         <YStack gap="$1">
-          <SizableText size="$2" color="$color10" fontWeight="500">Channel Secret</SizableText>
+          <SizableText size="$2" color="$color10" fontWeight="500">
+            Channel Secret
+          </SizableText>
           <SizableText size="$3" color="$color12" fontFamily="$mono">
             {secret?.secret?.channelSecret ?? '••••••••••••••••'}
           </SizableText>
         </YStack>
 
         <YStack gap="$1">
-          <SizableText size="$2" color="$color10" fontWeight="500">Provider ID</SizableText>
+          <SizableText size="$2" color="$color10" fontWeight="500">
+            Provider ID
+          </SizableText>
           <SizableText size="$3" color="$color12" fontFamily="$mono">
             {chan?.providerId ?? '—'}
           </SizableText>
@@ -114,8 +128,12 @@ export const LoginChannelSettingsPage = memo(() => {
 
         {chan?.description && (
           <YStack gap="$1">
-            <SizableText size="$2" color="$color10" fontWeight="500">Description</SizableText>
-            <SizableText size="$3" color="$color12">{chan.description}</SizableText>
+            <SizableText size="$2" color="$color10" fontWeight="500">
+              Description
+            </SizableText>
+            <SizableText size="$3" color="$color12">
+              {chan.description}
+            </SizableText>
           </YStack>
         )}
       </YStack>

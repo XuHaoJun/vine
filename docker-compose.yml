@@ -55,7 +55,7 @@ services:
       - ZERO_UPSTREAM_DB=postgresql://user:password@pgdb:5432/postgres
       - ZERO_CVR_DB=postgresql://user:password@pgdb:5432/zero_cvr
       - ZERO_CHANGE_DB=postgresql://user:password@pgdb:5432/zero_cdb
-    command: sh -c 'bunx --bun vite build --config vite.config.ts && bun run migrate-dist.js'
+    entrypoint: sh -c 'bunx --bun vite build --config vite.config.ts && bun run migrate-dist.js'
 
   zero:
     image: "rocicorp/zero:${ZERO_VERSION:-error-run-bun-tko-run-env-update}"
@@ -68,8 +68,6 @@ services:
       - zero_data:/app
     working_dir: /app
     extra_hosts:
-      # maps host.docker.internal to the host gateway IP on Linux
-      # on Mac/Windows Docker Desktop, this is already available
       - "host.docker.internal:host-gateway"
     environment:
       ZERO_LOG_LEVEL: ${ZERO_LOG_LEVEL:-warn}
@@ -87,6 +85,48 @@ services:
       ZERO_UPSTREAM_MAX_CONNS: ${ZERO_UPSTREAM_MAX_CONNS:-10}
     ports:
       - "${VITE_PORT_ZERO:-4948}:4848"
+
+  server:
+    image: oven/bun:1
+    depends_on:
+      pgdb:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    working_dir: /app/apps/server
+    env_file:
+      - path: .env.docker-compose
+        required: true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      GIT_SHA: ${GIT_SHA:-}
+      PORT: "3001"
+    command: bun --watch --env-file=../../.env.docker-compose src/index.ts
+    ports:
+      - "3001:3001"
+
+  web:
+    image: oven/bun:1
+    depends_on:
+      - server
+      - zero
+    volumes:
+      - .:/app
+    working_dir: /app/apps/web
+    env_file:
+      - path: .env.docker-compose
+        required: true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      GIT_SHA: ${GIT_SHA:-}
+      ONE_PORT: "3000"
+      # Web talks to server via host.docker.internal in Docker
+      ONE_SERVER_URL: "http://host.docker.internal:3001"
+    command: bun run dev
+    ports:
+      - "3000:3000"
 
 volumes:
   pgdb_data:
