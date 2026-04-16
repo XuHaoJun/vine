@@ -5,14 +5,44 @@ Vine is a self-hostable instant-messaging product modeled after LINE. It is not 
 ## Essential Commands
 
 ```bash
-bun install                    # Install dependencies
-bun run dev                    # Start all apps (turbo dev)
-bun run build                  # Build all packages (turbo build)
-bun run check:all              # Type check + lint (tko check)
-bun run format                 # Format all files (oxfmt)
-bun run test                   # Run all tests (turbo test)
-bun run backend -d             # Build migrate js and then docker compose up -d db, zero and exec migrate job
+bun install           # Install dependencies
+docker compose up -d  # Start the full local dev stack in Docker
+bun run build         # Build all packages (turbo build)
+bun run check:all     # Type check + lint (tko check)
+bun run format        # Format all files (oxfmt)
+bun run test          # Run all tests (turbo test)
 ```
+
+### Docker Compose Development
+
+Use Docker Compose as the default and only supported way to start the local dev servers for this repo.
+
+```bash
+docker compose up -d           # Start all services in the background
+docker compose ps              # Check whether each service is up/healthy
+docker compose logs server     # Inspect backend logs
+docker compose logs web        # Inspect frontend logs
+docker compose restart server  # Restart only the backend dev server
+docker compose restart web     # Restart only the frontend dev server
+docker compose down            # Stop the stack
+docker compose down -v         # Stop the stack and remove volumes for a clean rebuild
+```
+
+The Compose stack includes these services:
+
+- `pgdb`: PostgreSQL database for local development
+- `migrate`: one-shot migration/bootstrap job that runs before dependent services
+- `zero`: Zero sync service
+- `server`: backend dev server on port `3001`
+- `web`: frontend dev server on port `3000`
+
+Agent rules for local development:
+
+- Do not start `bun run dev` for frontend/backend development. It duplicates the `server` and `web` containers managed by Docker Compose.
+- Before starting anything new, check whether the Compose stack is already running with `docker compose ps`.
+- If the stack is already up, reuse it instead of launching another dev server process.
+- If only one app needs a restart, use `docker compose restart server` or `docker compose restart web` instead of starting extra processes.
+- Use `docker compose logs <service>` for debugging service output.
 
 ### Running Single Tests
 
@@ -35,6 +65,28 @@ bun run --cwd apps/web test:unit -- src/test/unit/example.test.ts
 # Watch mode
 bun run --cwd apps/web test:unit -- --watch
 ```
+
+### Integration Test Environment
+
+Before running integration tests, first verify that the dev stack is up and healthy:
+
+```bash
+docker compose ps
+docker compose logs server
+docker compose logs web
+docker compose logs zero
+```
+
+Do not start integration tests until `server`, `web`, and `zero` are running correctly.
+
+If the environment looks stale, corrupted, or you need a fully clean state for integration tests, it is safe to rebuild from scratch:
+
+```bash
+docker compose down -v
+docker compose up -d
+```
+
+`docker compose down -v` removes the local Compose volumes, including database state, so the next boot starts from a clean environment.
 
 ### Zero Schema Workflow
 
