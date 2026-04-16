@@ -50,9 +50,14 @@ export const ChannelListPage = memo(() => {
 
   const createLoginChannel = useTanMutation({
     mutationFn: (input: { providerId: string; name: string }) =>
-      loginChannelClient.createLoginChannel({ providerId: input.providerId, name: input.name }),
+      loginChannelClient.createLoginChannel({
+        providerId: input.providerId,
+        name: input.name,
+      }),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['liff', 'login-channels', providerId] })
+      void queryClient.invalidateQueries({
+        queryKey: ['liff', 'login-channels', providerId],
+      })
       showToast('Login channel created', { type: 'success' })
       setShowCreateLogin(false)
       setNewLoginChannelName('')
@@ -300,7 +305,9 @@ export const ChannelListPage = memo(() => {
             rounded="$2"
             bg="$background"
           >
-            <SizableText size="$3" fontWeight="600" color="$color12">New Login Channel</SizableText>
+            <SizableText size="$3" fontWeight="600" color="$color12">
+              New Login Channel
+            </SizableText>
             <Input
               value={newLoginChannelName}
               onChangeText={setNewLoginChannelName}
@@ -308,12 +315,21 @@ export const ChannelListPage = memo(() => {
               size="$2"
             />
             <XStack gap="$2" justify="flex-end">
-              <Button size="$2" variant="outlined" onPress={() => setShowCreateLogin(false)}>Cancel</Button>
+              <Button
+                size="$2"
+                variant="outlined"
+                onPress={() => setShowCreateLogin(false)}
+              >
+                Cancel
+              </Button>
               <Button
                 size="$2"
                 onPress={() => {
                   if (!newLoginChannelName.trim() || !providerId) return
-                  createLoginChannel.mutate({ providerId, name: newLoginChannelName.trim() })
+                  createLoginChannel.mutate({
+                    providerId,
+                    name: newLoginChannelName.trim(),
+                  })
                 }}
                 disabled={createLoginChannel.isPending}
               >
@@ -339,8 +355,18 @@ export const ChannelListPage = memo(() => {
                 router.push(`/developers/console/login-channel/${ch.id}` as never)
               }
             >
-              <XStack position="absolute" t="$2" r="$2" px="$2" py="$0.5" bg="$blue9" rounded="$1">
-                <SizableText size="$1" color="white" fontWeight="700">LINE Login</SizableText>
+              <XStack
+                position="absolute"
+                t="$2"
+                r="$2"
+                px="$2"
+                py="$0.5"
+                bg="$blue9"
+                rounded="$1"
+              >
+                <SizableText size="$1" color="white" fontWeight="700">
+                  LINE Login
+                </SizableText>
               </XStack>
               <YStack flex={1} items="center" justify="center" gap="$4" pt="$6">
                 <YStack
@@ -361,7 +387,9 @@ export const ChannelListPage = memo(() => {
                   {ch.name}
                 </SizableText>
                 <XStack gap="$1.5" items="center">
-                  <SizableText size="$2" color="$color10" fontWeight="500">LINE Login</SizableText>
+                  <SizableText size="$2" color="$color10" fontWeight="500">
+                    LINE Login
+                  </SizableText>
                 </XStack>
               </YStack>
             </YStack>

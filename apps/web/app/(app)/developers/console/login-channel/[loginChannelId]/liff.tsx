@@ -14,7 +14,8 @@ import { showToast } from '~/interface/toast/Toast'
 import { dialogConfirm } from '~/interface/dialogs/actions'
 import { ViewType } from '@vine/proto/liff'
 
-const route = createRoute<'/(app)/developers/console/login-channel/[loginChannelId]/liff'>()
+const route =
+  createRoute<'/(app)/developers/console/login-channel/[loginChannelId]/liff'>()
 
 const createSchema = v.object({
   endpointUrl: v.pipe(
@@ -45,7 +46,12 @@ export const LiffAppsPage = memo(() => {
     enabled: !!loginChannelId,
   })
 
-  const { control, handleSubmit, reset, formState: { isSubmitting } } = useForm<CreateForm>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { isSubmitting },
+  } = useForm<CreateForm>({
     resolver: valibotResolver(createSchema),
     defaultValues: { endpointUrl: '', description: '' },
   })
@@ -107,8 +113,12 @@ export const LiffAppsPage = memo(() => {
         <SizableText size="$2" color="$color10" fontWeight="500">
           {chan?.name ?? 'Login Channel'}
         </SizableText>
-        <SizableText size="$2" color="$color10">›</SizableText>
-        <SizableText size="$2" color="$color12" fontWeight="700">LIFF</SizableText>
+        <SizableText size="$2" color="$color10">
+          ›
+        </SizableText>
+        <SizableText size="$2" color="$color12" fontWeight="700">
+          LIFF
+        </SizableText>
       </XStack>
 
       {/* Tabs */}
@@ -129,10 +139,18 @@ export const LiffAppsPage = memo(() => {
       {/* Header row */}
       <XStack justify="space-between" items="center">
         <YStack>
-          <SizableText size="$5" fontWeight="700" color="$color12">LIFF Apps</SizableText>
-          <SizableText size="$2" color="$color10">{apps.length}/30 apps</SizableText>
+          <SizableText size="$5" fontWeight="700" color="$color12">
+            LIFF Apps
+          </SizableText>
+          <SizableText size="$2" color="$color10">
+            {apps.length}/30 apps
+          </SizableText>
         </YStack>
-        <Button size="$2" onPress={() => setShowCreate(!showCreate)} disabled={apps.length >= 30}>
+        <Button
+          size="$2"
+          onPress={() => setShowCreate(!showCreate)}
+          disabled={apps.length >= 30}
+        >
           Add LIFF App
         </Button>
       </XStack>
@@ -147,7 +165,9 @@ export const LiffAppsPage = memo(() => {
           rounded="$2"
           bg="$background"
         >
-          <SizableText size="$3" fontWeight="600" color="$color12">New LIFF App</SizableText>
+          <SizableText size="$3" fontWeight="600" color="$color12">
+            New LIFF App
+          </SizableText>
           <Controller
             control={control}
             name="endpointUrl"
@@ -175,10 +195,21 @@ export const LiffAppsPage = memo(() => {
             )}
           />
           <XStack gap="$2" justify="flex-end">
-            <Button size="$2" variant="outlined" onPress={() => { setShowCreate(false); reset() }}>
+            <Button
+              size="$2"
+              variant="outlined"
+              onPress={() => {
+                setShowCreate(false)
+                reset()
+              }}
+            >
               Cancel
             </Button>
-            <Button size="$2" onPress={handleSubmit((d) => createApp.mutate(d))} disabled={isSubmitting}>
+            <Button
+              size="$2"
+              onPress={handleSubmit((d) => createApp.mutate(d))}
+              disabled={isSubmitting}
+            >
               Create
             </Button>
           </XStack>
@@ -192,8 +223,12 @@ export const LiffAppsPage = memo(() => {
         </YStack>
       ) : apps.length === 0 ? (
         <YStack items="center" py="$10" gap="$3">
-          <SizableText size="$4" color="$color10">No LIFF apps yet</SizableText>
-          <SizableText size="$2" color="$color8">Add your first LIFF app to get started</SizableText>
+          <SizableText size="$4" color="$color10">
+            No LIFF apps yet
+          </SizableText>
+          <SizableText size="$2" color="$color8">
+            Add your first LIFF app to get started
+          </SizableText>
         </YStack>
       ) : (
         <YStack gap="$2">
@@ -207,10 +242,21 @@ export const LiffAppsPage = memo(() => {
             bg="$color3"
             gap="$4"
           >
-            <SizableText size="$2" fontWeight="600" color="$color10" flex={1}>LIFF ID</SizableText>
-            <SizableText size="$2" fontWeight="600" color="$color10" width={80}>Type</SizableText>
-            <SizableText size="$2" fontWeight="600" color="$color10" flex={2}>Endpoint URL</SizableText>
-            <SizableText size="$2" fontWeight="600" color="$color10" width={60}></SizableText>
+            <SizableText size="$2" fontWeight="600" color="$color10" flex={1}>
+              LIFF ID
+            </SizableText>
+            <SizableText size="$2" fontWeight="600" color="$color10" width={80}>
+              Type
+            </SizableText>
+            <SizableText size="$2" fontWeight="600" color="$color10" flex={2}>
+              Endpoint URL
+            </SizableText>
+            <SizableText
+              size="$2"
+              fontWeight="600"
+              color="$color10"
+              width={60}
+            ></SizableText>
           </XStack>
           {apps.map((app) => (
             <XStack
@@ -223,10 +269,18 @@ export const LiffAppsPage = memo(() => {
               gap="$4"
               items="center"
             >
-              <SizableText size="$2" color="$color12" fontFamily="$mono" flex={1} numberOfLines={1}>
+              <SizableText
+                size="$2"
+                color="$color12"
+                fontFamily="$mono"
+                flex={1}
+                numberOfLines={1}
+              >
                 {app.liffId}
               </SizableText>
-              <SizableText size="$2" color="$color10" width={80}>{app.viewType}</SizableText>
+              <SizableText size="$2" color="$color10" width={80}>
+                {app.viewType}
+              </SizableText>
               <SizableText size="$2" color="$color12" flex={2} numberOfLines={1}>
                 {app.endpointUrl}
               </SizableText>

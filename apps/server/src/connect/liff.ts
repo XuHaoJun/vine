@@ -1,12 +1,7 @@
 import type { ServiceImpl } from '@connectrpc/connect'
 import { Code, ConnectError, ConnectRouter } from '@connectrpc/connect'
 import type { AuthServer } from '@take-out/better-auth-utils/server'
-import {
-  BotPrompt,
-  LIFFService,
-  LoginChannelService,
-  ViewType,
-} from '@vine/proto/liff'
+import { BotPrompt, LIFFService, LoginChannelService, ViewType } from '@vine/proto/liff'
 import type { createLiffService } from '../services/liff'
 import { requireAuthData, withAuthService } from './auth-context'
 
@@ -120,7 +115,8 @@ export function liffHandler(deps: LiffHandlerDeps) {
     const loginChannelImpl: ServiceImpl<typeof LoginChannelService> = {
       async createLoginChannel(req, ctx) {
         const auth = requireAuthData(ctx)
-        if (!req.providerId) throw new ConnectError('providerId required', Code.InvalidArgument)
+        if (!req.providerId)
+          throw new ConnectError('providerId required', Code.InvalidArgument)
         if (!req.name) throw new ConnectError('name required', Code.InvalidArgument)
         const channel = await deps.liff.createLoginChannel({
           providerId: req.providerId,
@@ -143,14 +139,21 @@ export function liffHandler(deps: LiffHandlerDeps) {
         if (!req.id) throw new ConnectError('id required', Code.InvalidArgument)
         const secret = await deps.liff.getLoginChannelSecret(req.id)
         if (!secret) throw new ConnectError('Login channel not found', Code.NotFound)
-        return { secret: { channelSecret: secret.channelSecret, channelId: secret.channelId } }
+        return {
+          secret: { channelSecret: secret.channelSecret, channelId: secret.channelId },
+        }
       },
 
       async listLoginChannels(req, ctx) {
         requireAuthData(ctx)
-        if (!req.providerId) throw new ConnectError('providerId required', Code.InvalidArgument)
+        if (!req.providerId)
+          throw new ConnectError('providerId required', Code.InvalidArgument)
         const channels = await deps.liff.listLoginChannels(req.providerId)
-        return { channels: channels.map(toProtoLoginChannel).filter((c): c is NonNullable<typeof c> => c != null) }
+        return {
+          channels: channels
+            .map(toProtoLoginChannel)
+            .filter((c): c is NonNullable<typeof c> => c != null),
+        }
       },
 
       async deleteLoginChannel(req, ctx) {
@@ -164,8 +167,10 @@ export function liffHandler(deps: LiffHandlerDeps) {
     const liffImpl: ServiceImpl<typeof LIFFService> = {
       async createLiffApp(req, ctx) {
         requireAuthData(ctx)
-        if (!req.loginChannelId) throw new ConnectError('loginChannelId required', Code.InvalidArgument)
-        if (!req.endpointUrl) throw new ConnectError('endpointUrl required', Code.InvalidArgument)
+        if (!req.loginChannelId)
+          throw new ConnectError('loginChannelId required', Code.InvalidArgument)
+        if (!req.endpointUrl)
+          throw new ConnectError('endpointUrl required', Code.InvalidArgument)
 
         // Get channelId to build liffId
         const loginChan = await deps.liff.getLoginChannel(req.loginChannelId)
@@ -180,7 +185,8 @@ export function liffHandler(deps: LiffHandlerDeps) {
             moduleMode: req.moduleMode,
             description: req.description,
             scopes: req.scopes.length ? req.scopes : undefined,
-            botPrompt: req.botPrompt !== undefined ? botPromptToDb(req.botPrompt) : undefined,
+            botPrompt:
+              req.botPrompt !== undefined ? botPromptToDb(req.botPrompt) : undefined,
             qrCode: req.qrCode,
           })
           return { app: toProtoLiffApp(app) }
@@ -200,7 +206,8 @@ export function liffHandler(deps: LiffHandlerDeps) {
             moduleMode: req.moduleMode,
             description: req.description,
             scopes: req.scopes.length ? req.scopes : undefined,
-            botPrompt: req.botPrompt !== undefined ? botPromptToDb(req.botPrompt) : undefined,
+            botPrompt:
+              req.botPrompt !== undefined ? botPromptToDb(req.botPrompt) : undefined,
             qrCode: req.qrCode,
           })
           if (!app) throw new ConnectError('LIFF app not found', Code.NotFound)
@@ -222,9 +229,14 @@ export function liffHandler(deps: LiffHandlerDeps) {
 
       async listLiffApps(req, ctx) {
         requireAuthData(ctx)
-        if (!req.loginChannelId) throw new ConnectError('loginChannelId required', Code.InvalidArgument)
+        if (!req.loginChannelId)
+          throw new ConnectError('loginChannelId required', Code.InvalidArgument)
         const apps = await deps.liff.listLiffApps(req.loginChannelId)
-        return { apps: apps.map(toProtoLiffApp).filter((a): a is NonNullable<typeof a> => a != null) }
+        return {
+          apps: apps
+            .map(toProtoLiffApp)
+            .filter((a): a is NonNullable<typeof a> => a != null),
+        }
       },
 
       async deleteLiffApp(req, ctx) {
@@ -235,7 +247,10 @@ export function liffHandler(deps: LiffHandlerDeps) {
       },
     }
 
-    router.service(LoginChannelService, withAuthService(LoginChannelService, deps.auth, loginChannelImpl))
+    router.service(
+      LoginChannelService,
+      withAuthService(LoginChannelService, deps.auth, loginChannelImpl),
+    )
     router.service(LIFFService, withAuthService(LIFFService, deps.auth, liffImpl))
   }
 }

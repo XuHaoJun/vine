@@ -41,7 +41,10 @@ describe('createLiffService — LoginChannel', () => {
   it('creates a login channel with generated channelId and channelSecret', async () => {
     const mockDb = createMockDb()
     const svc = createLiffService({ db: mockDb as any })
-    const result = await svc.createLoginChannel({ providerId: 'prov-1', name: 'My Login Channel' })
+    const result = await svc.createLoginChannel({
+      providerId: 'prov-1',
+      name: 'My Login Channel',
+    })
     expect(mockDb.insert).toHaveBeenCalled()
     expect(result.name).toBe('My Login Channel')
     expect(result.channelId).toBeTruthy()
@@ -60,7 +63,16 @@ describe('createLiffService — LoginChannel', () => {
     mockDb.select.mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockResolvedValue([
-          { id: 'chan-1', providerId: 'prov-1', name: 'Chan A', channelId: 'x', channelSecret: 's', description: null, createdAt: '', updatedAt: '' },
+          {
+            id: 'chan-1',
+            providerId: 'prov-1',
+            name: 'Chan A',
+            channelId: 'x',
+            channelSecret: 's',
+            description: null,
+            createdAt: '',
+            updatedAt: '',
+          },
         ]),
       }),
     })
@@ -89,7 +101,11 @@ describe('createLiffService — LiffApp', () => {
     mockDb.select.mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
-          limit: vi.fn().mockResolvedValue(Array.from({ length: 30 }, (_, i) => ({ id: `app-${i}` }))),
+          limit: vi
+            .fn()
+            .mockResolvedValue(
+              Array.from({ length: 30 }, (_, i) => ({ id: `app-${i}` })),
+            ),
         }),
       }),
     })

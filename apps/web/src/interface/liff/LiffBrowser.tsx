@@ -11,7 +11,14 @@ type LiffBrowserProps = {
 }
 
 export const LiffBrowser = memo(
-  ({ endpointUrl, liffId, accessToken, onClose, onMessage, height = '100%' }: LiffBrowserProps) => {
+  ({
+    endpointUrl,
+    liffId,
+    accessToken,
+    onClose,
+    onMessage,
+    height = '100%',
+  }: LiffBrowserProps) => {
     const iframeRef = useRef<HTMLIFrameElement>(null)
 
     const src = accessToken
