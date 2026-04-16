@@ -234,9 +234,14 @@ async function main() {
     })
     console.info(`  ➜  Proxy:  http://localhost:${FRONTEND_PORT}/`)
 
-    // run tests
+    // run tests (optional args forwarded to playwright, e.g. integration/foo.test.ts)
+    const playwrightExtra = process.argv.slice(2)
+    const playwrightCmd =
+      playwrightExtra.length > 0
+        ? `bunx playwright test ${playwrightExtra.join(' ')}`
+        : `bunx playwright test`
     console.info('\nrunning tests...')
-    await $('cd apps/web/src/test && bunx playwright test', { timeout: TEST_TIMEOUT })
+    await $(`cd apps/web/src/test && ${playwrightCmd}`, { timeout: TEST_TIMEOUT })
 
     console.info('\n✓ integration tests passed')
   } finally {

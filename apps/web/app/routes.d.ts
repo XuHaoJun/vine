@@ -79,6 +79,7 @@ declare module 'one' {
         | `/(app)/developers/console/provider/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/home/(tabs)/talks/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/home/talks/${OneRouter.SingleRoutePart<T>}`
+        | `/(app)/liff/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/manager/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/manager/${OneRouter.SingleRoutePart<T>}/richmenu/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/oa/${OneRouter.SingleRoutePart<T>}`
@@ -101,6 +102,7 @@ declare module 'one' {
         | `/(app)/developers/console/provider/[providerId]`
         | `/(app)/home/(tabs)/talks/[chatId]`
         | `/(app)/home/talks/[chatId]`
+        | `/(app)/liff/[liffId]`
         | `/(app)/manager/[oaId]`
         | `/(app)/manager/[oaId]/richmenu/[richMenuId]`
         | `/(app)/oa/[oaId]`
@@ -124,6 +126,7 @@ declare module 'one' {
         '/(app)/developers/console/provider/[providerId]': RouteInfo<{ providerId: string }>
         '/(app)/home/(tabs)/talks/[chatId]': RouteInfo<{ chatId: string }>
         '/(app)/home/talks/[chatId]': RouteInfo<{ chatId: string }>
+        '/(app)/liff/[liffId]': RouteInfo<{ liffId: string }>
         '/(app)/manager/[oaId]': RouteInfo<{ oaId: string }>
         '/(app)/manager/[oaId]/richmenu/[richMenuId]': RouteInfo<{ oaId: string; richMenuId: string }>
         '/(app)/oa/[oaId]': RouteInfo<{ oaId: string }>

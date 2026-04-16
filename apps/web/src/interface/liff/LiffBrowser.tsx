@@ -28,6 +28,12 @@ export const LiffBrowser = memo(
     height = '100%',
   }: LiffBrowserProps) => {
     const iframeRef = useRef<HTMLIFrameElement>(null)
+    const onCloseRef = useRef(onClose)
+    const onMessageRef = useRef(onMessage)
+    const onShareTargetPickerRef = useRef(onShareTargetPicker)
+    onCloseRef.current = onClose
+    onMessageRef.current = onMessage
+    onShareTargetPickerRef.current = onShareTargetPicker
 
     const src = accessToken
       ? `${endpointUrl}${endpointUrl.includes('#') ? '&' : '#'}access_token=${encodeURIComponent(accessToken)}`
@@ -38,16 +44,16 @@ export const LiffBrowser = memo(
         if (!event.data || typeof event.data !== 'object') return
         const msg = event.data as Record<string, unknown>
         if (msg['type'] === 'liff:closeWindow') {
-          onClose?.()
-        } else if (msg['type'] === 'liff:shareTargetPicker' && onShareTargetPicker) {
-          onShareTargetPicker(event.data as ShareTargetPickerPayload)
+          onCloseRef.current?.()
+        } else if (msg['type'] === 'liff:shareTargetPicker') {
+          onShareTargetPickerRef.current?.(event.data as ShareTargetPickerPayload)
         } else {
-          onMessage?.(event.data)
+          onMessageRef.current?.(event.data)
         }
       }
       window.addEventListener('message', handler)
       return () => window.removeEventListener('message', handler)
-    }, [onClose, onMessage, onShareTargetPicker])
+    }, [])
 
     return (
       <YStack flex={1} style={{ height }}>
