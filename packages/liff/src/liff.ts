@@ -1,9 +1,40 @@
 export type LiffOS = 'ios' | 'android' | 'web'
 
+export type LiffAvailability = {
+  shareTargetPicker: { permission: boolean }
+  multipleLiffTransition: { permission: boolean }
+  subwindowOpen: { permission: boolean }
+  scanCode: { permission: boolean }
+  scanCodeV2: { permission: boolean }
+  createShortcutOnHomeScreen: { permission: boolean }
+}
+
+export type LiffMenuColorScheme = {
+  iconColor: string
+  statusBarColor: string
+  titleTextColor: string
+  titleSubtextColor: string
+  titleButtonColor: string
+  titleBackgroundColor: string
+  progressBarColor: string
+  progressBackgroundColor: string
+}
+
+export type LiffMenuColorSetting = {
+  adaptableColorSchemes: string[]
+  lightModeColor: LiffMenuColorScheme
+}
+
 export type LiffContext = {
   type: 'none' | 'utou' | 'room' | 'group' | 'square_chat' | 'external'
   userId: string | undefined
-  viewType: string
+  liffId: string
+  viewType: 'compact' | 'tall' | 'full'
+  endpointUrl: string
+  accessTokenHash: string
+  scope: string[]
+  availability: LiffAvailability
+  menuColorSetting: LiffMenuColorSetting
 }
 
 export type DecodedIDToken = {
@@ -28,11 +59,52 @@ type LiffConfig = {
   liffId: string
 }
 
+type LiffAppConfig = {
+  liffId: string
+  viewType: string
+  endpointUrl: string
+  scopes: string[]
+  moduleMode: boolean
+  botPrompt: string
+}
+
+const DEFAULT_MENU_COLOR_SETTING: LiffMenuColorSetting = {
+  adaptableColorSchemes: ['light'],
+  lightModeColor: {
+    iconColor: '#111111',
+    statusBarColor: 'black',
+    titleTextColor: '#111111',
+    titleSubtextColor: '#B7B7B7',
+    titleButtonColor: '#111111',
+    titleBackgroundColor: '#FFFFFF',
+    progressBarColor: '#06C755',
+    progressBackgroundColor: '#FFFFFF',
+  },
+}
+
+async function computeAccessTokenHash(token: string): Promise<string> {
+  if (typeof crypto !== 'undefined' && crypto.subtle) {
+    try {
+      const encoder = new TextEncoder()
+      const data = encoder.encode(token)
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+      const hashArray = Array.from(new Uint8Array(hashBuffer))
+      const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+      return hashHex.slice(0, hashHex.length / 2)
+    } catch {
+      return ''
+    }
+  }
+  return ''
+}
+
 class LiffImpl {
   private _liffId: string | null = null
   private _initialized = false
   private _accessToken: string | null = null
   private _idToken: string | null = null
+  private _accessTokenHash: string = ''
+  private _appConfig: LiffAppConfig | null = null
   private _readyResolve: (() => void) | null = null
 
   readonly ready: Promise<void>
@@ -52,9 +124,13 @@ class LiffImpl {
       throw new Error(`LIFF init failed: liffId "${config.liffId}" not found`)
     }
 
+    const appConfig = (await res.json()) as LiffAppConfig
+    this._appConfig = appConfig
+
     if (typeof window !== 'undefined') {
       const hash = new URLSearchParams(window.location.hash.slice(1))
       const token = hash.get('access_token')
+      const idToken = hash.get('id_token')
       if (token) {
         this._accessToken = token
         window.history.replaceState(
@@ -63,12 +139,23 @@ class LiffImpl {
           window.location.pathname + window.location.search,
         )
       }
+      if (idToken) {
+        this._idToken = idToken
+      }
       if (!this._accessToken) {
         const stored = sessionStorage.getItem(`vine_liff_token_${config.liffId}`)
         if (stored) this._accessToken = stored
       }
+      if (!this._idToken) {
+        const storedIdToken = sessionStorage.getItem(`vine_liff_idtoken_${config.liffId}`)
+        if (storedIdToken) this._idToken = storedIdToken
+      }
       if (this._accessToken) {
         sessionStorage.setItem(`vine_liff_token_${config.liffId}`, this._accessToken)
+        this._accessTokenHash = await computeAccessTokenHash(this._accessToken)
+      }
+      if (this._idToken) {
+        sessionStorage.setItem(`vine_liff_idtoken_${config.liffId}`, this._idToken)
       }
     }
 
@@ -126,8 +213,10 @@ class LiffImpl {
   logout(): void {
     this._accessToken = null
     this._idToken = null
+    this._accessTokenHash = ''
     if (typeof sessionStorage !== 'undefined' && this._liffId) {
       sessionStorage.removeItem(`vine_liff_token_${this._liffId}`)
+      sessionStorage.removeItem(`vine_liff_idtoken_${this._liffId}`)
     }
   }
 
@@ -161,7 +250,17 @@ class LiffImpl {
   }
 
   async getFriendship(): Promise<{ friendFlag: boolean }> {
-    return { friendFlag: false }
+    if (!this._accessToken) throw new Error('Not logged in')
+    const apiBase = typeof window !== 'undefined' ? window.location.origin : ''
+    const liffId = this._liffId ?? ''
+    const res = await fetch(
+      `${apiBase}/liff/v1/friendship?liffId=${encodeURIComponent(liffId)}`,
+      {
+        headers: { Authorization: `Bearer ${this._accessToken}` },
+      },
+    )
+    if (!res.ok) throw new Error('Failed to get friendship')
+    return res.json() as Promise<{ friendFlag: boolean }>
   }
 
   async sendMessages(messages: unknown[]): Promise<void> {
@@ -190,10 +289,25 @@ class LiffImpl {
   }
 
   getContext(): LiffContext {
+    const inClient = this.isInClient()
+    const cfg = this._appConfig
     return {
-      type: 'external',
+      type: inClient ? 'utou' : 'external',
       userId: this.getDecodedIDToken()?.sub,
-      viewType: 'full',
+      liffId: this._liffId ?? '',
+      viewType: (cfg?.viewType as LiffContext['viewType']) ?? 'full',
+      endpointUrl: cfg?.endpointUrl ?? '',
+      accessTokenHash: this._accessTokenHash,
+      scope: cfg?.scopes ?? [],
+      availability: {
+        shareTargetPicker: { permission: true },
+        multipleLiffTransition: { permission: inClient },
+        subwindowOpen: { permission: true },
+        scanCode: { permission: false },
+        scanCodeV2: { permission: inClient },
+        createShortcutOnHomeScreen: { permission: false },
+      },
+      menuColorSetting: DEFAULT_MENU_COLOR_SETTING,
     }
   }
 
@@ -217,11 +331,21 @@ class LiffImpl {
   }
 
   isApiAvailable(apiName: string): boolean {
-    const inClientApis = ['sendMessages', 'scanCodeV2', 'closeWindow']
-    if (inClientApis.includes(apiName)) {
-      return this.isInClient()
+    const inClient = this.isInClient()
+    const ctx = this.getContext()
+    const map: Record<string, boolean> = {
+      shareTargetPicker: true,
+      sendMessages: ctx.availability.subwindowOpen.permission && inClient,
+      closeWindow: true,
+      scanCodeV2: ctx.availability.scanCodeV2.permission,
+      multipleLiffTransition:
+        ctx.availability.multipleLiffTransition.permission && inClient,
+      createShortcutOnHomeScreen: ctx.availability.createShortcutOnHomeScreen.permission,
+      skipChannelVerificationScreen: false,
+      iap: false,
+      scanCode: ctx.availability.scanCode.permission,
     }
-    return true
+    return map[apiName] ?? false
   }
 
   permanentLink = {

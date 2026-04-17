@@ -11,7 +11,10 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "types": ["node", "bun"],
-    "lib": ["esnext"]
+    "lib": ["esnext"],
+    "paths": {
+      "@vine/liff-fixtures/paths": ["../../packages/liff-fixtures/src/paths"]
+    }
   },
   "include": [
     "./src",

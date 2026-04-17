@@ -1,5 +1,5 @@
 import { boolean, index, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
-import { oaProvider } from './schema-oa'
+import { oaProvider, officialAccount } from './schema-oa'
 
 export const loginChannel = pgTable(
   'loginChannel',
@@ -8,6 +8,7 @@ export const loginChannel = pgTable(
     providerId: uuid('providerId')
       .notNull()
       .references(() => oaProvider.id, { onDelete: 'cascade' }),
+    oaId: uuid('oaId').references(() => officialAccount.id, { onDelete: 'set null' }),
     name: text('name').notNull(),
     channelId: text('channelId').notNull().unique(),
     channelSecret: text('channelSecret').notNull(),

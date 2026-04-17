@@ -5,7 +5,10 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./paths": "./src/paths.ts"
+    "./paths": {
+      "types": "./src/paths.d.ts",
+      "default": "./src/paths.ts"
+    }
   },
   "scripts": {
     "build": "bun build src/mock-share-target-picker.ts --outfile=dist/mock-share-target-picker.js --target=browser --minify && cp src/mock-share-target-picker.html dist/",

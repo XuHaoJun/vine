@@ -59,7 +59,7 @@ await oaMessagingPlugin(app, { oa, db, drive })
 await oaRichMenuPlugin(app, { oa, db, drive })
 await oaWebhookPlugin(app, { oa, db })
 await liffFixturesPublicPlugin(app)
-await liffPublicPlugin(app, { liff })
+await liffPublicPlugin(app, { liff, auth, db })
 
 app.get('/healthz', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))
 

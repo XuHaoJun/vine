@@ -15,6 +15,7 @@ export function createLiffService(deps: LiffDeps) {
     providerId: string
     name: string
     description?: string | undefined
+    oaId?: string | undefined
   }) {
     const channelId = randomUUID().replace(/-/g, '').slice(0, 10)
     const channelSecret = randomBytes(16).toString('hex')
@@ -22,6 +23,7 @@ export function createLiffService(deps: LiffDeps) {
       .insert(loginChannel)
       .values({
         providerId: input.providerId,
+        oaId: input.oaId ?? null,
         name: input.name,
         channelId,
         channelSecret,
@@ -29,6 +31,15 @@ export function createLiffService(deps: LiffDeps) {
       })
       .returning()
     return channel
+  }
+
+  async function getLinkedOA(loginChannelId: string): Promise<string | null> {
+    const [channel] = await db
+      .select({ oaId: loginChannel.oaId })
+      .from(loginChannel)
+      .where(eq(loginChannel.id, loginChannelId))
+      .limit(1)
+    return channel?.oaId ?? null
   }
 
   async function getLoginChannel(id: string) {
@@ -164,6 +175,7 @@ export function createLiffService(deps: LiffDeps) {
     getLiffApp,
     listLiffApps,
     deleteLiffApp,
+    getLinkedOA,
   }
 }
 
