@@ -9,11 +9,12 @@ import { zero } from '~/zero/client'
 
 type ShareTargetItem = {
   id: string
-  kind: 'friend' | 'chat'
+  kind: 'friend' | 'chat' | 'group'
   name: string
   image: string | null | undefined
   chatId?: string
   userId?: string
+  memberCount?: number
 }
 
 type ShareTargetPickerProps = {
@@ -92,10 +93,11 @@ export const ShareTargetPicker = memo(
   ({ messages, isMultiple, onDone }: ShareTargetPickerProps) => {
     const { user } = useAuth()
     const userId = user?.id ?? ''
-    const { chats, friends, isLoading } = useShareTargets()
+    const { chats, friends, groups, isLoading } = useShareTargets()
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
     const [chatsExpanded, setChatsExpanded] = useState(true)
     const [friendsExpanded, setFriendsExpanded] = useState(true)
+    const [groupsExpanded, setGroupsExpanded] = useState(true)
 
     const allTargets = useMemo<ShareTargetItem[]>(() => {
       const items: ShareTargetItem[] = []
@@ -117,8 +119,18 @@ export const ShareTargetPicker = memo(
           chatId: c.chatId,
         })
       }
+      for (const g of groups) {
+        items.push({
+          id: `group-${g.chatId}`,
+          kind: 'group',
+          name: g.name,
+          image: g.image,
+          chatId: g.chatId,
+          memberCount: g.memberCount,
+        })
+      }
       return items
-    }, [friends, chats])
+    }, [friends, chats, groups])
 
     const handleSelect = (id: string) => {
       setSelectedIds((prev) => {
@@ -170,6 +182,19 @@ export const ShareTargetPicker = memo(
             }
           }
           if (target.kind === 'chat' && target.chatId) {
+            for (const msg of textMessages) {
+              zero.mutate.message.send({
+                id: crypto.randomUUID(),
+                chatId: target.chatId,
+                senderId: userId,
+                senderType: 'user',
+                type: 'text',
+                text: msg.text ?? '',
+                createdAt: Date.now(),
+              })
+            }
+          }
+          if (target.kind === 'group' && target.chatId) {
             for (const msg of textMessages) {
               zero.mutate.message.send({
                 id: crypto.randomUUID(),
@@ -278,6 +303,37 @@ export const ShareTargetPicker = memo(
                 <YStack px="$4" py="$6" items="center">
                   <SizableText size="$3" color="$color10">
                     沒有聊天
+                  </SizableText>
+                </YStack>
+              )}
+            </CollapsibleSection>
+
+            {/* Groups section */}
+            <CollapsibleSection
+              title="群組"
+              count={groups.length}
+              expanded={groupsExpanded}
+              onToggle={() => setGroupsExpanded((v) => !v)}
+            >
+              {groups.map((g) => (
+                <TargetItem
+                  key={`group-${g.chatId}`}
+                  item={{
+                    id: `group-${g.chatId}`,
+                    kind: 'group',
+                    name: g.name,
+                    image: g.image,
+                    chatId: g.chatId,
+                    memberCount: g.memberCount,
+                  }}
+                  selected={selectedIds.has(`group-${g.chatId}`)}
+                  onSelect={() => handleSelect(`group-${g.chatId}`)}
+                />
+              ))}
+              {groups.length === 0 && (
+                <YStack px="$4" py="$6" items="center">
+                  <SizableText size="$3" color="$color10">
+                    沒有群組
                   </SizableText>
                 </YStack>
               )}

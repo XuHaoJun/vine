@@ -21,6 +21,14 @@ type ShareChat = {
   lastMessageText: string | null | undefined
 }
 
+type ShareGroup = {
+  kind: 'group'
+  chatId: string
+  name: string
+  image: string | null | undefined
+  memberCount: number
+}
+
 export function useShareTargets() {
   const { user } = useAuth()
   const userId = user?.id ?? ''
@@ -64,9 +72,23 @@ export function useShareTargets() {
       })
   }, [chats, userId])
 
+  const shareGroups = useMemo<ShareGroup[]>(() => {
+    if (!chats) return []
+    return chats
+      .filter((c) => c.type === 'group')
+      .map((c) => ({
+        kind: 'group' as const,
+        chatId: c.id,
+        name: c.name ?? '群組',
+        image: c.image ?? null,
+        memberCount: c.members?.length ?? 0,
+      }))
+  }, [chats])
+
   return {
     friends: shareFriends,
     chats: shareChats,
+    groups: shareGroups,
     isLoading: !friends || !chats,
   }
 }
