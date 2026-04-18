@@ -6,6 +6,7 @@ import { Avatar } from '~/interface/avatars/Avatar'
 type Props = {
   name: string
   image?: string | null
+  type?: string
   lastMessageText?: string | null
   lastMessageAt?: number | null
   unreadCount?: number
@@ -32,7 +33,7 @@ function formatChatTime(ts: number): string {
 }
 
 export const ChatListItem = memo(
-  ({ name, image, lastMessageText, lastMessageAt, unreadCount, onPress }: Props) => {
+  ({ name, image, type, lastMessageText, lastMessageAt, unreadCount, onPress }: Props) => {
     const timeLabel = lastMessageAt ? formatChatTime(lastMessageAt) : ''
 
     return (
@@ -43,9 +44,25 @@ export const ChatListItem = memo(
       >
         <YStack flex={1} gap="$1">
           <XStack justify="space-between" items="center">
-            <SizableText size="$3" fontWeight="600" numberOfLines={1}>
-              {name}
-            </SizableText>
+            <XStack items="center" gap="$2">
+              <SizableText size="$3" fontWeight="600" numberOfLines={1}>
+                {name}
+              </SizableText>
+              {type === 'group' && (
+                <XStack
+                  bg="$color4"
+                  rounded="$10"
+                  px="$1.5"
+                  py="$0.5"
+                  items="center"
+                  justify="center"
+                >
+                  <SizableText size="$1" color="$color12" fontWeight="600">
+                    👥
+                  </SizableText>
+                </XStack>
+              )}
+            </XStack>
             <XStack items="center" gap="$2">
               <SizableText size="$1" color="$color10">
                 {timeLabel}
