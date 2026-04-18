@@ -674,9 +674,16 @@ describe('createOAService — checkAndIncrementUsage', () => {
       select: vi.fn().mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([
-              { oaId: 'oa-123', monthlyLimit: 1000, currentUsage: 500, resetAt: new Date().toISOString() },
-            ]),
+            limit: vi
+              .fn()
+              .mockResolvedValue([
+                {
+                  oaId: 'oa-123',
+                  monthlyLimit: 1000,
+                  currentUsage: 500,
+                  resetAt: new Date().toISOString(),
+                },
+              ]),
           }),
         }),
       }),
@@ -701,9 +708,16 @@ describe('createOAService — checkAndIncrementUsage', () => {
       select: vi.fn().mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([
-              { oaId: 'oa-123', monthlyLimit: 1000, currentUsage: 999, resetAt: new Date().toISOString() },
-            ]),
+            limit: vi
+              .fn()
+              .mockResolvedValue([
+                {
+                  oaId: 'oa-123',
+                  monthlyLimit: 1000,
+                  currentUsage: 999,
+                  resetAt: new Date().toISOString(),
+                },
+              ]),
           }),
         }),
       }),
@@ -722,9 +736,16 @@ describe('createOAService — checkAndIncrementUsage', () => {
       select: vi.fn().mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([
-              { oaId: 'oa-123', monthlyLimit: 1000, currentUsage: 999, resetAt: new Date().toISOString() },
-            ]),
+            limit: vi
+              .fn()
+              .mockResolvedValue([
+                {
+                  oaId: 'oa-123',
+                  monthlyLimit: 1000,
+                  currentUsage: 999,
+                  resetAt: new Date().toISOString(),
+                },
+              ]),
           }),
         }),
       }),
@@ -732,11 +753,11 @@ describe('createOAService — checkAndIncrementUsage', () => {
         set: vi.fn().mockReturnValue({
           where: vi.fn().mockImplementation(() => {
             callCount++
-            const returning = vi.fn().mockResolvedValue(
-              callCount === 1
-                ? [{ oaId: 'oa-123', currentUsage: 1001 }]
-                : [],
-            )
+            const returning = vi
+              .fn()
+              .mockResolvedValue(
+                callCount === 1 ? [{ oaId: 'oa-123', currentUsage: 1001 }] : [],
+              )
             return { returning }
           }),
         }),
@@ -768,9 +789,16 @@ describe('createOAService — setQuota', () => {
       select: vi.fn().mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([
-              { oaId: 'oa-123', monthlyLimit: 1000, currentUsage: 500, resetAt: new Date().toISOString() },
-            ]),
+            limit: vi
+              .fn()
+              .mockResolvedValue([
+                {
+                  oaId: 'oa-123',
+                  monthlyLimit: 1000,
+                  currentUsage: 500,
+                  resetAt: new Date().toISOString(),
+                },
+              ]),
           }),
         }),
       }),
@@ -780,7 +808,9 @@ describe('createOAService — setQuota', () => {
     await oa.setQuota('oa-123', 2000)
 
     expect(mockOnConflictDoUpdate).toHaveBeenCalled()
-    const setCall = mockOnConflictDoUpdate.mock.calls[0][0] as { set: Record<string, unknown> }
+    const setCall = mockOnConflictDoUpdate.mock.calls[0][0] as {
+      set: Record<string, unknown>
+    }
     expect(setCall.set).toHaveProperty('monthlyLimit', 2000)
     expect(setCall.set).not.toHaveProperty('currentUsage')
   })
