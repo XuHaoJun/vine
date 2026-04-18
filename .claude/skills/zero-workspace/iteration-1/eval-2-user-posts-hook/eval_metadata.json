@@ -1,0 +1,6 @@
+{
+  "eval_id": 2,
+  "eval_name": "user-posts-hook",
+  "prompt": "Write a React hook called useUserPosts that fetches all posts for the currently logged-in user, ordered by newest first, plus a function to create a new post. Show me how a component would call it. (Assume the post table from the previous task already exists.)",
+  "assertions": []
+}
