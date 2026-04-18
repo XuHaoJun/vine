@@ -40,11 +40,6 @@ export async function liffPublicPlugin(
   app.get<{ Querystring: { liffId?: string } }>(
     '/liff/v1/friendship',
     async (request, reply) => {
-      const token = request.headers.authorization?.replace('Bearer ', '')
-      if (!token) {
-        return reply.status(401).send({ error: 'Unauthorized' })
-      }
-
       const liffId = request.query.liffId
       if (!liffId) {
         return reply.status(400).send({ error: 'liffId is required' })

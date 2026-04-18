@@ -67,6 +67,6 @@ export function useShareTargets() {
   return {
     friends: shareFriends,
     chats: shareChats,
-    isLoading: !friends && !chats,
+    isLoading: !friends || !chats,
   }
 }

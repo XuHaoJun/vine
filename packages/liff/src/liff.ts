@@ -314,9 +314,15 @@ class LiffImpl {
   async scanCodeV2(): Promise<{ value: string }> {
     if (!this.isInClient())
       throw new Error('scanCodeV2 is only available in LIFF browser')
+    const TIMEOUT_MS = 120_000
     return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        window.removeEventListener('message', handler)
+        reject(new Error('Scan timed out'))
+      }, TIMEOUT_MS)
       const handler = (event: MessageEvent) => {
         if (event.data?.type === 'liff:scanCodeResult') {
+          clearTimeout(timeoutId)
           window.removeEventListener('message', handler)
           if (event.data.value) {
             resolve({ value: event.data.value as string })
@@ -367,9 +373,15 @@ class LiffImpl {
   ): Promise<{ status: 'sent' } | false> {
     if (typeof window === 'undefined') return false
 
+    const TIMEOUT_MS = 120_000
     return new Promise((resolve) => {
+      const timeoutId = setTimeout(() => {
+        window.removeEventListener('message', handler)
+        resolve(false)
+      }, TIMEOUT_MS)
       const handler = (event: MessageEvent) => {
         if (event.data?.type === 'liff:shareTargetPicker:done') {
+          clearTimeout(timeoutId)
           window.removeEventListener('message', handler)
           const result = event.data as { status: 'sent' } | false
           resolve(result)

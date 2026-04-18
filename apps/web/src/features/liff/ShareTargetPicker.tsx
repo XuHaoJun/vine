@@ -92,22 +92,12 @@ export const ShareTargetPicker = memo(
   ({ messages, isMultiple, onDone }: ShareTargetPickerProps) => {
     const { user } = useAuth()
     const userId = user?.id ?? ''
-    const { friends, chats, isLoading } = useShareTargets()
+    const { chats, isLoading } = useShareTargets()
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-    const [friendsExpanded, setFriendsExpanded] = useState(true)
     const [chatsExpanded, setChatsExpanded] = useState(true)
 
     const allTargets = useMemo<ShareTargetItem[]>(() => {
       const items: ShareTargetItem[] = []
-      for (const f of friends) {
-        items.push({
-          id: `friend-${f.userId}`,
-          kind: 'friend',
-          name: f.name,
-          image: f.image,
-          userId: f.userId,
-        })
-      }
       for (const c of chats) {
         items.push({
           id: `chat-${c.chatId}`,
@@ -118,7 +108,7 @@ export const ShareTargetPicker = memo(
         })
       }
       return items
-    }, [friends, chats])
+    }, [chats])
 
     const handleSelect = (id: string) => {
       setSelectedIds((prev) => {
@@ -206,36 +196,6 @@ export const ShareTargetPicker = memo(
           </YStack>
         ) : (
           <ScrollView flex={1}>
-            {/* Friends section */}
-            <CollapsibleSection
-              title="好友"
-              count={friends.length}
-              expanded={friendsExpanded}
-              onToggle={() => setFriendsExpanded((v) => !v)}
-            >
-              {friends.map((f) => (
-                <TargetItem
-                  key={`friend-${f.userId}`}
-                  item={{
-                    id: `friend-${f.userId}`,
-                    kind: 'friend',
-                    name: f.name,
-                    image: f.image,
-                    userId: f.userId,
-                  }}
-                  selected={selectedIds.has(`friend-${f.userId}`)}
-                  onSelect={() => handleSelect(`friend-${f.userId}`)}
-                />
-              ))}
-              {friends.length === 0 && (
-                <YStack px="$4" py="$6" items="center">
-                  <SizableText size="$3" color="$color10">
-                    沒有好友
-                  </SizableText>
-                </YStack>
-              )}
-            </CollapsibleSection>
-
             {/* Chats section */}
             <CollapsibleSection
               title="聊天"

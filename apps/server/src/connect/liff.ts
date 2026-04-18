@@ -203,12 +203,12 @@ export function liffHandler(deps: LiffHandlerDeps) {
           const app = await deps.liff.updateLiffApp(req.liffId, {
             viewType: req.viewType !== undefined ? viewTypeToDb(req.viewType) : undefined,
             endpointUrl: req.endpointUrl,
-            moduleMode: req.moduleMode,
+            moduleMode: req.moduleMode !== undefined ? req.moduleMode : undefined,
             description: req.description,
-            scopes: req.scopes.length ? req.scopes : undefined,
             botPrompt:
               req.botPrompt !== undefined ? botPromptToDb(req.botPrompt) : undefined,
-            qrCode: req.qrCode,
+            qrCode: req.qrCode !== undefined ? req.qrCode : undefined,
+            scopes: req.scopes ?? undefined,
           })
           if (!app) throw new ConnectError('LIFF app not found', Code.NotFound)
           return { app: toProtoLiffApp(app) }

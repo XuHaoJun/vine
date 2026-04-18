@@ -69,7 +69,9 @@ export const LiffPage = memo(() => {
   const handlePickerDone = (result: { status: 'sent' } | false) => {
     setPickerState({ visible: false, messages: [], isMultiple: true })
     // Post result back to iframe
-    const iframe = document.querySelector('iframe')
+    const iframe = document.getElementById(
+      'liff-browser-iframe',
+    ) as HTMLIFrameElement | null
     if (iframe?.contentWindow) {
       iframe.contentWindow.postMessage(
         { type: 'liff:shareTargetPicker:done', ...result },

@@ -59,9 +59,11 @@ export const LiffBrowser = memo(
       <YStack flex={1} style={{ height }}>
         <iframe
           ref={iframeRef}
+          id="liff-browser-iframe"
           src={src}
           style={{ width: '100%', height: '100%', border: 'none' }}
           allow="camera; microphone"
+          sandbox="allow-scripts"
           title={`LIFF App ${liffId}`}
         />
       </YStack>
