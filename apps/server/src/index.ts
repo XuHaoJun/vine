@@ -13,6 +13,7 @@ import { createZeroService, zeroPlugin } from './plugins/zero'
 import { oaMessagingPlugin } from './plugins/oa-messaging'
 import { oaRichMenuPlugin } from './plugins/oa-richmenu'
 import { oaWebhookPlugin } from './plugins/oa-webhook'
+import { oaWebhookEndpointPlugin } from './plugins/oa-webhook-endpoint'
 import { createOAService } from './services/oa'
 import { createLiffService } from './services/liff'
 import { liffFixturesPublicPlugin } from './plugins/liff-fixtures-public'
@@ -58,6 +59,7 @@ await zeroPlugin(app, { auth, zero })
 await oaMessagingPlugin(app, { oa, db, drive })
 await oaRichMenuPlugin(app, { oa, db, drive })
 await oaWebhookPlugin(app, { oa, db })
+await oaWebhookEndpointPlugin(app, { oa, db })
 await liffFixturesPublicPlugin(app)
 await liffPublicPlugin(app, { liff, auth, db })
 
