@@ -2,7 +2,7 @@ import type { PoolClient } from 'pg'
 
 const sql = `-- Add requireApproval to chat table
 DO $$ BEGIN
-  ALTER TABLE "chat" ADD COLUMN "requireApproval" boolean not null default false;
+  ALTER TABLE "chat" ADD COLUMN "requireApproval" integer not null default 0;
 EXCEPTION
   WHEN duplicate_column THEN null;
 END $$;

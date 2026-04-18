@@ -65,7 +65,7 @@ export const chat = pgTable('chat', {
   image: text('image'),
   description: text('description'),
   inviteCode: text('inviteCode').unique(),
-  requireApproval: boolean('requireApproval').notNull().default(false),
+  requireApproval: integer('requireApproval').notNull().default(0),
   albumCount: integer('albumCount').notNull().default(0),
   noteCount: integer('noteCount').notNull().default(0),
   lastMessageId: text('lastMessageId'),
