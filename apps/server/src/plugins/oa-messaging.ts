@@ -204,6 +204,15 @@ export async function oaMessagingPlugin(
             .send({ message: 'User is not a friend of this OA', code: 'NOT_FRIEND' })
         }
 
+        // Check and increment quota
+        const allowed = await oa.checkAndIncrementUsage(oaId)
+        if (!allowed) {
+          return await reply.code(429).send({
+            message: 'You have reached your monthly limit.',
+            code: 'QUOTA_EXCEEDED',
+          })
+        }
+
         // Validate all messages first
         const validated = body.messages.map((msg) => validateMessage(msg))
 
@@ -265,6 +274,64 @@ export async function oaMessagingPlugin(
           return reply
             .code(401)
             .send({ message: 'Invalid access token', code: 'INVALID_TOKEN' })
+        }
+        return reply.code(500).send({ message: 'Internal server error' })
+      }
+    },
+  )
+
+  // Get Quota
+  fastify.get(
+    '/api/oa/v2/bot/message/quota',
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const oaId = await extractOaFromToken(request, db)
+        const quota = await oa.getQuota(oaId)
+        return await reply.send(quota)
+      } catch (err) {
+        if (err instanceof Error && err.message === 'Missing Bearer token') {
+          return reply
+            .code(401)
+            .send({ message: 'Missing Bearer token', code: 'INVALID_TOKEN' })
+        }
+        if (err instanceof Error && err.message === 'Invalid access token') {
+          return reply
+            .code(401)
+            .send({ message: 'Invalid access token', code: 'INVALID_TOKEN' })
+        }
+        if (err instanceof Error && err.message === 'Access token expired') {
+          return reply
+            .code(401)
+            .send({ message: 'Access token expired', code: 'TOKEN_EXPIRED' })
+        }
+        return reply.code(500).send({ message: 'Internal server error' })
+      }
+    },
+  )
+
+  // Get Quota Consumption
+  fastify.get(
+    '/api/oa/v2/bot/message/quota/consumption',
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const oaId = await extractOaFromToken(request, db)
+        const consumption = await oa.getConsumption(oaId)
+        return await reply.send(consumption)
+      } catch (err) {
+        if (err instanceof Error && err.message === 'Missing Bearer token') {
+          return reply
+            .code(401)
+            .send({ message: 'Missing Bearer token', code: 'INVALID_TOKEN' })
+        }
+        if (err instanceof Error && err.message === 'Invalid access token') {
+          return reply
+            .code(401)
+            .send({ message: 'Invalid access token', code: 'INVALID_TOKEN' })
+        }
+        if (err instanceof Error && err.message === 'Access token expired') {
+          return reply
+            .code(401)
+            .send({ message: 'Access token expired', code: 'TOKEN_EXPIRED' })
         }
         return reply.code(500).send({ message: 'Internal server error' })
       }

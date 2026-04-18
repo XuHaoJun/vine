@@ -12,6 +12,7 @@ import {
   oaRichMenuAlias,
   oaRichMenuUserLink,
   oaDefaultRichMenu,
+  oaQuota,
 } from '@vine/db/schema-oa'
 import { createHmac, randomBytes, randomUUID } from 'crypto'
 import { chat, chatMember, message } from '@vine/db/schema-public'
@@ -846,6 +847,90 @@ export function createOAService(deps: OADeps) {
     return db.select().from(oaRichMenuAlias).where(eq(oaRichMenuAlias.oaId, oaId))
   }
 
+  function getStartOfMonth(): Date {
+    const now = new Date()
+    return new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0)
+  }
+
+  async function getQuota(oaId: string) {
+    await resetIfNewMonth(oaId)
+    const [row] = await db.select().from(oaQuota).where(eq(oaQuota.oaId, oaId)).limit(1)
+    if (!row) {
+      return { type: 'none' as const, value: undefined, totalUsage: 0 }
+    }
+    return {
+      type: row.monthlyLimit > 0 ? ('limited' as const) : ('none' as const),
+      value: row.monthlyLimit > 0 ? row.monthlyLimit : undefined,
+      totalUsage: row.currentUsage,
+    }
+  }
+
+  async function getConsumption(oaId: string) {
+    await resetIfNewMonth(oaId)
+    const [row] = await db.select().from(oaQuota).where(eq(oaQuota.oaId, oaId)).limit(1)
+    return { totalUsage: row?.currentUsage ?? 0 }
+  }
+
+  async function resetIfNewMonth(oaId: string) {
+    const [row] = await db.select().from(oaQuota).where(eq(oaQuota.oaId, oaId)).limit(1)
+    if (!row) return
+
+    const startOfMonth = getStartOfMonth()
+    const resetAt = new Date(row.resetAt)
+
+    if (resetAt < startOfMonth) {
+      await db
+        .update(oaQuota)
+        .set({
+          currentUsage: 0,
+          resetAt: startOfMonth.toISOString(),
+        })
+        .where(eq(oaQuota.oaId, oaId))
+    }
+  }
+
+  async function checkAndIncrementUsage(
+    oaId: string,
+    delta: number = 1,
+  ): Promise<boolean> {
+    await resetIfNewMonth(oaId)
+
+    const [row] = await db.select().from(oaQuota).where(eq(oaQuota.oaId, oaId)).limit(1)
+
+    if (!row || row.monthlyLimit === 0) {
+      return true
+    }
+
+    if (row.currentUsage + delta > row.monthlyLimit) {
+      return false
+    }
+
+    const [updated] = await db
+      .update(oaQuota)
+      .set({ currentUsage: row.currentUsage + delta })
+      .where(
+        and(eq(oaQuota.oaId, oaId), sql`${oaQuota.currentUsage} = ${row.currentUsage}`),
+      )
+      .returning()
+
+    return !!updated
+  }
+
+  async function setQuota(oaId: string, monthlyLimit: number) {
+    await db
+      .insert(oaQuota)
+      .values({
+        oaId,
+        monthlyLimit,
+        currentUsage: 0,
+        resetAt: getStartOfMonth().toISOString(),
+      })
+      .onConflictDoUpdate({
+        target: oaQuota.oaId,
+        set: { monthlyLimit, currentUsage: 0, resetAt: getStartOfMonth().toISOString() },
+      })
+  }
+
   return {
     createProvider,
     getProvider,
@@ -899,6 +984,10 @@ export function createOAService(deps: OADeps) {
     deleteRichMenuAlias,
     getRichMenuAlias,
     getRichMenuAliasList,
+    getQuota,
+    getConsumption,
+    checkAndIncrementUsage,
+    setQuota,
   }
 }
 

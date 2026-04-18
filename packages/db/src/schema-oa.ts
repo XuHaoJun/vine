@@ -155,5 +155,14 @@ export const oaDefaultRichMenu = pgTable('oaDefaultRichMenu', {
     .primaryKey()
     .references(() => officialAccount.id, { onDelete: 'cascade' }),
   richMenuId: text('richMenuId').notNull(),
-  updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt', { mode: 'string' }).notNull(),
+})
+
+export const oaQuota = pgTable('oaQuota', {
+  oaId: uuid('oaId')
+    .primaryKey()
+    .references(() => officialAccount.id, { onDelete: 'cascade' }),
+  monthlyLimit: integer('monthlyLimit').notNull().default(0),
+  currentUsage: integer('currentUsage').notNull().default(0),
+  resetAt: timestamp('resetAt', { mode: 'string' }).notNull(),
 })
