@@ -1,6 +1,0 @@
-{
-  "eval_id": 3,
-  "eval_name": "post-with-comments",
-  "prompt": "I want to add comments to posts. A comment has id, postId, userId, text, createdAt. I need: (a) the comment model with permissions so only the post's commenters and the post owner can read, (b) a query that loads a single post with all its comments and each comment's author, and (c) the relationships entries. Walk me through every file I need to touch and the order to do it in.",
-  "assertions": []
-}

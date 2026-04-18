@@ -1,6 +1,0 @@
-{
-  "eval_id": 1,
-  "eval_name": "add-post-table",
-  "prompt": "I want to add a new 'post' table to the zero data layer in vine. Each post has id, userId, caption (optional), imageUrl, and createdAt. Users should only be able to read/write their own posts. Show me the model file and tell me what other steps I need to do.",
-  "assertions": []
-}
