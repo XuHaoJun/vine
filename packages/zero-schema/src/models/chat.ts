@@ -72,4 +72,64 @@ export const mutate = mutations(schema, chatReadPermission, {
       joinedAt: args.createdAt,
     })
   },
+  findOrCreateDirectChat: async (
+    { authData, tx },
+    args: {
+      friendUserId: string
+      chatId: string
+      member1Id: string
+      member2Id: string
+    },
+  ) => {
+    if (!authData) throw new Error('Unauthorized')
+
+    const userId = authData.id
+    const query = tx.query as Record<string, any> | undefined
+
+    const now = Date.now()
+    let foundChatId: string | undefined
+
+    if (query?.chatMember) {
+      const userMemberships = await query.chatMember.where('userId', userId).run()
+
+      for (const userMember of userMemberships) {
+        const friendMemberships = await query.chatMember
+          .where('chatId', userMember.chatId)
+          .where('userId', args.friendUserId)
+          .run()
+        if (friendMemberships.length > 0) {
+          const chatRows = await query.chat
+            .where('id', userMember.chatId)
+            .where('type', 'direct')
+            .run()
+          if (chatRows.length > 0) {
+            foundChatId = userMember.chatId
+            break
+          }
+        }
+      }
+    }
+
+    if (!foundChatId) {
+      await tx.mutate.chat.insert({
+        id: args.chatId,
+        type: 'direct',
+        createdAt: now,
+      })
+
+      await tx.mutate.chatMember.insert({
+        id: args.member1Id,
+        chatId: args.chatId,
+        userId,
+        joinedAt: now,
+      })
+
+      await tx.mutate.chatMember.insert({
+        id: args.member2Id,
+        chatId: args.chatId,
+        userId: args.friendUserId,
+        joinedAt: now,
+      })
+    }
+  },
 })

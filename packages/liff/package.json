@@ -1,0 +1,14 @@
+{
+  "name": "@vine/liff",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "echo 'liff package - no build step'",
+    "dev": "echo 'liff package - no dev step'"
+  },
+  "dependencies": {}
+}

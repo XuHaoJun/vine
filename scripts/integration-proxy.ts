@@ -8,6 +8,8 @@ export function isBackendProxyPath(pathname: string) {
   return (
     pathname.startsWith('/api') ||
     pathname.startsWith('/oauth2') ||
+    pathname.startsWith('/liff/v1') ||
+    pathname.startsWith('/fixtures/') ||
     CONNECT_RPC_PATH.test(pathname)
   )
 }

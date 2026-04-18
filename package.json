@@ -22,7 +22,7 @@
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "backend:clean": "docker compose down --volumes --remove-orphans --rmi local",
-    "backend": "bun run --filter @vine/web migrate:build && docker compose up --remove-orphans"
+    "backend": "GIT_SHA=$(git rev-parse HEAD) docker compose up --remove-orphans"
   },
   "devDependencies": {
     "oxfmt": "^0.16.0",

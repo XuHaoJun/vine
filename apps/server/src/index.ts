@@ -14,6 +14,9 @@ import { oaMessagingPlugin } from './plugins/oa-messaging'
 import { oaRichMenuPlugin } from './plugins/oa-richmenu'
 import { oaWebhookPlugin } from './plugins/oa-webhook'
 import { createOAService } from './services/oa'
+import { createLiffService } from './services/liff'
+import { liffFixturesPublicPlugin } from './plugins/liff-fixtures-public'
+import { liffPublicPlugin } from './plugins/liff-public'
 import { createFsDriveService } from '@vine/drive'
 
 const app = Fastify({ logger: true })
@@ -30,15 +33,16 @@ const database = getDatabase()
 const db = createDb()
 
 const oa = createOAService({ db, database })
+const liff = createLiffService({ db })
 const auth = createAuthServer({ database, db })
 const drive = createFsDriveService({
   basePath: process.env['DRIVE_BASE_PATH'] ?? './uploads',
   baseUrl: process.env['DRIVE_BASE_URL'] ?? 'http://localhost:3001/uploads',
 })
 
-// ConnectRPC routes (GreeterService, OAService, etc.)
+// ConnectRPC routes (GreeterService, OAService, LIFFService, etc.)
 await app.register(fastifyConnectPlugin, {
-  routes: connectRoutes({ oa, auth, drive }),
+  routes: connectRoutes({ oa, liff, auth, drive }),
 })
 
 // Seed test data (only in dev with VITE_DEMO_MODE=1)
@@ -54,6 +58,8 @@ await zeroPlugin(app, { auth, zero })
 await oaMessagingPlugin(app, { oa, db, drive })
 await oaRichMenuPlugin(app, { oa, db, drive })
 await oaWebhookPlugin(app, { oa, db })
+await liffFixturesPublicPlugin(app)
+await liffPublicPlugin(app, { liff, auth, db })
 
 app.get('/healthz', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))
 

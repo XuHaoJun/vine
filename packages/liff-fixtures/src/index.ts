@@ -1,0 +1,1 @@
+export { getLiffFixturesDistDir } from './paths'

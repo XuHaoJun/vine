@@ -4,6 +4,7 @@ import { SizableText, Spinner, XStack, YStack } from 'tamagui'
 
 import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
 import { oaClient } from '~/features/oa/client'
+import { loginChannelClient } from '~/features/liff/client'
 import { Button } from '~/interface/buttons/Button'
 import { CaretLeftIcon } from '~/interface/icons/phosphor/CaretLeftIcon'
 import { Input } from '~/interface/forms/Input'
@@ -36,6 +37,34 @@ export const ChannelListPage = memo(() => {
     queryKey: ['oa', 'channels', providerId],
     queryFn: () => oaClient.listProviderAccounts({ providerId }),
     enabled: !!providerId,
+  })
+
+  const { data: loginChannels, isLoading: loginChannelsLoading } = useTanQuery({
+    queryKey: ['liff', 'login-channels', providerId],
+    queryFn: () => loginChannelClient.listLoginChannels({ providerId: providerId! }),
+    enabled: !!providerId,
+  })
+
+  const [showCreateLogin, setShowCreateLogin] = useState(false)
+  const [newLoginChannelName, setNewLoginChannelName] = useState('')
+
+  const createLoginChannel = useTanMutation({
+    mutationFn: (input: { providerId: string; name: string }) =>
+      loginChannelClient.createLoginChannel({
+        providerId: input.providerId,
+        name: input.name,
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ['liff', 'login-channels', providerId],
+      })
+      showToast('Login channel created', { type: 'success' })
+      setShowCreateLogin(false)
+      setNewLoginChannelName('')
+    },
+    onError: () => {
+      showToast('Failed to create login channel', { type: 'error' })
+    },
   })
 
   const createChannel = useTanMutation({
@@ -254,6 +283,119 @@ export const ChannelListPage = memo(() => {
           </XStack>
         </YStack>
       )}
+
+      {/* Login Channels Section */}
+      <YStack mt="$6">
+        <XStack justify="space-between" items="center" mb="$4">
+          <SizableText size="$3" fontWeight="600" color="$color10">
+            LINE Login Channels ({loginChannels?.channels?.length ?? 0})
+          </SizableText>
+          <Button size="$2" onPress={() => setShowCreateLogin(!showCreateLogin)}>
+            Create Login Channel
+          </Button>
+        </XStack>
+
+        {showCreateLogin && (
+          <YStack
+            gap="$3"
+            p="$4"
+            mb="$4"
+            borderWidth={1}
+            borderColor="$borderColor"
+            rounded="$2"
+            bg="$background"
+          >
+            <SizableText size="$3" fontWeight="600" color="$color12">
+              New Login Channel
+            </SizableText>
+            <Input
+              value={newLoginChannelName}
+              onChangeText={setNewLoginChannelName}
+              placeholder="Channel name"
+              size="$2"
+            />
+            <XStack gap="$2" justify="flex-end">
+              <Button
+                size="$2"
+                variant="outlined"
+                onPress={() => setShowCreateLogin(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                size="$2"
+                onPress={() => {
+                  if (!newLoginChannelName.trim() || !providerId) return
+                  createLoginChannel.mutate({
+                    providerId,
+                    name: newLoginChannelName.trim(),
+                  })
+                }}
+                disabled={createLoginChannel.isPending}
+              >
+                Create
+              </Button>
+            </XStack>
+          </YStack>
+        )}
+
+        <XStack flexWrap="wrap" gap="$4">
+          {loginChannels?.channels?.map((ch) => (
+            <YStack
+              key={ch.id}
+              width={220}
+              height={240}
+              borderWidth={1}
+              borderColor="$borderColor"
+              rounded="$3"
+              position="relative"
+              cursor="pointer"
+              hoverStyle={{ shadowColor: '$shadowColor', shadowRadius: 8 }}
+              onPress={() =>
+                router.push(`/developers/console/login-channel/${ch.id}` as never)
+              }
+            >
+              <XStack
+                position="absolute"
+                t="$2"
+                r="$2"
+                px="$2"
+                py="$0.5"
+                bg="$blue9"
+                rounded="$1"
+              >
+                <SizableText size="$1" color="white" fontWeight="700">
+                  LINE Login
+                </SizableText>
+              </XStack>
+              <YStack flex={1} items="center" justify="center" gap="$4" pt="$6">
+                <YStack
+                  width={64}
+                  height={64}
+                  rounded="$10"
+                  bg="$color5"
+                  items="center"
+                  justify="center"
+                  borderWidth={2}
+                  borderColor="$borderColor"
+                >
+                  <SizableText size="$6" fontWeight="700" color="$color11">
+                    {ch.name.charAt(0).toUpperCase()}
+                  </SizableText>
+                </YStack>
+                <SizableText size="$3" fontWeight="700" color="$color12" text="center">
+                  {ch.name}
+                </SizableText>
+                <XStack gap="$1.5" items="center">
+                  <SizableText size="$2" color="$color10" fontWeight="500">
+                    LINE Login
+                  </SizableText>
+                </XStack>
+              </YStack>
+            </YStack>
+          ))}
+        </XStack>
+      </YStack>
     </YStack>
   )
 })

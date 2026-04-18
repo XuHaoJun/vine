@@ -74,34 +74,46 @@ declare module 'one' {
       DynamicRoutes: 
         | `/(app)/auth/signup/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/developers/console/channel/${OneRouter.SingleRoutePart<T>}`
+        | `/(app)/developers/console/login-channel/${OneRouter.SingleRoutePart<T>}`
+        | `/(app)/developers/console/login-channel/${OneRouter.SingleRoutePart<T>}/liff`
         | `/(app)/developers/console/provider/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/home/(tabs)/talks/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/home/talks/${OneRouter.SingleRoutePart<T>}`
+        | `/(app)/liff/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/manager/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/manager/${OneRouter.SingleRoutePart<T>}/richmenu/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/oa/${OneRouter.SingleRoutePart<T>}`
         | `/auth/signup/${OneRouter.SingleRoutePart<T>}`
         | `/developers/console/channel/${OneRouter.SingleRoutePart<T>}`
+        | `/developers/console/login-channel/${OneRouter.SingleRoutePart<T>}`
+        | `/developers/console/login-channel/${OneRouter.SingleRoutePart<T>}/liff`
         | `/developers/console/provider/${OneRouter.SingleRoutePart<T>}`
         | `/home/(tabs)/talks/${OneRouter.SingleRoutePart<T>}`
         | `/home/talks/${OneRouter.SingleRoutePart<T>}`
+        | `/liff/${OneRouter.SingleRoutePart<T>}`
         | `/manager/${OneRouter.SingleRoutePart<T>}`
         | `/manager/${OneRouter.SingleRoutePart<T>}/richmenu/${OneRouter.SingleRoutePart<T>}`
         | `/oa/${OneRouter.SingleRoutePart<T>}`
       DynamicRouteTemplate: 
         | `/(app)/auth/signup/[method]`
         | `/(app)/developers/console/channel/[channelId]`
+        | `/(app)/developers/console/login-channel/[loginChannelId]`
+        | `/(app)/developers/console/login-channel/[loginChannelId]/liff`
         | `/(app)/developers/console/provider/[providerId]`
         | `/(app)/home/(tabs)/talks/[chatId]`
         | `/(app)/home/talks/[chatId]`
+        | `/(app)/liff/[liffId]`
         | `/(app)/manager/[oaId]`
         | `/(app)/manager/[oaId]/richmenu/[richMenuId]`
         | `/(app)/oa/[oaId]`
         | `/auth/signup/[method]`
         | `/developers/console/channel/[channelId]`
+        | `/developers/console/login-channel/[loginChannelId]`
+        | `/developers/console/login-channel/[loginChannelId]/liff`
         | `/developers/console/provider/[providerId]`
         | `/home/(tabs)/talks/[chatId]`
         | `/home/talks/[chatId]`
+        | `/liff/[liffId]`
         | `/manager/[oaId]`
         | `/manager/[oaId]/richmenu/[richMenuId]`
         | `/oa/[oaId]`
@@ -109,17 +121,23 @@ declare module 'one' {
       RouteTypes: {
         '/(app)/auth/signup/[method]': RouteInfo<{ method: string }>
         '/(app)/developers/console/channel/[channelId]': RouteInfo<{ channelId: string }>
+        '/(app)/developers/console/login-channel/[loginChannelId]': RouteInfo<{ loginChannelId: string }>
+        '/(app)/developers/console/login-channel/[loginChannelId]/liff': RouteInfo<{ loginChannelId: string }>
         '/(app)/developers/console/provider/[providerId]': RouteInfo<{ providerId: string }>
         '/(app)/home/(tabs)/talks/[chatId]': RouteInfo<{ chatId: string }>
         '/(app)/home/talks/[chatId]': RouteInfo<{ chatId: string }>
+        '/(app)/liff/[liffId]': RouteInfo<{ liffId: string }>
         '/(app)/manager/[oaId]': RouteInfo<{ oaId: string }>
         '/(app)/manager/[oaId]/richmenu/[richMenuId]': RouteInfo<{ oaId: string; richMenuId: string }>
         '/(app)/oa/[oaId]': RouteInfo<{ oaId: string }>
         '/auth/signup/[method]': RouteInfo<{ method: string }>
         '/developers/console/channel/[channelId]': RouteInfo<{ channelId: string }>
+        '/developers/console/login-channel/[loginChannelId]': RouteInfo<{ loginChannelId: string }>
+        '/developers/console/login-channel/[loginChannelId]/liff': RouteInfo<{ loginChannelId: string }>
         '/developers/console/provider/[providerId]': RouteInfo<{ providerId: string }>
         '/home/(tabs)/talks/[chatId]': RouteInfo<{ chatId: string }>
         '/home/talks/[chatId]': RouteInfo<{ chatId: string }>
+        '/liff/[liffId]': RouteInfo<{ liffId: string }>
         '/manager/[oaId]': RouteInfo<{ oaId: string }>
         '/manager/[oaId]/richmenu/[richMenuId]': RouteInfo<{ oaId: string; richMenuId: string }>
         '/oa/[oaId]': RouteInfo<{ oaId: string }>
