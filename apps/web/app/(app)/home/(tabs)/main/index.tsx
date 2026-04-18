@@ -26,6 +26,8 @@ import { SearchInput } from '~/interface/forms/SearchInput'
 import { showToast } from '~/interface/toast/Toast'
 
 import type { IconProps } from '~/interface/icons/types'
+import { useZeroQuery } from '~/zero/client'
+import { chatsByUserId } from '@vine/zero-schema/queries/chat'
 
 type ServiceItem = {
   icon: React.FC<IconProps>
@@ -59,8 +61,14 @@ export const MainPage = memo(() => {
     queryFn: () => oaClient.listMyOAFriends({}),
   })
 
+  const { rows: allChats } = useZeroQuery({
+    query: chatsByUserId,
+    args: { userId: user?.id ?? '' },
+  })
+
+  const groupCount = allChats?.filter((c) => c.type === 'group').length ?? 0
+
   const friendCount = friends?.length ?? 0
-  const groupCount = 0
 
   const filteredFriends =
     friends?.filter((f) => {
@@ -225,7 +233,7 @@ export const MainPage = memo(() => {
           <ListItem
             py="$2"
             cursor="pointer"
-            onPress={() => showToast('Groups coming soon', { type: 'info' })}
+            onPress={() => router.push('/home/talks')}
             hoverStyle={{ bg: '$backgroundHover' }}
           >
             <XStack flex={1} items="center">
