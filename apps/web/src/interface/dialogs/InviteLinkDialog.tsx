@@ -72,7 +72,7 @@ export function InviteLinkDialog({
     if (inviteUrl && navigator.share) {
       try {
         await navigator.share({ title: '加入群組', url: inviteUrl })
-      } catch { }
+      } catch {}
     } else {
       handleCopy()
     }
@@ -80,18 +80,30 @@ export function InviteLinkDialog({
 
   return (
     <Sheet modal open={open} onOpenChange={onOpenChange} snapPoints={[50]}>
-      <Sheet.Overlay opacity={0.5} enterStyle={{ opacity: 0 }} exitStyle={{ opacity: 0 }} />
+      <Sheet.Overlay
+        opacity={0.5}
+        enterStyle={{ opacity: 0 }}
+        exitStyle={{ opacity: 0 }}
+      />
       <Sheet.Frame bg="$background" p="$4">
-        <SizableText size="$6" fontWeight="700" mb="$3">邀請連結</SizableText>
+        <SizableText size="$6" fontWeight="700" mb="$3">
+          邀請連結
+        </SizableText>
 
         {inviteUrl ? (
           <YStack gap="$3">
             <YStack bg="$color2" p="$3" rounded="$3">
-              <SizableText size="$2" numberOfLines={1}>{inviteUrl}</SizableText>
+              <SizableText size="$2" numberOfLines={1}>
+                {inviteUrl}
+              </SizableText>
             </YStack>
             <XStack gap="$2">
-              <Button flex={1} onPress={handleCopy}>複製</Button>
-              <Button flex={1} onPress={handleShare}>分享</Button>
+              <Button flex={1} onPress={handleCopy}>
+                複製
+              </Button>
+              <Button flex={1} onPress={handleShare}>
+                分享
+              </Button>
             </XStack>
             {(role === 'owner' || role === 'admin') && (
               <Button onPress={handleRevoke}>撤銷連結</Button>
@@ -99,13 +111,17 @@ export function InviteLinkDialog({
           </YStack>
         ) : (
           <YStack gap="$3" items="center">
-            <SizableText size="$3" color="$color10">尚無邀請連結</SizableText>
+            <SizableText size="$3" color="$color10">
+              尚無邀請連結
+            </SizableText>
             {(role === 'owner' || role === 'admin') && (
               <Button onPress={handleGenerate}>生成連結</Button>
             )}
           </YStack>
         )}
-        <Button mt="$4" variant="transparent" onPress={() => onOpenChange(false)}>關閉</Button>
+        <Button mt="$4" variant="transparent" onPress={() => onOpenChange(false)}>
+          關閉
+        </Button>
       </Sheet.Frame>
     </Sheet>
   )

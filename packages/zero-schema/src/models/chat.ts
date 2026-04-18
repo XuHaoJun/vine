@@ -192,17 +192,19 @@ export const mutate = mutations(schema, chatReadPermission, {
 
     if (members.length === 0) throw new Error('Not a member of this group')
 
-    const updateData: { id: string; name?: string; image?: string; description?: string } = { id: args.chatId }
+    const updateData: {
+      id: string
+      name?: string
+      image?: string
+      description?: string
+    } = { id: args.chatId }
     if (args.name !== undefined) updateData.name = args.name
     if (args.image !== undefined) updateData.image = args.image
     if (args.description !== undefined) updateData.description = args.description
 
     await tx.mutate.chat.update(updateData)
   },
-  generateInviteLink: async (
-    { authData, tx },
-    args: { chatId: string },
-  ) => {
+  generateInviteLink: async ({ authData, tx }, args: { chatId: string }) => {
     if (!authData) throw new Error('Unauthorized')
 
     const query = tx.query as Record<string, any> | undefined
@@ -222,10 +224,7 @@ export const mutate = mutations(schema, chatReadPermission, {
       inviteCode,
     })
   },
-  revokeInviteLink: async (
-    { authData, tx },
-    args: { chatId: string },
-  ) => {
+  revokeInviteLink: async ({ authData, tx }, args: { chatId: string }) => {
     if (!authData) throw new Error('Unauthorized')
 
     const query = tx.query as Record<string, any> | undefined

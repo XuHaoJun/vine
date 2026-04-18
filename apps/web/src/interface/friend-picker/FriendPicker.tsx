@@ -25,21 +25,23 @@ export const FriendPicker = memo(
     const currentUserId = user?.id ?? ''
     const [searchQuery, setSearchQuery] = useState('')
 
-    const filteredFriends = friends
-      ?.filter((f) => {
-        const otherUser = f.requesterId === currentUserId ? f.addressee : f.requester
-        if (!otherUser?.name) return false
-        if (excludeUserIds.includes(otherUser.id)) return false
-        if (searchQuery) {
-          return otherUser.name.toLowerCase().includes(searchQuery.toLowerCase())
-        }
-        return true
-      })
-      .map((f) => ({
-        id: f.requesterId === currentUserId ? f.addresseeId : f.requesterId,
-        name: (f.requesterId === currentUserId ? f.addressee : f.requester)?.name ?? '',
-        image: (f.requesterId === currentUserId ? f.addressee : f.requester)?.image ?? null,
-      })) ?? []
+    const filteredFriends =
+      friends
+        ?.filter((f) => {
+          const otherUser = f.requesterId === currentUserId ? f.addressee : f.requester
+          if (!otherUser?.name) return false
+          if (excludeUserIds.includes(otherUser.id)) return false
+          if (searchQuery) {
+            return otherUser.name.toLowerCase().includes(searchQuery.toLowerCase())
+          }
+          return true
+        })
+        .map((f) => ({
+          id: f.requesterId === currentUserId ? f.addresseeId : f.requesterId,
+          name: (f.requesterId === currentUserId ? f.addressee : f.requester)?.name ?? '',
+          image:
+            (f.requesterId === currentUserId ? f.addressee : f.requester)?.image ?? null,
+        })) ?? []
 
     const toggleUser = (userId: string) => {
       if (selectedUserIds.includes(userId)) {

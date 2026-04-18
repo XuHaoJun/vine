@@ -52,16 +52,33 @@ export function CreateGroupDialog({
 
   return (
     <Sheet modal open={open} onOpenChange={onOpenChange} snapPoints={[100]}>
-      <Sheet.Overlay opacity={0.5} enterStyle={{ opacity: 0 }} exitStyle={{ opacity: 0 }} />
+      <Sheet.Overlay
+        opacity={0.5}
+        enterStyle={{ opacity: 0 }}
+        exitStyle={{ opacity: 0 }}
+      />
       <Sheet.Frame flex={1} bg="$background">
         <YStack flex={1}>
-          <XStack px="$3" py="$3" items="center" justify="space-between" borderBottomWidth={1} borderBottomColor="$color4">
-            <SizableText size="$6" fontWeight="700">建立群組</SizableText>
-            <Button variant="transparent" onPress={() => onOpenChange(false)}>✕</Button>
+          <XStack
+            px="$3"
+            py="$3"
+            items="center"
+            justify="space-between"
+            borderBottomWidth={1}
+            borderBottomColor="$color4"
+          >
+            <SizableText size="$6" fontWeight="700">
+              建立群組
+            </SizableText>
+            <Button variant="transparent" onPress={() => onOpenChange(false)}>
+              ✕
+            </Button>
           </XStack>
 
           <YStack px="$3" py="$2" gap="$2">
-            <SizableText size="$3" fontWeight="600">群組名稱</SizableText>
+            <SizableText size="$3" fontWeight="600">
+              群組名稱
+            </SizableText>
             <Input
               placeholder="輸入群組名稱"
               value={groupName}

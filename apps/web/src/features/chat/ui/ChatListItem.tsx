@@ -33,7 +33,15 @@ function formatChatTime(ts: number): string {
 }
 
 export const ChatListItem = memo(
-  ({ name, image, type, lastMessageText, lastMessageAt, unreadCount, onPress }: Props) => {
+  ({
+    name,
+    image,
+    type,
+    lastMessageText,
+    lastMessageAt,
+    unreadCount,
+    onPress,
+  }: Props) => {
     const timeLabel = lastMessageAt ? formatChatTime(lastMessageAt) : ''
 
     return (

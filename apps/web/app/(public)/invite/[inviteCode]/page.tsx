@@ -57,7 +57,9 @@ export const InvitePage = memo(() => {
     <YStack flex={1} items="center" justify="center" bg="$background" px="$6">
       <YStack items="center" gap="$4" maxW={400}>
         <Avatar size={80} image={null} name="Group" />
-        <SizableText size="$8" fontWeight="700">邀請加入群組</SizableText>
+        <SizableText size="$8" fontWeight="700">
+          邀請加入群組
+        </SizableText>
         <SizableText size="$3" color="$color10" text="center">
           {user
             ? existingChat
@@ -66,12 +68,14 @@ export const InvitePage = memo(() => {
             : '請先登入帳號以加入群組'}
         </SizableText>
 
-        <Button
-          onPress={handleJoin}
-          disabled={joining}
-          width="100%"
-        >
-          {joining ? '加入中...' : user ? (existingChat ? '進入群組' : '加入群組') : '登入以加入'}
+        <Button onPress={handleJoin} disabled={joining} width="100%">
+          {joining
+            ? '加入中...'
+            : user
+              ? existingChat
+                ? '進入群組'
+                : '加入群組'
+              : '登入以加入'}
         </Button>
       </YStack>
     </YStack>

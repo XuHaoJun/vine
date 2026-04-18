@@ -31,8 +31,15 @@ export const ChatRoomPage = memo(() => {
   const userId = user?.id ?? ''
   const scrollRef = useRef<ScrollView>(null)
 
-  const { messages, isLoading, members, otherMember, sendMessage, markRead, myMembership } =
-    useMessages(chatId!)
+  const {
+    messages,
+    isLoading,
+    members,
+    otherMember,
+    sendMessage,
+    markRead,
+    myMembership,
+  } = useMessages(chatId!)
 
   const { data: oaFriendsData } = useTanQuery({
     queryKey: ['oa', 'myFriends'],
@@ -158,7 +165,11 @@ export const ChatRoomPage = memo(() => {
         <Button variant="transparent" onPress={() => window.history.back()} px="$2">
           ←
         </Button>
-        <Avatar size={32} image={isGroupChat ? groupImage : otherImage} name={isGroupChat ? groupName : otherName} />
+        <Avatar
+          size={32}
+          image={isGroupChat ? groupImage : otherImage}
+          name={isGroupChat ? groupName : otherName}
+        />
         <H3 flex={1}>{isGroupChat ? groupName : otherName}</H3>
       </XStack>
 

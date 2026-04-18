@@ -12,11 +12,7 @@ type AddMembersDialogProps = {
   onOpenChange: (open: boolean) => void
 }
 
-export function AddMembersDialog({
-  chatId,
-  open,
-  onOpenChange,
-}: AddMembersDialogProps) {
+export function AddMembersDialog({ chatId, open, onOpenChange }: AddMembersDialogProps) {
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([])
 
   const handleAdd = async () => {
@@ -42,12 +38,27 @@ export function AddMembersDialog({
 
   return (
     <Sheet modal open={open} onOpenChange={onOpenChange} snapPoints={[100]}>
-      <Sheet.Overlay opacity={0.5} enterStyle={{ opacity: 0 }} exitStyle={{ opacity: 0 }} />
+      <Sheet.Overlay
+        opacity={0.5}
+        enterStyle={{ opacity: 0 }}
+        exitStyle={{ opacity: 0 }}
+      />
       <Sheet.Frame flex={1} bg="$background">
         <YStack flex={1}>
-          <XStack px="$3" py="$3" items="center" justify="space-between" borderBottomWidth={1} borderBottomColor="$color4">
-            <SizableText size="$6" fontWeight="700">新增成員</SizableText>
-            <Button variant="transparent" onPress={() => onOpenChange(false)}>✕</Button>
+          <XStack
+            px="$3"
+            py="$3"
+            items="center"
+            justify="space-between"
+            borderBottomWidth={1}
+            borderBottomColor="$color4"
+          >
+            <SizableText size="$6" fontWeight="700">
+              新增成員
+            </SizableText>
+            <Button variant="transparent" onPress={() => onOpenChange(false)}>
+              ✕
+            </Button>
           </XStack>
 
           <YStack flex={1} minH={0}>

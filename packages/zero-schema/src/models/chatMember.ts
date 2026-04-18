@@ -195,9 +195,7 @@ export const mutate = mutations(schema, chatMemberPermission, {
   ) => {
     if (!authData) throw new Error('Unauthorized')
 
-    const chats = await tx.query.chat
-      .where('inviteCode', args.inviteCode)
-      .run()
+    const chats = await tx.query.chat.where('inviteCode', args.inviteCode).run()
 
     if (chats.length === 0) throw new Error('Invalid invite code')
 

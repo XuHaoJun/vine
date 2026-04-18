@@ -57,18 +57,37 @@ export function GroupInfoSheet({
   return (
     <>
       <Sheet modal open={open} onOpenChange={onOpenChange} snapPoints={[80]}>
-        <Sheet.Overlay opacity={0.5} enterStyle={{ opacity: 0 }} exitStyle={{ opacity: 0 }} />
+        <Sheet.Overlay
+          opacity={0.5}
+          enterStyle={{ opacity: 0 }}
+          exitStyle={{ opacity: 0 }}
+        />
         <Sheet.Frame flex={1} bg="$background">
-          <XStack px="$3" py="$3" items="center" justify="space-between" borderBottomWidth={1} borderBottomColor="$color4">
-            <SizableText size="$6" fontWeight="700">群組資訊</SizableText>
-            <Button variant="transparent" onPress={() => onOpenChange(false)}>✕</Button>
+          <XStack
+            px="$3"
+            py="$3"
+            items="center"
+            justify="space-between"
+            borderBottomWidth={1}
+            borderBottomColor="$color4"
+          >
+            <SizableText size="$6" fontWeight="700">
+              群組資訊
+            </SizableText>
+            <Button variant="transparent" onPress={() => onOpenChange(false)}>
+              ✕
+            </Button>
           </XStack>
 
           <ScrollView flex={1}>
             <YStack px="$4" py="$4" items="center">
               <Avatar size={64} image={groupImage} name={groupName} />
-              <SizableText size="$6" fontWeight="700" mt="$2">{groupName}</SizableText>
-              <SizableText size="$2" color="$color10">{members?.length ?? 0} 位成員</SizableText>
+              <SizableText size="$6" fontWeight="700" mt="$2">
+                {groupName}
+              </SizableText>
+              <SizableText size="$2" color="$color10">
+                {members?.length ?? 0} 位成員
+              </SizableText>
             </YStack>
 
             <YStack px="$4" gap="$2">
@@ -81,16 +100,24 @@ export function GroupInfoSheet({
             </YStack>
 
             <YStack px="$4" py="$3">
-              <SizableText size="$4" fontWeight="600" mb="$2">成員</SizableText>
+              <SizableText size="$4" fontWeight="600" mb="$2">
+                成員
+              </SizableText>
               {members?.map((m) => (
                 <XStack key={m.id} py="$2" items="center" gap="$3">
-                  <Avatar size={32} image={m.user?.image ?? null} name={m.user?.name ?? '?'} />
+                  <Avatar
+                    size={32}
+                    image={m.user?.image ?? null}
+                    name={m.user?.name ?? '?'}
+                  />
                   <SizableText flex={1}>{m.user?.name ?? '未知'}</SizableText>
                   <SizableText size="$2" color="$color10">
                     {m.role === 'owner' ? '擁有者' : m.role === 'admin' ? '管理員' : ''}
                   </SizableText>
                   {(myRole === 'owner' || myRole === 'admin') && m.role !== 'owner' && (
-                    <Button size="$1" onPress={() => handleRemoveMember(m.userId!)}>移除</Button>
+                    <Button size="$1" onPress={() => handleRemoveMember(m.userId!)}>
+                      移除
+                    </Button>
                   )}
                 </XStack>
               ))}
