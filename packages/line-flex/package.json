@@ -9,12 +9,12 @@
   },
   "peerDependencies": {
     "react": "*",
-    "tamagui": "2.0.0-rc.40"
+    "tamagui": "2.0.0-rc.41"
   },
   "devDependencies": {
-    "@tamagui/config": "2.0.0-rc.40",
+    "@tamagui/config": "2.0.0-rc.41",
     "@types/react": "^18.2.0",
-    "tamagui": "2.0.0-rc.40",
+    "tamagui": "2.0.0-rc.41",
     "vitest": "^4.1.4"
   }
 }
