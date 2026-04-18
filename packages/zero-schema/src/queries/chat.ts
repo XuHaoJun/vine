@@ -23,6 +23,7 @@ export const chatById = (props: { chatId: string }) => {
 
 export const groupInfo = (props: { chatId: string }) => {
   return zql.chat
+    .where(chatReadPermission)
     .where('id', props.chatId)
     .where('type', 'group')
     .related('members')

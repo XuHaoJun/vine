@@ -53,6 +53,13 @@ export const ChatRoomPage = memo(() => {
     ? oaFriendsData?.friendships?.find((f) => f.officialAccountId === otherMemberOaId)
     : null
 
+  const otherName = isOAChat
+    ? (oaFriend?.oaName ?? '官方帳號')
+    : (otherMember?.user?.name ?? '未知用戶')
+  const otherImage = isOAChat
+    ? oaFriend?.oaImageUrl || null
+    : (otherMember?.user?.image ?? null)
+
   const { richMenu, imageUrl } = useRichMenu(otherMemberOaId ?? undefined)
   const hasRichMenu = !!richMenu && !!imageUrl
 
@@ -318,6 +325,7 @@ export const ChatRoomPage = memo(() => {
           myRole={myRole}
           open={showGroupInfo}
           onOpenChange={setShowGroupInfo}
+          groupDescription={chat?.[0]?.description}
         />
       )}
     </YStack>
