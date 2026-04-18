@@ -18,7 +18,7 @@ export const chatMembersByChatId = (props: { chatId: string }) => {
 }
 
 export const chatById = (props: { chatId: string }) => {
-  return zql.chat.where('id', props.chatId).limit(1)
+  return zql.chat.where(chatReadPermission).where('id', props.chatId).limit(1)
 }
 
 export const groupInfo = (props: { chatId: string }) => {
