@@ -16,3 +16,18 @@ export const chatsByUserId = (props: { userId: string }) => {
 export const chatMembersByChatId = (props: { chatId: string }) => {
   return zql.chatMember.where('chatId', props.chatId).related('user')
 }
+
+export const groupInfo = (props: { chatId: string }) => {
+  return zql.chat
+    .where('id', props.chatId)
+    .where('type', 'group')
+    .related('members')
+    .limit(1)
+}
+
+export const groupMembersWithRoles = (props: { chatId: string }) => {
+  return zql.chatMember
+    .where('chatId', props.chatId)
+    .related('user')
+    .orderBy('joinedAt', 'asc')
+}
