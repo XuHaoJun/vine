@@ -16,6 +16,8 @@ function createTestApp(
   mockCheckAndIncrementUsage?: ReturnType<typeof vi.fn>,
   mockGetQuota?: ReturnType<typeof vi.fn>,
   mockGetConsumption?: ReturnType<typeof vi.fn>,
+  mockResolveReplyToken?: ReturnType<typeof vi.fn>,
+  mockMarkReplyTokenUsed?: ReturnType<typeof vi.fn>,
 ) {
   const { mockSelect, mockInsert, mockUpdate } = mockDb
   const db = { select: mockSelect, insert: mockInsert, update: mockUpdate } as any
@@ -37,6 +39,22 @@ function createTestApp(
     checkAndIncrementUsage: mockCheckAndIncrementUsage ?? vi.fn().mockResolvedValue(true),
     getQuota: mockGetQuota ?? vi.fn().mockResolvedValue({ type: 'none', totalUsage: 0 }),
     getConsumption: mockGetConsumption ?? vi.fn().mockResolvedValue({ totalUsage: 0 }),
+    resolveReplyToken:
+      mockResolveReplyToken ??
+      vi.fn().mockResolvedValue({
+        valid: true,
+        record: {
+          id: 'token-id-1',
+          oaId,
+          token: 'reply-1',
+          userId,
+          chatId: 'chat-1',
+          messageId: 'msg-1',
+          used: false,
+          expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+        },
+      }),
+    markReplyTokenUsed: mockMarkReplyTokenUsed ?? vi.fn().mockResolvedValue(undefined),
   }
   const mockDrive = {
     put: vi.fn().mockResolvedValue(undefined),
@@ -630,9 +648,12 @@ describe('oaMessagingPlugin — Reply Message', () => {
   })
 
   describe('reply message', () => {
-    it('accepts valid text reply', async () => {
+    it('sends text reply via sendOAMessage', async () => {
+      const mockSend = vi
+        .fn()
+        .mockResolvedValue({ success: true, chatId: 'chat-1', messageId: 'msg-reply-1' })
       const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
-      const { app } = createTestApp(mockDb)
+      const { app, mockOa } = createTestApp(mockDb, mockSend)
       await app.ready()
 
       const res = await app.inject({
@@ -647,12 +668,34 @@ describe('oaMessagingPlugin — Reply Message', () => {
 
       await app.close()
       expect(res.statusCode).toBe(200)
+      expect(mockOa.sendOAMessage).toHaveBeenCalledWith(oaId, userId, {
+        type: 'text',
+        text: 'hello back',
+        metadata: null,
+      })
+      expect(mockOa.markReplyTokenUsed).toHaveBeenCalled()
     })
 
-    it('accepts valid flex reply', async () => {
+    it('sends flex reply via sendOAMessage', async () => {
+      const mockSend = vi
+        .fn()
+        .mockResolvedValue({ success: true, chatId: 'chat-1', messageId: 'msg-reply-1' })
       const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
-      const { app } = createTestApp(mockDb)
+      const { app, mockOa } = createTestApp(mockDb, mockSend)
       await app.ready()
+
+      const flexMessage = {
+        type: 'flex',
+        altText: 'reply',
+        contents: {
+          type: 'bubble',
+          body: {
+            type: 'box',
+            layout: 'vertical',
+            contents: [{ type: 'text', text: 'replied' }],
+          },
+        },
+      }
 
       const res = await app.inject({
         method: 'POST',
@@ -660,25 +703,106 @@ describe('oaMessagingPlugin — Reply Message', () => {
         headers: { authorization: `Bearer ${validToken}` },
         payload: {
           replyToken: 'reply-1',
-          messages: [
-            {
-              type: 'flex',
-              altText: 'reply',
-              contents: {
-                type: 'bubble',
-                body: {
-                  type: 'box',
-                  layout: 'vertical',
-                  contents: [{ type: 'text', text: 'replied' }],
-                },
-              },
-            },
-          ],
+          messages: [flexMessage],
         },
       })
 
       await app.close()
       expect(res.statusCode).toBe(200)
+      expect(mockOa.sendOAMessage).toHaveBeenCalledOnce()
+      const call = mockOa.sendOAMessage.mock.calls[0]
+      expect(call[0]).toBe(oaId)
+      expect(call[1]).toBe(userId)
+      expect(call[2].type).toBe('flex')
+      expect(call[2].text).toBeNull()
+      expect(JSON.parse(call[2].metadata!)).toEqual(flexMessage)
+    })
+
+    it('returns 400 for not_found reply token', async () => {
+      const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+      const { app } = createTestApp(
+        mockDb,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        vi.fn(() => Promise.resolve({ valid: false, reason: 'not_found' as const })),
+      )
+      await app.ready()
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/oa/v2/bot/message/reply',
+        headers: { authorization: `Bearer ${validToken}` },
+        payload: {
+          replyToken: 'unknown-token',
+          messages: [{ type: 'text', text: 'hello back' }],
+        },
+      })
+
+      await app.close()
+      expect(res.statusCode).toBe(400)
+      const body = JSON.parse(res.body)
+      expect(body.code).toBe('INVALID_REPLY_TOKEN')
+      expect(body.message).toBe('Reply token not_found')
+    })
+
+    it('returns 400 for expired reply token', async () => {
+      const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+      const { app } = createTestApp(
+        mockDb,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        vi.fn(() => Promise.resolve({ valid: false, reason: 'expired' as const })),
+      )
+      await app.ready()
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/oa/v2/bot/message/reply',
+        headers: { authorization: `Bearer ${validToken}` },
+        payload: {
+          replyToken: 'expired-token',
+          messages: [{ type: 'text', text: 'hello back' }],
+        },
+      })
+
+      await app.close()
+      expect(res.statusCode).toBe(400)
+      const body = JSON.parse(res.body)
+      expect(body.code).toBe('INVALID_REPLY_TOKEN')
+      expect(body.message).toBe('Reply token expired')
+    })
+
+    it('returns 400 for already_used reply token', async () => {
+      const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+      const { app } = createTestApp(
+        mockDb,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        vi.fn(() => Promise.resolve({ valid: false, reason: 'already_used' as const })),
+      )
+      await app.ready()
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/oa/v2/bot/message/reply',
+        headers: { authorization: `Bearer ${validToken}` },
+        payload: {
+          replyToken: 'used-token',
+          messages: [{ type: 'text', text: 'hello back' }],
+        },
+      })
+
+      await app.close()
+      expect(res.statusCode).toBe(400)
+      const body = JSON.parse(res.body)
+      expect(body.code).toBe('INVALID_REPLY_TOKEN')
+      expect(body.message).toBe('Reply token already_used')
     })
   })
 })

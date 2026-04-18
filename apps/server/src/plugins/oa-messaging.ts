@@ -148,13 +148,31 @@ export async function oaMessagingPlugin(
           })
         }
 
-        // Deliver messages (reply token tracking is a future enhancement)
+        // Deliver messages
         const validMessages = validated as ValidationSuccess[]
-        for (const msg of validMessages) {
-          // Reply requires knowing the chat from the replyToken.
-          // For now, reply delivery is deferred until reply token tracking is implemented.
-          // Messages are validated but not yet delivered on reply.
+
+        const tokenResult = await oa.resolveReplyToken(body.replyToken)
+        if (!tokenResult.valid) {
+          const statusMap = {
+            not_found: 400,
+            already_used: 400,
+            expired: 400,
+          }
+          return await reply.code(statusMap[tokenResult.reason] ?? 400).send({
+            message: `Reply token ${tokenResult.reason}`,
+            code: 'INVALID_REPLY_TOKEN',
+          })
         }
+
+        for (const msg of validMessages) {
+          await oa.sendOAMessage(oaId, tokenResult.record.userId, {
+            type: msg.type,
+            text: msg.text,
+            metadata: msg.metadata,
+          })
+        }
+
+        await oa.markReplyTokenUsed(tokenResult.record.id)
 
         return await reply.send({})
       } catch (err) {

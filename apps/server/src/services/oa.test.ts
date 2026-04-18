@@ -674,16 +674,14 @@ describe('createOAService — checkAndIncrementUsage', () => {
       select: vi.fn().mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
-            limit: vi
-              .fn()
-              .mockResolvedValue([
-                {
-                  oaId: 'oa-123',
-                  monthlyLimit: 1000,
-                  currentUsage: 500,
-                  resetAt: new Date().toISOString(),
-                },
-              ]),
+            limit: vi.fn().mockResolvedValue([
+              {
+                oaId: 'oa-123',
+                monthlyLimit: 1000,
+                currentUsage: 500,
+                resetAt: new Date().toISOString(),
+              },
+            ]),
           }),
         }),
       }),
@@ -708,16 +706,14 @@ describe('createOAService — checkAndIncrementUsage', () => {
       select: vi.fn().mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
-            limit: vi
-              .fn()
-              .mockResolvedValue([
-                {
-                  oaId: 'oa-123',
-                  monthlyLimit: 1000,
-                  currentUsage: 999,
-                  resetAt: new Date().toISOString(),
-                },
-              ]),
+            limit: vi.fn().mockResolvedValue([
+              {
+                oaId: 'oa-123',
+                monthlyLimit: 1000,
+                currentUsage: 999,
+                resetAt: new Date().toISOString(),
+              },
+            ]),
           }),
         }),
       }),
@@ -736,16 +732,14 @@ describe('createOAService — checkAndIncrementUsage', () => {
       select: vi.fn().mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
-            limit: vi
-              .fn()
-              .mockResolvedValue([
-                {
-                  oaId: 'oa-123',
-                  monthlyLimit: 1000,
-                  currentUsage: 999,
-                  resetAt: new Date().toISOString(),
-                },
-              ]),
+            limit: vi.fn().mockResolvedValue([
+              {
+                oaId: 'oa-123',
+                monthlyLimit: 1000,
+                currentUsage: 999,
+                resetAt: new Date().toISOString(),
+              },
+            ]),
           }),
         }),
       }),
@@ -789,16 +783,14 @@ describe('createOAService — setQuota', () => {
       select: vi.fn().mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
-            limit: vi
-              .fn()
-              .mockResolvedValue([
-                {
-                  oaId: 'oa-123',
-                  monthlyLimit: 1000,
-                  currentUsage: 500,
-                  resetAt: new Date().toISOString(),
-                },
-              ]),
+            limit: vi.fn().mockResolvedValue([
+              {
+                oaId: 'oa-123',
+                monthlyLimit: 1000,
+                currentUsage: 500,
+                resetAt: new Date().toISOString(),
+              },
+            ]),
           }),
         }),
       }),
@@ -813,5 +805,169 @@ describe('createOAService — setQuota', () => {
     }
     expect(setCall.set).toHaveProperty('monthlyLimit', 2000)
     expect(setCall.set).not.toHaveProperty('currentUsage')
+  })
+})
+
+describe('createOAService — Reply Token', () => {
+  it('registers reply token and returns token string', async () => {
+    const mockReturning = vi.fn().mockResolvedValue([
+      {
+        id: 'token-id-1',
+        oaId: 'oa-1',
+        token: 'reply-token-abc',
+        userId: 'user-1',
+        chatId: 'chat-1',
+        messageId: 'msg-1',
+        used: false,
+        expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+      },
+    ])
+    const mockDb = {
+      ...createMockDb(),
+      insert: vi.fn().mockReturnValue({
+        values: vi.fn().mockReturnValue({
+          returning: mockReturning,
+        }),
+      }),
+    }
+    const oa = createOAService({ db: mockDb as any, database: {} as any })
+
+    const result = await oa.registerReplyToken({
+      oaId: 'oa-1',
+      userId: 'user-1',
+      chatId: 'chat-1',
+      messageId: 'msg-1',
+    })
+
+    expect(result.token).toBe('reply-token-abc')
+    expect(mockDb.insert).toHaveBeenCalled()
+  })
+
+  it('resolves valid reply token', async () => {
+    const mockDb = {
+      ...createMockDb(),
+      select: vi.fn().mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([
+              {
+                id: 'token-id-1',
+                oaId: 'oa-1',
+                token: 'reply-token-abc',
+                userId: 'user-1',
+                chatId: 'chat-1',
+                messageId: 'msg-1',
+                used: false,
+                expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+              },
+            ]),
+          }),
+        }),
+      }),
+    }
+    const oa = createOAService({ db: mockDb as any, database: {} as any })
+
+    const result = await oa.resolveReplyToken('reply-token-abc')
+
+    expect(result.valid).toBe(true)
+    expect(result.record!.userId).toBe('user-1')
+  })
+
+  it('returns not_found for unknown token', async () => {
+    const mockDb = {
+      ...createMockDb(),
+      select: vi.fn().mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([]),
+          }),
+        }),
+      }),
+    }
+    const oa = createOAService({ db: mockDb as any, database: {} as any })
+
+    const result = await oa.resolveReplyToken('unknown-token')
+
+    expect(result.valid).toBe(false)
+    expect(result.reason).toBe('not_found')
+  })
+
+  it('returns already_used for consumed token', async () => {
+    const mockDb = {
+      ...createMockDb(),
+      select: vi.fn().mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([
+              {
+                id: 'token-id-1',
+                oaId: 'oa-1',
+                token: 'reply-token-abc',
+                userId: 'user-1',
+                chatId: 'chat-1',
+                messageId: 'msg-1',
+                used: true,
+                expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+              },
+            ]),
+          }),
+        }),
+      }),
+    }
+    const oa = createOAService({ db: mockDb as any, database: {} as any })
+
+    const result = await oa.resolveReplyToken('reply-token-abc')
+
+    expect(result.valid).toBe(false)
+    expect(result.reason).toBe('already_used')
+  })
+
+  it('returns expired for expired token', async () => {
+    const mockDb = {
+      ...createMockDb(),
+      select: vi.fn().mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([
+              {
+                id: 'token-id-1',
+                oaId: 'oa-1',
+                token: 'reply-token-abc',
+                userId: 'user-1',
+                chatId: 'chat-1',
+                messageId: 'msg-1',
+                used: false,
+                expiresAt: new Date(Date.now() - 1000).toISOString(),
+              },
+            ]),
+          }),
+        }),
+      }),
+    }
+    const oa = createOAService({ db: mockDb as any, database: {} as any })
+
+    const result = await oa.resolveReplyToken('reply-token-abc')
+
+    expect(result.valid).toBe(false)
+    expect(result.reason).toBe('expired')
+  })
+
+  it('marks reply token as used', async () => {
+    const mockReturning = vi.fn().mockResolvedValue([{ id: 'token-id-1', used: true }])
+    const mockDb = {
+      ...createMockDb(),
+      update: vi.fn().mockReturnValue({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: mockReturning,
+          }),
+        }),
+      }),
+    }
+    const oa = createOAService({ db: mockDb as any, database: {} as any })
+
+    await oa.markReplyTokenUsed('token-id-1')
+
+    expect(mockDb.update).toHaveBeenCalled()
   })
 })
