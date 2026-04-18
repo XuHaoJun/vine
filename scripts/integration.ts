@@ -182,12 +182,12 @@ async function main() {
     // start backend
     console.info('\nstarting backend...')
     const commonEnv = await getTestEnv()
-    await spawnWithEnv('cd apps/server && bun start', commonEnv)
+    await spawnWithEnv('bun --cwd apps/server start', commonEnv)
     await waitForPort(BACKEND_PORT, 30_000)
 
     // start static file server on internal port
     console.info('\nstarting frontend...')
-    await spawnWithEnv(`cd apps/web && bun one serve --port ${STATIC_PORT}`, commonEnv)
+    await spawnWithEnv(`bun --cwd apps/web one serve --port ${STATIC_PORT}`, commonEnv)
     await waitForPort(STATIC_PORT, 60_000)
 
     // start proxy on FRONTEND_PORT: routes /api/* to backend, everything else to static server
