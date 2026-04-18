@@ -1,5 +1,7 @@
 # Vine Agents Guide
 
+Attention!!! Vine is **not** the official LINE platform. It is a standalone, open product that ships its own server, sync layer, and mobile/web clients. There is no dependency on LINE Developers Console, Messaging API, or `api.line.me`.
+
 Vine is a self-hostable instant-messaging product modeled after LINE. It is not the official LINE platform: avoid assuming LINE Developers Console, Messaging API, LINE Login with LY Corp app/channel IDs, or calling LINE's hosted `api.line.me` as an external integration target. Build features against this repo unless the user explicitly asks for real LINE cloud integration.
 
 ## Essential Commands
