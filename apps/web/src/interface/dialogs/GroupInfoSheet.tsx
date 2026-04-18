@@ -8,7 +8,10 @@ import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
 import { showToast } from '~/interface/toast/Toast'
 import { zero, useZeroQuery } from '~/zero/client'
-import { groupMembersWithRoles, pendingMembersByChatId } from '@vine/zero-schema/queries/chat'
+import {
+  groupMembersWithRoles,
+  pendingMembersByChatId,
+} from '@vine/zero-schema/queries/chat'
 import { InviteLinkDialog } from './InviteLinkDialog'
 import { AddMembersDialog } from './AddMembersDialog'
 
@@ -213,10 +216,7 @@ export function GroupInfoSheet({
                       待審核
                     </SizableText>
                     {(myRole === 'owner' || myRole === 'admin') && (
-                      <Button
-                        size="$1"
-                        onPress={() => handleRemoveMember(m.userId!)}
-                      >
+                      <Button size="$1" onPress={() => handleRemoveMember(m.userId!)}>
                         移除
                       </Button>
                     )}

@@ -172,7 +172,7 @@ export const mutate = mutations(schema, chatReadPermission, {
         chatId: args.chatId,
         userId: args.memberIds[i],
         role: isOwner ? 'owner' : 'member',
-        status: isOwner ? 'accepted' : (args.requireApproval ? 'pending' : 'accepted'),
+        status: isOwner ? 'accepted' : args.requireApproval ? 'pending' : 'accepted',
         joinedAt: args.createdAt,
       })
     }
@@ -214,7 +214,8 @@ export const mutate = mutations(schema, chatReadPermission, {
     if (args.name !== undefined) updateData.name = args.name
     if (args.image !== undefined) updateData.image = args.image
     if (args.description !== undefined) updateData.description = args.description
-    if (args.requireApproval !== undefined) updateData.requireApproval = args.requireApproval ? 1 : 0
+    if (args.requireApproval !== undefined)
+      updateData.requireApproval = args.requireApproval ? 1 : 0
 
     await tx.mutate.chat.update(updateData)
   },
