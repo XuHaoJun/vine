@@ -1,4 +1,4 @@
-import { and, eq, ilike, inArray, or, sql } from 'drizzle-orm'
+import { and, eq, ilike, inArray, lt, or, sql } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { Pool } from 'pg'
 import type { schema } from '@vine/db'
@@ -13,6 +13,7 @@ import {
   oaRichMenuUserLink,
   oaDefaultRichMenu,
   oaQuota,
+  oaReplyToken,
 } from '@vine/db/schema-oa'
 import { createHmac, randomBytes, randomUUID } from 'crypto'
 import { chat, chatMember, message } from '@vine/db/schema-public'
@@ -930,6 +931,48 @@ export function createOAService(deps: OADeps) {
       })
   }
 
+  async function registerReplyToken(input: {
+    oaId: string
+    userId: string
+    chatId: string
+    messageId: string
+  }) {
+    const token = generateReplyToken()
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString()
+
+    const [record] = await db
+      .insert(oaReplyToken)
+      .values({
+        oaId: input.oaId,
+        token,
+        userId: input.userId,
+        chatId: input.chatId,
+        messageId: input.messageId,
+        expiresAt,
+      })
+      .returning()
+    return record
+  }
+
+  async function resolveReplyToken(token: string) {
+    const [record] = await db
+      .select()
+      .from(oaReplyToken)
+      .where(eq(oaReplyToken.token, token))
+      .limit(1)
+
+    if (!record) return { valid: false as const, reason: 'not_found' as const }
+    if (record.used) return { valid: false as const, reason: 'already_used' as const }
+    if (new Date(record.expiresAt) < new Date())
+      return { valid: false as const, reason: 'expired' as const }
+
+    return { valid: true as const, record }
+  }
+
+  async function markReplyTokenUsed(tokenId: string) {
+    await db.update(oaReplyToken).set({ used: true }).where(eq(oaReplyToken.id, tokenId))
+  }
+
   return {
     createProvider,
     getProvider,
@@ -987,6 +1030,9 @@ export function createOAService(deps: OADeps) {
     getConsumption,
     checkAndIncrementUsage,
     setQuota,
+    registerReplyToken,
+    resolveReplyToken,
+    markReplyTokenUsed,
   }
 }
 

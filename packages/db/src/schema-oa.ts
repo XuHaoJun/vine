@@ -166,3 +166,25 @@ export const oaQuota = pgTable('oaQuota', {
   currentUsage: integer('currentUsage').notNull().default(0),
   resetAt: timestamp('resetAt', { mode: 'string' }).notNull(),
 })
+
+export const oaReplyToken = pgTable(
+  'oaReplyToken',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    oaId: uuid('oaId')
+      .notNull()
+      .references(() => officialAccount.id, { onDelete: 'cascade' }),
+    token: text('token').notNull().unique(),
+    userId: text('userId').notNull(),
+    chatId: uuid('chatId').notNull(),
+    messageId: text('messageId'),
+    used: boolean('used').notNull().default(false),
+    expiresAt: timestamp('expiresAt', { mode: 'string' }).notNull(),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('oaReplyToken_token_idx').on(table.token),
+    index('oaReplyToken_oaId_idx').on(table.oaId),
+    index('oaReplyToken_expiresAt_idx').on(table.expiresAt),
+  ],
+)

@@ -20,9 +20,10 @@ export async function oaWebhookPlugin(fastify: FastifyInstance, deps: WebhookPlu
       const body = request.body as {
         oaId: string
         userId: string
+        chatId: string
         messageId: string
         text: string
-        replyToken: string
+        replyToken?: string
       }
 
       const account = await oa.getOfficialAccount(body.oaId)
@@ -33,12 +34,19 @@ export async function oaWebhookPlugin(fastify: FastifyInstance, deps: WebhookPlu
         return reply.code(400).send({ message: 'Webhook not configured or not verified' })
       }
 
+      const replyTokenRecord = await oa.registerReplyToken({
+        oaId: body.oaId,
+        userId: body.userId,
+        chatId: body.chatId,
+        messageId: body.messageId,
+      })
+
       const payload = oa.buildMessageEvent({
         oaId: body.oaId,
         userId: body.userId,
         messageId: body.messageId,
         text: body.text,
-        replyToken: body.replyToken,
+        replyToken: replyTokenRecord.token,
       })
       const payloadBody = JSON.stringify(payload)
       const signature = oa.generateWebhookSignature(payloadBody, account.channelSecret)
