@@ -14,7 +14,10 @@ export const chatsByUserId = (props: { userId: string }) => {
 
 // Members of a specific chat (for chatroom: find the other user)
 export const chatMembersByChatId = (props: { chatId: string }) => {
-  return zql.chatMember.where('chatId', props.chatId).related('user')
+  return zql.chatMember
+    .where('chatId', props.chatId)
+    .where('status', 'accepted')
+    .related('user')
 }
 
 export const chatById = (props: { chatId: string }) => {
@@ -33,6 +36,21 @@ export const groupInfo = (props: { chatId: string }) => {
 export const groupMembersWithRoles = (props: { chatId: string }) => {
   return zql.chatMember
     .where('chatId', props.chatId)
+    .where('status', 'accepted')
     .related('user')
     .orderBy('joinedAt', 'asc')
+}
+
+export const pendingMembersByChatId = (props: { chatId: string }) => {
+  return zql.chatMember
+    .where('chatId', props.chatId)
+    .where('status', 'pending')
+    .related('user')
+}
+
+export const pendingInvitesByUserId = (props: { userId: string }) => {
+  return zql.chatMember
+    .where('userId', props.userId)
+    .where('status', 'pending')
+    .related('chat')
 }

@@ -13,6 +13,7 @@ export const schema = table('chat')
     image: string().optional(),
     description: string().optional(),
     inviteCode: string().optional(),
+    requireApproval: number().optional(),
     albumCount: number().optional(),
     noteCount: number().optional(),
     lastMessageId: string().optional(),
@@ -145,6 +146,7 @@ export const mutate = mutations(schema, chatReadPermission, {
       name: string
       image?: string
       memberIds: string[]
+      requireApproval: boolean
       createdAt: number
     },
   ) => {
@@ -159,15 +161,18 @@ export const mutate = mutations(schema, chatReadPermission, {
       type: 'group',
       name: args.name,
       image: args.image,
+      requireApproval: args.requireApproval ? 1 : 0,
       createdAt: args.createdAt,
     })
 
     for (let i = 0; i < args.memberIds.length; i++) {
+      const isOwner = args.memberIds[i] === authData.id
       await tx.mutate.chatMember.insert({
         id: `${args.chatId}_${args.memberIds[i]}`,
         chatId: args.chatId,
         userId: args.memberIds[i],
-        role: args.memberIds[i] === authData.id ? 'owner' : 'member',
+        role: isOwner ? 'owner' : 'member',
+        status: isOwner ? 'accepted' : (args.requireApproval ? 'pending' : 'accepted'),
         joinedAt: args.createdAt,
       })
     }
@@ -179,6 +184,7 @@ export const mutate = mutations(schema, chatReadPermission, {
       name?: string
       image?: string
       description?: string
+      requireApproval?: boolean
     },
   ) => {
     if (!authData) throw new Error('Unauthorized')
@@ -203,10 +209,12 @@ export const mutate = mutations(schema, chatReadPermission, {
       name?: string
       image?: string
       description?: string
+      requireApproval?: number
     } = { id: args.chatId }
     if (args.name !== undefined) updateData.name = args.name
     if (args.image !== undefined) updateData.image = args.image
     if (args.description !== undefined) updateData.description = args.description
+    if (args.requireApproval !== undefined) updateData.requireApproval = args.requireApproval ? 1 : 0
 
     await tx.mutate.chat.update(updateData)
   },

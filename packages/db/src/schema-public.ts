@@ -65,6 +65,7 @@ export const chat = pgTable('chat', {
   image: text('image'),
   description: text('description'),
   inviteCode: text('inviteCode').unique(),
+  requireApproval: boolean('requireApproval').notNull().default(false),
   albumCount: integer('albumCount').notNull().default(0),
   noteCount: integer('noteCount').notNull().default(0),
   lastMessageId: text('lastMessageId'),
@@ -82,6 +83,7 @@ export const chatMember = pgTable(
     lastReadAt: timestamp('lastReadAt', { mode: 'string' }),
     joinedAt: timestamp('joinedAt', { mode: 'string' }).defaultNow().notNull(),
     role: text('role').$type<'owner' | 'admin' | 'member'>(),
+    status: text('status').$type<'pending' | 'accepted'>().notNull().default('accepted'),
     oaId: uuid('oaId').references(() => officialAccount.id),
   },
   (table) => [
@@ -99,6 +101,10 @@ export const chatMember = pgTable(
     check(
       'chatMember_role_oa_check',
       sql`(${table.role} IS NULL OR ${table.oaId} IS NULL)`,
+    ),
+    check(
+      'chatMember_status_oa_check',
+      sql`(${table.status} IS NULL OR ${table.oaId} IS NULL)`,
     ),
   ],
 )

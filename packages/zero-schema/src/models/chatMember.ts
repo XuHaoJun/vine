@@ -11,6 +11,7 @@ export const schema = table('chatMember')
     chatId: string(),
     userId: string().optional(),
     role: string().optional(),
+    status: string().optional(),
     lastReadMessageId: string().optional(),
     lastReadAt: number().optional(),
     joinedAt: number(),
@@ -77,6 +78,14 @@ export const mutate = mutations(schema, chatMemberPermission, {
       throw new Error('Only owner or admin can add members')
     }
 
+    let requireApproval = false
+    if (query?.chat) {
+      const chats = await query.chat.where('id', args.chatId).run()
+      if (chats.length > 0) {
+        requireApproval = chats[0].requireApproval === 1
+      }
+    }
+
     for (const userId of args.userIds) {
       if (userId === authData.id) continue
 
@@ -92,6 +101,7 @@ export const mutate = mutations(schema, chatMemberPermission, {
         chatId: args.chatId,
         userId,
         role: 'member',
+        status: requireApproval ? 'pending' : 'accepted',
         joinedAt: args.createdAt,
       })
     }
@@ -231,12 +241,70 @@ export const mutate = mutations(schema, chatMemberPermission, {
 
     if (existing.length > 0) throw new Error('Already a member of this group')
 
+    const requireApproval = chat.requireApproval === 1
+
     await tx.mutate.chatMember.insert({
       id: `${chat.id}_${authData.id}`,
       chatId: chat.id,
       userId: authData.id,
       role: 'member',
+      status: requireApproval ? 'pending' : 'accepted',
       joinedAt: args.createdAt,
     })
+  },
+
+  acceptInvite: async (
+    { authData, tx },
+    args: {
+      chatId: string
+    },
+  ) => {
+    if (!authData) throw new Error('Unauthorized')
+
+    const query = tx.query as Record<string, any> | undefined
+    if (!query?.chatMember) throw new Error('Unauthorized')
+
+    const members = await query.chatMember
+      .where('chatId', args.chatId)
+      .where('userId', authData.id)
+      .run()
+
+    if (members.length === 0) throw new Error('Not a member of this group')
+
+    const member = members[0]
+    if (member.status !== 'pending') {
+      throw new Error('No pending invitation')
+    }
+
+    await tx.mutate.chatMember.update({
+      id: member.id,
+      status: 'accepted',
+    })
+  },
+
+  declineInvite: async (
+    { authData, tx },
+    args: {
+      chatId: string
+    },
+  ) => {
+    if (!authData) throw new Error('Unauthorized')
+
+    const query = tx.query as Record<string, any> | undefined
+    if (!query?.chatMember) throw new Error('Unauthorized')
+
+    const members = await query.chatMember
+      .where('chatId', args.chatId)
+      .where('userId', authData.id)
+      .run()
+
+    if (members.length === 0) throw new Error('Not a member of this group')
+
+    const member = members[0]
+    if (member.status !== 'pending') {
+      throw new Error('No pending invitation')
+    }
+
+    await tx.mutate.chatMember.delete({ id: member.id })
   },
 })

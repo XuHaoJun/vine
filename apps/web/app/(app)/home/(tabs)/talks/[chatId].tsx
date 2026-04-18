@@ -68,8 +68,15 @@ export const ChatRoomPage = memo(() => {
   )
   const [richMenuExpanded, setRichMenuExpanded] = useState(richMenu?.selected ?? false)
   const [showGroupInfo, setShowGroupInfo] = useState(false)
+  const [requireApproval, setRequireApproval] = useState(false)
 
   const [chat] = useZeroQuery(chatById, { chatId: chatId! }, { enabled: Boolean(chatId) })
+
+  useEffect(() => {
+    if (chat?.[0]?.requireApproval !== undefined) {
+      setRequireApproval(chat[0].requireApproval === 1)
+    }
+  }, [chat])
 
   const isGroupChat = members.length > 2
   const myRole = myMembership?.role as 'owner' | 'admin' | 'member' | null
@@ -326,6 +333,8 @@ export const ChatRoomPage = memo(() => {
           open={showGroupInfo}
           onOpenChange={setShowGroupInfo}
           groupDescription={chat?.[0]?.description}
+          requireApproval={requireApproval}
+          onUpdateRequireApproval={setRequireApproval}
         />
       )}
     </YStack>

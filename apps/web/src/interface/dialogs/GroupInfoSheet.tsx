@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Sheet, SizableText, YStack, XStack, ScrollView, Dialog } from 'tamagui'
+import { TouchableOpacity } from 'react-native'
 
 import { useAuth } from '~/features/auth/client/authClient'
 import { Avatar } from '~/interface/avatars/Avatar'
@@ -7,7 +8,7 @@ import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
 import { showToast } from '~/interface/toast/Toast'
 import { zero, useZeroQuery } from '~/zero/client'
-import { groupMembersWithRoles } from '@vine/zero-schema/queries/chat'
+import { groupMembersWithRoles, pendingMembersByChatId } from '@vine/zero-schema/queries/chat'
 import { InviteLinkDialog } from './InviteLinkDialog'
 import { AddMembersDialog } from './AddMembersDialog'
 
@@ -19,7 +20,9 @@ type GroupInfoSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   groupDescription?: string | null
+  requireApproval?: boolean
   onUpdateDescription?: (description: string) => void
+  onUpdateRequireApproval?: (requireApproval: boolean) => void
 }
 
 export function GroupInfoSheet({
@@ -30,7 +33,9 @@ export function GroupInfoSheet({
   open,
   onOpenChange,
   groupDescription,
+  requireApproval = false,
   onUpdateDescription,
+  onUpdateRequireApproval,
 }: GroupInfoSheetProps) {
   const [showInviteDialog, setShowInviteDialog] = useState(false)
   const [showAddMembersDialog, setShowAddMembersDialog] = useState(false)
@@ -44,6 +49,12 @@ export function GroupInfoSheet({
     groupMembersWithRoles,
     { chatId },
     { enabled: Boolean(chatId) },
+  )
+
+  const [pendingMembers] = useZeroQuery(
+    pendingMembersByChatId,
+    { chatId },
+    { enabled: Boolean(chatId) && (myRole === 'owner' || myRole === 'admin') },
   )
 
   const handleLeave = async () => {
@@ -74,6 +85,20 @@ export function GroupInfoSheet({
       onUpdateDescription?.(editDescriptionValue)
       setShowEditDescription(false)
       showToast('已更新群組描述', { type: 'success' })
+    } catch (e: any) {
+      showToast(`更新失敗: ${e.message}`, { type: 'error' })
+    }
+  }
+
+  const handleToggleRequireApproval = async () => {
+    try {
+      const newValue = !requireApproval
+      await zero.mutate.chat.updateGroupInfo({
+        chatId,
+        requireApproval: newValue,
+      })
+      onUpdateRequireApproval?.(newValue)
+      showToast(newValue ? '已開啟邀請審批' : '已關閉邀請審批', { type: 'success' })
     } catch (e: any) {
       showToast(`更新失敗: ${e.message}`, { type: 'error' })
     }
@@ -147,9 +172,58 @@ export function GroupInfoSheet({
                     編輯群組描述
                   </Button>
                   <Button onPress={() => setShowTransferOwnership(true)}>轉讓群主</Button>
+                  <TouchableOpacity
+                    onPress={handleToggleRequireApproval}
+                    activeOpacity={0.7}
+                  >
+                    <XStack py="$2" items="center" gap="$2">
+                      <SizableText
+                        size="$3"
+                        color={requireApproval ? '$color10' : '$color9'}
+                        fontWeight="500"
+                      >
+                        {requireApproval ? '☑' : '☐'}
+                      </SizableText>
+                      <SizableText size="$3" color="$color10" flex={1}>
+                        邀請審批
+                      </SizableText>
+                      <SizableText size="$2" color="$color10">
+                        {requireApproval ? '開啟' : '關閉'}
+                      </SizableText>
+                    </XStack>
+                  </TouchableOpacity>
                 </>
               )}
             </YStack>
+
+            {pendingMembers && pendingMembers.length > 0 && (
+              <YStack px="$4" py="$3">
+                <SizableText size="$4" fontWeight="600" mb="$2">
+                  待審核成員 ({pendingMembers.length})
+                </SizableText>
+                {pendingMembers.map((m) => (
+                  <XStack key={m.id} py="$2" items="center" gap="$3">
+                    <Avatar
+                      size={32}
+                      image={m.user?.image ?? null}
+                      name={m.user?.name ?? '?'}
+                    />
+                    <SizableText flex={1}>{m.user?.name ?? '未知'}</SizableText>
+                    <SizableText size="$2" color="$color10">
+                      待審核
+                    </SizableText>
+                    {(myRole === 'owner' || myRole === 'admin') && (
+                      <Button
+                        size="$1"
+                        onPress={() => handleRemoveMember(m.userId!)}
+                      >
+                        移除
+                      </Button>
+                    )}
+                  </XStack>
+                ))}
+              </YStack>
+            )}
 
             <YStack px="$4" py="$3">
               <SizableText size="$4" fontWeight="600" mb="$2">

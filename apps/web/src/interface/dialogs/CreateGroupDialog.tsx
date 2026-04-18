@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Sheet, SizableText, YStack, XStack } from 'tamagui'
+import { TouchableOpacity } from 'react-native'
 
 import { FriendPicker } from '~/interface/friend-picker/FriendPicker'
 import { Button } from '~/interface/buttons/Button'
@@ -20,6 +21,7 @@ export function CreateGroupDialog({
 }: CreateGroupDialogProps) {
   const [groupName, setGroupName] = useState('')
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([])
+  const [requireApproval, setRequireApproval] = useState(false)
 
   const handleCreate = async () => {
     if (!groupName.trim()) {
@@ -39,6 +41,7 @@ export function CreateGroupDialog({
         chatId,
         name: groupName.trim(),
         memberIds: selectedUserIds,
+        requireApproval,
         createdAt,
       })
 
@@ -85,6 +88,24 @@ export function CreateGroupDialog({
               onChangeText={setGroupName}
             />
           </YStack>
+
+          <TouchableOpacity
+            onPress={() => setRequireApproval(!requireApproval)}
+            activeOpacity={0.7}
+          >
+            <XStack px="$3" py="$2" items="center" gap="$2">
+              <SizableText
+                size="$3"
+                color={requireApproval ? '$color10' : '$color9'}
+                fontWeight="500"
+              >
+                {requireApproval ? '☑' : '☐'}
+              </SizableText>
+              <SizableText size="$2" color="$color10" flex={1}>
+                用戶收到邀請後就會加入群組。關閉此設定以要求成員加入前須接受邀請
+              </SizableText>
+            </XStack>
+          </TouchableOpacity>
 
           <YStack flex={1} minH={0}>
             <FriendPicker
