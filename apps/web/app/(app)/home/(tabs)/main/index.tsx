@@ -61,10 +61,7 @@ export const MainPage = memo(() => {
     queryFn: () => oaClient.listMyOAFriends({}),
   })
 
-  const { rows: allChats } = useZeroQuery({
-    query: chatsByUserId,
-    args: { userId: user?.id ?? '' },
-  })
+  const [allChats] = useZeroQuery(chatsByUserId, { userId: user?.id ?? '' })
 
   const groupCount = allChats?.filter((c) => c.type === 'group').length ?? 0
 

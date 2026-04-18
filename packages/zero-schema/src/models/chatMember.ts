@@ -39,6 +39,12 @@ export const mutate = mutations(schema, chatMemberPermission, {
 
     await can(chatMemberPermission, data.id)
 
+    const query = tx.query as Record<string, any> | undefined
+    if (!query?.chatMember) throw new Error('Unauthorized')
+
+    const members = await query.chatMember.where('id', data.id).run()
+    if (members.length === 0) throw new Error('Not found')
+
     await tx.mutate.chatMember.update({
       id: data.id,
       lastReadMessageId: data.lastReadMessageId,
@@ -56,7 +62,10 @@ export const mutate = mutations(schema, chatMemberPermission, {
   ) => {
     if (!authData) throw new Error('Unauthorized')
 
-    const callerMembers = await tx.query.chatMember
+    const query = tx.query as Record<string, any> | undefined
+    if (!query?.chatMember) throw new Error('Not a member of this group')
+
+    const callerMembers = await query.chatMember
       .where('chatId', args.chatId)
       .where('userId', authData.id)
       .run()
@@ -71,7 +80,7 @@ export const mutate = mutations(schema, chatMemberPermission, {
     for (const userId of args.userIds) {
       if (userId === authData.id) continue
 
-      const existing = await tx.query.chatMember
+      const existing = await query.chatMember
         .where('chatId', args.chatId)
         .where('userId', userId)
         .run()
@@ -97,7 +106,10 @@ export const mutate = mutations(schema, chatMemberPermission, {
   ) => {
     if (!authData) throw new Error('Unauthorized')
 
-    const callerMembers = await tx.query.chatMember
+    const query = tx.query as Record<string, any> | undefined
+    if (!query?.chatMember) throw new Error('Not a member of this group')
+
+    const callerMembers = await query.chatMember
       .where('chatId', args.chatId)
       .where('userId', authData.id)
       .run()
@@ -109,7 +121,7 @@ export const mutate = mutations(schema, chatMemberPermission, {
       throw new Error('Only owner or admin can remove members')
     }
 
-    const targetMembers = await tx.query.chatMember
+    const targetMembers = await query.chatMember
       .where('chatId', args.chatId)
       .where('userId', args.targetUserId)
       .run()
@@ -132,7 +144,10 @@ export const mutate = mutations(schema, chatMemberPermission, {
   ) => {
     if (!authData) throw new Error('Unauthorized')
 
-    const myMembers = await tx.query.chatMember
+    const query = tx.query as Record<string, any> | undefined
+    if (!query?.chatMember) throw new Error('Not a member of this group')
+
+    const myMembers = await query.chatMember
       .where('chatId', args.chatId)
       .where('userId', authData.id)
       .run()
@@ -156,7 +171,10 @@ export const mutate = mutations(schema, chatMemberPermission, {
   ) => {
     if (!authData) throw new Error('Unauthorized')
 
-    const myMembers = await tx.query.chatMember
+    const query = tx.query as Record<string, any> | undefined
+    if (!query?.chatMember) throw new Error('Not a member of this group')
+
+    const myMembers = await query.chatMember
       .where('chatId', args.chatId)
       .where('userId', authData.id)
       .run()
@@ -168,7 +186,7 @@ export const mutate = mutations(schema, chatMemberPermission, {
       throw new Error('Only owner can transfer ownership')
     }
 
-    const newOwnerMembers = await tx.query.chatMember
+    const newOwnerMembers = await query.chatMember
       .where('chatId', args.chatId)
       .where('userId', args.newOwnerId)
       .run()
@@ -195,13 +213,18 @@ export const mutate = mutations(schema, chatMemberPermission, {
   ) => {
     if (!authData) throw new Error('Unauthorized')
 
-    const chats = await tx.query.chat.where('inviteCode', args.inviteCode).run()
+    const query = tx.query as Record<string, any> | undefined
+    if (!query?.chat) throw new Error('Invalid invite code')
+
+    const chats = await query.chat.where('inviteCode', args.inviteCode).run()
 
     if (chats.length === 0) throw new Error('Invalid invite code')
 
     const chat = chats[0]
 
-    const existing = await tx.query.chatMember
+    if (!query?.chatMember) throw new Error('Already a member of this group')
+
+    const existing = await query.chatMember
       .where('chatId', chat.id)
       .where('userId', authData.id)
       .run()

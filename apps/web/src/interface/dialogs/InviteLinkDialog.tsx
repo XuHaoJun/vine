@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Sheet, SizableText, YStack, XStack } from 'tamagui'
 
 import { Button } from '~/interface/buttons/Button'
@@ -22,7 +22,7 @@ export function InviteLinkDialog({
 }: InviteLinkDialogProps) {
   const [inviteUrl, setInviteUrl] = useState<string | null>(null)
 
-  const loadInviteUrl = () => {
+  const loadInviteUrl = useCallback(() => {
     const chatQuery = getQuery(chatById, { chatId })
     chatQuery.subscribe((chats: Chat[] | null) => {
       const chat = chats?.[0]
@@ -34,14 +34,14 @@ export function InviteLinkDialog({
       }
     })
     return () => chatQuery.unsubscribe()
-  }
+  }, [chatId])
 
   useEffect(() => {
     if (open) {
       const cleanup = loadInviteUrl()
       return cleanup
     }
-  }, [open, chatId])
+  }, [open, loadInviteUrl])
 
   const handleGenerate = async () => {
     try {

@@ -143,7 +143,9 @@ export function GroupInfoSheet({
               )}
               {myRole === 'owner' && (
                 <>
-                  <Button onPress={() => setShowEditDescription(true)}>編輯群組描述</Button>
+                  <Button onPress={() => setShowEditDescription(true)}>
+                    編輯群組描述
+                  </Button>
                   <Button onPress={() => setShowTransferOwnership(true)}>轉讓群主</Button>
                 </>
               )}
@@ -164,11 +166,13 @@ export function GroupInfoSheet({
                   <SizableText size="$2" color="$color10">
                     {m.role === 'owner' ? '擁有者' : m.role === 'admin' ? '管理員' : ''}
                   </SizableText>
-                  {(myRole === 'owner' || myRole === 'admin') && m.role !== 'owner' && m.userId !== currentUserId && (
-                    <Button size="$1" onPress={() => handleRemoveMember(m.userId!)}>
-                      移除
-                    </Button>
-                  )}
+                  {(myRole === 'owner' || myRole === 'admin') &&
+                    m.role !== 'owner' &&
+                    m.userId !== currentUserId && (
+                      <Button size="$1" onPress={() => handleRemoveMember(m.userId!)}>
+                        移除
+                      </Button>
+                    )}
                 </XStack>
               ))}
             </YStack>
@@ -199,7 +203,9 @@ export function GroupInfoSheet({
         <Dialog.Overlay opacity={0.5} />
         <Dialog.Content bg="$background" p="$4" bordered rounded="$4">
           <YStack gap="$3">
-            <SizableText size="$5" fontWeight="700">編輯群組描述</SizableText>
+            <SizableText size="$5" fontWeight="700">
+              編輯群組描述
+            </SizableText>
             <Input
               placeholder="輸入群組描述"
               value={editDescriptionValue}
@@ -220,21 +226,25 @@ export function GroupInfoSheet({
         <Dialog.Overlay opacity={0.5} />
         <Dialog.Content bg="$background" p="$4" bordered rounded="$4">
           <YStack gap="$3">
-            <SizableText size="$5" fontWeight="700">轉讓群主</SizableText>
+            <SizableText size="$5" fontWeight="700">
+              轉讓群主
+            </SizableText>
             <SizableText size="$3" color="$color10">
               選擇新群主後，你將會變成普通成員
             </SizableText>
-            <ScrollView maxHeight={200}>
+            <ScrollView height={200}>
               <YStack gap="$2">
-                {members?.filter((m) => m.role !== 'owner').map((m) => (
-                  <Button
-                    key={m.id}
-                    onPress={() => handleTransferOwnership(m.userId!)}
-                    variant="secondary"
-                  >
-                    {m.user?.name ?? '未知用戶'}
-                  </Button>
-                ))}
+                {members
+                  ?.filter((m) => m.role !== 'owner')
+                  .map((m) => (
+                    <Button
+                      key={m.id}
+                      onPress={() => handleTransferOwnership(m.userId!)}
+                      variant="outlined"
+                    >
+                      {m.user?.name ?? '未知用戶'}
+                    </Button>
+                  ))}
               </YStack>
             </ScrollView>
             <Button variant="transparent" onPress={() => setShowTransferOwnership(false)}>
