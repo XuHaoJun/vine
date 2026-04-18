@@ -13,6 +13,9 @@ function createTestApp(
     mockUpdate: ReturnType<typeof vi.fn>
   },
   mockSendOAMessage?: ReturnType<typeof vi.fn>,
+  mockCheckAndIncrementUsage?: ReturnType<typeof vi.fn>,
+  mockGetQuota?: ReturnType<typeof vi.fn>,
+  mockGetConsumption?: ReturnType<typeof vi.fn>,
 ) {
   const { mockSelect, mockInsert, mockUpdate } = mockDb
   const db = { select: mockSelect, insert: mockInsert, update: mockUpdate } as any
@@ -31,6 +34,9 @@ function createTestApp(
         chatId: 'chat-id',
         messageId: 'msg-id',
       }),
+    checkAndIncrementUsage: mockCheckAndIncrementUsage ?? vi.fn().mockResolvedValue(true),
+    getQuota: mockGetQuota ?? vi.fn().mockResolvedValue({ type: 'none', totalUsage: 0 }),
+    getConsumption: mockGetConsumption ?? vi.fn().mockResolvedValue({ totalUsage: 0 }),
   }
   const mockDrive = {
     put: vi.fn().mockResolvedValue(undefined),
@@ -41,7 +47,7 @@ function createTestApp(
   }
   const app = Fastify()
   app.register(oaMessagingPlugin, { oa: mockOa as any, db, drive: mockDrive })
-  return app
+  return { app, mockOa }
 }
 
 function makeMockDb(tokenResult: unknown[], friendshipResult: unknown[]) {
@@ -81,7 +87,7 @@ describe('oaMessagingPlugin — Push Message', () => {
   describe('auth', () => {
     it('returns 401 when no Bearer token', async () => {
       const mockDb = makeMockDb([], [])
-      const app = createTestApp(mockDb)
+      const { app } = createTestApp(mockDb)
       await app.ready()
 
       const res = await app.inject({
@@ -99,7 +105,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
     it('returns 401 when token not found', async () => {
       const mockDb = makeMockDb([], [])
-      const app = createTestApp(mockDb)
+      const { app } = createTestApp(mockDb)
       await app.ready()
 
       const res = await app.inject({
@@ -120,7 +126,7 @@ describe('oaMessagingPlugin — Push Message', () => {
   describe('validation', () => {
     it('returns 400 when missing to', async () => {
       const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
-      const app = createTestApp(mockDb)
+      const { app } = createTestApp(mockDb)
       await app.ready()
 
       const res = await app.inject({
@@ -138,7 +144,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
     it('returns 400 when missing messages', async () => {
       const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
-      const app = createTestApp(mockDb)
+      const { app } = createTestApp(mockDb)
       await app.ready()
 
       const res = await app.inject({
@@ -159,7 +165,7 @@ describe('oaMessagingPlugin — Push Message', () => {
         [{ oaId, token: validToken, expiresAt: null }],
         [{ oaId, userId, status: 'friend' }],
       )
-      const app = createTestApp(mockDb)
+      const { app } = createTestApp(mockDb)
       await app.ready()
 
       const res = await app.inject({
@@ -181,7 +187,7 @@ describe('oaMessagingPlugin — Push Message', () => {
         [{ oaId, token: validToken, expiresAt: null }],
         [{ oaId, userId, status: 'friend' }],
       )
-      const app = createTestApp(mockDb)
+      const { app } = createTestApp(mockDb)
       await app.ready()
 
       const res = await app.inject({
@@ -214,7 +220,7 @@ describe('oaMessagingPlugin — Push Message', () => {
         [{ oaId, token: validToken, expiresAt: null }],
         [{ oaId, userId, status: 'friend' }],
       )
-      const app = createTestApp(mockDb)
+      const { app } = createTestApp(mockDb)
       await app.ready()
 
       const res = await app.inject({
@@ -235,7 +241,7 @@ describe('oaMessagingPlugin — Push Message', () => {
   describe('friendship check', () => {
     it('returns 403 when user is not a friend', async () => {
       const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
-      const app = createTestApp(mockDb)
+      const { app } = createTestApp(mockDb)
       await app.ready()
 
       const res = await app.inject({
@@ -256,7 +262,7 @@ describe('oaMessagingPlugin — Push Message', () => {
         [{ oaId, token: validToken, expiresAt: null }],
         [{ oaId, userId, status: 'pending' }],
       )
-      const app = createTestApp(mockDb)
+      const { app } = createTestApp(mockDb)
       await app.ready()
 
       const res = await app.inject({
@@ -282,7 +288,7 @@ describe('oaMessagingPlugin — Push Message', () => {
       const mockSend = vi
         .fn()
         .mockResolvedValue({ success: true, chatId: 'chat-1', messageId: 'msg-1' })
-      const app = createTestApp(mockDb, mockSend)
+      const { app, mockOa } = createTestApp(mockDb, mockSend)
       await app.ready()
 
       const res = await app.inject({
@@ -294,7 +300,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
       await app.close()
       expect(res.statusCode).toBe(200)
-      expect(mockSend).toHaveBeenCalledWith(oaId, userId, {
+      expect(mockOa.sendOAMessage).toHaveBeenCalledWith(oaId, userId, {
         type: 'text',
         text: 'hello world',
         metadata: null,
@@ -309,7 +315,7 @@ describe('oaMessagingPlugin — Push Message', () => {
       const mockSend = vi
         .fn()
         .mockResolvedValue({ success: true, chatId: 'chat-1', messageId: 'msg-1' })
-      const app = createTestApp(mockDb, mockSend)
+      const { app, mockOa } = createTestApp(mockDb, mockSend)
       await app.ready()
 
       const flexMessage = {
@@ -334,8 +340,8 @@ describe('oaMessagingPlugin — Push Message', () => {
 
       await app.close()
       expect(res.statusCode).toBe(200)
-      expect(mockSend).toHaveBeenCalledOnce()
-      const call = mockSend.mock.calls[0]
+      expect(mockOa.sendOAMessage).toHaveBeenCalledOnce()
+      const call = mockOa.sendOAMessage.mock.calls[0]
       expect(call[0]).toBe(oaId)
       expect(call[1]).toBe(userId)
       expect(call[2].type).toBe('flex')
@@ -351,7 +357,7 @@ describe('oaMessagingPlugin — Push Message', () => {
       const mockSend = vi
         .fn()
         .mockResolvedValue({ success: true, chatId: 'chat-1', messageId: 'msg-1' })
-      const app = createTestApp(mockDb, mockSend)
+      const { app, mockOa } = createTestApp(mockDb, mockSend)
       await app.ready()
 
       const res = await app.inject({
@@ -369,9 +375,162 @@ describe('oaMessagingPlugin — Push Message', () => {
 
       await app.close()
       expect(res.statusCode).toBe(200)
-      expect(mockSend).toHaveBeenCalledTimes(2)
-      expect(mockSend.mock.calls[0][2].text).toBe('first')
-      expect(mockSend.mock.calls[1][2].text).toBe('second')
+      expect(mockOa.sendOAMessage).toHaveBeenCalledTimes(2)
+      expect(mockOa.sendOAMessage.mock.calls[0][2].text).toBe('first')
+      expect(mockOa.sendOAMessage.mock.calls[1][2].text).toBe('second')
+    })
+  })
+
+  describe('quota enforcement', () => {
+    it('allows push when quota is not exceeded', async () => {
+      const mockDb = makeMockDb(
+        [{ oaId, token: validToken, expiresAt: null }],
+        [{ oaId, userId, status: 'friend' }],
+      )
+      const mockSend = vi
+        .fn()
+        .mockResolvedValue({ success: true, chatId: 'chat-1', messageId: 'msg-1' })
+      const { app, mockOa } = createTestApp(mockDb, mockSend)
+      await app.ready()
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/oa/v2/bot/message/push',
+        headers: { authorization: `Bearer ${validToken}` },
+        payload: { to: userId, messages: [{ type: 'text', text: 'hello' }] },
+      })
+
+      await app.close()
+      expect(res.statusCode).toBe(200)
+    })
+
+    it('blocks push when quota is exceeded', async () => {
+      const mockDb = makeMockDb(
+        [{ oaId, token: validToken, expiresAt: null }],
+        [{ oaId, userId, status: 'friend' }],
+      )
+      const mockSend = vi.fn()
+      const { app, mockOa } = createTestApp(
+        mockDb,
+        mockSend,
+        vi.fn().mockResolvedValue(false),
+      )
+      await app.ready()
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/oa/v2/bot/message/push',
+        headers: { authorization: `Bearer ${validToken}` },
+        payload: { to: userId, messages: [{ type: 'text', text: 'hello' }] },
+      })
+
+      await app.close()
+      expect(res.statusCode).toBe(429)
+      const body = JSON.parse(res.body)
+      expect(body.code).toBe('QUOTA_EXCEEDED')
+      expect(body.message).toBe('You have reached your monthly limit.')
+      expect(mockOa.sendOAMessage).not.toHaveBeenCalled()
+    })
+
+    it('does not check quota for reply messages', async () => {
+      const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+      const { app, mockOa } = createTestApp(mockDb)
+      await app.ready()
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/oa/v2/bot/message/reply',
+        headers: { authorization: `Bearer ${validToken}` },
+        payload: {
+          replyToken: 'reply-1',
+          messages: [{ type: 'text', text: 'hello back' }],
+        },
+      })
+
+      await app.close()
+      expect(res.statusCode).toBe(200)
+      expect(mockOa.checkAndIncrementUsage).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('quota endpoints', () => {
+    it('returns quota info with type none when no limit set', async () => {
+      const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+      const { app } = createTestApp(mockDb)
+      await app.ready()
+
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/oa/v2/bot/message/quota',
+        headers: { authorization: `Bearer ${validToken}` },
+      })
+
+      await app.close()
+      expect(res.statusCode).toBe(200)
+      const body = JSON.parse(res.body)
+      expect(body.type).toBe('none')
+      expect(body.totalUsage).toBe(0)
+    })
+
+    it('returns quota info with type limited when limit is set', async () => {
+      const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+      const { app, mockOa } = createTestApp(
+        mockDb,
+        undefined,
+        undefined,
+        vi.fn().mockResolvedValue({ type: 'limited', value: 1000, totalUsage: 500 }),
+      )
+      await app.ready()
+
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/oa/v2/bot/message/quota',
+        headers: { authorization: `Bearer ${validToken}` },
+      })
+
+      await app.close()
+      expect(res.statusCode).toBe(200)
+      const body = JSON.parse(res.body)
+      expect(body.type).toBe('limited')
+      expect(body.value).toBe(1000)
+      expect(body.totalUsage).toBe(500)
+    })
+
+    it('returns consumption info', async () => {
+      const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+      const { app, mockOa } = createTestApp(
+        mockDb,
+        undefined,
+        undefined,
+        undefined,
+        vi.fn().mockResolvedValue({ totalUsage: 500 }),
+      )
+      await app.ready()
+
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/oa/v2/bot/message/quota/consumption',
+        headers: { authorization: `Bearer ${validToken}` },
+      })
+
+      await app.close()
+      expect(res.statusCode).toBe(200)
+      const body = JSON.parse(res.body)
+      expect(body.totalUsage).toBe(500)
+    })
+
+    it('returns 401 when accessing quota without token', async () => {
+      const mockDb = makeMockDb([], [])
+      const { app } = createTestApp(mockDb)
+      await app.ready()
+
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/oa/v2/bot/message/quota',
+      })
+
+      await app.close()
+      expect(res.statusCode).toBe(401)
     })
   })
 })
@@ -380,7 +539,7 @@ describe('oaMessagingPlugin — Reply Message', () => {
   describe('auth', () => {
     it('returns 401 when no Bearer token', async () => {
       const mockDb = makeMockDb([], [])
-      const app = createTestApp(mockDb)
+      const { app } = createTestApp(mockDb)
       await app.ready()
 
       const res = await app.inject({
@@ -397,7 +556,7 @@ describe('oaMessagingPlugin — Reply Message', () => {
   describe('validation', () => {
     it('returns 400 when missing replyToken', async () => {
       const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
-      const app = createTestApp(mockDb)
+      const { app } = createTestApp(mockDb)
       await app.ready()
 
       const res = await app.inject({
@@ -415,7 +574,7 @@ describe('oaMessagingPlugin — Reply Message', () => {
 
     it('returns 400 when missing messages', async () => {
       const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
-      const app = createTestApp(mockDb)
+      const { app } = createTestApp(mockDb)
       await app.ready()
 
       const res = await app.inject({
@@ -433,7 +592,7 @@ describe('oaMessagingPlugin — Reply Message', () => {
 
     it('returns 400 when text is missing in text message', async () => {
       const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
-      const app = createTestApp(mockDb)
+      const { app } = createTestApp(mockDb)
       await app.ready()
 
       const res = await app.inject({
@@ -451,7 +610,7 @@ describe('oaMessagingPlugin — Reply Message', () => {
 
     it('returns 400 when unsupported message type', async () => {
       const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
-      const app = createTestApp(mockDb)
+      const { app } = createTestApp(mockDb)
       await app.ready()
 
       const res = await app.inject({
@@ -473,7 +632,7 @@ describe('oaMessagingPlugin — Reply Message', () => {
   describe('reply message', () => {
     it('accepts valid text reply', async () => {
       const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
-      const app = createTestApp(mockDb)
+      const { app } = createTestApp(mockDb)
       await app.ready()
 
       const res = await app.inject({
@@ -492,7 +651,7 @@ describe('oaMessagingPlugin — Reply Message', () => {
 
     it('accepts valid flex reply', async () => {
       const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
-      const app = createTestApp(mockDb)
+      const { app } = createTestApp(mockDb)
       await app.ready()
 
       const res = await app.inject({
