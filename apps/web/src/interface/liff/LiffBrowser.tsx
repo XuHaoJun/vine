@@ -63,7 +63,7 @@ export const LiffBrowser = memo(
           src={src}
           style={{ width: '100%', height: '100%', border: 'none' }}
           allow="camera; microphone"
-          sandbox="allow-scripts"
+          sandbox="allow-scripts allow-same-origin"
           title={`LIFF App ${liffId}`}
         />
       </YStack>
