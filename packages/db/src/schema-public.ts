@@ -2,6 +2,7 @@ import {
   boolean,
   check,
   index,
+  integer,
   pgTable,
   text,
   timestamp,
@@ -60,6 +61,12 @@ export const friendship = pgTable(
 export const chat = pgTable('chat', {
   id: text('id').primaryKey(),
   type: text('type').notNull().$type<'direct' | 'group' | 'oa'>(),
+  name: text('name'),
+  image: text('image'),
+  description: text('description'),
+  inviteCode: text('inviteCode').unique(),
+  albumCount: integer('albumCount').notNull().default(0),
+  noteCount: integer('noteCount').notNull().default(0),
   lastMessageId: text('lastMessageId'),
   lastMessageAt: timestamp('lastMessageAt', { mode: 'string' }),
   createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
@@ -74,6 +81,7 @@ export const chatMember = pgTable(
     lastReadMessageId: text('lastReadMessageId'),
     lastReadAt: timestamp('lastReadAt', { mode: 'string' }),
     joinedAt: timestamp('joinedAt', { mode: 'string' }).defaultNow().notNull(),
+    role: text('role').$type<'owner' | 'admin' | 'member'>(),
     oaId: uuid('oaId').references(() => officialAccount.id),
   },
   (table) => [
@@ -87,6 +95,10 @@ export const chatMember = pgTable(
     check(
       'chatMember_user_oa_mutual_exclusion_check',
       sql`(${table.userId} IS NULL OR ${table.oaId} IS NULL)`,
+    ),
+    check(
+      'chatMember_role_oa_check',
+      sql`(${table.role} IS NULL OR ${table.oaId} IS NULL)`,
     ),
   ],
 )
