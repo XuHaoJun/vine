@@ -666,3 +666,122 @@ describe('createOAService — updateRichMenu', () => {
     ])
   })
 })
+
+describe('createOAService — checkAndIncrementUsage', () => {
+  it('allows request when currentUsage + delta <= monthlyLimit', async () => {
+    const mockDb = {
+      ...createMockDb(),
+      select: vi.fn().mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([
+              { oaId: 'oa-123', monthlyLimit: 1000, currentUsage: 500, resetAt: new Date().toISOString() },
+            ]),
+          }),
+        }),
+      }),
+      update: vi.fn().mockReturnValue({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ currentUsage: 501 }]),
+          }),
+        }),
+      }),
+    }
+    const oa = createOAService({ db: mockDb as any, database: {} as any })
+
+    const result = await oa.checkAndIncrementUsage('oa-123', 1)
+
+    expect(result).toBe(true)
+  })
+
+  it('rejects request when currentUsage + delta > monthlyLimit', async () => {
+    const mockDb = {
+      ...createMockDb(),
+      select: vi.fn().mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([
+              { oaId: 'oa-123', monthlyLimit: 1000, currentUsage: 999, resetAt: new Date().toISOString() },
+            ]),
+          }),
+        }),
+      }),
+    }
+    const oa = createOAService({ db: mockDb as any, database: {} as any })
+
+    const result = await oa.checkAndIncrementUsage('oa-123', 2)
+
+    expect(result).toBe(false)
+  })
+
+  it('uses atomic update to prevent race conditions with delta > 1', async () => {
+    let callCount = 0
+    const mockDb = {
+      ...createMockDb(),
+      select: vi.fn().mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([
+              { oaId: 'oa-123', monthlyLimit: 1000, currentUsage: 999, resetAt: new Date().toISOString() },
+            ]),
+          }),
+        }),
+      }),
+      update: vi.fn().mockReturnValue({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockImplementation(() => {
+            callCount++
+            const returning = vi.fn().mockResolvedValue(
+              callCount === 1
+                ? [{ oaId: 'oa-123', currentUsage: 1001 }]
+                : [],
+            )
+            return { returning }
+          }),
+        }),
+      }),
+    }
+    const oa = createOAService({ db: mockDb as any, database: {} as any })
+
+    const [result1, result2] = await Promise.all([
+      oa.checkAndIncrementUsage('oa-123', 2),
+      oa.checkAndIncrementUsage('oa-123', 2),
+    ])
+
+    const successes = [result1, result2].filter(Boolean).length
+    expect(successes).toBe(1)
+  })
+})
+
+describe('createOAService — setQuota', () => {
+  it('preserves currentUsage when updating monthlyLimit', async () => {
+    const mockInsertValues = vi.fn().mockResolvedValue(undefined)
+    const mockOnConflictDoUpdate = vi.fn().mockReturnValue({ values: mockInsertValues })
+    const mockDb = {
+      ...createMockDb(),
+      insert: vi.fn().mockReturnValue({
+        values: vi.fn().mockReturnValue({
+          onConflictDoUpdate: mockOnConflictDoUpdate,
+        }),
+      }),
+      select: vi.fn().mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([
+              { oaId: 'oa-123', monthlyLimit: 1000, currentUsage: 500, resetAt: new Date().toISOString() },
+            ]),
+          }),
+        }),
+      }),
+    }
+    const oa = createOAService({ db: mockDb as any, database: {} as any })
+
+    await oa.setQuota('oa-123', 2000)
+
+    expect(mockOnConflictDoUpdate).toHaveBeenCalled()
+    const setCall = mockOnConflictDoUpdate.mock.calls[0][0] as { set: Record<string, unknown> }
+    expect(setCall.set).toHaveProperty('monthlyLimit', 2000)
+    expect(setCall.set).not.toHaveProperty('currentUsage')
+  })
+})

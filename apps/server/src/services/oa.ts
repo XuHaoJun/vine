@@ -901,15 +901,14 @@ export function createOAService(deps: OADeps) {
       return true
     }
 
-    if (row.currentUsage + delta > row.monthlyLimit) {
-      return false
-    }
-
     const [updated] = await db
       .update(oaQuota)
       .set({ currentUsage: row.currentUsage + delta })
       .where(
-        and(eq(oaQuota.oaId, oaId), sql`${oaQuota.currentUsage} = ${row.currentUsage}`),
+        and(
+          eq(oaQuota.oaId, oaId),
+          sql`${oaQuota.currentUsage} + ${delta} <= ${row.monthlyLimit}`,
+        ),
       )
       .returning()
 
@@ -927,7 +926,7 @@ export function createOAService(deps: OADeps) {
       })
       .onConflictDoUpdate({
         target: oaQuota.oaId,
-        set: { monthlyLimit, currentUsage: 0, resetAt: getStartOfMonth().toISOString() },
+        set: { monthlyLimit },
       })
   }
 
