@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Sheet, SizableText, YStack, XStack, ScrollView } from 'tamagui'
 
+import { useAuth } from '~/features/auth/client/authClient'
 import { Avatar } from '~/interface/avatars/Avatar'
 import { Button } from '~/interface/buttons/Button'
 import { showToast } from '~/interface/toast/Toast'
@@ -28,6 +29,8 @@ export function GroupInfoSheet({
 }: GroupInfoSheetProps) {
   const [showInviteDialog, setShowInviteDialog] = useState(false)
   const [showAddMembersDialog, setShowAddMembersDialog] = useState(false)
+  const { user } = useAuth()
+  const currentUserId = user?.id ?? ''
 
   const [members] = useZeroQuery(
     groupMembersWithRoles,
@@ -114,7 +117,7 @@ export function GroupInfoSheet({
                   <SizableText size="$2" color="$color10">
                     {m.role === 'owner' ? '擁有者' : m.role === 'admin' ? '管理員' : ''}
                   </SizableText>
-                  {(myRole === 'owner' || myRole === 'admin') && m.role !== 'owner' && (
+                  {(myRole === 'owner' || myRole === 'admin') && m.role !== 'owner' && m.userId !== currentUserId && (
                     <Button size="$1" onPress={() => handleRemoveMember(m.userId!)}>
                       移除
                     </Button>

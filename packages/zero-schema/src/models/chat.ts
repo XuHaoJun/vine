@@ -167,6 +167,7 @@ export const mutate = mutations(schema, chatReadPermission, {
         id: `${args.chatId}_${args.memberIds[i]}`,
         chatId: args.chatId,
         userId: args.memberIds[i],
+        role: args.memberIds[i] === authData.id ? 'owner' : 'member',
         joinedAt: args.createdAt,
       })
     }
@@ -191,6 +192,11 @@ export const mutate = mutations(schema, chatReadPermission, {
       .run()
 
     if (members.length === 0) throw new Error('Not a member of this group')
+
+    const member = members[0]
+    if (member.role !== 'owner' && member.role !== 'admin') {
+      throw new Error('Only owner or admin can update group info')
+    }
 
     const updateData: {
       id: string
@@ -217,6 +223,11 @@ export const mutate = mutations(schema, chatReadPermission, {
 
     if (members.length === 0) throw new Error('Not a member of this group')
 
+    const member = members[0]
+    if (member.role !== 'owner' && member.role !== 'admin') {
+      throw new Error('Only owner or admin can generate invite links')
+    }
+
     const inviteCode = crypto.randomUUID().replace(/-/g, '').slice(0, 16)
 
     await tx.mutate.chat.update({
@@ -236,6 +247,11 @@ export const mutate = mutations(schema, chatReadPermission, {
       .run()
 
     if (members.length === 0) throw new Error('Not a member of this group')
+
+    const member = members[0]
+    if (member.role !== 'owner' && member.role !== 'admin') {
+      throw new Error('Only owner or admin can revoke invite links')
+    }
 
     await tx.mutate.chat.update({
       id: args.chatId,
