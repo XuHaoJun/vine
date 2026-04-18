@@ -83,6 +83,7 @@ declare module 'one' {
         | `/(app)/manager/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/manager/${OneRouter.SingleRoutePart<T>}/richmenu/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/oa/${OneRouter.SingleRoutePart<T>}`
+        | `/(public)/invite/${OneRouter.SingleRoutePart<T>}/page`
         | `/auth/signup/${OneRouter.SingleRoutePart<T>}`
         | `/developers/console/channel/${OneRouter.SingleRoutePart<T>}`
         | `/developers/console/login-channel/${OneRouter.SingleRoutePart<T>}`
@@ -90,6 +91,7 @@ declare module 'one' {
         | `/developers/console/provider/${OneRouter.SingleRoutePart<T>}`
         | `/home/(tabs)/talks/${OneRouter.SingleRoutePart<T>}`
         | `/home/talks/${OneRouter.SingleRoutePart<T>}`
+        | `/invite/${OneRouter.SingleRoutePart<T>}/page`
         | `/liff/${OneRouter.SingleRoutePart<T>}`
         | `/manager/${OneRouter.SingleRoutePart<T>}`
         | `/manager/${OneRouter.SingleRoutePart<T>}/richmenu/${OneRouter.SingleRoutePart<T>}`
@@ -106,6 +108,7 @@ declare module 'one' {
         | `/(app)/manager/[oaId]`
         | `/(app)/manager/[oaId]/richmenu/[richMenuId]`
         | `/(app)/oa/[oaId]`
+        | `/(public)/invite/[inviteCode]/page`
         | `/auth/signup/[method]`
         | `/developers/console/channel/[channelId]`
         | `/developers/console/login-channel/[loginChannelId]`
@@ -113,6 +116,7 @@ declare module 'one' {
         | `/developers/console/provider/[providerId]`
         | `/home/(tabs)/talks/[chatId]`
         | `/home/talks/[chatId]`
+        | `/invite/[inviteCode]/page`
         | `/liff/[liffId]`
         | `/manager/[oaId]`
         | `/manager/[oaId]/richmenu/[richMenuId]`
@@ -130,6 +134,7 @@ declare module 'one' {
         '/(app)/manager/[oaId]': RouteInfo<{ oaId: string }>
         '/(app)/manager/[oaId]/richmenu/[richMenuId]': RouteInfo<{ oaId: string; richMenuId: string }>
         '/(app)/oa/[oaId]': RouteInfo<{ oaId: string }>
+        '/(public)/invite/[inviteCode]/page': RouteInfo<{ inviteCode: string }>
         '/auth/signup/[method]': RouteInfo<{ method: string }>
         '/developers/console/channel/[channelId]': RouteInfo<{ channelId: string }>
         '/developers/console/login-channel/[loginChannelId]': RouteInfo<{ loginChannelId: string }>
@@ -137,6 +142,7 @@ declare module 'one' {
         '/developers/console/provider/[providerId]': RouteInfo<{ providerId: string }>
         '/home/(tabs)/talks/[chatId]': RouteInfo<{ chatId: string }>
         '/home/talks/[chatId]': RouteInfo<{ chatId: string }>
+        '/invite/[inviteCode]/page': RouteInfo<{ inviteCode: string }>
         '/liff/[liffId]': RouteInfo<{ liffId: string }>
         '/manager/[oaId]': RouteInfo<{ oaId: string }>
         '/manager/[oaId]/richmenu/[richMenuId]': RouteInfo<{ oaId: string; richMenuId: string }>

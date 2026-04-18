@@ -31,42 +31,40 @@ test.describe('Chat System', () => {
     await expect(page.getByText('聊天 ▾')).toBeVisible()
   })
 
-  test('friend requests page loads', async ({ page }) => {
+  test('create group dialog opens when clicking + button', async ({ page }) => {
     await loginAsDemo(page)
 
     await page.goto(`${BASE_URL}/home/talks`, { waitUntil: 'domcontentloaded' })
     await page.waitForURL(/\/home\/talks$/, { timeout: 10000 })
 
-    // Navigate to requests page via the + button
+    // Open create group dialog via the + button
     await page.getByRole('button', { name: '＋' }).click()
-    await page.waitForURL(/\/home\/talks\/requests/, { timeout: 10000 })
 
-    // Wait for page to render
-    await page.waitForTimeout(1000)
-
-    // The H3 heading renders as a heading role
-    await expect(page.getByRole('heading', { name: '好友管理' })).toBeVisible()
-  })
-
-  test('user search input is available on requests page', async ({ page }) => {
-    await loginAsDemo(page)
-
-    await page.goto(`${BASE_URL}/home/talks`, { waitUntil: 'domcontentloaded' })
-    await page.waitForURL(/\/home\/talks$/, { timeout: 10000 })
-
-    // Navigate to requests page via the + button
-    await page.getByRole('button', { name: '＋' }).click()
-    await page.waitForURL(/\/home\/talks\/requests/, { timeout: 10000 })
-
-    // Wait for page to render
-    await page.waitForTimeout(1000)
-
-    // Click search mode button with force to avoid detachment issues
-    await page.getByRole('button', { name: '搜尋新好友' }).click({ force: true })
+    // Wait for dialog to appear
     await page.waitForTimeout(500)
 
-    // Search input should be visible
-    const searchInput = page.getByPlaceholder('輸入 username 搜尋')
-    await expect(searchInput).toBeVisible()
+    // Dialog title should be visible
+    await expect(page.getByText('建立群組').first()).toBeVisible()
+
+    // Close button should be visible
+    await expect(page.getByRole('button', { name: '✕' })).toBeVisible()
+  })
+
+  test('create group dialog has required input fields', async ({ page }) => {
+    await loginAsDemo(page)
+
+    await page.goto(`${BASE_URL}/home/talks`, { waitUntil: 'domcontentloaded' })
+    await page.waitForURL(/\/home\/talks$/, { timeout: 10000 })
+
+    // Open create group dialog via the + button
+    await page.getByRole('button', { name: '＋' }).click()
+    await page.waitForTimeout(500)
+
+    // Group name input should be visible
+    const groupNameInput = page.getByPlaceholder('輸入群組名稱')
+    await expect(groupNameInput).toBeVisible()
+
+    // Create button should be visible (initially disabled without name)
+    await expect(page.getByRole('button', { name: '建立群組' })).toBeVisible()
   })
 })

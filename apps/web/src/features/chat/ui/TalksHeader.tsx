@@ -1,5 +1,5 @@
 import { router } from 'one'
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import { SizableText, XStack, YStack } from 'tamagui'
 
 import { Button } from '~/interface/buttons/Button'
@@ -7,6 +7,7 @@ import { ClockIcon } from '~/interface/icons/phosphor/ClockIcon'
 import { FunnelIcon } from '~/interface/icons/phosphor/FunnelIcon'
 import { GearIcon } from '~/interface/icons/phosphor/GearIcon'
 import { SearchInput } from '~/interface/forms/SearchInput'
+import { CreateGroupDialog } from '~/interface/dialogs/CreateGroupDialog'
 
 type TalksHeaderProps = {
   activeTab: 'chats' | 'friends'
@@ -24,6 +25,8 @@ export const TalksHeader = memo(
     onSearchChange,
     pendingCount,
   }: TalksHeaderProps) => {
+    const [showCreateGroup, setShowCreateGroup] = useState(false)
+
     return (
       <YStack bg="$background" pb="$2">
         <XStack px="$3" py="$2" justify="space-between" items="center">
@@ -73,7 +76,7 @@ export const TalksHeader = memo(
               variant="transparent"
               cursor="pointer"
               p="$1"
-              onPress={() => router.push('/home/talks/requests')}
+              onPress={() => setShowCreateGroup(true)}
             >
               <SizableText size="$4">＋</SizableText>
             </Button>
@@ -100,6 +103,11 @@ export const TalksHeader = memo(
             <FunnelIcon size={18} color="$color10" />
           </XStack>
         </XStack>
+        <CreateGroupDialog
+          open={showCreateGroup}
+          onOpenChange={setShowCreateGroup}
+          onSuccess={(chatId) => router.push(`/home/talks/${chatId}` as any)}
+        />
       </YStack>
     )
   },

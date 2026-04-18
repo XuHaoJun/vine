@@ -169,6 +169,7 @@ export const TalksPage = memo(() => {
                     key={chat.id}
                     name={name}
                     image={image}
+                    type={chat.type}
                     lastMessageText={lastMsg?.text ?? null}
                     lastMessageAt={chat.lastMessageAt}
                     unreadCount={hasUnread ? 1 : 0}

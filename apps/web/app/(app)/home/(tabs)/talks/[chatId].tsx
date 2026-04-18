@@ -3,6 +3,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Linking, Platform } from 'react-native'
 import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
 
+import { useZeroQuery } from '~/zero/client'
 import { useMessages } from '~/features/chat/useMessages'
 import { DateSeparator } from '~/features/chat/ui/DateSeparator'
 import { MessageBubbleFactory } from '~/interface/message/MessageBubbleFactory'
@@ -11,8 +12,10 @@ import { useAuth } from '~/features/auth/client/authClient'
 import { oaClient } from '~/features/oa/client'
 import { Avatar } from '~/interface/avatars/Avatar'
 import { Button } from '~/interface/buttons/Button'
+import { GroupInfoSheet } from '~/interface/dialogs/GroupInfoSheet'
 import { H3 } from '~/interface/text/Headings'
 import { useTanQuery } from '~/query'
+import { chatById } from '@vine/zero-schema/queries/chat'
 import { showToast } from '~/interface/toast/Toast'
 import { useRichMenu } from '~/features/chat/useRichMenu'
 import { RichMenu } from '~/features/chat/ui/RichMenu'
@@ -28,8 +31,15 @@ export const ChatRoomPage = memo(() => {
   const userId = user?.id ?? ''
   const scrollRef = useRef<ScrollView>(null)
 
-  const { messages, isLoading, members, otherMember, sendMessage, markRead } =
-    useMessages(chatId!)
+  const {
+    messages,
+    isLoading,
+    members,
+    otherMember,
+    sendMessage,
+    markRead,
+    myMembership,
+  } = useMessages(chatId!)
 
   const { data: oaFriendsData } = useTanQuery({
     queryKey: ['oa', 'myFriends'],
@@ -43,6 +53,13 @@ export const ChatRoomPage = memo(() => {
     ? oaFriendsData?.friendships?.find((f) => f.officialAccountId === otherMemberOaId)
     : null
 
+  const otherName = isOAChat
+    ? (oaFriend?.oaName ?? '官方帳號')
+    : (otherMember?.user?.name ?? '未知用戶')
+  const otherImage = isOAChat
+    ? oaFriend?.oaImageUrl || null
+    : (otherMember?.user?.image ?? null)
+
   const { richMenu, imageUrl } = useRichMenu(otherMemberOaId ?? undefined)
   const hasRichMenu = !!richMenu && !!imageUrl
 
@@ -50,6 +67,21 @@ export const ChatRoomPage = memo(() => {
     hasRichMenu ? 'richmenu' : 'normal',
   )
   const [richMenuExpanded, setRichMenuExpanded] = useState(richMenu?.selected ?? false)
+  const [showGroupInfo, setShowGroupInfo] = useState(false)
+  const [requireApproval, setRequireApproval] = useState(false)
+
+  const [chat] = useZeroQuery(chatById, { chatId: chatId! }, { enabled: Boolean(chatId) })
+
+  useEffect(() => {
+    if (chat?.[0]?.requireApproval !== undefined) {
+      setRequireApproval(chat[0].requireApproval === 1)
+    }
+  }, [chat])
+
+  const isGroupChat = members.length > 2
+  const myRole = myMembership?.role as 'owner' | 'admin' | 'member' | null
+  const groupName = chat?.[0]?.name ?? otherName
+  const groupImage = chat?.[0]?.image ?? null
 
   useEffect(() => {
     if (hasRichMenu) {
@@ -103,13 +135,6 @@ export const ChatRoomPage = memo(() => {
     }
   }, [])
 
-  const otherName = isOAChat
-    ? (oaFriend?.oaName ?? '官方帳號')
-    : (otherMember?.user?.name ?? '未知用戶')
-  const otherImage = isOAChat
-    ? oaFriend?.oaImageUrl || null
-    : (otherMember?.user?.image ?? null)
-
   const handleRichMenuAreaTap = useCallback(
     (area: { action: { type: string; uri?: string; data?: string; text?: string } }) => {
       const { action } = area
@@ -148,12 +173,18 @@ export const ChatRoomPage = memo(() => {
         items="center"
         borderBottomWidth={1}
         borderBottomColor="$color4"
+        cursor={isGroupChat ? 'pointer' : 'default'}
+        onPress={isGroupChat ? () => setShowGroupInfo(true) : undefined}
       >
         <Button variant="transparent" onPress={() => window.history.back()} px="$2">
           ←
         </Button>
-        <Avatar size={32} image={otherImage} name={otherName} />
-        <H3 flex={1}>{otherName}</H3>
+        <Avatar
+          size={32}
+          image={isGroupChat ? groupImage : otherImage}
+          name={isGroupChat ? groupName : otherName}
+        />
+        <H3 flex={1}>{isGroupChat ? groupName : otherName}</H3>
       </XStack>
 
       <YStack flex={1} minH={0} $platform-web={{ overflow: 'hidden' }}>
@@ -292,6 +323,20 @@ export const ChatRoomPage = memo(() => {
           />
         )}
       </YStack>
+
+      {isGroupChat && (
+        <GroupInfoSheet
+          chatId={chatId!}
+          groupName={groupName}
+          groupImage={groupImage}
+          myRole={myRole}
+          open={showGroupInfo}
+          onOpenChange={setShowGroupInfo}
+          groupDescription={chat?.[0]?.description}
+          requireApproval={requireApproval}
+          onUpdateRequireApproval={setRequireApproval}
+        />
+      )}
     </YStack>
   )
 })

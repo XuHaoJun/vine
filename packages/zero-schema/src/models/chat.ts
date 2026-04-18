@@ -9,6 +9,13 @@ export const schema = table('chat')
   .columns({
     id: string(),
     type: string(),
+    name: string().optional(),
+    image: string().optional(),
+    description: string().optional(),
+    inviteCode: string().optional(),
+    requireApproval: number().optional(),
+    albumCount: number().optional(),
+    noteCount: number().optional(),
     lastMessageId: string().optional(),
     lastMessageAt: number().optional(),
     createdAt: number(),
@@ -131,5 +138,133 @@ export const mutate = mutations(schema, chatReadPermission, {
         joinedAt: now,
       })
     }
+  },
+  createGroupChat: async (
+    { authData, tx },
+    args: {
+      chatId: string
+      name: string
+      image?: string
+      memberIds: string[]
+      requireApproval: boolean
+      createdAt: number
+    },
+  ) => {
+    if (!authData) throw new Error('Unauthorized')
+    if (args.memberIds.length < 1) throw new Error('Group needs at least 2 members')
+    if (!args.memberIds.includes(authData.id)) {
+      args.memberIds.unshift(authData.id)
+    }
+
+    await tx.mutate.chat.insert({
+      id: args.chatId,
+      type: 'group',
+      name: args.name,
+      image: args.image,
+      requireApproval: args.requireApproval ? 1 : 0,
+      createdAt: args.createdAt,
+    })
+
+    for (let i = 0; i < args.memberIds.length; i++) {
+      const isOwner = args.memberIds[i] === authData.id
+      await tx.mutate.chatMember.insert({
+        id: `${args.chatId}_${args.memberIds[i]}`,
+        chatId: args.chatId,
+        userId: args.memberIds[i],
+        role: isOwner ? 'owner' : 'member',
+        status: isOwner ? 'accepted' : args.requireApproval ? 'pending' : 'accepted',
+        joinedAt: args.createdAt,
+      })
+    }
+  },
+  updateGroupInfo: async (
+    { authData, tx },
+    args: {
+      chatId: string
+      name?: string
+      image?: string
+      description?: string
+      requireApproval?: boolean
+    },
+  ) => {
+    if (!authData) throw new Error('Unauthorized')
+
+    const query = tx.query as Record<string, any> | undefined
+    if (!query?.chatMember) throw new Error('Not a member of this group')
+
+    const members = await query.chatMember
+      .where('chatId', args.chatId)
+      .where('userId', authData.id)
+      .run()
+
+    if (members.length === 0) throw new Error('Not a member of this group')
+
+    const member = members[0]
+    if (member.role !== 'owner' && member.role !== 'admin') {
+      throw new Error('Only owner or admin can update group info')
+    }
+
+    const updateData: {
+      id: string
+      name?: string
+      image?: string
+      description?: string
+      requireApproval?: number
+    } = { id: args.chatId }
+    if (args.name !== undefined) updateData.name = args.name
+    if (args.image !== undefined) updateData.image = args.image
+    if (args.description !== undefined) updateData.description = args.description
+    if (args.requireApproval !== undefined)
+      updateData.requireApproval = args.requireApproval ? 1 : 0
+
+    await tx.mutate.chat.update(updateData)
+  },
+  generateInviteLink: async ({ authData, tx }, args: { chatId: string }) => {
+    if (!authData) throw new Error('Unauthorized')
+
+    const query = tx.query as Record<string, any> | undefined
+    if (!query?.chatMember) throw new Error('Not a member of this group')
+
+    const members = await query.chatMember
+      .where('chatId', args.chatId)
+      .where('userId', authData.id)
+      .run()
+
+    if (members.length === 0) throw new Error('Not a member of this group')
+
+    const member = members[0]
+    if (member.role !== 'owner' && member.role !== 'admin') {
+      throw new Error('Only owner or admin can generate invite links')
+    }
+
+    const inviteCode = crypto.randomUUID().replace(/-/g, '').slice(0, 16)
+
+    await tx.mutate.chat.update({
+      id: args.chatId,
+      inviteCode,
+    })
+  },
+  revokeInviteLink: async ({ authData, tx }, args: { chatId: string }) => {
+    if (!authData) throw new Error('Unauthorized')
+
+    const query = tx.query as Record<string, any> | undefined
+    if (!query?.chatMember) throw new Error('Not a member of this group')
+
+    const members = await query.chatMember
+      .where('chatId', args.chatId)
+      .where('userId', authData.id)
+      .run()
+
+    if (members.length === 0) throw new Error('Not a member of this group')
+
+    const member = members[0]
+    if (member.role !== 'owner' && member.role !== 'admin') {
+      throw new Error('Only owner or admin can revoke invite links')
+    }
+
+    await tx.mutate.chat.update({
+      id: args.chatId,
+      inviteCode: null,
+    })
   },
 })
