@@ -12,7 +12,8 @@ export function useAudioRecorder() {
     return false
   }, [])
   const stopRecording = useCallback(
-    async (): Promise<{ blob: Blob; mimeType: string; durationMs: number } | null> => null,
+    async (): Promise<{ blob: Blob; mimeType: string; durationMs: number } | null> =>
+      null,
     [],
   )
   const cancelRecording = useCallback(() => {}, [])

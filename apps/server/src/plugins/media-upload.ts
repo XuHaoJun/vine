@@ -82,7 +82,10 @@ export async function mediaUploadPlugin(
       try {
         data = await request.file()
       } catch (err) {
-        if (err instanceof Error && err.message.toLowerCase().includes('file too large')) {
+        if (
+          err instanceof Error &&
+          err.message.toLowerCase().includes('file too large')
+        ) {
           return reply.code(413).send({ message: 'File too large' })
         }
         logger.error({ err }, '[media-upload] file() failed')
@@ -104,7 +107,10 @@ export async function mediaUploadPlugin(
       try {
         buffer = await data.toBuffer()
       } catch (err) {
-        if (err instanceof Error && err.message.toLowerCase().includes('file too large')) {
+        if (
+          err instanceof Error &&
+          err.message.toLowerCase().includes('file too large')
+        ) {
           return reply.code(413).send({ message: 'File too large' })
         }
         logger.error({ err }, '[media-upload] toBuffer failed')

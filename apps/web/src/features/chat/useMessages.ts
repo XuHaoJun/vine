@@ -48,11 +48,7 @@ export function useMessages(chatId: string) {
   }
 
   const sendMedia = useCallback(
-    (
-      type: 'image' | 'video' | 'audio',
-      url: string,
-      extra?: Record<string, unknown>,
-    ) => {
+    (type: 'image' | 'video' | 'audio', url: string, extra?: Record<string, unknown>) => {
       if (!userId) return
       zero.mutate.message.send({
         id: crypto.randomUUID(),

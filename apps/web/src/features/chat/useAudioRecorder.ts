@@ -4,7 +4,11 @@ type UseAudioRecorderReturn = {
   isRecording: boolean
   elapsedMs: number
   startRecording: () => Promise<boolean>
-  stopRecording: () => Promise<{ blob: Blob; mimeType: string; durationMs: number } | null>
+  stopRecording: () => Promise<{
+    blob: Blob
+    mimeType: string
+    durationMs: number
+  } | null>
   cancelRecording: () => void
 }
 
@@ -67,32 +71,33 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
     }
   }, [])
 
-  const stopRecording = useCallback(
-    (): Promise<{ blob: Blob; mimeType: string; durationMs: number } | null> => {
-      const recorder = recorderRef.current
-      if (!recorder || recorder.state === 'inactive') {
+  const stopRecording = useCallback((): Promise<{
+    blob: Blob
+    mimeType: string
+    durationMs: number
+  } | null> => {
+    const recorder = recorderRef.current
+    if (!recorder || recorder.state === 'inactive') {
+      setIsRecording(false)
+      stopTimer()
+      return Promise.resolve(null)
+    }
+    const mime = mimeRef.current
+    const durationMs = Date.now() - startedAtRef.current
+    return new Promise((resolve) => {
+      recorder.addEventListener('stop', () => {
+        const blob = new Blob(chunksRef.current, { type: mime })
+        recorder.stream.getTracks().forEach((t) => t.stop())
+        recorderRef.current = null
+        chunksRef.current = []
         setIsRecording(false)
+        setElapsedMs(0)
         stopTimer()
-        return Promise.resolve(null)
-      }
-      const mime = mimeRef.current
-      const durationMs = Date.now() - startedAtRef.current
-      return new Promise((resolve) => {
-        recorder.addEventListener('stop', () => {
-          const blob = new Blob(chunksRef.current, { type: mime })
-          recorder.stream.getTracks().forEach((t) => t.stop())
-          recorderRef.current = null
-          chunksRef.current = []
-          setIsRecording(false)
-          setElapsedMs(0)
-          stopTimer()
-          resolve({ blob, mimeType: mime, durationMs })
-        })
-        recorder.stop()
+        resolve({ blob, mimeType: mime, durationMs })
       })
-    },
-    [stopTimer],
-  )
+      recorder.stop()
+    })
+  }, [stopTimer])
 
   const cancelRecording = useCallback(() => {
     const recorder = recorderRef.current

@@ -136,13 +136,8 @@ export const MessageInput = memo(
     const insets = useSafeAreaInsets()
     const fileInputRef = useRef<HTMLInputElement | null>(null)
     const { upload, status: uploadStatus } = useMediaUpload()
-    const {
-      isRecording,
-      elapsedMs,
-      startRecording,
-      stopRecording,
-      cancelRecording,
-    } = useAudioRecorder()
+    const { isRecording, elapsedMs, startRecording, stopRecording, cancelRecording } =
+      useAudioRecorder()
     const cancelOnReleaseRef = useRef(false)
 
     const handleSend = () => {
@@ -231,13 +226,7 @@ export const MessageInput = memo(
           </XStack>
         )}
 
-        <XStack
-          items="center"
-          gap="$2"
-          px="$3"
-          pt="$2"
-          pb={8 + insets.bottom}
-        >
+        <XStack items="center" gap="$2" px="$3" pt="$2" pb={8 + insets.bottom}>
           {/* + button or Rich Menu toggle */}
           {hasRichMenu && onSwitchToRichMenu ? (
             <Pressable onPress={onSwitchToRichMenu}>
