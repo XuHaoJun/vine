@@ -92,6 +92,23 @@ export default {
           ios: {
             deploymentTarget: '17.0',
           },
+          android: {
+            compileSdkVersion: 35,
+            targetSdkVersion: 35,
+          },
+        },
+      ],
+      [
+        'expo-image-picker',
+        {
+          photosPermission: '允許 Vine 從相簿選取照片與影片來傳送訊息。',
+          cameraPermission: '允許 Vine 使用相機（目前未啟用）。',
+        },
+      ],
+      [
+        'expo-audio',
+        {
+          microphonePermission: '允許 Vine 錄製語音訊息。',
         },
       ],
       [
