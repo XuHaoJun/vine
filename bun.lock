@@ -218,6 +218,16 @@
         "tamagui": "2.0.0-rc.41",
       },
     },
+    "packages/line-schema-primitives": {
+      "name": "@vine/line-schema-primitives",
+      "version": "0.0.1",
+      "dependencies": {
+        "valibot": "^1.1.0",
+      },
+      "devDependencies": {
+        "vitest": "^4.1.4",
+      },
+    },
     "packages/proto": {
       "name": "@vine/proto",
       "version": "0.0.1",
@@ -1927,6 +1937,8 @@
     "@vine/liff-fixtures": ["@vine/liff-fixtures@workspace:packages/liff-fixtures"],
 
     "@vine/line-flex": ["@vine/line-flex@workspace:packages/line-flex"],
+
+    "@vine/line-schema-primitives": ["@vine/line-schema-primitives@workspace:packages/line-schema-primitives"],
 
     "@vine/proto": ["@vine/proto@workspace:packages/proto"],
 
