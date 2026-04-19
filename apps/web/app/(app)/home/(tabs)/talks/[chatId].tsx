@@ -37,6 +37,7 @@ export const ChatRoomPage = memo(() => {
     members,
     otherMember,
     sendMessage,
+    sendMedia,
     markRead,
     myMembership,
   } = useMessages(chatId!)
@@ -315,6 +316,7 @@ export const ChatRoomPage = memo(() => {
         ) : (
           <MessageInput
             onSend={sendMessage}
+            onSendMedia={sendMedia}
             hasRichMenu={hasRichMenu}
             onSwitchToRichMenu={() => {
               setInputMode('richmenu')
