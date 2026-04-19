@@ -4,6 +4,7 @@ import { LfBubble, LfCarousel } from '@vine/line-flex'
 import type { LFexBubble, LFexCarousel } from '@vine/line-flex'
 import { ImageBubble } from './ImageBubble'
 import { TextBubble } from './TextBubble'
+import { VideoBubble } from './VideoBubble'
 
 function parseMetadata(metadata?: string): Record<string, unknown> {
   if (!metadata) return {}
@@ -37,6 +38,14 @@ export const MessageBubbleFactory = memo(
         typeof meta.originalContentUrl === 'string' ? meta.originalContentUrl : ''
       if (!url) return <UnsupportedBubble type={type} />
       return <ImageBubble url={url} isMine={isMine} />
+    }
+
+    if (type === 'video') {
+      const meta = parseMetadata(metadata)
+      const url =
+        typeof meta.originalContentUrl === 'string' ? meta.originalContentUrl : ''
+      if (!url) return <UnsupportedBubble type={type} />
+      return <VideoBubble url={url} isMine={isMine} />
     }
 
     return <UnsupportedBubble type={type} />
