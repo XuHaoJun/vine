@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { SERVER_URL } from '~/constants/urls'
 
 type UploadStatus = 'idle' | 'uploading' | 'done' | 'error'
 
@@ -19,8 +20,6 @@ type UseMediaUploadReturn = {
   abort: () => void
   reset: () => void
 }
-
-const API_URL = process.env['VITE_API_URL'] ?? ''
 
 function parseServerError(responseText: string, status: number): string {
   try {
@@ -60,7 +59,7 @@ export function useMediaUpload(): UseMediaUploadReturn {
     controllerRef.current = controller
 
     try {
-      const res = await fetch(`${API_URL}/api/v1/media/upload`, {
+      const res = await fetch(`${SERVER_URL}/api/v1/media/upload`, {
         method: 'POST',
         body: form,
         credentials: 'include',
