@@ -10,13 +10,19 @@ Add image, video, and audio message support to Vine's user-to-user and user-to-O
 
 ## File Size Limits (v1)
 
-| Type | Limit | Why this number |
-|------|-------|-----------------|
-| Image | 10 MB | Comfortably above phone-camera JPEGs without forcing compression in v1 |
-| Video | 25 MB | Roughly 30s of 1080p H.264; keeps the upload synchronous and the server in-memory buffer bounded |
-| Audio | 10 MB | ~30 minutes of opus/aac at chat-quality bitrates |
+LINE Messaging API spec
+([reference](https://developers.line.biz/en/reference/messaging-api/#image-message))
+is the source of truth for the user-facing contract. We match it for `image`
+and clamp `video`/`audio` to a smaller v1 cap because the upload pipeline is
+in-memory.
 
-These limits are enforced server-side via `@fastify/multipart`'s `limits.fileSize`. Larger files (200 MB+) would require streaming uploads (a `putStream` API on `DriveService`) and direct-to-storage signed URLs — see "Future Work."
+| Type | LINE spec | v1 enforced cap | Why the v1 delta |
+|------|-----------|-----------------|------------------|
+| Image | JPEG/PNG, 10 MB | **10 MB** | LINE-aligned; no delta. |
+| Video | mp4, 200 MB | **25 MB** | We `data.toBuffer()` the upload before handing it to `DriveService.put`. 200 MB would need a `putStream` API + multipart streaming. See "Future Work." |
+| Audio | mp3/m4a, 200 MB | **25 MB** | Same in-memory constraint as video. ~30 min of mid-bitrate Opus/AAC fits comfortably. |
+
+Per-type caps are enforced **after** MIME validation, against `data.toBuffer().byteLength`. `@fastify/multipart`'s `limits.fileSize` is set to the largest per-type cap (25 MB) so requests above that are rejected pre-buffer with a 413; smaller per-type caps (e.g. images > 10 MB) are then enforced with their own 413 carrying a typed message. This avoids loading multi-MB videos only to reject as oversized images.
 
 ## Architecture
 
@@ -64,8 +70,13 @@ These limits are enforced server-side via `@fastify/multipart`'s `limits.fileSiz
 **`POST /api/v1/media/upload`**
 - Auth: requires a valid better-auth session, resolved via `getAuthDataFromRequest(auth, webReq)` (same pattern `zeroPlugin` uses). 401 if no auth data.
 - Content-Type: `multipart/form-data`, single file under field name `file`
-- Allowed MIME: `image/jpeg|png|gif|webp`, `video/mp4|quicktime|webm`, `audio/mp4|m4a|x-m4a|mpeg|ogg|webm`
-- Size enforced by `@fastify/multipart` `limits.fileSize: MAX_FILE_SIZE`
+- Allowed MIME (LINE-aligned where practical):
+  - **Image:** `image/jpeg`, `image/png` (LINE-strict — no GIF, no WebP).
+  - **Video:** `video/mp4` (LINE-strict — no QuickTime, no WebM).
+  - **Audio LINE-strict:** `audio/mpeg` (mp3), `audio/mp4` (m4a), `audio/x-m4a`.
+  - **Audio browser-recorder pragma:** `audio/webm`, `audio/ogg`. Web `MediaRecorder` outputs these on Chrome / Firefox; rather than running a server-side transcoder for v1 we accept them as-is. Vine is a LINE-clone, not a Messaging API integration, so we control the receiver — files persist with their original container extension.
+  - Codec parameters (`audio/webm;codecs=opus`, `video/mp4;codecs="avc1.42E01E"`) are stripped before lookup via `stripMimeParams`.
+- Size enforced in two stages — `@fastify/multipart` `limits.fileSize` rejects payloads above the largest per-type cap; the route then enforces per-type caps after `toBuffer()` (see "File Size Limits" above) and returns a typed 413 message (e.g. `"image exceeds the 10 MB limit"`).
 - Stores via `drive.put(key, buffer, mimeType)` with key `media/<userId>/<random>.<ext>`
 - Returns `{ url: string }` — the URL produced by `drive.getUrl(key)`
 
@@ -140,7 +151,9 @@ OA inbound media messages already work via the existing `POST /api/oa/v2/bot/mes
 - Video thumbnail extraction (web `<video>` + canvas, or server-side ffmpeg).
 - Audio waveform visualization.
 - Chat-list preview text (`[Photo]` / `[Video]` / `[Audio] 0:32`) — small, but touches the chat list rendering and isn't on the critical path.
-- Streaming uploads + signed URLs for files >25 MB.
+- Streaming uploads + signed URLs for files > 25 MB so we can match LINE's 200 MB caps for video and audio. Requires a `putStream(key, readable, mime)` API on `DriveService` and re-wiring `mediaUploadPlugin` to forward `data.file` directly without buffering.
+- Server-side transcode of `audio/webm` → `audio/m4a` so audio messages composed from Chrome/Firefox conform to LINE's strict mp3/m4a-only audio spec on the wire (currently kept as-is because vine is a clone, not an integration).
+- `previewImageUrl` thumbnails for `image` and `video` to fully match the LINE message-object schema (currently we only emit `originalContentUrl`).
 - File cleanup job (orphan deletion + delete-on-message-delete).
 - Per-bubble upload-progress placeholder and per-bubble retry button for failed sends.
 

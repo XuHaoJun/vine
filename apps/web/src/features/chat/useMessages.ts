@@ -61,7 +61,7 @@ export function useMessages(chatId: string) {
         senderType: 'user',
         type,
         text: null,
-        metadata: JSON.stringify({ originalContentUrl: url, ...(extra ?? {}) }),
+        metadata: JSON.stringify({ ...(extra ?? {}), originalContentUrl: url }),
         createdAt: Date.now(),
       })
     },

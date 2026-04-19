@@ -238,7 +238,9 @@ git commit -m "feat(native): real URI-based media upload hook"
 
 ## Phase 1: Image messages on native
 
-**Goal:** Picker → upload → send → cross-platform `ImageBubble` (already works on native, no changes). Native users can both **send** and **receive** image messages.
+**Goal:** Picker → upload → send → image lightbox that actually works full-screen on native. Native users can both **send** and **receive** image messages, and tapping a received image opens a real full-screen viewer (not a same-bubble overlay).
+
+> **Note:** The cross-platform `ImageBubble.tsx` from web v1 renders the thumbnail correctly on native, but its tap-to-fullscreen lightbox uses `$platform-web={{ position: 'fixed' as any }}` and falls back to `position: 'absolute'` on native — which positions the overlay relative to the bubble container, not the screen. Task 1.3 below replaces that fallback with a native-correct full-screen modal.
 
 ### Task 1.1: Native image picker hook
 
@@ -387,7 +389,80 @@ git add apps/web/src/features/chat/ui/MessageInput.tsx
 git commit -m "feat(native): send images and videos from the chat composer"
 ```
 
-After Phase 1: image messages are fully cross-platform. Video upload works from native, but native viewers still see the placeholder until Phase 2.
+### Task 1.3: Native-correct image lightbox
+
+**Files:**
+- Create: `apps/web/src/interface/message/ImageBubble.native.tsx`
+
+The web `ImageBubble.tsx` opens its lightbox via an absolutely-positioned overlay with a web-only `position: 'fixed'` escape hatch. On native that escape hatch doesn't apply and the overlay ends up positioned relative to the bubble's container — not full-screen. Ship a `.native.tsx` sibling that uses RN's `Modal` (already in `react-native`) so the lightbox actually covers the screen.
+
+- [ ] **Step 1: Add the native sibling**
+
+```tsx
+// apps/web/src/interface/message/ImageBubble.native.tsx
+import { memo, useState } from 'react'
+import { Modal, Pressable } from 'react-native'
+import { YStack } from 'tamagui'
+
+import { Image } from '~/interface/image/Image'
+
+type Props = { url: string; isMine: boolean }
+
+export const ImageBubble = memo(({ url }: Props) => {
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <Pressable onPress={() => setOpen(true)}>
+        <YStack maxW={280} style={{ borderRadius: 18, overflow: 'hidden' }}>
+          <Image source={{ uri: url }} style={{ width: 280, height: 200 }} resizeMode="cover" />
+        </YStack>
+      </Pressable>
+
+      <Modal
+        visible={open}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setOpen(false)}
+        statusBarTranslucent
+      >
+        <Pressable
+          onPress={() => setOpen(false)}
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.92)',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Image
+            source={{ uri: url }}
+            style={{ width: '95%', height: '95%' }}
+            resizeMode="contain"
+          />
+        </Pressable>
+      </Modal>
+    </>
+  )
+})
+```
+
+`Modal` handles Android back-button (`onRequestClose`), portal-on-screen rendering, and status-bar overlap (`statusBarTranslucent`). No new dependency needed.
+
+- [ ] **Step 2: Native smoke test**
+
+1. Send / receive an image, tap the bubble → modal covers the entire screen.
+2. Tap the dimmed background → closes.
+3. On Android, hardware back also closes.
+4. Status bar overlay looks right (no white strip at the top).
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add apps/web/src/interface/message/ImageBubble.native.tsx
+git commit -m "feat(native): full-screen ImageBubble lightbox via Modal"
+```
+
+After Phase 1: image messages are fully cross-platform — picker, upload, send, receive, **and** lightbox. Video upload works from native, but native viewers still see the placeholder until Phase 2.
 
 ---
 
@@ -824,14 +899,14 @@ git commit -m "docs(spec): native parity is now shipped, remove from future work
 - Server-side transcode of `audio/webm` → `audio/m4a` on upload, so web (Chrome/Firefox) audio messages play on iOS/Android.
 - Background audio playback (lock-screen controls, notification, etc.).
 - Video thumbnail extraction client-side on native (`expo-video-thumbnails`).
-- Native lightbox with pinch-zoom for `ImageBubble` (current implementation is a tap-to-fullscreen overlay, not a pinch-zoomable viewer).
+- Pinch-zoom + swipe-to-dismiss in the native `ImageBubble` lightbox (Phase 1 ships a basic full-screen `Modal`; gesture-driven zoom/dismiss would need `react-native-gesture-handler` + `react-native-reanimated` work).
 
 ## Effort estimate
 
 | Phase | Estimate |
 |---|---|
 | Phase 0 (config + upload primitive) | 0.5 day |
-| Phase 1 (image) | 0.5 day |
+| Phase 1 (image picker + native lightbox) | 0.75 day |
 | Phase 2 (video) | 0.5 day |
 | Phase 3 (audio recording + playback + iOS session) | 1.5 days |
 | Phase 4 (polish + matrix testing) | 0.5–1 day |

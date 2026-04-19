@@ -169,12 +169,12 @@ export const MessageInput = memo(
         e.target.value = ''
         if (!file || !onSendMedia) return
         const isVideo = file.type.startsWith('video/')
-        const url = await upload(file)
-        if (!url) {
-          showToast('上傳失敗', { type: 'error' })
+        const result = await upload(file)
+        if ('error' in result) {
+          showToast(result.error, { type: 'error' })
           return
         }
-        onSendMedia(isVideo ? 'video' : 'image', url)
+        onSendMedia(isVideo ? 'video' : 'image', result.url)
       },
       [onSendMedia, upload],
     )
@@ -204,12 +204,12 @@ export const MessageInput = memo(
       if (result.durationMs < 500) return
       const ext = result.mimeType.includes('mp4') ? 'm4a' : 'webm'
       const file = new File([result.blob], `audio.${ext}`, { type: result.mimeType })
-      const url = await upload(file)
-      if (!url) {
-        showToast('音訊上傳失敗', { type: 'error' })
+      const uploadResult = await upload(file)
+      if ('error' in uploadResult) {
+        showToast(uploadResult.error, { type: 'error' })
         return
       }
-      onSendMedia('audio', url, { duration: result.durationMs })
+      onSendMedia('audio', uploadResult.url, { duration: result.durationMs })
     }, [onSendMedia, isRecording, stopRecording, cancelRecording, upload])
 
     const handleMicCancel = useCallback(() => {
@@ -350,6 +350,7 @@ export const MessageInput = memo(
               onPressIn={handleMicPressIn}
               onPressOut={handleMicPressOut}
               onTouchCancel={handleMicCancel}
+              onHoverOut={handleMicCancel}
               disabled={!onSendMedia}
             >
               <XStack

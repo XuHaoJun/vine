@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import Fastify from 'fastify'
 import FormData from 'form-data'
-import { mediaUploadPlugin } from './media-upload'
+import { mediaUploadPlugin, stripMimeParams } from './media-upload'
 
 vi.mock('@take-out/better-auth-utils/server', () => ({
   getAuthDataFromRequest: vi.fn(),
@@ -109,7 +109,7 @@ describe('media-upload plugin', () => {
     expect(mime).toBe('image/jpeg')
   })
 
-  it('rejects files over the size limit with 413', async () => {
+  it('rejects files over the multipart cap with 413', async () => {
     mockedAuth.mockResolvedValue({ id: 'u1' } as any)
     const { app, drive, register } = createApp()
     await register()
@@ -123,5 +123,88 @@ describe('media-upload plugin', () => {
     })
     expect(res.statusCode).toBe(413)
     expect(drive.put).not.toHaveBeenCalled()
+  })
+
+  it('rejects images over the per-type 10 MB cap with 413', async () => {
+    mockedAuth.mockResolvedValue({ id: 'u1' } as any)
+    const { app, drive, register } = createApp()
+    await register()
+    // 11 MB image — under the 25 MB multipart cap, over the 10 MB image cap.
+    const big = Buffer.alloc(11 * 1024 * 1024, 0)
+    const { payload, headers } = multipartPayload('big.jpg', 'image/jpeg', big)
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/media/upload',
+      payload,
+      headers,
+    })
+    expect(res.statusCode).toBe(413)
+    expect(JSON.parse(res.body).message).toMatch(/image.*10 MB/)
+    expect(drive.put).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    ['image/gif', 'pic.gif'],
+    ['image/webp', 'pic.webp'],
+    ['video/quicktime', 'clip.mov'],
+    ['video/webm', 'clip.webm'],
+  ] as const)('rejects %s as outside the LINE format set', async (mime, name) => {
+    mockedAuth.mockResolvedValue({ id: 'u1' } as any)
+    const { app, drive, register } = createApp()
+    await register()
+    const { payload, headers } = multipartPayload(name, mime, Buffer.from('x'))
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/media/upload',
+      payload,
+      headers,
+    })
+    expect(res.statusCode).toBe(415)
+    expect(drive.put).not.toHaveBeenCalled()
+  })
+
+  it('accepts audio/webm;codecs=opus from a browser MediaRecorder', async () => {
+    mockedAuth.mockResolvedValue({ id: 'u1' } as any)
+    const { app, drive, register } = createApp({
+      driveUrl: 'http://localhost/uploads/audio.webm',
+    })
+    await register()
+    const { payload, headers } = multipartPayload(
+      'audio.webm',
+      'audio/webm;codecs=opus',
+      Buffer.from('OPUS'),
+    )
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/media/upload',
+      payload,
+      headers,
+    })
+    expect(res.statusCode).toBe(200)
+    expect(drive.put).toHaveBeenCalledTimes(1)
+    const [key, _buf, mime] = drive.put.mock.calls[0]!
+    // Stored under .webm and tagged with the stripped MIME (no codec param).
+    expect(key).toMatch(/^media\/u1\/[0-9a-f-]+\.webm$/)
+    expect(mime).toBe('audio/webm')
+  })
+})
+
+describe('stripMimeParams', () => {
+  it('returns the base type unchanged when no parameters are present', () => {
+    expect(stripMimeParams('image/jpeg')).toBe('image/jpeg')
+    expect(stripMimeParams('audio/mp4')).toBe('audio/mp4')
+  })
+
+  it('strips codec parameters emitted by MediaRecorder', () => {
+    expect(stripMimeParams('audio/webm;codecs=opus')).toBe('audio/webm')
+    expect(stripMimeParams('video/mp4; codecs="avc1.42E01E"')).toBe('video/mp4')
+  })
+
+  it('trims whitespace around the base type', () => {
+    expect(stripMimeParams('  image/png ;charset=binary')).toBe('image/png')
+  })
+
+  it('falls back to the input when the base segment is empty', () => {
+    expect(stripMimeParams(';codecs=opus')).toBe(';codecs=opus')
   })
 })

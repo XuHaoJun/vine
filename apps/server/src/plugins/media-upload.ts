@@ -12,43 +12,51 @@ type MediaUploadPluginDeps = {
   drive: DriveService
 }
 
-const ALLOWED_MIME_TYPES = new Set([
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'image/webp',
-  'video/mp4',
-  'video/quicktime',
-  'video/webm',
-  'audio/mp4',
-  'audio/m4a',
-  'audio/x-m4a',
-  'audio/mpeg',
-  'audio/ogg',
-  'audio/webm',
-])
+type MediaKind = 'image' | 'video' | 'audio'
 
-const MAX_FILE_SIZE = 25 * 1024 * 1024
-
-const EXT_BY_MIME: Record<string, string> = {
-  'image/jpeg': 'jpg',
-  'image/png': 'png',
-  'image/gif': 'gif',
-  'image/webp': 'webp',
-  'video/mp4': 'mp4',
-  'video/quicktime': 'mov',
-  'video/webm': 'webm',
-  'audio/mp4': 'm4a',
-  'audio/m4a': 'm4a',
-  'audio/x-m4a': 'm4a',
-  'audio/mpeg': 'mp3',
-  'audio/ogg': 'ogg',
-  'audio/webm': 'webm',
+type MediaRule = {
+  kind: MediaKind
+  ext: string
+  /** Per-type max size in bytes. Aligned with LINE Messaging API spec where
+   *  practical (image: 10 MB), and clamped to a v1-safe in-memory cap for
+   *  video/audio (LINE allows 200 MB; we cap at 25 MB until DriveService
+   *  grows a putStream API — see spec "Future Work"). */
+  maxSize: number
 }
 
-// Strip codec/charset parameters off a MIME type so values like
-// `audio/webm;codecs=opus` (Chrome MediaRecorder) match our allow-list.
-function stripMimeParams(mime: string): string {
+const MB = 1024 * 1024
+
+// MIME allow-list. Matches LINE Messaging API
+// (https://developers.line.biz/en/reference/messaging-api/) for image and
+// video. Audio is LINE-strict (mp3, m4a) PLUS a small set of browser
+// MediaRecorder outputs (webm/ogg/opus) since vine is a LINE-clone, not an
+// integration — we control both ends and want web mic recording to work
+// without server-side transcoding. The audio extension is kept stable so
+// the file lands on disk with a recognizable name regardless of source.
+const MEDIA_RULES: Record<string, MediaRule> = {
+  // image — LINE: JPEG, PNG, 10 MB
+  'image/jpeg': { kind: 'image', ext: 'jpg', maxSize: 10 * MB },
+  'image/png': { kind: 'image', ext: 'png', maxSize: 10 * MB },
+  // video — LINE: mp4, 200 MB. We cap at 25 MB for v1 (in-memory upload).
+  'video/mp4': { kind: 'video', ext: 'mp4', maxSize: 25 * MB },
+  // audio LINE-strict — mp3, m4a, 200 MB. We cap at 25 MB for v1.
+  'audio/mpeg': { kind: 'audio', ext: 'mp3', maxSize: 25 * MB },
+  'audio/mp4': { kind: 'audio', ext: 'm4a', maxSize: 25 * MB },
+  'audio/x-m4a': { kind: 'audio', ext: 'm4a', maxSize: 25 * MB },
+  // audio browser-recorder pragma — Chrome/Firefox MediaRecorder output.
+  'audio/webm': { kind: 'audio', ext: 'webm', maxSize: 25 * MB },
+  'audio/ogg': { kind: 'audio', ext: 'ogg', maxSize: 25 * MB },
+}
+
+const MAX_FILE_SIZE = Object.values(MEDIA_RULES).reduce(
+  (max, r) => Math.max(max, r.maxSize),
+  0,
+)
+
+/** Strip codec/charset parameters off a MIME type so values like
+ *  `audio/webm;codecs=opus` (Chrome MediaRecorder) match our allow-list.
+ *  Exported for unit testing. */
+export function stripMimeParams(mime: string): string {
   const base = mime.split(';')[0]?.trim()
   return base && base.length > 0 ? base : mime
 }
@@ -86,8 +94,9 @@ export async function mediaUploadPlugin(
       }
 
       const baseMime = stripMimeParams(data.mimetype)
+      const rule = MEDIA_RULES[baseMime]
 
-      if (!ALLOWED_MIME_TYPES.has(baseMime)) {
+      if (!rule) {
         return reply.code(415).send({ message: 'Unsupported file type' })
       }
 
@@ -102,8 +111,17 @@ export async function mediaUploadPlugin(
         return reply.code(500).send({ message: 'Upload failed' })
       }
 
-      const ext = EXT_BY_MIME[baseMime] ?? 'bin'
-      const key = `media/${authData.id}/${randomUUID()}.${ext}`
+      // Per-type size cap. multipart's global cap rejects payloads above the
+      // largest type's limit; this enforces the smaller per-type limits
+      // (e.g. images > 10 MB, even though videos up to 25 MB are allowed).
+      if (buffer.byteLength > rule.maxSize) {
+        const limitMb = Math.round(rule.maxSize / MB)
+        return reply.code(413).send({
+          message: `${rule.kind} exceeds the ${limitMb} MB limit`,
+        })
+      }
+
+      const key = `media/${authData.id}/${randomUUID()}.${rule.ext}`
 
       try {
         await deps.drive.put(key, buffer, baseMime)

@@ -2,14 +2,28 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 type UploadStatus = 'idle' | 'uploading' | 'done' | 'error'
 
+export type UploadResult = { url: string } | { error: string }
+
 type UseMediaUploadReturn = {
   url: string | null
   progress: number
   status: UploadStatus
   error: string | null
-  upload: (file: File | Blob, filename?: string) => Promise<string | null>
+  upload: (file: File | Blob, filename?: string) => Promise<UploadResult>
   abort: () => void
   reset: () => void
+}
+
+function parseServerError(responseText: string, status: number): string {
+  try {
+    const data = JSON.parse(responseText) as { message?: string }
+    if (typeof data.message === 'string' && data.message.length > 0) {
+      return `${data.message} (${status})`
+    }
+  } catch {
+    // fall through
+  }
+  return `Upload failed (${status})`
 }
 
 export function useMediaUpload(): UseMediaUploadReturn {
@@ -26,7 +40,7 @@ export function useMediaUpload(): UseMediaUploadReturn {
   }, [])
 
   const upload = useCallback(
-    async (file: File | Blob, filename?: string): Promise<string | null> => {
+    async (file: File | Blob, filename?: string): Promise<UploadResult> => {
       setStatus('uploading')
       setProgress(0)
       setError(null)
@@ -52,7 +66,7 @@ export function useMediaUpload(): UseMediaUploadReturn {
                 reject(new Error('Malformed upload response'))
               }
             } else {
-              reject(new Error(`Upload failed (${xhr.status})`))
+              reject(new Error(parseServerError(xhr.responseText, xhr.status)))
             }
           })
           xhr.addEventListener('error', () => reject(new Error('Network error')))
@@ -64,13 +78,13 @@ export function useMediaUpload(): UseMediaUploadReturn {
         setUrl(result)
         setStatus('done')
         xhrRef.current = null
-        return result
+        return { url: result }
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Upload failed'
         setError(message)
         setStatus('error')
         xhrRef.current = null
-        return null
+        return { error: message }
       }
     },
     [],
