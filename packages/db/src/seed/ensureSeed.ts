@@ -19,7 +19,7 @@ import { FLEX_SIMULATOR_OA_UNIQUE_ID } from '../constants'
 const TEST_OA_UNIQUE_ID = 'testbot'
 const TEST_OA_NAME = 'Test Bot'
 const TEST_RICH_MENU_IMAGE_URL =
-  'https://i.im.ge/en5Toh/Gemini_Generated_Image_puffhnpuffhnpuff-edited.jpg'
+  'https://img2.pixhost.to/images/7292/716433745_gemini_generated_image_puffhnpuffhnpuff-edited.jpg'
 
 const TEST_OA_RICH_MENU = {
   richMenuId: 'richmenu-testbot-default',
