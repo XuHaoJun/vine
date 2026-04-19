@@ -1,7 +1,6 @@
 type DispatchPostbackInput = {
   oaId: string
   chatId: string
-  userId: string
   data: string
   params?: { date?: string; time?: string; datetime?: string }
 }
@@ -10,6 +9,13 @@ type DispatchPostbackResult = { success: boolean; reason?: string }
 
 const ENDPOINT = '/api/oa/internal/dispatch-postback'
 
+/**
+ * Dispatch a postback event to the OA's webhook URL.
+ *
+ * The acting user is derived server-side from the session — do not send
+ * `userId` from the client. The server also enforces that the session user
+ * is a member of `chatId` before delivering the event.
+ */
 export async function dispatchPostback(
   input: DispatchPostbackInput,
 ): Promise<DispatchPostbackResult> {

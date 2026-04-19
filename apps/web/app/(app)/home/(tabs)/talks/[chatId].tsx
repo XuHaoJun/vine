@@ -213,7 +213,6 @@ export const ChatRoomPage = memo(() => {
           dispatchPostback({
             oaId: otherMemberOaId,
             chatId: chatId!,
-            userId,
             data: action.data,
           }).then((res) => {
             if (!res.success) {
@@ -229,7 +228,6 @@ export const ChatRoomPage = memo(() => {
             dispatchPostback({
               oaId: otherMemberOaId,
               chatId: chatId!,
-              userId,
               data: action.data,
               params,
             }).then((res) => {
@@ -253,7 +251,7 @@ export const ChatRoomPage = memo(() => {
         }
       }
     },
-    [messages, sendMessage, otherMemberOaId, chatId, userId],
+    [messages, sendMessage, otherMemberOaId, chatId],
   )
 
   if (!chatId) {
