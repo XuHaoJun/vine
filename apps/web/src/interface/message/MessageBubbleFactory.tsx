@@ -2,8 +2,10 @@ import { memo, useMemo } from 'react'
 import { SizableText, YStack } from 'tamagui'
 import { LfBubble, LfCarousel } from '@vine/line-flex'
 import type { LFexBubble, LFexCarousel } from '@vine/line-flex'
+import type { ImagemapAction, ImagemapVideo } from '@vine/imagemap-schema'
 import { AudioBubble } from './AudioBubble'
 import { ImageBubble } from './ImageBubble'
+import { ImagemapBubble } from './ImagemapBubble'
 import { TextBubble } from './TextBubble'
 import { VideoBubble } from './VideoBubble'
 
@@ -21,10 +23,21 @@ type MessageBubbleFactoryProps = {
   text?: string
   metadata?: string
   isMine: boolean
+  chatId: string
+  otherMemberOaId: string | null
+  sendMessage: (text: string) => void
 }
 
 export const MessageBubbleFactory = memo(
-  ({ type, text, metadata, isMine }: MessageBubbleFactoryProps) => {
+  ({
+    type,
+    text,
+    metadata,
+    isMine,
+    chatId,
+    otherMemberOaId,
+    sendMessage,
+  }: MessageBubbleFactoryProps) => {
     if (type === 'text') {
       return <TextBubble text={text ?? ''} isMine={isMine} />
     }
@@ -56,6 +69,28 @@ export const MessageBubbleFactory = memo(
       const duration = typeof meta.duration === 'number' ? meta.duration : undefined
       if (!url) return <UnsupportedBubble type={type} />
       return <AudioBubble url={url} duration={duration} isMine={isMine} />
+    }
+
+    if (type === 'imagemap') {
+      const meta = parseMetadata(metadata)
+      const baseUrl = typeof meta.baseUrl === 'string' ? meta.baseUrl : ''
+      const baseSize = meta.baseSize as { width: number; height: number } | undefined
+      const actions = Array.isArray(meta.actions) ? (meta.actions as ImagemapAction[]) : null
+      const video = meta.video as ImagemapVideo | undefined
+      if (!baseUrl || !baseSize || !actions) return <UnsupportedBubble type={type} />
+      return (
+        <ImagemapBubble
+          baseUrl={baseUrl}
+          baseSize={baseSize}
+          altText={(meta.altText as string) ?? ''}
+          actions={actions}
+          video={video}
+          chatId={chatId}
+          otherMemberOaId={otherMemberOaId}
+          sendMessage={sendMessage}
+          isMine={isMine}
+        />
+      )
     }
 
     return <UnsupportedBubble type={type} />

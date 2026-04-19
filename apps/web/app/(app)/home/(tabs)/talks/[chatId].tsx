@@ -331,6 +331,9 @@ export const ChatRoomPage = memo(() => {
                           text={msg.text ?? undefined}
                           metadata={msg.metadata ?? undefined}
                           isMine={isMine}
+                          chatId={chatId ?? ''}
+                          otherMemberOaId={otherMemberOaId ?? null}
+                          sendMessage={sendMessage}
                         />
                       </XStack>
                     </YStack>
