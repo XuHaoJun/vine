@@ -228,4 +228,100 @@ describe('validateMessage', () => {
       }
     })
   })
+
+  describe('quickReply', () => {
+    const messageItem = {
+      type: 'action' as const,
+      action: { type: 'message' as const, label: 'Yes', text: 'Yes' },
+    }
+
+    it('accepts text message with quickReply and stores it in metadata', () => {
+      const result = validateMessage({
+        type: 'text',
+        text: 'pick one',
+        quickReply: { items: [messageItem] },
+      })
+      expect(result.valid).toBe(true)
+      if (result.valid) {
+        expect(result.text).toBe('pick one')
+        expect(result.metadata).not.toBeNull()
+        const parsed = JSON.parse(result.metadata!)
+        expect(parsed.quickReply.items[0].action.text).toBe('Yes')
+      }
+    })
+
+    it('keeps text metadata null when quickReply is absent', () => {
+      const result = validateMessage({ type: 'text', text: 'plain' })
+      expect(result.valid).toBe(true)
+      if (result.valid) expect(result.metadata).toBeNull()
+    })
+
+    it('merges quickReply into flex metadata alongside contents', () => {
+      const result = validateMessage({
+        type: 'flex',
+        altText: 'alt',
+        contents: {
+          type: 'bubble',
+          body: { type: 'box', layout: 'vertical', contents: [] },
+        },
+        quickReply: { items: [messageItem] },
+      })
+      expect(result.valid).toBe(true)
+      if (result.valid) {
+        const parsed = JSON.parse(result.metadata!)
+        expect(parsed.type).toBe('flex')
+        expect(parsed.contents.type).toBe('bubble')
+        expect(parsed.quickReply.items).toHaveLength(1)
+      }
+    })
+
+    it('merges quickReply into image metadata alongside originalContentUrl', () => {
+      const result = validateMessage({
+        type: 'image',
+        originalContentUrl: 'https://example.com/i.png',
+        previewImageUrl: 'https://example.com/p.png',
+        quickReply: { items: [messageItem] },
+      })
+      expect(result.valid).toBe(true)
+      if (result.valid) {
+        const parsed = JSON.parse(result.metadata!)
+        expect(parsed.originalContentUrl).toBe('https://example.com/i.png')
+        expect(parsed.quickReply.items).toHaveLength(1)
+      }
+    })
+
+    it('rejects text with invalid quickReply (camera action)', () => {
+      const result = validateMessage({
+        type: 'text',
+        text: 'x',
+        quickReply: {
+          items: [{ type: 'action', action: { type: 'camera', label: 'C' } }],
+        },
+      })
+      expect(result.valid).toBe(false)
+      if (!result.valid) expect(result.error).toContain('quickReply')
+    })
+
+    it('rejects image with invalid quickReply (camera action)', () => {
+      const result = validateMessage({
+        type: 'image',
+        originalContentUrl: 'https://example.com/i.png',
+        previewImageUrl: 'https://example.com/p.png',
+        quickReply: {
+          items: [{ type: 'action', action: { type: 'camera', label: 'C' } }],
+        },
+      })
+      expect(result.valid).toBe(false)
+      if (!result.valid) expect(result.error).toContain('quickReply')
+    })
+
+    it('rejects text with quickReply exceeding 13 items', () => {
+      const items = Array.from({ length: 14 }, (_, i) => ({
+        type: 'action' as const,
+        action: { type: 'message' as const, label: `B${i}`, text: `b${i}` },
+      }))
+      const result = validateMessage({ type: 'text', text: 'x', quickReply: { items } })
+      expect(result.valid).toBe(false)
+    })
+  })
 })

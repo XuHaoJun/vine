@@ -332,6 +332,33 @@ export function createOAService(deps: OADeps) {
     }
   }
 
+  function buildPostbackEvent(input: {
+    oaId: string
+    userId: string
+    replyToken: string
+    data: string
+    params?: { date?: string; time?: string; datetime?: string }
+  }) {
+    return {
+      destination: input.oaId,
+      events: [
+        {
+          type: 'postback' as const,
+          mode: 'active' as const,
+          timestamp: Date.now(),
+          source: { type: 'user' as const, userId: input.userId },
+          webhookEventId: randomUUID(),
+          deliveryContext: { isRedelivery: false },
+          replyToken: input.replyToken,
+          postback: {
+            data: input.data,
+            ...(input.params ? { params: input.params } : {}),
+          },
+        },
+      ],
+    }
+  }
+
   async function searchOAs(query: string) {
     const searchPattern = `%${query}%`
     return db
@@ -935,7 +962,7 @@ export function createOAService(deps: OADeps) {
     oaId: string
     userId: string
     chatId: string
-    messageId: string
+    messageId: string | null
   }) {
     const token = generateReplyToken()
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString()
@@ -996,6 +1023,7 @@ export function createOAService(deps: OADeps) {
     buildMessageEvent,
     buildFollowEvent,
     buildUnfollowEvent,
+    buildPostbackEvent,
     searchOAs,
     searchOAsForOwner,
     recommendOfficialAccounts,

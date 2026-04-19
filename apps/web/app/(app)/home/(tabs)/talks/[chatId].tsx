@@ -20,8 +20,21 @@ import { showToast } from '~/interface/toast/Toast'
 import { useRichMenu } from '~/features/chat/useRichMenu'
 import { RichMenu } from '~/features/chat/ui/RichMenu'
 import { RichMenuBar } from '~/features/chat/ui/RichMenuBar'
+import type { QuickReply, QuickReplyAction, QuickReplyItem } from '@vine/flex-schema'
+import { QuickReplyBar } from '~/interface/message/QuickReplyBar'
+import { dispatchPostback } from '~/features/oa/dispatchPostback'
+import { openDateTimePicker } from '~/features/oa/openDateTimePicker'
 
 const AVATAR_COLORS = ['#7a9cbf', '#c4aed0', '#a0c4a0', '#e0b98a']
+
+function parseMetadata(metadata?: string | null): Record<string, unknown> | null {
+  if (!metadata) return null
+  try {
+    return JSON.parse(metadata) as Record<string, unknown>
+  } catch {
+    return null
+  }
+}
 
 const route = createRoute<'/(app)/home/(tabs)/talks/[chatId]'>()
 
@@ -70,6 +83,25 @@ export const ChatRoomPage = memo(() => {
   const [richMenuExpanded, setRichMenuExpanded] = useState(richMenu?.selected ?? false)
   const [showGroupInfo, setShowGroupInfo] = useState(false)
   const [requireApproval, setRequireApproval] = useState(false)
+  const [dismissedFor, setDismissedFor] = useState<string | null>(null)
+
+  const activeQuickReply = useMemo<QuickReply | null>(() => {
+    const latest = messages?.[messages.length - 1]
+    if (!latest) return null
+    if (latest.id === dismissedFor) return null
+    if (latest.senderType !== 'oa') return null
+    const meta = parseMetadata(latest.metadata)
+    const qr = meta?.['quickReply']
+    if (!qr || typeof qr !== 'object') return null
+    const items = (qr as { items?: unknown }).items
+    if (!Array.isArray(items) || items.length === 0) return null
+    return qr as QuickReply
+  }, [messages, dismissedFor])
+
+  // Reset dismissal when a new message arrives — the next bar can render.
+  useEffect(() => {
+    setDismissedFor(null)
+  }, [messages?.length])
 
   const [chat] = useZeroQuery(chatById, { chatId: chatId! }, { enabled: Boolean(chatId) })
 
@@ -158,6 +190,68 @@ export const ChatRoomPage = memo(() => {
       }
     },
     [sendMessage],
+  )
+
+  const handleQuickReplyAction = useCallback(
+    (action: QuickReplyAction) => {
+      const latestId = messages?.[messages.length - 1]?.id
+      // Disappear rule: datetimepicker / clipboard keep the bar visible,
+      // everything else dismisses immediately on tap.
+      const keepBar = action.type === 'datetimepicker' || action.type === 'clipboard'
+      if (!keepBar && latestId) setDismissedFor(latestId)
+
+      switch (action.type) {
+        case 'message':
+          sendMessage(action.text)
+          return
+        case 'uri':
+          Linking.openURL(action.uri)
+          return
+        case 'postback': {
+          if (!otherMemberOaId) return
+          if (action.displayText) sendMessage(action.displayText)
+          dispatchPostback({
+            oaId: otherMemberOaId,
+            chatId: chatId!,
+            data: action.data,
+          }).then((res) => {
+            if (!res.success) {
+              showToast(`Postback 失敗：${res.reason ?? 'unknown'}`, { type: 'error' })
+            }
+          })
+          return
+        }
+        case 'datetimepicker': {
+          if (!otherMemberOaId) return
+          openDateTimePicker(action).then((params) => {
+            if (!params) return
+            dispatchPostback({
+              oaId: otherMemberOaId,
+              chatId: chatId!,
+              data: action.data,
+              params,
+            }).then((res) => {
+              if (!res.success) {
+                showToast(`Postback 失敗：${res.reason ?? 'unknown'}`, { type: 'error' })
+              }
+            })
+          })
+          return
+        }
+        case 'clipboard': {
+          if (Platform.OS !== 'web' || typeof navigator === 'undefined') {
+            showToast('複製功能尚未支援', { type: 'info' })
+            return
+          }
+          navigator.clipboard
+            .writeText(action.clipboardText)
+            .then(() => showToast('已複製', { type: 'info' }))
+            .catch(() => showToast('複製失敗', { type: 'error' }))
+          return
+        }
+      }
+    },
+    [messages, sendMessage, otherMemberOaId, chatId],
   )
 
   if (!chatId) {
@@ -300,6 +394,13 @@ export const ChatRoomPage = memo(() => {
             onAreaTap={handleRichMenuAreaTap}
           />
         </YStack>
+      )}
+
+      {activeQuickReply && inputMode !== 'richmenu' && (
+        <QuickReplyBar
+          items={activeQuickReply.items as QuickReplyItem[]}
+          onAction={handleQuickReplyAction}
+        />
       )}
 
       <YStack shrink={0}>

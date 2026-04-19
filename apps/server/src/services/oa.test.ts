@@ -971,3 +971,40 @@ describe('createOAService — Reply Token', () => {
     expect(mockDb.update).toHaveBeenCalled()
   })
 })
+
+describe('createOAService — buildPostbackEvent', () => {
+  // The build* functions don't touch the DB, so a stub `db` is fine.
+  const oa = createOAService({ db: {} as any, database: {} as any })
+
+  it('produces a LINE-shaped postback webhook event without params', () => {
+    const evt = oa.buildPostbackEvent({
+      oaId: 'oa-1',
+      userId: 'user-1',
+      replyToken: 'token-abc',
+      data: 'action=buy&id=42',
+    })
+    expect(evt.destination).toBe('oa-1')
+    expect(evt.events).toHaveLength(1)
+    const e = evt.events[0]!
+    expect(e.type).toBe('postback')
+    expect(e.replyToken).toBe('token-abc')
+    expect(e.source).toEqual({ type: 'user', userId: 'user-1' })
+    expect(e.postback).toEqual({ data: 'action=buy&id=42' })
+    expect(typeof e.timestamp).toBe('number')
+    expect(typeof e.webhookEventId).toBe('string')
+  })
+
+  it('includes params for datetimepicker postback', () => {
+    const evt = oa.buildPostbackEvent({
+      oaId: 'oa-1',
+      userId: 'user-1',
+      replyToken: 'token-abc',
+      data: 'action=pick',
+      params: { datetime: '2026-04-19T14:30' },
+    })
+    expect(evt.events[0]!.postback).toEqual({
+      data: 'action=pick',
+      params: { datetime: '2026-04-19T14:30' },
+    })
+  })
+})
