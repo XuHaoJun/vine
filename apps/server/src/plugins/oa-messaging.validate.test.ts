@@ -142,7 +142,8 @@ describe('validateMessage', () => {
     it('accepts image message', () => {
       const result = validateMessage({
         type: 'image',
-        url: 'https://example.com/img.png',
+        originalContentUrl: 'https://example.com/img.png',
+        previewImageUrl: 'https://example.com/preview.png',
       })
       expect(result.valid).toBe(true)
       if (result.valid) {
