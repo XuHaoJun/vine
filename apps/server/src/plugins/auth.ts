@@ -4,7 +4,8 @@ import { eq, sql } from 'drizzle-orm'
 import { time } from '@take-out/helpers'
 import { betterAuth } from 'better-auth'
 import { admin, bearer, jwt, magicLink, oidcProvider } from 'better-auth/plugins'
-import type { FastifyInstance } from 'fastify'
+import { createRemoteJWKSet, jwtVerify } from 'jose'
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import type { Pool } from 'pg'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { schema } from '@vine/db'
@@ -313,4 +314,145 @@ export async function authPlugin(fastify: FastifyInstance, deps: AuthPluginDeps)
       },
     })
   }
+
+  // GET /oauth2/v2.1/verify — Verify access token (LINE Login v2.1)
+  fastify.get(
+    '/oauth2/v2.1/verify',
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const query = request.query as { access_token?: string }
+      const accessToken = query.access_token
+
+      if (!accessToken) {
+        return reply.code(400).send({
+          error: 'invalid_request',
+          error_description: 'access_token is required',
+        })
+      }
+
+      try {
+        const result = await deps.db.execute(
+          sql`SELECT "clientId", "scopes", "accessTokenExpiresAt" FROM "oauthAccessToken" WHERE "accessToken" = ${accessToken} LIMIT 1`,
+        )
+
+        if (result.rows.length === 0) {
+          return reply.code(400).send({
+            error: 'invalid_request',
+            error_description: 'invalid access token',
+          })
+        }
+
+        const row = result.rows[0] as {
+          clientId: string
+          scopes: string
+          accessTokenExpiresAt: string
+        }
+
+        const expiresAt = new Date(row.accessTokenExpiresAt)
+        const now = new Date()
+
+        if (expiresAt <= now) {
+          return reply.code(400).send({
+            error: 'invalid_request',
+            error_description: 'access token expired',
+          })
+        }
+
+        const expiresIn = Math.floor((expiresAt.getTime() - now.getTime()) / 1000)
+
+        return reply.send({
+          scope: row.scopes,
+          client_id: row.clientId,
+          expires_in: expiresIn,
+        })
+      } catch (err) {
+        logger.error({ err }, '[oauth] verify access token error')
+        return reply.code(500).send({ error: 'Internal server error' })
+      }
+    },
+  )
+
+  // POST /oauth2/v2.1/verify — Verify ID token (LINE Login v2.1)
+  fastify.post(
+    '/oauth2/v2.1/verify',
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const body = request.body as Record<string, string> | undefined
+      const idToken = body?.id_token
+      const clientId = body?.client_id
+      const nonce = body?.nonce
+      const userId = body?.user_id
+
+      if (!idToken) {
+        return reply.code(400).send({
+          error: 'invalid_request',
+          error_description: 'id_token is required',
+        })
+      }
+
+      if (!clientId) {
+        return reply.code(400).send({
+          error: 'invalid_request',
+          error_description: 'client_id is required',
+        })
+      }
+
+      try {
+        const jwksUrl = new URL('/api/auth/jwks', BETTER_AUTH_URL)
+        const jwks = createRemoteJWKSet(jwksUrl)
+
+        const { payload } = await jwtVerify(idToken, jwks)
+
+        if (payload.aud !== clientId) {
+          return reply.code(400).send({
+            error: 'invalid_request',
+            error_description: 'Invalid IdToken Audience.',
+          })
+        }
+
+        if (nonce && payload.nonce !== nonce) {
+          return reply.code(400).send({
+            error: 'invalid_request',
+            error_description: 'Invalid IdToken Nonce.',
+          })
+        }
+
+        if (userId && payload.sub !== userId) {
+          return reply.code(400).send({
+            error: 'invalid_request',
+            error_description: 'Invalid IdToken Subject Identifier.',
+          })
+        }
+
+        const response: Record<string, unknown> = {
+          iss: payload.iss,
+          sub: payload.sub,
+          aud: payload.aud,
+          exp: payload.exp,
+          iat: payload.iat,
+        }
+
+        if (payload.auth_time) response.auth_time = payload.auth_time
+        if (payload.nonce) response.nonce = payload.nonce
+        if (payload.amr) response.amr = payload.amr
+        if (payload.name) response.name = payload.name
+        if (payload.picture) response.picture = payload.picture
+        if (payload.email) response.email = payload.email
+
+        return reply.send(response)
+      } catch (err) {
+        logger.error({ err }, '[oauth] verify id token error')
+
+        if (err instanceof Error && err.message.includes('expired')) {
+          return reply.code(400).send({
+            error: 'invalid_request',
+            error_description: 'IdToken expired.',
+          })
+        }
+
+        return reply.code(400).send({
+          error: 'invalid_request',
+          error_description: 'Invalid IdToken.',
+        })
+      }
+    },
+  )
 }
