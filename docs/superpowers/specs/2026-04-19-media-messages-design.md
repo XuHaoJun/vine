@@ -152,7 +152,7 @@ OA inbound media messages already work via the existing `POST /api/oa/v2/bot/mes
 - Audio waveform visualization.
 - Chat-list preview text (`[Photo]` / `[Video]` / `[Audio] 0:32`) — small, but touches the chat list rendering and isn't on the critical path.
 - Streaming uploads + signed URLs for files > 25 MB so we can match LINE's 200 MB caps for video and audio. Requires a `putStream(key, readable, mime)` API on `DriveService` and re-wiring `mediaUploadPlugin` to forward `data.file` directly without buffering.
-- Server-side transcode of `audio/webm` → `audio/m4a` so audio messages composed from Chrome/Firefox conform to LINE's strict mp3/m4a-only audio spec on the wire (currently kept as-is because vine is a clone, not an integration).
+- Server-side transcode of `audio/webm` → `audio/m4a` so audio messages composed from Chrome/Firefox (a) conform to LINE's strict mp3/m4a-only audio spec on the wire (currently kept as-is because vine is a clone, not an integration), and (b) play on native — `expo-audio`'s player cannot decode webm, so without transcoding, web→native audio messages silently fail to play.
 - `previewImageUrl` thumbnails for `image` and `video` to fully match the LINE message-object schema (currently we only emit `originalContentUrl`).
 - File cleanup job (orphan deletion + delete-on-message-delete).
 - Per-bubble upload-progress placeholder and per-bubble retry button for failed sends.
