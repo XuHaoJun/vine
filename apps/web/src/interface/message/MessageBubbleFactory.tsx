@@ -2,7 +2,17 @@ import { memo, useMemo } from 'react'
 import { SizableText, YStack } from 'tamagui'
 import { LfBubble, LfCarousel } from '@vine/line-flex'
 import type { LFexBubble, LFexCarousel } from '@vine/line-flex'
+import { ImageBubble } from './ImageBubble'
 import { TextBubble } from './TextBubble'
+
+function parseMetadata(metadata?: string): Record<string, unknown> {
+  if (!metadata) return {}
+  try {
+    return JSON.parse(metadata) as Record<string, unknown>
+  } catch {
+    return {}
+  }
+}
 
 type MessageBubbleFactoryProps = {
   type: string
@@ -19,6 +29,14 @@ export const MessageBubbleFactory = memo(
 
     if (type === 'flex') {
       return <FlexBubbleContent metadata={metadata ?? ''} isMine={isMine} />
+    }
+
+    if (type === 'image') {
+      const meta = parseMetadata(metadata)
+      const url =
+        typeof meta.originalContentUrl === 'string' ? meta.originalContentUrl : ''
+      if (!url) return <UnsupportedBubble type={type} />
+      return <ImageBubble url={url} isMine={isMine} />
     }
 
     return <UnsupportedBubble type={type} />
