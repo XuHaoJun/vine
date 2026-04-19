@@ -935,7 +935,7 @@ export function createOAService(deps: OADeps) {
     oaId: string
     userId: string
     chatId: string
-    messageId: string
+    messageId: string | null
   }) {
     const token = generateReplyToken()
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString()
