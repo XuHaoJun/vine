@@ -41,6 +41,12 @@ describe('ImagemapActionSchema', () => {
     ).toBe(false)
   })
 
+  it('rejects empty message text', () => {
+    expect(
+      v.safeParse(ImagemapActionSchema, { type: 'message', text: '', area }).success,
+    ).toBe(false)
+  })
+
   it('accepts clipboard action', () => {
     expect(
       v.safeParse(ImagemapActionSchema, {
@@ -56,6 +62,16 @@ describe('ImagemapActionSchema', () => {
       v.safeParse(ImagemapActionSchema, {
         type: 'clipboard',
         clipboardText: 'x'.repeat(1001),
+        area,
+      }).success,
+    ).toBe(false)
+  })
+
+  it('rejects empty clipboardText', () => {
+    expect(
+      v.safeParse(ImagemapActionSchema, {
+        type: 'clipboard',
+        clipboardText: '',
         area,
       }).success,
     ).toBe(false)
@@ -93,5 +109,16 @@ describe('ImagemapActionSchema', () => {
         area,
       }).success,
     ).toBe(true)
+  })
+
+  it('rejects label > 100 chars', () => {
+    expect(
+      v.safeParse(ImagemapActionSchema, {
+        type: 'uri',
+        label: 'x'.repeat(101),
+        linkUri: 'https://x',
+        area,
+      }).success,
+    ).toBe(false)
   })
 })
