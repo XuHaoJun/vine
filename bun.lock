@@ -184,6 +184,7 @@
       "name": "@vine/flex-schema",
       "version": "0.0.1",
       "dependencies": {
+        "@vine/line-schema-primitives": "workspace:*",
         "valibot": "^1.1.0",
       },
       "devDependencies": {

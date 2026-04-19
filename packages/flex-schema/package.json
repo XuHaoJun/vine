@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@vine/line-schema-primitives": "workspace:*",
     "valibot": "^1.1.0"
   },
   "devDependencies": {
