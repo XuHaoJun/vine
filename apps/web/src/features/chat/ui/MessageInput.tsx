@@ -189,10 +189,6 @@ export const MessageInput = memo(
 
     const handleMicPressIn = useCallback(async () => {
       if (!onSendMedia) return
-      if (!isWeb) {
-        showToast('行動版即將支援語音', { type: 'info' })
-        return
-      }
       cancelOnReleaseRef.current = false
       const ok = await startRecording()
       if (!ok) {

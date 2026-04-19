@@ -42,6 +42,14 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       stopTimer()
       if (recorder.isRecording) {
         recorder.stop().catch(() => {})
+        // Restore default mode so a later useAudioPlayer (AudioBubble) doesn't
+        // route through the iOS receiver earpiece if the user navigates away
+        // mid-recording.
+        setAudioModeAsync({
+          allowsRecording: false,
+          playsInSilentMode: true,
+          interruptionMode: 'mixWithOthers',
+        }).catch(() => {})
       }
     }
   }, [recorder, stopTimer])
