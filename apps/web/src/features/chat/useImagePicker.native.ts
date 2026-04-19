@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 import * as ImagePicker from 'expo-image-picker'
+import { showToast } from '~/interface/toast/Toast'
 
 export type PickedMedia = {
   uri: string
@@ -13,7 +14,14 @@ const VIDEO_EXT_RE = /\.(mp4|mov|m4v|webm)$/i
 export function useImagePicker() {
   const pick = useCallback(async (): Promise<PickedMedia | null> => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync()
-    if (!perm.granted) return null
+    if (!perm.granted) {
+      // canAskAgain === false means the OS will no longer show its own dialog
+      // (user previously denied). Surface a toast so the tap doesn't appear dead.
+      if (!perm.canAskAgain) {
+        showToast('請在系統設定開啟相簿權限', { type: 'error' })
+      }
+      return null
+    }
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images', 'videos'],

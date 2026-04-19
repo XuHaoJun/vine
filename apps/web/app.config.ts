@@ -95,6 +95,15 @@ export default {
           },
         },
       ],
+      // Source-of-truth split for iOS permissions:
+      //   - expo-* plugins below own the Info.plist *usage description strings*
+      //     (the text shown in the system prompt). One string per permission;
+      //     do NOT also add the matching NS*UsageDescription to ios.infoPlist
+      //     above or it'll be silently overridden at prebuild time.
+      //   - react-native-permissions below owns the *runtime handler pods*
+      //     (RNPermissions_Camera, etc.) that the JS API calls into. It does
+      //     NOT write Info.plist strings, so removing a permission from the
+      //     iosPermissions array won't drop its description text.
       [
         'expo-image-picker',
         {
