@@ -78,4 +78,71 @@ export async function oaWebhookPlugin(fastify: FastifyInstance, deps: WebhookPlu
       }
     },
   )
+
+  // Internal dispatch endpoint for postback events (quick reply, future template/flex buttons).
+  // NOTE: this route is intentionally a near-duplicate of /api/oa/internal/dispatch above.
+  // If a third event-dispatch route is added, extract the resolve+sign+deliver flow into a helper.
+  fastify.post(
+    '/api/oa/internal/dispatch-postback',
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const body = request.body as {
+        oaId: string
+        userId: string
+        chatId: string
+        data: string
+        params?: { date?: string; time?: string; datetime?: string }
+      }
+
+      const account = await oa.getOfficialAccount(body.oaId)
+      if (!account) return reply.code(404).send({ message: 'OA not found' })
+
+      const webhook = await oa.getWebhook(body.oaId)
+      if (!webhook || webhook.status !== 'verified') {
+        return reply.code(400).send({ message: 'Webhook not configured or not verified' })
+      }
+
+      const replyTokenRecord = await oa.registerReplyToken({
+        oaId: body.oaId,
+        userId: body.userId,
+        chatId: body.chatId,
+        messageId: null,
+      })
+
+      const payload = oa.buildPostbackEvent({
+        oaId: body.oaId,
+        userId: body.userId,
+        replyToken: replyTokenRecord.token,
+        data: body.data,
+        params: body.params,
+      })
+      const payloadBody = JSON.stringify(payload)
+      const signature = oa.generateWebhookSignature(payloadBody, account.channelSecret)
+
+      try {
+        const response = await fetch(webhook.url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            'x-line-signature': signature,
+          },
+          body: payloadBody,
+          signal: AbortSignal.timeout(10000),
+        })
+
+        if (!response.ok) {
+          await db
+            .update(oaWebhook)
+            .set({ status: 'failed' })
+            .where(eq(oaWebhook.oaId, body.oaId))
+          return await reply
+            .code(502)
+            .send({ message: 'Webhook delivery failed', status: response.status })
+        }
+
+        return await reply.send({ success: true })
+      } catch {
+        return reply.code(504).send({ message: 'Webhook delivery timeout' })
+      }
+    },
+  )
 }
