@@ -2,6 +2,7 @@ import { memo, useMemo } from 'react'
 import { SizableText, YStack } from 'tamagui'
 import { LfBubble, LfCarousel } from '@vine/line-flex'
 import type { LFexBubble, LFexCarousel } from '@vine/line-flex'
+import { AudioBubble } from './AudioBubble'
 import { ImageBubble } from './ImageBubble'
 import { TextBubble } from './TextBubble'
 import { VideoBubble } from './VideoBubble'
@@ -46,6 +47,15 @@ export const MessageBubbleFactory = memo(
         typeof meta.originalContentUrl === 'string' ? meta.originalContentUrl : ''
       if (!url) return <UnsupportedBubble type={type} />
       return <VideoBubble url={url} isMine={isMine} />
+    }
+
+    if (type === 'audio') {
+      const meta = parseMetadata(metadata)
+      const url =
+        typeof meta.originalContentUrl === 'string' ? meta.originalContentUrl : ''
+      const duration = typeof meta.duration === 'number' ? meta.duration : undefined
+      if (!url) return <UnsupportedBubble type={type} />
+      return <AudioBubble url={url} duration={duration} isMine={isMine} />
     }
 
     return <UnsupportedBubble type={type} />
