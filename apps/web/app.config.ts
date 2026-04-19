@@ -59,11 +59,6 @@ export default {
         usesNonExemptEncryption: false,
       },
       infoPlist: {
-        NSCameraUsageDescription:
-          '$(PRODUCT_NAME) uses the camera to take profile photos and capture images for AI-powered image creation features.',
-        NSMicrophoneUsageDescription: 'Allow $(PRODUCT_NAME) to access your microphone',
-        NSPhotoLibraryUsageDescription:
-          '$(PRODUCT_NAME) accesses your photo library to let you select images for profile pictures and choose photos as input for AI image generation.',
         NSPhotoLibraryAddUsageDescription:
           '$(PRODUCT_NAME) saves generated AI artwork and edited profile photos to your photo library so you can keep and share your creations.',
         NSAppleMusicUsageDescription:
@@ -90,6 +85,8 @@ export default {
         'expo-build-properties',
         {
           ios: {
+            // Keep 17.0; the native plan's 15.1 was illustrative — downgrading
+            // would lose features and force pod resolution churn.
             deploymentTarget: '17.0',
           },
           android: {
@@ -102,7 +99,6 @@ export default {
         'expo-image-picker',
         {
           photosPermission: '允許 Vine 從相簿選取照片與影片來傳送訊息。',
-          cameraPermission: '允許 Vine 使用相機（目前未啟用）。',
         },
       ],
       [
