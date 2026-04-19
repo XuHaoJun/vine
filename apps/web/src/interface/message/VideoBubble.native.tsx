@@ -35,11 +35,7 @@ export const VideoBubble = memo(({ url }: Props) => {
         player.play()
       }}
     >
-      <YStack
-        maxW={300}
-        bg="$color3"
-        style={{ borderRadius: 18, overflow: 'hidden' }}
-      >
+      <YStack maxW={300} bg="$color3" style={{ borderRadius: 18, overflow: 'hidden' }}>
         <YStack width={300} height={200} bg="$color3" />
         <YStack
           position="absolute"

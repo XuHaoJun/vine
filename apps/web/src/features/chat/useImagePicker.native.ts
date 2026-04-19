@@ -33,7 +33,8 @@ export function useImagePicker() {
     const asset = result.assets[0]
     const uri = asset.uri
     const isVideo =
-      asset.type === 'video' || (asset.fileName ? VIDEO_EXT_RE.test(asset.fileName) : false)
+      asset.type === 'video' ||
+      (asset.fileName ? VIDEO_EXT_RE.test(asset.fileName) : false)
     const name = asset.fileName ?? (isVideo ? 'video.mp4' : 'image.jpg')
     const mimeType = asset.mimeType ?? (isVideo ? 'video/mp4' : 'image/jpeg')
 

@@ -12,7 +12,9 @@ export type PickedMedia = {
 export function useImagePicker() {
   const pick = useCallback(async (): Promise<PickedMedia | null> => {
     if (__DEV__) {
-      console.warn('[useImagePicker] web should use the hidden <input> path, not this hook')
+      console.warn(
+        '[useImagePicker] web should use the hidden <input> path, not this hook',
+      )
     }
     return null
   }, [])

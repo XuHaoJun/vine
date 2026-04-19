@@ -161,9 +161,11 @@ export const MessageInput = memo(
       if (!picked || !onSendMedia) return
       // Native upload accepts { uri, name, type }; web hook's TS signature
       // expects File|Blob, but this branch is unreachable on web (isWeb early-return).
-      const result = await upload(
-        { uri: picked.uri, name: picked.name, type: picked.type } as never,
-      )
+      const result = await upload({
+        uri: picked.uri,
+        name: picked.name,
+        type: picked.type,
+      } as never)
       if ('error' in result) {
         showToast(result.error, { type: 'error' })
         return
@@ -215,13 +217,11 @@ export const MessageInput = memo(
         // Native: result.uri is the file:// path written by expo-audio.
         // Web hook's TS signature expects File|Blob, but this branch is
         // unreachable on web (isWeb === true) — same convention as handlePhotoPress.
-        uploadResult = await upload(
-          {
-            uri: (result as { uri?: string }).uri ?? '',
-            name: 'audio.m4a',
-            type: 'audio/m4a',
-          } as never,
-        )
+        uploadResult = await upload({
+          uri: (result as { uri?: string }).uri ?? '',
+          name: 'audio.m4a',
+          type: 'audio/m4a',
+        } as never)
       }
       if ('error' in uploadResult) {
         showToast(uploadResult.error, { type: 'error' })
