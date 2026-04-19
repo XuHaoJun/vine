@@ -191,6 +191,17 @@
         "vitest": "^4.1.4",
       },
     },
+    "packages/imagemap-schema": {
+      "name": "@vine/imagemap-schema",
+      "version": "0.0.1",
+      "dependencies": {
+        "@vine/line-schema-primitives": "workspace:*",
+        "valibot": "^1.1.0",
+      },
+      "devDependencies": {
+        "vitest": "^4.1.4",
+      },
+    },
     "packages/liff": {
       "name": "@vine/liff",
       "version": "0.0.1",
@@ -1932,6 +1943,8 @@
     "@vine/drive": ["@vine/drive@workspace:packages/drive"],
 
     "@vine/flex-schema": ["@vine/flex-schema@workspace:packages/flex-schema"],
+
+    "@vine/imagemap-schema": ["@vine/imagemap-schema@workspace:packages/imagemap-schema"],
 
     "@vine/liff": ["@vine/liff@workspace:packages/liff"],
 
