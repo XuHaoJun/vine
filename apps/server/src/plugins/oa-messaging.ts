@@ -4,7 +4,7 @@ import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { schema } from '@vine/db'
 import { message } from '@vine/db/schema-public'
 import { oaAccessToken, oaFriendship } from '@vine/db/schema-oa'
-import { FlexMessageSchema } from '@vine/flex-schema'
+import { FlexMessageSchema, QuickReplySchema } from '@vine/flex-schema'
 import * as v from 'valibot'
 import type { DriveService } from '@vine/drive'
 import type { createOAService } from '../services/oa'
@@ -36,7 +36,38 @@ export type ValidationSuccess = {
   text: string | null
   metadata: string | null
 }
-export type ValidationFailure = { valid: false; error: string }
+export type ValidationFailure = {
+  valid: false
+  error: string
+  code?: 'INVALID_QUICK_REPLY'
+}
+
+function attachQuickReply(
+  baseMetadata: Record<string, unknown> | null,
+  rawQuickReply: unknown,
+):
+  | { ok: true; metadata: string | null }
+  | { ok: false; error: string; code: 'INVALID_QUICK_REPLY' } {
+  if (rawQuickReply === undefined) {
+    return {
+      ok: true,
+      metadata: baseMetadata !== null ? JSON.stringify(baseMetadata) : null,
+    }
+  }
+  const result = v.safeParse(QuickReplySchema, rawQuickReply)
+  if (!result.success) {
+    const flat = v.flatten<typeof QuickReplySchema>(result.issues)
+    return {
+      ok: false,
+      error: `Invalid quickReply: ${JSON.stringify(flat.nested)}`,
+      code: 'INVALID_QUICK_REPLY' as const,
+    }
+  }
+  return {
+    ok: true,
+    metadata: JSON.stringify({ ...(baseMetadata ?? {}), quickReply: result.output }),
+  }
+}
 
 export function validateMessage(msg: unknown): ValidationSuccess | ValidationFailure {
   if (typeof msg !== 'object' || msg === null) {
@@ -49,6 +80,9 @@ export function validateMessage(msg: unknown): ValidationSuccess | ValidationFai
     return { valid: false, error: 'Message must have a "type" field' }
   }
 
+  // Pull quickReply out of the rest bag so each arm can decide where it goes.
+  const { quickReply, ...restWithoutQuickReply } = rest as Record<string, unknown>
+
   switch (type) {
     case 'text': {
       if (typeof text !== 'string') {
@@ -57,7 +91,9 @@ export function validateMessage(msg: unknown): ValidationSuccess | ValidationFai
       if (text.length > 5000) {
         return { valid: false, error: 'Text message must not exceed 5000 characters' }
       }
-      return { valid: true, type, text, metadata: null }
+      const qr = attachQuickReply(null, quickReply)
+      if (!qr.ok) return { valid: false, error: qr.error, code: qr.code }
+      return { valid: true, type, text, metadata: qr.metadata }
     }
 
     case 'flex': {
@@ -69,17 +105,20 @@ export function validateMessage(msg: unknown): ValidationSuccess | ValidationFai
           error: `Invalid flex message: ${JSON.stringify(flatResult.nested)}`,
         }
       }
-      return {
-        valid: true,
-        type,
-        text: null,
-        metadata: JSON.stringify(result.output),
-      }
+      const qr = attachQuickReply(
+        result.output as Record<string, unknown>,
+        quickReply,
+      )
+      if (!qr.ok) return { valid: false, error: qr.error, code: qr.code }
+      return { valid: true, type, text: null, metadata: qr.metadata }
     }
 
     case 'image':
     case 'video': {
-      const { originalContentUrl, previewImageUrl } = rest as Record<string, unknown>
+      const { originalContentUrl, previewImageUrl } = restWithoutQuickReply as Record<
+        string,
+        unknown
+      >
       if (typeof originalContentUrl !== 'string') {
         return {
           valid: false,
@@ -98,16 +137,16 @@ export function validateMessage(msg: unknown): ValidationSuccess | ValidationFai
       if (!previewImageUrl.startsWith('https://')) {
         return { valid: false, error: `"previewImageUrl" must be an HTTPS URL` }
       }
-      return {
-        valid: true,
-        type,
-        text: null,
-        metadata: JSON.stringify(rest),
-      }
+      const qr = attachQuickReply(restWithoutQuickReply, quickReply)
+      if (!qr.ok) return { valid: false, error: qr.error, code: qr.code }
+      return { valid: true, type, text: null, metadata: qr.metadata }
     }
 
     case 'audio': {
-      const { originalContentUrl, duration } = rest as Record<string, unknown>
+      const { originalContentUrl, duration } = restWithoutQuickReply as Record<
+        string,
+        unknown
+      >
       if (typeof originalContentUrl !== 'string') {
         return {
           valid: false,
@@ -120,23 +159,17 @@ export function validateMessage(msg: unknown): ValidationSuccess | ValidationFai
       if (duration !== undefined && typeof duration !== 'number') {
         return { valid: false, error: '"duration" must be a number (milliseconds)' }
       }
-      return {
-        valid: true,
-        type,
-        text: null,
-        metadata: JSON.stringify(rest),
-      }
+      const qr = attachQuickReply(restWithoutQuickReply, quickReply)
+      if (!qr.ok) return { valid: false, error: qr.error, code: qr.code }
+      return { valid: true, type, text: null, metadata: qr.metadata }
     }
 
     case 'sticker':
     case 'location':
     case 'template': {
-      return {
-        valid: true,
-        type,
-        text: null,
-        metadata: JSON.stringify(rest),
-      }
+      const qr = attachQuickReply(restWithoutQuickReply, quickReply)
+      if (!qr.ok) return { valid: false, error: qr.error, code: qr.code }
+      return { valid: true, type, text: null, metadata: qr.metadata }
     }
 
     default:
@@ -206,7 +239,7 @@ export async function oaMessagingPlugin(
         if (failed && !failed.valid) {
           return await reply.code(400).send({
             message: failed.error,
-            code: 'INVALID_MESSAGE_TYPE',
+            code: failed.code ?? 'INVALID_MESSAGE_TYPE',
           })
         }
 
@@ -300,7 +333,7 @@ export async function oaMessagingPlugin(
         if (failed && !failed.valid) {
           return await reply.code(400).send({
             message: failed.error,
-            code: 'INVALID_MESSAGE_TYPE',
+            code: failed.code ?? 'INVALID_MESSAGE_TYPE',
           })
         }
 
