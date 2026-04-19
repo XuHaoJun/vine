@@ -1,30 +1,62 @@
-import { memo } from 'react'
-import { SizableText, XStack } from 'tamagui'
+import { useVideoPlayer, VideoView } from 'expo-video'
+import { memo, useState } from 'react'
+import { Pressable } from 'react-native'
 import Svg, { Circle, Path } from 'react-native-svg'
+import { YStack } from 'tamagui'
 
 type Props = {
   url: string
   isMine: boolean
 }
 
-export const VideoBubble = memo(({ isMine }: Props) => {
+export const VideoBubble = memo(({ url }: Props) => {
+  const [playing, setPlaying] = useState(false)
+  const player = useVideoPlayer(url, (p) => {
+    p.loop = false
+  })
+
+  if (playing) {
+    return (
+      <YStack maxW={300} style={{ borderRadius: 18, overflow: 'hidden' }}>
+        <VideoView
+          player={player}
+          style={{ width: 300, height: 200 }}
+          nativeControls
+          contentFit="contain"
+        />
+      </YStack>
+    )
+  }
+
   return (
-    <XStack
-      items="center"
-      gap="$2"
-      px="$3"
-      py="$2"
-      minW={180}
-      bg={isMine ? '#8be872' : 'white'}
-      style={{ borderRadius: 18 }}
+    <Pressable
+      onPress={() => {
+        setPlaying(true)
+        player.play()
+      }}
     >
-      <Svg width={20} height={20} viewBox="0 0 24 24">
-        <Circle cx={12} cy={12} r={11} fill="rgba(0,0,0,0.15)" />
-        <Path d="M10 8l6 4-6 4V8z" fill={isMine ? 'white' : '#666'} />
-      </Svg>
-      <SizableText fontSize={13} color={isMine ? 'white' : '$color10'}>
-        影片訊息（行動版即將推出）
-      </SizableText>
-    </XStack>
+      <YStack
+        maxW={300}
+        bg="$color3"
+        style={{ borderRadius: 18, overflow: 'hidden' }}
+      >
+        <YStack width={300} height={200} bg="$color3" />
+        <YStack
+          position="absolute"
+          t={0}
+          l={0}
+          r={0}
+          b={0}
+          items="center"
+          justify="center"
+          bg="rgba(0,0,0,0.3)"
+        >
+          <Svg width={48} height={48} viewBox="0 0 48 48">
+            <Circle cx={24} cy={24} r={24} fill="rgba(0,0,0,0.6)" />
+            <Path d="M19 16l14 8-14 8V16z" fill="white" />
+          </Svg>
+        </YStack>
+      </YStack>
+    </Pressable>
   )
 })
