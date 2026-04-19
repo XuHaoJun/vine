@@ -11,6 +11,7 @@ import { ensureSeed } from '@vine/db/seed'
 import { connectRoutes } from './connect/routes'
 import { createAuthServer, authPlugin } from './plugins/auth'
 import { createZeroService, zeroPlugin } from './plugins/zero'
+import { mediaUploadPlugin } from './plugins/media-upload'
 import { oaMessagingPlugin } from './plugins/oa-messaging'
 import { oaRichMenuPlugin } from './plugins/oa-richmenu'
 import { oaWebhookPlugin } from './plugins/oa-webhook'
@@ -65,6 +66,7 @@ const zero = createZeroService({
 // Register plugins with injected dependencies
 await authPlugin(app, { auth, db })
 await zeroPlugin(app, { auth, zero })
+await mediaUploadPlugin(app, { auth, drive })
 await oaMessagingPlugin(app, { oa, db, drive })
 await oaRichMenuPlugin(app, { oa, db, drive })
 await oaWebhookPlugin(app, { oa, db })
