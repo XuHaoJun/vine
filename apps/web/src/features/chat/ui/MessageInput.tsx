@@ -9,6 +9,7 @@ import { Input } from '~/interface/forms/Input'
 import { showToast } from '~/interface/toast/Toast'
 
 import { useAudioRecorder } from '../useAudioRecorder'
+import { useImagePicker } from '../useImagePicker'
 import { useMediaUpload } from '../useMediaUpload'
 
 type Props = {
@@ -136,6 +137,7 @@ export const MessageInput = memo(
     const insets = useSafeAreaInsets()
     const fileInputRef = useRef<HTMLInputElement | null>(null)
     const { upload, status: uploadStatus } = useMediaUpload()
+    const { pick } = useImagePicker()
     const { isRecording, elapsedMs, startRecording, stopRecording, cancelRecording } =
       useAudioRecorder()
     const cancelOnReleaseRef = useRef(false)
@@ -149,14 +151,25 @@ export const MessageInput = memo(
 
     const hasText = text.trim().length > 0
 
-    const handlePhotoPress = useCallback(() => {
-      if (!isWeb) {
-        showToast('行動版即將支援照片', { type: 'info' })
+    const handlePhotoPress = useCallback(async () => {
+      if (uploadStatus === 'uploading') return
+      if (isWeb) {
+        fileInputRef.current?.click()
         return
       }
-      if (uploadStatus === 'uploading') return
-      fileInputRef.current?.click()
-    }, [uploadStatus])
+      const picked = await pick()
+      if (!picked || !onSendMedia) return
+      // Native upload accepts { uri, name, type }; web hook's TS signature
+      // expects File|Blob, but this branch is unreachable on web (isWeb early-return).
+      const result = await upload(
+        { uri: picked.uri, name: picked.name, type: picked.type } as never,
+      )
+      if ('error' in result) {
+        showToast(result.error, { type: 'error' })
+        return
+      }
+      onSendMedia(picked.kind, result.url)
+    }, [uploadStatus, pick, upload, onSendMedia])
 
     const handleFileSelected = useCallback(
       async (e: ChangeEvent<HTMLInputElement>) => {
