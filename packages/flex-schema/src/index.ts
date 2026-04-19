@@ -57,6 +57,14 @@ export {
 } from './action'
 export type { FlexAction } from './action'
 
+// Quick Reply
+export {
+  QuickReplyActionSchema,
+  QuickReplyItemSchema,
+  QuickReplySchema,
+} from './quickReply'
+export type { QuickReply, QuickReplyItem, QuickReplyAction } from './quickReply'
+
 // Components
 export {
   FlexSpanSchema,
