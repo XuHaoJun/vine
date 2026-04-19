@@ -30,8 +30,10 @@ await app.register(cors, {
 
 await app.register(formbody)
 
+const driveBasePath = path.resolve(process.env['DRIVE_BASE_PATH'] ?? './uploads')
+
 await app.register(import('@fastify/static'), {
-  root: path.resolve(process.env['DRIVE_BASE_PATH'] ?? './uploads'),
+  root: driveBasePath,
   prefix: '/uploads/',
   decorateReply: false,
 })
@@ -44,7 +46,7 @@ const oa = createOAService({ db, database })
 const liff = createLiffService({ db })
 const auth = createAuthServer({ database, db })
 const drive = createFsDriveService({
-  basePath: process.env['DRIVE_BASE_PATH'] ?? './uploads',
+  basePath: driveBasePath,
   baseUrl: process.env['DRIVE_BASE_URL'] ?? 'http://localhost:3001/uploads',
 })
 
