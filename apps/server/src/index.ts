@@ -1,3 +1,4 @@
+import path from 'node:path'
 import { logger } from './lib/logger'
 import cors from '@fastify/cors'
 import formbody from '@fastify/formbody'
@@ -28,6 +29,12 @@ await app.register(cors, {
 })
 
 await app.register(formbody)
+
+await app.register(import('@fastify/static'), {
+  root: path.resolve(process.env['DRIVE_BASE_PATH'] ?? './uploads'),
+  prefix: '/uploads/',
+  decorateReply: false,
+})
 
 // Wire services with explicit dependencies
 const database = getDatabase()
