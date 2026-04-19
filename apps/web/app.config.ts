@@ -59,11 +59,6 @@ export default {
         usesNonExemptEncryption: false,
       },
       infoPlist: {
-        NSCameraUsageDescription:
-          '$(PRODUCT_NAME) uses the camera to take profile photos and capture images for AI-powered image creation features.',
-        NSMicrophoneUsageDescription: 'Allow $(PRODUCT_NAME) to access your microphone',
-        NSPhotoLibraryUsageDescription:
-          '$(PRODUCT_NAME) accesses your photo library to let you select images for profile pictures and choose photos as input for AI image generation.',
         NSPhotoLibraryAddUsageDescription:
           '$(PRODUCT_NAME) saves generated AI artwork and edited profile photos to your photo library so you can keep and share your creations.',
         NSAppleMusicUsageDescription:
@@ -90,8 +85,35 @@ export default {
         'expo-build-properties',
         {
           ios: {
+            // Keep 17.0; the native plan's 15.1 was illustrative — downgrading
+            // would lose features and force pod resolution churn.
             deploymentTarget: '17.0',
           },
+          android: {
+            compileSdkVersion: 35,
+            targetSdkVersion: 35,
+          },
+        },
+      ],
+      // Source-of-truth split for iOS permissions:
+      //   - expo-* plugins below own the Info.plist *usage description strings*
+      //     (the text shown in the system prompt). One string per permission;
+      //     do NOT also add the matching NS*UsageDescription to ios.infoPlist
+      //     above or it'll be silently overridden at prebuild time.
+      //   - react-native-permissions below owns the *runtime handler pods*
+      //     (RNPermissions_Camera, etc.) that the JS API calls into. It does
+      //     NOT write Info.plist strings, so removing a permission from the
+      //     iosPermissions array won't drop its description text.
+      [
+        'expo-image-picker',
+        {
+          photosPermission: '允許 Vine 從相簿選取照片與影片來傳送訊息。',
+        },
+      ],
+      [
+        'expo-audio',
+        {
+          microphonePermission: '允許 Vine 錄製語音訊息。',
         },
       ],
       [

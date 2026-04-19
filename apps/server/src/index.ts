@@ -1,3 +1,4 @@
+import path from 'node:path'
 import { logger } from './lib/logger'
 import cors from '@fastify/cors'
 import formbody from '@fastify/formbody'
@@ -10,6 +11,7 @@ import { ensureSeed } from '@vine/db/seed'
 import { connectRoutes } from './connect/routes'
 import { createAuthServer, authPlugin } from './plugins/auth'
 import { createZeroService, zeroPlugin } from './plugins/zero'
+import { mediaUploadPlugin } from './plugins/media-upload'
 import { oaMessagingPlugin } from './plugins/oa-messaging'
 import { oaRichMenuPlugin } from './plugins/oa-richmenu'
 import { oaWebhookPlugin } from './plugins/oa-webhook'
@@ -29,6 +31,14 @@ await app.register(cors, {
 
 await app.register(formbody)
 
+const driveBasePath = path.resolve(process.env['DRIVE_BASE_PATH'] ?? './uploads')
+
+await app.register(import('@fastify/static'), {
+  root: driveBasePath,
+  prefix: '/uploads/',
+  decorateReply: false,
+})
+
 // Wire services with explicit dependencies
 const database = getDatabase()
 const db = createDb()
@@ -37,7 +47,7 @@ const oa = createOAService({ db, database })
 const liff = createLiffService({ db })
 const auth = createAuthServer({ database, db })
 const drive = createFsDriveService({
-  basePath: process.env['DRIVE_BASE_PATH'] ?? './uploads',
+  basePath: driveBasePath,
   baseUrl: process.env['DRIVE_BASE_URL'] ?? 'http://localhost:3001/uploads',
 })
 
@@ -56,6 +66,7 @@ const zero = createZeroService({
 // Register plugins with injected dependencies
 await authPlugin(app, { auth, db })
 await zeroPlugin(app, { auth, zero })
+await mediaUploadPlugin(app, { auth, drive })
 await oaMessagingPlugin(app, { oa, db, drive })
 await oaRichMenuPlugin(app, { oa, db, drive })
 await oaWebhookPlugin(app, { oa, db })
