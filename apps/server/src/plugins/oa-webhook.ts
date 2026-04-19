@@ -63,10 +63,7 @@ async function dispatchSignedWebhook(args: {
     })
 
     if (!response.ok) {
-      await db
-        .update(oaWebhook)
-        .set({ status: 'failed' })
-        .where(eq(oaWebhook.oaId, oaId))
+      await db.update(oaWebhook).set({ status: 'failed' }).where(eq(oaWebhook.oaId, oaId))
       return { kind: 'delivery-failed', status: response.status }
     }
 

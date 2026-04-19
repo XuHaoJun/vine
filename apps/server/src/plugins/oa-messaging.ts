@@ -105,10 +105,7 @@ export function validateMessage(msg: unknown): ValidationSuccess | ValidationFai
           error: `Invalid flex message: ${JSON.stringify(flatResult.nested)}`,
         }
       }
-      const qr = attachQuickReply(
-        result.output as Record<string, unknown>,
-        quickReply,
-      )
+      const qr = attachQuickReply(result.output as Record<string, unknown>, quickReply)
       if (!qr.ok) return { valid: false, error: qr.error, code: qr.code }
       return { valid: true, type, text: null, metadata: qr.metadata }
     }

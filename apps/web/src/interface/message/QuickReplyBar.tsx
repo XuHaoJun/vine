@@ -42,34 +42,32 @@ const PillButton = memo(
   },
 )
 
-export const QuickReplyBar = memo(
-  ({ items, onAction }: QuickReplyBarProps) => {
-    const handlePress = useCallback(
-      (action: QuickReplyAction) => () => onAction(action),
-      [onAction],
-    )
+export const QuickReplyBar = memo(({ items, onAction }: QuickReplyBarProps) => {
+  const handlePress = useCallback(
+    (action: QuickReplyAction) => () => onAction(action),
+    [onAction],
+  )
 
-    if (items.length === 0) return null
+  if (items.length === 0) return null
 
-    return (
-      <YStack py="$2" bg="$background">
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 12, gap: 8 }}
-        >
-          {items.map((item, idx) => (
-            <PillButton
-              key={`${item.action.type}-${idx}`}
-              item={item}
-              onPress={handlePress(item.action)}
-            />
-          ))}
-        </ScrollView>
-      </YStack>
-    )
-  },
-)
+  return (
+    <YStack py="$2" bg="$background">
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 12, gap: 8 }}
+      >
+        {items.map((item, idx) => (
+          <PillButton
+            key={`${item.action.type}-${idx}`}
+            item={item}
+            onPress={handlePress(item.action)}
+          />
+        ))}
+      </ScrollView>
+    </YStack>
+  )
+})
 
 function labelFor(action: QuickReplyAction): string {
   if ('label' in action && action.label) return action.label

@@ -102,9 +102,9 @@ afterEach(() => {
 
 describe('POST /api/oa/internal/dispatch-postback', () => {
   it('dispatches a postback event to the OA webhook with x-line-signature', async () => {
-    const fetchSpy = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({}), { status: 200 }),
-    )
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValue(new Response(JSON.stringify({}), { status: 200 }))
     const { app, oa } = createTestApp({
       account: { id: oaId, channelSecret },
       webhook: { oaId, url: 'https://hook.example/bot', status: 'verified' },
