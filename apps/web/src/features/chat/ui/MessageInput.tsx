@@ -210,9 +210,23 @@ export const MessageInput = memo(
       const result = await stopRecording()
       if (!result) return
       if (result.durationMs < 500) return
-      const ext = result.mimeType.includes('mp4') ? 'm4a' : 'webm'
-      const file = new File([result.blob], `audio.${ext}`, { type: result.mimeType })
-      const uploadResult = await upload(file)
+      let uploadResult
+      if (isWeb) {
+        const ext = result.mimeType.includes('mp4') ? 'm4a' : 'webm'
+        const file = new File([result.blob], `audio.${ext}`, { type: result.mimeType })
+        uploadResult = await upload(file)
+      } else {
+        // Native: result.uri is the file:// path written by expo-audio.
+        // Web hook's TS signature expects File|Blob, but this branch is
+        // unreachable on web (isWeb === true) — same convention as handlePhotoPress.
+        uploadResult = await upload(
+          {
+            uri: (result as { uri?: string }).uri ?? '',
+            name: 'audio.m4a',
+            type: 'audio/m4a',
+          } as never,
+        )
+      }
       if ('error' in uploadResult) {
         showToast(uploadResult.error, { type: 'error' })
         return
