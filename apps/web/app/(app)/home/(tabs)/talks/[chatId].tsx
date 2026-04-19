@@ -22,8 +22,10 @@ import { RichMenu } from '~/features/chat/ui/RichMenu'
 import { RichMenuBar } from '~/features/chat/ui/RichMenuBar'
 import type { QuickReply, QuickReplyAction, QuickReplyItem } from '@vine/flex-schema'
 import { QuickReplyBar } from '~/interface/message/QuickReplyBar'
-import { dispatchPostback } from '~/features/oa/dispatchPostback'
-import { openDateTimePicker } from '~/features/oa/openDateTimePicker'
+import {
+  useActionDispatcher,
+  type DispatchableAction,
+} from '~/features/chat/useActionDispatcher'
 
 const AVATAR_COLORS = ['#7a9cbf', '#c4aed0', '#a0c4a0', '#e0b98a']
 
@@ -192,6 +194,12 @@ export const ChatRoomPage = memo(() => {
     [sendMessage],
   )
 
+  const dispatchAction = useActionDispatcher({
+    chatId: chatId ?? '',
+    otherMemberOaId: otherMemberOaId ?? null,
+    sendMessage,
+  })
+
   const handleQuickReplyAction = useCallback(
     (action: QuickReplyAction) => {
       const latestId = messages?.[messages.length - 1]?.id
@@ -199,59 +207,9 @@ export const ChatRoomPage = memo(() => {
       // everything else dismisses immediately on tap.
       const keepBar = action.type === 'datetimepicker' || action.type === 'clipboard'
       if (!keepBar && latestId) setDismissedFor(latestId)
-
-      switch (action.type) {
-        case 'message':
-          sendMessage(action.text)
-          return
-        case 'uri':
-          Linking.openURL(action.uri)
-          return
-        case 'postback': {
-          if (!otherMemberOaId) return
-          if (action.displayText) sendMessage(action.displayText)
-          dispatchPostback({
-            oaId: otherMemberOaId,
-            chatId: chatId!,
-            data: action.data,
-          }).then((res) => {
-            if (!res.success) {
-              showToast(`Postback 失敗：${res.reason ?? 'unknown'}`, { type: 'error' })
-            }
-          })
-          return
-        }
-        case 'datetimepicker': {
-          if (!otherMemberOaId) return
-          openDateTimePicker(action).then((params) => {
-            if (!params) return
-            dispatchPostback({
-              oaId: otherMemberOaId,
-              chatId: chatId!,
-              data: action.data,
-              params,
-            }).then((res) => {
-              if (!res.success) {
-                showToast(`Postback 失敗：${res.reason ?? 'unknown'}`, { type: 'error' })
-              }
-            })
-          })
-          return
-        }
-        case 'clipboard': {
-          if (Platform.OS !== 'web' || typeof navigator === 'undefined') {
-            showToast('複製功能尚未支援', { type: 'info' })
-            return
-          }
-          navigator.clipboard
-            .writeText(action.clipboardText)
-            .then(() => showToast('已複製', { type: 'info' }))
-            .catch(() => showToast('複製失敗', { type: 'error' }))
-          return
-        }
-      }
+      dispatchAction(action as DispatchableAction)
     },
-    [messages, sendMessage, otherMemberOaId, chatId],
+    [messages, dispatchAction],
   )
 
   if (!chatId) {
