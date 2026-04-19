@@ -47,7 +47,7 @@ beforeEach(() => {
 describe('media-upload plugin', () => {
   it('returns 401 when unauthenticated', async () => {
     mockedAuth.mockResolvedValue(null as any)
-    const { app, register } = createApp()
+    const { app, drive, register } = createApp()
     await register()
     const { payload, headers } = multipartPayload(
       'a.jpg',
@@ -61,11 +61,12 @@ describe('media-upload plugin', () => {
       headers,
     })
     expect(res.statusCode).toBe(401)
+    expect(drive.put).not.toHaveBeenCalled()
   })
 
   it('rejects unsupported mime types', async () => {
     mockedAuth.mockResolvedValue({ id: 'u1' } as any)
-    const { app, register } = createApp()
+    const { app, drive, register } = createApp()
     await register()
     const { payload, headers } = multipartPayload(
       'a.exe',
@@ -79,6 +80,7 @@ describe('media-upload plugin', () => {
       headers,
     })
     expect(res.statusCode).toBe(415)
+    expect(drive.put).not.toHaveBeenCalled()
   })
 
   it('stores file under media/<userId>/ and returns the drive URL', async () => {
@@ -109,7 +111,7 @@ describe('media-upload plugin', () => {
 
   it('rejects files over the size limit with 413', async () => {
     mockedAuth.mockResolvedValue({ id: 'u1' } as any)
-    const { app, register } = createApp()
+    const { app, drive, register } = createApp()
     await register()
     const big = Buffer.alloc(26 * 1024 * 1024, 0)
     const { payload, headers } = multipartPayload('big.mp4', 'video/mp4', big)
@@ -120,5 +122,6 @@ describe('media-upload plugin', () => {
       headers,
     })
     expect(res.statusCode).toBe(413)
+    expect(drive.put).not.toHaveBeenCalled()
   })
 })
