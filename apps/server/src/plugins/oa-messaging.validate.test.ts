@@ -324,4 +324,115 @@ describe('validateMessage', () => {
       expect(result.valid).toBe(false)
     })
   })
+
+  describe('imagemap messages', () => {
+    const validImagemap = {
+      type: 'imagemap',
+      baseUrl: 'https://example.com/bot/images/rm001',
+      altText: 'alt',
+      baseSize: { width: 1040, height: 1040 },
+      actions: [
+        {
+          type: 'uri',
+          linkUri: 'https://example.com',
+          area: { x: 0, y: 0, width: 100, height: 100 },
+        },
+      ],
+    }
+
+    it('accepts valid imagemap', () => {
+      const result = validateMessage(validImagemap)
+      expect(result.valid).toBe(true)
+      if (result.valid) {
+        expect(result.type).toBe('imagemap')
+        expect(result.text).toBeNull()
+        expect(result.metadata).toBeTruthy()
+        const meta = JSON.parse(result.metadata!)
+        expect(meta.baseUrl).toBe('https://example.com/bot/images/rm001')
+        expect(meta.actions).toHaveLength(1)
+      }
+    })
+
+    it('rejects imagemap with baseUrl ending in .jpg', () => {
+      const result = validateMessage({
+        ...validImagemap,
+        baseUrl: 'https://example.com/a/b.jpg',
+      })
+      expect(result.valid).toBe(false)
+    })
+
+    it('rejects imagemap with baseSize.width != 1040', () => {
+      const result = validateMessage({
+        ...validImagemap,
+        baseSize: { width: 800, height: 1040 },
+      })
+      expect(result.valid).toBe(false)
+    })
+
+    it('rejects imagemap with empty actions', () => {
+      const result = validateMessage({ ...validImagemap, actions: [] })
+      expect(result.valid).toBe(false)
+    })
+
+    it('rejects imagemap with area overflowing baseSize', () => {
+      const result = validateMessage({
+        ...validImagemap,
+        actions: [
+          {
+            type: 'uri',
+            linkUri: 'https://x',
+            area: { x: 500, y: 0, width: 600, height: 10 },
+          },
+        ],
+      })
+      expect(result.valid).toBe(false)
+    })
+
+    it('rejects postback as imagemap action', () => {
+      const result = validateMessage({
+        ...validImagemap,
+        actions: [
+          {
+            type: 'postback',
+            data: 'x=1',
+            area: { x: 0, y: 0, width: 10, height: 10 },
+          },
+        ],
+      })
+      expect(result.valid).toBe(false)
+    })
+
+    it('accepts imagemap with quickReply', () => {
+      const result = validateMessage({
+        ...validImagemap,
+        quickReply: {
+          items: [
+            {
+              type: 'action',
+              action: { type: 'message', label: 'Hi', text: 'Hi' },
+            },
+          ],
+        },
+      })
+      expect(result.valid).toBe(true)
+      if (result.valid) {
+        const meta = JSON.parse(result.metadata!)
+        expect(meta.quickReply).toBeDefined()
+        expect(meta.quickReply.items).toHaveLength(1)
+      }
+    })
+
+    it('rejects imagemap with invalid quickReply', () => {
+      const result = validateMessage({
+        ...validImagemap,
+        quickReply: {
+          items: [{ type: 'action', action: { type: 'camera', label: 'Cam' } }],
+        },
+      })
+      expect(result.valid).toBe(false)
+      if (!result.valid) {
+        expect(result.code).toBe('INVALID_QUICK_REPLY')
+      }
+    })
+  })
 })

@@ -27,6 +27,7 @@
     "@vine/db": "workspace:*",
     "@vine/drive": "workspace:*",
     "@vine/flex-schema": "workspace:*",
+    "@vine/imagemap-schema": "workspace:*",
     "@vine/liff-fixtures": "workspace:*",
     "@vine/proto": "workspace:*",
     "@vine/richmenu-schema": "workspace:*",

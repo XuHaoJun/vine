@@ -5,6 +5,7 @@ import type { schema } from '@vine/db'
 import { message } from '@vine/db/schema-public'
 import { oaAccessToken, oaFriendship } from '@vine/db/schema-oa'
 import { FlexMessageSchema, QuickReplySchema } from '@vine/flex-schema'
+import { ImagemapMessageSchema } from '@vine/imagemap-schema'
 import * as v from 'valibot'
 import type { DriveService } from '@vine/drive'
 import type { createOAService } from '../services/oa'
@@ -157,6 +158,20 @@ export function validateMessage(msg: unknown): ValidationSuccess | ValidationFai
         return { valid: false, error: '"duration" must be a number (milliseconds)' }
       }
       const qr = attachQuickReply(restWithoutQuickReply, quickReply)
+      if (!qr.ok) return { valid: false, error: qr.error, code: qr.code }
+      return { valid: true, type, text: null, metadata: qr.metadata }
+    }
+
+    case 'imagemap': {
+      const result = v.safeParse(ImagemapMessageSchema, msg)
+      if (!result.success) {
+        const flat = v.flatten<typeof ImagemapMessageSchema>(result.issues)
+        return {
+          valid: false,
+          error: `Invalid imagemap message: ${JSON.stringify(flat.nested)}`,
+        }
+      }
+      const qr = attachQuickReply(result.output as Record<string, unknown>, quickReply)
       if (!qr.ok) return { valid: false, error: qr.error, code: qr.code }
       return { valid: true, type, text: null, metadata: qr.metadata }
     }

@@ -127,6 +127,7 @@ export const message = pgTable(
         | 'location'
         | 'flex'
         | 'template'
+        | 'imagemap'
       >(),
     text: text('text'),
     metadata: text('metadata'),

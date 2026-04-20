@@ -27,6 +27,7 @@
         "@vine/db": "workspace:*",
         "@vine/drive": "workspace:*",
         "@vine/flex-schema": "workspace:*",
+        "@vine/imagemap-schema": "workspace:*",
         "@vine/liff-fixtures": "workspace:*",
         "@vine/proto": "workspace:*",
         "@vine/richmenu-schema": "workspace:*",
@@ -79,6 +80,7 @@
         "@tamagui/toast": "2.0.0-rc.41",
         "@tamagui/vite-plugin": "2.0.0-rc.41",
         "@tanstack/react-query": "^5.99.0",
+        "@vine/imagemap-schema": "workspace:*",
         "@vine/proto": "workspace:*",
         "@vine/zero-schema": "workspace:*",
         "@vxrn/color-scheme": "1.15.10",
@@ -184,6 +186,18 @@
       "name": "@vine/flex-schema",
       "version": "0.0.1",
       "dependencies": {
+        "@vine/line-schema-primitives": "workspace:*",
+        "valibot": "^1.1.0",
+      },
+      "devDependencies": {
+        "vitest": "^4.1.4",
+      },
+    },
+    "packages/imagemap-schema": {
+      "name": "@vine/imagemap-schema",
+      "version": "0.0.1",
+      "dependencies": {
+        "@vine/line-schema-primitives": "workspace:*",
         "valibot": "^1.1.0",
       },
       "devDependencies": {
@@ -216,6 +230,16 @@
       "peerDependencies": {
         "react": "*",
         "tamagui": "2.0.0-rc.41",
+      },
+    },
+    "packages/line-schema-primitives": {
+      "name": "@vine/line-schema-primitives",
+      "version": "0.0.1",
+      "dependencies": {
+        "valibot": "^1.1.0",
+      },
+      "devDependencies": {
+        "vitest": "^4.1.4",
       },
     },
     "packages/proto": {
@@ -1922,11 +1946,15 @@
 
     "@vine/flex-schema": ["@vine/flex-schema@workspace:packages/flex-schema"],
 
+    "@vine/imagemap-schema": ["@vine/imagemap-schema@workspace:packages/imagemap-schema"],
+
     "@vine/liff": ["@vine/liff@workspace:packages/liff"],
 
     "@vine/liff-fixtures": ["@vine/liff-fixtures@workspace:packages/liff-fixtures"],
 
     "@vine/line-flex": ["@vine/line-flex@workspace:packages/line-flex"],
+
+    "@vine/line-schema-primitives": ["@vine/line-schema-primitives@workspace:packages/line-schema-primitives"],
 
     "@vine/proto": ["@vine/proto@workspace:packages/proto"],
 

@@ -125,13 +125,7 @@ export const FlexColorSchema = v.pipe(
   ),
 )
 
-export const FlexHttpsUrlSchema = v.pipe(
-  v.string(),
-  v.url(),
-  v.startsWith('https://', 'Must use HTTPS'),
-)
-
-export const FlexUrlSchema = v.pipe(v.string(), v.url())
+export { FlexHttpsUrlSchema, FlexUrlSchema } from '@vine/line-schema-primitives'
 
 export const FlexAspectRatioValueSchema = v.pipe(
   v.string(),
