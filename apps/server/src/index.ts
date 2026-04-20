@@ -12,6 +12,7 @@ import { connectRoutes } from './connect/routes'
 import { createAuthServer, authPlugin } from './plugins/auth'
 import { createZeroService, zeroPlugin } from './plugins/zero'
 import { mediaUploadPlugin } from './plugins/media-upload'
+import { locationMapPlugin } from './plugins/oa-location-map'
 import { oaMessagingPlugin } from './plugins/oa-messaging'
 import { oaRichMenuPlugin } from './plugins/oa-richmenu'
 import { oaWebhookPlugin } from './plugins/oa-webhook'
@@ -67,6 +68,7 @@ const zero = createZeroService({
 await authPlugin(app, { auth, db })
 await zeroPlugin(app, { auth, zero })
 await mediaUploadPlugin(app, { auth, drive })
+await locationMapPlugin(app, { db, auth })
 await oaMessagingPlugin(app, { oa, db, drive })
 await oaRichMenuPlugin(app, { oa, db, drive })
 await oaWebhookPlugin(app, { oa, db, auth })

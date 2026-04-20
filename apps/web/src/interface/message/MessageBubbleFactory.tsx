@@ -6,6 +6,7 @@ import type { ImagemapAction, ImagemapVideo } from '@vine/imagemap-schema'
 import { AudioBubble } from './AudioBubble'
 import { ImageBubble } from './ImageBubble'
 import { ImagemapBubble } from './ImagemapBubble'
+import { LocationBubble } from './LocationBubble'
 import { TextBubble } from './TextBubble'
 import { VideoBubble } from './VideoBubble'
 
@@ -24,6 +25,7 @@ type MessageBubbleFactoryProps = {
   metadata?: string
   isMine: boolean
   chatId: string
+  messageId?: string
   otherMemberOaId: string | null
   sendMessage: (text: string) => void
 }
@@ -35,6 +37,7 @@ export const MessageBubbleFactory = memo(
     metadata,
     isMine,
     chatId,
+    messageId,
     otherMemberOaId,
     sendMessage,
   }: MessageBubbleFactoryProps) => {
@@ -75,7 +78,9 @@ export const MessageBubbleFactory = memo(
       const meta = parseMetadata(metadata)
       const baseUrl = typeof meta.baseUrl === 'string' ? meta.baseUrl : ''
       const baseSize = meta.baseSize as { width: number; height: number } | undefined
-      const actions = Array.isArray(meta.actions) ? (meta.actions as ImagemapAction[]) : null
+      const actions = Array.isArray(meta.actions)
+        ? (meta.actions as ImagemapAction[])
+        : null
       const video = meta.video as ImagemapVideo | undefined
       if (!baseUrl || !baseSize || !actions) return <UnsupportedBubble type={type} />
       return (
@@ -88,6 +93,18 @@ export const MessageBubbleFactory = memo(
           chatId={chatId}
           otherMemberOaId={otherMemberOaId}
           sendMessage={sendMessage}
+          isMine={isMine}
+        />
+      )
+    }
+
+    if (type === 'location') {
+      if (!messageId) return <UnsupportedBubble type={type} />
+      return (
+        <LocationBubble
+          messageId={messageId}
+          metadata={metadata ?? ''}
+          chatId={chatId}
           isMine={isMine}
         />
       )

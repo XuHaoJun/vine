@@ -332,6 +332,7 @@ export const ChatRoomPage = memo(() => {
                           metadata={msg.metadata ?? undefined}
                           isMine={isMine}
                           chatId={chatId ?? ''}
+                          messageId={msg.id}
                           otherMemberOaId={otherMemberOaId ?? null}
                           sendMessage={sendMessage}
                         />
