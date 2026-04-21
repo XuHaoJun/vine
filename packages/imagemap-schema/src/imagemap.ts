@@ -35,9 +35,7 @@ function areaFits(
   area: { x: number; y: number; width: number; height: number },
   baseSize: ImagemapBaseSize,
 ): boolean {
-  return (
-    area.x + area.width <= baseSize.width && area.y + area.height <= baseSize.height
-  )
+  return area.x + area.width <= baseSize.width && area.y + area.height <= baseSize.height
 }
 
 const ImagemapMessageShape = v.object({

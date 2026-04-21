@@ -69,9 +69,9 @@ describe('Individual action schemas', () => {
 
 describe('FlexActionSchema (union)', () => {
   it('accepts uri action', () => {
-    expect(
-      v.safeParse(FlexActionSchema, { type: 'uri', uri: 'https://x' }).success,
-    ).toBe(true)
+    expect(v.safeParse(FlexActionSchema, { type: 'uri', uri: 'https://x' }).success).toBe(
+      true,
+    )
   })
   it('rejects unknown action type', () => {
     expect(v.safeParse(FlexActionSchema, { type: 'nonsense' }).success).toBe(false)

@@ -35,9 +35,9 @@ describe('ImagemapMessageSchema', () => {
   })
 
   it('rejects type other than "imagemap"', () => {
-    expect(v.safeParse(ImagemapMessageSchema, { ...validBase, type: 'text' }).success).toBe(
-      false,
-    )
+    expect(
+      v.safeParse(ImagemapMessageSchema, { ...validBase, type: 'text' }).success,
+    ).toBe(false)
   })
 
   it('rejects baseUrl with .jpg extension', () => {
@@ -88,9 +88,9 @@ describe('ImagemapMessageSchema', () => {
       linkUri: 'https://x',
       area: { x: i, y: 0, width: 1, height: 1 },
     }))
-    expect(
-      v.safeParse(ImagemapMessageSchema, { ...validBase, actions }).success,
-    ).toBe(false)
+    expect(v.safeParse(ImagemapMessageSchema, { ...validBase, actions }).success).toBe(
+      false,
+    )
   })
 
   it('rejects altText > 1500 chars', () => {

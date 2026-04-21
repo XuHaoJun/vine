@@ -29,7 +29,11 @@ function imagemapActionToDispatchable(action: ImagemapAction): DispatchableActio
     case 'message':
       return { type: 'message', label: action.label, text: action.text }
     case 'clipboard':
-      return { type: 'clipboard', label: action.label, clipboardText: action.clipboardText }
+      return {
+        type: 'clipboard',
+        label: action.label,
+        clipboardText: action.clipboardText,
+      }
   }
 }
 
@@ -131,7 +135,11 @@ export const ImagemapBubble = memo(
             video={video}
             scale={scale}
             onExternalLinkTap={(uri) =>
-              dispatch({ type: 'uri', uri, label: undefined } satisfies DispatchableAction)
+              dispatch({
+                type: 'uri',
+                uri,
+                label: undefined,
+              } satisfies DispatchableAction)
             }
           />
         )}
