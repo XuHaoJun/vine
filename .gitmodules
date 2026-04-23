@@ -19,3 +19,7 @@
 [submodule "learn-projects/react-line-flex"]
 	path = learn-projects/react-line-flex
 	url = https://github.com/XuHaoJun/react-line-flex.git
+[submodule "learn-projects/hyperswitch-prism"]
+	path = learn-projects/hyperswitch-prism
+	url = https://github.com/XuHaoJun/hyperswitch-prism.git
+	branch = ecpay
