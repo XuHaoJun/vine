@@ -11,6 +11,7 @@ import type {
   Money,
 } from './types'
 import { computeCheckMacValue } from './utils/ecpay-mac'
+import { ConfigError } from './errors'
 
 const { PaymentStatus, WebhookEventType } = types
 
@@ -37,16 +38,16 @@ export function createPaymentsService(deps: PaymentsServiceDeps): PaymentsServic
     async createCharge(input: CreateChargeInput): Promise<CreateChargeResult> {
       // Validate
       if (ecpay.mode === 'prod' && input.testMode?.simulatePaid) {
-        throw new Error('createCharge: simulatePaid is not allowed in prod mode')
+        throw new ConfigError('createCharge: simulatePaid is not allowed in prod mode')
       }
       if (input.amount.currency !== 'TWD') {
-        throw new Error(`createCharge: unsupported currency ${input.amount.currency}, only TWD is supported`)
+        throw new ConfigError(`createCharge: unsupported currency ${input.amount.currency}, only TWD is supported`)
       }
       if (input.merchantTransactionId.length > 20) {
-        throw new Error('createCharge: merchantTransactionId must be ≤ 20 characters')
+        throw new ConfigError('createCharge: merchantTransactionId must be ≤ 20 characters')
       }
       if (!/^[A-Za-z0-9_]+$/.test(input.merchantTransactionId)) {
-        throw new Error('createCharge: merchantTransactionId must be alphanumeric (underscore allowed) only')
+        throw new ConfigError('createCharge: merchantTransactionId must be alphanumeric (underscore allowed) only')
       }
 
       // Build ECPay AioCheckOut form fields directly.

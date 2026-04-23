@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { createPaymentsService } from './service'
 import { signFormBody } from './test-utils/ecpay-mac'
+import { ConfigError } from './errors'
 
 const STAGE_CREDS = {
   merchantId: '3002607',
@@ -114,5 +115,47 @@ describe('handleWebhook', () => {
     if (res.verified) {
       expect(res.event.kind).toBe('charge.failed')
     }
+  })
+})
+
+describe('createCharge edge cases', () => {
+  const baseInput = {
+    merchantTransactionId: 'o_ec_001',
+    amount: { minorAmount: 75, currency: 'TWD' as const },
+    description: 'test',
+    returnUrl: 'http://r',
+    orderResultUrl: 'http://o',
+    idempotencyKey: 'o_ec_001',
+  }
+
+  it('rejects non-TWD', async () => {
+    const pay = createPaymentsService({ connector: 'ecpay', ecpay: STAGE_CREDS })
+    await expect(
+      pay.createCharge({ ...baseInput, amount: { minorAmount: 100, currency: 'USD' as const } }),
+    ).rejects.toThrow(ConfigError)
+  })
+
+  it('rejects merchantTransactionId > 20 chars', async () => {
+    const pay = createPaymentsService({ connector: 'ecpay', ecpay: STAGE_CREDS })
+    await expect(
+      pay.createCharge({ ...baseInput, merchantTransactionId: 'a'.repeat(21) }),
+    ).rejects.toThrow(ConfigError)
+  })
+
+  it('rejects non-alphanumeric merchantTransactionId', async () => {
+    const pay = createPaymentsService({ connector: 'ecpay', ecpay: STAGE_CREDS })
+    await expect(
+      pay.createCharge({ ...baseInput, merchantTransactionId: 'order-with-hyphen' }),
+    ).rejects.toThrow(ConfigError)
+  })
+
+  it('rejects SimulatePaid in prod mode', async () => {
+    const pay = createPaymentsService({
+      connector: 'ecpay',
+      ecpay: { ...STAGE_CREDS, mode: 'prod' },
+    })
+    await expect(
+      pay.createCharge({ ...baseInput, testMode: { simulatePaid: true } }),
+    ).rejects.toThrow(ConfigError)
   })
 })
