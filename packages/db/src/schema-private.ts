@@ -1,4 +1,4 @@
-import { pgTable } from 'drizzle-orm/pg-core'
+import { index, integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 
 import type { InferSelectModel } from 'drizzle-orm'
 
@@ -69,3 +69,26 @@ export const verification = pgTable('verification', (t) => ({
   createdAt: t.timestamp('createdAt', { mode: 'string' }),
   updatedAt: t.timestamp('updatedAt', { mode: 'string' }),
 }))
+
+export const stickerOrder = pgTable(
+  'stickerOrder',
+  {
+    id: text('id').primaryKey(),
+    userId: text('userId').notNull(),
+    packageId: text('packageId').notNull(),
+    amountMinor: integer('amountMinor').notNull(),
+    currency: text('currency').notNull().$type<'TWD'>(),
+    status: text('status').notNull().$type<'created' | 'paid' | 'failed'>().default('created'),
+    connectorName: text('connectorName').notNull().$type<'ecpay'>(),
+    connectorChargeId: text('connectorChargeId'),
+    paidAt: timestamp('paidAt', { mode: 'string' }),
+    failureReason: text('failureReason'),
+    // FUTURE(refund): add refundedAt / refundedAmountMinor when refund capability is added
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('stickerOrder_userId_idx').on(table.userId),
+    index('stickerOrder_status_idx').on(table.status),
+  ],
+)
