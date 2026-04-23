@@ -6,6 +6,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
@@ -142,5 +143,37 @@ export const message = pgTable(
       'message_sender_user_check',
       sql`(${table.senderType} = 'user' AND ${table.senderId} IS NOT NULL) OR (${table.senderType} = 'oa' AND ${table.oaId} IS NOT NULL)`,
     ),
+  ],
+)
+
+export const stickerPackage = pgTable(
+  'stickerPackage',
+  {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    description: text('description').notNull().default(''),
+    priceMinor: integer('priceMinor').notNull(),
+    currency: text('currency').notNull().$type<'TWD'>(),
+    coverDriveKey: text('coverDriveKey').notNull(),
+    tabIconDriveKey: text('tabIconDriveKey').notNull(),
+    stickerCount: integer('stickerCount').notNull(),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [index('stickerPackage_createdAt_idx').on(table.createdAt)],
+)
+
+export const entitlement = pgTable(
+  'entitlement',
+  {
+    id: text('id').primaryKey(),
+    userId: text('userId').notNull(),
+    packageId: text('packageId').notNull(),
+    grantedByOrderId: text('grantedByOrderId').notNull(),
+    grantedAt: timestamp('grantedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('entitlement_userId_idx').on(table.userId),
+    uniqueIndex('entitlement_userPackage_unique').on(table.userId, table.packageId),
   ],
 )
