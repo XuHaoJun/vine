@@ -8,7 +8,7 @@ import type {
   WebhookEvent,
   Money,
 } from './types'
-import { computeCheckMacValue } from './test-utils/ecpay-mac'
+import { computeCheckMacValue } from './utils/ecpay-mac'
 
 const { PaymentStatus, WebhookEventType } = types
 
@@ -46,7 +46,7 @@ export function createPaymentsService(deps: PaymentsServiceDeps): PaymentsServic
 
         const req: types.IEventServiceHandleRequest = {
           requestDetails: {
-            method: types.HttpMethod.POST,
+            method: types.HttpMethod.HTTP_METHOD_POST,
             headers: flatHeaders,
             body: new Uint8Array(input.rawBody),
           },
@@ -58,7 +58,8 @@ export function createPaymentsService(deps: PaymentsServiceDeps): PaymentsServic
 
         const res = await eventClient.handleEvent(req)
         return normalizeResponse(res, input.rawBody, ecpay.hashKey, ecpay.hashIv)
-      } catch {
+      } catch (err) {
+        console.warn('[pay] prism eventClient.handleEvent failed, falling back to manual ECPay verification', err)
         // Fallback: manual ECPay verification when prism is unavailable
         return manualEcpayWebhook(input.rawBody, ecpay.hashKey, ecpay.hashIv)
       }
