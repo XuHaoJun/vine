@@ -18,6 +18,7 @@ export * as entitlementModel from './models/entitlement'
 
 // Queries
 export * as chatQueries from './queries/chat'
+export * as entitlementQueries from './queries/entitlement'
 export * as friendshipQueries from './queries/friendship'
 export * as messageQueries from './queries/message'
 
