@@ -9,6 +9,39 @@ const STAGE_CREDS = {
   mode: 'stage' as const,
 }
 
+describe('createCharge', () => {
+  const baseInput = {
+    merchantTransactionId: 'o_cc_001',
+    amount: { minorAmount: 75, currency: 'TWD' as const },
+    description: '貓咪日常 40 款',
+    returnUrl: 'http://localhost:3001/webhooks/ecpay',
+    orderResultUrl: 'http://localhost:3000/pay/result',
+    idempotencyKey: 'o_cc_001',
+  }
+
+  it('returns redirect_form_post action', async () => {
+    const pay = createPaymentsService({ connector: 'ecpay', ecpay: STAGE_CREDS })
+    const res = await pay.createCharge(baseInput)
+    expect(res.status).toBe('pending_action')
+    expect(res.action.type).toBe('redirect_form_post')
+    if (res.action.type === 'redirect_form_post') {
+      expect(res.action.targetUrl).toContain('payment-stage.ecpay.com.tw')
+      expect(res.action.formFields.MerchantTradeNo).toBe('o_cc_001')
+      expect(res.action.formFields.TotalAmount).toBe('75')
+      expect(res.action.formFields.CheckMacValue).toMatch(/^[A-F0-9]{64}$/)
+    }
+    expect(res.connectorName).toBe('ecpay')
+  })
+
+  it('injects SimulatePaid=1 in stage when testMode.simulatePaid', async () => {
+    const pay = createPaymentsService({ connector: 'ecpay', ecpay: STAGE_CREDS })
+    const res = await pay.createCharge({ ...baseInput, testMode: { simulatePaid: true } })
+    if (res.action.type === 'redirect_form_post') {
+      expect(res.action.formFields.SimulatePaid).toBe('1')
+    }
+  })
+})
+
 describe('handleWebhook', () => {
   it('verified=true with charge.succeeded for RtnCode=1', async () => {
     const pay = createPaymentsService({ connector: 'ecpay', ecpay: STAGE_CREDS })

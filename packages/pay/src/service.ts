@@ -3,6 +3,8 @@ import { createPrismClients } from './prism/client'
 import type {
   PaymentsService,
   PaymentsServiceDeps,
+  CreateChargeInput,
+  CreateChargeResult,
   HandleWebhookInput,
   HandleWebhookResult,
   WebhookEvent,
@@ -11,6 +13,9 @@ import type {
 import { computeCheckMacValue } from './utils/ecpay-mac'
 
 const { PaymentStatus, WebhookEventType } = types
+
+const ECPAY_STAGE_CHECKOUT_URL = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5'
+const ECPAY_PROD_CHECKOUT_URL = 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5'
 
 export function createPaymentsService(deps: PaymentsServiceDeps): PaymentsService {
   if (deps.connector !== 'ecpay') {
@@ -29,8 +34,59 @@ export function createPaymentsService(deps: PaymentsServiceDeps): PaymentsServic
   }
 
   return {
-    async createCharge() {
-      throw new Error('createCharge: not implemented')
+    async createCharge(input: CreateChargeInput): Promise<CreateChargeResult> {
+      // Validate
+      if (ecpay.mode === 'prod' && input.testMode?.simulatePaid) {
+        throw new Error('createCharge: simulatePaid is not allowed in prod mode')
+      }
+      if (input.amount.currency !== 'TWD') {
+        throw new Error(`createCharge: unsupported currency ${input.amount.currency}, only TWD is supported`)
+      }
+      if (input.merchantTransactionId.length > 20) {
+        throw new Error('createCharge: merchantTransactionId must be ≤ 20 characters')
+      }
+      if (!/^[A-Za-z0-9_]+$/.test(input.merchantTransactionId)) {
+        throw new Error('createCharge: merchantTransactionId must be alphanumeric (underscore allowed) only')
+      }
+
+      // Build ECPay AioCheckOut form fields directly.
+      // Prism's paymentClient.authorize is not used here because the prism ECPay integration
+      // calls ECPay's AioCheckOut endpoint and tries to JSON-parse the HTML response, which
+      // fails. The correct ECPay redirect flow has the server build the form fields and return
+      // them to the client — the browser then POSTs them to ECPay's checkout URL directly.
+      const now = new Date()
+      const twOffset = 8 * 60 * 60 * 1000
+      const tw = new Date(now.getTime() + twOffset)
+      const pad = (n: number) => String(n).padStart(2, '0')
+      const merchantTradeDate = `${tw.getUTCFullYear()}/${pad(tw.getUTCMonth() + 1)}/${pad(tw.getUTCDate())} ${pad(tw.getUTCHours())}:${pad(tw.getUTCMinutes())}:${pad(tw.getUTCSeconds())}`
+
+      const params: Record<string, string> = {
+        MerchantID: ecpay.merchantId,
+        MerchantTradeNo: input.merchantTransactionId,
+        MerchantTradeDate: merchantTradeDate,
+        PaymentType: 'aio',
+        TotalAmount: String(input.amount.minorAmount),
+        TradeDesc: input.description,
+        ItemName: input.description,
+        ReturnURL: input.returnUrl,
+        ChoosePayment: 'Credit',
+        EncryptType: '1',
+        OrderResultURL: input.orderResultUrl,
+      }
+
+      if (input.testMode?.simulatePaid && ecpay.mode === 'stage') {
+        params['SimulatePaid'] = '1'
+      }
+
+      params['CheckMacValue'] = computeCheckMacValue(params, ecpay.hashKey, ecpay.hashIv)
+
+      const targetUrl = ecpay.mode === 'prod' ? ECPAY_PROD_CHECKOUT_URL : ECPAY_STAGE_CHECKOUT_URL
+
+      return {
+        status: 'pending_action',
+        action: { type: 'redirect_form_post', targetUrl, formFields: params },
+        connectorName: 'ecpay',
+      }
     },
 
     async handleWebhook(input: HandleWebhookInput): Promise<HandleWebhookResult> {
