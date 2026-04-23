@@ -4,6 +4,15 @@ import { defineQuery, defineQueries } from '@rocicorp/zero'
 import * as v from 'valibot'
 import * as Queries from './groupedQueries'
 
+const entitlement = {
+  entitlementsByUserId: defineQuery(
+    v.object({
+      userId: v.string(),
+    }),
+    ({ args }) => Queries.entitlement.entitlementsByUserId(args),
+  ),
+}
+
 const chat = {
   chatMembersByChatId: defineQuery(
     v.object({
@@ -83,6 +92,7 @@ const user = {
 
 export const queries = defineQueries({
   chat,
+  entitlement,
   friendship,
   message,
   todo,
