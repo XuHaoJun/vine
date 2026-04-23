@@ -3,8 +3,10 @@
 
 export { schema as chat } from '../models/chat'
 export { schema as chatMember } from '../models/chatMember'
+export { schema as entitlement } from '../models/entitlement'
 export { schema as friendship } from '../models/friendship'
 export { schema as message } from '../models/message'
+export { schema as stickerPackage } from '../models/stickerPackage'
 export { schema as todo } from '../models/todo'
 export { schema as userPublic } from '../models/user'
 export { schema as userState } from '../models/userState'

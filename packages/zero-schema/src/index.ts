@@ -13,6 +13,8 @@ export * as friendshipModel from './models/friendship'
 export * as chatModel from './models/chat'
 export * as chatMemberModel from './models/chatMember'
 export * as messageModel from './models/message'
+export * as stickerPackageModel from './models/stickerPackage'
+export * as entitlementModel from './models/entitlement'
 
 // Queries
 export * as chatQueries from './queries/chat'

@@ -7,11 +7,17 @@ export type ChatUpdate = TableUpdateRow<typeof schema.chat>
 export type ChatMember = TableInsertRow<typeof schema.chatMember>
 export type ChatMemberUpdate = TableUpdateRow<typeof schema.chatMember>
 
+export type Entitlement = TableInsertRow<typeof schema.entitlement>
+export type EntitlementUpdate = TableUpdateRow<typeof schema.entitlement>
+
 export type Friendship = TableInsertRow<typeof schema.friendship>
 export type FriendshipUpdate = TableUpdateRow<typeof schema.friendship>
 
 export type Message = TableInsertRow<typeof schema.message>
 export type MessageUpdate = TableUpdateRow<typeof schema.message>
+
+export type StickerPackage = TableInsertRow<typeof schema.stickerPackage>
+export type StickerPackageUpdate = TableUpdateRow<typeof schema.stickerPackage>
 
 export type Todo = TableInsertRow<typeof schema.todo>
 export type TodoUpdate = TableUpdateRow<typeof schema.todo>

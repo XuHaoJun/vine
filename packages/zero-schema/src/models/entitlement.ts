@@ -1,0 +1,20 @@
+import { string, table } from '@rocicorp/zero'
+import { serverWhere } from 'on-zero'
+
+import type { TableInsertRow } from 'on-zero'
+
+export type Entitlement = TableInsertRow<typeof schema>
+
+export const schema = table('entitlement')
+  .columns({
+    id: string(),
+    userId: string(),
+    packageId: string(),
+    grantedByOrderId: string(),
+    grantedAt: string(),
+  })
+  .primaryKey('id')
+
+export const entitlementReadPermission = serverWhere('entitlement', (_, auth) => {
+  return _.cmp('userId', auth?.id || '')
+})
