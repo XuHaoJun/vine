@@ -1,9 +1,11 @@
 import { Code, ConnectError } from '@connectrpc/connect'
+import type { HandlerContext } from '@connectrpc/connect'
 import { and, eq } from 'drizzle-orm'
 import { stickerPackage, entitlement } from '@vine/db/schema-public'
 import { stickerOrder } from '@vine/db/schema-private'
 import type { PaymentsService } from '@vine/pay'
 import { OrderStatus } from '@vine/proto/stickerMarket'
+import { requireAuthData } from './auth-context'
 
 export type StickerMarketUserHandlerDeps = {
   db: any
@@ -14,15 +16,13 @@ export type StickerMarketUserHandlerDeps = {
   clientBackUrl?: string
 }
 
-type AuthContext = { authData: { userID: string } }
-
 export function createStickerMarketUserHandler(deps: StickerMarketUserHandlerDeps) {
   return {
     async createCheckout(
       req: { packageId: string; simulatePaid: boolean },
-      ctx: AuthContext,
+      ctx: HandlerContext,
     ) {
-      const userId = ctx.authData.userID
+      const userId = requireAuthData(ctx).id
 
       if (req.simulatePaid && deps.mode !== 'stage') {
         throw new ConnectError('simulatePaid is only allowed in stage mode', Code.InvalidArgument)
@@ -82,8 +82,8 @@ export function createStickerMarketUserHandler(deps: StickerMarketUserHandlerDep
       }
     },
 
-    async getOrder(req: { orderId: string }, ctx: AuthContext) {
-      const userId = ctx.authData.userID
+    async getOrder(req: { orderId: string }, ctx: HandlerContext) {
+      const userId = requireAuthData(ctx).id
 
       const [order] = await deps.db
         .select()

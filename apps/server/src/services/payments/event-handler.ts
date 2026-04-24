@@ -1,7 +1,12 @@
-import type { Logger } from 'pino'
 import type { WebhookEvent } from '@vine/pay'
 import type { StickerOrderRepository } from './order.repository'
 import type { EntitlementRepository } from './entitlement.repository'
+
+type MinLogger = {
+  warn(obj: object, msg: string): void
+  error(obj: object, msg: string): void
+  info(obj: object, msg: string): void
+}
 
 export type PaymentEventDeps = {
   db: any
@@ -12,7 +17,7 @@ export type PaymentEventDeps = {
 export async function handlePaymentEvent(
   deps: PaymentEventDeps,
   event: WebhookEvent,
-  log: Logger,
+  log: MinLogger,
 ): Promise<void> {
   if (event.kind === 'unknown') {
     log.warn({ raw: event.raw }, 'unknown ecpay event, skipping')
@@ -40,7 +45,7 @@ async function applyChargeSucceeded(
   deps: PaymentEventDeps,
   order: Awaited<ReturnType<StickerOrderRepository['findById']>> & {},
   event: Extract<WebhookEvent, { kind: 'charge.succeeded' }>,
-  log: Logger,
+  log: MinLogger,
 ): Promise<void> {
   if (order.amountMinor !== event.amount.minorAmount || order.currency !== event.amount.currency) {
     log.error(
@@ -76,7 +81,7 @@ async function applyChargeFailed(
   deps: PaymentEventDeps,
   order: Awaited<ReturnType<StickerOrderRepository['findById']>> & {},
   event: Extract<WebhookEvent, { kind: 'charge.failed' }>,
-  log: Logger,
+  log: MinLogger,
 ): Promise<void> {
   if (order.status === 'paid') {
     log.error({ orderId: order.id }, 'CRITICAL: charge.failed after paid — ignoring')

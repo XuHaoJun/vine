@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { createStickerMarketUserHandler } from './stickerMarketUser'
-import { Code, ConnectError } from '@connectrpc/connect'
+import { Code, ConnectError, createContextValues } from '@connectrpc/connect'
+import { connectAuthDataKey } from './auth-context'
 
 function makeMockPay() {
   return {
@@ -84,7 +85,25 @@ function makeDeps(overrides: { rowsQueue?: Array<unknown[]>; mode?: 'stage' | 'p
   }
 }
 
-const authCtx = { authData: { userID: 'user-1' } }
+function makeAuthCtx(userId: string) {
+  const values = createContextValues()
+  values.set(connectAuthDataKey, { id: userId } as any)
+  return {
+    values,
+    signal: new AbortController().signal,
+    timeoutMs: undefined,
+    method: {} as any,
+    service: {} as any,
+    requestMethod: 'POST',
+    url: new URL('http://localhost/'),
+    peer: { addr: '127.0.0.1' },
+    requestHeader: new Headers(),
+    responseHeader: new Headers(),
+    responseTrailer: new Headers(),
+  } as any
+}
+
+const authCtx = makeAuthCtx('user-1')
 
 describe('createStickerMarketUserHandler', () => {
   describe('createCheckout', () => {
@@ -156,7 +175,7 @@ describe('createStickerMarketUserHandler', () => {
       const handler = createStickerMarketUserHandler(deps)
 
       await expect(
-        handler.getOrder({ orderId: 'ORDER123' }, { authData: { userID: 'user-1' } }),
+        handler.getOrder({ orderId: 'ORDER123' }, makeAuthCtx('user-1')),
       ).rejects.toMatchObject({ code: Code.PermissionDenied })
     })
 
