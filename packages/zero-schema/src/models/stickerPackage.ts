@@ -1,4 +1,5 @@
 import { number, string, table } from '@rocicorp/zero'
+import { mutations } from 'on-zero'
 
 import type { TableInsertRow } from 'on-zero'
 
@@ -18,3 +19,5 @@ export const schema = table('stickerPackage')
     updatedAt: string(),
   })
   .primaryKey('id')
+
+export const mutate = mutations({})

@@ -59,6 +59,19 @@ const message = {
   ),
 }
 
+const stickerPackage = {
+  allStickerPackages: defineQuery(
+    v.object({}),
+    ({ args }) => Queries.stickerPackage.allStickerPackages(args),
+  ),
+  stickerPackageById: defineQuery(
+    v.object({
+      packageId: v.string(),
+    }),
+    ({ args }) => Queries.stickerPackage.stickerPackageById(args),
+  ),
+}
+
 const todo = {
   todoById: defineQuery(
     v.object({
@@ -95,6 +108,7 @@ export const queries = defineQueries({
   entitlement,
   friendship,
   message,
+  stickerPackage,
   todo,
   user,
 })

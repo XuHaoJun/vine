@@ -7,6 +7,7 @@ import { XStack, YStack, SizableText, isWeb } from 'tamagui'
 
 import { Input } from '~/interface/forms/Input'
 import { showToast } from '~/interface/toast/Toast'
+import { StickerPicker } from '~/features/sticker-market/StickerPicker'
 
 import { useAudioRecorder } from '../useAudioRecorder'
 import { useImagePicker } from '../useImagePicker'
@@ -19,6 +20,7 @@ type Props = {
     url: string,
     extra?: Record<string, unknown>,
   ) => void
+  onSendSticker?: (packageId: string, stickerId: number) => void
   disabled?: boolean
   hasRichMenu?: boolean
   onSwitchToRichMenu?: () => void
@@ -86,6 +88,30 @@ function EmojiIcon() {
   )
 }
 
+function StickerIcon({ active }: { active: boolean }) {
+  return (
+    <Svg
+      width={22}
+      height={22}
+      viewBox="0 0 24 24"
+      fill={active ? '#8be872' : 'none'}
+      stroke={active ? '#8be872' : '#666'}
+      strokeWidth={1.5}
+    >
+      <Path
+        d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4 11c0 2.21-1.79 4-4 4s-4-1.79-4-4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M15.5 8.5a.5.5 0 110-1 .5.5 0 010 1zm-7 0a.5.5 0 110-1 .5.5 0 010 1z"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  )
+}
+
 function MicIcon() {
   return (
     <Svg
@@ -132,8 +158,9 @@ function formatRecordingTime(ms: number): string {
 }
 
 export const MessageInput = memo(
-  ({ onSend, onSendMedia, disabled, hasRichMenu, onSwitchToRichMenu }: Props) => {
+  ({ onSend, onSendMedia, onSendSticker, disabled, hasRichMenu, onSwitchToRichMenu }: Props) => {
     const [text, setText] = useState('')
+    const [showStickers, setShowStickers] = useState(false)
     const insets = useSafeAreaInsets()
     const fileInputRef = useRef<HTMLInputElement | null>(null)
     const { upload, status: uploadStatus } = useMediaUpload()
@@ -235,8 +262,20 @@ export const MessageInput = memo(
       cancelOnReleaseRef.current = true
     }, [isRecording])
 
+    const handleStickerSelect = useCallback(
+      (packageId: string, stickerId: number) => {
+        setShowStickers(false)
+        onSendSticker?.(packageId, stickerId)
+      },
+      [onSendSticker],
+    )
+
     return (
       <YStack bg="white" borderTopWidth={1} borderTopColor="$color4">
+        {showStickers && onSendSticker && (
+          <StickerPicker onSelect={handleStickerSelect} />
+        )}
+
         {isRecording && (
           <XStack items="center" justify="center" gap="$2" py="$2" bg="$red2">
             <YStack width={8} height={8} rounded="$10" bg="$red10" opacity={0.85} />
@@ -305,6 +344,14 @@ export const MessageInput = memo(
               <PhotoIcon />
             </XStack>
           </Pressable>
+
+          {onSendSticker && (
+            <Pressable onPress={() => setShowStickers((v) => !v)}>
+              <XStack style={{ flexShrink: 0 }} items="center" justify="center">
+                <StickerIcon active={showStickers} />
+              </XStack>
+            </Pressable>
+          )}
 
           {isWeb && (
             <input

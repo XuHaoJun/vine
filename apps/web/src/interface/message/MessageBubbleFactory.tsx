@@ -74,6 +74,14 @@ export const MessageBubbleFactory = memo(
       return <AudioBubble url={url} duration={duration} isMine={isMine} />
     }
 
+    if (type === 'sticker') {
+      const meta = parseMetadata(metadata)
+      const packageId = typeof meta.packageId === 'string' ? meta.packageId : ''
+      const stickerId = typeof meta.stickerId === 'number' ? meta.stickerId : 0
+      if (!packageId || !stickerId) return <UnsupportedBubble type={type} />
+      return <StickerBubble packageId={packageId} stickerId={stickerId} />
+    }
+
     if (type === 'imagemap') {
       const meta = parseMetadata(metadata)
       const baseUrl = typeof meta.baseUrl === 'string' ? meta.baseUrl : ''
@@ -168,3 +176,17 @@ const UnsupportedBubble = memo(({ type }: UnsupportedBubbleProps) => {
     </YStack>
   )
 })
+
+const StickerBubble = memo(
+  ({ packageId, stickerId }: { packageId: string; stickerId: number }) => (
+    <YStack p="$1">
+      <img
+        src={`/uploads/stickers/${packageId}/${stickerId}.png`}
+        width={120}
+        height={120}
+        alt="sticker"
+        style={{ objectFit: 'contain' }}
+      />
+    </YStack>
+  ),
+)

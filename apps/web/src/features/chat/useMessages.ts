@@ -47,6 +47,22 @@ export function useMessages(chatId: string) {
     })
   }
 
+  const sendSticker = useCallback(
+    (packageId: string, stickerId: number) => {
+      if (!userId) return
+      zero.mutate.message.sendSticker({
+        id: crypto.randomUUID(),
+        chatId,
+        senderId: userId,
+        senderType: 'user',
+        type: 'sticker',
+        metadata: JSON.stringify({ packageId, stickerId }),
+        createdAt: Date.now(),
+      })
+    },
+    [chatId, userId],
+  )
+
   const sendMedia = useCallback(
     (type: 'image' | 'video' | 'audio', url: string, extra?: Record<string, unknown>) => {
       if (!userId) return
@@ -85,6 +101,7 @@ export function useMessages(chatId: string) {
     members: members ?? [],
     sendMessage,
     sendMedia,
+    sendSticker,
     markRead,
   }
 }
