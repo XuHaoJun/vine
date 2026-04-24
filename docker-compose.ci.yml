@@ -1,0 +1,7 @@
+services:
+  migrate:
+    user: "0:0"
+  server:
+    user: "0:0"
+  web:
+    user: "0:0"
