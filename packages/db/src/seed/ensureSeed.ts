@@ -3,9 +3,12 @@ import { bytesToHex, randomBytes } from '@noble/hashes/utils.js'
 import { and, eq } from 'drizzle-orm'
 import type { Pool } from 'pg'
 import { randomUUID } from 'crypto'
+import { readFileSync } from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 import { user, account } from '../schema-private'
-import { friendship, userPublic, userState, chat, chatMember } from '../schema-public'
+import { friendship, userPublic, userState, chat, chatMember, stickerPackage } from '../schema-public'
 import {
   oaProvider,
   officialAccount,
@@ -81,6 +84,17 @@ const TEST_USERS = [
   { email: 'test2@example.com', name: 'Test Two', username: 'test2' },
   { email: 'test3@example.com', name: 'Test Three', username: 'test3' },
 ] as const
+
+const STICKER_PACKAGE_SEEDS = [
+  { id: 'pkg_cat_01', name: '貓咪日常', description: '', priceMinor: 75, stickerCount: 8 },
+  { id: 'pkg_dog_01', name: '狗狗合集', description: '', priceMinor: 45, stickerCount: 8 },
+  { id: 'pkg_bun_01', name: '兔兔聖誕限定', description: '', priceMinor: 129, stickerCount: 8 },
+] as const
+
+const FIXTURES_DIR = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  'sticker-fixtures',
+)
 
 const TEST_PASSWORD = 'test@1234'
 
@@ -461,5 +475,50 @@ export async function ensureSeed(pool: Pool, db: any, drive?: SeedDrive) {
     }
   }
 
+  await seedStickerPackages(db, drive)
+
   console.info('[seed] Seed data initialization complete')
+}
+
+async function seedStickerPackages(db: any, drive?: SeedDrive): Promise<void> {
+  const now = new Date().toISOString()
+  for (const pkg of STICKER_PACKAGE_SEEDS) {
+    const existing = await db
+      .select()
+      .from(stickerPackage)
+      .where(eq(stickerPackage.id, pkg.id))
+      .limit(1)
+
+    if (existing.length === 0) {
+      await db.insert(stickerPackage).values({
+        id: pkg.id,
+        name: pkg.name,
+        description: pkg.description,
+        priceMinor: pkg.priceMinor,
+        currency: 'TWD',
+        coverDriveKey: `stickers/${pkg.id}/cover.png`,
+        tabIconDriveKey: `stickers/${pkg.id}/tab.png`,
+        stickerCount: pkg.stickerCount,
+        createdAt: now,
+        updatedAt: now,
+      })
+      console.info(`[seed] created sticker package ${pkg.id}`)
+    } else {
+      console.info(`[seed] sticker package ${pkg.id} already exists`)
+    }
+
+    if (drive) {
+      const base = path.join(FIXTURES_DIR, pkg.id)
+      await putPng(drive, `stickers/${pkg.id}/cover.png`, path.join(base, 'cover.png'))
+      await putPng(drive, `stickers/${pkg.id}/tab.png`, path.join(base, 'tab.png'))
+      for (let i = 1; i <= pkg.stickerCount; i++) {
+        await putPng(drive, `stickers/${pkg.id}/${i}.png`, path.join(base, `${i}.png`))
+      }
+    }
+  }
+}
+
+async function putPng(drive: SeedDrive, key: string, file: string): Promise<void> {
+  const buffer = readFileSync(file)
+  await drive.put(key, buffer, 'image/png')
 }
