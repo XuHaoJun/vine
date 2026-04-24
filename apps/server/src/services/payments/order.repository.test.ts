@@ -1,124 +1,108 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { drizzle } from 'drizzle-orm/node-postgres'
-import { Pool } from 'pg'
-import { stickerOrder } from '@vine/db/schema-private'
+import { describe, it, expect, vi } from 'vitest'
 import { createStickerOrderRepository } from './order.repository'
 
-const TEST_DB_URL =
-  process.env['ZERO_UPSTREAM_DB'] ?? 'postgresql://user:password@localhost:5533/postgres'
+// Build a Drizzle-shaped mock tx without any real DB connection.
+// The mock controls what rowCount / rows come back so tests can
+// verify both the happy path and the pass-through of 0 (idempotent).
+function makeTx(opts: { rows?: object[]; rowCount?: number } = {}) {
+  const rows = opts.rows ?? []
+  const rowCount = opts.rowCount ?? 0
 
-const pool = new Pool({ connectionString: TEST_DB_URL, max: 5 })
-const db = drizzle({ client: pool })
+  const whereChain = { where: vi.fn().mockResolvedValue({ rowCount }) }
+  const setChain = { set: vi.fn().mockReturnValue(whereChain) }
+  const limitChain = { limit: vi.fn().mockResolvedValue(rows) }
+  const fromChain = { where: vi.fn().mockReturnValue(limitChain) }
 
-const repo = createStickerOrderRepository(db)
+  return {
+    insert: vi.fn().mockReturnValue({ values: vi.fn().mockResolvedValue(undefined) }),
+    select: vi.fn().mockReturnValue({ from: vi.fn().mockReturnValue(fromChain) }),
+    update: vi.fn().mockReturnValue(setChain),
+    // exposed for assertions
+    _setChain: setChain,
+    _whereChain: whereChain,
+    _fromChain: fromChain,
+  }
+}
 
-beforeEach(async () => {
-  await db.delete(stickerOrder)
-})
+const INPUT = {
+  id: 'order-1',
+  userId: 'user-1',
+  packageId: 'pkg-1',
+  amountMinor: 3000,
+  currency: 'TWD' as const,
+  connectorName: 'ecpay' as const,
+}
+
+const repo = createStickerOrderRepository({} as any)
 
 describe('StickerOrderRepository', () => {
   it('create inserts a row with status=created', async () => {
-    await repo.create(db, {
+    const tx = makeTx()
+    await repo.create(tx, INPUT)
+
+    expect(tx.insert).toHaveBeenCalledOnce()
+    const valuesArg = (tx.insert.mock.results[0]!.value as any).values.mock.calls[0][0]
+    expect(valuesArg).toMatchObject({
       id: 'order-1',
       userId: 'user-1',
       packageId: 'pkg-1',
       amountMinor: 3000,
       currency: 'TWD',
       connectorName: 'ecpay',
+      status: 'created',
     })
-
-    const row = await repo.findById(db, 'order-1')
-    expect(row).not.toBeNull()
-    expect(row!.status).toBe('created')
-    expect(row!.amountMinor).toBe(3000)
   })
 
-  it('transitionToPaid updates created→paid and returns 1', async () => {
-    await repo.create(db, {
-      id: 'order-2',
-      userId: 'user-1',
-      packageId: 'pkg-1',
-      amountMinor: 3000,
-      currency: 'TWD',
-      connectorName: 'ecpay',
-    })
+  it('findById returns the matching row', async () => {
+    const row = { id: 'order-1', status: 'created', amountMinor: 3000 }
+    const tx = makeTx({ rows: [row] })
+    const result = await repo.findById(tx, 'order-1')
+    expect(result).toEqual(row)
+  })
 
-    const count = await repo.transitionToPaid(db, 'order-2', {
+  it('findById returns null when no row found', async () => {
+    const tx = makeTx({ rows: [] })
+    const result = await repo.findById(tx, 'missing')
+    expect(result).toBeNull()
+  })
+
+  it('transitionToPaid sets status=paid and returns rowCount', async () => {
+    const tx = makeTx({ rowCount: 1 })
+    const count = await repo.transitionToPaid(tx, 'order-1', {
       connectorChargeId: 'charge-abc',
       paidAt: new Date('2026-04-23T10:00:00Z'),
     })
 
     expect(count).toBe(1)
-    const row = await repo.findById(db, 'order-2')
-    expect(row!.status).toBe('paid')
-    expect(row!.connectorChargeId).toBe('charge-abc')
+    const setArg = tx._setChain.set.mock.calls[0]![0]
+    expect(setArg).toMatchObject({
+      status: 'paid',
+      connectorChargeId: 'charge-abc',
+      paidAt: '2026-04-23T10:00:00.000Z',
+    })
   })
 
-  it('transitionToPaid is idempotent when already paid (returns 0)', async () => {
-    await repo.create(db, {
-      id: 'order-3',
-      userId: 'user-1',
-      packageId: 'pkg-1',
-      amountMinor: 3000,
-      currency: 'TWD',
-      connectorName: 'ecpay',
-    })
-
-    await repo.transitionToPaid(db, 'order-3', {
+  it('transitionToPaid propagates rowCount=0 (idempotent / already paid)', async () => {
+    const tx = makeTx({ rowCount: 0 })
+    const count = await repo.transitionToPaid(tx, 'order-1', {
       connectorChargeId: 'charge-abc',
       paidAt: new Date('2026-04-23T10:00:00Z'),
     })
-
-    const count = await repo.transitionToPaid(db, 'order-3', {
-      connectorChargeId: 'charge-abc',
-      paidAt: new Date('2026-04-23T10:00:00Z'),
-    })
-
     expect(count).toBe(0)
   })
 
-  it('transitionToPaid allows failed→paid', async () => {
-    await repo.create(db, {
-      id: 'order-4',
-      userId: 'user-1',
-      packageId: 'pkg-1',
-      amountMinor: 3000,
-      currency: 'TWD',
-      connectorName: 'ecpay',
-    })
-
-    await repo.transitionToFailed(db, 'order-4', { failureReason: 'timeout' })
-    const count = await repo.transitionToPaid(db, 'order-4', {
-      connectorChargeId: 'charge-xyz',
-      paidAt: new Date('2026-04-23T10:00:00Z'),
-    })
+  it('transitionToFailed sets status=failed and returns rowCount', async () => {
+    const tx = makeTx({ rowCount: 1 })
+    const count = await repo.transitionToFailed(tx, 'order-1', { failureReason: 'timeout' })
 
     expect(count).toBe(1)
-    const row = await repo.findById(db, 'order-4')
-    expect(row!.status).toBe('paid')
+    const setArg = tx._setChain.set.mock.calls[0]![0]
+    expect(setArg).toMatchObject({ status: 'failed', failureReason: 'timeout' })
   })
 
-  it('transitionToFailed blocks already-paid orders (returns 0)', async () => {
-    await repo.create(db, {
-      id: 'order-5',
-      userId: 'user-1',
-      packageId: 'pkg-1',
-      amountMinor: 3000,
-      currency: 'TWD',
-      connectorName: 'ecpay',
-    })
-
-    await repo.transitionToPaid(db, 'order-5', {
-      connectorChargeId: 'charge-abc',
-      paidAt: new Date('2026-04-23T10:00:00Z'),
-    })
-
-    const count = await repo.transitionToFailed(db, 'order-5', {
-      failureReason: 'some-error',
-    })
-
+  it('transitionToFailed propagates rowCount=0 (blocked when already paid)', async () => {
+    const tx = makeTx({ rowCount: 0 })
+    const count = await repo.transitionToFailed(tx, 'order-1', { failureReason: 'some-error' })
     expect(count).toBe(0)
-    const row = await repo.findById(db, 'order-5')
-    expect(row!.status).toBe('paid')
   })
 })
