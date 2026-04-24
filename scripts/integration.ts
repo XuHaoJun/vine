@@ -191,7 +191,7 @@ async function main() {
 
     // start docker
     console.info('\nstarting docker...')
-    await spawn('docker compose -f docker-compose.yml -f docker-compose.ci.yml up --remove-orphans pgdb migrate zero')
+    await spawn('docker compose up --remove-orphans pgdb migrate zero')
     await waitForMigrations()
 
     // install playwright

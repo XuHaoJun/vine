@@ -42,7 +42,7 @@ services:
 
   migrate:
     image: oven/bun:1
-    user: "${UID:-1000}:${GID:-1000}"
+    user: "${CI:-false}" != "false" ? "0:0" : "${UID:-1000}:${GID:-1000}"
     depends_on:
       pgdb:
         condition: service_healthy
@@ -89,7 +89,7 @@ services:
 
   server:
     image: oven/bun:1
-    user: "${UID:-1000}:${GID:-1000}"
+    user: "${CI:-false}" != "false" ? "0:0" : "${UID:-1000}:${GID:-1000}"
     depends_on:
       pgdb:
         condition: service_healthy
@@ -110,7 +110,7 @@ services:
 
   web:
     image: oven/bun:1
-    user: "${UID:-1000}:${GID:-1000}"
+    user: "${CI:-false}" != "false" ? "0:0" : "${UID:-1000}:${GID:-1000}"
     depends_on:
       - server
       - zero
