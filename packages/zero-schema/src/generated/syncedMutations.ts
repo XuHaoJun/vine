@@ -9,14 +9,14 @@ export const mutationValidators = {
       userId: v.string(),
       packageId: v.string(),
       grantedByOrderId: v.string(),
-      grantedAt: v.string(),
+      grantedAt: v.number(),
     }),
     update: v.object({
       id: v.string(),
       userId: v.optional(v.nullable(v.string())),
       packageId: v.optional(v.nullable(v.string())),
       grantedByOrderId: v.optional(v.nullable(v.string())),
-      grantedAt: v.optional(v.nullable(v.string())),
+      grantedAt: v.optional(v.nullable(v.number())),
     }),
     delete: v.object({
       id: v.string(),
@@ -32,8 +32,8 @@ export const mutationValidators = {
       coverDriveKey: v.string(),
       tabIconDriveKey: v.string(),
       stickerCount: v.number(),
-      createdAt: v.string(),
-      updatedAt: v.string(),
+      createdAt: v.number(),
+      updatedAt: v.number(),
     }),
     update: v.object({
       id: v.string(),
@@ -44,8 +44,8 @@ export const mutationValidators = {
       coverDriveKey: v.optional(v.nullable(v.string())),
       tabIconDriveKey: v.optional(v.nullable(v.string())),
       stickerCount: v.optional(v.nullable(v.number())),
-      createdAt: v.optional(v.nullable(v.string())),
-      updatedAt: v.optional(v.nullable(v.string())),
+      createdAt: v.optional(v.nullable(v.number())),
+      updatedAt: v.optional(v.nullable(v.number())),
     }),
     delete: v.object({
       id: v.string(),

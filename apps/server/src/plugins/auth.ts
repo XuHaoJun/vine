@@ -18,6 +18,17 @@ const DOMAIN = 'takeout.tamagui.dev'
 const APP_SCHEME = 'takeout'
 const BETTER_AUTH_URL = process.env['BETTER_AUTH_URL'] ?? 'http://localhost:3001'
 const DEMO_EMAIL = process.env['DEMO_EMAIL'] ?? `demo@${DOMAIN}`
+const DEFAULT_INTEGRATION_TEST_PROXY_PORT = 8081
+
+function getIntegrationTestProxyPort() {
+  const parsedPort = Number(process.env['INTEGRATION_TEST_PROXY_PORT'])
+  if (Number.isInteger(parsedPort) && parsedPort > 0) {
+    return parsedPort
+  }
+  return DEFAULT_INTEGRATION_TEST_PROXY_PORT
+}
+
+const INTEGRATION_TEST_PROXY_PORT = getIntegrationTestProxyPort()
 
 type AuthDeps = {
   database: Pool
@@ -92,8 +103,8 @@ function createAuthServer(deps: AuthDeps) {
 
     trustedOrigins: [
       `https://${DOMAIN}`,
-      'http://localhost:8081',
-      'http://host.docker.internal:8081',
+      `http://localhost:${INTEGRATION_TEST_PROXY_PORT}`,
+      `http://host.docker.internal:${INTEGRATION_TEST_PROXY_PORT}`,
       `${APP_SCHEME}://`,
       BETTER_AUTH_URL,
     ],

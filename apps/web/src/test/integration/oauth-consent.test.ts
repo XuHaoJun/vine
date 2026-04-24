@@ -6,12 +6,13 @@
 import { test, expect } from '@playwright/test'
 
 import type { APIRequestContext, Page } from '@playwright/test'
+import { BASE_URL, OAUTH_CALLBACK_URL } from './helpers'
 
 function createAuthUrl({ scope, state }: { scope: string; state: string }) {
   return (
-    'http://localhost:8081/oauth2/v2.1/authorize' +
+    `${BASE_URL}/oauth2/v2.1/authorize` +
     '?client_id=vine-dev-client' +
-    '&redirect_uri=http://localhost:8081/auth/oauth-callback' +
+    `&redirect_uri=${encodeURIComponent(OAUTH_CALLBACK_URL)}` +
     '&response_type=code' +
     `&scope=${encodeURIComponent(scope)}` +
     `&state=${encodeURIComponent(state)}` +
@@ -159,7 +160,7 @@ test('login page preserves explicit redirect back to consent', async ({
     '/auth/consent?consent_code=test-consent&client_id=vine-dev-client&scope=profile+openid'
 
   await page.goto(
-    `http://localhost:8081/auth/login?redirect=${encodeURIComponent(returnUrl)}`,
+    `${BASE_URL}/auth/login?redirect=${encodeURIComponent(returnUrl)}`,
     {
       waitUntil: 'domcontentloaded',
       timeout: 10000,
@@ -227,7 +228,7 @@ test('authorization code exchanges for token and userinfo', async ({ page, reque
     body: new URLSearchParams({
       grant_type: 'authorization_code',
       code: code ?? '',
-      redirect_uri: 'http://localhost:8081/auth/oauth-callback',
+      redirect_uri: OAUTH_CALLBACK_URL,
       client_id: 'vine-dev-client',
       client_secret: 'vine-dev-secret',
       code_verifier: CODE_VERIFIER,

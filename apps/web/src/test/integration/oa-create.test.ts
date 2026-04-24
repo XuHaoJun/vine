@@ -5,9 +5,7 @@
 
 import { expect, test } from '@playwright/test'
 
-import { loginAsDemo } from './helpers'
-
-const BASE_URL = 'http://localhost:8081'
+import { BASE_URL, loginAsDemo } from './helpers'
 
 test('create OA account flow', async ({ page }) => {
   test.setTimeout(60000)

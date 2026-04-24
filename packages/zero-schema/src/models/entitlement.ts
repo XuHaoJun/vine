@@ -1,4 +1,4 @@
-import { string, table } from '@rocicorp/zero'
+import { number, string, table } from '@rocicorp/zero'
 import { serverWhere } from 'on-zero'
 
 import type { TableInsertRow } from 'on-zero'
@@ -11,7 +11,7 @@ export const schema = table('entitlement')
     userId: string(),
     packageId: string(),
     grantedByOrderId: string(),
-    grantedAt: string(),
+    grantedAt: number(),
   })
   .primaryKey('id')
 

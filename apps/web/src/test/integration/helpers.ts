@@ -1,6 +1,18 @@
 import type { Page } from '@playwright/test'
 
-const BASE_URL = 'http://localhost:8081'
+const DEFAULT_INTEGRATION_TEST_PROXY_PORT = 8081
+
+function getIntegrationTestProxyPort() {
+  const parsedPort = Number(process.env.INTEGRATION_TEST_PROXY_PORT)
+  if (Number.isInteger(parsedPort) && parsedPort > 0) {
+    return parsedPort
+  }
+  return DEFAULT_INTEGRATION_TEST_PROXY_PORT
+}
+
+export const INTEGRATION_TEST_PROXY_PORT = getIntegrationTestProxyPort()
+export const BASE_URL = `http://localhost:${INTEGRATION_TEST_PROXY_PORT}`
+export const OAUTH_CALLBACK_URL = `${BASE_URL}/auth/oauth-callback`
 
 export async function loginAsDemo(page: Page, pathname = '/') {
   console.info('Navigating to login page...')

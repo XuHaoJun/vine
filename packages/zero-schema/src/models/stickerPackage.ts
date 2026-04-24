@@ -15,8 +15,8 @@ export const schema = table('stickerPackage')
     coverDriveKey: string(),
     tabIconDriveKey: string(),
     stickerCount: number(),
-    createdAt: string(),
-    updatedAt: string(),
+    createdAt: number(),
+    updatedAt: number(),
   })
   .primaryKey('id')
 

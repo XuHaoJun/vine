@@ -3,7 +3,7 @@ import { bytesToHex, randomBytes } from '@noble/hashes/utils.js'
 import { and, eq } from 'drizzle-orm'
 import type { Pool } from 'pg'
 import { randomUUID } from 'crypto'
-import { readFileSync } from 'fs'
+import { existsSync, readFileSync } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -91,11 +91,6 @@ const STICKER_PACKAGE_SEEDS = [
   { id: 'pkg_bun_01', name: '兔兔聖誕限定', description: '', priceMinor: 129, stickerCount: 8 },
 ] as const
 
-const FIXTURES_DIR = path.join(
-  path.dirname(fileURLToPath(import.meta.url)),
-  'sticker-fixtures',
-)
-
 const TEST_PASSWORD = 'test@1234'
 
 const scryptConfig = { N: 16384, r: 16, p: 1, dkLen: 64 }
@@ -127,6 +122,27 @@ function validateDbCredentials(connStr: string): boolean {
   const { user: dbUser } = parseConnectionString(connStr)
   return ALLOWED_DB_CREDENTIALS.some(
     (allowed) => connStr.includes(allowed) || dbUser === allowed.split(':')[0],
+  )
+}
+
+export function resolveStickerFixturesDir(
+  moduleDir = path.dirname(fileURLToPath(import.meta.url)),
+  cwd = process.cwd(),
+): string {
+  const candidates = [
+    path.join(moduleDir, 'sticker-fixtures'),
+    path.resolve(cwd, '../../packages/db/src/seed/sticker-fixtures'),
+    path.resolve(cwd, 'packages/db/src/seed/sticker-fixtures'),
+  ]
+
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) {
+      return candidate
+    }
+  }
+
+  throw new Error(
+    `Sticker fixtures directory not found. Checked: ${candidates.join(', ')}`,
   )
 }
 
@@ -482,6 +498,7 @@ export async function ensureSeed(pool: Pool, db: any, drive?: SeedDrive) {
 
 async function seedStickerPackages(db: any, drive?: SeedDrive): Promise<void> {
   const now = new Date().toISOString()
+  const fixturesDir = resolveStickerFixturesDir()
   for (const pkg of STICKER_PACKAGE_SEEDS) {
     const existing = await db
       .select()
@@ -508,7 +525,7 @@ async function seedStickerPackages(db: any, drive?: SeedDrive): Promise<void> {
     }
 
     if (drive) {
-      const base = path.join(FIXTURES_DIR, pkg.id)
+      const base = path.join(fixturesDir, pkg.id)
       await putPng(drive, `stickers/${pkg.id}/cover.png`, path.join(base, 'cover.png'))
       await putPng(drive, `stickers/${pkg.id}/tab.png`, path.join(base, 'tab.png'))
       for (let i = 1; i <= pkg.stickerCount; i++) {

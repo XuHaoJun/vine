@@ -1,6 +1,19 @@
 import type { PoolClient } from 'pg'
 
-const sql = `
+const DEFAULT_INTEGRATION_TEST_PROXY_PORT = 8081
+
+function getIntegrationTestProxyPort() {
+  const parsedPort = Number(process.env.INTEGRATION_TEST_PROXY_PORT)
+  if (Number.isInteger(parsedPort) && parsedPort > 0) {
+    return parsedPort
+  }
+  return DEFAULT_INTEGRATION_TEST_PROXY_PORT
+}
+
+function getSql() {
+  const oauthCallbackUrl = `http://localhost:${getIntegrationTestProxyPort()}/auth/oauth-callback`
+
+  return `
 CREATE TABLE "oauthApplication" (
   "id" text PRIMARY KEY,
   "name" text NOT NULL,
@@ -58,16 +71,17 @@ INSERT INTO "oauthApplication" (
   'vine-dev-client',
   -- dev-only plaintext secret (not a real credential)
   'vine-dev-secret',
-  'http://localhost:8081/auth/oauth-callback',
+  '${oauthCallbackUrl}',
   'web',
   false,
   NOW(),
   NOW()
 );
 `
+}
 
 export async function up(client: PoolClient) {
-  await client.query(sql)
+  await client.query(getSql())
 }
 
 export async function down(client: PoolClient) {
