@@ -1,8 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-import { loginAsDemo } from './helpers'
-
-const BASE_URL = 'http://localhost:8081'
+import { BASE_URL, loginAsDemo } from './helpers'
 
 test.describe('Chat System', () => {
   test('talks page loads with LINE-style header tabs', async ({ page }) => {

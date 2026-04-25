@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test'
+import { BASE_URL } from './integration/helpers'
 
 export default defineConfig({
   testDir: './integration',
@@ -14,7 +15,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:8081',
+    baseURL: BASE_URL,
     trace: 'on-first-retry',
   },
 

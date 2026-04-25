@@ -7,6 +7,9 @@
  */
 
 import { Socket } from 'node:net'
+import { access, mkdir, rename, rm, writeFile } from 'node:fs/promises'
+import { constants as fsConstants } from 'node:fs'
+import path from 'node:path'
 import { getTestEnv } from './helpers/get-test-env'
 import {
   BACKEND_PORT,
@@ -18,7 +21,7 @@ import {
 // --- config ---
 const DOCKER_TIMEOUT = 120_000 // 2 min
 const BUILD_TIMEOUT = 300_000 // 5 min
-const TEST_TIMEOUT = 120_000 // 2 min
+const TEST_TIMEOUT = 300_000 // 5 min
 
 // --- state ---
 const processes: Bun.Subprocess[] = []
@@ -129,6 +132,26 @@ async function waitForMigrations(timeoutMs = DOCKER_TIMEOUT) {
   throw new Error('migrations timed out')
 }
 
+async function ensureWritableVxrnCompilerCache() {
+  const cacheDir = path.resolve('apps/web/node_modules/.vxrn/compiler-cache')
+  const probeFile = path.join(cacheDir, `.write-test-${process.pid}`)
+
+  try {
+    await mkdir(cacheDir, { recursive: true })
+    await writeFile(probeFile, '')
+    await rm(probeFile, { force: true })
+    return
+  } catch (error) {
+    const cause = error instanceof Error ? error.message : String(error)
+    const staleDir = `${cacheDir}.stale-${Date.now()}`
+
+    console.info(`resetting unwritable vxrn compiler cache: ${cause}`)
+    await access(path.dirname(cacheDir), fsConstants.W_OK)
+    await rename(cacheDir, staleDir)
+    await mkdir(cacheDir, { recursive: true })
+  }
+}
+
 async function cleanup() {
   console.info('\ncleaning up...')
   for (const p of processes) {
@@ -168,7 +191,7 @@ async function main() {
 
     // start docker
     console.info('\nstarting docker...')
-    await spawn('docker compose up --remove-orphans')
+    await spawn('docker compose up --remove-orphans pgdb migrate zero')
     await waitForMigrations()
 
     // install playwright
@@ -177,6 +200,7 @@ async function main() {
 
     // build (bake VITE_DEMO_MODE into client bundle at build time)
     console.info('\nbuilding...')
+    await ensureWritableVxrnCompilerCache()
     await $('VITE_DEMO_MODE=1 bun run build', { timeout: BUILD_TIMEOUT })
 
     // start backend

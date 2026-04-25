@@ -13,11 +13,15 @@ export * as friendshipModel from './models/friendship'
 export * as chatModel from './models/chat'
 export * as chatMemberModel from './models/chatMember'
 export * as messageModel from './models/message'
+export * as stickerPackageModel from './models/stickerPackage'
+export * as entitlementModel from './models/entitlement'
 
 // Queries
 export * as chatQueries from './queries/chat'
+export * as entitlementQueries from './queries/entitlement'
 export * as friendshipQueries from './queries/friendship'
 export * as messageQueries from './queries/message'
+export * as stickerPackageQueries from './queries/stickerPackage'
 
 // Generated
 export * as tables from './generated/tables'

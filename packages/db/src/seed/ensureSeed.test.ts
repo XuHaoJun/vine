@@ -1,6 +1,10 @@
 import { describe, expect, it, mock } from 'bun:test'
 
-import { resolveTestRichMenuImageSource } from './ensureSeed'
+import { mkdtempSync, mkdirSync, rmSync } from 'fs'
+import os from 'os'
+import path from 'path'
+
+import { resolveStickerFixturesDir, resolveTestRichMenuImageSource } from './ensureSeed'
 
 describe('resolveTestRichMenuImageSource', () => {
   it('downloads the configured rich menu image and keeps jpeg metadata', async () => {
@@ -24,10 +28,28 @@ describe('resolveTestRichMenuImageSource', () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1)
     expect(requestedUrl).toBe(
-      'https://i.im.ge/en5Toh/Gemini_Generated_Image_puffhnpuffhnpuff-edited.jpg',
+      'https://img2.pixhost.to/images/7292/716433745_gemini_generated_image_puffhnpuffhnpuff-edited.jpg',
     )
     expect(result.mimeType).toBe('image/jpeg')
     expect(result.extension).toBe('jpg')
     expect(Array.from(result.buffer)).toEqual([0xff, 0xd8, 0xff, 0xd9])
+  })
+
+  it('falls back to the repo sticker fixtures when bundled output has no local assets', () => {
+    const tempDir = mkdtempSync(path.join(os.tmpdir(), 'vine-seed-fixtures-'))
+    const repoFixturesDir = path.join(tempDir, 'packages/db/src/seed/sticker-fixtures')
+
+    mkdirSync(repoFixturesDir, { recursive: true })
+
+    try {
+      const result = resolveStickerFixturesDir(
+        path.join(tempDir, 'apps/server/dist'),
+        path.join(tempDir, 'apps/server'),
+      )
+
+      expect(result).toBe(repoFixturesDir)
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true })
+    }
   })
 })

@@ -41,7 +41,9 @@ export function AppLayout() {
   const isLoggedInRoute =
     pathname.startsWith('/home') ||
     pathname.startsWith('/developers') ||
-    pathname.startsWith('/manager')
+    pathname.startsWith('/manager') ||
+    pathname.startsWith('/store') ||
+    pathname.startsWith('/pay')
   if (state === 'logged-out' && isLoggedInRoute) {
     if (typeof window !== 'undefined') {
       window.sessionStorage.setItem(LOGIN_REDIRECT_KEY, pathname)

@@ -86,6 +86,14 @@ export const messageRelationships = relationships(tables.message, ({ many, one }
   }),
 }))
 
+export const entitlementRelationships = relationships(tables.entitlement, ({ one }) => ({
+  stickerPackage: one({
+    sourceField: ['packageId'],
+    destSchema: tables.stickerPackage,
+    destField: ['id'],
+  }),
+}))
+
 export const allRelationships = [
   userRelationships,
   todoRelationships,
@@ -94,4 +102,5 @@ export const allRelationships = [
   chatRelationships,
   chatMemberRelationships,
   messageRelationships,
+  entitlementRelationships,
 ]

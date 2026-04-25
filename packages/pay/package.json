@@ -1,0 +1,23 @@
+{
+  "name": "@vine/pay",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts"
+  },
+  "scripts": {
+    "build": "echo 'pay package - no build step'",
+    "dev": "echo 'pay package - no dev step'",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@xuhaojun/hyperswitch-prism": "0.0.8-xuhaojun.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vitest": "^3.0.0"
+  }
+}

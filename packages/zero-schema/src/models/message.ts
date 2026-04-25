@@ -48,4 +48,32 @@ export const mutate = mutations(schema, messageReadPermission, {
       lastMessageAt: message.createdAt,
     })
   },
+  sendSticker: async ({ authData, tx }, message: Message) => {
+    if (!authData) throw new Error('Unauthorized')
+    if (message.senderId !== authData.id) throw new Error('Unauthorized')
+
+    const meta = JSON.parse(message.metadata ?? '{}') as {
+      packageId?: string
+      stickerId?: number
+    }
+    if (!meta.packageId || typeof meta.stickerId !== 'number') {
+      throw new Error('Invalid sticker metadata')
+    }
+
+    // Verify entitlement: user must own the sticker package
+    const query = tx.query as Record<string, any> | undefined
+    if (!query?.entitlement) throw new Error('Unauthorized')
+    const owned = await query.entitlement
+      .where('userId', authData.id)
+      .where('packageId', meta.packageId)
+      .run()
+    if (owned.length === 0) throw new Error('entitlement required')
+
+    await tx.mutate.message.insert(message)
+    await tx.mutate.chat.update({
+      id: message.chatId,
+      lastMessageId: message.id,
+      lastMessageAt: message.createdAt,
+    })
+  },
 })

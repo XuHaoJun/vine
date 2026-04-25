@@ -5,9 +5,7 @@
 
 import { expect, test, type Page } from '@playwright/test'
 
-import { loginAsDemo } from './helpers'
-
-const BASE_URL = 'http://localhost:8081'
+import { BASE_URL, loginAsDemo } from './helpers'
 
 /** Flex bubble render root — scoped so JSON in the editor textarea never matches these locators. */
 function flexBubble(page: Page) {

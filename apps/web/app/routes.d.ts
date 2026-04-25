@@ -39,6 +39,9 @@ declare module 'one' {
         | `/(app)/manager/[oaId]/richmenu`
         | `/(app)/manager/[oaId]/richmenu/create`
         | `/(app)/manager/create`
+        | `/(app)/pay/redirect`
+        | `/(app)/pay/result`
+        | `/(app)/store`
         | `/_sitemap`
         | `/auth`
         | `/auth/consent`
@@ -71,6 +74,9 @@ declare module 'one' {
         | `/manager/[oaId]/richmenu`
         | `/manager/[oaId]/richmenu/create`
         | `/manager/create`
+        | `/pay/redirect`
+        | `/pay/result`
+        | `/store`
       DynamicRoutes: 
         | `/(app)/auth/signup/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/developers/console/channel/${OneRouter.SingleRoutePart<T>}`
@@ -83,6 +89,7 @@ declare module 'one' {
         | `/(app)/manager/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/manager/${OneRouter.SingleRoutePart<T>}/richmenu/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/oa/${OneRouter.SingleRoutePart<T>}`
+        | `/(app)/store/${OneRouter.SingleRoutePart<T>}`
         | `/(public)/invite/${OneRouter.SingleRoutePart<T>}/page`
         | `/auth/signup/${OneRouter.SingleRoutePart<T>}`
         | `/developers/console/channel/${OneRouter.SingleRoutePart<T>}`
@@ -96,6 +103,7 @@ declare module 'one' {
         | `/manager/${OneRouter.SingleRoutePart<T>}`
         | `/manager/${OneRouter.SingleRoutePart<T>}/richmenu/${OneRouter.SingleRoutePart<T>}`
         | `/oa/${OneRouter.SingleRoutePart<T>}`
+        | `/store/${OneRouter.SingleRoutePart<T>}`
       DynamicRouteTemplate: 
         | `/(app)/auth/signup/[method]`
         | `/(app)/developers/console/channel/[channelId]`
@@ -108,6 +116,7 @@ declare module 'one' {
         | `/(app)/manager/[oaId]`
         | `/(app)/manager/[oaId]/richmenu/[richMenuId]`
         | `/(app)/oa/[oaId]`
+        | `/(app)/store/[packageId]`
         | `/(public)/invite/[inviteCode]/page`
         | `/auth/signup/[method]`
         | `/developers/console/channel/[channelId]`
@@ -121,6 +130,7 @@ declare module 'one' {
         | `/manager/[oaId]`
         | `/manager/[oaId]/richmenu/[richMenuId]`
         | `/oa/[oaId]`
+        | `/store/[packageId]`
       IsTyped: true
       RouteTypes: {
         '/(app)/auth/signup/[method]': RouteInfo<{ method: string }>
@@ -134,6 +144,7 @@ declare module 'one' {
         '/(app)/manager/[oaId]': RouteInfo<{ oaId: string }>
         '/(app)/manager/[oaId]/richmenu/[richMenuId]': RouteInfo<{ oaId: string; richMenuId: string }>
         '/(app)/oa/[oaId]': RouteInfo<{ oaId: string }>
+        '/(app)/store/[packageId]': RouteInfo<{ packageId: string }>
         '/(public)/invite/[inviteCode]/page': RouteInfo<{ inviteCode: string }>
         '/auth/signup/[method]': RouteInfo<{ method: string }>
         '/developers/console/channel/[channelId]': RouteInfo<{ channelId: string }>
@@ -147,6 +158,7 @@ declare module 'one' {
         '/manager/[oaId]': RouteInfo<{ oaId: string }>
         '/manager/[oaId]/richmenu/[richMenuId]': RouteInfo<{ oaId: string; richMenuId: string }>
         '/oa/[oaId]': RouteInfo<{ oaId: string }>
+        '/store/[packageId]': RouteInfo<{ packageId: string }>
       }
     }
   }

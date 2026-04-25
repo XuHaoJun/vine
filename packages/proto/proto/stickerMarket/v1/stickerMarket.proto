@@ -1,0 +1,50 @@
+syntax = "proto3";
+package stickerMarket.v1;
+
+// --- MVP slice ---
+service StickerMarketUserService {
+  rpc CreateCheckout(CreateCheckoutRequest) returns (CreateCheckoutResponse);
+  rpc GetOrder(GetOrderRequest) returns (GetOrderResponse);
+}
+
+// --- FUTURE: StickerMarketCreatorService, StickerMarketAdminService ---
+// 預留 — 本 slice 不實作,避免上架 / 審核 / Payout proto 污染 handler 實作。
+
+// --- Shared types ---
+message Money {
+  int32 minor_amount = 1;
+  string currency = 2;
+}
+
+enum OrderStatus {
+  ORDER_STATUS_UNSPECIFIED = 0;
+  ORDER_STATUS_CREATED = 1;
+  ORDER_STATUS_PAID = 2;
+  ORDER_STATUS_FAILED = 3;
+}
+
+message RedirectFormPost {
+  string target_url = 1;
+  map<string, string> form_fields = 2;
+}
+
+// --- Requests / Responses ---
+message CreateCheckoutRequest {
+  string package_id = 1;
+  bool simulate_paid = 2;  // dev-only; server rejects when PAYMENTS_ECPAY_MODE != 'stage'
+}
+
+message CreateCheckoutResponse {
+  string order_id = 1;
+  RedirectFormPost redirect = 2;
+}
+
+message GetOrderRequest { string order_id = 1; }
+
+message GetOrderResponse {
+  string order_id = 1;
+  OrderStatus status = 2;
+  string failure_reason = 3;
+  int32 amount_minor = 4;
+  string currency = 5;
+}

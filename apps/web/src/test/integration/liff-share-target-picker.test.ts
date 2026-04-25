@@ -15,9 +15,7 @@
 
 import { expect, test, type Frame, type Page } from '@playwright/test'
 
-import { loginAsDemo } from './helpers'
-
-const BASE_URL = 'http://localhost:8081'
+import { BASE_URL, loginAsDemo } from './helpers'
 
 /**
  * Mock LIFF app config response (what /liff/v1/apps/:liffId returns).
@@ -41,6 +39,9 @@ function liffIdFromAppsPath(url: string): string | undefined {
 }
 
 async function clickFixtureInit(fixtureFrame: Frame) {
+  await fixtureFrame
+    .locator('[data-testid="mock-liff-init-btn"]')
+    .waitFor({ state: 'visible', timeout: 10000 })
   await fixtureFrame.evaluate(() => {
     const btn = document.querySelector<HTMLButtonElement>(
       '[data-testid="mock-liff-init-btn"]',
@@ -51,6 +52,9 @@ async function clickFixtureInit(fixtureFrame: Frame) {
 }
 
 async function clickFixtureShare(fixtureFrame: Frame) {
+  await fixtureFrame
+    .locator('[data-testid="mock-liff-share-btn"]')
+    .waitFor({ state: 'visible', timeout: 10000 })
   await fixtureFrame.evaluate(() => {
     const btn = document.querySelector<HTMLButtonElement>(
       '[data-testid="mock-liff-share-btn"]',

@@ -3,6 +3,54 @@
 import * as v from 'valibot'
 
 export const mutationValidators = {
+  entitlement: {
+    insert: v.object({
+      id: v.string(),
+      userId: v.string(),
+      packageId: v.string(),
+      grantedByOrderId: v.string(),
+      grantedAt: v.number(),
+    }),
+    update: v.object({
+      id: v.string(),
+      userId: v.optional(v.nullable(v.string())),
+      packageId: v.optional(v.nullable(v.string())),
+      grantedByOrderId: v.optional(v.nullable(v.string())),
+      grantedAt: v.optional(v.nullable(v.number())),
+    }),
+    delete: v.object({
+      id: v.string(),
+    }),
+  },
+  stickerPackage: {
+    insert: v.object({
+      id: v.string(),
+      name: v.string(),
+      description: v.string(),
+      priceMinor: v.number(),
+      currency: v.string(),
+      coverDriveKey: v.string(),
+      tabIconDriveKey: v.string(),
+      stickerCount: v.number(),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    }),
+    update: v.object({
+      id: v.string(),
+      name: v.optional(v.nullable(v.string())),
+      description: v.optional(v.nullable(v.string())),
+      priceMinor: v.optional(v.nullable(v.number())),
+      currency: v.optional(v.nullable(v.string())),
+      coverDriveKey: v.optional(v.nullable(v.string())),
+      tabIconDriveKey: v.optional(v.nullable(v.string())),
+      stickerCount: v.optional(v.nullable(v.number())),
+      createdAt: v.optional(v.nullable(v.number())),
+      updatedAt: v.optional(v.nullable(v.number())),
+    }),
+    delete: v.object({
+      id: v.string(),
+    }),
+  },
   chat: {
     insert: v.object({
       id: v.string(),

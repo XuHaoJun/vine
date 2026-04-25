@@ -1,0 +1,112 @@
+import { describe, it, expect, vi } from 'vitest'
+import { createStickerOrderRepository } from './order.repository'
+
+// Build a Drizzle-shaped mock tx without any real DB connection.
+// The mock controls what rowCount / rows come back so tests can
+// verify both the happy path and the pass-through of 0 (idempotent).
+function makeTx(opts: { rows?: object[]; rowCount?: number } = {}) {
+  const rows = opts.rows ?? []
+  const rowCount = opts.rowCount ?? 0
+
+  const whereChain = { where: vi.fn().mockResolvedValue({ rowCount }) }
+  const setChain = { set: vi.fn().mockReturnValue(whereChain) }
+  const limitChain = { limit: vi.fn().mockResolvedValue(rows) }
+  const fromChain = { where: vi.fn().mockReturnValue(limitChain) }
+
+  return {
+    insert: vi.fn().mockReturnValue({ values: vi.fn().mockResolvedValue(undefined) }),
+    select: vi.fn().mockReturnValue({ from: vi.fn().mockReturnValue(fromChain) }),
+    update: vi.fn().mockReturnValue(setChain),
+    // exposed for assertions
+    _setChain: setChain,
+    _whereChain: whereChain,
+    _fromChain: fromChain,
+  }
+}
+
+const INPUT = {
+  id: 'order-1',
+  userId: 'user-1',
+  packageId: 'pkg-1',
+  amountMinor: 3000,
+  currency: 'TWD' as const,
+  connectorName: 'ecpay' as const,
+}
+
+const repo = createStickerOrderRepository({} as any)
+
+describe('StickerOrderRepository', () => {
+  it('create inserts a row with status=created', async () => {
+    const tx = makeTx()
+    await repo.create(tx, INPUT)
+
+    expect(tx.insert).toHaveBeenCalledOnce()
+    const valuesArg = (tx.insert.mock.results[0]!.value as any).values.mock.calls[0][0]
+    expect(valuesArg).toMatchObject({
+      id: 'order-1',
+      userId: 'user-1',
+      packageId: 'pkg-1',
+      amountMinor: 3000,
+      currency: 'TWD',
+      connectorName: 'ecpay',
+      status: 'created',
+    })
+  })
+
+  it('findById returns the matching row', async () => {
+    const row = { id: 'order-1', status: 'created', amountMinor: 3000 }
+    const tx = makeTx({ rows: [row] })
+    const result = await repo.findById(tx, 'order-1')
+    expect(result).toEqual(row)
+  })
+
+  it('findById returns null when no row found', async () => {
+    const tx = makeTx({ rows: [] })
+    const result = await repo.findById(tx, 'missing')
+    expect(result).toBeNull()
+  })
+
+  it('transitionToPaid sets status=paid and returns rowCount', async () => {
+    const tx = makeTx({ rowCount: 1 })
+    const count = await repo.transitionToPaid(tx, 'order-1', {
+      connectorChargeId: 'charge-abc',
+      paidAt: new Date('2026-04-23T10:00:00Z'),
+    })
+
+    expect(count).toBe(1)
+    const setArg = tx._setChain.set.mock.calls[0]![0]
+    expect(setArg).toMatchObject({
+      status: 'paid',
+      connectorChargeId: 'charge-abc',
+      paidAt: '2026-04-23T10:00:00.000Z',
+    })
+  })
+
+  it('transitionToPaid propagates rowCount=0 (idempotent / already paid)', async () => {
+    const tx = makeTx({ rowCount: 0 })
+    const count = await repo.transitionToPaid(tx, 'order-1', {
+      connectorChargeId: 'charge-abc',
+      paidAt: new Date('2026-04-23T10:00:00Z'),
+    })
+    expect(count).toBe(0)
+  })
+
+  it('transitionToFailed sets status=failed and returns rowCount', async () => {
+    const tx = makeTx({ rowCount: 1 })
+    const count = await repo.transitionToFailed(tx, 'order-1', {
+      failureReason: 'timeout',
+    })
+
+    expect(count).toBe(1)
+    const setArg = tx._setChain.set.mock.calls[0]![0]
+    expect(setArg).toMatchObject({ status: 'failed', failureReason: 'timeout' })
+  })
+
+  it('transitionToFailed propagates rowCount=0 (blocked when already paid)', async () => {
+    const tx = makeTx({ rowCount: 0 })
+    const count = await repo.transitionToFailed(tx, 'order-1', {
+      failureReason: 'some-error',
+    })
+    expect(count).toBe(0)
+  })
+})

@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test'
+import { BASE_URL } from './integration/helpers'
 
 /**
  * Playwright config for auth integration tests
@@ -16,7 +17,7 @@ export default defineConfig({
   workers: 1,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:8081',
+    baseURL: BASE_URL,
     trace: 'on-first-retry',
   },
 
