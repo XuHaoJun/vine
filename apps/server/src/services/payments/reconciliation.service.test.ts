@@ -39,15 +39,10 @@ function makeReconciliationDeps(opts: { orders: StickerOrderRow[]; chargeStatus:
   }
   const entitlementRepo = {
     grant: vi.fn().mockResolvedValue(undefined),
-    find: vi.fn(),
-    revokeByOrder: vi.fn(),
   }
   return {
     db: { transaction: vi.fn().mockImplementation((fn) => fn(tx)) },
     pay: {
-      createCharge: vi.fn(),
-      handleWebhook: vi.fn(),
-      refundCharge: vi.fn(),
       getCharge: vi.fn().mockResolvedValue(opts.chargeStatus),
     },
     orderRepo,
