@@ -33,13 +33,7 @@ function makeOrder(overrides: Partial<StickerOrderRow> = {}): StickerOrderRow {
 function makeReconciliationDeps(opts: { orders: StickerOrderRow[]; chargeStatus: any }) {
   const tx = {}
   const orderRepo = {
-    create: vi.fn(),
-    findById: vi.fn(),
     transitionToPaid: vi.fn().mockResolvedValue(1),
-    transitionToFailed: vi.fn(),
-    beginRefund: vi.fn(),
-    markRefunded: vi.fn(),
-    markRefundFailed: vi.fn(),
     updateReconciliation: vi.fn().mockResolvedValue(undefined),
     findForReconciliation: vi.fn().mockResolvedValue(opts.orders),
   }
@@ -84,6 +78,11 @@ describe('createReconciliationService', () => {
       action: 'reported',
     })
     expect(deps.orderRepo.transitionToPaid).not.toHaveBeenCalled()
+    expect(deps.orderRepo.updateReconciliation).toHaveBeenCalledWith(
+      expect.anything(),
+      'order-1',
+      expect.objectContaining({ connectorStatus: 'paid', mismatch: expect.any(String) }),
+    )
   })
 
   it('non-dry-run marks failed order paid and grants entitlement when connector is paid', async () => {
@@ -99,8 +98,20 @@ describe('createReconciliationService', () => {
       dryRun: false,
     })
 
-    expect(deps.orderRepo.transitionToPaid).toHaveBeenCalled()
-    expect(deps.entitlementRepo.grant).toHaveBeenCalled()
+    expect(deps.orderRepo.transitionToPaid).toHaveBeenCalledWith(
+      expect.anything(),
+      'order-1',
+      expect.any(Object),
+    )
+    expect(deps.entitlementRepo.grant).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ userId: 'user-1', packageId: 'pkg-1' }),
+    )
+    expect(deps.orderRepo.updateReconciliation).toHaveBeenCalledWith(
+      expect.anything(),
+      'order-1',
+      expect.objectContaining({ connectorStatus: 'paid', mismatch: expect.any(String) }),
+    )
   })
 
   it('alerts when local paid order is missing at connector', async () => {
@@ -121,5 +132,61 @@ describe('createReconciliationService', () => {
       severity: 'critical',
       orderId: 'order-1',
     }))
+    expect(deps.orderRepo.updateReconciliation).toHaveBeenCalledWith(
+      expect.anything(),
+      'order-1',
+      expect.objectContaining({ connectorStatus: 'not_found', mismatch: expect.any(String) }),
+    )
+  })
+
+  it('resiliently handles query errors and reports them', async () => {
+    const deps = makeReconciliationDeps({
+      orders: [makeOrder({ id: 'order-1', status: 'created' })],
+      chargeStatus: { status: 'paid', connectorChargeId: 'trade-1', amount: { minorAmount: 3000, currency: 'TWD' }, paidAt: new Date('2026-04-25T01:00:00Z'), rawStatus: '1', raw: {} },
+    })
+    deps.pay.getCharge = vi.fn().mockRejectedValue(new Error('network timeout'))
+
+    const service = createReconciliationService(deps)
+    const result = await service.reconcileOrders({
+      since: new Date('2026-04-24T00:00:00Z'),
+      limit: 100,
+      dryRun: false,
+    })
+
+    expect(result.checked).toBe(1)
+    expect(result.mismatches.length).toBe(1)
+    expect(result.mismatches[0]).toMatchObject({
+      orderId: 'order-1',
+      localStatus: 'created',
+      connectorStatus: 'query_error',
+      action: 'reported',
+    })
+    expect(deps.orderRepo.updateReconciliation).toHaveBeenCalledWith(
+      expect.anything(),
+      'order-1',
+      expect.objectContaining({ connectorStatus: 'query_error', mismatch: 'query_error' }),
+    )
+  })
+
+  it('has no mismatches when local paid and connector paid', async () => {
+    const deps = makeReconciliationDeps({
+      orders: [makeOrder({ id: 'order-1', status: 'paid' })],
+      chargeStatus: { status: 'paid', connectorChargeId: 'trade-1', amount: { minorAmount: 3000, currency: 'TWD' }, paidAt: new Date('2026-04-25T01:00:00Z'), rawStatus: '1', raw: {} },
+    })
+
+    const service = createReconciliationService(deps)
+    const result = await service.reconcileOrders({
+      since: new Date('2026-04-24T00:00:00Z'),
+      limit: 100,
+      dryRun: false,
+    })
+
+    expect(result.mismatches.length).toBe(0)
+    expect(deps.alerts.notify).not.toHaveBeenCalled()
+    expect(deps.orderRepo.updateReconciliation).toHaveBeenCalledWith(
+      expect.anything(),
+      'order-1',
+      expect.objectContaining({ connectorStatus: 'paid', mismatch: undefined }),
+    )
   })
 })
