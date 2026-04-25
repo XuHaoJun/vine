@@ -22,7 +22,7 @@ import type { Message } from '@bufbuild/protobuf'
 export const file_stickerMarket_v1_stickerMarket: GenFile =
   /*@__PURE__*/
   fileDesc(
-    'CiRzdGlja2VyTWFya2V0L3YxL3N0aWNrZXJNYXJrZXQucHJvdG8SEHN0aWNrZXJNYXJrZXQudjEiNgoSUmVmdW5kT3JkZXJSZXF1ZXN0EhAKCG9yZGVyX2lkGAEgASgJEg4KBnJlYXNvbhgCIAEoCSKCAQoTUmVmdW5kT3JkZXJSZXNwb25zZRIQCghvcmRlcl9pZBgBIAEoCRIuCgZzdGF0dXMYAiABKA4yHi5zdGlja2VyTWFya2V0LnYxLlJlZnVuZFN0YXR1cxIRCglzaW11bGF0ZWQYAyABKAgSFgoOZmFpbHVyZV9yZWFzb24YBCABKAkiUgodUmVjb25jaWxlU3RpY2tlck9yZGVyc1JlcXVlc3QSEQoJc2luY2VfaXNvGAEgASgJEg0KBWxpbWl0GAIgASgFEg8KB2RyeV9ydW4YAyABKAgiegoWUmVjb25jaWxpYXRpb25NaXNtYXRjaBIQCghvcmRlcl9pZBgBIAEoCRIUCgxsb2NhbF9zdGF0dXMYAiABKAkSGAoQY29ubmVjdG9yX3N0YXR1cxgDIAEoCRIOCgZhY3Rpb24YBCABKAkSDgoGcmVhc29uGAUgASgJIoABCh5SZWNvbmNpbGVTdGlja2VyT3JkZXJzUmVzcG9uc2USDwoHY2hlY2tlZBgBIAEoBRIPCgdtYXRjaGVkGAIgASgFEjwKCm1pc21hdGNoZXMYAyADKAsyKC5zdGlja2VyTWFya2V0LnYxLlJlY29uY2lsaWF0aW9uTWlzbWF0Y2giLwoFTW9uZXkSFAoMbWlub3JfYW1vdW50GAEgASgFEhAKCGN1cnJlbmN5GAIgASgJIqIBChBSZWRpcmVjdEZvcm1Qb3N0EhIKCnRhcmdldF91cmwYASABKAkSRwoLZm9ybV9maWVsZHMYAiADKAsyMi5zdGlja2VyTWFya2V0LnYxLlJlZGlyZWN0Rm9ybVBvc3QuRm9ybUZpZWxkc0VudHJ5GjEKD0Zvcm1GaWVsZHNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIkIKFUNyZWF0ZUNoZWNrb3V0UmVxdWVzdBISCgpwYWNrYWdlX2lkGAEgASgJEhUKDXNpbXVsYXRlX3BhaWQYAiABKAgiYAoWQ3JlYXRlQ2hlY2tvdXRSZXNwb25zZRIQCghvcmRlcl9pZBgBIAEoCRI0CghyZWRpcmVjdBgCIAEoCzIiLnN0aWNrZXJNYXJrZXQudjEuUmVkaXJlY3RGb3JtUG9zdCIjCg9HZXRPcmRlclJlcXVlc3QSEAoIb3JkZXJfaWQYASABKAkikwEKEEdldE9yZGVyUmVzcG9uc2USEAoIb3JkZXJfaWQYASABKAkSLQoGc3RhdHVzGAIgASgOMh0uc3RpY2tlck1hcmtldC52MS5PcmRlclN0YXR1cxIWCg5mYWlsdXJlX3JlYXNvbhgDIAEoCRIUCgxhbW91bnRfbWlub3IYBCABKAUSEAoIY3VycmVuY3kYBSABKAkqjAEKDFJlZnVuZFN0YXR1cxIdChlSRUZVTkRfU1RBVFVTX1VOU1BFQ0lGSUVEEAASIAocUkVGVU5EX1NUQVRVU19SRUZVTkRfUEVORElORxABEhoKFlJFRlVORF9TVEFUVVNfUkVGVU5ERUQQAhIfChtSRUZVTkRfU1RBVFVTX1JFRlVORF9GQUlMRUQQAyrRAQoLT3JkZXJTdGF0dXMSHAoYT1JERVJfU1RBVFVTX1VOU1BFQ0lGSUVEEAASGAoUT1JERVJfU1RBVFVTX0NSRUFURUQQARIVChFPUkRFUl9TVEFUVVNfUEFJRBACEhcKE09SREVSX1NUQVRVU19GQUlMRUQQAxIfChtPUkRFUl9TVEFUVVNfUkVGVU5EX1BFTkRJTkcQBBIZChVPUkRFUl9TVEFUVVNfUkVGVU5ERUQQBRIeChpPUkRFUl9TVEFUVVNfUkVGVU5EX0ZBSUxFRBAGMtIBChhTdGlja2VyTWFya2V0VXNlclNlcnZpY2USYwoOQ3JlYXRlQ2hlY2tvdXQSJy5zdGlja2VyTWFya2V0LnYxLkNyZWF0ZUNoZWNrb3V0UmVxdWVzdBooLnN0aWNrZXJNYXJrZXQudjEuQ3JlYXRlQ2hlY2tvdXRSZXNwb25zZRJRCghHZXRPcmRlchIhLnN0aWNrZXJNYXJrZXQudjEuR2V0T3JkZXJSZXF1ZXN0GiIuc3RpY2tlck1hcmtldC52MS5HZXRPcmRlclJlc3BvbnNlMvQBChlTdGlja2VyTWFya2V0QWRtaW5TZXJ2aWNlEloKC1JlZnVuZE9yZGVyEiQuc3RpY2tlck1hcmtldC52MS5SZWZ1bmRPcmRlclJlcXVlc3QaJS5zdGlja2VyTWFya2V0LnYxLlJlZnVuZE9yZGVyUmVzcG9uc2USewoWUmVjb25jaWxlU3RpY2tlck9yZGVycxIvLnN0aWNrZXJNYXJrZXQudjEuUmVjb25jaWxlU3RpY2tlck9yZGVyc1JlcXVlc3QaMC5zdGlja2VyTWFya2V0LnYxLlJlY29uY2lsZVN0aWNrZXJPcmRlcnNSZXNwb25zZWIGcHJvdG8z',
+    'CiRzdGlja2VyTWFya2V0L3YxL3N0aWNrZXJNYXJrZXQucHJvdG8SEHN0aWNrZXJNYXJrZXQudjEiNgoSUmVmdW5kT3JkZXJSZXF1ZXN0EhAKCG9yZGVyX2lkGAEgASgJEg4KBnJlYXNvbhgCIAEoCSKCAQoTUmVmdW5kT3JkZXJSZXNwb25zZRIQCghvcmRlcl9pZBgBIAEoCRIuCgZzdGF0dXMYAiABKA4yHi5zdGlja2VyTWFya2V0LnYxLlJlZnVuZFN0YXR1cxIRCglzaW11bGF0ZWQYAyABKAgSFgoOZmFpbHVyZV9yZWFzb24YBCABKAkiUgodUmVjb25jaWxlU3RpY2tlck9yZGVyc1JlcXVlc3QSEQoJc2luY2VfaXNvGAEgASgJEg0KBWxpbWl0GAIgASgFEg8KB2RyeV9ydW4YAyABKAgiegoWUmVjb25jaWxpYXRpb25NaXNtYXRjaBIQCghvcmRlcl9pZBgBIAEoCRIUCgxsb2NhbF9zdGF0dXMYAiABKAkSGAoQY29ubmVjdG9yX3N0YXR1cxgDIAEoCRIOCgZhY3Rpb24YBCABKAkSDgoGcmVhc29uGAUgASgJIoABCh5SZWNvbmNpbGVTdGlja2VyT3JkZXJzUmVzcG9uc2USDwoHY2hlY2tlZBgBIAEoBRIPCgdtYXRjaGVkGAIgASgFEjwKCm1pc21hdGNoZXMYAyADKAsyKC5zdGlja2VyTWFya2V0LnYxLlJlY29uY2lsaWF0aW9uTWlzbWF0Y2giLwoFTW9uZXkSFAoMbWlub3JfYW1vdW50GAEgASgFEhAKCGN1cnJlbmN5GAIgASgJIqIBChBSZWRpcmVjdEZvcm1Qb3N0EhIKCnRhcmdldF91cmwYASABKAkSRwoLZm9ybV9maWVsZHMYAiADKAsyMi5zdGlja2VyTWFya2V0LnYxLlJlZGlyZWN0Rm9ybVBvc3QuRm9ybUZpZWxkc0VudHJ5GjEKD0Zvcm1GaWVsZHNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIkIKFUNyZWF0ZUNoZWNrb3V0UmVxdWVzdBISCgpwYWNrYWdlX2lkGAEgASgJEhUKDXNpbXVsYXRlX3BhaWQYAiABKAgiYAoWQ3JlYXRlQ2hlY2tvdXRSZXNwb25zZRIQCghvcmRlcl9pZBgBIAEoCRI0CghyZWRpcmVjdBgCIAEoCzIiLnN0aWNrZXJNYXJrZXQudjEuUmVkaXJlY3RGb3JtUG9zdCIjCg9HZXRPcmRlclJlcXVlc3QSEAoIb3JkZXJfaWQYASABKAkikwEKEEdldE9yZGVyUmVzcG9uc2USEAoIb3JkZXJfaWQYASABKAkSLQoGc3RhdHVzGAIgASgOMh0uc3RpY2tlck1hcmtldC52MS5PcmRlclN0YXR1cxIWCg5mYWlsdXJlX3JlYXNvbhgDIAEoCRIUCgxhbW91bnRfbWlub3IYBCABKAUSEAoIY3VycmVuY3kYBSABKAkicQoOQ3JlYXRvclByb2ZpbGUSCgoCaWQYASABKAkSDwoHdXNlcl9pZBgCIAEoCRIUCgxkaXNwbGF5X25hbWUYAyABKAkSDwoHY291bnRyeRgEIAEoCRILCgNiaW8YBSABKAkSDgoGc3RhdHVzGAYgASgJIqABChpTdGlja2VyQXNzZXRWYWxpZGF0aW9uSXRlbRIRCglmaWxlX25hbWUYASABKAkSDgoGbnVtYmVyGAIgASgFEg0KBWxldmVsGAMgASgJEgwKBGNvZGUYBCABKAkSDwoHbWVzc2FnZRgFIAEoCRINCgV3aWR0aBgGIAEoBRIOCgZoZWlnaHQYByABKAUSEgoKc2l6ZV9ieXRlcxgIIAEoBSKPAgoTU3RpY2tlclBhY2thZ2VEcmFmdBIKCgJpZBgBIAEoCRISCgpjcmVhdG9yX2lkGAIgASgJEgwKBG5hbWUYAyABKAkSEwoLZGVzY3JpcHRpb24YBCABKAkSEwoLcHJpY2VfbWlub3IYBSABKAUSEAoIY3VycmVuY3kYBiABKAkSFQoNc3RpY2tlcl9jb3VudBgHIAEoBRI2CgZzdGF0dXMYCCABKA4yJi5zdGlja2VyTWFya2V0LnYxLlN0aWNrZXJQYWNrYWdlU3RhdHVzEhEKCXRhZ3NfanNvbhgJIAEoCRIWCg5jb3B5cmlnaHRfdGV4dBgKIAEoCRIUCgxhdXRvX3B1Ymxpc2gYCyABKAgiGgoYR2V0Q3JlYXRvclByb2ZpbGVSZXF1ZXN0Ik4KGUdldENyZWF0b3JQcm9maWxlUmVzcG9uc2USMQoHcHJvZmlsZRgBIAEoCzIgLnN0aWNrZXJNYXJrZXQudjEuQ3JlYXRvclByb2ZpbGUiUQobVXBzZXJ0Q3JlYXRvclByb2ZpbGVSZXF1ZXN0EhQKDGRpc3BsYXlfbmFtZRgBIAEoCRIPCgdjb3VudHJ5GAIgASgJEgsKA2JpbxgDIAEoCSJRChxVcHNlcnRDcmVhdG9yUHJvZmlsZVJlc3BvbnNlEjEKB3Byb2ZpbGUYASABKAsyIC5zdGlja2VyTWFya2V0LnYxLkNyZWF0b3JQcm9maWxlIs0BCiBDcmVhdGVTdGlja2VyUGFja2FnZURyYWZ0UmVxdWVzdBIMCgRuYW1lGAEgASgJEhMKC2Rlc2NyaXB0aW9uGAIgASgJEhMKC3ByaWNlX21pbm9yGAMgASgFEhUKDXN0aWNrZXJfY291bnQYBCABKAUSEQoJdGFnc19qc29uGAUgASgJEhYKDmNvcHlyaWdodF90ZXh0GAYgASgJEhkKEWxpY2Vuc2VfY29uZmlybWVkGAcgASgIEhQKDGF1dG9fcHVibGlzaBgIIAEoCCJbCiFDcmVhdGVTdGlja2VyUGFja2FnZURyYWZ0UmVzcG9uc2USNgoHcGFja2FnZRgBIAEoCzIlLnN0aWNrZXJNYXJrZXQudjEuU3RpY2tlclBhY2thZ2VEcmFmdCLhAQogVXBkYXRlU3RpY2tlclBhY2thZ2VEcmFmdFJlcXVlc3QSEgoKcGFja2FnZV9pZBgBIAEoCRIMCgRuYW1lGAIgASgJEhMKC2Rlc2NyaXB0aW9uGAMgASgJEhMKC3ByaWNlX21pbm9yGAQgASgFEhUKDXN0aWNrZXJfY291bnQYBSABKAUSEQoJdGFnc19qc29uGAYgASgJEhYKDmNvcHlyaWdodF90ZXh0GAcgASgJEhkKEWxpY2Vuc2VfY29uZmlybWVkGAggASgIEhQKDGF1dG9fcHVibGlzaBgJIAEoCCJbCiFVcGRhdGVTdGlja2VyUGFja2FnZURyYWZ0UmVzcG9uc2USNgoHcGFja2FnZRgBIAEoCzIlLnN0aWNrZXJNYXJrZXQudjEuU3RpY2tlclBhY2thZ2VEcmFmdCJJCiFVcGxvYWRTdGlja2VyUGFja2FnZUFzc2V0c1JlcXVlc3QSEgoKcGFja2FnZV9pZBgBIAEoCRIQCgh6aXBfZmlsZRgCIAEoDCJwCiJVcGxvYWRTdGlja2VyUGFja2FnZUFzc2V0c1Jlc3BvbnNlEg0KBXZhbGlkGAEgASgIEjsKBWl0ZW1zGAIgAygLMiwuc3RpY2tlck1hcmtldC52MS5TdGlja2VyQXNzZXRWYWxpZGF0aW9uSXRlbSI3CiFTdWJtaXRTdGlja2VyUGFja2FnZVJldmlld1JlcXVlc3QSEgoKcGFja2FnZV9pZBgBIAEoCSJcCiJTdWJtaXRTdGlja2VyUGFja2FnZVJldmlld1Jlc3BvbnNlEjYKB3BhY2thZ2UYASABKAsyJS5zdGlja2VyTWFya2V0LnYxLlN0aWNrZXJQYWNrYWdlRHJhZnQiOgokUHVibGlzaEFwcHJvdmVkU3RpY2tlclBhY2thZ2VSZXF1ZXN0EhIKCnBhY2thZ2VfaWQYASABKAkiXwolUHVibGlzaEFwcHJvdmVkU3RpY2tlclBhY2thZ2VSZXNwb25zZRI2CgdwYWNrYWdlGAEgASgLMiUuc3RpY2tlck1hcmtldC52MS5TdGlja2VyUGFja2FnZURyYWZ0Ii4KHUxpc3RTdGlja2VyUmV2aWV3UXVldWVSZXF1ZXN0Eg0KBWxpbWl0GAEgASgFIlkKHkxpc3RTdGlja2VyUmV2aWV3UXVldWVSZXNwb25zZRI3CghwYWNrYWdlcxgBIAMoCzIlLnN0aWNrZXJNYXJrZXQudjEuU3RpY2tlclBhY2thZ2VEcmFmdCIzCh1HZXRTdGlja2VyUmV2aWV3RGV0YWlsUmVxdWVzdBISCgpwYWNrYWdlX2lkGAEgASgJIqEBCh5HZXRTdGlja2VyUmV2aWV3RGV0YWlsUmVzcG9uc2USNgoHcGFja2FnZRgBIAEoCzIlLnN0aWNrZXJNYXJrZXQudjEuU3RpY2tlclBhY2thZ2VEcmFmdBJHChFsYXRlc3RfdmFsaWRhdGlvbhgCIAMoCzIsLnN0aWNrZXJNYXJrZXQudjEuU3RpY2tlckFzc2V0VmFsaWRhdGlvbkl0ZW0iMgocQXBwcm92ZVN0aWNrZXJQYWNrYWdlUmVxdWVzdBISCgpwYWNrYWdlX2lkGAEgASgJIlcKHUFwcHJvdmVTdGlja2VyUGFja2FnZVJlc3BvbnNlEjYKB3BhY2thZ2UYASABKAsyJS5zdGlja2VyTWFya2V0LnYxLlN0aWNrZXJQYWNrYWdlRHJhZnQikgEKG1JlamVjdFN0aWNrZXJQYWNrYWdlUmVxdWVzdBISCgpwYWNrYWdlX2lkGAEgASgJEhcKD3JlYXNvbl9jYXRlZ29yeRgCIAEoCRITCgtyZWFzb25fdGV4dBgDIAEoCRISCgpzdWdnZXN0aW9uGAQgASgJEh0KFXByb2JsZW1fYXNzZXRfbnVtYmVycxgFIAMoBSJWChxSZWplY3RTdGlja2VyUGFja2FnZVJlc3BvbnNlEjYKB3BhY2thZ2UYASABKAsyJS5zdGlja2VyTWFya2V0LnYxLlN0aWNrZXJQYWNrYWdlRHJhZnQqjAEKDFJlZnVuZFN0YXR1cxIdChlSRUZVTkRfU1RBVFVTX1VOU1BFQ0lGSUVEEAASIAocUkVGVU5EX1NUQVRVU19SRUZVTkRfUEVORElORxABEhoKFlJFRlVORF9TVEFUVVNfUkVGVU5ERUQQAhIfChtSRUZVTkRfU1RBVFVTX1JFRlVORF9GQUlMRUQQAyrRAQoLT3JkZXJTdGF0dXMSHAoYT1JERVJfU1RBVFVTX1VOU1BFQ0lGSUVEEAASGAoUT1JERVJfU1RBVFVTX0NSRUFURUQQARIVChFPUkRFUl9TVEFUVVNfUEFJRBACEhcKE09SREVSX1NUQVRVU19GQUlMRUQQAxIfChtPUkRFUl9TVEFUVVNfUkVGVU5EX1BFTkRJTkcQBBIZChVPUkRFUl9TVEFUVVNfUkVGVU5ERUQQBRIeChpPUkRFUl9TVEFUVVNfUkVGVU5EX0ZBSUxFRBAGKr0CChRTdGlja2VyUGFja2FnZVN0YXR1cxImCiJTVElDS0VSX1BBQ0tBR0VfU1RBVFVTX1VOU1BFQ0lGSUVEEAASIAocU1RJQ0tFUl9QQUNLQUdFX1NUQVRVU19EUkFGVBABEiQKIFNUSUNLRVJfUEFDS0FHRV9TVEFUVVNfSU5fUkVWSUVXEAISIwofU1RJQ0tFUl9QQUNLQUdFX1NUQVRVU19BUFBST1ZFRBADEiMKH1NUSUNLRVJfUEFDS0FHRV9TVEFUVVNfUkVKRUNURUQQBBIiCh5TVElDS0VSX1BBQ0tBR0VfU1RBVFVTX09OX1NBTEUQBRIjCh9TVElDS0VSX1BBQ0tBR0VfU1RBVFVTX1VOTElTVEVEEAYSIgoeU1RJQ0tFUl9QQUNLQUdFX1NUQVRVU19SRU1PVkVEEAcy0gEKGFN0aWNrZXJNYXJrZXRVc2VyU2VydmljZRJjCg5DcmVhdGVDaGVja291dBInLnN0aWNrZXJNYXJrZXQudjEuQ3JlYXRlQ2hlY2tvdXRSZXF1ZXN0Giguc3RpY2tlck1hcmtldC52MS5DcmVhdGVDaGVja291dFJlc3BvbnNlElEKCEdldE9yZGVyEiEuc3RpY2tlck1hcmtldC52MS5HZXRPcmRlclJlcXVlc3QaIi5zdGlja2VyTWFya2V0LnYxLkdldE9yZGVyUmVzcG9uc2Uy3wUKGVN0aWNrZXJNYXJrZXRBZG1pblNlcnZpY2USWgoLUmVmdW5kT3JkZXISJC5zdGlja2VyTWFya2V0LnYxLlJlZnVuZE9yZGVyUmVxdWVzdBolLnN0aWNrZXJNYXJrZXQudjEuUmVmdW5kT3JkZXJSZXNwb25zZRJ7ChZSZWNvbmNpbGVTdGlja2VyT3JkZXJzEi8uc3RpY2tlck1hcmtldC52MS5SZWNvbmNpbGVTdGlja2VyT3JkZXJzUmVxdWVzdBowLnN0aWNrZXJNYXJrZXQudjEuUmVjb25jaWxlU3RpY2tlck9yZGVyc1Jlc3BvbnNlEnsKFkxpc3RTdGlja2VyUmV2aWV3UXVldWUSLy5zdGlja2VyTWFya2V0LnYxLkxpc3RTdGlja2VyUmV2aWV3UXVldWVSZXF1ZXN0GjAuc3RpY2tlck1hcmtldC52MS5MaXN0U3RpY2tlclJldmlld1F1ZXVlUmVzcG9uc2USewoWR2V0U3RpY2tlclJldmlld0RldGFpbBIvLnN0aWNrZXJNYXJrZXQudjEuR2V0U3RpY2tlclJldmlld0RldGFpbFJlcXVlc3QaMC5zdGlja2VyTWFya2V0LnYxLkdldFN0aWNrZXJSZXZpZXdEZXRhaWxSZXNwb25zZRJ4ChVBcHByb3ZlU3RpY2tlclBhY2thZ2USLi5zdGlja2VyTWFya2V0LnYxLkFwcHJvdmVTdGlja2VyUGFja2FnZVJlcXVlc3QaLy5zdGlja2VyTWFya2V0LnYxLkFwcHJvdmVTdGlja2VyUGFja2FnZVJlc3BvbnNlEnUKFFJlamVjdFN0aWNrZXJQYWNrYWdlEi0uc3RpY2tlck1hcmtldC52MS5SZWplY3RTdGlja2VyUGFja2FnZVJlcXVlc3QaLi5zdGlja2VyTWFya2V0LnYxLlJlamVjdFN0aWNrZXJQYWNrYWdlUmVzcG9uc2UytwcKG1N0aWNrZXJNYXJrZXRDcmVhdG9yU2VydmljZRJsChFHZXRDcmVhdG9yUHJvZmlsZRIqLnN0aWNrZXJNYXJrZXQudjEuR2V0Q3JlYXRvclByb2ZpbGVSZXF1ZXN0Gisuc3RpY2tlck1hcmtldC52MS5HZXRDcmVhdG9yUHJvZmlsZVJlc3BvbnNlEnUKFFVwc2VydENyZWF0b3JQcm9maWxlEi0uc3RpY2tlck1hcmtldC52MS5VcHNlcnRDcmVhdG9yUHJvZmlsZVJlcXVlc3QaLi5zdGlja2VyTWFya2V0LnYxLlVwc2VydENyZWF0b3JQcm9maWxlUmVzcG9uc2UShAEKGUNyZWF0ZVN0aWNrZXJQYWNrYWdlRHJhZnQSMi5zdGlja2VyTWFya2V0LnYxLkNyZWF0ZVN0aWNrZXJQYWNrYWdlRHJhZnRSZXF1ZXN0GjMuc3RpY2tlck1hcmtldC52MS5DcmVhdGVTdGlja2VyUGFja2FnZURyYWZ0UmVzcG9uc2UShAEKGVVwZGF0ZVN0aWNrZXJQYWNrYWdlRHJhZnQSMi5zdGlja2VyTWFya2V0LnYxLlVwZGF0ZVN0aWNrZXJQYWNrYWdlRHJhZnRSZXF1ZXN0GjMuc3RpY2tlck1hcmtldC52MS5VcGRhdGVTdGlja2VyUGFja2FnZURyYWZ0UmVzcG9uc2UShwEKGlVwbG9hZFN0aWNrZXJQYWNrYWdlQXNzZXRzEjMuc3RpY2tlck1hcmtldC52MS5VcGxvYWRTdGlja2VyUGFja2FnZUFzc2V0c1JlcXVlc3QaNC5zdGlja2VyTWFya2V0LnYxLlVwbG9hZFN0aWNrZXJQYWNrYWdlQXNzZXRzUmVzcG9uc2UShwEKGlN1Ym1pdFN0aWNrZXJQYWNrYWdlUmV2aWV3EjMuc3RpY2tlck1hcmtldC52MS5TdWJtaXRTdGlja2VyUGFja2FnZVJldmlld1JlcXVlc3QaNC5zdGlja2VyTWFya2V0LnYxLlN1Ym1pdFN0aWNrZXJQYWNrYWdlUmV2aWV3UmVzcG9uc2USkAEKHVB1Ymxpc2hBcHByb3ZlZFN0aWNrZXJQYWNrYWdlEjYuc3RpY2tlck1hcmtldC52MS5QdWJsaXNoQXBwcm92ZWRTdGlja2VyUGFja2FnZVJlcXVlc3QaNy5zdGlja2VyTWFya2V0LnYxLlB1Ymxpc2hBcHByb3ZlZFN0aWNrZXJQYWNrYWdlUmVzcG9uc2ViBnByb3RvMw',
   )
 
 /**
@@ -334,6 +334,704 @@ export const GetOrderResponseSchema: GenMessage<GetOrderResponse> =
   messageDesc(file_stickerMarket_v1_stickerMarket, 10)
 
 /**
+ * @generated from message stickerMarket.v1.CreatorProfile
+ */
+export type CreatorProfile = Message<'stickerMarket.v1.CreatorProfile'> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string
+
+  /**
+   * @generated from field: string user_id = 2;
+   */
+  userId: string
+
+  /**
+   * @generated from field: string display_name = 3;
+   */
+  displayName: string
+
+  /**
+   * @generated from field: string country = 4;
+   */
+  country: string
+
+  /**
+   * @generated from field: string bio = 5;
+   */
+  bio: string
+
+  /**
+   * @generated from field: string status = 6;
+   */
+  status: string
+}
+
+/**
+ * Describes the message stickerMarket.v1.CreatorProfile.
+ * Use `create(CreatorProfileSchema)` to create a new message.
+ */
+export const CreatorProfileSchema: GenMessage<CreatorProfile> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 11)
+
+/**
+ * @generated from message stickerMarket.v1.StickerAssetValidationItem
+ */
+export type StickerAssetValidationItem =
+  Message<'stickerMarket.v1.StickerAssetValidationItem'> & {
+    /**
+     * @generated from field: string file_name = 1;
+     */
+    fileName: string
+
+    /**
+     * @generated from field: int32 number = 2;
+     */
+    number: number
+
+    /**
+     * @generated from field: string level = 3;
+     */
+    level: string
+
+    /**
+     * @generated from field: string code = 4;
+     */
+    code: string
+
+    /**
+     * @generated from field: string message = 5;
+     */
+    message: string
+
+    /**
+     * @generated from field: int32 width = 6;
+     */
+    width: number
+
+    /**
+     * @generated from field: int32 height = 7;
+     */
+    height: number
+
+    /**
+     * @generated from field: int32 size_bytes = 8;
+     */
+    sizeBytes: number
+  }
+
+/**
+ * Describes the message stickerMarket.v1.StickerAssetValidationItem.
+ * Use `create(StickerAssetValidationItemSchema)` to create a new message.
+ */
+export const StickerAssetValidationItemSchema: GenMessage<StickerAssetValidationItem> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 12)
+
+/**
+ * @generated from message stickerMarket.v1.StickerPackageDraft
+ */
+export type StickerPackageDraft = Message<'stickerMarket.v1.StickerPackageDraft'> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string
+
+  /**
+   * @generated from field: string creator_id = 2;
+   */
+  creatorId: string
+
+  /**
+   * @generated from field: string name = 3;
+   */
+  name: string
+
+  /**
+   * @generated from field: string description = 4;
+   */
+  description: string
+
+  /**
+   * @generated from field: int32 price_minor = 5;
+   */
+  priceMinor: number
+
+  /**
+   * @generated from field: string currency = 6;
+   */
+  currency: string
+
+  /**
+   * @generated from field: int32 sticker_count = 7;
+   */
+  stickerCount: number
+
+  /**
+   * @generated from field: stickerMarket.v1.StickerPackageStatus status = 8;
+   */
+  status: StickerPackageStatus
+
+  /**
+   * @generated from field: string tags_json = 9;
+   */
+  tagsJson: string
+
+  /**
+   * @generated from field: string copyright_text = 10;
+   */
+  copyrightText: string
+
+  /**
+   * @generated from field: bool auto_publish = 11;
+   */
+  autoPublish: boolean
+}
+
+/**
+ * Describes the message stickerMarket.v1.StickerPackageDraft.
+ * Use `create(StickerPackageDraftSchema)` to create a new message.
+ */
+export const StickerPackageDraftSchema: GenMessage<StickerPackageDraft> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 13)
+
+/**
+ * @generated from message stickerMarket.v1.GetCreatorProfileRequest
+ */
+export type GetCreatorProfileRequest =
+  Message<'stickerMarket.v1.GetCreatorProfileRequest'> & {}
+
+/**
+ * Describes the message stickerMarket.v1.GetCreatorProfileRequest.
+ * Use `create(GetCreatorProfileRequestSchema)` to create a new message.
+ */
+export const GetCreatorProfileRequestSchema: GenMessage<GetCreatorProfileRequest> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 14)
+
+/**
+ * @generated from message stickerMarket.v1.GetCreatorProfileResponse
+ */
+export type GetCreatorProfileResponse =
+  Message<'stickerMarket.v1.GetCreatorProfileResponse'> & {
+    /**
+     * @generated from field: stickerMarket.v1.CreatorProfile profile = 1;
+     */
+    profile?: CreatorProfile
+  }
+
+/**
+ * Describes the message stickerMarket.v1.GetCreatorProfileResponse.
+ * Use `create(GetCreatorProfileResponseSchema)` to create a new message.
+ */
+export const GetCreatorProfileResponseSchema: GenMessage<GetCreatorProfileResponse> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 15)
+
+/**
+ * @generated from message stickerMarket.v1.UpsertCreatorProfileRequest
+ */
+export type UpsertCreatorProfileRequest =
+  Message<'stickerMarket.v1.UpsertCreatorProfileRequest'> & {
+    /**
+     * @generated from field: string display_name = 1;
+     */
+    displayName: string
+
+    /**
+     * @generated from field: string country = 2;
+     */
+    country: string
+
+    /**
+     * @generated from field: string bio = 3;
+     */
+    bio: string
+  }
+
+/**
+ * Describes the message stickerMarket.v1.UpsertCreatorProfileRequest.
+ * Use `create(UpsertCreatorProfileRequestSchema)` to create a new message.
+ */
+export const UpsertCreatorProfileRequestSchema: GenMessage<UpsertCreatorProfileRequest> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 16)
+
+/**
+ * @generated from message stickerMarket.v1.UpsertCreatorProfileResponse
+ */
+export type UpsertCreatorProfileResponse =
+  Message<'stickerMarket.v1.UpsertCreatorProfileResponse'> & {
+    /**
+     * @generated from field: stickerMarket.v1.CreatorProfile profile = 1;
+     */
+    profile?: CreatorProfile
+  }
+
+/**
+ * Describes the message stickerMarket.v1.UpsertCreatorProfileResponse.
+ * Use `create(UpsertCreatorProfileResponseSchema)` to create a new message.
+ */
+export const UpsertCreatorProfileResponseSchema: GenMessage<UpsertCreatorProfileResponse> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 17)
+
+/**
+ * @generated from message stickerMarket.v1.CreateStickerPackageDraftRequest
+ */
+export type CreateStickerPackageDraftRequest =
+  Message<'stickerMarket.v1.CreateStickerPackageDraftRequest'> & {
+    /**
+     * @generated from field: string name = 1;
+     */
+    name: string
+
+    /**
+     * @generated from field: string description = 2;
+     */
+    description: string
+
+    /**
+     * @generated from field: int32 price_minor = 3;
+     */
+    priceMinor: number
+
+    /**
+     * @generated from field: int32 sticker_count = 4;
+     */
+    stickerCount: number
+
+    /**
+     * @generated from field: string tags_json = 5;
+     */
+    tagsJson: string
+
+    /**
+     * @generated from field: string copyright_text = 6;
+     */
+    copyrightText: string
+
+    /**
+     * @generated from field: bool license_confirmed = 7;
+     */
+    licenseConfirmed: boolean
+
+    /**
+     * @generated from field: bool auto_publish = 8;
+     */
+    autoPublish: boolean
+  }
+
+/**
+ * Describes the message stickerMarket.v1.CreateStickerPackageDraftRequest.
+ * Use `create(CreateStickerPackageDraftRequestSchema)` to create a new message.
+ */
+export const CreateStickerPackageDraftRequestSchema: GenMessage<CreateStickerPackageDraftRequest> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 18)
+
+/**
+ * @generated from message stickerMarket.v1.CreateStickerPackageDraftResponse
+ */
+export type CreateStickerPackageDraftResponse =
+  Message<'stickerMarket.v1.CreateStickerPackageDraftResponse'> & {
+    /**
+     * @generated from field: stickerMarket.v1.StickerPackageDraft package = 1;
+     */
+    package?: StickerPackageDraft
+  }
+
+/**
+ * Describes the message stickerMarket.v1.CreateStickerPackageDraftResponse.
+ * Use `create(CreateStickerPackageDraftResponseSchema)` to create a new message.
+ */
+export const CreateStickerPackageDraftResponseSchema: GenMessage<CreateStickerPackageDraftResponse> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 19)
+
+/**
+ * @generated from message stickerMarket.v1.UpdateStickerPackageDraftRequest
+ */
+export type UpdateStickerPackageDraftRequest =
+  Message<'stickerMarket.v1.UpdateStickerPackageDraftRequest'> & {
+    /**
+     * @generated from field: string package_id = 1;
+     */
+    packageId: string
+
+    /**
+     * @generated from field: string name = 2;
+     */
+    name: string
+
+    /**
+     * @generated from field: string description = 3;
+     */
+    description: string
+
+    /**
+     * @generated from field: int32 price_minor = 4;
+     */
+    priceMinor: number
+
+    /**
+     * @generated from field: int32 sticker_count = 5;
+     */
+    stickerCount: number
+
+    /**
+     * @generated from field: string tags_json = 6;
+     */
+    tagsJson: string
+
+    /**
+     * @generated from field: string copyright_text = 7;
+     */
+    copyrightText: string
+
+    /**
+     * @generated from field: bool license_confirmed = 8;
+     */
+    licenseConfirmed: boolean
+
+    /**
+     * @generated from field: bool auto_publish = 9;
+     */
+    autoPublish: boolean
+  }
+
+/**
+ * Describes the message stickerMarket.v1.UpdateStickerPackageDraftRequest.
+ * Use `create(UpdateStickerPackageDraftRequestSchema)` to create a new message.
+ */
+export const UpdateStickerPackageDraftRequestSchema: GenMessage<UpdateStickerPackageDraftRequest> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 20)
+
+/**
+ * @generated from message stickerMarket.v1.UpdateStickerPackageDraftResponse
+ */
+export type UpdateStickerPackageDraftResponse =
+  Message<'stickerMarket.v1.UpdateStickerPackageDraftResponse'> & {
+    /**
+     * @generated from field: stickerMarket.v1.StickerPackageDraft package = 1;
+     */
+    package?: StickerPackageDraft
+  }
+
+/**
+ * Describes the message stickerMarket.v1.UpdateStickerPackageDraftResponse.
+ * Use `create(UpdateStickerPackageDraftResponseSchema)` to create a new message.
+ */
+export const UpdateStickerPackageDraftResponseSchema: GenMessage<UpdateStickerPackageDraftResponse> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 21)
+
+/**
+ * @generated from message stickerMarket.v1.UploadStickerPackageAssetsRequest
+ */
+export type UploadStickerPackageAssetsRequest =
+  Message<'stickerMarket.v1.UploadStickerPackageAssetsRequest'> & {
+    /**
+     * @generated from field: string package_id = 1;
+     */
+    packageId: string
+
+    /**
+     * @generated from field: bytes zip_file = 2;
+     */
+    zipFile: Uint8Array
+  }
+
+/**
+ * Describes the message stickerMarket.v1.UploadStickerPackageAssetsRequest.
+ * Use `create(UploadStickerPackageAssetsRequestSchema)` to create a new message.
+ */
+export const UploadStickerPackageAssetsRequestSchema: GenMessage<UploadStickerPackageAssetsRequest> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 22)
+
+/**
+ * @generated from message stickerMarket.v1.UploadStickerPackageAssetsResponse
+ */
+export type UploadStickerPackageAssetsResponse =
+  Message<'stickerMarket.v1.UploadStickerPackageAssetsResponse'> & {
+    /**
+     * @generated from field: bool valid = 1;
+     */
+    valid: boolean
+
+    /**
+     * @generated from field: repeated stickerMarket.v1.StickerAssetValidationItem items = 2;
+     */
+    items: StickerAssetValidationItem[]
+  }
+
+/**
+ * Describes the message stickerMarket.v1.UploadStickerPackageAssetsResponse.
+ * Use `create(UploadStickerPackageAssetsResponseSchema)` to create a new message.
+ */
+export const UploadStickerPackageAssetsResponseSchema: GenMessage<UploadStickerPackageAssetsResponse> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 23)
+
+/**
+ * @generated from message stickerMarket.v1.SubmitStickerPackageReviewRequest
+ */
+export type SubmitStickerPackageReviewRequest =
+  Message<'stickerMarket.v1.SubmitStickerPackageReviewRequest'> & {
+    /**
+     * @generated from field: string package_id = 1;
+     */
+    packageId: string
+  }
+
+/**
+ * Describes the message stickerMarket.v1.SubmitStickerPackageReviewRequest.
+ * Use `create(SubmitStickerPackageReviewRequestSchema)` to create a new message.
+ */
+export const SubmitStickerPackageReviewRequestSchema: GenMessage<SubmitStickerPackageReviewRequest> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 24)
+
+/**
+ * @generated from message stickerMarket.v1.SubmitStickerPackageReviewResponse
+ */
+export type SubmitStickerPackageReviewResponse =
+  Message<'stickerMarket.v1.SubmitStickerPackageReviewResponse'> & {
+    /**
+     * @generated from field: stickerMarket.v1.StickerPackageDraft package = 1;
+     */
+    package?: StickerPackageDraft
+  }
+
+/**
+ * Describes the message stickerMarket.v1.SubmitStickerPackageReviewResponse.
+ * Use `create(SubmitStickerPackageReviewResponseSchema)` to create a new message.
+ */
+export const SubmitStickerPackageReviewResponseSchema: GenMessage<SubmitStickerPackageReviewResponse> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 25)
+
+/**
+ * @generated from message stickerMarket.v1.PublishApprovedStickerPackageRequest
+ */
+export type PublishApprovedStickerPackageRequest =
+  Message<'stickerMarket.v1.PublishApprovedStickerPackageRequest'> & {
+    /**
+     * @generated from field: string package_id = 1;
+     */
+    packageId: string
+  }
+
+/**
+ * Describes the message stickerMarket.v1.PublishApprovedStickerPackageRequest.
+ * Use `create(PublishApprovedStickerPackageRequestSchema)` to create a new message.
+ */
+export const PublishApprovedStickerPackageRequestSchema: GenMessage<PublishApprovedStickerPackageRequest> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 26)
+
+/**
+ * @generated from message stickerMarket.v1.PublishApprovedStickerPackageResponse
+ */
+export type PublishApprovedStickerPackageResponse =
+  Message<'stickerMarket.v1.PublishApprovedStickerPackageResponse'> & {
+    /**
+     * @generated from field: stickerMarket.v1.StickerPackageDraft package = 1;
+     */
+    package?: StickerPackageDraft
+  }
+
+/**
+ * Describes the message stickerMarket.v1.PublishApprovedStickerPackageResponse.
+ * Use `create(PublishApprovedStickerPackageResponseSchema)` to create a new message.
+ */
+export const PublishApprovedStickerPackageResponseSchema: GenMessage<PublishApprovedStickerPackageResponse> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 27)
+
+/**
+ * @generated from message stickerMarket.v1.ListStickerReviewQueueRequest
+ */
+export type ListStickerReviewQueueRequest =
+  Message<'stickerMarket.v1.ListStickerReviewQueueRequest'> & {
+    /**
+     * @generated from field: int32 limit = 1;
+     */
+    limit: number
+  }
+
+/**
+ * Describes the message stickerMarket.v1.ListStickerReviewQueueRequest.
+ * Use `create(ListStickerReviewQueueRequestSchema)` to create a new message.
+ */
+export const ListStickerReviewQueueRequestSchema: GenMessage<ListStickerReviewQueueRequest> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 28)
+
+/**
+ * @generated from message stickerMarket.v1.ListStickerReviewQueueResponse
+ */
+export type ListStickerReviewQueueResponse =
+  Message<'stickerMarket.v1.ListStickerReviewQueueResponse'> & {
+    /**
+     * @generated from field: repeated stickerMarket.v1.StickerPackageDraft packages = 1;
+     */
+    packages: StickerPackageDraft[]
+  }
+
+/**
+ * Describes the message stickerMarket.v1.ListStickerReviewQueueResponse.
+ * Use `create(ListStickerReviewQueueResponseSchema)` to create a new message.
+ */
+export const ListStickerReviewQueueResponseSchema: GenMessage<ListStickerReviewQueueResponse> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 29)
+
+/**
+ * @generated from message stickerMarket.v1.GetStickerReviewDetailRequest
+ */
+export type GetStickerReviewDetailRequest =
+  Message<'stickerMarket.v1.GetStickerReviewDetailRequest'> & {
+    /**
+     * @generated from field: string package_id = 1;
+     */
+    packageId: string
+  }
+
+/**
+ * Describes the message stickerMarket.v1.GetStickerReviewDetailRequest.
+ * Use `create(GetStickerReviewDetailRequestSchema)` to create a new message.
+ */
+export const GetStickerReviewDetailRequestSchema: GenMessage<GetStickerReviewDetailRequest> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 30)
+
+/**
+ * @generated from message stickerMarket.v1.GetStickerReviewDetailResponse
+ */
+export type GetStickerReviewDetailResponse =
+  Message<'stickerMarket.v1.GetStickerReviewDetailResponse'> & {
+    /**
+     * @generated from field: stickerMarket.v1.StickerPackageDraft package = 1;
+     */
+    package?: StickerPackageDraft
+
+    /**
+     * @generated from field: repeated stickerMarket.v1.StickerAssetValidationItem latest_validation = 2;
+     */
+    latestValidation: StickerAssetValidationItem[]
+  }
+
+/**
+ * Describes the message stickerMarket.v1.GetStickerReviewDetailResponse.
+ * Use `create(GetStickerReviewDetailResponseSchema)` to create a new message.
+ */
+export const GetStickerReviewDetailResponseSchema: GenMessage<GetStickerReviewDetailResponse> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 31)
+
+/**
+ * @generated from message stickerMarket.v1.ApproveStickerPackageRequest
+ */
+export type ApproveStickerPackageRequest =
+  Message<'stickerMarket.v1.ApproveStickerPackageRequest'> & {
+    /**
+     * @generated from field: string package_id = 1;
+     */
+    packageId: string
+  }
+
+/**
+ * Describes the message stickerMarket.v1.ApproveStickerPackageRequest.
+ * Use `create(ApproveStickerPackageRequestSchema)` to create a new message.
+ */
+export const ApproveStickerPackageRequestSchema: GenMessage<ApproveStickerPackageRequest> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 32)
+
+/**
+ * @generated from message stickerMarket.v1.ApproveStickerPackageResponse
+ */
+export type ApproveStickerPackageResponse =
+  Message<'stickerMarket.v1.ApproveStickerPackageResponse'> & {
+    /**
+     * @generated from field: stickerMarket.v1.StickerPackageDraft package = 1;
+     */
+    package?: StickerPackageDraft
+  }
+
+/**
+ * Describes the message stickerMarket.v1.ApproveStickerPackageResponse.
+ * Use `create(ApproveStickerPackageResponseSchema)` to create a new message.
+ */
+export const ApproveStickerPackageResponseSchema: GenMessage<ApproveStickerPackageResponse> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 33)
+
+/**
+ * @generated from message stickerMarket.v1.RejectStickerPackageRequest
+ */
+export type RejectStickerPackageRequest =
+  Message<'stickerMarket.v1.RejectStickerPackageRequest'> & {
+    /**
+     * @generated from field: string package_id = 1;
+     */
+    packageId: string
+
+    /**
+     * @generated from field: string reason_category = 2;
+     */
+    reasonCategory: string
+
+    /**
+     * @generated from field: string reason_text = 3;
+     */
+    reasonText: string
+
+    /**
+     * @generated from field: string suggestion = 4;
+     */
+    suggestion: string
+
+    /**
+     * @generated from field: repeated int32 problem_asset_numbers = 5;
+     */
+    problemAssetNumbers: number[]
+  }
+
+/**
+ * Describes the message stickerMarket.v1.RejectStickerPackageRequest.
+ * Use `create(RejectStickerPackageRequestSchema)` to create a new message.
+ */
+export const RejectStickerPackageRequestSchema: GenMessage<RejectStickerPackageRequest> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 34)
+
+/**
+ * @generated from message stickerMarket.v1.RejectStickerPackageResponse
+ */
+export type RejectStickerPackageResponse =
+  Message<'stickerMarket.v1.RejectStickerPackageResponse'> & {
+    /**
+     * @generated from field: stickerMarket.v1.StickerPackageDraft package = 1;
+     */
+    package?: StickerPackageDraft
+  }
+
+/**
+ * Describes the message stickerMarket.v1.RejectStickerPackageResponse.
+ * Use `create(RejectStickerPackageResponseSchema)` to create a new message.
+ */
+export const RejectStickerPackageResponseSchema: GenMessage<RejectStickerPackageResponse> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 35)
+
+/**
  * @generated from enum stickerMarket.v1.RefundStatus
  */
 export enum RefundStatus {
@@ -413,6 +1111,58 @@ export const OrderStatusSchema: GenEnum<OrderStatus> =
   enumDesc(file_stickerMarket_v1_stickerMarket, 1)
 
 /**
+ * @generated from enum stickerMarket.v1.StickerPackageStatus
+ */
+export enum StickerPackageStatus {
+  /**
+   * @generated from enum value: STICKER_PACKAGE_STATUS_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: STICKER_PACKAGE_STATUS_DRAFT = 1;
+   */
+  DRAFT = 1,
+
+  /**
+   * @generated from enum value: STICKER_PACKAGE_STATUS_IN_REVIEW = 2;
+   */
+  IN_REVIEW = 2,
+
+  /**
+   * @generated from enum value: STICKER_PACKAGE_STATUS_APPROVED = 3;
+   */
+  APPROVED = 3,
+
+  /**
+   * @generated from enum value: STICKER_PACKAGE_STATUS_REJECTED = 4;
+   */
+  REJECTED = 4,
+
+  /**
+   * @generated from enum value: STICKER_PACKAGE_STATUS_ON_SALE = 5;
+   */
+  ON_SALE = 5,
+
+  /**
+   * @generated from enum value: STICKER_PACKAGE_STATUS_UNLISTED = 6;
+   */
+  UNLISTED = 6,
+
+  /**
+   * @generated from enum value: STICKER_PACKAGE_STATUS_REMOVED = 7;
+   */
+  REMOVED = 7,
+}
+
+/**
+ * Describes the enum stickerMarket.v1.StickerPackageStatus.
+ */
+export const StickerPackageStatusSchema: GenEnum<StickerPackageStatus> =
+  /*@__PURE__*/
+  enumDesc(file_stickerMarket_v1_stickerMarket, 2)
+
+/**
  * --- MVP slice ---
  *
  * @generated from service stickerMarket.v1.StickerMarketUserService
@@ -456,4 +1206,98 @@ export const StickerMarketAdminService: GenService<{
     input: typeof ReconcileStickerOrdersRequestSchema
     output: typeof ReconcileStickerOrdersResponseSchema
   }
+  /**
+   * @generated from rpc stickerMarket.v1.StickerMarketAdminService.ListStickerReviewQueue
+   */
+  listStickerReviewQueue: {
+    methodKind: 'unary'
+    input: typeof ListStickerReviewQueueRequestSchema
+    output: typeof ListStickerReviewQueueResponseSchema
+  }
+  /**
+   * @generated from rpc stickerMarket.v1.StickerMarketAdminService.GetStickerReviewDetail
+   */
+  getStickerReviewDetail: {
+    methodKind: 'unary'
+    input: typeof GetStickerReviewDetailRequestSchema
+    output: typeof GetStickerReviewDetailResponseSchema
+  }
+  /**
+   * @generated from rpc stickerMarket.v1.StickerMarketAdminService.ApproveStickerPackage
+   */
+  approveStickerPackage: {
+    methodKind: 'unary'
+    input: typeof ApproveStickerPackageRequestSchema
+    output: typeof ApproveStickerPackageResponseSchema
+  }
+  /**
+   * @generated from rpc stickerMarket.v1.StickerMarketAdminService.RejectStickerPackage
+   */
+  rejectStickerPackage: {
+    methodKind: 'unary'
+    input: typeof RejectStickerPackageRequestSchema
+    output: typeof RejectStickerPackageResponseSchema
+  }
 }> = /*@__PURE__*/ serviceDesc(file_stickerMarket_v1_stickerMarket, 1)
+
+/**
+ * @generated from service stickerMarket.v1.StickerMarketCreatorService
+ */
+export const StickerMarketCreatorService: GenService<{
+  /**
+   * @generated from rpc stickerMarket.v1.StickerMarketCreatorService.GetCreatorProfile
+   */
+  getCreatorProfile: {
+    methodKind: 'unary'
+    input: typeof GetCreatorProfileRequestSchema
+    output: typeof GetCreatorProfileResponseSchema
+  }
+  /**
+   * @generated from rpc stickerMarket.v1.StickerMarketCreatorService.UpsertCreatorProfile
+   */
+  upsertCreatorProfile: {
+    methodKind: 'unary'
+    input: typeof UpsertCreatorProfileRequestSchema
+    output: typeof UpsertCreatorProfileResponseSchema
+  }
+  /**
+   * @generated from rpc stickerMarket.v1.StickerMarketCreatorService.CreateStickerPackageDraft
+   */
+  createStickerPackageDraft: {
+    methodKind: 'unary'
+    input: typeof CreateStickerPackageDraftRequestSchema
+    output: typeof CreateStickerPackageDraftResponseSchema
+  }
+  /**
+   * @generated from rpc stickerMarket.v1.StickerMarketCreatorService.UpdateStickerPackageDraft
+   */
+  updateStickerPackageDraft: {
+    methodKind: 'unary'
+    input: typeof UpdateStickerPackageDraftRequestSchema
+    output: typeof UpdateStickerPackageDraftResponseSchema
+  }
+  /**
+   * @generated from rpc stickerMarket.v1.StickerMarketCreatorService.UploadStickerPackageAssets
+   */
+  uploadStickerPackageAssets: {
+    methodKind: 'unary'
+    input: typeof UploadStickerPackageAssetsRequestSchema
+    output: typeof UploadStickerPackageAssetsResponseSchema
+  }
+  /**
+   * @generated from rpc stickerMarket.v1.StickerMarketCreatorService.SubmitStickerPackageReview
+   */
+  submitStickerPackageReview: {
+    methodKind: 'unary'
+    input: typeof SubmitStickerPackageReviewRequestSchema
+    output: typeof SubmitStickerPackageReviewResponseSchema
+  }
+  /**
+   * @generated from rpc stickerMarket.v1.StickerMarketCreatorService.PublishApprovedStickerPackage
+   */
+  publishApprovedStickerPackage: {
+    methodKind: 'unary'
+    input: typeof PublishApprovedStickerPackageRequestSchema
+    output: typeof PublishApprovedStickerPackageResponseSchema
+  }
+}> = /*@__PURE__*/ serviceDesc(file_stickerMarket_v1_stickerMarket, 2)
