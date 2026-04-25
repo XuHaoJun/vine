@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { createPaymentsService } from './service'
 import { signFormBody } from './test-utils/ecpay-mac'
 import { ConfigError } from './errors'
@@ -162,6 +162,124 @@ describe('createCharge edge cases', () => {
     })
     await expect(
       pay.createCharge({ ...baseInput, testMode: { simulatePaid: true } }),
+    ).rejects.toThrow(ConfigError)
+  })
+})
+
+describe('getCharge', () => {
+  it('maps QueryTradeInfo TradeStatus=1 to paid', async () => {
+    const fetch = vi.fn().mockResolvedValue(
+      new Response(
+        'MerchantTradeNo=oquery001&TradeNo=2402230000000001&TradeAmt=75&TradeStatus=1&PaymentDate=2026/04/25 10:00:00',
+      ),
+    )
+    const pay = createPaymentsService({
+      connector: 'ecpay',
+      ecpay: STAGE_CREDS,
+      fetch,
+      now: () => new Date('2026-04-25T02:00:00Z'),
+    })
+
+    const result = await pay.getCharge({ merchantTransactionId: 'oquery001' })
+
+    expect(result).toMatchObject({
+      status: 'paid',
+      connectorChargeId: '2402230000000001',
+      amount: { minorAmount: 75, currency: 'TWD' },
+      rawStatus: '1',
+    })
+    expect(fetch).toHaveBeenCalledOnce()
+    expect(fetch.mock.calls[0][0]).toBe(
+      'https://payment-stage.ecpay.com.tw/Cashier/QueryTradeInfo/V5',
+    )
+    expect(String(fetch.mock.calls[0][1].body)).toContain('MerchantTradeNo=oquery001')
+    expect(String(fetch.mock.calls[0][1].body)).toContain('TimeStamp=1777082400')
+  })
+
+  it('maps QueryTradeInfo order-not-found response to not_found', async () => {
+    const fetch = vi
+      .fn()
+      .mockResolvedValue(new Response('TradeStatus=10200047&TradeStatusDesc=查無資料'))
+    const pay = createPaymentsService({
+      connector: 'ecpay',
+      ecpay: STAGE_CREDS,
+      fetch,
+      now: () => new Date('2026-04-25T02:00:00Z'),
+    })
+
+    const result = await pay.getCharge({ merchantTransactionId: 'missing001' })
+
+    expect(result).toMatchObject({
+      status: 'not_found',
+      rawStatus: '10200047',
+    })
+  })
+})
+
+describe('refundCharge', () => {
+  it('returns simulated success in stage test mode without network', async () => {
+    const fetch = vi.fn()
+    const pay = createPaymentsService({
+      connector: 'ecpay',
+      ecpay: STAGE_CREDS,
+      fetch,
+      now: () => new Date('2026-04-25T02:00:00Z'),
+    })
+
+    const result = await pay.refundCharge({
+      merchantTransactionId: 'orefund001',
+      connectorChargeId: '2402230000000001',
+      amount: { minorAmount: 75, currency: 'TWD' },
+      reason: 'technical_error',
+      testMode: true,
+    })
+
+    expect(result).toMatchObject({
+      status: 'succeeded',
+      connectorRefundId: undefined,
+      simulated: true,
+    })
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('maps DoAction failure response to failed', async () => {
+    const fetch = vi
+      .fn()
+      .mockResolvedValue(new Response('RtnCode=0&RtnMsg=TradeNo not found'))
+    const pay = createPaymentsService({
+      connector: 'ecpay',
+      ecpay: { ...STAGE_CREDS, mode: 'prod' },
+      fetch,
+      now: () => new Date('2026-04-25T02:00:00Z'),
+    })
+
+    const result = await pay.refundCharge({
+      merchantTransactionId: 'orefund002',
+      connectorChargeId: '2402230000000002',
+      amount: { minorAmount: 75, currency: 'TWD' },
+      reason: 'admin_exception',
+    })
+
+    expect(result).toMatchObject({
+      status: 'failed',
+      reason: 'TradeNo not found',
+    })
+    expect(fetch).toHaveBeenCalledOnce()
+    expect(fetch.mock.calls[0][0]).toBe(
+      'https://payment.ecpay.com.tw/CreditDetail/DoAction',
+    )
+    expect(String(fetch.mock.calls[0][1].body)).toContain('Action=R')
+  })
+
+  it('rejects non-TWD refund amounts', async () => {
+    const pay = createPaymentsService({ connector: 'ecpay', ecpay: STAGE_CREDS })
+    await expect(
+      pay.refundCharge({
+        merchantTransactionId: 'orefund003',
+        connectorChargeId: '2402230000000003',
+        amount: { minorAmount: 75, currency: 'USD' },
+        reason: 'technical_error',
+      }),
     ).rejects.toThrow(ConfigError)
   })
 })
