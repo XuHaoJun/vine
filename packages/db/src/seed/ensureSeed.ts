@@ -8,7 +8,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { user, account } from '../schema-private'
-import { friendship, userPublic, userState, chat, chatMember, stickerPackage } from '../schema-public'
+import { friendship, userPublic, userState, chat, chatMember, stickerPackage, entitlement } from '../schema-public'
 import {
   oaProvider,
   officialAccount,
@@ -492,6 +492,41 @@ export async function ensureSeed(pool: Pool, db: any, drive?: SeedDrive) {
   }
 
   await seedStickerPackages(db, drive)
+
+  // Seed a pre-purchased entitlement for test1 so integration tests can
+  // verify the sticker picker / chat flow without going through ECPay.
+  const test1ForEntitlement = await db
+    .select()
+    .from(user)
+    .where(eq(user.email, 'test1@example.com'))
+    .limit(1)
+
+  if (test1ForEntitlement.length > 0) {
+    const test1Id = test1ForEntitlement[0].id
+    const existingEntitlement = await db
+      .select()
+      .from(entitlement)
+      .where(
+        and(
+          eq(entitlement.userId, test1Id),
+          eq(entitlement.packageId, 'pkg_cat_01'),
+        ),
+      )
+      .limit(1)
+
+    if (existingEntitlement.length === 0) {
+      await db.insert(entitlement).values({
+        id: randomUUID(),
+        userId: test1Id,
+        packageId: 'pkg_cat_01',
+        grantedByOrderId: 'seed-order-cat-01',
+        grantedAt: now,
+      })
+      console.info(`[seed] Created entitlement for test1 -> pkg_cat_01`)
+    } else {
+      console.info(`[seed] Entitlement for test1 -> pkg_cat_01 already exists`)
+    }
+  }
 
   console.info('[seed] Seed data initialization complete')
 }
