@@ -123,6 +123,43 @@ describe('createReconciliationService', () => {
     )
   })
 
+  it('does not mark paid or grant entitlement when connector amount mismatches local order', async () => {
+    const deps = makeReconciliationDeps({
+      orders: [makeOrder({ id: 'order-1', status: 'created', amountMinor: 3000 })],
+      chargeStatus: {
+        status: 'paid',
+        connectorChargeId: 'trade-1',
+        amount: { minorAmount: 9999, currency: 'TWD' },
+        paidAt: new Date('2026-04-25T01:00:00Z'),
+        rawStatus: '1',
+        raw: {},
+      },
+    })
+
+    const service = createReconciliationService(deps)
+    const result = await service.reconcileOrders({
+      since: new Date('2026-04-24T00:00:00Z'),
+      limit: 100,
+      dryRun: false,
+    })
+
+    expect(deps.orderRepo.transitionToPaid).not.toHaveBeenCalled()
+    expect(deps.entitlementRepo.grant).not.toHaveBeenCalled()
+    expect(deps.alerts.notify).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'payment.reconciliation_mismatch',
+        severity: 'critical',
+        orderId: 'order-1',
+      }),
+    )
+    expect(result.mismatches[0]).toMatchObject({
+      orderId: 'order-1',
+      localStatus: 'created',
+      connectorStatus: 'paid',
+      action: 'reported',
+    })
+  })
+
   it('alerts when local paid order is missing at connector', async () => {
     const deps = makeReconciliationDeps({
       orders: [makeOrder({ id: 'order-1', status: 'paid' })],

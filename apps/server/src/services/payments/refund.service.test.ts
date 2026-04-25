@@ -1,3 +1,4 @@
+import { Code } from '@connectrpc/connect'
 import { describe, expect, it, vi } from 'vitest'
 import { createRefundService } from './refund.service'
 import type { StickerOrderRow } from './order.repository'
@@ -144,6 +145,46 @@ describe('createRefundService', () => {
         orderId: 'order-1',
       }),
     )
+  })
+
+  it('rejects paid order without connectorChargeId before entering refund_pending', async () => {
+    const deps = makeRefundDeps({
+      order: makeOrder({ status: 'paid', connectorChargeId: null }),
+    })
+
+    const service = createRefundService(deps)
+    await expect(
+      service.refundOrder({
+        orderId: 'order-1',
+        reason: 'admin_exception',
+        requestedByUserId: 'admin-1',
+      }),
+    ).rejects.toMatchObject({ code: Code.FailedPrecondition })
+
+    expect(deps.orderRepo.beginRefund).not.toHaveBeenCalled()
+    expect(deps.pay.refundCharge).not.toHaveBeenCalled()
+  })
+
+  it('returns simulated flag when refund provider simulates success', async () => {
+    const deps = makeRefundDeps({
+      order: makeOrder({ status: 'paid', connectorChargeId: 'trade-1' }),
+      refundResult: {
+        status: 'succeeded',
+        simulated: true,
+        refundedAt: new Date('2026-04-25T02:00:00Z'),
+        connectorRefundId: undefined,
+        raw: {},
+      },
+    })
+
+    const service = createRefundService(deps)
+    const result = await service.refundOrder({
+      orderId: 'order-1',
+      reason: 'admin_exception',
+      requestedByUserId: 'admin-1',
+    })
+
+    expect(result).toMatchObject({ status: 'refunded', simulated: true })
   })
 
   it('compensatePaidCharge allows created order with verified connector charge id', async () => {

@@ -1,6 +1,7 @@
+import { Code, ConnectError, createContextValues } from '@connectrpc/connect'
+import { OrderStatus } from '@vine/proto/stickerMarket'
 import { describe, it, expect, vi } from 'vitest'
 import { createStickerMarketUserHandler } from './stickerMarketUser'
-import { Code, ConnectError, createContextValues } from '@connectrpc/connect'
 import { connectAuthDataKey } from './auth-context'
 
 function makeMockPay() {
@@ -183,6 +184,16 @@ describe('createStickerMarketUserHandler', () => {
       expect(result.amountMinor).toBe(7500)
       expect(result.currency).toBe('TWD')
       expect(result.failureReason).toBe('')
+    })
+
+    it('returns refunded order status', async () => {
+      const refundedOrder = { ...mockOrder, status: 'refunded' as const }
+      const { deps } = makeDeps({ rowsQueue: [[refundedOrder]] })
+      const handler = createStickerMarketUserHandler(deps)
+
+      const result = await handler.getOrder({ orderId: 'ORDER123' }, authCtx)
+
+      expect(result.status).toBe(OrderStatus.REFUNDED)
     })
 
     it("rejects another user's order with PermissionDenied", async () => {

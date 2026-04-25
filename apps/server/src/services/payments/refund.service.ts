@@ -21,7 +21,7 @@ export type CompensatePaidChargeInput = {
 }
 
 export type RefundOrderResult =
-  | { status: 'refunded'; refundedAt?: Date }
+  | { status: 'refunded'; refundedAt?: Date; simulated: boolean }
   | { status: 'refund_pending' }
   | { status: 'refund_failed'; failureReason: string }
 
@@ -97,13 +97,20 @@ async function runRefund(
     }
 
     const refundId = `refund_${row.id}`
+    const connectorChargeId = input.compensation?.connectorChargeId ?? row.connectorChargeId
+    if (!connectorChargeId) {
+      throw new ConnectError(
+        'order cannot be refunded without connector charge id',
+        Code.FailedPrecondition,
+      )
+    }
 
     const beginResult = await deps.orderRepo.beginRefund(tx, input.orderId, {
       refundId,
       refundAmountMinor: row.amountMinor,
       refundReason: input.reason,
       refundRequestedByUserId: input.requestedByUserId,
-      connectorChargeId: input.compensation?.connectorChargeId ?? row.connectorChargeId!,
+      connectorChargeId,
       paidAt: input.compensation
         ? new Date(input.compensation.paidAt)
         : row.paidAt
@@ -126,9 +133,18 @@ async function runRefund(
     return { status: order.status }
   }
 
+  const refundConnectorChargeId =
+    input.compensation?.connectorChargeId ?? order.connectorChargeId
+  if (!refundConnectorChargeId) {
+    throw new ConnectError(
+      'order cannot be refunded without connector charge id',
+      Code.FailedPrecondition,
+    )
+  }
+
   const refundResult = await deps.pay.refundCharge({
     merchantTransactionId: order.id,
-    connectorChargeId: input.compensation?.connectorChargeId ?? order.connectorChargeId!,
+    connectorChargeId: refundConnectorChargeId,
     amount: input.compensation?.amount ?? {
       minorAmount: order.amountMinor,
       currency: order.currency,
@@ -144,7 +160,11 @@ async function runRefund(
       })
       await deps.entitlementRepo.revokeByOrder(tx, input.orderId)
     })
-    return { status: 'refunded', refundedAt: refundResult.refundedAt }
+    return {
+      status: 'refunded',
+      refundedAt: refundResult.refundedAt,
+      simulated: refundResult.simulated,
+    }
   }
 
   await deps.db.transaction(async (tx) => {

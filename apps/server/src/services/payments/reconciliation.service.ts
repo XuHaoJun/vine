@@ -79,7 +79,27 @@ export function createReconciliationService(deps: ReconciliationServiceDeps) {
 
         if (isPaidMismatch) {
           mismatch = `local=${localStatus}, connector=${connectorStatus}`
-          if (input.dryRun) {
+          if (
+            chargeStatus.status === 'paid' &&
+            (order.amountMinor !== chargeStatus.amount.minorAmount ||
+              order.currency !== chargeStatus.amount.currency)
+          ) {
+            mismatch = `local=${localStatus}, connector=${connectorStatus}, amount mismatch`
+            action = 'reported'
+            await deps.alerts.notify({
+              type: 'payment.reconciliation_mismatch',
+              severity: 'critical',
+              orderId: order.id,
+              message: `Reconciliation amount mismatch for order ${order.id}: local=${order.amountMinor} ${order.currency}, connector=${chargeStatus.amount.minorAmount} ${chargeStatus.amount.currency}`,
+              context: {
+                localStatus,
+                connectorStatus,
+                localAmount: { minorAmount: order.amountMinor, currency: order.currency },
+                connectorAmount: chargeStatus.amount,
+                raw: chargeStatus.raw,
+              },
+            })
+          } else if (input.dryRun) {
             action = 'reported'
           } else {
             action = 'fixed'

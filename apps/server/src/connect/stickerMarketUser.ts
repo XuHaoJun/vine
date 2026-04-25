@@ -120,7 +120,9 @@ export function createStickerMarketUserHandler(deps: StickerMarketUserHandlerDep
   }
 }
 
-function statusToProto(s: 'created' | 'paid' | 'failed'): OrderStatus {
+function statusToProto(
+  s: 'created' | 'paid' | 'failed' | 'refund_pending' | 'refunded' | 'refund_failed',
+): OrderStatus {
   switch (s) {
     case 'created':
       return OrderStatus.CREATED
@@ -128,5 +130,11 @@ function statusToProto(s: 'created' | 'paid' | 'failed'): OrderStatus {
       return OrderStatus.PAID
     case 'failed':
       return OrderStatus.FAILED
+    case 'refund_pending':
+      return OrderStatus.REFUND_PENDING
+    case 'refunded':
+      return OrderStatus.REFUNDED
+    case 'refund_failed':
+      return OrderStatus.REFUND_FAILED
   }
 }
