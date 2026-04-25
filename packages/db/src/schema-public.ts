@@ -157,10 +157,77 @@ export const stickerPackage = pgTable(
     coverDriveKey: text('coverDriveKey').notNull(),
     tabIconDriveKey: text('tabIconDriveKey').notNull(),
     stickerCount: integer('stickerCount').notNull(),
+    creatorId: text('creatorId'),
+    status: text('status')
+      .notNull()
+      .$type<
+        'draft' | 'in_review' | 'approved' | 'rejected' | 'on_sale' | 'unlisted' | 'removed'
+      >()
+      .default('on_sale'),
+    stickerType: text('stickerType').notNull().$type<'static'>().default('static'),
+    locale: text('locale').notNull().default('zh-TW'),
+    tags: text('tags').notNull().default('[]'),
+    copyrightText: text('copyrightText').notNull().default(''),
+    licenseConfirmedAt: timestamp('licenseConfirmedAt', { mode: 'string' }),
+    autoPublish: boolean('autoPublish').notNull().default(true),
+    submittedAt: timestamp('submittedAt', { mode: 'string' }),
+    reviewedAt: timestamp('reviewedAt', { mode: 'string' }),
+    publishedAt: timestamp('publishedAt', { mode: 'string' }),
+    reviewReasonCategory: text('reviewReasonCategory'),
+    reviewReasonText: text('reviewReasonText'),
+    reviewSuggestion: text('reviewSuggestion'),
+    reviewProblemAssetNumbers: text('reviewProblemAssetNumbers')
+      .notNull()
+      .default('[]'),
     createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
     updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
   },
-  (table) => [index('stickerPackage_createdAt_idx').on(table.createdAt)],
+  (table) => [
+    index('stickerPackage_createdAt_idx').on(table.createdAt),
+    index('stickerPackage_creatorId_idx').on(table.creatorId),
+    index('stickerPackage_status_idx').on(table.status),
+  ],
+)
+
+export const creatorProfile = pgTable(
+  'creatorProfile',
+  {
+    id: text('id').primaryKey(),
+    userId: text('userId').notNull(),
+    displayName: text('displayName').notNull(),
+    country: text('country').notNull(),
+    bio: text('bio').notNull().default(''),
+    avatarDriveKey: text('avatarDriveKey'),
+    kycTier: text('kycTier').notNull().$type<'tier1'>().default('tier1'),
+    status: text('status').notNull().$type<'active' | 'suspended'>().default('active'),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('creatorProfile_userId_unique').on(table.userId),
+    index('creatorProfile_status_idx').on(table.status),
+  ],
+)
+
+export const stickerAsset = pgTable(
+  'stickerAsset',
+  {
+    id: text('id').primaryKey(),
+    packageId: text('packageId').notNull(),
+    number: integer('number').notNull(),
+    driveKey: text('driveKey').notNull(),
+    width: integer('width').notNull(),
+    height: integer('height').notNull(),
+    sizeBytes: integer('sizeBytes').notNull(),
+    mimeType: text('mimeType').notNull().$type<'image/png'>(),
+    resourceType: text('resourceType').notNull().$type<'static'>().default('static'),
+    keywords: text('keywords').notNull().default('[]'),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('stickerAsset_packageId_idx').on(table.packageId),
+    uniqueIndex('stickerAsset_packageNumber_unique').on(table.packageId, table.number),
+  ],
 )
 
 export const entitlement = pgTable(

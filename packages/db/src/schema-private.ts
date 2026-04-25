@@ -106,3 +106,19 @@ export const stickerOrder = pgTable(
     index('stickerOrder_status_idx').on(table.status),
   ],
 )
+
+export const stickerReviewEvent = pgTable(
+  'stickerReviewEvent',
+  {
+    id: text('id').primaryKey(),
+    packageId: text('packageId').notNull(),
+    actorUserId: text('actorUserId').notNull(),
+    action: text('action').notNull().$type<'submitted' | 'approved' | 'rejected'>(),
+    reasonCategory: text('reasonCategory'),
+    reasonText: text('reasonText'),
+    suggestion: text('suggestion'),
+    problemAssetNumbers: text('problemAssetNumbers').notNull().default('[]'),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [index('stickerReviewEvent_packageId_idx').on(table.packageId)],
+)

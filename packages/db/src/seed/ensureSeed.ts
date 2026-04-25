@@ -574,6 +574,13 @@ async function seedStickerPackages(db: any, drive?: SeedDrive): Promise<void> {
         coverDriveKey: `stickers/${pkg.id}/cover.png`,
         tabIconDriveKey: `stickers/${pkg.id}/tab.png`,
         stickerCount: pkg.stickerCount,
+        status: 'on_sale',
+        stickerType: 'static',
+        locale: 'zh-TW',
+        tags: '[]',
+        copyrightText: '',
+        autoPublish: true,
+        publishedAt: now,
         createdAt: now,
         updatedAt: now,
       })
