@@ -15,6 +15,8 @@ function makeMockPay() {
       connectorName: 'ecpay',
     }),
     handleWebhook: vi.fn(),
+    refundCharge: vi.fn(),
+    getCharge: vi.fn(),
   }
 }
 

@@ -39,11 +39,17 @@ function makeDeps(orderRow: StickerOrderRow | null, transitionToPaidCount = 1) {
     findById: vi.fn().mockResolvedValue(orderRow),
     transitionToPaid: vi.fn().mockResolvedValue(transitionToPaidCount),
     transitionToFailed: vi.fn().mockResolvedValue(1),
+    beginRefund: vi.fn().mockResolvedValue(1),
+    markRefunded: vi.fn().mockResolvedValue(1),
+    markRefundFailed: vi.fn().mockResolvedValue(1),
+    updateReconciliation: vi.fn(),
+    findForReconciliation: vi.fn().mockResolvedValue([]),
   }
 
   const entitlementRepo: EntitlementRepository = {
     grant: vi.fn().mockResolvedValue(undefined),
     find: vi.fn().mockResolvedValue(null),
+    revokeByOrder: vi.fn().mockResolvedValue(1),
   }
 
   const tx = {}
