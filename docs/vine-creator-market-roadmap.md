@@ -77,13 +77,16 @@
 
 ---
 
-### Phase 2 — 創作者側 MVP
+### Phase 2A — Creator Submission MVP
 
-**目標**:讓真實創作者能上架第一個貼圖組、拿到銷售報表。
+**目標**:讓真實創作者能建立帳號、提交第一個貼圖組、通過人工審核後上架到既有商店付款閉環。
 
-- **包含子系統**:B(Creator + Tier 1 KYC)、C(上傳 + 最簡人工審核)、A 完整版(sticker 資料表、資產管線)、G 的最小版(銷售報表)
-- **不含**:Payout、稅務、AI 輔助審核、申訴、多語系
-- **依賴**:Phase 1 完成(付款 pipeline 已穩)
+- **包含子系統**:B(Creator + Tier 1 KYC)、C(上傳 + 最簡人工審核)、A 完整版(sticker 資料表、資產管線)
+- **不含**:銷售報表、Payout、稅務、AI 輔助審核、申訴、多語系完整支援、動態 / 有聲貼圖
+- **依賴**:Phase 1 + Phase 1.5 完成(付款 pipeline 與 refund / reconciliation 已穩)
+- **成功標準**:創作者提交 ZIP → admin approve → package 進入 store → 用戶可購買 → entitlement 可在聊天室使用
+- **詳細設計**:[`docs/superpowers/specs/2026-04-25-vine-creator-market-submission-mvp-design.md`](./superpowers/specs/2026-04-25-vine-creator-market-submission-mvp-design.md)
+- **Implementation plan**:[`docs/superpowers/plans/2026-04-25-vine-creator-market-submission-mvp.md`](./superpowers/plans/2026-04-25-vine-creator-market-submission-mvp.md)
 
 **關鍵工作**:
 - `stickerPackage` schema 擴充(從 seed 演進到真 table) + `stickerAsset` 子表(keywords、stickerResourceType、依 spec §10.3)
@@ -92,7 +95,23 @@
 - 審核狀態機(`Draft → In Review → Approved/Rejected → On Sale`),人工審核後台(`(app)/admin/...` 或類似)
 - 拒絕通知(對映 uiux C6)
 - Creator Tier 1 KYC(email 驗證 + 居住國家)
+
+---
+
+### Phase 2B — Creator Sales Reporting
+
+**目標**:在 Phase 2A 已有真實創作者與真實銷售後,讓創作者能看到最小可用的銷售與分潤報表。
+
+- **包含子系統**:G 的最小版(銷售報表)、訂單 creator ownership 歸因、退款扣回顯示
+- **不含**:Payout 申請、稅務文件、Tier 2 KYC、年度憑證
+- **依賴**:Phase 2A 有已上架 package 與真實訂單
+
+**關鍵工作**:
 - 銷售報表(對映 uiux C7)
+- 每月 / 每日銷售聚合(銷售件數、GMV、70% 預估分潤)
+- 各貼圖組銷售排行
+- refunded / refund_pending 訂單在報表中的扣回語意
+- Dashboard 首頁概覽卡片接真資料(本月銷售、作品數、審核中數量)
 
 ---
 
@@ -101,7 +120,7 @@
 **目標**:創作者能把錢領出來。
 
 - **包含子系統**:G 完整(Payout、稅務)、B 延伸 Tier 2 KYC
-- **依賴**:Phase 2 有真銷售數字可結算
+- **依賴**:Phase 2B 有真銷售數字可結算
 
 **關鍵工作**:
 - Hyperswitch Payout API 整合(prism 的 `PayoutClient`)
@@ -118,7 +137,7 @@
 **目標**:讓商店不再只是「有能買」,而是用戶會主動逛、創作者會有曝光動機。
 
 - **包含子系統**:D 完整(搜尋、篩選、精緻化)、H(追蹤 / 推薦 / 評價)
-- **依賴**:Phase 2 有一批創作者 + 內容
+- **依賴**:Phase 2A 有一批創作者 + 內容
 
 **關鍵工作**:
 - 商店首頁的推薦 + 策展後台(編輯精選)
@@ -136,7 +155,7 @@
 **目標**:處理真實上線後會出現的侵權、違規、詐欺。
 
 - **包含子系統**:I(DMCA / 申訴 / 違規)、C 的 AI 審核輔助
-- **依賴**:Phase 2 上線一段時間、累積 edge case
+- **依賴**:Phase 2A 上線一段時間、累積 edge case
 
 **關鍵工作**:
 - DMCA 投訴表單 + 48h 暫時下架流程(對映 spec §13.3)
@@ -158,13 +177,18 @@
         └───────────┬─────────────┘
                     │
         ┌───────────▼─────────────┐
-        │ Phase 1.5  付款強化     │  ← 現在
+        │ Phase 1.5  付款強化     │  ✅ Completed 2026-04-25
         │   Refund, Sentry, 對帳   │
         └───────────┬─────────────┘
                     │
         ┌───────────▼─────────────┐
-        │ Phase 2  創作者 MVP     │
-        │   B + C + A 完整 + G 最小│
+        │ Phase 2A Creator Submit │  ← 下一階段
+        │   B + C + A 完整        │
+        └───────────┬─────────────┘
+                    │
+        ┌───────────▼─────────────┐
+        │ Phase 2B Sales Reports  │
+        │   G 最小                │
         └───────────┬─────────────┘
                     │
         ┌───────────▼─────────────┐
@@ -182,12 +206,12 @@
 ```
 
 **硬依賴**:
-- Phase 2 需要 Phase 1(付款已穩),否則創作者上架也賣不出去
-- Phase 2.5 需要 Phase 2(有真實銷售才能結算)
-- Phase 3/4 需要 Phase 2 以上(有真內容才能推薦 / 治理)
+- Phase 2A 需要 Phase 1 + Phase 1.5(付款、refund、對帳已穩),否則創作者上架後共同付款 bug 會回流到 creator 流程
+- Phase 2B 需要 Phase 2A(有真實創作者、package ownership、訂單歸因後才有報表意義)
+- Phase 2.5 需要 Phase 2B(有真實銷售與分潤數字才能結算)
+- Phase 3/4 需要 Phase 2A 以上(有真內容才能推薦 / 治理)
 
 **軟依賴**:
-- Phase 1.5 可以延後到 Phase 2 啟動前完成,不必立刻做
 - Phase 3 與 4 內部子項可重排
 
 ---
@@ -212,13 +236,11 @@
 
 ### 交付後,下一刀會是什麼
 
-**預設下一刀 = Phase 1.5 Refund**,理由:
+**預設下一刀 = Phase 2A Creator Submission MVP**,理由:
 
-1. Phase 1 上線後,**第一個碰到的真實問題幾乎一定是「付了沒授權」或「用戶想退款」** — 這是 payment edge case,不是產品問題
-2. Refund 的 code 路徑與 authorize 對稱,設計還熱、實作最便宜
-3. Refund 完成後,`packages/pay` 就接近 prod-ready 的狀態,再上 Phase 2 把創作者拉進來才不會踩共同 bug
-
-替代選擇:如果 Phase 1 上線後**沒有明顯 payment pain**,可以跳 Phase 1.5 直接進 Phase 2(創作者 MVP),讓產品團隊先證實創作者願意上架。Payout 時才會強制要求 refund 等能力完備 — 屆時 Phase 1.5 項目可以併進 Phase 2.5 一起做。
+1. Phase 1 + 1.5 已經驗證「用戶付款 → entitlement → 聊天室可用」,下一個最大未知數是「真創作者能不能把內容送進這條 pipeline」
+2. 2A 聚焦 submission / 審核 / 上架,不先做銷售報表,避免第一刀同時承擔資料模型、資產管線、Dashboard、審核、統計聚合
+3. 2A 完成後,store 不再只靠 seed package,Phase 2B 才有真實 creator ownership 與訂單歸因可做報表
 
 ---
 
