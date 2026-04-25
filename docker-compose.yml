@@ -49,6 +49,9 @@ services:
     volumes:
       - .:/app
     working_dir: /app/packages/db/src
+    env_file:
+      - path: .env.docker-compose
+        required: true
     environment:
       - RUN=1
       - ALLOW_MISSING_ENV=1

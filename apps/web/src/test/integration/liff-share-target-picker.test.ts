@@ -39,6 +39,9 @@ function liffIdFromAppsPath(url: string): string | undefined {
 }
 
 async function clickFixtureInit(fixtureFrame: Frame) {
+  await fixtureFrame
+    .locator('[data-testid="mock-liff-init-btn"]')
+    .waitFor({ state: 'visible', timeout: 10000 })
   await fixtureFrame.evaluate(() => {
     const btn = document.querySelector<HTMLButtonElement>(
       '[data-testid="mock-liff-init-btn"]',
@@ -49,6 +52,9 @@ async function clickFixtureInit(fixtureFrame: Frame) {
 }
 
 async function clickFixtureShare(fixtureFrame: Frame) {
+  await fixtureFrame
+    .locator('[data-testid="mock-liff-share-btn"]')
+    .waitFor({ state: 'visible', timeout: 10000 })
   await fixtureFrame.evaluate(() => {
     const btn = document.querySelector<HTMLButtonElement>(
       '[data-testid="mock-liff-share-btn"]',

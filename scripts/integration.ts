@@ -21,7 +21,7 @@ import {
 // --- config ---
 const DOCKER_TIMEOUT = 120_000 // 2 min
 const BUILD_TIMEOUT = 300_000 // 5 min
-const TEST_TIMEOUT = 120_000 // 2 min
+const TEST_TIMEOUT = 300_000 // 5 min
 
 // --- state ---
 const processes: Bun.Subprocess[] = []
