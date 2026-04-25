@@ -73,35 +73,32 @@ async function runRefund(
     allowedStatuses: Array<'paid' | 'refund_failed' | 'created' | 'failed'>
   },
 ): Promise<RefundOrderResult> {
-  let order: StickerOrderRow
-
-  await deps.db.transaction(async (tx) => {
+  const order = await deps.db.transaction(async (tx) => {
     const row = await deps.orderRepo.findById(tx, input.orderId)
     if (!row) {
       throw new ConnectError('order not found', Code.NotFound)
     }
-    order = row
 
-    if (order.status === 'refunded' || order.status === 'refund_pending') {
-      return
+    if (row.status === 'refunded' || row.status === 'refund_pending') {
+      return row
     }
 
-    if (!input.allowedStatuses.includes(order.status as (typeof input.allowedStatuses)[number])) {
+    if (!input.allowedStatuses.includes(row.status as (typeof input.allowedStatuses)[number])) {
       throw new ConnectError('order cannot be refunded in current state', Code.FailedPrecondition)
     }
 
-    const refundId = `refund_${order.id}`
+    const refundId = `refund_${row.id}`
 
     const beginResult = await deps.orderRepo.beginRefund(tx, input.orderId, {
       refundId,
-      refundAmountMinor: order.amountMinor,
+      refundAmountMinor: row.amountMinor,
       refundReason: input.reason,
       refundRequestedByUserId: input.requestedByUserId,
-      connectorChargeId: input.compensation?.connectorChargeId ?? order.connectorChargeId!,
+      connectorChargeId: input.compensation?.connectorChargeId ?? row.connectorChargeId!,
       paidAt: input.compensation
         ? new Date(input.compensation.paidAt)
-        : order.paidAt
-          ? new Date(order.paidAt)
+        : row.paidAt
+          ? new Date(row.paidAt)
           : undefined,
       allowedStatuses: input.allowedStatuses,
     })
@@ -109,16 +106,18 @@ async function runRefund(
     if (beginResult === 0) {
       throw new ConnectError('order cannot be refunded in current state', Code.FailedPrecondition)
     }
+
+    return row
   })
 
-  if (order!.status === 'refunded' || order!.status === 'refund_pending') {
-    return { status: order!.status }
+  if (order.status === 'refunded' || order.status === 'refund_pending') {
+    return { status: order.status }
   }
 
   const refundResult = await deps.pay.refundCharge({
-    merchantTransactionId: order!.id,
-    connectorChargeId: input.compensation?.connectorChargeId ?? order!.connectorChargeId!,
-    amount: input.compensation?.amount ?? { minorAmount: order!.amountMinor, currency: order!.currency },
+    merchantTransactionId: order.id,
+    connectorChargeId: input.compensation?.connectorChargeId ?? order.connectorChargeId!,
+    amount: input.compensation?.amount ?? { minorAmount: order.amountMinor, currency: order.currency },
     reason: input.reason,
     testMode: deps.mode === 'stage',
   })
@@ -140,8 +139,8 @@ async function runRefund(
   await deps.alerts.notify({
     type: 'payment.refund_failed',
     severity: 'critical',
-    orderId: order!.id,
-    message: `Refund failed for order ${order!.id}: ${refundResult.reason}`,
+    orderId: order.id,
+    message: `Refund failed for order ${order.id}: ${refundResult.reason}`,
     context: { reason: refundResult.reason, raw: refundResult.raw },
   })
 

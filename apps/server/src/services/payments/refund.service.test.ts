@@ -94,7 +94,7 @@ describe('createRefundService', () => {
       reason: 'admin_exception',
       testMode: true,
     })
-    expect(deps.entitlementRepo.revokeByOrder).toHaveBeenCalled()
+    expect(deps.entitlementRepo.revokeByOrder).toHaveBeenCalledWith(expect.anything(), 'order-1')
   })
 
   it('refundOrder does not call ECPay for an already refunded order', async () => {
@@ -152,5 +152,13 @@ describe('createRefundService', () => {
       connectorChargeId: 'trade-from-webhook',
       allowedStatuses: ['created', 'failed', 'paid', 'refund_failed'],
     }))
+    expect(deps.pay.refundCharge).toHaveBeenCalledWith({
+      merchantTransactionId: 'order-1',
+      connectorChargeId: 'trade-from-webhook',
+      amount: { minorAmount: 3000, currency: 'TWD' },
+      reason: 'technical_error',
+      testMode: true,
+    })
+    expect(deps.entitlementRepo.revokeByOrder).toHaveBeenCalledWith(expect.anything(), 'order-1')
   })
 })
