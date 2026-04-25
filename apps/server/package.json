@@ -10,7 +10,9 @@
     "start": "bun dist/index.js",
     "lint": "oxlint --import-plugin --type-aware",
     "typecheck": "tsc --noEmit",
-    "test:unit": "vitest run",
+    "test": "bun run test:unit",
+    "test:unit": "vitest run -c vitest.config.ts",
+    "test:integration": "vitest run -c vitest.integration.config.ts",
     "test:watch": "vitest"
   },
   "dependencies": {

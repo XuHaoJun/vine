@@ -194,6 +194,14 @@ async function main() {
     await spawn('docker compose up --remove-orphans pgdb migrate zero')
     await waitForMigrations()
 
+    // Run backend DB integration tests before app startup. These tests use the
+    // migrated Docker PostgreSQL database and rollback every test transaction.
+    console.info('\nrunning server db integration tests...')
+    await $(
+      'ZERO_UPSTREAM_DB=postgresql://user:password@localhost:5533/postgres bun run --cwd apps/server test:integration',
+      { timeout: TEST_TIMEOUT },
+    )
+
     // install playwright
     console.info('\ninstalling playwright...')
     await $('bunx playwright install chromium', { timeout: BUILD_TIMEOUT })
