@@ -57,7 +57,9 @@ function makeDeps(orderRow: StickerOrderRow | null, transitionToPaidCount = 1) {
     transaction: vi.fn().mockImplementation((fn: (tx: any) => Promise<void>) => fn(tx)),
   }
 
-  return { pay, orderRepo, entitlementRepo, db, tx }
+  const alerts = { notify: vi.fn().mockResolvedValue(undefined) }
+
+  return { pay, orderRepo, entitlementRepo, db, tx, alerts }
 }
 
 function buildSuccessBody() {
@@ -103,10 +105,10 @@ describe('POST /webhooks/ecpay', () => {
   })
 
   it('bad CheckMacValue → 400', async () => {
-    const { pay, orderRepo, entitlementRepo, db } = makeDeps(null)
+    const { pay, orderRepo, entitlementRepo, db, alerts } = makeDeps(null)
 
     const app = Fastify()
-    await registerPaymentsWebhookRoutes(app, { pay, orderRepo, entitlementRepo, db })
+    await registerPaymentsWebhookRoutes(app, { pay, orderRepo, entitlementRepo, db, alerts })
     await app.ready()
 
     const tampered = Buffer.from(
@@ -125,6 +127,11 @@ describe('POST /webhooks/ecpay', () => {
 
     expect(res.statusCode).toBe(400)
     expect(orderRepo.findById).not.toHaveBeenCalled()
+    expect(alerts.notify).toHaveBeenCalledWith(expect.objectContaining({
+      type: 'payment.webhook_verification_failed',
+      severity: 'warning',
+      orderId: undefined,
+    }))
   })
 
   it('amount mismatch → still 200 "1|OK" but no state change', async () => {

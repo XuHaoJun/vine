@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify'
 import type { PaymentsService } from '@vine/pay'
 import type { StickerOrderRepository } from './order.repository'
 import type { EntitlementRepository } from './entitlement.repository'
+import type { PaymentAlertSink } from './alert-sink'
 import { handlePaymentEvent } from './event-handler'
 
 export type WebhookDeps = {
@@ -9,6 +10,7 @@ export type WebhookDeps = {
   orderRepo: StickerOrderRepository
   entitlementRepo: EntitlementRepository
   db: any
+  alerts?: PaymentAlertSink
 }
 
 export async function registerPaymentsWebhookRoutes(
@@ -37,6 +39,13 @@ export async function registerPaymentsWebhookRoutes(
 
       if (!result.verified) {
         request.log.warn({ reason: result.reason }, 'ecpay webhook verification failed')
+        await deps.alerts?.notify({
+          type: 'payment.webhook_verification_failed',
+          severity: 'warning',
+          orderId: undefined,
+          message: 'ecpay webhook verification failed',
+          context: { reason: result.reason },
+        })
         return reply
           .code(result.ackReply.status)
           .type('text/plain')
