@@ -97,7 +97,8 @@ async function runRefund(
     }
 
     const refundId = `refund_${row.id}`
-    const connectorChargeId = input.compensation?.connectorChargeId ?? row.connectorChargeId
+    const connectorChargeId =
+      input.compensation?.connectorChargeId ?? row.connectorChargeId
     if (!connectorChargeId) {
       throw new ConnectError(
         'order cannot be refunded without connector charge id',
