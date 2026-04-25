@@ -33,4 +33,24 @@ describe('EntitlementRepository DB integration', () => {
       })
     })
   })
+
+  it('revokeByOrder deletes entitlement by orderId', async () => {
+    await withRollbackDb(async (db) => {
+      const repo = createEntitlementRepository()
+
+      await repo.grant(db, {
+        userId: 'user-int-1',
+        packageId: 'pkg-int-1',
+        grantedByOrderId: 'order-int-1',
+      })
+
+      const before = await repo.find(db, { userId: 'user-int-1', packageId: 'pkg-int-1' })
+      expect(before).not.toBeNull()
+
+      await repo.revokeByOrder(db, 'order-int-1')
+
+      const after = await repo.find(db, { userId: 'user-int-1', packageId: 'pkg-int-1' })
+      expect(after).toBeNull()
+    })
+  })
 })

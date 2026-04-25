@@ -80,13 +80,22 @@ export const stickerOrder = pgTable(
     currency: text('currency').notNull().$type<'TWD'>(),
     status: text('status')
       .notNull()
-      .$type<'created' | 'paid' | 'failed'>()
+      .$type<'created' | 'paid' | 'failed' | 'refund_pending' | 'refunded' | 'refund_failed'>()
       .default('created'),
     connectorName: text('connectorName').notNull().$type<'ecpay'>(),
     connectorChargeId: text('connectorChargeId'),
     paidAt: timestamp('paidAt', { mode: 'string' }),
     failureReason: text('failureReason'),
-    // FUTURE(refund): add refundedAt / refundedAmountMinor when refund capability is added
+    refundId: text('refundId'),
+    refundAmountMinor: integer('refundAmountMinor'),
+    refundReason: text('refundReason'),
+    refundRequestedAt: timestamp('refundRequestedAt', { mode: 'string' }),
+    refundedAt: timestamp('refundedAt', { mode: 'string' }),
+    refundFailureReason: text('refundFailureReason'),
+    refundRequestedByUserId: text('refundRequestedByUserId'),
+    lastReconciledAt: timestamp('lastReconciledAt', { mode: 'string' }),
+    lastConnectorStatus: text('lastConnectorStatus'),
+    lastReconciliationMismatch: text('lastReconciliationMismatch'),
     createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
     updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
   },

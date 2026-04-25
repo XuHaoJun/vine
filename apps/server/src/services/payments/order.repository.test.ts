@@ -109,4 +109,65 @@ describe('StickerOrderRepository', () => {
     })
     expect(count).toBe(0)
   })
+
+  it('beginRefund sets status=refund_pending and returns rowCount', async () => {
+    const tx = makeTx({ rowCount: 1 })
+    const count = await repo.beginRefund(tx, 'order-1', {
+      refundId: 'refund-order-1',
+      refundAmountMinor: 3000,
+      refundReason: 'admin_exception',
+      refundRequestedByUserId: 'admin-1',
+      connectorChargeId: 'charge-abc',
+      paidAt: new Date('2026-04-25T01:00:00Z'),
+      allowedStatuses: ['paid', 'refund_failed'],
+    })
+
+    expect(count).toBe(1)
+    const setArg = tx._setChain.set.mock.calls[0]![0]
+    expect(setArg).toMatchObject({
+      status: 'refund_pending',
+      refundId: 'refund-order-1',
+      refundAmountMinor: 3000,
+      refundReason: 'admin_exception',
+      refundRequestedByUserId: 'admin-1',
+    })
+    expect(setArg.updatedAt).toBeDefined()
+  })
+
+  it('markRefunded sets status=refunded and returns rowCount', async () => {
+    const tx = makeTx({ rowCount: 1 })
+    const count = await repo.markRefunded(tx, 'order-1', {
+      refundedAt: new Date('2026-04-25T01:01:00Z'),
+    })
+
+    expect(count).toBe(1)
+    const setArg = tx._setChain.set.mock.calls[0]![0]
+    expect(setArg).toMatchObject({
+      status: 'refunded',
+      refundedAt: '2026-04-25T01:01:00.000Z',
+      refundFailureReason: null,
+    })
+  })
+
+  it('markRefundFailed sets status=refund_failed and returns rowCount', async () => {
+    const tx = makeTx({ rowCount: 1 })
+    const count = await repo.markRefundFailed(tx, 'order-1', { refundFailureReason: 'denied' })
+
+    expect(count).toBe(1)
+    const setArg = tx._setChain.set.mock.calls[0]![0]
+    expect(setArg).toMatchObject({ status: 'refund_failed', refundFailureReason: 'denied' })
+  })
+
+  it('updateReconciliation sets last reconciled fields', async () => {
+    const tx = makeTx({ rowCount: 1 })
+    await repo.updateReconciliation(tx, 'order-1', {
+      connectorStatus: 'paid',
+      mismatch: 'local created, connector paid',
+    })
+
+    const setArg = tx._setChain.set.mock.calls[0]![0]
+    expect(setArg.lastReconciledAt).toBeDefined()
+    expect(setArg.lastConnectorStatus).toBe('paid')
+    expect(setArg.lastReconciliationMismatch).toBe('local created, connector paid')
+  })
 })
