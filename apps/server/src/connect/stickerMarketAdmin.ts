@@ -1,6 +1,6 @@
 import { Code, ConnectError } from '@connectrpc/connect'
 import type { HandlerContext } from '@connectrpc/connect'
-import { RefundStatus } from '@vine/proto/stickerMarket'
+import { RefundStatus, StickerPackageStatus } from '@vine/proto/stickerMarket'
 import { requireAuthData } from './auth-context'
 
 const DEFAULT_RECONCILE_SINCE_MS = 24 * 60 * 60 * 1000
@@ -16,6 +16,19 @@ export type StickerMarketAdminHandlerDeps = {
   }
   reconciliation: {
     reconcileOrders(input: { since: Date; limit: number; dryRun: boolean }): Promise<any>
+  }
+  review: {
+    listQueue(input: { limit: number }): Promise<any[]>
+    getDetail(input: { packageId: string }): Promise<any>
+    approve(input: { packageId: string; actorUserId: string }): Promise<any>
+    reject(input: {
+      packageId: string
+      actorUserId: string
+      reasonCategory: string
+      reasonText: string
+      suggestion: string
+      problemAssetNumbers: number[]
+    }): Promise<any>
   }
 }
 
@@ -71,6 +84,45 @@ export function createStickerMarketAdminHandler(deps: StickerMarketAdminHandlerD
         })),
       }
     },
+
+    async listStickerReviewQueue(req: { limit: number }, ctx: HandlerContext) {
+      requireAdmin(ctx)
+      const packages = await deps.review.listQueue({
+        limit: req.limit > 0 ? req.limit : 50,
+      })
+      return { packages: packages.map(mapStickerPackageDraft) }
+    },
+
+    async getStickerReviewDetail(req: { packageId: string }, ctx: HandlerContext) {
+      requireAdmin(ctx)
+      const detail = await deps.review.getDetail({ packageId: req.packageId })
+      return {
+        package: mapStickerPackageDraft(detail.package),
+        latestValidation: detail.latestValidation ?? [],
+      }
+    },
+
+    async approveStickerPackage(req: { packageId: string }, ctx: HandlerContext) {
+      const auth = requireAdmin(ctx)
+      const pkg = await deps.review.approve({
+        packageId: req.packageId,
+        actorUserId: auth.id,
+      })
+      return { package: mapStickerPackageDraft(pkg) }
+    },
+
+    async rejectStickerPackage(req: any, ctx: HandlerContext) {
+      const auth = requireAdmin(ctx)
+      const pkg = await deps.review.reject({
+        packageId: req.packageId,
+        actorUserId: auth.id,
+        reasonCategory: req.reasonCategory,
+        reasonText: req.reasonText,
+        suggestion: req.suggestion,
+        problemAssetNumbers: req.problemAssetNumbers ?? [],
+      })
+      return { package: mapStickerPackageDraft(pkg) }
+    },
   }
 }
 
@@ -84,5 +136,42 @@ function refundStatusToProto(status: string): RefundStatus {
       return RefundStatus.REFUND_FAILED
     default:
       return RefundStatus.UNSPECIFIED
+  }
+}
+
+function mapStickerPackageDraft(row: any) {
+  return {
+    id: row.id,
+    creatorId: row.creatorId ?? '',
+    name: row.name,
+    description: row.description,
+    priceMinor: row.priceMinor,
+    currency: row.currency,
+    stickerCount: row.stickerCount,
+    status: statusToProto(row.status),
+    tagsJson: row.tags ?? '[]',
+    copyrightText: row.copyrightText ?? '',
+    autoPublish: row.autoPublish ?? true,
+  }
+}
+
+function statusToProto(status: string): StickerPackageStatus {
+  switch (status) {
+    case 'draft':
+      return StickerPackageStatus.DRAFT
+    case 'in_review':
+      return StickerPackageStatus.IN_REVIEW
+    case 'approved':
+      return StickerPackageStatus.APPROVED
+    case 'rejected':
+      return StickerPackageStatus.REJECTED
+    case 'on_sale':
+      return StickerPackageStatus.ON_SALE
+    case 'unlisted':
+      return StickerPackageStatus.UNLISTED
+    case 'removed':
+      return StickerPackageStatus.REMOVED
+    default:
+      return StickerPackageStatus.UNSPECIFIED
   }
 }

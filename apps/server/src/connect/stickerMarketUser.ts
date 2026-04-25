@@ -38,6 +38,9 @@ export function createStickerMarketUserHandler(deps: StickerMarketUserHandlerDep
         .limit(1)
       if (!pkg)
         throw new ConnectError(`package ${req.packageId} not found`, Code.NotFound)
+      if (pkg.status !== 'on_sale') {
+        throw new ConnectError('package is not on sale', Code.FailedPrecondition)
+      }
 
       const [existing] = await deps.db
         .select()

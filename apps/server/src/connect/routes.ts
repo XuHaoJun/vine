@@ -9,11 +9,14 @@ import type { DriveService } from '@vine/drive'
 import {
   StickerMarketUserService,
   StickerMarketAdminService,
+  StickerMarketCreatorService,
 } from '@vine/proto/stickerMarket'
 import type { StickerMarketUserHandlerDeps } from './stickerMarketUser'
 import { createStickerMarketUserHandler } from './stickerMarketUser'
 import type { StickerMarketAdminHandlerDeps } from './stickerMarketAdmin'
 import { createStickerMarketAdminHandler } from './stickerMarketAdmin'
+import type { StickerMarketCreatorHandlerDeps } from './stickerMarketCreator'
+import { createStickerMarketCreatorHandler } from './stickerMarketCreator'
 import { withAuthService } from './auth-context'
 
 type ConnectDeps = {
@@ -23,6 +26,7 @@ type ConnectDeps = {
   drive: DriveService
   stickerMarketUser: StickerMarketUserHandlerDeps
   stickerMarketAdmin: StickerMarketAdminHandlerDeps
+  stickerMarketCreator: StickerMarketCreatorHandlerDeps
 }
 
 export function connectRoutes(deps: ConnectDeps) {
@@ -44,6 +48,14 @@ export function connectRoutes(deps: ConnectDeps) {
         StickerMarketAdminService,
         deps.auth,
         createStickerMarketAdminHandler(deps.stickerMarketAdmin),
+      ),
+    )
+    router.service(
+      StickerMarketCreatorService,
+      withAuthService(
+        StickerMarketCreatorService,
+        deps.auth,
+        createStickerMarketCreatorHandler(deps.stickerMarketCreator),
       ),
     )
   }

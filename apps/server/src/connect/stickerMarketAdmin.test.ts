@@ -38,6 +38,12 @@ function makeDeps() {
         mismatches: [],
       }),
     },
+    review: {
+      listQueue: vi.fn().mockResolvedValue([]),
+      getDetail: vi.fn().mockResolvedValue({ package: {}, latestValidation: [] }),
+      approve: vi.fn().mockResolvedValue({}),
+      reject: vi.fn().mockResolvedValue({}),
+    },
   }
 }
 
