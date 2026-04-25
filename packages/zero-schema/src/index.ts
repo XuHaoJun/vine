@@ -15,6 +15,8 @@ export * as chatMemberModel from './models/chatMember'
 export * as messageModel from './models/message'
 export * as stickerPackageModel from './models/stickerPackage'
 export * as entitlementModel from './models/entitlement'
+export * as creatorProfileModel from './models/creatorProfile'
+export * as stickerAssetModel from './models/stickerAsset'
 
 // Queries
 export * as chatQueries from './queries/chat'
@@ -22,6 +24,8 @@ export * as entitlementQueries from './queries/entitlement'
 export * as friendshipQueries from './queries/friendship'
 export * as messageQueries from './queries/message'
 export * as stickerPackageQueries from './queries/stickerPackage'
+export * as creatorProfileQueries from './queries/creatorProfile'
+export * as stickerAssetQueries from './queries/stickerAsset'
 
 // Generated
 export * as tables from './generated/tables'

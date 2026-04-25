@@ -4,109 +4,173 @@ import { defineQuery, defineQueries } from '@rocicorp/zero'
 import * as v from 'valibot'
 import * as Queries from './groupedQueries'
 
-const entitlement = {
-  entitlementsByUserId: defineQuery(
-    v.object({
-      userId: v.string(),
-    }),
-    ({ args }) => Queries.entitlement.entitlementsByUserId(args),
-  ),
-}
-
 const chat = {
+  chatById: defineQuery(
+    v.object({
+        chatId: v.string(),
+      }),
+    ({ args }) => Queries.chat.chatById(args)
+  ),
   chatMembersByChatId: defineQuery(
     v.object({
-      chatId: v.string(),
-    }),
-    ({ args }) => Queries.chat.chatMembersByChatId(args),
+        chatId: v.string(),
+      }),
+    ({ args }) => Queries.chat.chatMembersByChatId(args)
   ),
   chatsByUserId: defineQuery(
     v.object({
-      userId: v.string(),
-    }),
-    ({ args }) => Queries.chat.chatsByUserId(args),
+        userId: v.string(),
+      }),
+    ({ args }) => Queries.chat.chatsByUserId(args)
+  ),
+  groupInfo: defineQuery(
+    v.object({
+        chatId: v.string(),
+      }),
+    ({ args }) => Queries.chat.groupInfo(args)
+  ),
+  groupMembersWithRoles: defineQuery(
+    v.object({
+        chatId: v.string(),
+      }),
+    ({ args }) => Queries.chat.groupMembersWithRoles(args)
+  ),
+  pendingInvitesByUserId: defineQuery(
+    v.object({
+        userId: v.string(),
+      }),
+    ({ args }) => Queries.chat.pendingInvitesByUserId(args)
+  ),
+  pendingMembersByChatId: defineQuery(
+    v.object({
+        chatId: v.string(),
+      }),
+    ({ args }) => Queries.chat.pendingMembersByChatId(args)
+  ),
+}
+
+const creatorProfile = {
+  creatorProfileByUserId: defineQuery(
+    v.object({
+        userId: v.string(),
+      }),
+    ({ args }) => Queries.creatorProfile.creatorProfileByUserId(args)
+  ),
+}
+
+const entitlement = {
+  entitlementsByUserId: defineQuery(
+    v.object({
+        userId: v.string(),
+      }),
+    ({ args }) => Queries.entitlement.entitlementsByUserId(args)
   ),
 }
 
 const friendship = {
   friendsByUserId: defineQuery(
     v.object({
-      userId: v.string(),
-    }),
-    ({ args }) => Queries.friendship.friendsByUserId(args),
+        userId: v.string(),
+      }),
+    ({ args }) => Queries.friendship.friendsByUserId(args)
   ),
   pendingRequestsByUserId: defineQuery(
     v.object({
-      userId: v.string(),
-    }),
-    ({ args }) => Queries.friendship.pendingRequestsByUserId(args),
+        userId: v.string(),
+      }),
+    ({ args }) => Queries.friendship.pendingRequestsByUserId(args)
   ),
   usersByUsername: defineQuery(
     v.object({
-      query: v.string(),
-    }),
-    ({ args }) => Queries.friendship.usersByUsername(args),
+        query: v.string(),
+      }),
+    ({ args }) => Queries.friendship.usersByUsername(args)
   ),
 }
 
 const message = {
   messagesByChatId: defineQuery(
     v.object({
-      chatId: v.string(),
-      limit: v.optional(v.number()),
-    }),
-    ({ args }) => Queries.message.messagesByChatId(args),
+        chatId: v.string(),
+        limit: v.optional(v.number()),
+      }),
+    ({ args }) => Queries.message.messagesByChatId(args)
+  ),
+}
+
+const stickerAsset = {
+  stickerAssetsByPackageId: defineQuery(
+    v.object({
+        packageId: v.string(),
+      }),
+    ({ args }) => Queries.stickerAsset.stickerAssetsByPackageId(args)
   ),
 }
 
 const stickerPackage = {
-  allStickerPackages: defineQuery(v.object({}), ({ args }) =>
-    Queries.stickerPackage.allStickerPackages(args),
+  allStickerPackages: defineQuery(
+    v.record(v.string(), v.never()),
+    ({ args }) => Queries.stickerPackage.allStickerPackages(args)
   ),
   stickerPackageById: defineQuery(
     v.object({
-      packageId: v.string(),
-    }),
-    ({ args }) => Queries.stickerPackage.stickerPackageById(args),
+        packageId: v.string(),
+      }),
+    ({ args }) => Queries.stickerPackage.stickerPackageById(args)
+  ),
+  stickerPackageForCreator: defineQuery(
+    v.object({
+        packageId: v.string(),
+        creatorId: v.string(),
+      }),
+    ({ args }) => Queries.stickerPackage.stickerPackageForCreator(args)
+  ),
+  stickerPackagesByCreatorId: defineQuery(
+    v.object({
+        creatorId: v.string(),
+      }),
+    ({ args }) => Queries.stickerPackage.stickerPackagesByCreatorId(args)
   ),
 }
 
 const todo = {
   todoById: defineQuery(
     v.object({
-      todoId: v.string(),
-    }),
-    ({ args }) => Queries.todo.todoById(args),
+        todoId: v.string(),
+      }),
+    ({ args }) => Queries.todo.todoById(args)
   ),
   todosByUserId: defineQuery(
     v.object({
-      userId: v.string(),
-      limit: v.optional(v.number()),
-    }),
-    ({ args }) => Queries.todo.todosByUserId(args),
+        userId: v.string(),
+        limit: v.optional(v.number()),
+      }),
+    ({ args }) => Queries.todo.todosByUserId(args)
   ),
 }
 
 const user = {
   userById: defineQuery(
     v.object({
-      userId: v.string(),
-    }),
-    ({ args }) => Queries.user.userById(args),
+        userId: v.string(),
+      }),
+    ({ args }) => Queries.user.userById(args)
   ),
   userWithState: defineQuery(
     v.object({
-      userId: v.string(),
-    }),
-    ({ args }) => Queries.user.userWithState(args),
+        userId: v.string(),
+      }),
+    ({ args }) => Queries.user.userWithState(args)
   ),
 }
 
 export const queries = defineQueries({
   chat,
+  creatorProfile,
   entitlement,
   friendship,
   message,
+  stickerAsset,
   stickerPackage,
   todo,
   user,

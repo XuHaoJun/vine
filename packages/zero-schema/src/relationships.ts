@@ -94,6 +94,41 @@ export const entitlementRelationships = relationships(tables.entitlement, ({ one
   }),
 }))
 
+export const creatorProfileRelationships = relationships(
+  tables.creatorProfile,
+  ({ many }) => ({
+    packages: many({
+      sourceField: ['id'],
+      destSchema: tables.stickerPackage,
+      destField: ['creatorId'],
+    }),
+  }),
+)
+
+export const stickerPackageRelationships = relationships(
+  tables.stickerPackage,
+  ({ one, many }) => ({
+    creator: one({
+      sourceField: ['creatorId'],
+      destSchema: tables.creatorProfile,
+      destField: ['id'],
+    }),
+    assets: many({
+      sourceField: ['id'],
+      destSchema: tables.stickerAsset,
+      destField: ['packageId'],
+    }),
+  }),
+)
+
+export const stickerAssetRelationships = relationships(tables.stickerAsset, ({ one }) => ({
+  package: one({
+    sourceField: ['packageId'],
+    destSchema: tables.stickerPackage,
+    destField: ['id'],
+  }),
+}))
+
 export const allRelationships = [
   userRelationships,
   todoRelationships,
@@ -103,4 +138,7 @@ export const allRelationships = [
   chatMemberRelationships,
   messageRelationships,
   entitlementRelationships,
+  creatorProfileRelationships,
+  stickerPackageRelationships,
+  stickerAssetRelationships,
 ]
