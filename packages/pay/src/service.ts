@@ -12,12 +12,11 @@ import type {
 } from './types'
 import { computeCheckMacValue } from './utils/ecpay-mac'
 import { ConfigError } from './errors'
+import { getAioCheckoutUrl } from './ecpay/endpoints'
+import { queryEcpayTrade } from './ecpay/query-trade'
+import { refundEcpayCharge } from './ecpay/refund'
 
 const { PaymentStatus, WebhookEventType } = types
-
-const ECPAY_STAGE_CHECKOUT_URL =
-  'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5'
-const ECPAY_PROD_CHECKOUT_URL = 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5'
 
 export function createPaymentsService(deps: PaymentsServiceDeps): PaymentsService {
   if (deps.connector !== 'ecpay') {
@@ -25,6 +24,8 @@ export function createPaymentsService(deps: PaymentsServiceDeps): PaymentsServic
   }
 
   const { ecpay, libPath } = deps
+  const fetchImpl = deps.fetch ?? globalThis.fetch.bind(globalThis)
+  const nowImpl = deps.now ?? (() => new Date())
 
   // Lazily create prism clients to avoid loading the .so at module-import time
   let clients: ReturnType<typeof createPrismClients> | undefined
@@ -88,8 +89,7 @@ export function createPaymentsService(deps: PaymentsServiceDeps): PaymentsServic
 
       params['CheckMacValue'] = computeCheckMacValue(params, ecpay.hashKey, ecpay.hashIv)
 
-      const targetUrl =
-        ecpay.mode === 'prod' ? ECPAY_PROD_CHECKOUT_URL : ECPAY_STAGE_CHECKOUT_URL
+      const targetUrl = getAioCheckoutUrl(ecpay.mode)
 
       return {
         status: 'pending_action',
@@ -131,6 +131,14 @@ export function createPaymentsService(deps: PaymentsServiceDeps): PaymentsServic
         // Fallback: manual ECPay verification when prism is unavailable
         return manualEcpayWebhook(input.rawBody, ecpay.hashKey, ecpay.hashIv)
       }
+    },
+
+    async refundCharge(input) {
+      return refundEcpayCharge({ ecpay, fetch: fetchImpl, now: nowImpl }, input)
+    },
+
+    async getCharge(input) {
+      return queryEcpayTrade({ ecpay, fetch: fetchImpl, now: nowImpl }, input)
     },
   }
 }

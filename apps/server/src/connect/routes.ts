@@ -6,9 +6,14 @@ import { liffHandler } from './liff'
 import type { createOAService } from '../services/oa'
 import type { createLiffService } from '../services/liff'
 import type { DriveService } from '@vine/drive'
-import { StickerMarketUserService } from '@vine/proto/stickerMarket'
+import {
+  StickerMarketUserService,
+  StickerMarketAdminService,
+} from '@vine/proto/stickerMarket'
 import type { StickerMarketUserHandlerDeps } from './stickerMarketUser'
 import { createStickerMarketUserHandler } from './stickerMarketUser'
+import type { StickerMarketAdminHandlerDeps } from './stickerMarketAdmin'
+import { createStickerMarketAdminHandler } from './stickerMarketAdmin'
 import { withAuthService } from './auth-context'
 
 type ConnectDeps = {
@@ -17,6 +22,7 @@ type ConnectDeps = {
   auth: AuthServer
   drive: DriveService
   stickerMarketUser: StickerMarketUserHandlerDeps
+  stickerMarketAdmin: StickerMarketAdminHandlerDeps
 }
 
 export function connectRoutes(deps: ConnectDeps) {
@@ -30,6 +36,14 @@ export function connectRoutes(deps: ConnectDeps) {
         StickerMarketUserService,
         deps.auth,
         createStickerMarketUserHandler(deps.stickerMarketUser),
+      ),
+    )
+    router.service(
+      StickerMarketAdminService,
+      withAuthService(
+        StickerMarketAdminService,
+        deps.auth,
+        createStickerMarketAdminHandler(deps.stickerMarketAdmin),
       ),
     )
   }

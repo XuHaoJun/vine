@@ -13,6 +13,7 @@ export type EntitlementRepository = {
     tx: any,
     input: { userId: string; packageId: string },
   ): Promise<EntitlementRow | null>
+  revokeByOrder(tx: any, orderId: string): Promise<number>
 }
 
 export function createEntitlementRepository(): EntitlementRepository {
@@ -41,6 +42,13 @@ export function createEntitlementRepository(): EntitlementRepository {
         )
         .limit(1)
       return (rows[0] as EntitlementRow | undefined) ?? null
+    },
+
+    async revokeByOrder(tx, orderId) {
+      const result = await tx
+        .delete(entitlement)
+        .where(eq(entitlement.grantedByOrderId, orderId))
+      return (result.rowCount as number | undefined) ?? 0
     },
   }
 }

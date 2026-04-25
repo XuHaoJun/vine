@@ -22,8 +22,161 @@ import type { Message } from '@bufbuild/protobuf'
 export const file_stickerMarket_v1_stickerMarket: GenFile =
   /*@__PURE__*/
   fileDesc(
-    'CiRzdGlja2VyTWFya2V0L3YxL3N0aWNrZXJNYXJrZXQucHJvdG8SEHN0aWNrZXJNYXJrZXQudjEiLwoFTW9uZXkSFAoMbWlub3JfYW1vdW50GAEgASgFEhAKCGN1cnJlbmN5GAIgASgJIqIBChBSZWRpcmVjdEZvcm1Qb3N0EhIKCnRhcmdldF91cmwYASABKAkSRwoLZm9ybV9maWVsZHMYAiADKAsyMi5zdGlja2VyTWFya2V0LnYxLlJlZGlyZWN0Rm9ybVBvc3QuRm9ybUZpZWxkc0VudHJ5GjEKD0Zvcm1GaWVsZHNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIkIKFUNyZWF0ZUNoZWNrb3V0UmVxdWVzdBISCgpwYWNrYWdlX2lkGAEgASgJEhUKDXNpbXVsYXRlX3BhaWQYAiABKAgiYAoWQ3JlYXRlQ2hlY2tvdXRSZXNwb25zZRIQCghvcmRlcl9pZBgBIAEoCRI0CghyZWRpcmVjdBgCIAEoCzIiLnN0aWNrZXJNYXJrZXQudjEuUmVkaXJlY3RGb3JtUG9zdCIjCg9HZXRPcmRlclJlcXVlc3QSEAoIb3JkZXJfaWQYASABKAkikwEKEEdldE9yZGVyUmVzcG9uc2USEAoIb3JkZXJfaWQYASABKAkSLQoGc3RhdHVzGAIgASgOMh0uc3RpY2tlck1hcmtldC52MS5PcmRlclN0YXR1cxIWCg5mYWlsdXJlX3JlYXNvbhgDIAEoCRIUCgxhbW91bnRfbWlub3IYBCABKAUSEAoIY3VycmVuY3kYBSABKAkqdQoLT3JkZXJTdGF0dXMSHAoYT1JERVJfU1RBVFVTX1VOU1BFQ0lGSUVEEAASGAoUT1JERVJfU1RBVFVTX0NSRUFURUQQARIVChFPUkRFUl9TVEFUVVNfUEFJRBACEhcKE09SREVSX1NUQVRVU19GQUlMRUQQAzLSAQoYU3RpY2tlck1hcmtldFVzZXJTZXJ2aWNlEmMKDkNyZWF0ZUNoZWNrb3V0Eicuc3RpY2tlck1hcmtldC52MS5DcmVhdGVDaGVja291dFJlcXVlc3QaKC5zdGlja2VyTWFya2V0LnYxLkNyZWF0ZUNoZWNrb3V0UmVzcG9uc2USUQoIR2V0T3JkZXISIS5zdGlja2VyTWFya2V0LnYxLkdldE9yZGVyUmVxdWVzdBoiLnN0aWNrZXJNYXJrZXQudjEuR2V0T3JkZXJSZXNwb25zZWIGcHJvdG8z',
+    'CiRzdGlja2VyTWFya2V0L3YxL3N0aWNrZXJNYXJrZXQucHJvdG8SEHN0aWNrZXJNYXJrZXQudjEiNgoSUmVmdW5kT3JkZXJSZXF1ZXN0EhAKCG9yZGVyX2lkGAEgASgJEg4KBnJlYXNvbhgCIAEoCSKCAQoTUmVmdW5kT3JkZXJSZXNwb25zZRIQCghvcmRlcl9pZBgBIAEoCRIuCgZzdGF0dXMYAiABKA4yHi5zdGlja2VyTWFya2V0LnYxLlJlZnVuZFN0YXR1cxIRCglzaW11bGF0ZWQYAyABKAgSFgoOZmFpbHVyZV9yZWFzb24YBCABKAkiUgodUmVjb25jaWxlU3RpY2tlck9yZGVyc1JlcXVlc3QSEQoJc2luY2VfaXNvGAEgASgJEg0KBWxpbWl0GAIgASgFEg8KB2RyeV9ydW4YAyABKAgiegoWUmVjb25jaWxpYXRpb25NaXNtYXRjaBIQCghvcmRlcl9pZBgBIAEoCRIUCgxsb2NhbF9zdGF0dXMYAiABKAkSGAoQY29ubmVjdG9yX3N0YXR1cxgDIAEoCRIOCgZhY3Rpb24YBCABKAkSDgoGcmVhc29uGAUgASgJIoABCh5SZWNvbmNpbGVTdGlja2VyT3JkZXJzUmVzcG9uc2USDwoHY2hlY2tlZBgBIAEoBRIPCgdtYXRjaGVkGAIgASgFEjwKCm1pc21hdGNoZXMYAyADKAsyKC5zdGlja2VyTWFya2V0LnYxLlJlY29uY2lsaWF0aW9uTWlzbWF0Y2giLwoFTW9uZXkSFAoMbWlub3JfYW1vdW50GAEgASgFEhAKCGN1cnJlbmN5GAIgASgJIqIBChBSZWRpcmVjdEZvcm1Qb3N0EhIKCnRhcmdldF91cmwYASABKAkSRwoLZm9ybV9maWVsZHMYAiADKAsyMi5zdGlja2VyTWFya2V0LnYxLlJlZGlyZWN0Rm9ybVBvc3QuRm9ybUZpZWxkc0VudHJ5GjEKD0Zvcm1GaWVsZHNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIkIKFUNyZWF0ZUNoZWNrb3V0UmVxdWVzdBISCgpwYWNrYWdlX2lkGAEgASgJEhUKDXNpbXVsYXRlX3BhaWQYAiABKAgiYAoWQ3JlYXRlQ2hlY2tvdXRSZXNwb25zZRIQCghvcmRlcl9pZBgBIAEoCRI0CghyZWRpcmVjdBgCIAEoCzIiLnN0aWNrZXJNYXJrZXQudjEuUmVkaXJlY3RGb3JtUG9zdCIjCg9HZXRPcmRlclJlcXVlc3QSEAoIb3JkZXJfaWQYASABKAkikwEKEEdldE9yZGVyUmVzcG9uc2USEAoIb3JkZXJfaWQYASABKAkSLQoGc3RhdHVzGAIgASgOMh0uc3RpY2tlck1hcmtldC52MS5PcmRlclN0YXR1cxIWCg5mYWlsdXJlX3JlYXNvbhgDIAEoCRIUCgxhbW91bnRfbWlub3IYBCABKAUSEAoIY3VycmVuY3kYBSABKAkqjAEKDFJlZnVuZFN0YXR1cxIdChlSRUZVTkRfU1RBVFVTX1VOU1BFQ0lGSUVEEAASIAocUkVGVU5EX1NUQVRVU19SRUZVTkRfUEVORElORxABEhoKFlJFRlVORF9TVEFUVVNfUkVGVU5ERUQQAhIfChtSRUZVTkRfU1RBVFVTX1JFRlVORF9GQUlMRUQQAyrRAQoLT3JkZXJTdGF0dXMSHAoYT1JERVJfU1RBVFVTX1VOU1BFQ0lGSUVEEAASGAoUT1JERVJfU1RBVFVTX0NSRUFURUQQARIVChFPUkRFUl9TVEFUVVNfUEFJRBACEhcKE09SREVSX1NUQVRVU19GQUlMRUQQAxIfChtPUkRFUl9TVEFUVVNfUkVGVU5EX1BFTkRJTkcQBBIZChVPUkRFUl9TVEFUVVNfUkVGVU5ERUQQBRIeChpPUkRFUl9TVEFUVVNfUkVGVU5EX0ZBSUxFRBAGMtIBChhTdGlja2VyTWFya2V0VXNlclNlcnZpY2USYwoOQ3JlYXRlQ2hlY2tvdXQSJy5zdGlja2VyTWFya2V0LnYxLkNyZWF0ZUNoZWNrb3V0UmVxdWVzdBooLnN0aWNrZXJNYXJrZXQudjEuQ3JlYXRlQ2hlY2tvdXRSZXNwb25zZRJRCghHZXRPcmRlchIhLnN0aWNrZXJNYXJrZXQudjEuR2V0T3JkZXJSZXF1ZXN0GiIuc3RpY2tlck1hcmtldC52MS5HZXRPcmRlclJlc3BvbnNlMvQBChlTdGlja2VyTWFya2V0QWRtaW5TZXJ2aWNlEloKC1JlZnVuZE9yZGVyEiQuc3RpY2tlck1hcmtldC52MS5SZWZ1bmRPcmRlclJlcXVlc3QaJS5zdGlja2VyTWFya2V0LnYxLlJlZnVuZE9yZGVyUmVzcG9uc2USewoWUmVjb25jaWxlU3RpY2tlck9yZGVycxIvLnN0aWNrZXJNYXJrZXQudjEuUmVjb25jaWxlU3RpY2tlck9yZGVyc1JlcXVlc3QaMC5zdGlja2VyTWFya2V0LnYxLlJlY29uY2lsZVN0aWNrZXJPcmRlcnNSZXNwb25zZWIGcHJvdG8z',
   )
+
+/**
+ * @generated from message stickerMarket.v1.RefundOrderRequest
+ */
+export type RefundOrderRequest = Message<'stickerMarket.v1.RefundOrderRequest'> & {
+  /**
+   * @generated from field: string order_id = 1;
+   */
+  orderId: string
+
+  /**
+   * @generated from field: string reason = 2;
+   */
+  reason: string
+}
+
+/**
+ * Describes the message stickerMarket.v1.RefundOrderRequest.
+ * Use `create(RefundOrderRequestSchema)` to create a new message.
+ */
+export const RefundOrderRequestSchema: GenMessage<RefundOrderRequest> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 0)
+
+/**
+ * @generated from message stickerMarket.v1.RefundOrderResponse
+ */
+export type RefundOrderResponse = Message<'stickerMarket.v1.RefundOrderResponse'> & {
+  /**
+   * @generated from field: string order_id = 1;
+   */
+  orderId: string
+
+  /**
+   * @generated from field: stickerMarket.v1.RefundStatus status = 2;
+   */
+  status: RefundStatus
+
+  /**
+   * @generated from field: bool simulated = 3;
+   */
+  simulated: boolean
+
+  /**
+   * @generated from field: string failure_reason = 4;
+   */
+  failureReason: string
+}
+
+/**
+ * Describes the message stickerMarket.v1.RefundOrderResponse.
+ * Use `create(RefundOrderResponseSchema)` to create a new message.
+ */
+export const RefundOrderResponseSchema: GenMessage<RefundOrderResponse> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 1)
+
+/**
+ * @generated from message stickerMarket.v1.ReconcileStickerOrdersRequest
+ */
+export type ReconcileStickerOrdersRequest =
+  Message<'stickerMarket.v1.ReconcileStickerOrdersRequest'> & {
+    /**
+     * @generated from field: string since_iso = 1;
+     */
+    sinceIso: string
+
+    /**
+     * @generated from field: int32 limit = 2;
+     */
+    limit: number
+
+    /**
+     * @generated from field: bool dry_run = 3;
+     */
+    dryRun: boolean
+  }
+
+/**
+ * Describes the message stickerMarket.v1.ReconcileStickerOrdersRequest.
+ * Use `create(ReconcileStickerOrdersRequestSchema)` to create a new message.
+ */
+export const ReconcileStickerOrdersRequestSchema: GenMessage<ReconcileStickerOrdersRequest> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 2)
+
+/**
+ * @generated from message stickerMarket.v1.ReconciliationMismatch
+ */
+export type ReconciliationMismatch =
+  Message<'stickerMarket.v1.ReconciliationMismatch'> & {
+    /**
+     * @generated from field: string order_id = 1;
+     */
+    orderId: string
+
+    /**
+     * @generated from field: string local_status = 2;
+     */
+    localStatus: string
+
+    /**
+     * @generated from field: string connector_status = 3;
+     */
+    connectorStatus: string
+
+    /**
+     * @generated from field: string action = 4;
+     */
+    action: string
+
+    /**
+     * @generated from field: string reason = 5;
+     */
+    reason: string
+  }
+
+/**
+ * Describes the message stickerMarket.v1.ReconciliationMismatch.
+ * Use `create(ReconciliationMismatchSchema)` to create a new message.
+ */
+export const ReconciliationMismatchSchema: GenMessage<ReconciliationMismatch> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 3)
+
+/**
+ * @generated from message stickerMarket.v1.ReconcileStickerOrdersResponse
+ */
+export type ReconcileStickerOrdersResponse =
+  Message<'stickerMarket.v1.ReconcileStickerOrdersResponse'> & {
+    /**
+     * @generated from field: int32 checked = 1;
+     */
+    checked: number
+
+    /**
+     * @generated from field: int32 matched = 2;
+     */
+    matched: number
+
+    /**
+     * @generated from field: repeated stickerMarket.v1.ReconciliationMismatch mismatches = 3;
+     */
+    mismatches: ReconciliationMismatch[]
+  }
+
+/**
+ * Describes the message stickerMarket.v1.ReconcileStickerOrdersResponse.
+ * Use `create(ReconcileStickerOrdersResponseSchema)` to create a new message.
+ */
+export const ReconcileStickerOrdersResponseSchema: GenMessage<ReconcileStickerOrdersResponse> =
+  /*@__PURE__*/
+  messageDesc(file_stickerMarket_v1_stickerMarket, 4)
 
 /**
  * --- Shared types ---
@@ -48,7 +201,7 @@ export type Money = Message<'stickerMarket.v1.Money'> & {
  */
 export const MoneySchema: GenMessage<Money> =
   /*@__PURE__*/
-  messageDesc(file_stickerMarket_v1_stickerMarket, 0)
+  messageDesc(file_stickerMarket_v1_stickerMarket, 5)
 
 /**
  * @generated from message stickerMarket.v1.RedirectFormPost
@@ -71,7 +224,7 @@ export type RedirectFormPost = Message<'stickerMarket.v1.RedirectFormPost'> & {
  */
 export const RedirectFormPostSchema: GenMessage<RedirectFormPost> =
   /*@__PURE__*/
-  messageDesc(file_stickerMarket_v1_stickerMarket, 1)
+  messageDesc(file_stickerMarket_v1_stickerMarket, 6)
 
 /**
  * --- Requests / Responses ---
@@ -98,7 +251,7 @@ export type CreateCheckoutRequest = Message<'stickerMarket.v1.CreateCheckoutRequ
  */
 export const CreateCheckoutRequestSchema: GenMessage<CreateCheckoutRequest> =
   /*@__PURE__*/
-  messageDesc(file_stickerMarket_v1_stickerMarket, 2)
+  messageDesc(file_stickerMarket_v1_stickerMarket, 7)
 
 /**
  * @generated from message stickerMarket.v1.CreateCheckoutResponse
@@ -122,7 +275,7 @@ export type CreateCheckoutResponse =
  */
 export const CreateCheckoutResponseSchema: GenMessage<CreateCheckoutResponse> =
   /*@__PURE__*/
-  messageDesc(file_stickerMarket_v1_stickerMarket, 3)
+  messageDesc(file_stickerMarket_v1_stickerMarket, 8)
 
 /**
  * @generated from message stickerMarket.v1.GetOrderRequest
@@ -140,7 +293,7 @@ export type GetOrderRequest = Message<'stickerMarket.v1.GetOrderRequest'> & {
  */
 export const GetOrderRequestSchema: GenMessage<GetOrderRequest> =
   /*@__PURE__*/
-  messageDesc(file_stickerMarket_v1_stickerMarket, 4)
+  messageDesc(file_stickerMarket_v1_stickerMarket, 9)
 
 /**
  * @generated from message stickerMarket.v1.GetOrderResponse
@@ -178,7 +331,39 @@ export type GetOrderResponse = Message<'stickerMarket.v1.GetOrderResponse'> & {
  */
 export const GetOrderResponseSchema: GenMessage<GetOrderResponse> =
   /*@__PURE__*/
-  messageDesc(file_stickerMarket_v1_stickerMarket, 5)
+  messageDesc(file_stickerMarket_v1_stickerMarket, 10)
+
+/**
+ * @generated from enum stickerMarket.v1.RefundStatus
+ */
+export enum RefundStatus {
+  /**
+   * @generated from enum value: REFUND_STATUS_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: REFUND_STATUS_REFUND_PENDING = 1;
+   */
+  REFUND_PENDING = 1,
+
+  /**
+   * @generated from enum value: REFUND_STATUS_REFUNDED = 2;
+   */
+  REFUNDED = 2,
+
+  /**
+   * @generated from enum value: REFUND_STATUS_REFUND_FAILED = 3;
+   */
+  REFUND_FAILED = 3,
+}
+
+/**
+ * Describes the enum stickerMarket.v1.RefundStatus.
+ */
+export const RefundStatusSchema: GenEnum<RefundStatus> =
+  /*@__PURE__*/
+  enumDesc(file_stickerMarket_v1_stickerMarket, 0)
 
 /**
  * @generated from enum stickerMarket.v1.OrderStatus
@@ -203,6 +388,21 @@ export enum OrderStatus {
    * @generated from enum value: ORDER_STATUS_FAILED = 3;
    */
   FAILED = 3,
+
+  /**
+   * @generated from enum value: ORDER_STATUS_REFUND_PENDING = 4;
+   */
+  REFUND_PENDING = 4,
+
+  /**
+   * @generated from enum value: ORDER_STATUS_REFUNDED = 5;
+   */
+  REFUNDED = 5,
+
+  /**
+   * @generated from enum value: ORDER_STATUS_REFUND_FAILED = 6;
+   */
+  REFUND_FAILED = 6,
 }
 
 /**
@@ -210,7 +410,7 @@ export enum OrderStatus {
  */
 export const OrderStatusSchema: GenEnum<OrderStatus> =
   /*@__PURE__*/
-  enumDesc(file_stickerMarket_v1_stickerMarket, 0)
+  enumDesc(file_stickerMarket_v1_stickerMarket, 1)
 
 /**
  * --- MVP slice ---
@@ -235,3 +435,25 @@ export const StickerMarketUserService: GenService<{
     output: typeof GetOrderResponseSchema
   }
 }> = /*@__PURE__*/ serviceDesc(file_stickerMarket_v1_stickerMarket, 0)
+
+/**
+ * @generated from service stickerMarket.v1.StickerMarketAdminService
+ */
+export const StickerMarketAdminService: GenService<{
+  /**
+   * @generated from rpc stickerMarket.v1.StickerMarketAdminService.RefundOrder
+   */
+  refundOrder: {
+    methodKind: 'unary'
+    input: typeof RefundOrderRequestSchema
+    output: typeof RefundOrderResponseSchema
+  }
+  /**
+   * @generated from rpc stickerMarket.v1.StickerMarketAdminService.ReconcileStickerOrders
+   */
+  reconcileStickerOrders: {
+    methodKind: 'unary'
+    input: typeof ReconcileStickerOrdersRequestSchema
+    output: typeof ReconcileStickerOrdersResponseSchema
+  }
+}> = /*@__PURE__*/ serviceDesc(file_stickerMarket_v1_stickerMarket, 1)

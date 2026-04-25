@@ -66,7 +66,7 @@ const paymentsEnv = {
     process.env['PAYMENTS_ORDER_RESULT_URL'] ?? 'http://localhost:3000/pay/result',
   PAYMENTS_CLIENT_BACK_URL: process.env['PAYMENTS_CLIENT_BACK_URL'],
 }
-const payments = createPayments(paymentsEnv, db)
+const payments = createPayments(paymentsEnv, db, app.log)
 await registerPaymentsWebhookRoutes(app, { ...payments, db })
 
 // ConnectRPC routes (GreeterService, OAService, LIFFService, StickerMarketUserService, etc.)
@@ -83,6 +83,10 @@ await app.register(fastifyConnectPlugin, {
       returnUrl: paymentsEnv.PAYMENTS_RETURN_URL,
       orderResultUrl: paymentsEnv.PAYMENTS_ORDER_RESULT_URL,
       clientBackUrl: paymentsEnv.PAYMENTS_CLIENT_BACK_URL,
+    },
+    stickerMarketAdmin: {
+      refund: payments.refund,
+      reconciliation: payments.reconciliation,
     },
   }),
 })

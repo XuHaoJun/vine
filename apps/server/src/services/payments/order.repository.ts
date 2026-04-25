@@ -25,6 +25,34 @@ export type StickerOrderRepository = {
     id: string,
     input: { failureReason: string },
   ): Promise<number>
+  beginRefund(
+    tx: any,
+    id: string,
+    input: {
+      refundId: string
+      refundAmountMinor: number
+      refundReason: string
+      refundRequestedByUserId: string | undefined
+      connectorChargeId: string
+      paidAt: Date | undefined
+      allowedStatuses: Array<'paid' | 'refund_failed' | 'created' | 'failed'>
+    },
+  ): Promise<number>
+  markRefunded(tx: any, id: string, input: { refundedAt: Date }): Promise<number>
+  markRefundFailed(
+    tx: any,
+    id: string,
+    input: { refundFailureReason: string },
+  ): Promise<number>
+  updateReconciliation(
+    tx: any,
+    id: string,
+    input: { connectorStatus: string; mismatch: string | undefined },
+  ): Promise<void>
+  findForReconciliation(
+    tx: any,
+    input: { since: Date; limit: number },
+  ): Promise<StickerOrderRow[]>
 }
 
 export function createStickerOrderRepository(_db: any): StickerOrderRepository {
@@ -78,6 +106,87 @@ export function createStickerOrderRepository(_db: any): StickerOrderRepository {
         })
         .where(and(eq(stickerOrder.id, id), eq(stickerOrder.status, 'created')))
       return (result.rowCount as number | undefined) ?? 0
+    },
+
+    async beginRefund(tx, id, input) {
+      const result = await tx
+        .update(stickerOrder)
+        .set({
+          status: 'refund_pending',
+          refundId: input.refundId,
+          refundAmountMinor: input.refundAmountMinor,
+          refundReason: input.refundReason,
+          refundRequestedByUserId: input.refundRequestedByUserId,
+          refundRequestedAt: new Date().toISOString(),
+          connectorChargeId: input.connectorChargeId ?? undefined,
+          paidAt: input.paidAt?.toISOString() ?? undefined,
+          updatedAt: sql`now()`,
+        })
+        .where(
+          and(
+            eq(stickerOrder.id, id),
+            inArray(stickerOrder.status, input.allowedStatuses),
+          ),
+        )
+      return (result.rowCount as number | undefined) ?? 0
+    },
+
+    async markRefunded(tx, id, input) {
+      const result = await tx
+        .update(stickerOrder)
+        .set({
+          status: 'refunded',
+          refundedAt: input.refundedAt.toISOString(),
+          refundFailureReason: null,
+          updatedAt: sql`now()`,
+        })
+        .where(and(eq(stickerOrder.id, id), eq(stickerOrder.status, 'refund_pending')))
+      return (result.rowCount as number | undefined) ?? 0
+    },
+
+    async markRefundFailed(tx, id, input) {
+      const result = await tx
+        .update(stickerOrder)
+        .set({
+          status: 'refund_failed',
+          refundFailureReason: input.refundFailureReason,
+          updatedAt: sql`now()`,
+        })
+        .where(and(eq(stickerOrder.id, id), eq(stickerOrder.status, 'refund_pending')))
+      return (result.rowCount as number | undefined) ?? 0
+    },
+
+    async updateReconciliation(tx, id, input) {
+      await tx
+        .update(stickerOrder)
+        .set({
+          lastReconciledAt: new Date().toISOString(),
+          lastConnectorStatus: input.connectorStatus,
+          lastReconciliationMismatch: input.mismatch ?? null,
+          updatedAt: sql`now()`,
+        })
+        .where(eq(stickerOrder.id, id))
+    },
+
+    async findForReconciliation(tx, input) {
+      const rows = await tx
+        .select()
+        .from(stickerOrder)
+        .where(
+          and(
+            sql`${stickerOrder.createdAt} >= ${input.since.toISOString()}`,
+            inArray(stickerOrder.status, [
+              'created',
+              'paid',
+              'failed',
+              'refund_pending',
+              'refund_failed',
+            ]),
+          ),
+        )
+        .orderBy(stickerOrder.createdAt)
+        .limit(input.limit)
+      return rows as StickerOrderRow[]
     },
   }
 }

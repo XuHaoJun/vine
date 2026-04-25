@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
+import { entitlement } from '@vine/db/schema-public'
 import { createEntitlementRepository } from './entitlement.repository'
 
 function createMockTx(existingRows: any[] = []) {
@@ -14,6 +15,9 @@ function createMockTx(existingRows: any[] = []) {
           limit: vi.fn().mockResolvedValue(existingRows),
         }),
       }),
+    }),
+    delete: vi.fn().mockReturnValue({
+      where: vi.fn().mockResolvedValue({ rowCount: 1 }),
     }),
   }
 }
@@ -86,5 +90,17 @@ describe('entitlementRepository', () => {
     const [call1, call2] = onConflictDoNothing.mock.calls
     expect(call1[0]).toHaveProperty('target')
     expect(call2[0]).toHaveProperty('target')
+  })
+
+  it('revokeByOrder deletes by grantedByOrderId', async () => {
+    const tx = createMockTx()
+    const repo = createEntitlementRepository()
+
+    await repo.revokeByOrder(tx, 'order-1')
+
+    expect(tx.delete).toHaveBeenCalledOnce()
+    expect(tx.delete.mock.calls[0][0]).toBe(entitlement)
+    const whereArg = tx.delete.mock.results[0].value.where.mock.calls[0][0]
+    expect(whereArg).toBeDefined()
   })
 })

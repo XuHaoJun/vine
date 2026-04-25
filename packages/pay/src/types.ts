@@ -68,17 +68,59 @@ export type EcpayCredentials = {
   mode: 'stage' | 'prod'
 }
 
+export type RefundChargeInput = {
+  merchantTransactionId: string
+  connectorChargeId: string
+  amount: Money
+  reason: string
+  testMode?: boolean
+}
+
+export type RefundChargeResult =
+  | {
+      status: 'succeeded'
+      connectorRefundId: string | undefined
+      refundedAt: Date
+      simulated: boolean
+      raw: Record<string, string>
+    }
+  | {
+      status: 'failed'
+      reason: string
+      raw: Record<string, string> | undefined
+    }
+
+export type GetChargeInput = {
+  merchantTransactionId: string
+}
+
+export type ChargeStatusResult =
+  | {
+      status: 'paid'
+      connectorChargeId: string
+      amount: Money
+      paidAt: Date | undefined
+      rawStatus: string
+      raw: Record<string, string>
+    }
+  | {
+      status: 'unpaid' | 'failed' | 'not_found' | 'unknown'
+      reason: string
+      rawStatus: string | undefined
+      raw: Record<string, string> | undefined
+    }
+
 export type PaymentsServiceDeps = {
   connector: 'ecpay'
   ecpay: EcpayCredentials
   libPath?: string
+  fetch?: typeof fetch
+  now?: () => Date
 }
 
 export type PaymentsService = {
   createCharge(input: CreateChargeInput): Promise<CreateChargeResult>
   handleWebhook(input: HandleWebhookInput): Promise<HandleWebhookResult>
-  // FUTURE(refund): refund(chargeId: string, amount?: Money): Promise<RefundResult>
-  //   當用戶退款或 entitlement grant 失敗需要補償時啟用
-  // FUTURE(sync): getCharge(merchantTransactionId: string): Promise<ChargeStatus>
-  //   對帳 / reconciliation 用
+  refundCharge(input: RefundChargeInput): Promise<RefundChargeResult>
+  getCharge(input: GetChargeInput): Promise<ChargeStatusResult>
 }
