@@ -39,13 +39,17 @@ export async function registerPaymentsWebhookRoutes(
 
       if (!result.verified) {
         request.log.warn({ reason: result.reason }, 'ecpay webhook verification failed')
-        await deps.alerts?.notify({
-          type: 'payment.webhook_verification_failed',
-          severity: 'warning',
-          orderId: undefined,
-          message: 'ecpay webhook verification failed',
-          context: { reason: result.reason },
-        })
+        try {
+          await deps.alerts?.notify({
+            type: 'payment.webhook_verification_failed',
+            severity: 'warning',
+            orderId: undefined,
+            message: 'ecpay webhook verification failed',
+            context: { reason: result.reason },
+          })
+        } catch {
+          // alert failed — still return 400 response
+        }
         return reply
           .code(result.ackReply.status)
           .type('text/plain')

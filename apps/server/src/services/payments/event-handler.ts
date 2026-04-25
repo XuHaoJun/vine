@@ -2,7 +2,6 @@ import type { WebhookEvent } from '@vine/pay'
 import type { StickerOrderRepository } from './order.repository'
 import type { EntitlementRepository } from './entitlement.repository'
 import type { PaymentAlertSink } from './alert-sink'
-import { createRefundService } from './refund.service'
 
 type MinLogger = {
   warn(obj: object, msg: string): void
@@ -15,7 +14,15 @@ export type PaymentEventDeps = {
   orderRepo: StickerOrderRepository
   entitlementRepo: EntitlementRepository
   alerts?: PaymentAlertSink
-  refund?: Pick<ReturnType<typeof createRefundService>, 'compensatePaidCharge'>
+  refund?: {
+    compensatePaidCharge: (input: {
+      orderId: string
+      connectorChargeId: string
+      amount: { minorAmount: number; currency: string }
+      paidAt: Date
+      reason: string
+    }) => Promise<unknown>
+  }
 }
 
 export async function handlePaymentEvent(
@@ -45,24 +52,35 @@ export async function handlePaymentEvent(
     })
   } catch (err) {
     if (event.kind === 'charge.succeeded') {
-      if (deps.alerts) {
-        await deps.alerts.notify({
-          type: 'payment.entitlement_grant_failed',
-          severity: 'critical',
-          orderId: event.merchantTransactionId,
-          message: `Entitlement grant failed for order ${event.merchantTransactionId}`,
-          context: { error: String(err) },
-        })
-      }
       if (deps.refund) {
-        await deps.refund.compensatePaidCharge({
-          orderId: event.merchantTransactionId,
-          connectorChargeId: event.connectorChargeId,
-          amount: event.amount,
-          paidAt: event.paidAt,
-          reason: 'technical_error',
-        })
-      } else {
+        try {
+          await deps.refund.compensatePaidCharge({
+            orderId: event.merchantTransactionId,
+            connectorChargeId: event.connectorChargeId,
+            amount: event.amount,
+            paidAt: event.paidAt,
+            reason: 'technical_error',
+          })
+        } catch {
+          // compensation failed — already in a bad state, don't block alert
+        }
+      }
+
+      if (deps.alerts) {
+        try {
+          await deps.alerts.notify({
+            type: 'payment.entitlement_grant_failed',
+            severity: 'critical',
+            orderId: event.merchantTransactionId,
+            message: `Entitlement grant failed for order ${event.merchantTransactionId}`,
+            context: { error: String(err) },
+          })
+        } catch {
+          // alert failed — don't block response
+        }
+      }
+
+      if (!deps.refund) {
         throw err
       }
     } else {
@@ -86,7 +104,7 @@ async function applyChargeSucceeded(
       { orderId: order.id, expected: order.amountMinor, got: event.amount },
       'AMOUNT MISMATCH — not transitioning, not granting',
     )
-    deps.alerts?.notify({
+    await deps.alerts?.notify({
       type: 'payment.amount_mismatch',
       severity: 'critical',
       orderId: order.id,
