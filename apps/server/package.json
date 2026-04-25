@@ -37,6 +37,7 @@
     "better-auth": "^1.6.5",
     "drizzle-orm": "1.0.0-beta.9-e89174b",
     "fastify": "^5.8.5",
+    "fflate": "^0.8.2",
     "jose": "^6.0.10",
     "on-zero": "0.2.10",
     "pino": "^10.3.1",
