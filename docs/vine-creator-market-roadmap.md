@@ -46,11 +46,12 @@
 
 ---
 
-### Phase 1.5 — 付款強化(**當前階段**)
+### Phase 1.5 — 付款強化(✅ Completed 2026-04-25)
 
 **目標**:把 Phase 1 暴露出的 payment edge case 補起來,讓付款層可以放心進 prod。
 
 **詳細設計**:[`docs/superpowers/specs/2026-04-25-vine-creator-market-payments-hardening-design.md`](./superpowers/specs/2026-04-25-vine-creator-market-payments-hardening-design.md)
+**實作計畫**:[`docs/superpowers/plans/2026-04-25-vine-creator-market-payments-hardening.md`](./superpowers/plans/2026-04-25-vine-creator-market-payments-hardening.md)
 
 | 工作 | 動機 |
 |---|---|
@@ -62,6 +63,17 @@
 | 第二個 connector(例:Stripe 信用卡) | 驗證 `PaymentsService` interface 真的是 connector-agnostic |
 
 **不含**:創作者側,仍是假資料。
+
+**完成 commit 範圍**:
+- `6f32f32..fa0c754` (payments hardening branch)
+- 關鍵 commits:
+  - `6f32f32` feat(pay): add ecpay query and refund helpers
+  - `6cfa8c0` feat(payments): add refund order state
+  - `2596ee2` feat(payments): add refund orchestration
+  - `91e9fd3` feat(payments): compensate failed entitlement grants
+  - `175a5a3` feat(payments): add order reconciliation service
+  - `730a72e` feat(payments): add admin refund rpc
+  - `fa0c754` fix(payments): add reconcileStickerOrders tests, name constants, and format
 
 ---
 
