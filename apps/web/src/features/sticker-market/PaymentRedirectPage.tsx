@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { SizableText, YStack } from 'tamagui'
 
 type RedirectData = {
@@ -9,21 +9,29 @@ type RedirectData = {
 
 export function PaymentRedirectPage() {
   const formRef = useRef<HTMLFormElement>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const raw = sessionStorage.getItem('pay-redirect')
-    if (!raw) return
-    sessionStorage.removeItem('pay-redirect')
+    const raw = localStorage.getItem('pay-redirect')
+    if (!raw) {
+      setError('找不到付款資料，請重新操作')
+      return
+    }
+    localStorage.removeItem('pay-redirect')
 
     let data: RedirectData
     try {
       data = JSON.parse(raw) as RedirectData
     } catch {
+      setError('付款資料格式錯誤')
       return
     }
 
     const form = formRef.current
-    if (!form || !data.targetUrl) return
+    if (!form || !data.targetUrl) {
+      setError('付款連結無效')
+      return
+    }
 
     form.action = data.targetUrl
     form.method = 'POST'
@@ -40,6 +48,19 @@ export function PaymentRedirectPage() {
 
     form.submit()
   }, [])
+
+  if (error) {
+    return (
+      <YStack flex={1} items="center" justify="center" bg="$background" gap="$4" p="$6">
+        <SizableText size="$6" fontWeight="700" color="$color12">
+          無法完成付款
+        </SizableText>
+        <SizableText size="$3" color="$color10" text="center">
+          {error}
+        </SizableText>
+      </YStack>
+    )
+  }
 
   return (
     <YStack flex={1} items="center" justify="center" bg="$background" gap="$4">

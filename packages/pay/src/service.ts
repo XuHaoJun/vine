@@ -46,8 +46,8 @@ export function createPaymentsService(deps: PaymentsServiceDeps): PaymentsServic
       if (input.merchantTransactionId.length > 20) {
         throw new ConfigError('createCharge: merchantTransactionId must be ≤ 20 characters')
       }
-      if (!/^[A-Za-z0-9_]+$/.test(input.merchantTransactionId)) {
-        throw new ConfigError('createCharge: merchantTransactionId must be alphanumeric (underscore allowed) only')
+      if (!/^[A-Za-z0-9]+$/.test(input.merchantTransactionId)) {
+        throw new ConfigError('createCharge: merchantTransactionId must be alphanumeric only')
       }
 
       // Build ECPay AioCheckOut form fields directly.

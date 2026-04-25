@@ -71,7 +71,7 @@ export function StoreHome() {
                     </YStack>
                   ) : (
                     <SizableText size="$4" fontWeight="700" color="$color12">
-                      NT${((pkg.priceMinor ?? 0) / 100).toFixed(0)}
+                      NT${pkg.priceMinor ?? 0}
                     </SizableText>
                   )}
                 </XStack>

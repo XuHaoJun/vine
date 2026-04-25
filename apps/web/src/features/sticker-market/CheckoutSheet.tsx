@@ -32,7 +32,7 @@ export function CheckoutSheet({ pkg, open, onOpenChange }: CheckoutSheetProps) {
         packageId: pkg.id,
         simulatePaid: enableSimulate && simulatePaid,
       })
-      sessionStorage.setItem('pay-redirect', JSON.stringify({
+      localStorage.setItem('pay-redirect', JSON.stringify({
         orderId: res.orderId,
         targetUrl: res.redirect?.targetUrl ?? '',
         formFields: res.redirect?.formFields ?? {},
@@ -47,7 +47,7 @@ export function CheckoutSheet({ pkg, open, onOpenChange }: CheckoutSheetProps) {
     }
   }
 
-  const priceDisplay = `NT$${((pkg.priceMinor ?? 0) / 100).toFixed(0)}`
+  const priceDisplay = `NT$${pkg.priceMinor ?? 0}`
 
   return (
     <Sheet modal open={open} onOpenChange={onOpenChange} snapPoints={[40]}>

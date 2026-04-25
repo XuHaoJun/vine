@@ -60,6 +60,15 @@ export const mutate = mutations(schema, messageReadPermission, {
       throw new Error('Invalid sticker metadata')
     }
 
+    // Verify entitlement: user must own the sticker package
+    const query = tx.query as Record<string, any> | undefined
+    if (!query?.entitlement) throw new Error('Unauthorized')
+    const owned = await query.entitlement
+      .where('userId', authData.id)
+      .where('packageId', meta.packageId)
+      .run()
+    if (owned.length === 0) throw new Error('entitlement required')
+
     await tx.mutate.message.insert(message)
     await tx.mutate.chat.update({
       id: message.chatId,

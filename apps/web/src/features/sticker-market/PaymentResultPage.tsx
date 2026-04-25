@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { router } from 'one'
 import { SizableText, YStack } from 'tamagui'
 
@@ -15,6 +15,7 @@ type PaymentResultPageProps = {
 export function PaymentResultPage({ orderId }: PaymentResultPageProps) {
   const [status, setStatus] = useState<Status>('polling')
   const [failureReason, setFailureReason] = useState('')
+  const timerRef = useRef<number | null>(null)
 
   useEffect(() => {
     if (!orderId) {
@@ -47,11 +48,16 @@ export function PaymentResultPage({ orderId }: PaymentResultPageProps) {
         return
       }
 
-      timer = window.setTimeout(poll, 1000)
+      timerRef.current = window.setTimeout(poll, 1000)
     }
 
-    let timer = window.setTimeout(poll, 1000)
-    return () => clearTimeout(timer)
+    timerRef.current = window.setTimeout(poll, 1000)
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+        timerRef.current = null
+      }
+    }
   }, [orderId])
 
   if (status === 'polling') {

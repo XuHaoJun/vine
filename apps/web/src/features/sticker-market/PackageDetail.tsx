@@ -37,7 +37,7 @@ export function PackageDetail({ packageId }: PackageDetailProps) {
     )
   }
 
-  const priceDisplay = `NT$${((pkg.priceMinor ?? 0) / 100).toFixed(0)}`
+  const priceDisplay = `NT$${pkg.priceMinor ?? 0}`
 
   // Mock sticker previews (sticker count boxes)
   const stickerCount = Math.min(pkg.stickerCount ?? 0, 16)

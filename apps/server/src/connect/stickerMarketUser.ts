@@ -63,7 +63,11 @@ export function createStickerMarketUserHandler(deps: StickerMarketUserHandlerDep
         amount: { minorAmount: pkg.priceMinor, currency: pkg.currency },
         description: pkg.name,
         returnUrl: deps.returnUrl,
-        orderResultUrl: `${deps.orderResultUrl}?orderId=${orderId}`,
+        orderResultUrl: (() => {
+          const url = new URL(deps.orderResultUrl)
+          url.searchParams.set('orderId', orderId)
+          return url.toString()
+        })(),
         clientBackUrl: deps.clientBackUrl,
         idempotencyKey: orderId,
         testMode: req.simulatePaid ? { simulatePaid: true } : undefined,
