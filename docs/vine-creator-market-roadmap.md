@@ -32,7 +32,7 @@
 
 ## 2. 分期總覽
 
-### Phase 1 — MVP:付款閉環(**當前階段**)
+### Phase 1 — MVP:付款閉環(✅ Completed 2026-04-25)
 
 **目標**:驗證「用戶掏錢 → 貼圖可用」的端到端 pipeline,架構正確、風險清空。
 
@@ -40,12 +40,17 @@
 - **不含創作者側** — 貼圖用 seed 假資料,沒有上傳、審核、Dashboard、Payout
 - **成功標準**:用戶能在 store 頁點購買 → ECPay 付款 → 聊天室發送貼圖 → 對方看得到
 - **詳細設計**:[`docs/superpowers/specs/2026-04-23-vine-creator-market-payments-mvp-design.md`](./superpowers/specs/2026-04-23-vine-creator-market-payments-mvp-design.md)
+- **Implementation plan**:[`docs/superpowers/plans/2026-04-23-vine-creator-market-payments-mvp.md`](./superpowers/plans/2026-04-23-vine-creator-market-payments-mvp.md)
+- **交付物**:`packages/pay`、`apps/server/src/services/payments`、`StickerMarketUserService`、`/webhooks/ecpay`、`stickerPackage` / `entitlement` / `stickerOrder` schema、Zero sticker queries、store / pay routes、chat sticker picker、seed sticker packages
+- **完成 commit**:`a1109d6 feat: payments mvp (#16)`
 
 ---
 
-### Phase 1.5 — 付款強化(小包,可併於 Phase 1 後)
+### Phase 1.5 — 付款強化(**當前階段**)
 
 **目標**:把 Phase 1 暴露出的 payment edge case 補起來,讓付款層可以放心進 prod。
+
+**詳細設計**:[`docs/superpowers/specs/2026-04-25-vine-creator-market-payments-hardening-design.md`](./superpowers/specs/2026-04-25-vine-creator-market-payments-hardening-design.md)
 
 | 工作 | 動機 |
 |---|---|
@@ -136,12 +141,12 @@
 
 ```
         ┌─────────────────────────┐
-        │ Phase 1  付款閉環 MVP   │  ← 現在
+        │ Phase 1  付款閉環 MVP   │  ✅ Completed 2026-04-25
         │   E + F 最小 + A 假資料 │
         └───────────┬─────────────┘
                     │
         ┌───────────▼─────────────┐
-        │ Phase 1.5  付款強化     │
+        │ Phase 1.5  付款強化     │  ← 現在
         │   Refund, Sentry, 對帳   │
         └───────────┬─────────────┘
                     │
@@ -175,7 +180,7 @@
 
 ---
 
-## 4. 本 slice(Phase 1)詳細範圍
+## 4. 已完成 slice(Phase 1)詳細範圍
 
 以下只給摘要,完整設計見 [2026-04-23 payments MVP design](./superpowers/specs/2026-04-23-vine-creator-market-payments-mvp-design.md)。
 
@@ -214,4 +219,4 @@
 
 ---
 
-*最後更新:2026-04-23*
+*最後更新:2026-04-25*
