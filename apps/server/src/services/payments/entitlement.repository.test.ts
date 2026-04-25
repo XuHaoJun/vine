@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
+import { entitlement } from '@vine/db/schema-public'
 import { createEntitlementRepository } from './entitlement.repository'
 
 function createMockTx(existingRows: any[] = []) {
@@ -98,6 +99,7 @@ describe('entitlementRepository', () => {
     await repo.revokeByOrder(tx, 'order-1')
 
     expect(tx.delete).toHaveBeenCalledOnce()
+    expect(tx.delete.mock.calls[0][0]).toBe(entitlement)
     const whereArg = tx.delete.mock.results[0].value.where.mock.calls[0][0]
     expect(whereArg).toBeDefined()
   })

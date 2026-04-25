@@ -18,7 +18,8 @@
   },
   "scripts": {
     "build": "echo 'db package - no build step'",
-    "dev": "echo 'db package - no dev step'"
+    "dev": "echo 'db package - no dev step'",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@take-out/postgres": "^0.2.10",
