@@ -111,6 +111,8 @@ export function createStickerOrderRepository(_db: any): StickerOrderRepository {
           refundReason: input.refundReason,
           refundRequestedByUserId: input.refundRequestedByUserId,
           refundRequestedAt: new Date().toISOString(),
+          connectorChargeId: input.connectorChargeId ?? undefined,
+          paidAt: input.paidAt?.toISOString() ?? undefined,
           updatedAt: sql`now()`,
         })
         .where(and(eq(stickerOrder.id, id), inArray(stickerOrder.status, input.allowedStatuses)))

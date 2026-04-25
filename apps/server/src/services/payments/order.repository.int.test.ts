@@ -168,4 +168,150 @@ describe('StickerOrderRepository DB integration', () => {
       expect(order?.lastReconciledAt).toBeDefined()
     })
   })
+
+  it('findForReconciliation returns reconcilable orders filtered, ordered, and limited', async () => {
+    await withRollbackDb(async (db) => {
+      const repo = createStickerOrderRepository(db)
+
+      // Orders that should be included (reconcilable statuses, createdAt >= since)
+      await repo.create(db, {
+        id: 'int_order_created',
+        userId: 'user-int-1',
+        packageId: 'pkg-int-1',
+        amountMinor: 1000,
+        currency: 'TWD',
+        connectorName: 'ecpay',
+      })
+      await repo.create(db, {
+        id: 'int_order_paid',
+        userId: 'user-int-1',
+        packageId: 'pkg-int-1',
+        amountMinor: 2000,
+        currency: 'TWD',
+        connectorName: 'ecpay',
+      })
+      await repo.transitionToPaid(db, 'int_order_paid', {
+        connectorChargeId: 'charge-int-1',
+        paidAt: new Date('2026-04-25T02:00:00Z'),
+      })
+      await repo.create(db, {
+        id: 'int_order_failed',
+        userId: 'user-int-1',
+        packageId: 'pkg-int-1',
+        amountMinor: 3000,
+        currency: 'TWD',
+        connectorName: 'ecpay',
+      })
+      await repo.transitionToFailed(db, 'int_order_failed', {
+        failureReason: 'timeout',
+      })
+      await repo.create(db, {
+        id: 'int_order_refund_pending',
+        userId: 'user-int-1',
+        packageId: 'pkg-int-1',
+        amountMinor: 4000,
+        currency: 'TWD',
+        connectorName: 'ecpay',
+      })
+      await repo.transitionToPaid(db, 'int_order_refund_pending', {
+        connectorChargeId: 'charge-int-2',
+        paidAt: new Date('2026-04-25T03:00:00Z'),
+      })
+      await repo.beginRefund(db, 'int_order_refund_pending', {
+        refundId: 'refund-int-1',
+        refundAmountMinor: 4000,
+        refundReason: 'admin_exception',
+        refundRequestedByUserId: 'admin-1',
+        connectorChargeId: 'charge-int-2',
+        paidAt: new Date('2026-04-25T03:00:00Z'),
+        allowedStatuses: ['paid'],
+      })
+      await repo.create(db, {
+        id: 'int_order_refund_failed',
+        userId: 'user-int-1',
+        packageId: 'pkg-int-1',
+        amountMinor: 5000,
+        currency: 'TWD',
+        connectorName: 'ecpay',
+      })
+      await repo.transitionToPaid(db, 'int_order_refund_failed', {
+        connectorChargeId: 'charge-int-3',
+        paidAt: new Date('2026-04-25T04:00:00Z'),
+      })
+      await repo.beginRefund(db, 'int_order_refund_failed', {
+        refundId: 'refund-int-2',
+        refundAmountMinor: 5000,
+        refundReason: 'admin_exception',
+        refundRequestedByUserId: 'admin-1',
+        connectorChargeId: 'charge-int-3',
+        paidAt: new Date('2026-04-25T04:00:00Z'),
+        allowedStatuses: ['paid'],
+      })
+      await repo.markRefundFailed(db, 'int_order_refund_failed', {
+        refundFailureReason: 'denied',
+      })
+
+      // Order that should be excluded (refunded status)
+      await repo.create(db, {
+        id: 'int_order_refunded',
+        userId: 'user-int-1',
+        packageId: 'pkg-int-1',
+        amountMinor: 6000,
+        currency: 'TWD',
+        connectorName: 'ecpay',
+      })
+      await repo.transitionToPaid(db, 'int_order_refunded', {
+        connectorChargeId: 'charge-int-4',
+        paidAt: new Date('2026-04-25T05:00:00Z'),
+      })
+      await repo.beginRefund(db, 'int_order_refunded', {
+        refundId: 'refund-int-3',
+        refundAmountMinor: 6000,
+        refundReason: 'admin_exception',
+        refundRequestedByUserId: 'admin-1',
+        connectorChargeId: 'charge-int-4',
+        paidAt: new Date('2026-04-25T05:00:00Z'),
+        allowedStatuses: ['paid'],
+      })
+      await repo.markRefunded(db, 'int_order_refunded', {
+        refundedAt: new Date('2026-04-25T06:00:00Z'),
+      })
+
+      // Order that should be excluded (createdAt < since)
+      await repo.create(db, {
+        id: 'int_order_old',
+        userId: 'user-int-1',
+        packageId: 'pkg-int-1',
+        amountMinor: 7000,
+        currency: 'TWD',
+        connectorName: 'ecpay',
+      })
+      await db.execute(
+        `UPDATE "stickerOrder" SET "createdAt" = '2026-04-24T00:00:00Z' WHERE id = 'int_order_old'`,
+      )
+
+      const since = new Date('2026-04-25T00:00:00Z')
+      const results = await repo.findForReconciliation(db, { since, limit: 10 })
+
+      const ids = results.map((r) => r.id)
+      expect(ids).toContain('int_order_created')
+      expect(ids).toContain('int_order_paid')
+      expect(ids).toContain('int_order_failed')
+      expect(ids).toContain('int_order_refund_pending')
+      expect(ids).toContain('int_order_refund_failed')
+      expect(ids).not.toContain('int_order_refunded')
+      expect(ids).not.toContain('int_order_old')
+
+      // Assert ordering by createdAt ascending
+      for (let i = 1; i < results.length; i++) {
+        expect(new Date(results[i]!.createdAt).getTime()).toBeGreaterThanOrEqual(
+          new Date(results[i - 1]!.createdAt).getTime(),
+        )
+      }
+
+      // Assert limit is respected
+      const limited = await repo.findForReconciliation(db, { since, limit: 2 })
+      expect(limited.length).toBe(2)
+    })
+  })
 })

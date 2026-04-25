@@ -11,7 +11,8 @@ function makeTx(opts: { rows?: object[]; rowCount?: number } = {}) {
   const whereChain = { where: vi.fn().mockResolvedValue({ rowCount }) }
   const setChain = { set: vi.fn().mockReturnValue(whereChain) }
   const limitChain = { limit: vi.fn().mockResolvedValue(rows) }
-  const fromChain = { where: vi.fn().mockReturnValue(limitChain) }
+  const orderByChain = { orderBy: vi.fn().mockReturnValue(limitChain) }
+  const fromChain = { where: vi.fn().mockReturnValue({ ...orderByChain, ...limitChain }) }
 
   return {
     insert: vi.fn().mockReturnValue({ values: vi.fn().mockResolvedValue(undefined) }),
@@ -131,6 +132,7 @@ describe('StickerOrderRepository', () => {
       refundReason: 'admin_exception',
       refundRequestedByUserId: 'admin-1',
     })
+    expect(setArg.refundRequestedAt).toBeDefined()
     expect(setArg.updatedAt).toBeDefined()
   })
 
@@ -169,5 +171,31 @@ describe('StickerOrderRepository', () => {
     expect(setArg.lastReconciledAt).toBeDefined()
     expect(setArg.lastConnectorStatus).toBe('paid')
     expect(setArg.lastReconciliationMismatch).toBe('local created, connector paid')
+  })
+
+  it('findForReconciliation calls select with correct filters, order, and limit', async () => {
+    const rows = [
+      { id: 'order-1', status: 'paid', createdAt: '2026-04-24T10:00:00.000Z' },
+      { id: 'order-2', status: 'failed', createdAt: '2026-04-24T11:00:00.000Z' },
+    ]
+    const tx = makeTx({ rows })
+    const since = new Date('2026-04-24T00:00:00Z')
+    const result = await repo.findForReconciliation(tx, { since, limit: 10 })
+
+    expect(result).toEqual(rows)
+    expect(tx.select).toHaveBeenCalledOnce()
+    expect(tx.select.mock.results[0]!.value.from).toHaveBeenCalledOnce()
+    const fromArg = tx.select.mock.results[0]!.value.from.mock.calls[0][0]
+    expect(fromArg).toBeDefined()
+
+    const whereChain = tx.select.mock.results[0]!.value.from.mock.results[0]!.value
+    expect(whereChain.where).toHaveBeenCalledOnce()
+
+    const orderByChain = whereChain.where.mock.results[0]!.value
+    expect(orderByChain.orderBy).toHaveBeenCalledOnce()
+
+    const limitChain = orderByChain.orderBy.mock.results[0]!.value
+    expect(limitChain.limit).toHaveBeenCalledOnce()
+    expect(limitChain.limit.mock.calls[0][0]).toBe(10)
   })
 })
