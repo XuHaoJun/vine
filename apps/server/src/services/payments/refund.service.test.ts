@@ -75,7 +75,13 @@ describe('createRefundService', () => {
   it('refundOrder transitions paid order to refunded and revokes entitlement', async () => {
     const deps = makeRefundDeps({
       order: makeOrder({ status: 'paid', connectorChargeId: 'trade-1' }),
-      refundResult: { status: 'succeeded', simulated: true, refundedAt: new Date('2026-04-25T02:00:00Z'), connectorRefundId: undefined, raw: {} },
+      refundResult: {
+        status: 'succeeded',
+        simulated: true,
+        refundedAt: new Date('2026-04-25T02:00:00Z'),
+        connectorRefundId: undefined,
+        raw: {},
+      },
     })
 
     const service = createRefundService(deps)
@@ -94,7 +100,10 @@ describe('createRefundService', () => {
       reason: 'admin_exception',
       testMode: true,
     })
-    expect(deps.entitlementRepo.revokeByOrder).toHaveBeenCalledWith(expect.anything(), 'order-1')
+    expect(deps.entitlementRepo.revokeByOrder).toHaveBeenCalledWith(
+      expect.anything(),
+      'order-1',
+    )
   })
 
   it('refundOrder does not call ECPay for an already refunded order', async () => {
@@ -123,19 +132,30 @@ describe('createRefundService', () => {
       requestedByUserId: 'admin-1',
     })
 
-    expect(result).toMatchObject({ status: 'refund_failed', failureReason: 'TradeNo not found' })
+    expect(result).toMatchObject({
+      status: 'refund_failed',
+      failureReason: 'TradeNo not found',
+    })
     expect(deps.orderRepo.markRefundFailed).toHaveBeenCalled()
-    expect(deps.alerts.notify).toHaveBeenCalledWith(expect.objectContaining({
-      type: 'payment.refund_failed',
-      severity: 'critical',
-      orderId: 'order-1',
-    }))
+    expect(deps.alerts.notify).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'payment.refund_failed',
+        severity: 'critical',
+        orderId: 'order-1',
+      }),
+    )
   })
 
   it('compensatePaidCharge allows created order with verified connector charge id', async () => {
     const deps = makeRefundDeps({
       order: makeOrder({ status: 'created', connectorChargeId: null }),
-      refundResult: { status: 'succeeded', simulated: true, refundedAt: new Date('2026-04-25T02:00:00Z'), connectorRefundId: undefined, raw: {} },
+      refundResult: {
+        status: 'succeeded',
+        simulated: true,
+        refundedAt: new Date('2026-04-25T02:00:00Z'),
+        connectorRefundId: undefined,
+        raw: {},
+      },
     })
 
     const service = createRefundService(deps)
@@ -148,10 +168,14 @@ describe('createRefundService', () => {
     })
 
     expect(result.status).toBe('refunded')
-    expect(deps.orderRepo.beginRefund).toHaveBeenCalledWith(expect.anything(), 'order-1', expect.objectContaining({
-      connectorChargeId: 'trade-from-webhook',
-      allowedStatuses: ['created', 'failed', 'paid', 'refund_failed'],
-    }))
+    expect(deps.orderRepo.beginRefund).toHaveBeenCalledWith(
+      expect.anything(),
+      'order-1',
+      expect.objectContaining({
+        connectorChargeId: 'trade-from-webhook',
+        allowedStatuses: ['created', 'failed', 'paid', 'refund_failed'],
+      }),
+    )
     expect(deps.pay.refundCharge).toHaveBeenCalledWith({
       merchantTransactionId: 'order-1',
       connectorChargeId: 'trade-from-webhook',
@@ -159,6 +183,9 @@ describe('createRefundService', () => {
       reason: 'technical_error',
       testMode: true,
     })
-    expect(deps.entitlementRepo.revokeByOrder).toHaveBeenCalledWith(expect.anything(), 'order-1')
+    expect(deps.entitlementRepo.revokeByOrder).toHaveBeenCalledWith(
+      expect.anything(),
+      'order-1',
+    )
   })
 })

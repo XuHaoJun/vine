@@ -85,10 +85,14 @@ export function createReconciliationService(deps: ReconciliationServiceDeps) {
             action = 'fixed'
             await deps.db.transaction(async (tx) => {
               if (chargeStatus?.status !== 'paid') return
-              const transitionResult = await deps.orderRepo.transitionToPaid(tx, order.id, {
-                connectorChargeId: chargeStatus.connectorChargeId,
-                paidAt: chargeStatus.paidAt ? chargeStatus.paidAt : new Date(),
-              })
+              const transitionResult = await deps.orderRepo.transitionToPaid(
+                tx,
+                order.id,
+                {
+                  connectorChargeId: chargeStatus.connectorChargeId,
+                  paidAt: chargeStatus.paidAt ? chargeStatus.paidAt : new Date(),
+                },
+              )
               if (transitionResult === 0) {
                 action = 'reported'
                 return

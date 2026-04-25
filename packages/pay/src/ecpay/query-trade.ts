@@ -34,7 +34,9 @@ export async function queryEcpayTrade(
         minorAmount: Number.parseInt(raw['TradeAmt'] ?? '0', 10),
         currency: 'TWD',
       },
-      paidAt: raw['PaymentDate'] ? new Date(raw['PaymentDate'].replaceAll('/', '-')) : undefined,
+      paidAt: raw['PaymentDate']
+        ? new Date(raw['PaymentDate'].replaceAll('/', '-'))
+        : undefined,
       rawStatus,
       raw,
     }

@@ -205,15 +205,21 @@ describe('handlePaymentEvent', () => {
       silentLog,
     )
 
-    expect(alerts.notify).toHaveBeenCalledWith(expect.objectContaining({
-      type: 'payment.amount_mismatch',
-      severity: 'critical',
-      orderId: 'order-1',
-    }))
+    expect(alerts.notify).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'payment.amount_mismatch',
+        severity: 'critical',
+        orderId: 'order-1',
+      }),
+    )
   })
 
   it('compensates when entitlement grant throws after verified successful charge', async () => {
-    const refund = { compensatePaidCharge: vi.fn().mockResolvedValue({ status: 'refunded', simulated: true }) }
+    const refund = {
+      compensatePaidCharge: vi
+        .fn()
+        .mockResolvedValue({ status: 'refunded', simulated: true }),
+    }
     const alerts = { notify: vi.fn().mockResolvedValue(undefined) }
     const order = makeOrder({ status: 'created' })
     const { orderRepo, entitlementRepo, db } = makeDeps(order)
@@ -238,10 +244,12 @@ describe('handlePaymentEvent', () => {
       paidAt: new Date('2026-04-25T01:00:00Z'),
       reason: 'technical_error',
     })
-    expect(alerts.notify).toHaveBeenCalledWith(expect.objectContaining({
-      type: 'payment.entitlement_grant_failed',
-      severity: 'critical',
-      orderId: 'order-1',
-    }))
+    expect(alerts.notify).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'payment.entitlement_grant_failed',
+        severity: 'critical',
+        orderId: 'order-1',
+      }),
+    )
   })
 })

@@ -45,7 +45,10 @@ describe('createStickerMarketAdminHandler', () => {
   it('rejects non-admin refund with PermissionDenied', async () => {
     const handler = createStickerMarketAdminHandler(makeDeps())
     await expect(
-      handler.refundOrder({ orderId: 'order-1', reason: 'admin_exception' }, makeAuthCtx({ id: 'user-1' })),
+      handler.refundOrder(
+        { orderId: 'order-1', reason: 'admin_exception' },
+        makeAuthCtx({ id: 'user-1' }),
+      ),
     ).rejects.toMatchObject({ code: Code.PermissionDenied })
   })
 
@@ -63,5 +66,33 @@ describe('createStickerMarketAdminHandler', () => {
       requestedByUserId: 'admin-1',
     })
     expect(result.status).toBe(2)
+  })
+
+  it('rejects non-admin reconcile with PermissionDenied', async () => {
+    const handler = createStickerMarketAdminHandler(makeDeps())
+    await expect(
+      handler.reconcileStickerOrders(
+        { sinceIso: '', limit: 0, dryRun: true },
+        makeAuthCtx({ id: 'user-1' }),
+      ),
+    ).rejects.toMatchObject({ code: Code.PermissionDenied })
+  })
+
+  it('calls reconciliation service for admin reconcile', async () => {
+    const deps = makeDeps()
+    const handler = createStickerMarketAdminHandler(deps)
+    const result = await handler.reconcileStickerOrders(
+      { sinceIso: '2024-01-01T00:00:00.000Z', limit: 50, dryRun: false },
+      makeAuthCtx({ id: 'admin-1', role: 'admin' }),
+    )
+
+    expect(deps.reconciliation.reconcileOrders).toHaveBeenCalledWith({
+      since: new Date('2024-01-01T00:00:00.000Z'),
+      limit: 50,
+      dryRun: false,
+    })
+    expect(result).toHaveProperty('checked')
+    expect(result).toHaveProperty('matched')
+    expect(result).toHaveProperty('mismatches')
   })
 })

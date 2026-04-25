@@ -3,6 +3,9 @@ import type { HandlerContext } from '@connectrpc/connect'
 import { RefundStatus } from '@vine/proto/stickerMarket'
 import { requireAuthData } from './auth-context'
 
+const DEFAULT_RECONCILE_SINCE_MS = 24 * 60 * 60 * 1000
+const DEFAULT_RECONCILE_LIMIT = 100
+
 export type StickerMarketAdminHandlerDeps = {
   refund: {
     refundOrder(input: {
@@ -12,11 +15,7 @@ export type StickerMarketAdminHandlerDeps = {
     }): Promise<any>
   }
   reconciliation: {
-    reconcileOrders(input: {
-      since: Date
-      limit: number
-      dryRun: boolean
-    }): Promise<any>
+    reconcileOrders(input: { since: Date; limit: number; dryRun: boolean }): Promise<any>
   }
 }
 
@@ -32,7 +31,8 @@ export function createStickerMarketAdminHandler(deps: StickerMarketAdminHandlerD
   return {
     async refundOrder(req: { orderId: string; reason: string }, ctx: HandlerContext) {
       const auth = requireAdmin(ctx)
-      const reason = req.reason === 'technical_error' ? 'technical_error' : 'admin_exception'
+      const reason =
+        req.reason === 'technical_error' ? 'technical_error' : 'admin_exception'
       const result = await deps.refund.refundOrder({
         orderId: req.orderId,
         reason,
@@ -53,10 +53,10 @@ export function createStickerMarketAdminHandler(deps: StickerMarketAdminHandlerD
       requireAdmin(ctx)
       const since = req.sinceIso
         ? new Date(req.sinceIso)
-        : new Date(Date.now() - 24 * 60 * 60 * 1000)
+        : new Date(Date.now() - DEFAULT_RECONCILE_SINCE_MS)
       const result = await deps.reconciliation.reconcileOrders({
         since,
-        limit: req.limit > 0 ? req.limit : 100,
+        limit: req.limit > 0 ? req.limit : DEFAULT_RECONCILE_LIMIT,
         dryRun: req.dryRun,
       })
       return {

@@ -80,7 +80,9 @@ export const stickerOrder = pgTable(
     currency: text('currency').notNull().$type<'TWD'>(),
     status: text('status')
       .notNull()
-      .$type<'created' | 'paid' | 'failed' | 'refund_pending' | 'refunded' | 'refund_failed'>()
+      .$type<
+        'created' | 'paid' | 'failed' | 'refund_pending' | 'refunded' | 'refund_failed'
+      >()
       .default('created'),
     connectorName: text('connectorName').notNull().$type<'ecpay'>(),
     connectorChargeId: text('connectorChargeId'),

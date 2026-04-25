@@ -153,11 +153,16 @@ describe('StickerOrderRepository', () => {
 
   it('markRefundFailed sets status=refund_failed and returns rowCount', async () => {
     const tx = makeTx({ rowCount: 1 })
-    const count = await repo.markRefundFailed(tx, 'order-1', { refundFailureReason: 'denied' })
+    const count = await repo.markRefundFailed(tx, 'order-1', {
+      refundFailureReason: 'denied',
+    })
 
     expect(count).toBe(1)
     const setArg = tx._setChain.set.mock.calls[0]![0]
-    expect(setArg).toMatchObject({ status: 'refund_failed', refundFailureReason: 'denied' })
+    expect(setArg).toMatchObject({
+      status: 'refund_failed',
+      refundFailureReason: 'denied',
+    })
   })
 
   it('updateReconciliation sets last reconciled fields', async () => {

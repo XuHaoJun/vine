@@ -6,7 +6,10 @@ import { liffHandler } from './liff'
 import type { createOAService } from '../services/oa'
 import type { createLiffService } from '../services/liff'
 import type { DriveService } from '@vine/drive'
-import { StickerMarketUserService, StickerMarketAdminService } from '@vine/proto/stickerMarket'
+import {
+  StickerMarketUserService,
+  StickerMarketAdminService,
+} from '@vine/proto/stickerMarket'
 import type { StickerMarketUserHandlerDeps } from './stickerMarketUser'
 import { createStickerMarketUserHandler } from './stickerMarketUser'
 import type { StickerMarketAdminHandlerDeps } from './stickerMarketAdmin'

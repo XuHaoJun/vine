@@ -51,7 +51,9 @@ export function createRefundService(deps: RefundServiceDeps) {
       })
     },
 
-    async compensatePaidCharge(input: CompensatePaidChargeInput): Promise<RefundOrderResult> {
+    async compensatePaidCharge(
+      input: CompensatePaidChargeInput,
+    ): Promise<RefundOrderResult> {
       return runRefund(deps, {
         orderId: input.orderId,
         reason: input.reason,
@@ -83,8 +85,15 @@ async function runRefund(
       return row
     }
 
-    if (!input.allowedStatuses.includes(row.status as (typeof input.allowedStatuses)[number])) {
-      throw new ConnectError('order cannot be refunded in current state', Code.FailedPrecondition)
+    if (
+      !input.allowedStatuses.includes(
+        row.status as (typeof input.allowedStatuses)[number],
+      )
+    ) {
+      throw new ConnectError(
+        'order cannot be refunded in current state',
+        Code.FailedPrecondition,
+      )
     }
 
     const refundId = `refund_${row.id}`
@@ -104,7 +113,10 @@ async function runRefund(
     })
 
     if (beginResult === 0) {
-      throw new ConnectError('order cannot be refunded in current state', Code.FailedPrecondition)
+      throw new ConnectError(
+        'order cannot be refunded in current state',
+        Code.FailedPrecondition,
+      )
     }
 
     return row
@@ -117,14 +129,19 @@ async function runRefund(
   const refundResult = await deps.pay.refundCharge({
     merchantTransactionId: order.id,
     connectorChargeId: input.compensation?.connectorChargeId ?? order.connectorChargeId!,
-    amount: input.compensation?.amount ?? { minorAmount: order.amountMinor, currency: order.currency },
+    amount: input.compensation?.amount ?? {
+      minorAmount: order.amountMinor,
+      currency: order.currency,
+    },
     reason: input.reason,
     testMode: deps.mode === 'stage',
   })
 
   if (refundResult.status === 'succeeded') {
     await deps.db.transaction(async (tx) => {
-      await deps.orderRepo.markRefunded(tx, input.orderId, { refundedAt: refundResult.refundedAt })
+      await deps.orderRepo.markRefunded(tx, input.orderId, {
+        refundedAt: refundResult.refundedAt,
+      })
       await deps.entitlementRepo.revokeByOrder(tx, input.orderId)
     })
     return { status: 'refunded', refundedAt: refundResult.refundedAt }

@@ -39,13 +39,20 @@ export type StickerOrderRepository = {
     },
   ): Promise<number>
   markRefunded(tx: any, id: string, input: { refundedAt: Date }): Promise<number>
-  markRefundFailed(tx: any, id: string, input: { refundFailureReason: string }): Promise<number>
+  markRefundFailed(
+    tx: any,
+    id: string,
+    input: { refundFailureReason: string },
+  ): Promise<number>
   updateReconciliation(
     tx: any,
     id: string,
     input: { connectorStatus: string; mismatch: string | undefined },
   ): Promise<void>
-  findForReconciliation(tx: any, input: { since: Date; limit: number }): Promise<StickerOrderRow[]>
+  findForReconciliation(
+    tx: any,
+    input: { since: Date; limit: number },
+  ): Promise<StickerOrderRow[]>
 }
 
 export function createStickerOrderRepository(_db: any): StickerOrderRepository {
@@ -115,7 +122,12 @@ export function createStickerOrderRepository(_db: any): StickerOrderRepository {
           paidAt: input.paidAt?.toISOString() ?? undefined,
           updatedAt: sql`now()`,
         })
-        .where(and(eq(stickerOrder.id, id), inArray(stickerOrder.status, input.allowedStatuses)))
+        .where(
+          and(
+            eq(stickerOrder.id, id),
+            inArray(stickerOrder.status, input.allowedStatuses),
+          ),
+        )
       return (result.rowCount as number | undefined) ?? 0
     },
 

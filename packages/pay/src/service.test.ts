@@ -168,11 +168,13 @@ describe('createCharge edge cases', () => {
 
 describe('getCharge', () => {
   it('maps QueryTradeInfo TradeStatus=1 to paid', async () => {
-    const fetch = vi.fn().mockResolvedValue(
-      new Response(
-        'MerchantTradeNo=oquery001&TradeNo=2402230000000001&TradeAmt=75&TradeStatus=1&PaymentDate=2026/04/25 10:00:00',
-      ),
-    )
+    const fetch = vi
+      .fn()
+      .mockResolvedValue(
+        new Response(
+          'MerchantTradeNo=oquery001&TradeNo=2402230000000001&TradeAmt=75&TradeStatus=1&PaymentDate=2026/04/25 10:00:00',
+        ),
+      )
     const pay = createPaymentsService({
       connector: 'ecpay',
       ecpay: STAGE_CREDS,

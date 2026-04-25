@@ -55,7 +55,14 @@ describe('createReconciliationService', () => {
   it('dryRun reports created order that is paid at connector', async () => {
     const deps = makeReconciliationDeps({
       orders: [makeOrder({ id: 'order-1', status: 'created' })],
-      chargeStatus: { status: 'paid', connectorChargeId: 'trade-1', amount: { minorAmount: 3000, currency: 'TWD' }, paidAt: new Date('2026-04-25T01:00:00Z'), rawStatus: '1', raw: {} },
+      chargeStatus: {
+        status: 'paid',
+        connectorChargeId: 'trade-1',
+        amount: { minorAmount: 3000, currency: 'TWD' },
+        paidAt: new Date('2026-04-25T01:00:00Z'),
+        rawStatus: '1',
+        raw: {},
+      },
     })
 
     const service = createReconciliationService(deps)
@@ -83,7 +90,14 @@ describe('createReconciliationService', () => {
   it('non-dry-run marks failed order paid and grants entitlement when connector is paid', async () => {
     const deps = makeReconciliationDeps({
       orders: [makeOrder({ id: 'order-1', status: 'failed' })],
-      chargeStatus: { status: 'paid', connectorChargeId: 'trade-1', amount: { minorAmount: 3000, currency: 'TWD' }, paidAt: new Date('2026-04-25T01:00:00Z'), rawStatus: '1', raw: {} },
+      chargeStatus: {
+        status: 'paid',
+        connectorChargeId: 'trade-1',
+        amount: { minorAmount: 3000, currency: 'TWD' },
+        paidAt: new Date('2026-04-25T01:00:00Z'),
+        rawStatus: '1',
+        raw: {},
+      },
     })
 
     const service = createReconciliationService(deps)
@@ -112,7 +126,12 @@ describe('createReconciliationService', () => {
   it('alerts when local paid order is missing at connector', async () => {
     const deps = makeReconciliationDeps({
       orders: [makeOrder({ id: 'order-1', status: 'paid' })],
-      chargeStatus: { status: 'not_found', reason: 'order not found', rawStatus: '10200047', raw: {} },
+      chargeStatus: {
+        status: 'not_found',
+        reason: 'order not found',
+        rawStatus: '10200047',
+        raw: {},
+      },
     })
 
     const service = createReconciliationService(deps)
@@ -122,22 +141,34 @@ describe('createReconciliationService', () => {
       dryRun: false,
     })
 
-    expect(deps.alerts.notify).toHaveBeenCalledWith(expect.objectContaining({
-      type: 'payment.reconciliation_mismatch',
-      severity: 'critical',
-      orderId: 'order-1',
-    }))
+    expect(deps.alerts.notify).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'payment.reconciliation_mismatch',
+        severity: 'critical',
+        orderId: 'order-1',
+      }),
+    )
     expect(deps.orderRepo.updateReconciliation).toHaveBeenCalledWith(
       expect.anything(),
       'order-1',
-      expect.objectContaining({ connectorStatus: 'not_found', mismatch: expect.any(String) }),
+      expect.objectContaining({
+        connectorStatus: 'not_found',
+        mismatch: expect.any(String),
+      }),
     )
   })
 
   it('resiliently handles query errors and reports them', async () => {
     const deps = makeReconciliationDeps({
       orders: [makeOrder({ id: 'order-1', status: 'created' })],
-      chargeStatus: { status: 'paid', connectorChargeId: 'trade-1', amount: { minorAmount: 3000, currency: 'TWD' }, paidAt: new Date('2026-04-25T01:00:00Z'), rawStatus: '1', raw: {} },
+      chargeStatus: {
+        status: 'paid',
+        connectorChargeId: 'trade-1',
+        amount: { minorAmount: 3000, currency: 'TWD' },
+        paidAt: new Date('2026-04-25T01:00:00Z'),
+        rawStatus: '1',
+        raw: {},
+      },
     })
     deps.pay.getCharge = vi.fn().mockRejectedValue(new Error('network timeout'))
 
@@ -159,14 +190,24 @@ describe('createReconciliationService', () => {
     expect(deps.orderRepo.updateReconciliation).toHaveBeenCalledWith(
       expect.anything(),
       'order-1',
-      expect.objectContaining({ connectorStatus: 'query_error', mismatch: 'query_error' }),
+      expect.objectContaining({
+        connectorStatus: 'query_error',
+        mismatch: 'query_error',
+      }),
     )
   })
 
   it('has no mismatches when local paid and connector paid', async () => {
     const deps = makeReconciliationDeps({
       orders: [makeOrder({ id: 'order-1', status: 'paid' })],
-      chargeStatus: { status: 'paid', connectorChargeId: 'trade-1', amount: { minorAmount: 3000, currency: 'TWD' }, paidAt: new Date('2026-04-25T01:00:00Z'), rawStatus: '1', raw: {} },
+      chargeStatus: {
+        status: 'paid',
+        connectorChargeId: 'trade-1',
+        amount: { minorAmount: 3000, currency: 'TWD' },
+        paidAt: new Date('2026-04-25T01:00:00Z'),
+        rawStatus: '1',
+        raw: {},
+      },
     })
 
     const service = createReconciliationService(deps)

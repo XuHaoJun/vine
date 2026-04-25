@@ -108,7 +108,13 @@ describe('POST /webhooks/ecpay', () => {
     const { pay, orderRepo, entitlementRepo, db, alerts } = makeDeps(null)
 
     const app = Fastify()
-    await registerPaymentsWebhookRoutes(app, { pay, orderRepo, entitlementRepo, db, alerts })
+    await registerPaymentsWebhookRoutes(app, {
+      pay,
+      orderRepo,
+      entitlementRepo,
+      db,
+      alerts,
+    })
     await app.ready()
 
     const tampered = Buffer.from(
@@ -127,11 +133,13 @@ describe('POST /webhooks/ecpay', () => {
 
     expect(res.statusCode).toBe(400)
     expect(orderRepo.findById).not.toHaveBeenCalled()
-    expect(alerts.notify).toHaveBeenCalledWith(expect.objectContaining({
-      type: 'payment.webhook_verification_failed',
-      severity: 'warning',
-      orderId: undefined,
-    }))
+    expect(alerts.notify).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'payment.webhook_verification_failed',
+        severity: 'warning',
+        orderId: undefined,
+      }),
+    )
   })
 
   it('amount mismatch → still 200 "1|OK" but no state change', async () => {
