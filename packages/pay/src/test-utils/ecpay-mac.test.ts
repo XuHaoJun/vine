@@ -101,7 +101,11 @@ describe('computeCheckMacValue', () => {
 
 describe('signFormBody', () => {
   it('returns Buffer with CheckMacValue appended', () => {
-    const body = signFormBody({ MerchantTradeNo: 'o_1', TradeAmt: '75' }, HASH_KEY, HASH_IV)
+    const body = signFormBody(
+      { MerchantTradeNo: 'o_1', TradeAmt: '75' },
+      HASH_KEY,
+      HASH_IV,
+    )
     const decoded = body.toString('utf8')
     expect(decoded).toContain('CheckMacValue=')
     expect(decoded).toContain('MerchantTradeNo=o_1')

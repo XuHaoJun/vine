@@ -2,7 +2,9 @@ export const DEFAULT_FRONTEND_PORT = 8081
 export const STATIC_PORT = 9090
 export const BACKEND_PORT = 3001
 
-export function getIntegrationTestProxyPort(rawPort = process.env.INTEGRATION_TEST_PROXY_PORT) {
+export function getIntegrationTestProxyPort(
+  rawPort = process.env.INTEGRATION_TEST_PROXY_PORT,
+) {
   const parsedPort = Number(rawPort)
   if (Number.isInteger(parsedPort) && parsedPort > 0) {
     return parsedPort

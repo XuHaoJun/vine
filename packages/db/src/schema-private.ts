@@ -78,7 +78,10 @@ export const stickerOrder = pgTable(
     packageId: text('packageId').notNull(),
     amountMinor: integer('amountMinor').notNull(),
     currency: text('currency').notNull().$type<'TWD'>(),
-    status: text('status').notNull().$type<'created' | 'paid' | 'failed'>().default('created'),
+    status: text('status')
+      .notNull()
+      .$type<'created' | 'paid' | 'failed'>()
+      .default('created'),
     connectorName: text('connectorName').notNull().$type<'ecpay'>(),
     connectorChargeId: text('connectorChargeId'),
     paidAt: timestamp('paidAt', { mode: 'string' }),

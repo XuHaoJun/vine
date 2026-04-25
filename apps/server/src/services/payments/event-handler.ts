@@ -47,7 +47,10 @@ async function applyChargeSucceeded(
   event: Extract<WebhookEvent, { kind: 'charge.succeeded' }>,
   log: MinLogger,
 ): Promise<void> {
-  if (order.amountMinor !== event.amount.minorAmount || order.currency !== event.amount.currency) {
+  if (
+    order.amountMinor !== event.amount.minorAmount ||
+    order.currency !== event.amount.currency
+  ) {
     log.error(
       { orderId: order.id, expected: order.amountMinor, got: event.amount },
       'AMOUNT MISMATCH — not transitioning, not granting',
@@ -66,7 +69,10 @@ async function applyChargeSucceeded(
   }
 
   if (order.status === 'failed') {
-    log.warn({ orderId: order.id }, 'order transitioned failed → paid (ECPay retry scenario)')
+    log.warn(
+      { orderId: order.id },
+      'order transitioned failed → paid (ECPay retry scenario)',
+    )
   }
 
   await deps.entitlementRepo.grant(tx, {

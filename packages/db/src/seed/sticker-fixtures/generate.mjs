@@ -7,7 +7,7 @@ function crc32(buf) {
   const table = []
   for (let n = 0; n < 256; n++) {
     let c = n
-    for (let k = 0; k < 8; k++) c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1)
+    for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1
     table[n] = c >>> 0
   }
   let c = 0xffffffff
@@ -29,7 +29,8 @@ function makeSolidPng(r, g, b, width = 200, height = 200) {
   // IHDR
   const ihdrData = Buffer.concat([
     Buffer.from('IHDR'),
-    intBE(width), intBE(height),
+    intBE(width),
+    intBE(height),
     Buffer.from([0x08, 0x02, 0x00, 0x00, 0x00]),
   ])
   const ihdr = Buffer.concat([intBE(13), ihdrData, crc32(ihdrData)])
@@ -41,7 +42,9 @@ function makeSolidPng(r, g, b, width = 200, height = 200) {
     raw[y * (rowLen + 1)] = 0 // filter byte
     for (let x = 0; x < width; x++) {
       const off = y * (rowLen + 1) + 1 + x * 3
-      raw[off] = r; raw[off + 1] = g; raw[off + 2] = b
+      raw[off] = r
+      raw[off + 1] = g
+      raw[off + 2] = b
     }
   }
   const compressed = deflateSync(raw)
@@ -56,9 +59,9 @@ function makeSolidPng(r, g, b, width = 200, height = 200) {
 }
 
 const PACKAGES = [
-  { id: 'pkg_cat_01', r: 255, g: 179, b: 71 },   // orange
-  { id: 'pkg_dog_01', r: 135, g: 206, b: 235 },  // sky blue
-  { id: 'pkg_bun_01', r: 248, g: 180, b: 217 },  // pink
+  { id: 'pkg_cat_01', r: 255, g: 179, b: 71 }, // orange
+  { id: 'pkg_dog_01', r: 135, g: 206, b: 235 }, // sky blue
+  { id: 'pkg_bun_01', r: 248, g: 180, b: 217 }, // pink
 ]
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname)

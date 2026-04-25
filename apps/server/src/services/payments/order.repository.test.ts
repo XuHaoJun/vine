@@ -93,7 +93,9 @@ describe('StickerOrderRepository', () => {
 
   it('transitionToFailed sets status=failed and returns rowCount', async () => {
     const tx = makeTx({ rowCount: 1 })
-    const count = await repo.transitionToFailed(tx, 'order-1', { failureReason: 'timeout' })
+    const count = await repo.transitionToFailed(tx, 'order-1', {
+      failureReason: 'timeout',
+    })
 
     expect(count).toBe(1)
     const setArg = tx._setChain.set.mock.calls[0]![0]
@@ -102,7 +104,9 @@ describe('StickerOrderRepository', () => {
 
   it('transitionToFailed propagates rowCount=0 (blocked when already paid)', async () => {
     const tx = makeTx({ rowCount: 0 })
-    const count = await repo.transitionToFailed(tx, 'order-1', { failureReason: 'some-error' })
+    const count = await repo.transitionToFailed(tx, 'order-1', {
+      failureReason: 'some-error',
+    })
     expect(count).toBe(0)
   })
 })

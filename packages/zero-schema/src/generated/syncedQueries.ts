@@ -60,9 +60,8 @@ const message = {
 }
 
 const stickerPackage = {
-  allStickerPackages: defineQuery(
-    v.object({}),
-    ({ args }) => Queries.stickerPackage.allStickerPackages(args),
+  allStickerPackages: defineQuery(v.object({}), ({ args }) =>
+    Queries.stickerPackage.allStickerPackages(args),
   ),
   stickerPackageById: defineQuery(
     v.object({

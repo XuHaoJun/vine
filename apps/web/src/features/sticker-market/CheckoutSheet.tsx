@@ -32,11 +32,14 @@ export function CheckoutSheet({ pkg, open, onOpenChange }: CheckoutSheetProps) {
         packageId: pkg.id,
         simulatePaid: enableSimulate && simulatePaid,
       })
-      localStorage.setItem('pay-redirect', JSON.stringify({
-        orderId: res.orderId,
-        targetUrl: res.redirect?.targetUrl ?? '',
-        formFields: res.redirect?.formFields ?? {},
-      }))
+      localStorage.setItem(
+        'pay-redirect',
+        JSON.stringify({
+          orderId: res.orderId,
+          targetUrl: res.redirect?.targetUrl ?? '',
+          formFields: res.redirect?.formFields ?? {},
+        }),
+      )
       onOpenChange(false)
       router.push('/pay/redirect' as any)
     } catch (err: unknown) {
@@ -90,7 +93,9 @@ export function CheckoutSheet({ pkg, open, onOpenChange }: CheckoutSheetProps) {
               justify="center"
             >
               {simulatePaid && (
-                <SizableText size="$1" color="white">✓</SizableText>
+                <SizableText size="$1" color="white">
+                  ✓
+                </SizableText>
               )}
             </YStack>
             <SizableText size="$3" color="$color10">
@@ -108,12 +113,7 @@ export function CheckoutSheet({ pkg, open, onOpenChange }: CheckoutSheetProps) {
           >
             取消
           </Button>
-          <Button
-            flex={1}
-            theme="accent"
-            onPress={handleConfirm}
-            disabled={loading}
-          >
+          <Button flex={1} theme="accent" onPress={handleConfirm} disabled={loading}>
             {loading ? '處理中...' : `確認付款 ${priceDisplay}`}
           </Button>
         </XStack>

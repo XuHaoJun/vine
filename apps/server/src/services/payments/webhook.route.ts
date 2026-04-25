@@ -37,7 +37,10 @@ export async function registerPaymentsWebhookRoutes(
 
       if (!result.verified) {
         request.log.warn({ reason: result.reason }, 'ecpay webhook verification failed')
-        return reply.code(result.ackReply.status).type('text/plain').send(result.ackReply.body)
+        return reply
+          .code(result.ackReply.status)
+          .type('text/plain')
+          .send(result.ackReply.body)
       }
 
       try {
@@ -47,7 +50,10 @@ export async function registerPaymentsWebhookRoutes(
         // Intentional: still reply 1|OK to avoid ECPay infinite retry
       }
 
-      return reply.code(result.ackReply.status).type('text/plain').send(result.ackReply.body)
+      return reply
+        .code(result.ackReply.status)
+        .type('text/plain')
+        .send(result.ackReply.body)
     })
   })
 }

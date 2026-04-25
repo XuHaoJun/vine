@@ -80,7 +80,10 @@ describe('handleWebhook', () => {
 
   it('verified=false when CheckMacValue is wrong', async () => {
     const pay = createPaymentsService({ connector: 'ecpay', ecpay: STAGE_CREDS })
-    const tampered = Buffer.from('MerchantTradeNo=o_1&TradeAmt=75&RtnCode=1&CheckMacValue=DEADBEEF', 'utf8')
+    const tampered = Buffer.from(
+      'MerchantTradeNo=o_1&TradeAmt=75&RtnCode=1&CheckMacValue=DEADBEEF',
+      'utf8',
+    )
     const res = await pay.handleWebhook({
       rawBody: tampered,
       headers: { 'content-type': 'application/x-www-form-urlencoded' },
@@ -131,7 +134,10 @@ describe('createCharge edge cases', () => {
   it('rejects non-TWD', async () => {
     const pay = createPaymentsService({ connector: 'ecpay', ecpay: STAGE_CREDS })
     await expect(
-      pay.createCharge({ ...baseInput, amount: { minorAmount: 100, currency: 'USD' as const } }),
+      pay.createCharge({
+        ...baseInput,
+        amount: { minorAmount: 100, currency: 'USD' as const },
+      }),
     ).rejects.toThrow(ConfigError)
   })
 

@@ -46,9 +46,18 @@ export function PackageDetail({ packageId }: PackageDetailProps) {
   return (
     <YStack flex={1} bg="$background">
       {/* Header */}
-      <XStack px="$4" py="$3" items="center" gap="$3" borderBottomWidth={1} borderBottomColor="$color4">
+      <XStack
+        px="$4"
+        py="$3"
+        items="center"
+        gap="$3"
+        borderBottomWidth={1}
+        borderBottomColor="$color4"
+      >
         <YStack cursor="pointer" onPress={() => router.back()}>
-          <SizableText size="$5" color="$color12">‹</SizableText>
+          <SizableText size="$5" color="$color12">
+            ‹
+          </SizableText>
         </YStack>
         <SizableText size="$5" fontWeight="700" color="$color12" flex={1}>
           {pkg.name}
@@ -100,7 +109,9 @@ export function PackageDetail({ packageId }: PackageDetailProps) {
                     items="center"
                     justify="center"
                   >
-                    <SizableText size="$2" color="$color9">{i + 1}</SizableText>
+                    <SizableText size="$2" color="$color9">
+                      {i + 1}
+                    </SizableText>
                   </YStack>
                 ))}
               </XStack>
@@ -128,11 +139,7 @@ export function PackageDetail({ packageId }: PackageDetailProps) {
         )}
       </YStack>
 
-      <CheckoutSheet
-        pkg={pkg}
-        open={checkoutOpen}
-        onOpenChange={setCheckoutOpen}
-      />
+      <CheckoutSheet pkg={pkg} open={checkoutOpen} onOpenChange={setCheckoutOpen} />
     </YStack>
   )
 }

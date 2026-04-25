@@ -69,7 +69,9 @@ function makeDb(rowsQueue: Array<unknown[]>) {
   }
 }
 
-function makeDeps(overrides: { rowsQueue?: Array<unknown[]>; mode?: 'stage' | 'prod' } = {}) {
+function makeDeps(
+  overrides: { rowsQueue?: Array<unknown[]>; mode?: 'stage' | 'prod' } = {},
+) {
   const pay = makeMockPay()
   const db = makeDb(overrides.rowsQueue ?? [[mockPkg], []])
   return {
@@ -111,7 +113,10 @@ describe('createStickerMarketUserHandler', () => {
       const { deps, pay } = makeDeps()
       const handler = createStickerMarketUserHandler(deps)
 
-      const result = await handler.createCheckout({ packageId: 'pkg-1', simulatePaid: false }, authCtx)
+      const result = await handler.createCheckout(
+        { packageId: 'pkg-1', simulatePaid: false },
+        authCtx,
+      )
 
       expect(result.orderId).toBeTruthy()
       expect(result.redirect.targetUrl).toBe(
@@ -130,13 +135,22 @@ describe('createStickerMarketUserHandler', () => {
       const handler = createStickerMarketUserHandler(deps)
 
       await expect(
-        handler.createCheckout({ packageId: 'unknown-pkg', simulatePaid: false }, authCtx),
+        handler.createCheckout(
+          { packageId: 'unknown-pkg', simulatePaid: false },
+          authCtx,
+        ),
       ).rejects.toMatchObject({ code: Code.NotFound })
     })
 
     it('rejects if already entitled with AlreadyExists', async () => {
       // pkg found, entitlement found
-      const existingEntitlement = { id: 'ent-1', userId: 'user-1', packageId: 'pkg-1', grantedByOrderId: 'o1', grantedAt: '2026-04-23T00:00:00Z' }
+      const existingEntitlement = {
+        id: 'ent-1',
+        userId: 'user-1',
+        packageId: 'pkg-1',
+        grantedByOrderId: 'o1',
+        grantedAt: '2026-04-23T00:00:00Z',
+      }
       const { deps } = makeDeps({ rowsQueue: [[mockPkg], [existingEntitlement]] })
       const handler = createStickerMarketUserHandler(deps)
 

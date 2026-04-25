@@ -23,7 +23,11 @@ describe('entitlementRepository', () => {
     const tx = createMockTx()
     const repo = createEntitlementRepository()
 
-    await repo.grant(tx, { userId: 'u1', packageId: 'pkg_cat_01', grantedByOrderId: 'o1' })
+    await repo.grant(tx, {
+      userId: 'u1',
+      packageId: 'pkg_cat_01',
+      grantedByOrderId: 'o1',
+    })
 
     expect(tx.insert).toHaveBeenCalledOnce()
     const insertValues = tx.insert.mock.results[0].value.values.mock.calls[0][0]
@@ -64,8 +68,16 @@ describe('entitlementRepository', () => {
     const tx = createMockTx()
     const repo = createEntitlementRepository()
 
-    await repo.grant(tx, { userId: 'u1', packageId: 'pkg_cat_01', grantedByOrderId: 'o1' })
-    await repo.grant(tx, { userId: 'u1', packageId: 'pkg_cat_01', grantedByOrderId: 'o2' })
+    await repo.grant(tx, {
+      userId: 'u1',
+      packageId: 'pkg_cat_01',
+      grantedByOrderId: 'o1',
+    })
+    await repo.grant(tx, {
+      userId: 'u1',
+      packageId: 'pkg_cat_01',
+      grantedByOrderId: 'o2',
+    })
 
     const onConflictDoNothing =
       tx.insert.mock.results[0].value.values.mock.results[0].value.onConflictDoNothing

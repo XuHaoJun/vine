@@ -8,7 +8,15 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { user, account } from '../schema-private'
-import { friendship, userPublic, userState, chat, chatMember, stickerPackage, entitlement } from '../schema-public'
+import {
+  friendship,
+  userPublic,
+  userState,
+  chat,
+  chatMember,
+  stickerPackage,
+  entitlement,
+} from '../schema-public'
 import {
   oaProvider,
   officialAccount,
@@ -86,9 +94,27 @@ const TEST_USERS = [
 ] as const
 
 const STICKER_PACKAGE_SEEDS = [
-  { id: 'pkg_cat_01', name: '貓咪日常', description: '', priceMinor: 75, stickerCount: 8 },
-  { id: 'pkg_dog_01', name: '狗狗合集', description: '', priceMinor: 45, stickerCount: 8 },
-  { id: 'pkg_bun_01', name: '兔兔聖誕限定', description: '', priceMinor: 129, stickerCount: 8 },
+  {
+    id: 'pkg_cat_01',
+    name: '貓咪日常',
+    description: '',
+    priceMinor: 75,
+    stickerCount: 8,
+  },
+  {
+    id: 'pkg_dog_01',
+    name: '狗狗合集',
+    description: '',
+    priceMinor: 45,
+    stickerCount: 8,
+  },
+  {
+    id: 'pkg_bun_01',
+    name: '兔兔聖誕限定',
+    description: '',
+    priceMinor: 129,
+    stickerCount: 8,
+  },
 ] as const
 
 const TEST_PASSWORD = 'test@1234'
@@ -507,10 +533,7 @@ export async function ensureSeed(pool: Pool, db: any, drive?: SeedDrive) {
       .select()
       .from(entitlement)
       .where(
-        and(
-          eq(entitlement.userId, test1Id),
-          eq(entitlement.packageId, 'pkg_cat_01'),
-        ),
+        and(eq(entitlement.userId, test1Id), eq(entitlement.packageId, 'pkg_cat_01')),
       )
       .limit(1)
 

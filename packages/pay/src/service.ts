@@ -15,7 +15,8 @@ import { ConfigError } from './errors'
 
 const { PaymentStatus, WebhookEventType } = types
 
-const ECPAY_STAGE_CHECKOUT_URL = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5'
+const ECPAY_STAGE_CHECKOUT_URL =
+  'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5'
 const ECPAY_PROD_CHECKOUT_URL = 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5'
 
 export function createPaymentsService(deps: PaymentsServiceDeps): PaymentsService {
@@ -41,13 +42,19 @@ export function createPaymentsService(deps: PaymentsServiceDeps): PaymentsServic
         throw new ConfigError('createCharge: simulatePaid is not allowed in prod mode')
       }
       if (input.amount.currency !== 'TWD') {
-        throw new ConfigError(`createCharge: unsupported currency ${input.amount.currency}, only TWD is supported`)
+        throw new ConfigError(
+          `createCharge: unsupported currency ${input.amount.currency}, only TWD is supported`,
+        )
       }
       if (input.merchantTransactionId.length > 20) {
-        throw new ConfigError('createCharge: merchantTransactionId must be ≤ 20 characters')
+        throw new ConfigError(
+          'createCharge: merchantTransactionId must be ≤ 20 characters',
+        )
       }
       if (!/^[A-Za-z0-9]+$/.test(input.merchantTransactionId)) {
-        throw new ConfigError('createCharge: merchantTransactionId must be alphanumeric only')
+        throw new ConfigError(
+          'createCharge: merchantTransactionId must be alphanumeric only',
+        )
       }
 
       // Build ECPay AioCheckOut form fields directly.
@@ -81,7 +88,8 @@ export function createPaymentsService(deps: PaymentsServiceDeps): PaymentsServic
 
       params['CheckMacValue'] = computeCheckMacValue(params, ecpay.hashKey, ecpay.hashIv)
 
-      const targetUrl = ecpay.mode === 'prod' ? ECPAY_PROD_CHECKOUT_URL : ECPAY_STAGE_CHECKOUT_URL
+      const targetUrl =
+        ecpay.mode === 'prod' ? ECPAY_PROD_CHECKOUT_URL : ECPAY_STAGE_CHECKOUT_URL
 
       return {
         status: 'pending_action',
@@ -116,7 +124,10 @@ export function createPaymentsService(deps: PaymentsServiceDeps): PaymentsServic
         const res = await eventClient.handleEvent(req)
         return normalizeResponse(res, input.rawBody, ecpay.hashKey, ecpay.hashIv)
       } catch (err) {
-        console.warn('[pay] prism eventClient.handleEvent failed, falling back to manual ECPay verification', err)
+        console.warn(
+          '[pay] prism eventClient.handleEvent failed, falling back to manual ECPay verification',
+          err,
+        )
         // Fallback: manual ECPay verification when prism is unavailable
         return manualEcpayWebhook(input.rawBody, ecpay.hashKey, ecpay.hashIv)
       }
@@ -183,11 +194,15 @@ function mapEvent(
     const amount: Money = payment.amount
       ? {
           minorAmount: Number(payment.amount.minorAmount),
-          currency: (payment.amount.currency === types.Currency.TWD ? 'TWD' : 'USD') as Money['currency'],
+          currency: (payment.amount.currency === types.Currency.TWD
+            ? 'TWD'
+            : 'USD') as Money['currency'],
         }
       : { minorAmount: 0, currency: 'TWD' }
 
-    const capturedAt = payment.capturedAt ? new Date(Number(payment.capturedAt) * 1000) : new Date()
+    const capturedAt = payment.capturedAt
+      ? new Date(Number(payment.capturedAt) * 1000)
+      : new Date()
 
     return {
       kind: 'charge.succeeded',

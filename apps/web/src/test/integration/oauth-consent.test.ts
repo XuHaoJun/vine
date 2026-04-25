@@ -159,13 +159,10 @@ test('login page preserves explicit redirect back to consent', async ({
   const returnUrl =
     '/auth/consent?consent_code=test-consent&client_id=vine-dev-client&scope=profile+openid'
 
-  await page.goto(
-    `${BASE_URL}/auth/login?redirect=${encodeURIComponent(returnUrl)}`,
-    {
-      waitUntil: 'domcontentloaded',
-      timeout: 10000,
-    },
-  )
+  await page.goto(`${BASE_URL}/auth/login?redirect=${encodeURIComponent(returnUrl)}`, {
+    waitUntil: 'domcontentloaded',
+    timeout: 10000,
+  })
 
   await loginWithCredentials(page, credentials)
 

@@ -35,12 +35,19 @@ function ecpayUrlEncode(s: string): string {
   encoded = encoded.toLowerCase()
   // Restore chars that .NET HttpUtility.UrlEncode leaves unencoded
   encoded = encoded
-    .split('%2d').join('-')
-    .split('%5f').join('_')
-    .split('%2e').join('.')
-    .split('%21').join('!')
-    .split('%2a').join('*')
-    .split('%28').join('(')
-    .split('%29').join(')')
+    .split('%2d')
+    .join('-')
+    .split('%5f')
+    .join('_')
+    .split('%2e')
+    .join('.')
+    .split('%21')
+    .join('!')
+    .split('%2a')
+    .join('*')
+    .split('%28')
+    .join('(')
+    .split('%29')
+    .join(')')
   return encoded
 }

@@ -33,7 +33,12 @@ export function createEntitlementRepository(): EntitlementRepository {
       const rows = await tx
         .select()
         .from(entitlement)
-        .where(and(eq(entitlement.userId, input.userId), eq(entitlement.packageId, input.packageId)))
+        .where(
+          and(
+            eq(entitlement.userId, input.userId),
+            eq(entitlement.packageId, input.packageId),
+          ),
+        )
         .limit(1)
       return (rows[0] as EntitlementRow | undefined) ?? null
     },

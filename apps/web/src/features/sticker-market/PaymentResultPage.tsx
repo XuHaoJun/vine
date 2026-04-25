@@ -103,9 +103,7 @@ export function PaymentResultPage({ orderId }: PaymentResultPageProps) {
             {failureReason}
           </SizableText>
         ) : null}
-        <Button onPress={() => router.push('/store' as any)}>
-          回到貼圖商店
-        </Button>
+        <Button onPress={() => router.push('/store' as any)}>回到貼圖商店</Button>
       </YStack>
     )
   }

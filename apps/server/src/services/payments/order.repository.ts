@@ -42,7 +42,11 @@ export function createStickerOrderRepository(_db: any): StickerOrderRepository {
     },
 
     async findById(tx, id) {
-      const rows = await tx.select().from(stickerOrder).where(eq(stickerOrder.id, id)).limit(1)
+      const rows = await tx
+        .select()
+        .from(stickerOrder)
+        .where(eq(stickerOrder.id, id))
+        .limit(1)
       return (rows[0] as StickerOrderRow | undefined) ?? null
     },
 

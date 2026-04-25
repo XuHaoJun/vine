@@ -54,12 +54,16 @@ const drive = createFsDriveService({
 })
 
 const paymentsEnv = {
-  PAYMENTS_ECPAY_MODE: (process.env['PAYMENTS_ECPAY_MODE'] ?? 'stage') as 'stage' | 'prod',
+  PAYMENTS_ECPAY_MODE: (process.env['PAYMENTS_ECPAY_MODE'] ?? 'stage') as
+    | 'stage'
+    | 'prod',
   PAYMENTS_ECPAY_MERCHANT_ID: process.env['PAYMENTS_ECPAY_MERCHANT_ID'] ?? '3002607',
   PAYMENTS_ECPAY_HASH_KEY: process.env['PAYMENTS_ECPAY_HASH_KEY'] ?? 'pwFHCqoQZGmho4w6',
   PAYMENTS_ECPAY_HASH_IV: process.env['PAYMENTS_ECPAY_HASH_IV'] ?? 'EkRm7iFT261dpevs',
-  PAYMENTS_RETURN_URL: process.env['PAYMENTS_RETURN_URL'] ?? 'http://localhost:3001/webhooks/ecpay',
-  PAYMENTS_ORDER_RESULT_URL: process.env['PAYMENTS_ORDER_RESULT_URL'] ?? 'http://localhost:3000/pay/result',
+  PAYMENTS_RETURN_URL:
+    process.env['PAYMENTS_RETURN_URL'] ?? 'http://localhost:3001/webhooks/ecpay',
+  PAYMENTS_ORDER_RESULT_URL:
+    process.env['PAYMENTS_ORDER_RESULT_URL'] ?? 'http://localhost:3000/pay/result',
   PAYMENTS_CLIENT_BACK_URL: process.env['PAYMENTS_CLIENT_BACK_URL'],
 }
 const payments = createPayments(paymentsEnv, db)

@@ -11,13 +11,23 @@ export function StoreHome() {
   const userId = user?.id ?? ''
 
   const [packages] = useZeroQuery(allStickerPackages, {})
-  const [entitlements] = useZeroQuery(entitlementsByUserId, { userId }, { enabled: Boolean(userId) })
+  const [entitlements] = useZeroQuery(
+    entitlementsByUserId,
+    { userId },
+    { enabled: Boolean(userId) },
+  )
 
   const ownedPackageIds = new Set((entitlements ?? []).map((e) => e.packageId))
 
   return (
     <YStack flex={1} bg="$background">
-      <XStack px="$4" py="$3" items="center" borderBottomWidth={1} borderBottomColor="$color4">
+      <XStack
+        px="$4"
+        py="$3"
+        items="center"
+        borderBottomWidth={1}
+        borderBottomColor="$color4"
+      >
         <SizableText size="$6" fontWeight="700" color="$color12">
           貼圖商店
         </SizableText>
@@ -59,12 +69,7 @@ export function StoreHome() {
                     </SizableText>
                   </YStack>
                   {owned ? (
-                    <YStack
-                      bg="$green8"
-                      rounded="$2"
-                      px="$2"
-                      py="$1"
-                    >
+                    <YStack bg="$green8" rounded="$2" px="$2" py="$1">
                       <SizableText size="$2" color="white">
                         已擁有
                       </SizableText>

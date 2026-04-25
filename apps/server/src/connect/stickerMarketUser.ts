@@ -25,7 +25,10 @@ export function createStickerMarketUserHandler(deps: StickerMarketUserHandlerDep
       const userId = requireAuthData(ctx).id
 
       if (req.simulatePaid && deps.mode !== 'stage') {
-        throw new ConnectError('simulatePaid is only allowed in stage mode', Code.InvalidArgument)
+        throw new ConnectError(
+          'simulatePaid is only allowed in stage mode',
+          Code.InvalidArgument,
+        )
       }
 
       const [pkg] = await deps.db
@@ -33,12 +36,15 @@ export function createStickerMarketUserHandler(deps: StickerMarketUserHandlerDep
         .from(stickerPackage)
         .where(eq(stickerPackage.id, req.packageId))
         .limit(1)
-      if (!pkg) throw new ConnectError(`package ${req.packageId} not found`, Code.NotFound)
+      if (!pkg)
+        throw new ConnectError(`package ${req.packageId} not found`, Code.NotFound)
 
       const [existing] = await deps.db
         .select()
         .from(entitlement)
-        .where(and(eq(entitlement.userId, userId), eq(entitlement.packageId, req.packageId)))
+        .where(
+          and(eq(entitlement.userId, userId), eq(entitlement.packageId, req.packageId)),
+        )
         .limit(1)
       if (existing) {
         throw new ConnectError('already owned', Code.AlreadyExists)
@@ -46,7 +52,9 @@ export function createStickerMarketUserHandler(deps: StickerMarketUserHandlerDep
 
       // Generate short alphanumeric id (≤20 chars for ECPay MerchantTradeNo)
       // Strip dashes from UUID → 32 hex chars, take first 19 and prefix with 'O'
-      const orderId = ('O' + crypto.randomUUID().replace(/-/g, '').slice(0, 19)).toUpperCase()
+      const orderId = (
+        'O' + crypto.randomUUID().replace(/-/g, '').slice(0, 19)
+      ).toUpperCase()
 
       await deps.db.insert(stickerOrder).values({
         id: orderId,
@@ -74,7 +82,10 @@ export function createStickerMarketUserHandler(deps: StickerMarketUserHandlerDep
       })
 
       if (charge.action.type !== 'redirect_form_post') {
-        throw new ConnectError(`unexpected action type ${charge.action.type}`, Code.Internal)
+        throw new ConnectError(
+          `unexpected action type ${charge.action.type}`,
+          Code.Internal,
+        )
       }
 
       return {
@@ -95,7 +106,8 @@ export function createStickerMarketUserHandler(deps: StickerMarketUserHandlerDep
         .where(eq(stickerOrder.id, req.orderId))
         .limit(1)
       if (!order) throw new ConnectError('order not found', Code.NotFound)
-      if (order.userId !== userId) throw new ConnectError('forbidden', Code.PermissionDenied)
+      if (order.userId !== userId)
+        throw new ConnectError('forbidden', Code.PermissionDenied)
 
       return {
         orderId: order.id,

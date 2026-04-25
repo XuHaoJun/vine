@@ -158,7 +158,14 @@ function formatRecordingTime(ms: number): string {
 }
 
 export const MessageInput = memo(
-  ({ onSend, onSendMedia, onSendSticker, disabled, hasRichMenu, onSwitchToRichMenu }: Props) => {
+  ({
+    onSend,
+    onSendMedia,
+    onSendSticker,
+    disabled,
+    hasRichMenu,
+    onSwitchToRichMenu,
+  }: Props) => {
     const [text, setText] = useState('')
     const [showStickers, setShowStickers] = useState(false)
     const insets = useSafeAreaInsets()

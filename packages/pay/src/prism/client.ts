@@ -7,7 +7,10 @@ export type PrismClients = {
   eventClient: EventClient
 }
 
-export function createPrismClients(creds: EcpayCredentials, libPath?: string): PrismClients {
+export function createPrismClients(
+  creds: EcpayCredentials,
+  libPath?: string,
+): PrismClients {
   const config = buildEcpayConnectorConfig(creds)
   const paymentClient = new PaymentClient(config, undefined, libPath)
   const eventClient = new EventClient(config, undefined, libPath)
