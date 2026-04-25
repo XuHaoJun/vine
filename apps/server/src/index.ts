@@ -66,26 +66,30 @@ const paymentsEnv = {
     process.env['PAYMENTS_ORDER_RESULT_URL'] ?? 'http://localhost:3000/pay/result',
   PAYMENTS_CLIENT_BACK_URL: process.env['PAYMENTS_CLIENT_BACK_URL'],
 }
-const payments = createPayments(paymentsEnv, db)
+const payments = createPayments(paymentsEnv, db, app.log)
 await registerPaymentsWebhookRoutes(app, { ...payments, db })
 
 // ConnectRPC routes (GreeterService, OAService, LIFFService, StickerMarketUserService, etc.)
 await app.register(fastifyConnectPlugin, {
-  routes: connectRoutes({
-    oa,
-    liff,
-    auth,
-    drive,
-    stickerMarketUser: {
-      db,
-      pay: payments.pay,
-      mode: paymentsEnv.PAYMENTS_ECPAY_MODE,
-      returnUrl: paymentsEnv.PAYMENTS_RETURN_URL,
-      orderResultUrl: paymentsEnv.PAYMENTS_ORDER_RESULT_URL,
-      clientBackUrl: paymentsEnv.PAYMENTS_CLIENT_BACK_URL,
-    },
-  }),
-})
+    routes: connectRoutes({
+      oa,
+      liff,
+      auth,
+      drive,
+      stickerMarketUser: {
+        db,
+        pay: payments.pay,
+        mode: paymentsEnv.PAYMENTS_ECPAY_MODE,
+        returnUrl: paymentsEnv.PAYMENTS_RETURN_URL,
+        orderResultUrl: paymentsEnv.PAYMENTS_ORDER_RESULT_URL,
+        clientBackUrl: paymentsEnv.PAYMENTS_CLIENT_BACK_URL,
+      },
+      stickerMarketAdmin: {
+        refund: payments.refund,
+        reconciliation: payments.reconciliation,
+      },
+    }),
+  })
 
 // Seed test data (only in dev with VITE_DEMO_MODE=1)
 await ensureSeed(database, db, drive)

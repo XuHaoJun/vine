@@ -1,6 +1,9 @@
 import { createPaymentsService } from '@vine/pay'
 import { createStickerOrderRepository } from './order.repository'
 import { createEntitlementRepository } from './entitlement.repository'
+import { createLogPaymentAlertSink } from './alert-sink'
+import { createRefundService } from './refund.service'
+import { createReconciliationService } from './reconciliation.service'
 
 export type PaymentsEnv = {
   PAYMENTS_ECPAY_MODE: 'stage' | 'prod'
@@ -12,7 +15,7 @@ export type PaymentsEnv = {
   PAYMENTS_CLIENT_BACK_URL?: string
 }
 
-export function createPayments(env: PaymentsEnv, db: any) {
+export function createPayments(env: PaymentsEnv, db: any, log: any) {
   const pay = createPaymentsService({
     connector: 'ecpay',
     ecpay: {
@@ -24,7 +27,23 @@ export function createPayments(env: PaymentsEnv, db: any) {
   })
   const orderRepo = createStickerOrderRepository(db)
   const entitlementRepo = createEntitlementRepository()
-  return { pay, orderRepo, entitlementRepo }
+  const alerts = createLogPaymentAlertSink(log)
+  const refund = createRefundService({
+    db,
+    pay,
+    orderRepo,
+    entitlementRepo,
+    alerts,
+    mode: env.PAYMENTS_ECPAY_MODE,
+  })
+  const reconciliation = createReconciliationService({
+    db,
+    pay,
+    orderRepo,
+    entitlementRepo,
+    alerts,
+  })
+  return { pay, orderRepo, entitlementRepo, alerts, refund, reconciliation }
 }
 
 export { createStickerOrderRepository } from './order.repository'
