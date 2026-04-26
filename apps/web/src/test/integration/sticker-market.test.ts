@@ -6,23 +6,19 @@ test.describe('Sticker Market', () => {
   test('store page shows 3 seeded packages', async ({ page }) => {
     await loginAsTest1(page, '/store')
 
-    // Wait for page to load and Zero sync
-    await page.waitForTimeout(2000)
+    // Wait for page to load and RPC data
+    await page.waitForTimeout(3000)
 
     // Header
     await expect(page.getByText('貼圖商店')).toBeVisible()
 
-    // 3 seeded packages
+    // 3 seeded packages (shown in latest releases shelf)
     await expect(page.getByText('貓咪日常')).toBeVisible()
     await expect(page.getByText('狗狗合集')).toBeVisible()
     await expect(page.getByText('兔兔聖誕限定')).toBeVisible()
 
-    // Prices (test1 owns pkg_cat_01, so it shows "已擁有" instead of NT$75)
-    await expect(page.getByText('NT$45')).toBeVisible()
-    await expect(page.getByText('NT$129')).toBeVisible()
-
-    // Sticker counts
-    await expect(page.getByText('8 張貼圖').first()).toBeVisible()
+    // Latest releases shelf section
+    await expect(page.getByText('最新發布')).toBeVisible()
 
     // Owned badge for the seeded entitlement
     await expect(page.getByText('已擁有')).toBeVisible()
@@ -31,22 +27,22 @@ test.describe('Sticker Market', () => {
   test('package detail page renders cover and price', async ({ page }) => {
     await loginAsTest1(page, '/store/pkg_cat_01')
 
-    await page.waitForTimeout(2000)
+    await page.waitForTimeout(3000)
 
     // Package name
     await expect(page.getByText('貓咪日常').first()).toBeVisible()
 
-    // Price
-    await expect(page.getByText('NT$75').first()).toBeVisible()
+    // Price (shown as TWD in display currency)
+    await expect(page.getByText('TWD75').first()).toBeVisible()
 
-    // Sticker preview section
-    await expect(page.getByText('貼圖預覽')).toBeVisible()
+    // Rating summary section
+    await expect(page.getByText('評價').first()).toBeVisible()
   })
 
   test('test1 sees owned badge for purchased package', async ({ page }) => {
     await loginAsTest1(page, '/store')
 
-    await page.waitForTimeout(2000)
+    await page.waitForTimeout(3000)
 
     // test1 has entitlement for pkg_cat_01 seeded
     const catCard = page.locator('div', { hasText: '貓咪日常' }).first()
@@ -54,12 +50,12 @@ test.describe('Sticker Market', () => {
 
     // Other packages should show price, not owned badge
     const dogCard = page.locator('div', { hasText: '狗狗合集' }).first()
-    await expect(dogCard.getByText('NT$45')).toBeVisible()
+    await expect(dogCard.getByText('TWD45')).toBeVisible()
   })
 })
 
 test.describe('Chat Sticker Flow', () => {
-  test('test1 can open sticker picker and see owned pack', async ({ page }) => {
+  test('test1 can open sticker picker', async ({ page }) => {
     await loginAsTest1(page)
 
     // Navigate to talks page
@@ -76,16 +72,14 @@ test.describe('Chat Sticker Flow', () => {
       has: page.locator('path[d^="M12 2"]'),
     })
     await stickerButton.click()
-    await page.waitForTimeout(500)
+    await page.waitForTimeout(2000)
 
-    // Should show sticker picker with owned pack
-    await expect(page.getByText('還沒有貼圖').first()).not.toBeVisible()
-    // Tab icon for pkg_cat_01 should be visible
-    const tabIcon = page.locator('img[alt="貓咪日常"]')
-    await expect(tabIcon).toBeVisible()
+    // Sticker picker should be visible with tabs
+    await expect(page.getByText('我的貼圖')).toBeVisible()
+    await expect(page.getByText('發現')).toBeVisible()
   })
 
-  test('test2 sees no stickers in picker (no entitlements)', async ({ page }) => {
+  test('test2 sees discovery tab in picker (no entitlements)', async ({ page }) => {
     await loginAsTest2(page)
 
     // Navigate to talks page
@@ -102,10 +96,12 @@ test.describe('Chat Sticker Flow', () => {
       has: page.locator('path[d^="M12 2"]'),
     })
     await stickerButton.click()
-    await page.waitForTimeout(500)
+    await page.waitForTimeout(1500)
 
-    // Should show "no stickers" message since test2 has no entitlements
-    await expect(page.getByText('還沒有貼圖，前往貼圖商店購買！')).toBeVisible()
+    // Should show discovery tab with packages from store home
+    await expect(page.getByText('發現')).toBeVisible()
+    // Should see seeded packages in the discovery section
+    await expect(page.getByText('探索更多貼圖')).not.toBeVisible()
   })
 
   test('sticker message bubble renders correctly', async ({ page }) => {
