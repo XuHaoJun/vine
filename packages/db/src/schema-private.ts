@@ -1,6 +1,7 @@
 import { index, integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 
 import type { InferSelectModel } from 'drizzle-orm'
+import { stickerPackage } from './schema-public'
 
 export const user = pgTable('user', (t) => ({
   id: t.varchar('id').primaryKey(),
@@ -111,7 +112,7 @@ export const stickerReviewEvent = pgTable(
   'stickerReviewEvent',
   {
     id: text('id').primaryKey(),
-    packageId: text('packageId').notNull(),
+    packageId: text('packageId').notNull().references(() => stickerPackage.id),
     actorUserId: text('actorUserId').notNull(),
     action: text('action').notNull().$type<'submitted' | 'approved' | 'rejected'>(),
     reasonCategory: text('reasonCategory'),

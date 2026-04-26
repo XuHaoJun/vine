@@ -34,6 +34,7 @@ ALTER TABLE "stickerPackage" ADD COLUMN "reviewSuggestion" text;
 ALTER TABLE "stickerPackage" ADD COLUMN "reviewProblemAssetNumbers" text DEFAULT '[]' NOT NULL;
 CREATE INDEX "stickerPackage_creatorId_idx" ON "stickerPackage" ("creatorId");
 CREATE INDEX "stickerPackage_status_idx" ON "stickerPackage" ("status");
+ALTER TABLE "stickerPackage" ADD CONSTRAINT "stickerPackage_creatorId_fk" FOREIGN KEY ("creatorId") REFERENCES "creatorProfile"("id");
 
 CREATE TABLE "stickerAsset" (
   "id" text PRIMARY KEY NOT NULL,
@@ -50,6 +51,7 @@ CREATE TABLE "stickerAsset" (
 );
 CREATE INDEX "stickerAsset_packageId_idx" ON "stickerAsset" ("packageId");
 CREATE UNIQUE INDEX "stickerAsset_packageNumber_unique" ON "stickerAsset" ("packageId", "number");
+ALTER TABLE "stickerAsset" ADD CONSTRAINT "stickerAsset_packageId_fk" FOREIGN KEY ("packageId") REFERENCES "stickerPackage"("id");
 
 CREATE TABLE "stickerReviewEvent" (
   "id" text PRIMARY KEY NOT NULL,
@@ -63,18 +65,22 @@ CREATE TABLE "stickerReviewEvent" (
   "createdAt" timestamp DEFAULT now() NOT NULL
 );
 CREATE INDEX "stickerReviewEvent_packageId_idx" ON "stickerReviewEvent" ("packageId");
+ALTER TABLE "stickerReviewEvent" ADD CONSTRAINT "stickerReviewEvent_packageId_fk" FOREIGN KEY ("packageId") REFERENCES "stickerPackage"("id");
 `)
 }
 
 export async function down(client: Client) {
   await client.query(`
+ALTER TABLE "stickerReviewEvent" DROP CONSTRAINT IF EXISTS "stickerReviewEvent_packageId_fk";
 DROP INDEX IF EXISTS "stickerReviewEvent_packageId_idx";
 DROP TABLE IF EXISTS "stickerReviewEvent";
+ALTER TABLE "stickerAsset" DROP CONSTRAINT IF EXISTS "stickerAsset_packageId_fk";
 DROP INDEX IF EXISTS "stickerAsset_packageNumber_unique";
 DROP INDEX IF EXISTS "stickerAsset_packageId_idx";
 DROP TABLE IF EXISTS "stickerAsset";
 DROP INDEX IF EXISTS "stickerPackage_status_idx";
 DROP INDEX IF EXISTS "stickerPackage_creatorId_idx";
+ALTER TABLE "stickerPackage" DROP CONSTRAINT IF EXISTS "stickerPackage_creatorId_fk";
 ALTER TABLE "stickerPackage" DROP COLUMN IF EXISTS "reviewProblemAssetNumbers";
 ALTER TABLE "stickerPackage" DROP COLUMN IF EXISTS "reviewSuggestion";
 ALTER TABLE "stickerPackage" DROP COLUMN IF EXISTS "reviewReasonText";

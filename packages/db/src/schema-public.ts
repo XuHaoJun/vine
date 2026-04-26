@@ -157,7 +157,7 @@ export const stickerPackage = pgTable(
     coverDriveKey: text('coverDriveKey').notNull(),
     tabIconDriveKey: text('tabIconDriveKey').notNull(),
     stickerCount: integer('stickerCount').notNull(),
-    creatorId: text('creatorId'),
+    creatorId: text('creatorId').references(() => creatorProfile.id),
     status: text('status')
       .notNull()
       .$type<
@@ -213,7 +213,7 @@ export const stickerAsset = pgTable(
   'stickerAsset',
   {
     id: text('id').primaryKey(),
-    packageId: text('packageId').notNull(),
+    packageId: text('packageId').notNull().references(() => stickerPackage.id),
     number: integer('number').notNull(),
     driveKey: text('driveKey').notNull(),
     width: integer('width').notNull(),

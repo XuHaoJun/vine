@@ -9,11 +9,16 @@ declare module 'one' {
       StaticRoutes: 
         | `/`
         | `/(app)`
+        | `/(app)/admin/sticker-reviews`
         | `/(app)/auth`
         | `/(app)/auth/consent`
         | `/(app)/auth/login`
         | `/(app)/auth/login/password`
         | `/(app)/auth/oauth-callback`
+        | `/(app)/creator`
+        | `/(app)/creator/`
+        | `/(app)/creator/packages`
+        | `/(app)/creator/packages/new`
         | `/(app)/developers/console`
         | `/(app)/developers/console/`
         | `/(app)/developers/flex-simulator`
@@ -43,11 +48,16 @@ declare module 'one' {
         | `/(app)/pay/result`
         | `/(app)/store`
         | `/_sitemap`
+        | `/admin/sticker-reviews`
         | `/auth`
         | `/auth/consent`
         | `/auth/login`
         | `/auth/login/password`
         | `/auth/oauth-callback`
+        | `/creator`
+        | `/creator/`
+        | `/creator/packages`
+        | `/creator/packages/new`
         | `/developers/console`
         | `/developers/console/`
         | `/developers/flex-simulator`
@@ -78,7 +88,9 @@ declare module 'one' {
         | `/pay/result`
         | `/store`
       DynamicRoutes: 
+        | `/(app)/admin/sticker-reviews/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/auth/signup/${OneRouter.SingleRoutePart<T>}`
+        | `/(app)/creator/packages/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/developers/console/channel/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/developers/console/login-channel/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/developers/console/login-channel/${OneRouter.SingleRoutePart<T>}/liff`
@@ -91,7 +103,9 @@ declare module 'one' {
         | `/(app)/oa/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/store/${OneRouter.SingleRoutePart<T>}`
         | `/(public)/invite/${OneRouter.SingleRoutePart<T>}/page`
+        | `/admin/sticker-reviews/${OneRouter.SingleRoutePart<T>}`
         | `/auth/signup/${OneRouter.SingleRoutePart<T>}`
+        | `/creator/packages/${OneRouter.SingleRoutePart<T>}`
         | `/developers/console/channel/${OneRouter.SingleRoutePart<T>}`
         | `/developers/console/login-channel/${OneRouter.SingleRoutePart<T>}`
         | `/developers/console/login-channel/${OneRouter.SingleRoutePart<T>}/liff`
@@ -105,7 +119,9 @@ declare module 'one' {
         | `/oa/${OneRouter.SingleRoutePart<T>}`
         | `/store/${OneRouter.SingleRoutePart<T>}`
       DynamicRouteTemplate: 
+        | `/(app)/admin/sticker-reviews/[packageId]`
         | `/(app)/auth/signup/[method]`
+        | `/(app)/creator/packages/[packageId]`
         | `/(app)/developers/console/channel/[channelId]`
         | `/(app)/developers/console/login-channel/[loginChannelId]`
         | `/(app)/developers/console/login-channel/[loginChannelId]/liff`
@@ -118,7 +134,9 @@ declare module 'one' {
         | `/(app)/oa/[oaId]`
         | `/(app)/store/[packageId]`
         | `/(public)/invite/[inviteCode]/page`
+        | `/admin/sticker-reviews/[packageId]`
         | `/auth/signup/[method]`
+        | `/creator/packages/[packageId]`
         | `/developers/console/channel/[channelId]`
         | `/developers/console/login-channel/[loginChannelId]`
         | `/developers/console/login-channel/[loginChannelId]/liff`
@@ -133,7 +151,9 @@ declare module 'one' {
         | `/store/[packageId]`
       IsTyped: true
       RouteTypes: {
+        '/(app)/admin/sticker-reviews/[packageId]': RouteInfo<{ packageId: string }>
         '/(app)/auth/signup/[method]': RouteInfo<{ method: string }>
+        '/(app)/creator/packages/[packageId]': RouteInfo<{ packageId: string }>
         '/(app)/developers/console/channel/[channelId]': RouteInfo<{ channelId: string }>
         '/(app)/developers/console/login-channel/[loginChannelId]': RouteInfo<{ loginChannelId: string }>
         '/(app)/developers/console/login-channel/[loginChannelId]/liff': RouteInfo<{ loginChannelId: string }>
@@ -146,7 +166,9 @@ declare module 'one' {
         '/(app)/oa/[oaId]': RouteInfo<{ oaId: string }>
         '/(app)/store/[packageId]': RouteInfo<{ packageId: string }>
         '/(public)/invite/[inviteCode]/page': RouteInfo<{ inviteCode: string }>
+        '/admin/sticker-reviews/[packageId]': RouteInfo<{ packageId: string }>
         '/auth/signup/[method]': RouteInfo<{ method: string }>
+        '/creator/packages/[packageId]': RouteInfo<{ packageId: string }>
         '/developers/console/channel/[channelId]': RouteInfo<{ channelId: string }>
         '/developers/console/login-channel/[loginChannelId]': RouteInfo<{ loginChannelId: string }>
         '/developers/console/login-channel/[loginChannelId]/liff': RouteInfo<{ loginChannelId: string }>
