@@ -10,6 +10,7 @@ import {
   StickerMarketUserService,
   StickerMarketAdminService,
   StickerMarketCreatorService,
+  StickerMarketDiscoveryService,
 } from '@vine/proto/stickerMarket'
 import type { StickerMarketUserHandlerDeps } from './stickerMarketUser'
 import { createStickerMarketUserHandler } from './stickerMarketUser'
@@ -17,6 +18,8 @@ import type { StickerMarketAdminHandlerDeps } from './stickerMarketAdmin'
 import { createStickerMarketAdminHandler } from './stickerMarketAdmin'
 import type { StickerMarketCreatorHandlerDeps } from './stickerMarketCreator'
 import { createStickerMarketCreatorHandler } from './stickerMarketCreator'
+import type { StickerMarketDiscoveryHandlerDeps } from './stickerMarketDiscovery'
+import { createStickerMarketDiscoveryHandler } from './stickerMarketDiscovery'
 import { withAuthService } from './auth-context'
 
 type ConnectDeps = {
@@ -27,6 +30,7 @@ type ConnectDeps = {
   stickerMarketUser: StickerMarketUserHandlerDeps
   stickerMarketAdmin: StickerMarketAdminHandlerDeps
   stickerMarketCreator: StickerMarketCreatorHandlerDeps
+  stickerMarketDiscovery: StickerMarketDiscoveryHandlerDeps
 }
 
 export function connectRoutes(deps: ConnectDeps) {
@@ -57,6 +61,10 @@ export function connectRoutes(deps: ConnectDeps) {
         deps.auth,
         createStickerMarketCreatorHandler(deps.stickerMarketCreator),
       ),
+    )
+    router.service(
+      StickerMarketDiscoveryService,
+      createStickerMarketDiscoveryHandler(deps.stickerMarketDiscovery),
     )
   }
 }

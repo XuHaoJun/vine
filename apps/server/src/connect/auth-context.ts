@@ -40,6 +40,26 @@ export async function ensureAuthInContext(
 }
 
 /**
+ * Tries to authenticate optionally. Returns auth data if session is present,
+ * undefined otherwise. Unlike ensureAuthInContext, this does NOT throw.
+ */
+export async function tryGetAuthData(
+  auth: AuthServer,
+  ctx: HandlerContext,
+): Promise<AuthData | undefined> {
+  const webReq = new Request(ctx.url, {
+    method: ctx.requestMethod,
+    headers: ctx.requestHeader,
+    signal: ctx.signal,
+  })
+  const authData = await getAuthDataFromRequest(auth, webReq)
+  if (authData) {
+    ctx.values.set(connectAuthDataKey, authData)
+  }
+  return authData ?? undefined
+}
+
+/**
  * Wraps a unary Connect handler: runs {@link ensureAuthInContext}, then `impl`.
  */
 export function withAuth<I, O>(

@@ -7,7 +7,7 @@ import { existsSync, readFileSync } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { user, account } from '../schema-private'
+import { user, account, currencyDisplayRate } from '../schema-private'
 import {
   friendship,
   userPublic,
@@ -91,6 +91,11 @@ const TEST_USERS = [
   { email: 'test1@example.com', name: 'Test One', username: 'test1' },
   { email: 'test2@example.com', name: 'Test Two', username: 'test2' },
   { email: 'test3@example.com', name: 'Test Three', username: 'test3' },
+] as const
+
+const CURRENCY_DISPLAY_RATES = [
+  { baseCurrency: 'TWD', quoteCurrency: 'USD', rate: '0.031', source: 'seed', effectiveDate: '2026-04-26T00:00:00Z' },
+  { baseCurrency: 'TWD', quoteCurrency: 'JPY', rate: '4.67', source: 'seed', effectiveDate: '2026-04-26T00:00:00Z' },
 ] as const
 
 const STICKER_PACKAGE_SEEDS = [
@@ -548,6 +553,36 @@ export async function ensureSeed(pool: Pool, db: any, drive?: SeedDrive) {
       console.info(`[seed] Created entitlement for test1 -> pkg_cat_01`)
     } else {
       console.info(`[seed] Entitlement for test1 -> pkg_cat_01 already exists`)
+    }
+  }
+
+  // Seed display currency rates
+  for (const rate of CURRENCY_DISPLAY_RATES) {
+    const existing = await db
+      .select()
+      .from(currencyDisplayRate)
+      .where(
+        and(
+          eq(currencyDisplayRate.baseCurrency, rate.baseCurrency),
+          eq(currencyDisplayRate.quoteCurrency, rate.quoteCurrency),
+          eq(currencyDisplayRate.effectiveDate, rate.effectiveDate),
+        ),
+      )
+      .limit(1)
+
+    if (existing.length === 0) {
+      await db.insert(currencyDisplayRate).values({
+        id: randomUUID(),
+        baseCurrency: rate.baseCurrency,
+        quoteCurrency: rate.quoteCurrency,
+        rate: rate.rate,
+        source: rate.source,
+        effectiveDate: rate.effectiveDate,
+        createdAt: now,
+      })
+      console.info(`[seed] Created currency rate ${rate.baseCurrency} -> ${rate.quoteCurrency}`)
+    } else {
+      console.info(`[seed] Currency rate ${rate.baseCurrency} -> ${rate.quoteCurrency} already exists`)
     }
   }
 

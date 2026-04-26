@@ -14,6 +14,9 @@ export type StickerMarketUserHandlerDeps = {
   returnUrl: string
   orderResultUrl: string
   clientBackUrl?: string
+  follow: any
+  review: any
+  launchNotification: any
 }
 
 export function createStickerMarketUserHandler(deps: StickerMarketUserHandlerDeps) {
@@ -53,8 +56,6 @@ export function createStickerMarketUserHandler(deps: StickerMarketUserHandlerDep
         throw new ConnectError('already owned', Code.AlreadyExists)
       }
 
-      // Generate short alphanumeric id (≤20 chars for ECPay MerchantTradeNo)
-      // Strip dashes from UUID → 32 hex chars, take first 19 and prefix with 'O'
       const orderId = (
         'O' + crypto.randomUUID().replace(/-/g, '').slice(0, 19)
       ).toUpperCase()
@@ -119,6 +120,74 @@ export function createStickerMarketUserHandler(deps: StickerMarketUserHandlerDep
         amountMinor: order.amountMinor,
         currency: order.currency,
       }
+    },
+
+    async followCreator(req: { creatorId: string }, ctx: HandlerContext) {
+      const userId = requireAuthData(ctx).id
+      await deps.follow.follow(userId, req.creatorId)
+      return {}
+    },
+
+    async unfollowCreator(req: { creatorId: string }, ctx: HandlerContext) {
+      const userId = requireAuthData(ctx).id
+      await deps.follow.unfollow(userId, req.creatorId)
+      return {}
+    },
+
+    async upsertStickerPackageReview(
+      req: { packageId: string; rating: number; body: string },
+      ctx: HandlerContext,
+    ) {
+      const userId = requireAuthData(ctx).id
+      if (req.rating < 1 || req.rating > 5) {
+        throw new ConnectError('rating must be between 1 and 5', Code.InvalidArgument)
+      }
+      const review = await deps.review.upsertReview({
+        userId,
+        packageId: req.packageId,
+        rating: req.rating,
+        body: req.body ?? '',
+      })
+      return {
+        review: {
+          id: review.id,
+          userId: review.userId,
+          rating: review.rating,
+          body: review.body,
+          createdAt: review.createdAt,
+        },
+      }
+    },
+
+    async deleteStickerPackageReview(req: { packageId: string }, ctx: HandlerContext) {
+      const userId = requireAuthData(ctx).id
+      await deps.review.deleteReview(userId, req.packageId)
+      return {}
+    },
+
+    async listLaunchNotifications(
+      req: { pageSize: number; pageToken: string },
+      ctx: HandlerContext,
+    ) {
+      const userId = requireAuthData(ctx).id
+      const result = await deps.launchNotification.listNotifications({
+        userId,
+        pageSize: req.pageSize,
+        pageToken: req.pageToken,
+      })
+      return {
+        notifications: result.items,
+        nextPageToken: result.nextPageToken,
+      }
+    },
+
+    async markLaunchNotificationRead(
+      req: { notificationId: string },
+      ctx: HandlerContext,
+    ) {
+      const userId = requireAuthData(ctx).id
+      await deps.launchNotification.markRead(userId, req.notificationId)
+      return {}
     },
   }
 }

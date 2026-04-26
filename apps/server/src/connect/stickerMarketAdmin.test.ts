@@ -45,6 +45,12 @@ function makeDeps() {
       reject: vi.fn().mockResolvedValue({}),
     },
     payout: {} as any,
+    featuredShelf: {
+      listShelves: vi.fn().mockResolvedValue([]),
+      upsertShelf: vi.fn().mockResolvedValue({}),
+      publishShelf: vi.fn().mockResolvedValue({}),
+      archiveShelf: vi.fn().mockResolvedValue({}),
+    },
   }
 }
 
@@ -55,6 +61,7 @@ describe('createStickerMarketAdminHandler', () => {
       reconciliation: {} as any,
       review: {} as any,
       payout: { listPendingRequests: vi.fn() },
+      featuredShelf: {} as any,
     })
 
     await expect(

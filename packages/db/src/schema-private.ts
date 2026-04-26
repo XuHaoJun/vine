@@ -229,6 +229,60 @@ export const creatorPayoutRequest = pgTable(
   ],
 )
 
+export const stickerFeaturedShelf = pgTable(
+  'stickerFeaturedShelf',
+  {
+    id: text('id').primaryKey(),
+    slug: text('slug').notNull(),
+    title: text('title').notNull(),
+    status: text('status')
+      .notNull()
+      .$type<'draft' | 'published' | 'archived'>()
+      .default('draft'),
+    startsAt: timestamp('startsAt', { mode: 'string' }),
+    endsAt: timestamp('endsAt', { mode: 'string' }),
+    createdByUserId: text('createdByUserId').notNull(),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('stickerFeaturedShelf_slug_unique').on(table.slug),
+    index('stickerFeaturedShelf_status_starts_ends_idx').on(table.status, table.startsAt, table.endsAt),
+  ],
+)
+
+export const stickerFeaturedShelfItem = pgTable(
+  'stickerFeaturedShelfItem',
+  {
+    id: text('id').primaryKey(),
+    shelfId: text('shelfId').notNull(),
+    packageId: text('packageId').notNull(),
+    position: integer('position').notNull(),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('stickerFeaturedShelfItem_shelf_package_unique').on(table.shelfId, table.packageId),
+    uniqueIndex('stickerFeaturedShelfItem_shelf_position_unique').on(table.shelfId, table.position),
+  ],
+)
+
+export const currencyDisplayRate = pgTable(
+  'currencyDisplayRate',
+  {
+    id: text('id').primaryKey(),
+    baseCurrency: text('baseCurrency').notNull(),
+    quoteCurrency: text('quoteCurrency').notNull(),
+    rate: text('rate').notNull(),
+    source: text('source').notNull(),
+    effectiveDate: timestamp('effectiveDate', { mode: 'string' }).notNull(),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('currencyDisplayRate_base_quote_date_unique').on(table.baseCurrency, table.quoteCurrency, table.effectiveDate),
+    index('currencyDisplayRate_quote_date_idx').on(table.quoteCurrency, table.effectiveDate),
+  ],
+)
+
 export const creatorPayoutAuditEvent = pgTable(
   'creatorPayoutAuditEvent',
   {
