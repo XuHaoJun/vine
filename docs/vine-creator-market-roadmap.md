@@ -148,6 +148,8 @@
 
 - **包含子系統**:D 完整(搜尋、篩選、精緻化)、H(追蹤 / 推薦 / 評價)
 - **依賴**:Phase 2A 有一批創作者 + 內容
+- **Design spec**:[`docs/superpowers/specs/2026-04-26-vine-creator-market-growth-discovery-design.md`](./superpowers/specs/2026-04-26-vine-creator-market-growth-discovery-design.md)
+- **Implementation plan**:[`docs/superpowers/plans/2026-04-26-vine-creator-market-growth-discovery.md`](./superpowers/plans/2026-04-26-vine-creator-market-growth-discovery.md)
 
 **關鍵工作**:
 - 商店首頁的推薦 + 策展後台(編輯精選)
