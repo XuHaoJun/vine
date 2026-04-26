@@ -23,16 +23,18 @@ export type StickerAssetValidationItem = {
 export type StickerAssetValidationResult = {
   valid: boolean
   items: StickerAssetValidationItem[]
-  files: {
-    cover: Uint8Array
-    tabIcon: Uint8Array
-    stickers: Array<{
-      number: number
-      fileName: string
-      bytes: Uint8Array
-      width: number
-      height: number
-      sizeBytes: number
-    }>
-  } | undefined
+  files:
+    | {
+        cover: Uint8Array
+        tabIcon: Uint8Array
+        stickers: Array<{
+          number: number
+          fileName: string
+          bytes: Uint8Array
+          width: number
+          height: number
+          sizeBytes: number
+        }>
+      }
+    | undefined
 }

@@ -14,14 +14,17 @@ export function createCreatorRepository() {
       return row
     },
 
-    async upsert(db: any, input: {
-      id: string
-      userId: string
-      displayName: string
-      country: string
-      bio: string
-      now: string
-    }): Promise<CreatorProfileRow> {
+    async upsert(
+      db: any,
+      input: {
+        id: string
+        userId: string
+        displayName: string
+        country: string
+        bio: string
+        now: string
+      },
+    ): Promise<CreatorProfileRow> {
       const [row] = await db
         .insert(creatorProfile)
         .values({

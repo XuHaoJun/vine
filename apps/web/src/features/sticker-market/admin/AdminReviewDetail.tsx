@@ -66,7 +66,9 @@ export function AdminReviewDetail({ packageId }: AdminReviewDetailProps) {
   const approve = useTanMutation({
     mutationFn: () => stickerMarketAdminClient.approveStickerPackage({ packageId }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sticker-market', 'admin', 'review-queue'] })
+      queryClient.invalidateQueries({
+        queryKey: ['sticker-market', 'admin', 'review-queue'],
+      })
       queryClient.invalidateQueries({
         queryKey: ['sticker-market', 'admin', 'review-detail', packageId],
       })
@@ -92,7 +94,9 @@ export function AdminReviewDetail({ packageId }: AdminReviewDetailProps) {
         problemAssetNumbers: payload.problemAssetNumbers,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sticker-market', 'admin', 'review-queue'] })
+      queryClient.invalidateQueries({
+        queryKey: ['sticker-market', 'admin', 'review-queue'],
+      })
       queryClient.invalidateQueries({
         queryKey: ['sticker-market', 'admin', 'review-detail', packageId],
       })
@@ -185,6 +189,81 @@ export function AdminReviewDetail({ packageId }: AdminReviewDetailProps) {
                   </SizableText>
                 ) : null}
               </YStack>
+
+              <XStack gap="$3" flexWrap="wrap">
+                {pkg.coverDriveKey ? (
+                  <YStack gap="$2">
+                    <SizableText size="$3" fontWeight="600" color="$color11">
+                      封面
+                    </SizableText>
+                    <YStack
+                      width={120}
+                      height={120}
+                      rounded="$3"
+                      bg="$color3"
+                      overflow="hidden"
+                    >
+                      <img
+                        src={`/uploads/${pkg.coverDriveKey}`}
+                        alt={`${pkg.name} cover`}
+                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                      />
+                    </YStack>
+                  </YStack>
+                ) : null}
+                {pkg.tabIconDriveKey ? (
+                  <YStack gap="$2">
+                    <SizableText size="$3" fontWeight="600" color="$color11">
+                      分頁圖示
+                    </SizableText>
+                    <YStack
+                      width={72}
+                      height={72}
+                      rounded="$3"
+                      bg="$color3"
+                      overflow="hidden"
+                    >
+                      <img
+                        src={`/uploads/${pkg.tabIconDriveKey}`}
+                        alt={`${pkg.name} tab icon`}
+                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                      />
+                    </YStack>
+                  </YStack>
+                ) : null}
+              </XStack>
+
+              {data?.assets && data.assets.length > 0 && (
+                <YStack gap="$2">
+                  <SizableText size="$4" fontWeight="600" color="$color11">
+                    貼圖素材
+                  </SizableText>
+                  <XStack flexWrap="wrap" gap="$2">
+                    {data.assets.map((asset) => (
+                      <YStack
+                        key={asset.id}
+                        width={72}
+                        height={88}
+                        rounded="$3"
+                        bg="$color2"
+                        items="center"
+                        justify="center"
+                        gap="$1"
+                        overflow="hidden"
+                      >
+                        <img
+                          src={`/uploads/${asset.driveKey}`}
+                          alt={`${pkg.name} ${asset.number}`}
+                          style={{ width: 64, height: 64, objectFit: 'contain' }}
+                        />
+                        <SizableText size="$1" color="$color10">
+                          #{asset.number}
+                        </SizableText>
+                      </YStack>
+                    ))}
+                  </XStack>
+                </YStack>
+              )}
 
               {data?.latestValidation && data.latestValidation.length > 0 && (
                 <YStack gap="$2">

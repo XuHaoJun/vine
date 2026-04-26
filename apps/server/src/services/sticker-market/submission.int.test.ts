@@ -31,7 +31,11 @@ describe('creator submission database behavior', () => {
         .from(stickerPackage)
         .where(eq(stickerPackage.status, 'on_sale'))
 
-      expect(rows.some((row: typeof stickerPackage.$inferSelect) => row.id === 'pkg_draft_int_1')).toBe(false)
+      expect(
+        rows.some(
+          (row: typeof stickerPackage.$inferSelect) => row.id === 'pkg_draft_int_1',
+        ),
+      ).toBe(false)
     })
   })
 

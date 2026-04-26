@@ -12,7 +12,11 @@ export const stickerPackageDraftSchema = v.object({
   priceMinor: v.pipe(v.number(), v.minValue(1, 'Price is required')),
   stickerCount: v.picklist([8, 16, 24, 32, 40]),
   tagsText: v.string(),
-  copyrightText: v.pipe(v.string(), v.trim(), v.minLength(1, 'Copyright text is required')),
+  copyrightText: v.pipe(
+    v.string(),
+    v.trim(),
+    v.minLength(1, 'Copyright text is required'),
+  ),
   licenseConfirmed: v.pipe(
     v.boolean(),
     v.custom((input) => input === true, 'Original work confirmation is required'),

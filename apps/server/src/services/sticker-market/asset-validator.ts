@@ -6,6 +6,7 @@ const MAX_WIDTH = 370
 const MAX_HEIGHT = 320
 const MIN_SIDE = 270
 const MAX_STATIC_SIZE_BYTES = 500 * 1024
+const TAB_ICON_SIZE = 60
 
 type ValidateInput = {
   zipFile: Uint8Array
@@ -18,7 +19,9 @@ export async function validateStickerZip(
   const items: StickerAssetValidationItem[] = []
 
   if (!STATIC_ALLOWED_COUNTS.has(input.stickerCount)) {
-    items.push(errorItem('submission.zip', 0, 'invalid_count', 'Unsupported sticker count'))
+    items.push(
+      errorItem('submission.zip', 0, 'invalid_count', 'Unsupported sticker count'),
+    )
     return { valid: false, items, files: undefined }
   }
 
@@ -71,7 +74,9 @@ export async function validateStickerZip(
   for (const { name, number } of requiredFiles) {
     const bytes = entries[name]
     if (!bytes) {
-      items.push(errorItem(name, number, 'missing_file', 'Required sticker file is missing'))
+      items.push(
+        errorItem(name, number, 'missing_file', 'Required sticker file is missing'),
+      )
       hasError = true
       continue
     }
@@ -84,7 +89,13 @@ export async function validateStickerZip(
 
     const { width, height } = extractPngDimensions(bytes)
     const sizeBytes = bytes.byteLength
-    const result = validatePngMetadata({ fileName: name, number, width, height, sizeBytes })
+    const result = validateFileMetadata({
+      fileName: name,
+      number,
+      width,
+      height,
+      sizeBytes,
+    })
     items.push(result)
     if (result.level === 'error') {
       hasError = true
@@ -124,13 +135,28 @@ export function validatePngMetadata(input: {
   sizeBytes: number
 }): StickerAssetValidationItem {
   if (input.width % 2 !== 0 || input.height % 2 !== 0) {
-    return errorItem(input.fileName, input.number, 'odd_pixels', 'Width and height must be even')
+    return errorItem(
+      input.fileName,
+      input.number,
+      'odd_pixels',
+      'Width and height must be even',
+    )
   }
   if (input.width > MAX_WIDTH || input.height > MAX_HEIGHT) {
-    return errorItem(input.fileName, input.number, 'too_large', 'Sticker dimensions exceed static limits')
+    return errorItem(
+      input.fileName,
+      input.number,
+      'too_large',
+      'Sticker dimensions exceed static limits',
+    )
   }
   if (Math.min(input.width, input.height) < MIN_SIDE) {
-    return errorItem(input.fileName, input.number, 'too_small', 'Sticker shortest side is too small')
+    return errorItem(
+      input.fileName,
+      input.number,
+      'too_small',
+      'Sticker shortest side is too small',
+    )
   }
   if (input.sizeBytes > MAX_STATIC_SIZE_BYTES) {
     return {
@@ -144,6 +170,63 @@ export function validatePngMetadata(input: {
       sizeBytes: input.sizeBytes,
     }
   }
+  return {
+    fileName: input.fileName,
+    number: input.number,
+    level: 'ok',
+    code: 'ok',
+    message: 'OK',
+    width: input.width,
+    height: input.height,
+    sizeBytes: input.sizeBytes,
+  }
+}
+
+function validateFileMetadata(input: {
+  fileName: string
+  number: number
+  width: number
+  height: number
+  sizeBytes: number
+}): StickerAssetValidationItem {
+  if (input.fileName === 'cover.png') {
+    if (input.width !== input.height) {
+      return {
+        fileName: input.fileName,
+        number: input.number,
+        level: 'warning',
+        code: 'cover_not_square',
+        message: 'Cover image is not square',
+        width: input.width,
+        height: input.height,
+        sizeBytes: input.sizeBytes,
+      }
+    }
+    return okItem(input)
+  }
+
+  if (input.fileName === 'tab_icon.png') {
+    if (input.width !== TAB_ICON_SIZE || input.height !== TAB_ICON_SIZE) {
+      return errorItem(
+        input.fileName,
+        input.number,
+        'tab_icon_size',
+        'Tab icon must be 60x60 px',
+      )
+    }
+    return okItem(input)
+  }
+
+  return validatePngMetadata(input)
+}
+
+function okItem(input: {
+  fileName: string
+  number: number
+  width: number
+  height: number
+  sizeBytes: number
+}): StickerAssetValidationItem {
   return {
     fileName: input.fileName,
     number: input.number,

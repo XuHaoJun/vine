@@ -6,10 +6,7 @@ import { storeStickerAssets } from './asset-storage'
 import { validateStickerZip } from './asset-validator'
 import { createPackageRepository } from './package.repository'
 
-export function createStickerMarketServices(deps: {
-  db: any
-  uploadRoot: string
-}) {
+export function createStickerMarketServices(deps: { db: any; uploadRoot: string }) {
   const creatorRepo = createCreatorRepository()
   const packageRepo = createPackageRepository()
   const common = {

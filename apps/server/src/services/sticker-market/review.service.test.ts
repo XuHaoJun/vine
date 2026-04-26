@@ -16,11 +16,14 @@ describe('createReviewService', () => {
     const result = await service.approve({ packageId: 'pkg_1', actorUserId: 'admin_1' })
 
     expect(result.status).toBe('on_sale')
-    expect(packageRepo.approve).toHaveBeenCalledWith({}, {
-      packageId: 'pkg_1',
-      actorUserId: 'admin_1',
-      eventId: 'evt_1',
-      now: '2026-04-25T00:00:00.000Z',
-    })
+    expect(packageRepo.approve).toHaveBeenCalledWith(
+      {},
+      {
+        packageId: 'pkg_1',
+        actorUserId: 'admin_1',
+        eventId: 'evt_1',
+        now: '2026-04-25T00:00:00.000Z',
+      },
+    )
   })
 })

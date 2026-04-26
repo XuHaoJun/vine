@@ -99,6 +99,7 @@ export function createStickerMarketAdminHandler(deps: StickerMarketAdminHandlerD
       return {
         package: mapStickerPackageDraft(detail.package),
         latestValidation: detail.latestValidation ?? [],
+        assets: (detail.assets ?? []).map(mapStickerAsset),
       }
     },
 
@@ -152,6 +153,38 @@ function mapStickerPackageDraft(row: any) {
     tagsJson: row.tags ?? '[]',
     copyrightText: row.copyrightText ?? '',
     autoPublish: row.autoPublish ?? true,
+    coverDriveKey: row.coverDriveKey ?? '',
+    tabIconDriveKey: row.tabIconDriveKey ?? '',
+    reviewReasonCategory: row.reviewReasonCategory ?? '',
+    reviewReasonText: row.reviewReasonText ?? '',
+    reviewSuggestion: row.reviewSuggestion ?? '',
+    reviewProblemAssetNumbers: parseNumberArray(row.reviewProblemAssetNumbers),
+  }
+}
+
+function mapStickerAsset(row: any) {
+  return {
+    id: row.id,
+    number: row.number,
+    driveKey: row.driveKey,
+    width: row.width,
+    height: row.height,
+    sizeBytes: row.sizeBytes,
+    mimeType: row.mimeType,
+  }
+}
+
+function parseNumberArray(value: unknown): number[] {
+  if (typeof value !== 'string' || !value) return []
+  try {
+    const parsed = JSON.parse(value)
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter((item): item is number => Number.isInteger(item))
+  } catch {
+    return value
+      .split(',')
+      .map((item) => Number(item.trim()))
+      .filter((item) => Number.isInteger(item))
   }
 }
 

@@ -7,33 +7,48 @@ export type StickerPackageRow = typeof stickerPackage.$inferSelect
 export function createPackageRepository() {
   return {
     async findById(db: any, packageId: string): Promise<StickerPackageRow | undefined> {
-      const [row] = await db.select().from(stickerPackage).where(eq(stickerPackage.id, packageId)).limit(1)
-      return row
-    },
-
-    async findOwnedPackage(db: any, input: { packageId: string; creatorId: string }): Promise<StickerPackageRow | undefined> {
       const [row] = await db
         .select()
         .from(stickerPackage)
-        .where(and(eq(stickerPackage.id, input.packageId), eq(stickerPackage.creatorId, input.creatorId)))
+        .where(eq(stickerPackage.id, packageId))
         .limit(1)
       return row
     },
 
-    async createDraft(db: any, input: {
-      id: string
-      creatorId: string
-      name: string
-      description: string
-      priceMinor: number
-      currency: string
-      stickerCount: number
-      tags: string
-      copyrightText: string
-      licenseConfirmedAt: string
-      autoPublish: boolean
-      now: string
-    }): Promise<StickerPackageRow> {
+    async findOwnedPackage(
+      db: any,
+      input: { packageId: string; creatorId: string },
+    ): Promise<StickerPackageRow | undefined> {
+      const [row] = await db
+        .select()
+        .from(stickerPackage)
+        .where(
+          and(
+            eq(stickerPackage.id, input.packageId),
+            eq(stickerPackage.creatorId, input.creatorId),
+          ),
+        )
+        .limit(1)
+      return row
+    },
+
+    async createDraft(
+      db: any,
+      input: {
+        id: string
+        creatorId: string
+        name: string
+        description: string
+        priceMinor: number
+        currency: string
+        stickerCount: number
+        tags: string
+        copyrightText: string
+        licenseConfirmedAt: string
+        autoPublish: boolean
+        now: string
+      },
+    ): Promise<StickerPackageRow> {
       const [row] = await db
         .insert(stickerPackage)
         .values({
@@ -60,19 +75,22 @@ export function createPackageRepository() {
       return row
     },
 
-    async updateDraft(db: any, input: {
-      packageId: string
-      creatorId: string
-      name: string
-      description: string
-      priceMinor: number
-      stickerCount: number
-      tags: string
-      copyrightText: string
-      licenseConfirmedAt: string | undefined
-      autoPublish: boolean
-      now: string
-    }): Promise<StickerPackageRow> {
+    async updateDraft(
+      db: any,
+      input: {
+        packageId: string
+        creatorId: string
+        name: string
+        description: string
+        priceMinor: number
+        stickerCount: number
+        tags: string
+        copyrightText: string
+        licenseConfirmedAt: string | undefined
+        autoPublish: boolean
+        now: string
+      },
+    ): Promise<StickerPackageRow> {
       const [row] = await db
         .update(stickerPackage)
         .set({
@@ -98,24 +116,27 @@ export function createPackageRepository() {
       return row
     },
 
-    async replaceAssets(db: any, input: {
-      packageId: string
-      coverDriveKey: string
-      tabIconDriveKey: string
-      assets: Array<{
-        id: string
+    async replaceAssets(
+      db: any,
+      input: {
         packageId: string
-        number: number
-        driveKey: string
-        width: number
-        height: number
-        sizeBytes: number
-        mimeType: string
-        resourceType: string
-        keywords: string
-      }>
-      now: string
-    }): Promise<void> {
+        coverDriveKey: string
+        tabIconDriveKey: string
+        assets: Array<{
+          id: string
+          packageId: string
+          number: number
+          driveKey: string
+          width: number
+          height: number
+          sizeBytes: number
+          mimeType: string
+          resourceType: string
+          keywords: string
+        }>
+        now: string
+      },
+    ): Promise<void> {
       await db.transaction(async (tx: any) => {
         await tx.delete(stickerAsset).where(eq(stickerAsset.packageId, input.packageId))
         if (input.assets.length > 0) {
@@ -132,13 +153,24 @@ export function createPackageRepository() {
       })
     },
 
-    async submitForReview(db: any, input: {
-      packageId: string
-      creatorId: string
-      now: string
-      eventId: string
-      actorUserId: string
-    }): Promise<StickerPackageRow> {
+    async countAssets(db: any, packageId: string): Promise<number> {
+      const rows = await db
+        .select({ id: stickerAsset.id })
+        .from(stickerAsset)
+        .where(eq(stickerAsset.packageId, packageId))
+      return rows.length
+    },
+
+    async submitForReview(
+      db: any,
+      input: {
+        packageId: string
+        creatorId: string
+        now: string
+        eventId: string
+        actorUserId: string
+      },
+    ): Promise<StickerPackageRow> {
       const [row] = await db
         .update(stickerPackage)
         .set({
@@ -170,16 +202,24 @@ export function createPackageRepository() {
       return row
     },
 
-    async approve(db: any, input: {
-      packageId: string
-      actorUserId: string
-      eventId: string
-      now: string
-    }): Promise<StickerPackageRow> {
+    async approve(
+      db: any,
+      input: {
+        packageId: string
+        actorUserId: string
+        eventId: string
+        now: string
+      },
+    ): Promise<StickerPackageRow> {
       const [pkg] = await db
         .select()
         .from(stickerPackage)
-        .where(and(eq(stickerPackage.id, input.packageId), eq(stickerPackage.status, 'in_review')))
+        .where(
+          and(
+            eq(stickerPackage.id, input.packageId),
+            eq(stickerPackage.status, 'in_review'),
+          ),
+        )
         .limit(1)
       if (!pkg) throw new Error('package not found or not in review')
 
@@ -205,20 +245,28 @@ export function createPackageRepository() {
       return row
     },
 
-    async reject(db: any, input: {
-      packageId: string
-      actorUserId: string
-      reasonCategory: string
-      reasonText: string
-      suggestion: string
-      problemAssetNumbers: number[]
-      eventId: string
-      now: string
-    }): Promise<StickerPackageRow> {
+    async reject(
+      db: any,
+      input: {
+        packageId: string
+        actorUserId: string
+        reasonCategory: string
+        reasonText: string
+        suggestion: string
+        problemAssetNumbers: number[]
+        eventId: string
+        now: string
+      },
+    ): Promise<StickerPackageRow> {
       const [pkg] = await db
         .select()
         .from(stickerPackage)
-        .where(and(eq(stickerPackage.id, input.packageId), eq(stickerPackage.status, 'in_review')))
+        .where(
+          and(
+            eq(stickerPackage.id, input.packageId),
+            eq(stickerPackage.status, 'in_review'),
+          ),
+        )
         .limit(1)
       if (!pkg) throw new Error('package not found or not in review')
 
@@ -250,11 +298,14 @@ export function createPackageRepository() {
       return row
     },
 
-    async publishApproved(db: any, input: {
-      packageId: string
-      creatorId: string
-      now: string
-    }): Promise<StickerPackageRow> {
+    async publishApproved(
+      db: any,
+      input: {
+        packageId: string
+        creatorId: string
+        now: string
+      },
+    ): Promise<StickerPackageRow> {
       const [row] = await db
         .update(stickerPackage)
         .set({
@@ -274,7 +325,10 @@ export function createPackageRepository() {
       return row
     },
 
-    async listReviewQueue(db: any, input: { limit: number }): Promise<StickerPackageRow[]> {
+    async listReviewQueue(
+      db: any,
+      input: { limit: number },
+    ): Promise<StickerPackageRow[]> {
       return db
         .select()
         .from(stickerPackage)
@@ -283,9 +337,20 @@ export function createPackageRepository() {
         .limit(input.limit)
     },
 
-    async findByIdWithAssets(db: any, packageId: string): Promise<{ package: StickerPackageRow; assets: any[] }> {
-      const [pkg] = await db.select().from(stickerPackage).where(eq(stickerPackage.id, packageId)).limit(1)
-      const assets = await db.select().from(stickerAsset).where(eq(stickerAsset.packageId, packageId)).orderBy(stickerAsset.number)
+    async findByIdWithAssets(
+      db: any,
+      packageId: string,
+    ): Promise<{ package: StickerPackageRow; assets: any[] }> {
+      const [pkg] = await db
+        .select()
+        .from(stickerPackage)
+        .where(eq(stickerPackage.id, packageId))
+        .limit(1)
+      const assets = await db
+        .select()
+        .from(stickerAsset)
+        .where(eq(stickerAsset.packageId, packageId))
+        .orderBy(stickerAsset.number)
       return { package: pkg, assets }
     },
   }

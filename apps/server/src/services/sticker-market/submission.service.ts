@@ -71,7 +71,11 @@ export function createSubmissionService(deps: {
       })
     },
 
-    async uploadAssets(input: { userId: string; packageId: string; zipFile: Uint8Array }) {
+    async uploadAssets(input: {
+      userId: string
+      packageId: string
+      zipFile: Uint8Array
+    }) {
       const creator = await deps.creatorRepo.findByUserId(deps.db, input.userId)
       if (!creator) throw new Error('creator profile required')
       const pkg = await deps.packageRepo.findOwnedPackage(deps.db, {
@@ -123,6 +127,18 @@ export function createSubmissionService(deps: {
     async submitForReview(input: { userId: string; packageId: string }) {
       const creator = await deps.creatorRepo.findByUserId(deps.db, input.userId)
       if (!creator) throw new Error('creator profile required')
+      const pkg = await deps.packageRepo.findOwnedPackage(deps.db, {
+        packageId: input.packageId,
+        creatorId: creator.id,
+      })
+      if (!pkg) throw new Error('package not found')
+      if (pkg.status !== 'draft' && pkg.status !== 'rejected') {
+        throw new Error('package not found or not submittable')
+      }
+      const assetCount = await deps.packageRepo.countAssets(deps.db, input.packageId)
+      if (!pkg.coverDriveKey || !pkg.tabIconDriveKey || assetCount !== pkg.stickerCount) {
+        throw new Error('package assets incomplete')
+      }
       return deps.packageRepo.submitForReview(deps.db, {
         packageId: input.packageId,
         creatorId: creator.id,

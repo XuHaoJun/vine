@@ -161,7 +161,13 @@ export const stickerPackage = pgTable(
     status: text('status')
       .notNull()
       .$type<
-        'draft' | 'in_review' | 'approved' | 'rejected' | 'on_sale' | 'unlisted' | 'removed'
+        | 'draft'
+        | 'in_review'
+        | 'approved'
+        | 'rejected'
+        | 'on_sale'
+        | 'unlisted'
+        | 'removed'
       >()
       .default('on_sale'),
     stickerType: text('stickerType').notNull().$type<'static'>().default('static'),
@@ -176,9 +182,7 @@ export const stickerPackage = pgTable(
     reviewReasonCategory: text('reviewReasonCategory'),
     reviewReasonText: text('reviewReasonText'),
     reviewSuggestion: text('reviewSuggestion'),
-    reviewProblemAssetNumbers: text('reviewProblemAssetNumbers')
-      .notNull()
-      .default('[]'),
+    reviewProblemAssetNumbers: text('reviewProblemAssetNumbers').notNull().default('[]'),
     createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
     updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
   },
@@ -213,7 +217,9 @@ export const stickerAsset = pgTable(
   'stickerAsset',
   {
     id: text('id').primaryKey(),
-    packageId: text('packageId').notNull().references(() => stickerPackage.id),
+    packageId: text('packageId')
+      .notNull()
+      .references(() => stickerPackage.id),
     number: integer('number').notNull(),
     driveKey: text('driveKey').notNull(),
     width: integer('width').notNull(),

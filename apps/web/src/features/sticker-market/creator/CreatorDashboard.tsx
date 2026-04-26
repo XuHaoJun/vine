@@ -29,8 +29,8 @@ export function CreatorDashboard() {
 
   const [packages] = useZeroQuery(
     stickerPackagesByCreatorId,
-    { creatorId: userId },
-    { enabled: Boolean(userId) },
+    { creatorId: profile?.id ?? '' },
+    { enabled: Boolean(profile?.id) },
   )
 
   const stats = useMemo(() => {
@@ -44,27 +44,43 @@ export function CreatorDashboard() {
 
   return (
     <YStack flex={1} p="$4" gap="$4">
-      <SizableText size="$6" fontWeight="700">創作者概覽</SizableText>
+      <SizableText size="$6" fontWeight="700">
+        創作者概覽
+      </SizableText>
 
       {!profile && <CreatorProfileForm userId={userId} />}
 
       <XStack gap="$3" flexWrap="wrap">
         <YStack flex={1} minW={140} p="$3" bg="$color2" rounded="$4" gap="$1">
-          <SizableText size="$2" color="$color10">作品總數</SizableText>
-          <SizableText size="$7" fontWeight="700">{stats.packageCount}</SizableText>
+          <SizableText size="$2" color="$color10">
+            作品總數
+          </SizableText>
+          <SizableText size="$7" fontWeight="700">
+            {stats.packageCount}
+          </SizableText>
         </YStack>
         <YStack flex={1} minW={140} p="$3" bg="$color2" rounded="$4" gap="$1">
-          <SizableText size="$2" color="$color10">審核中</SizableText>
-          <SizableText size="$7" fontWeight="700">{stats.inReviewCount}</SizableText>
+          <SizableText size="$2" color="$color10">
+            審核中
+          </SizableText>
+          <SizableText size="$7" fontWeight="700">
+            {stats.inReviewCount}
+          </SizableText>
         </YStack>
         <YStack flex={1} minW={140} p="$3" bg="$color2" rounded="$4" gap="$1">
-          <SizableText size="$2" color="$color10">未通過</SizableText>
-          <SizableText size="$7" fontWeight="700">{stats.rejectedCount}</SizableText>
+          <SizableText size="$2" color="$color10">
+            未通過
+          </SizableText>
+          <SizableText size="$7" fontWeight="700">
+            {stats.rejectedCount}
+          </SizableText>
         </YStack>
       </XStack>
 
       <YStack p="$3" bg="$color2" rounded="$4" gap="$1">
-        <SizableText size="$3" fontWeight="600">銷售報表</SizableText>
+        <SizableText size="$3" fontWeight="600">
+          銷售報表
+        </SizableText>
         <SizableText color="$color10">銷售報表將在 Phase 2B 開放</SizableText>
       </YStack>
     </YStack>
@@ -99,7 +115,9 @@ function CreatorProfileForm({ userId }: { userId: string }) {
 
   return (
     <YStack gap="$3" p="$3" bg="$color2" rounded="$4">
-      <SizableText size="$4" fontWeight="600">建立創作者資料</SizableText>
+      <SizableText size="$4" fontWeight="600">
+        建立創作者資料
+      </SizableText>
       <Controller
         control={control}
         name="displayName"
@@ -137,7 +155,10 @@ function CreatorProfileForm({ userId }: { userId: string }) {
           />
         )}
       />
-      <Button disabled={isSubmitting || upsert.isPending} onPress={handleSubmit(onSubmit)}>
+      <Button
+        disabled={isSubmitting || upsert.isPending}
+        onPress={handleSubmit(onSubmit)}
+      >
         儲存資料
       </Button>
     </YStack>

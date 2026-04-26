@@ -121,13 +121,16 @@ export const stickerPackageRelationships = relationships(
   }),
 )
 
-export const stickerAssetRelationships = relationships(tables.stickerAsset, ({ one }) => ({
-  package: one({
-    sourceField: ['packageId'],
-    destSchema: tables.stickerPackage,
-    destField: ['id'],
+export const stickerAssetRelationships = relationships(
+  tables.stickerAsset,
+  ({ one }) => ({
+    package: one({
+      sourceField: ['packageId'],
+      destSchema: tables.stickerPackage,
+      destField: ['id'],
+    }),
   }),
-}))
+)
 
 export const allRelationships = [
   userRelationships,

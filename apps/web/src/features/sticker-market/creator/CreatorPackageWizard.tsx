@@ -40,7 +40,10 @@ const STICKER_COUNT_OPTIONS = [
 export function CreatorPackageWizard() {
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [packageId, setPackageId] = useState<string>('')
-  const [uploadResult, setUploadResult] = useState<{ valid: boolean; items: any[] } | null>(null)
+  const [uploadResult, setUploadResult] = useState<{
+    valid: boolean
+    items: any[]
+  } | null>(null)
 
   const {
     control,
@@ -136,7 +139,9 @@ export function CreatorPackageWizard() {
 
   return (
     <YStack flex={1} p="$4" gap="$4">
-      <SizableText size="$6" fontWeight="700">建立新貼圖組</SizableText>
+      <SizableText size="$6" fontWeight="700">
+        建立新貼圖組
+      </SizableText>
 
       <XStack gap="$2">
         <StepBadge number={1} active={step === 1} />
@@ -297,7 +302,9 @@ export function CreatorPackageWizard() {
 
       {step === 3 && (
         <YStack gap="$4">
-          <SizableText size="$5" fontWeight="600">確認並提交審核</SizableText>
+          <SizableText size="$5" fontWeight="600">
+            確認並提交審核
+          </SizableText>
           <YStack gap="$2">
             <SizableText>名稱：{formValues.name}</SizableText>
             <SizableText>描述：{formValues.description}</SizableText>
@@ -306,10 +313,7 @@ export function CreatorPackageWizard() {
             <SizableText>版權聲明：{formValues.copyrightText}</SizableText>
             <SizableText>自動上架：{formValues.autoPublish ? '是' : '否'}</SizableText>
           </YStack>
-          <Button
-            disabled={submitReview.isPending}
-            onPress={onSubmitReview}
-          >
+          <Button disabled={submitReview.isPending} onPress={onSubmitReview}>
             提交審核
           </Button>
         </YStack>

@@ -2,6 +2,7 @@ import { Link } from 'one'
 import { useMemo, useState } from 'react'
 import { SizableText, XStack, YStack } from 'tamagui'
 
+import { creatorProfileByUserId } from '@vine/zero-schema/queries/creatorProfile'
 import { stickerPackagesByCreatorId } from '@vine/zero-schema/queries/stickerPackage'
 import { useAuth } from '~/features/auth/client/authClient'
 import { useZeroQuery } from '~/zero/client'
@@ -20,11 +21,16 @@ export function CreatorPackageList() {
   const { user } = useAuth()
   const userId = user?.id ?? ''
   const [activeTab, setActiveTab] = useState<TabKey>('all')
+  const [profile] = useZeroQuery(
+    creatorProfileByUserId,
+    { userId },
+    { enabled: Boolean(userId) },
+  )
 
   const [packages] = useZeroQuery(
     stickerPackagesByCreatorId,
-    { creatorId: userId },
-    { enabled: Boolean(userId) },
+    { creatorId: profile?.id ?? '' },
+    { enabled: Boolean(profile?.id) },
   )
 
   const filtered = useMemo(() => {
@@ -35,7 +41,9 @@ export function CreatorPackageList() {
 
   return (
     <YStack flex={1} p="$4" gap="$4">
-      <SizableText size="$6" fontWeight="700">我的作品</SizableText>
+      <SizableText size="$6" fontWeight="700">
+        我的作品
+      </SizableText>
 
       <XStack gap="$2" flexWrap="wrap">
         {TABS.map((tab) => (

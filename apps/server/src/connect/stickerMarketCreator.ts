@@ -95,6 +95,26 @@ function mapStickerPackageDraft(row: any) {
     tagsJson: row.tags ?? '[]',
     copyrightText: row.copyrightText ?? '',
     autoPublish: row.autoPublish ?? true,
+    coverDriveKey: row.coverDriveKey ?? '',
+    tabIconDriveKey: row.tabIconDriveKey ?? '',
+    reviewReasonCategory: row.reviewReasonCategory ?? '',
+    reviewReasonText: row.reviewReasonText ?? '',
+    reviewSuggestion: row.reviewSuggestion ?? '',
+    reviewProblemAssetNumbers: parseNumberArray(row.reviewProblemAssetNumbers),
+  }
+}
+
+function parseNumberArray(value: unknown): number[] {
+  if (typeof value !== 'string' || !value) return []
+  try {
+    const parsed = JSON.parse(value)
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter((item): item is number => Number.isInteger(item))
+  } catch {
+    return value
+      .split(',')
+      .map((item) => Number(item.trim()))
+      .filter((item) => Number.isInteger(item))
   }
 }
 

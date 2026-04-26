@@ -50,7 +50,9 @@ function makeTestPng(width: number, height: number): Uint8Array {
   const iendCrcBytes = new Uint8Array([0, 0, 0, 0]) // dummy CRC
   const iend = new Uint8Array([...iendLen, ...iendType, ...iendCrcBytes])
 
-  const result = new Uint8Array(signature.length + ihdr.length + idat.length + iend.length)
+  const result = new Uint8Array(
+    signature.length + ihdr.length + idat.length + iend.length,
+  )
   result.set(signature, 0)
   result.set(ihdr, signature.length)
   result.set(idat, signature.length + ihdr.length)
@@ -85,7 +87,7 @@ describe('validateStickerZip', () => {
       files[`png/${String(i).padStart(2, '0')}.png`] = makeTestPng(300, 300)
     }
     files['cover.png'] = makeTestPng(300, 300)
-    files['tab_icon.png'] = makeTestPng(300, 300)
+    files['tab_icon.png'] = makeTestPng(60, 60)
 
     const zipFile = await makeTestZip(files)
     const result = await validateStickerZip({ zipFile, stickerCount: 8 })
@@ -96,6 +98,36 @@ describe('validateStickerZip', () => {
     expect(result.files!.cover).toBeDefined()
     expect(result.files!.tabIcon).toBeDefined()
     expect(result.items.every((item) => item.level === 'ok')).toBe(true)
+  })
+
+  it('rejects tab icon PNGs that are not 60x60', async () => {
+    const files: Record<string, Uint8Array> = {}
+    for (let i = 1; i <= 8; i++) {
+      files[`png/${String(i).padStart(2, '0')}.png`] = makeTestPng(300, 300)
+    }
+    files['cover.png'] = makeTestPng(300, 300)
+    files['tab_icon.png'] = makeTestPng(300, 300)
+
+    const zipFile = await makeTestZip(files)
+    const result = await validateStickerZip({ zipFile, stickerCount: 8 })
+
+    expect(result.valid).toBe(false)
+    expect(result.items.some((item) => item.code === 'tab_icon_size')).toBe(true)
+  })
+
+  it('allows non-square cover PNGs with a warning', async () => {
+    const files: Record<string, Uint8Array> = {}
+    for (let i = 1; i <= 8; i++) {
+      files[`png/${String(i).padStart(2, '0')}.png`] = makeTestPng(300, 300)
+    }
+    files['cover.png'] = makeTestPng(320, 300)
+    files['tab_icon.png'] = makeTestPng(60, 60)
+
+    const zipFile = await makeTestZip(files)
+    const result = await validateStickerZip({ zipFile, stickerCount: 8 })
+
+    expect(result.valid).toBe(true)
+    expect(result.items.some((item) => item.code === 'cover_not_square')).toBe(true)
   })
 
   it('rejects a ZIP with missing files', async () => {
@@ -118,7 +150,7 @@ describe('validateStickerZip', () => {
       files[`png/${String(i).padStart(2, '0')}.png`] = makeTestPng(301, 300)
     }
     files['cover.png'] = makeTestPng(300, 300)
-    files['tab_icon.png'] = makeTestPng(300, 300)
+    files['tab_icon.png'] = makeTestPng(60, 60)
 
     const zipFile = await makeTestZip(files)
     const result = await validateStickerZip({ zipFile, stickerCount: 8 })
@@ -133,7 +165,7 @@ describe('validateStickerZip', () => {
       files[`png/${String(i).padStart(2, '0')}.png`] = makeTestPng(400, 300)
     }
     files['cover.png'] = makeTestPng(300, 300)
-    files['tab_icon.png'] = makeTestPng(300, 300)
+    files['tab_icon.png'] = makeTestPng(60, 60)
 
     const zipFile = await makeTestZip(files)
     const result = await validateStickerZip({ zipFile, stickerCount: 8 })

@@ -101,4 +101,57 @@ describe('createStickerMarketAdminHandler', () => {
     expect(result).toHaveProperty('matched')
     expect(result).toHaveProperty('mismatches')
   })
+
+  it('maps review detail assets for admin inspection', async () => {
+    const deps = makeDeps()
+    deps.review.getDetail.mockResolvedValue({
+      package: {
+        id: 'pkg-1',
+        creatorId: 'creator-1',
+        name: 'Review Pack',
+        description: 'needs review',
+        priceMinor: 75,
+        currency: 'TWD',
+        stickerCount: 8,
+        status: 'in_review',
+        tags: '[]',
+        copyrightText: 'creator',
+        autoPublish: true,
+        coverDriveKey: 'stickers/pkg-1/cover.png',
+        tabIconDriveKey: 'stickers/pkg-1/tab_icon.png',
+      },
+      assets: [
+        {
+          id: 'asset-1',
+          number: 1,
+          driveKey: 'stickers/pkg-1/01.png',
+          width: 300,
+          height: 300,
+          sizeBytes: 100,
+          mimeType: 'image/png',
+        },
+      ],
+      latestValidation: [],
+    })
+    const handler = createStickerMarketAdminHandler(deps)
+
+    const result = await handler.getStickerReviewDetail(
+      { packageId: 'pkg-1' },
+      makeAuthCtx({ id: 'admin-1', role: 'admin' }),
+    )
+
+    expect(result.package.coverDriveKey).toBe('stickers/pkg-1/cover.png')
+    expect(result.package.tabIconDriveKey).toBe('stickers/pkg-1/tab_icon.png')
+    expect(result.assets).toEqual([
+      {
+        id: 'asset-1',
+        number: 1,
+        driveKey: 'stickers/pkg-1/01.png',
+        width: 300,
+        height: 300,
+        sizeBytes: 100,
+        mimeType: 'image/png',
+      },
+    ])
+  })
 })

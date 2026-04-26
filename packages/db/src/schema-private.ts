@@ -112,7 +112,9 @@ export const stickerReviewEvent = pgTable(
   'stickerReviewEvent',
   {
     id: text('id').primaryKey(),
-    packageId: text('packageId').notNull().references(() => stickerPackage.id),
+    packageId: text('packageId')
+      .notNull()
+      .references(() => stickerPackage.id),
     actorUserId: text('actorUserId').notNull(),
     action: text('action').notNull().$type<'submitted' | 'approved' | 'rejected'>(),
     reasonCategory: text('reasonCategory'),

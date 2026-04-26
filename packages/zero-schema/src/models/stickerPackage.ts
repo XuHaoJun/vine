@@ -35,18 +35,15 @@ export const schema = table('stickerPackage')
   })
   .primaryKey('id')
 
-export const publicStickerPackagePermission = serverWhere(
-  'stickerPackage',
-  (_, _auth) => _.cmp('status', 'on_sale'),
+export const publicStickerPackagePermission = serverWhere('stickerPackage', (_, _auth) =>
+  _.cmp('status', 'on_sale'),
 )
 
-export const creatorStickerPackagePermission = serverWhere(
-  'stickerPackage',
-  (eb, auth) =>
-    eb.or(
-      eb.cmp('status', 'on_sale'),
-      eb.exists('creator', (q) => q.where('userId', auth?.id || '')),
-    ),
+export const creatorStickerPackagePermission = serverWhere('stickerPackage', (eb, auth) =>
+  eb.or(
+    eb.cmp('status', 'on_sale'),
+    eb.exists('creator', (q) => q.where('userId', auth?.id || '')),
+  ),
 )
 
 export const mutate = mutations({})

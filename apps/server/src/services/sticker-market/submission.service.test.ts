@@ -28,4 +28,36 @@ describe('createSubmissionService', () => {
       }),
     ).rejects.toThrow('creator profile required')
   })
+
+  it('blocks review submission until required assets are uploaded', async () => {
+    const packageRepo = {
+      findOwnedPackage: vi.fn().mockResolvedValue({
+        id: 'pkg_1',
+        creatorId: 'creator_1',
+        status: 'draft',
+        stickerCount: 8,
+        coverDriveKey: '',
+        tabIconDriveKey: '',
+      }),
+      countAssets: vi.fn().mockResolvedValue(0),
+      submitForReview: vi.fn(),
+    }
+    const service = createSubmissionService({
+      db: {},
+      creatorRepo: {
+        findByUserId: vi.fn().mockResolvedValue({ id: 'creator_1', userId: 'user_1' }),
+      } as any,
+      packageRepo: packageRepo as any,
+      validateStickerZip: vi.fn() as any,
+      storeStickerAssets: vi.fn() as any,
+      now: () => new Date('2026-04-25T00:00:00Z'),
+      createId: () => 'id_1',
+      uploadRoot: '/tmp/vine-test',
+    })
+
+    await expect(
+      service.submitForReview({ userId: 'user_1', packageId: 'pkg_1' }),
+    ).rejects.toThrow('package assets incomplete')
+    expect(packageRepo.submitForReview).not.toHaveBeenCalled()
+  })
 })

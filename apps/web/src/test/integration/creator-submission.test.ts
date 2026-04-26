@@ -25,9 +25,7 @@ test.describe('creator submission', () => {
     await page.getByRole('button', { name: /下一步/ }).click()
 
     // Upload valid ZIP and proceed to step 3
-    await page.locator('input[type="file"]').setInputFiles(
-      'fixtures/sticker-valid-8.zip',
-    )
+    await page.locator('input[type="file"]').setInputFiles('fixtures/sticker-valid-8.zip')
     await expect(page.getByText('確認並提交審核')).toBeVisible()
     await page.getByRole('button', { name: '提交審核' }).click()
 
@@ -51,9 +49,9 @@ test.describe('creator submission', () => {
     await page.getByRole('button', { name: /下一步/ }).click()
 
     // Upload empty/invalid ZIP
-    await page.locator('input[type="file"]').setInputFiles(
-      'fixtures/sticker-invalid-empty.zip',
-    )
+    await page
+      .locator('input[type="file"]')
+      .setInputFiles('fixtures/sticker-invalid-empty.zip')
 
     // Error feedback should be visible and user should remain on step 2
     await expect(page.getByText('驗證失敗：')).toBeVisible()

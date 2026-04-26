@@ -150,6 +150,22 @@ message StickerPackageDraft {
   string tags_json = 9;
   string copyright_text = 10;
   bool auto_publish = 11;
+  string cover_drive_key = 12;
+  string tab_icon_drive_key = 13;
+  string review_reason_category = 14;
+  string review_reason_text = 15;
+  string review_suggestion = 16;
+  repeated int32 review_problem_asset_numbers = 17;
+}
+
+message StickerAsset {
+  string id = 1;
+  int32 number = 2;
+  string drive_key = 3;
+  int32 width = 4;
+  int32 height = 5;
+  int32 size_bytes = 6;
+  string mime_type = 7;
 }
 
 message GetCreatorProfileRequest {}
@@ -213,6 +229,7 @@ message GetStickerReviewDetailRequest { string package_id = 1; }
 message GetStickerReviewDetailResponse {
   StickerPackageDraft package = 1;
   repeated StickerAssetValidationItem latest_validation = 2;
+  repeated StickerAsset assets = 3;
 }
 
 message ApproveStickerPackageRequest { string package_id = 1; }
