@@ -101,6 +101,7 @@ await app.register(fastifyConnectPlugin, {
     stickerMarketCreator: {
       creatorRepo: stickerMarket.creatorRepo,
       submission: stickerMarket.submission,
+      salesReport: stickerMarket.salesReport,
       db,
     },
   }),
