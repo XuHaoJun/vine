@@ -1,7 +1,9 @@
+import { randomUUID } from 'node:crypto'
 import { and, eq, inArray } from 'drizzle-orm'
 import { creatorProfile } from '@vine/db/schema-public'
 import {
   creatorPayoutAccount,
+  creatorPayoutAuditEvent,
   creatorPayoutBatch,
   creatorPayoutLedger,
   creatorPayoutRequest,
@@ -16,7 +18,12 @@ export function createPayoutRepository() {
         .where(eq(creatorProfile.userId, input.userId))
         .limit(1)
       if (!creator) {
-        return { creator: undefined, account: undefined, availableLedgers: [], history: [] }
+        return {
+          creator: undefined,
+          account: undefined,
+          availableLedgers: [],
+          history: [],
+        }
       }
       const [account] = await db
         .select()
@@ -70,6 +77,14 @@ export function createPayoutRepository() {
             eq(creatorPayoutLedger.status, 'available'),
           ),
         )
+      await insertAuditEvent(db, {
+        id: input.auditId,
+        payoutRequestId: request.id,
+        actorUserId: input.actorUserId,
+        action: 'request_created',
+        metadataJson: JSON.stringify({ ledgerIds: input.ledgerIds }),
+        createdAt: input.now,
+      })
       return request
     },
 
@@ -100,6 +115,17 @@ export function createPayoutRepository() {
           updatedAt: input.now,
         })
         .returning()
+      await insertAuditEvent(db, {
+        id: input.auditId,
+        actorUserId: input.actorUserId,
+        action: 'payout_account_replaced',
+        metadataJson: JSON.stringify({
+          creatorId: input.creatorId,
+          payoutAccountId: account.id,
+          accountLast4: account.accountLast4,
+        }),
+        createdAt: input.now,
+      })
       return account
     },
 
@@ -107,7 +133,9 @@ export function createPayoutRepository() {
       return db
         .select()
         .from(creatorPayoutRequest)
-        .where(eq(creatorPayoutRequest.status, 'requested'))
+        .where(
+          inArray(creatorPayoutRequest.status, ['requested', 'approved', 'exported']),
+        )
         .limit(input.limit)
     },
 
@@ -128,6 +156,14 @@ export function createPayoutRepository() {
         )
         .returning()
       if (!request) throw new Error('payout request not found or not in requested status')
+      await insertAuditEvent(db, {
+        id: input.auditId,
+        payoutRequestId: request.id,
+        actorUserId: input.actorUserId,
+        action: 'request_approved',
+        metadataJson: '{}',
+        createdAt: input.now,
+      })
       return request
     },
 
@@ -149,10 +185,40 @@ export function createPayoutRepository() {
         )
         .returning()
       if (!request) throw new Error('payout request not found or not in requested status')
+      const ledgerIds = parseLedgerIds(request.ledgerIdsJson)
+      if (ledgerIds.length > 0) {
+        await db
+          .update(creatorPayoutLedger)
+          .set({ status: 'available', updatedAt: input.now })
+          .where(inArray(creatorPayoutLedger.id, ledgerIds))
+      }
+      await insertAuditEvent(db, {
+        id: input.auditId,
+        payoutRequestId: request.id,
+        actorUserId: input.actorUserId,
+        action: 'request_rejected',
+        metadataJson: JSON.stringify({ reason: input.reason }),
+        createdAt: input.now,
+      })
       return request
     },
 
     async createBatchFromApprovedRequests(db: any, input: any) {
+      if (!Array.isArray(input.requestIds) || input.requestIds.length === 0) {
+        throw new Error('at least one approved payout request is required')
+      }
+      const approvedRequests = await db
+        .select()
+        .from(creatorPayoutRequest)
+        .where(
+          and(
+            inArray(creatorPayoutRequest.id, input.requestIds),
+            eq(creatorPayoutRequest.status, 'approved'),
+          ),
+        )
+      if (approvedRequests.length !== new Set(input.requestIds).size) {
+        throw new Error('all payout requests must be approved before batching')
+      }
       const [batch] = await db
         .insert(creatorPayoutBatch)
         .values({
@@ -171,21 +237,30 @@ export function createPayoutRepository() {
             eq(creatorPayoutRequest.status, 'approved'),
           ),
         )
-      const requests = await db
-        .select()
-        .from(creatorPayoutRequest)
-        .where(inArray(creatorPayoutRequest.id, input.requestIds))
-      const ledgerIds = requests.flatMap((request: any) => parseLedgerIds(request.ledgerIdsJson))
+      const ledgerIds = approvedRequests.flatMap((request: any) =>
+        parseLedgerIds(request.ledgerIdsJson),
+      )
       if (ledgerIds.length > 0) {
         await db
           .update(creatorPayoutLedger)
           .set({ status: 'locked', updatedAt: input.now })
           .where(inArray(creatorPayoutLedger.id, ledgerIds))
       }
+      await insertAuditEvent(db, {
+        id: input.auditId,
+        payoutBatchId: batch.id,
+        actorUserId: input.actorUserId,
+        action: 'batch_created',
+        metadataJson: JSON.stringify({ requestIds: input.requestIds }),
+        createdAt: input.now,
+      })
       return batch
     },
 
-    async exportBatchRows(db: any, input: { batchId: string }) {
+    async exportBatchRows(
+      db: any,
+      input: { actorUserId: string; batchId: string; auditId?: string; now?: string },
+    ) {
       const rows = await db
         .select({
           batchId: creatorPayoutRequest.batchId,
@@ -212,6 +287,23 @@ export function createPayoutRepository() {
         )
         .where(eq(creatorPayoutRequest.batchId, input.batchId))
 
+      await db
+        .update(creatorPayoutBatch)
+        .set({
+          status: 'exported',
+          exportedAt: input.now,
+          exportedByUserId: input.actorUserId,
+          updatedAt: input.now,
+        })
+        .where(eq(creatorPayoutBatch.id, input.batchId))
+      await insertAuditEvent(db, {
+        id: input.auditId,
+        payoutBatchId: input.batchId,
+        actorUserId: input.actorUserId,
+        action: 'batch_exported',
+        metadataJson: JSON.stringify({ rowCount: rows.length }),
+        createdAt: input.now,
+      })
       return rows.map((row: any) => ({
         ...row,
         batchId: row.batchId ?? input.batchId,
@@ -243,6 +335,15 @@ export function createPayoutRepository() {
           .set({ status: 'paid', updatedAt: input.now })
           .where(inArray(creatorPayoutLedger.id, ledgerIds))
       }
+      await insertAuditEvent(db, {
+        id: input.auditId,
+        payoutRequestId: request.id,
+        payoutBatchId: request.batchId,
+        actorUserId: input.actorUserId,
+        action: 'request_marked_paid',
+        metadataJson: JSON.stringify({ bankTransactionId: input.bankTransactionId }),
+        createdAt: input.now,
+      })
       return request
     },
 
@@ -269,9 +370,41 @@ export function createPayoutRepository() {
           .set({ status: 'available', updatedAt: input.now })
           .where(inArray(creatorPayoutLedger.id, ledgerIds))
       }
+      await insertAuditEvent(db, {
+        id: input.auditId,
+        payoutRequestId: request.id,
+        payoutBatchId: request.batchId,
+        actorUserId: input.actorUserId,
+        action: 'request_marked_failed',
+        metadataJson: JSON.stringify({ reason: input.reason }),
+        createdAt: input.now,
+      })
       return request
     },
   }
+}
+
+async function insertAuditEvent(
+  db: any,
+  input: {
+    id: string | undefined
+    payoutRequestId?: string | null
+    payoutBatchId?: string | null
+    actorUserId: string
+    action: string
+    metadataJson: string
+    createdAt: string | undefined
+  },
+) {
+  await db.insert(creatorPayoutAuditEvent).values({
+    id: input.id ?? randomUUID(),
+    payoutRequestId: input.payoutRequestId,
+    payoutBatchId: input.payoutBatchId,
+    actorUserId: input.actorUserId,
+    action: input.action,
+    metadataJson: input.metadataJson,
+    createdAt: input.createdAt,
+  })
 }
 
 function parseLedgerIds(value: string | null | undefined) {
@@ -279,7 +412,9 @@ function parseLedgerIds(value: string | null | undefined) {
   try {
     const parsed = JSON.parse(value)
     return Array.isArray(parsed)
-      ? parsed.filter((item): item is string => typeof item === 'string' && item.length > 0)
+      ? parsed.filter(
+          (item): item is string => typeof item === 'string' && item.length > 0,
+        )
       : []
   } catch {
     return []

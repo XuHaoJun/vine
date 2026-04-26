@@ -6,24 +6,32 @@ function makeService(overrides: Partial<any> = {}) {
     getCreatorPayoutOverview: vi.fn().mockResolvedValue({
       creator: { id: 'creator_1', displayName: 'Studio' },
       account: { id: 'acct_1', bankName: 'Taiwan Bank', accountLast4: '5678' },
-      availableLedgers: [{
-        id: 'ledger_1',
-        creatorId: 'creator_1',
-        month: '2026-03',
-        currency: 'TWD',
-        grossAmountMinor: 2000,
-        refundedAmountMinor: 0,
-        platformFeeMinor: 600,
-        creatorShareMinor: 1400,
-        taxWithholdingMinor: 0,
-        transferFeeMinor: 30,
-        netAmountMinor: 1370,
-        status: 'available',
-      }],
+      availableLedgers: [
+        {
+          id: 'ledger_1',
+          creatorId: 'creator_1',
+          month: '2026-03',
+          currency: 'TWD',
+          grossAmountMinor: 2000,
+          refundedAmountMinor: 0,
+          platformFeeMinor: 600,
+          creatorShareMinor: 1400,
+          taxWithholdingMinor: 0,
+          transferFeeMinor: 30,
+          netAmountMinor: 1370,
+          status: 'available',
+        },
+      ],
       history: [],
     }),
-    createRequestForLedgers: vi.fn().mockResolvedValue({ id: 'req_1', status: 'requested', netAmountMinor: 1370 }),
-    replaceActivePayoutAccount: vi.fn().mockResolvedValue({ id: 'acct_new', bankName: 'Taiwan Bank', accountLast4: '9012' }),
+    createRequestForLedgers: vi
+      .fn()
+      .mockResolvedValue({ id: 'req_1', status: 'requested', netAmountMinor: 1370 }),
+    replaceActivePayoutAccount: vi.fn().mockResolvedValue({
+      id: 'acct_new',
+      bankName: 'Taiwan Bank',
+      accountLast4: '9012',
+    }),
     listPendingRequests: vi.fn().mockResolvedValue([]),
     approveRequest: vi.fn().mockResolvedValue({ id: 'req_1', status: 'approved' }),
     rejectRequest: vi.fn().mockResolvedValue({ id: 'req_1', status: 'rejected' }),
@@ -118,31 +126,40 @@ describe('createPayoutService', () => {
   it('exports CSV with full account number only for admin batch export', async () => {
     const { service, repo } = makeService({
       repo: {
-        exportBatchRows: vi.fn().mockResolvedValue([{
-          batchId: 'batch_1',
-          payoutRequestId: 'req_1',
-          creatorId: 'creator_1',
-          creatorDisplayName: 'Studio',
-          legalName: 'Creator Legal Name',
-          bankCode: '004',
-          bankName: 'Taiwan Bank',
-          branchName: 'Main',
-          accountNumber: '123456789012',
-          accountLast4: '9012',
-          currency: 'TWD',
-          grossAmountMinor: 2000,
-          taxWithholdingMinor: 0,
-          transferFeeMinor: 30,
-          netAmountMinor: 1370,
-          memo: 'Vine payout req_1',
-        }]),
+        exportBatchRows: vi.fn().mockResolvedValue([
+          {
+            batchId: 'batch_1',
+            payoutRequestId: 'req_1',
+            creatorId: 'creator_1',
+            creatorDisplayName: 'Studio',
+            legalName: 'Creator Legal Name',
+            bankCode: '004',
+            bankName: 'Taiwan Bank',
+            branchName: 'Main',
+            accountNumber: '123456789012',
+            accountLast4: '9012',
+            currency: 'TWD',
+            grossAmountMinor: 2000,
+            taxWithholdingMinor: 0,
+            transferFeeMinor: 30,
+            netAmountMinor: 1370,
+            memo: 'Vine payout req_1',
+          },
+        ]),
       },
     })
     const csv = await service.exportBatchCsv({
       actorUserId: 'admin_1',
       batchId: 'batch_1',
     })
-    expect(repo.exportBatchRows).toHaveBeenCalledWith({}, { batchId: 'batch_1' })
+    expect(repo.exportBatchRows).toHaveBeenCalledWith(
+      {},
+      {
+        actorUserId: 'admin_1',
+        batchId: 'batch_1',
+        now: '2026-04-26T00:00:00.000Z',
+      },
+    )
     expect(csv).toContain('accountNumber')
     expect(csv).toContain('123456789012')
   })
