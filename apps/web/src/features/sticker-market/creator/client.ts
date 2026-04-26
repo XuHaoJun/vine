@@ -12,14 +12,14 @@ export function creatorSalesReportQueryKey(month: string) {
 }
 
 export function getCurrentReportMonth(date = new Date()) {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = date.getUTCFullYear()
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0')
   return `${year}-${month}`
 }
 
 export function shiftReportMonth(month: string, delta: number) {
   const [yearText, monthText] = month.split('-')
-  const date = new Date(Number(yearText), Number(monthText) - 1 + delta, 1)
+  const date = new Date(Date.UTC(Number(yearText), Number(monthText) - 1 + delta, 1))
   return getCurrentReportMonth(date)
 }
 
