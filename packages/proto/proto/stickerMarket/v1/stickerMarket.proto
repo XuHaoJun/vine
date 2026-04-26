@@ -5,6 +5,20 @@ package stickerMarket.v1;
 service StickerMarketUserService {
   rpc CreateCheckout(CreateCheckoutRequest) returns (CreateCheckoutResponse);
   rpc GetOrder(GetOrderRequest) returns (GetOrderResponse);
+  rpc FollowCreator(FollowCreatorRequest) returns (FollowCreatorResponse);
+  rpc UnfollowCreator(UnfollowCreatorRequest) returns (UnfollowCreatorResponse);
+  rpc UpsertStickerPackageReview(UpsertStickerPackageReviewRequest) returns (UpsertStickerPackageReviewResponse);
+  rpc DeleteStickerPackageReview(DeleteStickerPackageReviewRequest) returns (DeleteStickerPackageReviewResponse);
+  rpc ListLaunchNotifications(ListLaunchNotificationsRequest) returns (ListLaunchNotificationsResponse);
+  rpc MarkLaunchNotificationRead(MarkLaunchNotificationReadRequest) returns (MarkLaunchNotificationReadResponse);
+}
+
+// --- Public discovery (no auth required) ---
+service StickerMarketDiscoveryService {
+  rpc GetStoreHome(GetStoreHomeRequest) returns (GetStoreHomeResponse);
+  rpc SearchStickerPackages(SearchStickerPackagesRequest) returns (SearchStickerPackagesResponse);
+  rpc GetStickerPackageDetail(GetStickerPackageDetailRequest) returns (GetStickerPackageDetailResponse);
+  rpc GetCreatorPublicProfile(GetCreatorPublicProfileRequest) returns (GetCreatorPublicProfileResponse);
 }
 
 service StickerMarketAdminService {
@@ -21,6 +35,10 @@ service StickerMarketAdminService {
   rpc ExportPayoutBatch(ExportPayoutBatchRequest) returns (ExportPayoutBatchResponse);
   rpc MarkPayoutPaid(MarkPayoutPaidRequest) returns (MarkPayoutPaidResponse);
   rpc MarkPayoutFailed(MarkPayoutFailedRequest) returns (MarkPayoutFailedResponse);
+  rpc ListFeaturedShelves(ListFeaturedShelvesRequest) returns (ListFeaturedShelvesResponse);
+  rpc UpsertFeaturedShelf(UpsertFeaturedShelfRequest) returns (UpsertFeaturedShelfResponse);
+  rpc PublishFeaturedShelf(PublishFeaturedShelfRequest) returns (PublishFeaturedShelfResponse);
+  rpc ArchiveFeaturedShelf(ArchiveFeaturedShelfRequest) returns (ArchiveFeaturedShelfResponse);
 }
 
 enum RefundStatus {
@@ -371,3 +389,202 @@ message MarkPayoutFailedRequest {
   string reason = 2;
 }
 message MarkPayoutFailedResponse { string status = 1; }
+
+// --- Discovery messages ---
+
+message GetStoreHomeRequest {}
+
+message StoreHomeShelf {
+  string id = 1;
+  string title = 2;
+  repeated StickerPackageCard packages = 3;
+}
+
+message StickerPackageCard {
+  string id = 1;
+  string name = 2;
+  string creator_id = 3;
+  string creator_display_name = 4;
+  string cover_url = 5;
+  string sticker_type = 6;
+  int32 sticker_count = 7;
+  int32 price_minor = 8;
+  string currency = 9;
+  double average_rating = 10;
+  int32 review_count = 11;
+  bool owned = 12;
+  int32 display_price_minor = 13;
+  string display_currency = 14;
+  string published_at = 15;
+}
+
+message GetStoreHomeResponse {
+  repeated StoreHomeShelf featured_shelves = 1;
+  StoreHomeShelf bestseller_7d = 2;
+  StoreHomeShelf bestseller_30d = 3;
+  StoreHomeShelf latest_releases = 4;
+}
+
+message SearchStickerPackagesRequest {
+  string query = 1;
+  string sticker_type = 2;
+  int32 price_min = 3;
+  int32 price_max = 4;
+  bool owned_only = 5;
+  string creator_id = 6;
+  string locale = 7;
+  string sort = 8;
+  int32 page_size = 9;
+  string page_token = 10;
+}
+
+message SearchStickerPackagesResponse {
+  repeated StickerPackageCard results = 1;
+  string next_page_token = 2;
+  int32 total_count = 3;
+}
+
+message GetStickerPackageDetailRequest {
+  string package_id = 1;
+}
+
+message CreatorProfileSummary {
+  string id = 1;
+  string display_name = 2;
+  string bio = 3;
+  string avatar_url = 4;
+  int32 follower_count = 5;
+  bool followed_by_me = 6;
+}
+
+message ReviewSnippet {
+  string id = 1;
+  string user_id = 2;
+  string user_display_name = 3;
+  int32 rating = 4;
+  string body = 5;
+  string created_at = 6;
+}
+
+message RatingSummary {
+  double average_rating = 1;
+  int32 total_count = 2;
+  ReviewSnippet current_user_review = 3;
+}
+
+message StickerPackageDetail {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  int32 price_minor = 4;
+  string currency = 5;
+  string cover_url = 6;
+  string sticker_type = 7;
+  int32 sticker_count = 8;
+  string status = 9;
+  string published_at = 10;
+  repeated string tags = 11;
+  bool owned = 12;
+  CreatorProfileSummary creator = 13;
+  RatingSummary rating = 14;
+  repeated ReviewSnippet recent_reviews = 15;
+  repeated StickerPackageCard same_creator_packages = 16;
+  int32 display_price_minor = 17;
+  string display_currency = 18;
+}
+
+message GetStickerPackageDetailResponse {
+  StickerPackageDetail package = 1;
+}
+
+message GetCreatorPublicProfileRequest {
+  string creator_id = 1;
+}
+
+message GetCreatorPublicProfileResponse {
+  CreatorProfileSummary profile = 1;
+  repeated StickerPackageCard packages = 2;
+}
+
+// --- Follow / review messages ---
+
+message FollowCreatorRequest { string creator_id = 1; }
+message FollowCreatorResponse {}
+
+message UnfollowCreatorRequest { string creator_id = 1; }
+message UnfollowCreatorResponse {}
+
+message UpsertStickerPackageReviewRequest {
+  string package_id = 1;
+  int32 rating = 2;
+  string body = 3;
+}
+message UpsertStickerPackageReviewResponse { ReviewSnippet review = 1; }
+
+message DeleteStickerPackageReviewRequest { string package_id = 1; }
+message DeleteStickerPackageReviewResponse {}
+
+// --- Launch notification messages ---
+
+message LaunchNotification {
+  string id = 1;
+  string creator_id = 2;
+  string creator_display_name = 3;
+  string package_id = 4;
+  string package_name = 5;
+  string cover_url = 6;
+  string status = 7;
+  string created_at = 8;
+  string read_at = 9;
+}
+
+message ListLaunchNotificationsRequest { int32 page_size = 1; string page_token = 2; }
+message ListLaunchNotificationsResponse {
+  repeated LaunchNotification notifications = 1;
+  string next_page_token = 2;
+}
+
+message MarkLaunchNotificationReadRequest { string notification_id = 1; }
+message MarkLaunchNotificationReadResponse {}
+
+// --- Admin featured shelf messages ---
+
+message FeaturedShelf {
+  string id = 1;
+  string slug = 2;
+  string title = 3;
+  string status = 4;
+  string starts_at = 5;
+  string ends_at = 6;
+  string created_by_user_id = 7;
+  string created_at = 8;
+  string updated_at = 9;
+  repeated FeaturedShelfItem items = 10;
+}
+
+message FeaturedShelfItem {
+  string id = 1;
+  string shelf_id = 2;
+  string package_id = 3;
+  string package_name = 4;
+  int32 position = 5;
+}
+
+message ListFeaturedShelvesRequest {}
+message ListFeaturedShelvesResponse { repeated FeaturedShelf shelves = 1; }
+
+message UpsertFeaturedShelfRequest {
+  string id = 1;
+  string slug = 2;
+  string title = 3;
+  repeated string package_ids = 4;
+  string starts_at = 5;
+  string ends_at = 6;
+}
+message UpsertFeaturedShelfResponse { FeaturedShelf shelf = 1; }
+
+message PublishFeaturedShelfRequest { string id = 1; }
+message PublishFeaturedShelfResponse { FeaturedShelf shelf = 1; }
+
+message ArchiveFeaturedShelfRequest { string id = 1; }
+message ArchiveFeaturedShelfResponse { FeaturedShelf shelf = 1; }

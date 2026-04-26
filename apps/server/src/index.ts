@@ -92,12 +92,16 @@ await app.register(fastifyConnectPlugin, {
       returnUrl: paymentsEnv.PAYMENTS_RETURN_URL,
       orderResultUrl: paymentsEnv.PAYMENTS_ORDER_RESULT_URL,
       clientBackUrl: paymentsEnv.PAYMENTS_CLIENT_BACK_URL,
+      follow: stickerMarket.follow,
+      review: stickerMarket.review,
+      launchNotification: stickerMarket.launchNotification,
     },
     stickerMarketAdmin: {
       refund: payments.refund,
       reconciliation: payments.reconciliation,
       review: stickerMarket.review,
       payout: stickerMarket.payout,
+      featuredShelf: stickerMarket.featuredShelf,
     },
     stickerMarketCreator: {
       creatorRepo: stickerMarket.creatorRepo,
@@ -105,6 +109,12 @@ await app.register(fastifyConnectPlugin, {
       salesReport: stickerMarket.salesReport,
       payout: stickerMarket.payout,
       db,
+    },
+    stickerMarketDiscovery: {
+      db,
+      drive,
+      auth,
+      discovery: stickerMarket.discovery,
     },
   }),
 })

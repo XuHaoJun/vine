@@ -236,6 +236,66 @@ export const stickerAsset = pgTable(
   ],
 )
 
+export const creatorFollow = pgTable(
+  'creatorFollow',
+  {
+    id: text('id').primaryKey(),
+    userId: text('userId').notNull(),
+    creatorId: text('creatorId').notNull(),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('creatorFollow_userId_creatorId_unique').on(table.userId, table.creatorId),
+    index('creatorFollow_creatorId_idx').on(table.creatorId),
+    index('creatorFollow_userId_idx').on(table.userId),
+  ],
+)
+
+export const stickerPackageReview = pgTable(
+  'stickerPackageReview',
+  {
+    id: text('id').primaryKey(),
+    packageId: text('packageId').notNull(),
+    userId: text('userId').notNull(),
+    rating: integer('rating').notNull(),
+    body: text('body').notNull().default(''),
+    status: text('status')
+      .notNull()
+      .$type<'pending' | 'approved' | 'rejected'>()
+      .default('pending'),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('stickerPackageReview_packageId_userId_unique').on(table.packageId, table.userId),
+    index('stickerPackageReview_packageId_idx').on(table.packageId),
+    index('stickerPackageReview_userId_idx').on(table.userId),
+    index('stickerPackageReview_packageId_status_idx').on(table.packageId, table.status),
+    check('stickerPackageReview_rating_check', sql`${table.rating} >= 1 AND ${table.rating} <= 5`),
+  ],
+)
+
+export const creatorLaunchNotification = pgTable(
+  'creatorLaunchNotification',
+  {
+    id: text('id').primaryKey(),
+    recipientUserId: text('recipientUserId').notNull(),
+    creatorId: text('creatorId').notNull(),
+    packageId: text('packageId').notNull(),
+    status: text('status')
+      .notNull()
+      .$type<'pending' | 'sent' | 'failed'>()
+      .default('pending'),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    readAt: timestamp('readAt', { mode: 'string' }),
+  },
+  (table) => [
+    uniqueIndex('creatorLaunchNotification_recipient_package_unique').on(table.recipientUserId, table.packageId),
+    index('creatorLaunchNotification_recipient_status_created_idx').on(table.recipientUserId, table.status, table.createdAt),
+    index('creatorLaunchNotification_creatorId_idx').on(table.creatorId),
+  ],
+)
+
 export const entitlement = pgTable(
   'entitlement',
   {

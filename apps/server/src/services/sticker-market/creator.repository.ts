@@ -5,6 +5,15 @@ export type CreatorProfileRow = typeof creatorProfile.$inferSelect
 
 export function createCreatorRepository() {
   return {
+    async findById(db: any, id: string): Promise<CreatorProfileRow | undefined> {
+      const [row] = await db
+        .select()
+        .from(creatorProfile)
+        .where(eq(creatorProfile.id, id))
+        .limit(1)
+      return row
+    },
+
     async findByUserId(db: any, userId: string): Promise<CreatorProfileRow | undefined> {
       const [row] = await db
         .select()

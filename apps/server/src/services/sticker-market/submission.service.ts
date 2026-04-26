@@ -4,6 +4,7 @@ export function createSubmissionService(deps: {
   packageRepo: any
   validateStickerZip: any
   storeStickerAssets: any
+  launchNotification?: any
   now: () => Date
   createId: () => string
   uploadRoot: string
@@ -151,11 +152,18 @@ export function createSubmissionService(deps: {
     async publishApproved(input: { userId: string; packageId: string }) {
       const creator = await deps.creatorRepo.findByUserId(deps.db, input.userId)
       if (!creator) throw new Error('creator profile required')
-      return deps.packageRepo.publishApproved(deps.db, {
+      const pkg = await deps.packageRepo.publishApproved(deps.db, {
         packageId: input.packageId,
         creatorId: creator.id,
         now: deps.now().toISOString(),
       })
+      if (deps.launchNotification) {
+        await deps.launchNotification.notifyFollowers(deps.db, {
+          packageId: pkg.id,
+          creatorId: creator.id,
+        })
+      }
+      return pkg
     },
   }
 }

@@ -31,6 +31,7 @@ export type StickerMarketAdminHandlerDeps = {
     }): Promise<any>
   }
   payout: any
+  featuredShelf: any
 }
 
 function requireAdmin(ctx: HandlerContext) {
@@ -195,6 +196,59 @@ export function createStickerMarketAdminHandler(deps: StickerMarketAdminHandlerD
       })
       return { status: result.status }
     },
+
+    async listFeaturedShelves(_req: any, ctx: HandlerContext) {
+      requireAdmin(ctx)
+      const shelves = await deps.featuredShelf.listShelves()
+      return { shelves: shelves.map(mapFeaturedShelf) }
+    },
+
+    async upsertFeaturedShelf(req: any, ctx: HandlerContext) {
+      const auth = requireAdmin(ctx)
+      const shelf = await deps.featuredShelf.upsertShelf({
+        id: req.id || crypto.randomUUID(),
+        slug: req.slug,
+        title: req.title,
+        packageIds: req.packageIds ?? [],
+        startsAt: req.startsAt || null,
+        endsAt: req.endsAt || null,
+        createdByUserId: auth.id,
+      })
+      return { shelf: mapFeaturedShelf(shelf) }
+    },
+
+    async publishFeaturedShelf(req: { id: string }, ctx: HandlerContext) {
+      requireAdmin(ctx)
+      const shelf = await deps.featuredShelf.publishShelf(req.id)
+      return { shelf: mapFeaturedShelf(shelf) }
+    },
+
+    async archiveFeaturedShelf(req: { id: string }, ctx: HandlerContext) {
+      requireAdmin(ctx)
+      const shelf = await deps.featuredShelf.archiveShelf(req.id)
+      return { shelf: mapFeaturedShelf(shelf) }
+    },
+  }
+}
+
+function mapFeaturedShelf(shelf: any) {
+  return {
+    id: shelf.id,
+    slug: shelf.slug,
+    title: shelf.title,
+    status: shelf.status,
+    startsAt: shelf.startsAt ?? '',
+    endsAt: shelf.endsAt ?? '',
+    createdByUserId: shelf.createdByUserId,
+    createdAt: shelf.createdAt,
+    updatedAt: shelf.updatedAt,
+    items: (shelf.items ?? []).map((item: any) => ({
+      id: item.id,
+      shelfId: item.shelfId,
+      packageId: item.packageId,
+      packageName: item.packageName ?? '',
+      position: item.position,
+    })),
   }
 }
 
