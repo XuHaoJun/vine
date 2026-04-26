@@ -54,7 +54,7 @@ export function SearchResultsPage() {
         setAllResults((prev) => [...prev, ...(data.results ?? [])])
       }
     }
-  }, [data])
+  }, [data, pageToken])
 
   const handleSearch = () => {
     const q = query.trim()

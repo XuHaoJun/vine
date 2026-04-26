@@ -31,7 +31,10 @@ export function StickerPicker({ onSelect }: Props) {
     { enabled: Boolean(userId) },
   )
 
-  const ownedIds = new Set((entitlements ?? []).map((e) => e.packageId))
+  const ownedIds = useMemo(
+    () => new Set((entitlements ?? []).map((e) => e.packageId)),
+    [entitlements],
+  )
   const ownedPackages = useMemo(
     () => (packages ?? []).filter((p) => ownedIds.has(p.id)),
     [packages, ownedIds],
