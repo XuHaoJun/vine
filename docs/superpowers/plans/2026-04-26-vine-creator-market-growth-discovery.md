@@ -4,7 +4,7 @@
 
 **Goal:** Build Phase 3 so users can discover, search, follow, and trust creator sticker packages beyond the basic purchase flow.
 
-**Architecture:** Add small marketplace tables for featured shelves, creator follows, reviews, launch notifications, and display currency rates. Expose ranking/search/social operations through ConnectRPC services. Keep Zero for synced package/entitlement data already used by chat and store UI; use React Query around typed ConnectRPC clients for ranked/search/admin flows.
+**Architecture:** Add small marketplace tables for featured shelves, creator follows, reviews, launch notifications, and display currency rates. Expose ranking/search/social operations through ConnectRPC services. Keep Zero for synced package/entitlement data already used by chat and store UI; use React Query around typed ConnectRPC clients for ranked/search/admin flows. Public discovery reads must not live behind the existing fully authenticated `StickerMarketUserService` registration unless that registration is changed to optional auth.
 
 **Tech Stack:** Bun, Drizzle/PostgreSQL, ConnectRPC, Fastify, OneJS, Tamagui, Zero, React Query, Vitest.
 
@@ -17,7 +17,7 @@
 ### Database
 
 - Modify: `packages/db/src/schema-public.ts`
-  - Add public marketplace tables that can be safely synced or read publicly where appropriate: `creatorFollow`, `stickerPackageReview`, `creatorLaunchNotification`.
+  - Add product-facing marketplace tables: `creatorFollow`, `stickerPackageReview`, `creatorLaunchNotification`. "Public schema" here means the existing DB schema file, not public read access.
 - Modify: `packages/db/src/schema-private.ts`
   - Add admin/private operational tables: `stickerFeaturedShelf`, `stickerFeaturedShelfItem`, `currencyDisplayRate`.
 - Add: `packages/db/src/migrations/20260426000002_creator_market_growth_discovery.ts`
@@ -26,17 +26,17 @@
 ### Zero Schema
 
 - Add or modify models/queries only for tables that need live client sync:
-  - `packages/zero-schema/src/models/creatorFollow.ts`
-  - `packages/zero-schema/src/models/stickerPackageReview.ts`
   - `packages/zero-schema/src/models/creatorLaunchNotification.ts`
   - `packages/zero-schema/src/relationships.ts`
   - `packages/zero-schema/src/queries/*`
+- Do not sync `creatorFollow` or raw `stickerPackageReview` rows in Phase 3 unless the implementation also defines strict permissions and a concrete UI need. Prefer ConnectRPC for follow/review writes and public aggregate/snippet reads.
 - Generated files are updated through the existing Zero generation workflow.
 
 ### Proto
 
 - Modify: `packages/proto/proto/stickerMarket/v1/stickerMarket.proto`
-  - Add user-facing discovery/follow/review/notification RPCs.
+  - Add public discovery RPCs in a service that can be registered without whole-service auth.
+  - Add authenticated follow/review/notification RPCs.
   - Add admin featured shelf RPCs.
 - Generated: `packages/proto/gen/stickerMarket/v1/stickerMarket_pb.ts`
   - Created by `bun turbo proto:generate`.
@@ -56,6 +56,7 @@
   - `apps/server/src/services/sticker-market/currency-display.service.ts`
 - Modify:
   - `apps/server/src/services/sticker-market/index.ts`
+  - `apps/server/src/connect/routes.ts`
   - `apps/server/src/connect/stickerMarketUser.ts`
   - `apps/server/src/connect/stickerMarketAdmin.ts`
   - `apps/server/src/index.ts`
@@ -153,10 +154,10 @@ Create `20260426000002_creator_market_growth_discovery.ts` with matching `up` an
 Run:
 
 ```bash
-bun run --cwd packages/db test
+bun run --cwd packages/db typecheck
 ```
 
-Expected: db package tests pass.
+Expected: db package typecheck passes. Migration-backed behavior is verified by focused server integration tests in later tasks.
 
 ---
 
@@ -168,7 +169,7 @@ Expected: db package tests pass.
 
 - [ ] **Step 2.1: Add discovery RPCs**
 
-Extend the user sticker market service with:
+Add public discovery RPCs to a service that is not registered behind whole-service auth:
 
 ```proto
 rpc GetStoreHome(GetStoreHomeRequest) returns (GetStoreHomeResponse);
@@ -178,6 +179,8 @@ rpc GetCreatorPublicProfile(GetCreatorPublicProfileRequest) returns (GetCreatorP
 ```
 
 Responses should share compact package card messages with fields for package ID, title, creator, cover URL, sticker type, count, rating summary, owned state, and display price.
+
+Implementation constraint: existing `StickerMarketUserService` is registered through `withAuthService`. Either create a new public discovery service, or change route registration so these read methods support optional auth while checkout/order/follow/review/notification mutations still require auth.
 
 - [ ] **Step 2.2: Add follow and review RPCs**
 
@@ -276,6 +279,8 @@ Verify: Task 3.1 tests pass.
 Wire user-facing read handlers and map service results into proto responses.
 
 Run targeted handler tests if existing handler tests are present; otherwise add service-level coverage and rely on generated types for contract shape.
+
+Verify public discovery RPCs work without auth, and authenticated sessions enrich the response with owned/follow/current-user-review state.
 
 ---
 
@@ -433,6 +438,8 @@ Verify: unowned users cannot submit from the UI or server.
 Cover:
 
 - notifications are created when a package becomes `on_sale`
+- auto-published admin approvals create notifications
+- creator manual publish creates notifications
 - one notification per follower/package
 - repeated publish event is idempotent
 - creator does not notify themselves
@@ -440,7 +447,7 @@ Cover:
 
 - [ ] **Step 8.2: Hook publish transition**
 
-After a package is published, call launch notification service with package ID and creator ID.
+Call launch notification service for every `status -> on_sale` transition, including admin approval with `autoPublish = true` and creator manual publish from `approved`.
 
 Verify: existing publish tests still pass.
 
@@ -539,7 +546,13 @@ bun turbo proto:generate
 
 - [ ] **Step 11.2: Run Zero generation if synced tables were added**
 
-Use the repo's existing Zero schema generation workflow.
+If `creatorLaunchNotification` or any other new table is synced through Zero, run:
+
+```bash
+bun --filter @vine/zero-schema zero:generate
+```
+
+Then apply migrations through the repo migrate workflow so the Zero publication is rebuilt. In local Docker verification, restart `zero` and `server` after the migration/publication rebuild.
 
 - [ ] **Step 11.3: Run targeted server tests**
 

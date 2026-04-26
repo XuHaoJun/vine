@@ -55,6 +55,8 @@ Use the existing database plus small marketplace tables, and expose discovery re
 
 The store UI already reads public package data through Zero. That remains useful for live package metadata, ownership, and chat sticker use. Phase 3 discovery queries need ranking, search, private order aggregates, and write validation for reviews/follows, so those flows should live server-side behind ConnectRPC.
 
+Public discovery reads must not accidentally inherit the current authenticated `StickerMarketUserService` boundary. Existing sticker-market user RPCs are registered with `withAuthService`, which is correct for checkout and order reads. Phase 3 should either introduce a separate public discovery service or register public read methods without whole-service auth. Authenticated variants may enrich the same public responses with owned/follow/review state when a valid session is present.
+
 The implementation is intentionally split:
 
 1. **Discovery MVP**: curated shelves, bestsellers, latest, search/filter/sort.
@@ -113,6 +115,7 @@ Rules:
 - Unique key: `(userId, creatorId)`.
 - A creator cannot follow themselves.
 - Follower counts are computed from this table in Phase 3. A denormalized count can be added later if needed.
+- Follow rows are private user relationship data. Do not expose a global follow graph through Zero. Public surfaces should expose aggregate follower counts and the current user's follow state only.
 
 ### 4.3 Package Review
 
@@ -135,6 +138,7 @@ Rules:
 - Server verifies the user has an entitlement for the package before create/update.
 - Reviews for packages that are no longer on sale remain visible on the package detail page unless moderated.
 - Only `published` reviews count toward public average rating and review count.
+- Public responses may include published review snippets. The full current-user review state should be returned only for the authenticated reviewer.
 
 ### 4.4 Launch Notification Event
 
@@ -155,6 +159,7 @@ Rules:
 - Created when package status transitions to `on_sale`.
 - One notification per `(recipientUserId, packageId)`.
 - No push/email delivery in this phase.
+- Notification rows are recipient-private. If synced through Zero, permissions must restrict rows to `recipientUserId = auth.id`; otherwise keep notification reads behind authenticated ConnectRPC.
 
 ### 4.5 Currency Rate Snapshot
 
@@ -295,13 +300,20 @@ Responsibilities:
 
 Extend the existing sticker market services instead of adding raw REST endpoints.
 
-User-facing RPCs:
+Public discovery RPCs:
 
 ```proto
 rpc GetStoreHome(GetStoreHomeRequest) returns (GetStoreHomeResponse);
 rpc SearchStickerPackages(SearchStickerPackagesRequest) returns (SearchStickerPackagesResponse);
 rpc GetStickerPackageDetail(GetStickerPackageDetailRequest) returns (GetStickerPackageDetailResponse);
 rpc GetCreatorPublicProfile(GetCreatorPublicProfileRequest) returns (GetCreatorPublicProfileResponse);
+```
+
+These RPCs must be callable without a session. If a session exists, the handler may add user-specific fields such as owned state, follow state, and current user's review. If no session exists, those fields must be false/empty.
+
+Authenticated user RPCs:
+
+```proto
 rpc FollowCreator(FollowCreatorRequest) returns (FollowCreatorResponse);
 rpc UnfollowCreator(UnfollowCreatorRequest) returns (UnfollowCreatorResponse);
 rpc UpsertStickerPackageReview(UpsertStickerPackageReviewRequest) returns (UpsertStickerPackageReviewResponse);
@@ -319,7 +331,20 @@ rpc PublishFeaturedShelf(PublishFeaturedShelfRequest) returns (PublishFeaturedSh
 rpc ArchiveFeaturedShelf(ArchiveFeaturedShelfRequest) returns (ArchiveFeaturedShelfResponse);
 ```
 
-Authenticated reads should include ownership, follow state, and user review where relevant. Anonymous-compatible reads can return the public data without user-specific flags.
+Do not add public read RPCs to a service registered with `withAuthService` unless the route registration is changed to support optional auth. The implementation plan should make this boundary explicit before proto generation.
+
+---
+
+## 6.3 Zero Boundary
+
+Use Zero only where live sync is clearly useful and permissions are straightforward:
+
+- Existing `stickerPackage`, `stickerAsset`, and `entitlement` queries continue to serve chat and owned-package surfaces.
+- `creatorLaunchNotification` may be synced only with a recipient-owned permission.
+- `creatorFollow` should not expose global follow rows through Zero. Prefer ConnectRPC for follow/unfollow and return aggregate counts in discovery responses.
+- `stickerPackageReview` should not expose all raw review rows through Zero in Phase 3. Prefer ConnectRPC for review writes and public review snippets.
+
+Any new Zero-synced table requires the repo's Zero schema migration workflow: DB migration, Zero model/query, `zero:generate`, publication rebuild through the migrate job, and Zero/server restart in local verification.
 
 ---
 
