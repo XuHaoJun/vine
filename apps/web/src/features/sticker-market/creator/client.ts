@@ -23,6 +23,14 @@ export function shiftReportMonth(month: string, delta: number) {
   return getCurrentReportMonth(date)
 }
 
+export function creatorPayoutOverviewQueryKey() {
+  return ['sticker-market', 'creator-payout-overview'] as const
+}
+
+export function creatorPayoutAccountMutationKey() {
+  return ['sticker-market', 'creator-payout-account'] as const
+}
+
 export function formatTwdMinor(amountMinor: number) {
   return `NT$${amountMinor.toLocaleString('zh-TW')}`
 }
