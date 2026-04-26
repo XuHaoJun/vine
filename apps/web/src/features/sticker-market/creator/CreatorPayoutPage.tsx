@@ -1,10 +1,8 @@
 import { useState } from 'react'
 import { SizableText, XStack, YStack } from 'tamagui'
-import { useQueryClient } from '@tanstack/react-query'
-
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
-import { useTanMutation, useTanQuery } from '~/query'
+import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
 import {
   creatorPayoutAccountMutationKey,
   creatorPayoutOverviewQueryKey,
@@ -42,7 +40,7 @@ const emptyForm: PayoutAccountForm = {
 }
 
 export function CreatorPayoutPage() {
-  const queryClient = useQueryClient()
+  const queryClient = useTanQueryClient()
 
   const overview = useTanQuery({
     queryKey: creatorPayoutOverviewQueryKey(),
@@ -53,8 +51,13 @@ export function CreatorPayoutPage() {
 
   const upsertMutation = useTanMutation({
     mutationKey: creatorPayoutAccountMutationKey(),
-    mutationFn: (form: PayoutAccountForm) =>
-      stickerMarketCreatorClient.upsertCreatorPayoutAccount(form),
+    mutationFn: (form: PayoutAccountForm) => {
+      if (form.accountNumber !== form.accountNumberConfirmation) {
+        throw new Error('兩次輸入的帳號不一致')
+      }
+      const { accountNumberConfirmation: _, ...payload } = form
+      return stickerMarketCreatorClient.upsertCreatorPayoutAccount(payload)
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: creatorPayoutOverviewQueryKey() })
       setForm((prev) => ({ ...prev, accountNumber: '', accountNumberConfirmation: '' }))
