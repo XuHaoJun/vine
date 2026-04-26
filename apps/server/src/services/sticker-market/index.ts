@@ -7,11 +7,14 @@ import { validateStickerZip } from './asset-validator'
 import { createPackageRepository } from './package.repository'
 import { createSalesReportRepository } from './sales-report.repository'
 import { createSalesReportService } from './sales-report.service'
+import { createPayoutRepository } from './payout.repository'
+import { createPayoutService } from './payout.service'
 
 export function createStickerMarketServices(deps: { db: any; uploadRoot: string }) {
   const creatorRepo = createCreatorRepository()
   const packageRepo = createPackageRepository()
   const salesReportRepo = createSalesReportRepository()
+  const payoutRepo = createPayoutRepository()
   const common = {
     db: deps.db,
     creatorRepo,
@@ -34,6 +37,12 @@ export function createStickerMarketServices(deps: { db: any; uploadRoot: string 
       db: deps.db,
       creatorRepo,
       salesReportRepo,
+    }),
+    payout: createPayoutService({
+      db: deps.db,
+      repo: payoutRepo,
+      createId: () => randomUUID(),
+      now: () => new Date(),
     }),
   }
 }
