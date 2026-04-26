@@ -30,6 +30,7 @@ const mockPkg = {
   coverDriveKey: 'key',
   tabIconDriveKey: 'key2',
   stickerCount: 8,
+  status: 'on_sale' as const,
   createdAt: '2026-04-23T00:00:00Z',
   updatedAt: '2026-04-23T00:00:00Z',
 }

@@ -10,6 +10,10 @@ service StickerMarketUserService {
 service StickerMarketAdminService {
   rpc RefundOrder(RefundOrderRequest) returns (RefundOrderResponse);
   rpc ReconcileStickerOrders(ReconcileStickerOrdersRequest) returns (ReconcileStickerOrdersResponse);
+  rpc ListStickerReviewQueue(ListStickerReviewQueueRequest) returns (ListStickerReviewQueueResponse);
+  rpc GetStickerReviewDetail(GetStickerReviewDetailRequest) returns (GetStickerReviewDetailResponse);
+  rpc ApproveStickerPackage(ApproveStickerPackageRequest) returns (ApproveStickerPackageResponse);
+  rpc RejectStickerPackage(RejectStickerPackageRequest) returns (RejectStickerPackageResponse);
 }
 
 enum RefundStatus {
@@ -92,3 +96,150 @@ message GetOrderResponse {
   int32 amount_minor = 4;
   string currency = 5;
 }
+
+service StickerMarketCreatorService {
+  rpc GetCreatorProfile(GetCreatorProfileRequest) returns (GetCreatorProfileResponse);
+  rpc UpsertCreatorProfile(UpsertCreatorProfileRequest) returns (UpsertCreatorProfileResponse);
+  rpc CreateStickerPackageDraft(CreateStickerPackageDraftRequest) returns (CreateStickerPackageDraftResponse);
+  rpc UpdateStickerPackageDraft(UpdateStickerPackageDraftRequest) returns (UpdateStickerPackageDraftResponse);
+  rpc UploadStickerPackageAssets(UploadStickerPackageAssetsRequest) returns (UploadStickerPackageAssetsResponse);
+  rpc SubmitStickerPackageReview(SubmitStickerPackageReviewRequest) returns (SubmitStickerPackageReviewResponse);
+  rpc PublishApprovedStickerPackage(PublishApprovedStickerPackageRequest) returns (PublishApprovedStickerPackageResponse);
+}
+
+enum StickerPackageStatus {
+  STICKER_PACKAGE_STATUS_UNSPECIFIED = 0;
+  STICKER_PACKAGE_STATUS_DRAFT = 1;
+  STICKER_PACKAGE_STATUS_IN_REVIEW = 2;
+  STICKER_PACKAGE_STATUS_APPROVED = 3;
+  STICKER_PACKAGE_STATUS_REJECTED = 4;
+  STICKER_PACKAGE_STATUS_ON_SALE = 5;
+  STICKER_PACKAGE_STATUS_UNLISTED = 6;
+  STICKER_PACKAGE_STATUS_REMOVED = 7;
+}
+
+message CreatorProfile {
+  string id = 1;
+  string user_id = 2;
+  string display_name = 3;
+  string country = 4;
+  string bio = 5;
+  string status = 6;
+}
+
+message StickerAssetValidationItem {
+  string file_name = 1;
+  int32 number = 2;
+  string level = 3;
+  string code = 4;
+  string message = 5;
+  int32 width = 6;
+  int32 height = 7;
+  int32 size_bytes = 8;
+}
+
+message StickerPackageDraft {
+  string id = 1;
+  string creator_id = 2;
+  string name = 3;
+  string description = 4;
+  int32 price_minor = 5;
+  string currency = 6;
+  int32 sticker_count = 7;
+  StickerPackageStatus status = 8;
+  string tags_json = 9;
+  string copyright_text = 10;
+  bool auto_publish = 11;
+  string cover_drive_key = 12;
+  string tab_icon_drive_key = 13;
+  string review_reason_category = 14;
+  string review_reason_text = 15;
+  string review_suggestion = 16;
+  repeated int32 review_problem_asset_numbers = 17;
+}
+
+message StickerAsset {
+  string id = 1;
+  int32 number = 2;
+  string drive_key = 3;
+  int32 width = 4;
+  int32 height = 5;
+  int32 size_bytes = 6;
+  string mime_type = 7;
+}
+
+message GetCreatorProfileRequest {}
+message GetCreatorProfileResponse { CreatorProfile profile = 1; }
+
+message UpsertCreatorProfileRequest {
+  string display_name = 1;
+  string country = 2;
+  string bio = 3;
+}
+message UpsertCreatorProfileResponse { CreatorProfile profile = 1; }
+
+message CreateStickerPackageDraftRequest {
+  string name = 1;
+  string description = 2;
+  int32 price_minor = 3;
+  int32 sticker_count = 4;
+  string tags_json = 5;
+  string copyright_text = 6;
+  bool license_confirmed = 7;
+  bool auto_publish = 8;
+}
+message CreateStickerPackageDraftResponse { StickerPackageDraft package = 1; }
+
+message UpdateStickerPackageDraftRequest {
+  string package_id = 1;
+  string name = 2;
+  string description = 3;
+  int32 price_minor = 4;
+  int32 sticker_count = 5;
+  string tags_json = 6;
+  string copyright_text = 7;
+  bool license_confirmed = 8;
+  bool auto_publish = 9;
+}
+message UpdateStickerPackageDraftResponse { StickerPackageDraft package = 1; }
+
+message UploadStickerPackageAssetsRequest {
+  string package_id = 1;
+  bytes zip_file = 2;
+}
+message UploadStickerPackageAssetsResponse {
+  bool valid = 1;
+  repeated StickerAssetValidationItem items = 2;
+}
+
+message SubmitStickerPackageReviewRequest { string package_id = 1; }
+message SubmitStickerPackageReviewResponse { StickerPackageDraft package = 1; }
+
+message PublishApprovedStickerPackageRequest { string package_id = 1; }
+message PublishApprovedStickerPackageResponse { StickerPackageDraft package = 1; }
+
+message ListStickerReviewQueueRequest {
+  int32 limit = 1;
+}
+message ListStickerReviewQueueResponse {
+  repeated StickerPackageDraft packages = 1;
+}
+
+message GetStickerReviewDetailRequest { string package_id = 1; }
+message GetStickerReviewDetailResponse {
+  StickerPackageDraft package = 1;
+  repeated StickerAssetValidationItem latest_validation = 2;
+  repeated StickerAsset assets = 3;
+}
+
+message ApproveStickerPackageRequest { string package_id = 1; }
+message ApproveStickerPackageResponse { StickerPackageDraft package = 1; }
+
+message RejectStickerPackageRequest {
+  string package_id = 1;
+  string reason_category = 2;
+  string reason_text = 3;
+  string suggestion = 4;
+  repeated int32 problem_asset_numbers = 5;
+}
+message RejectStickerPackageResponse { StickerPackageDraft package = 1; }

@@ -20,6 +20,7 @@ import { oaWebhookPlugin } from './plugins/oa-webhook'
 import { oaWebhookEndpointPlugin } from './plugins/oa-webhook-endpoint'
 import { createOAService } from './services/oa'
 import { createLiffService } from './services/liff'
+import { createStickerMarketServices } from './services/sticker-market'
 import { liffFixturesPublicPlugin } from './plugins/liff-fixtures-public'
 import { liffPublicPlugin } from './plugins/liff-public'
 import { createFsDriveService } from '@vine/drive'
@@ -44,6 +45,14 @@ await app.register(import('@fastify/static'), {
 // Wire services with explicit dependencies
 const database = getDatabase()
 const db = createDb()
+
+const uploadRoot = process.env['UPLOADS_DIR'] ?? 'uploads'
+const stickerMarket = createStickerMarketServices({ db, uploadRoot })
+
+if (path.resolve(uploadRoot) !== driveBasePath) {
+  const { stickerAssetsPublicPlugin } = await import('./plugins/sticker-assets-public')
+  await stickerAssetsPublicPlugin(app, { uploadRoot })
+}
 
 const oa = createOAService({ db, database })
 const liff = createLiffService({ db })
@@ -87,6 +96,12 @@ await app.register(fastifyConnectPlugin, {
     stickerMarketAdmin: {
       refund: payments.refund,
       reconciliation: payments.reconciliation,
+      review: stickerMarket.review,
+    },
+    stickerMarketCreator: {
+      creatorRepo: stickerMarket.creatorRepo,
+      submission: stickerMarket.submission,
+      db,
     },
   }),
 })

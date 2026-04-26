@@ -4,16 +4,13 @@ import { defineQuery, defineQueries } from '@rocicorp/zero'
 import * as v from 'valibot'
 import * as Queries from './groupedQueries'
 
-const entitlement = {
-  entitlementsByUserId: defineQuery(
-    v.object({
-      userId: v.string(),
-    }),
-    ({ args }) => Queries.entitlement.entitlementsByUserId(args),
-  ),
-}
-
 const chat = {
+  chatById: defineQuery(
+    v.object({
+      chatId: v.string(),
+    }),
+    ({ args }) => Queries.chat.chatById(args),
+  ),
   chatMembersByChatId: defineQuery(
     v.object({
       chatId: v.string(),
@@ -25,6 +22,48 @@ const chat = {
       userId: v.string(),
     }),
     ({ args }) => Queries.chat.chatsByUserId(args),
+  ),
+  groupInfo: defineQuery(
+    v.object({
+      chatId: v.string(),
+    }),
+    ({ args }) => Queries.chat.groupInfo(args),
+  ),
+  groupMembersWithRoles: defineQuery(
+    v.object({
+      chatId: v.string(),
+    }),
+    ({ args }) => Queries.chat.groupMembersWithRoles(args),
+  ),
+  pendingInvitesByUserId: defineQuery(
+    v.object({
+      userId: v.string(),
+    }),
+    ({ args }) => Queries.chat.pendingInvitesByUserId(args),
+  ),
+  pendingMembersByChatId: defineQuery(
+    v.object({
+      chatId: v.string(),
+    }),
+    ({ args }) => Queries.chat.pendingMembersByChatId(args),
+  ),
+}
+
+const creatorProfile = {
+  creatorProfileByUserId: defineQuery(
+    v.object({
+      userId: v.string(),
+    }),
+    ({ args }) => Queries.creatorProfile.creatorProfileByUserId(args),
+  ),
+}
+
+const entitlement = {
+  entitlementsByUserId: defineQuery(
+    v.object({
+      userId: v.string(),
+    }),
+    ({ args }) => Queries.entitlement.entitlementsByUserId(args),
   ),
 }
 
@@ -59,8 +98,17 @@ const message = {
   ),
 }
 
+const stickerAsset = {
+  stickerAssetsByPackageId: defineQuery(
+    v.object({
+      packageId: v.string(),
+    }),
+    ({ args }) => Queries.stickerAsset.stickerAssetsByPackageId(args),
+  ),
+}
+
 const stickerPackage = {
-  allStickerPackages: defineQuery(v.object({}), ({ args }) =>
+  allStickerPackages: defineQuery(v.record(v.string(), v.never()), ({ args }) =>
     Queries.stickerPackage.allStickerPackages(args),
   ),
   stickerPackageById: defineQuery(
@@ -68,6 +116,19 @@ const stickerPackage = {
       packageId: v.string(),
     }),
     ({ args }) => Queries.stickerPackage.stickerPackageById(args),
+  ),
+  stickerPackageForCreator: defineQuery(
+    v.object({
+      packageId: v.string(),
+      creatorId: v.string(),
+    }),
+    ({ args }) => Queries.stickerPackage.stickerPackageForCreator(args),
+  ),
+  stickerPackagesByCreatorId: defineQuery(
+    v.object({
+      creatorId: v.string(),
+    }),
+    ({ args }) => Queries.stickerPackage.stickerPackagesByCreatorId(args),
   ),
 }
 
@@ -104,9 +165,11 @@ const user = {
 
 export const queries = defineQueries({
   chat,
+  creatorProfile,
   entitlement,
   friendship,
   message,
+  stickerAsset,
   stickerPackage,
   todo,
   user,

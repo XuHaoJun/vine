@@ -39,6 +39,8 @@ export function PackageDetail({ packageId }: PackageDetailProps) {
 
   const priceDisplay = `NT$${pkg.priceMinor ?? 0}`
 
+  const assets = Array.isArray((pkg as any).assets) ? (pkg as any).assets : []
+
   // Mock sticker previews (sticker count boxes)
   const stickerCount = Math.min(pkg.stickerCount ?? 0, 16)
   const stickerIndices = Array.from({ length: stickerCount }, (_, i) => i)
@@ -93,7 +95,25 @@ export function PackageDetail({ packageId }: PackageDetailProps) {
           </XStack>
 
           {/* Sticker grid preview */}
-          {stickerIndices.length > 0 && (
+          {assets.length > 0 && (
+            <YStack gap="$2">
+              <SizableText size="$4" fontWeight="600" color="$color11">
+                貼圖預覽
+              </SizableText>
+              <XStack flexWrap="wrap" gap="$2">
+                {assets.map((asset: any) => (
+                  <YStack key={asset.id} width={72} height={72} rounded="$3" bg="$color3">
+                    <img
+                      src={`/uploads/${asset.driveKey}`}
+                      alt={`${pkg.name} ${asset.number}`}
+                      style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                    />
+                  </YStack>
+                ))}
+              </XStack>
+            </YStack>
+          )}
+          {assets.length === 0 && stickerIndices.length > 0 && (
             <YStack gap="$2">
               <SizableText size="$4" fontWeight="600" color="$color11">
                 貼圖預覽

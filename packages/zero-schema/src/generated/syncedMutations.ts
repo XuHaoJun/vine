@@ -3,58 +3,17 @@
 import * as v from 'valibot'
 
 export const mutationValidators = {
-  entitlement: {
-    insert: v.object({
-      id: v.string(),
-      userId: v.string(),
-      packageId: v.string(),
-      grantedByOrderId: v.string(),
-      grantedAt: v.number(),
-    }),
-    update: v.object({
-      id: v.string(),
-      userId: v.optional(v.nullable(v.string())),
-      packageId: v.optional(v.nullable(v.string())),
-      grantedByOrderId: v.optional(v.nullable(v.string())),
-      grantedAt: v.optional(v.nullable(v.number())),
-    }),
-    delete: v.object({
-      id: v.string(),
-    }),
-  },
-  stickerPackage: {
-    insert: v.object({
-      id: v.string(),
-      name: v.string(),
-      description: v.string(),
-      priceMinor: v.number(),
-      currency: v.string(),
-      coverDriveKey: v.string(),
-      tabIconDriveKey: v.string(),
-      stickerCount: v.number(),
-      createdAt: v.number(),
-      updatedAt: v.number(),
-    }),
-    update: v.object({
-      id: v.string(),
-      name: v.optional(v.nullable(v.string())),
-      description: v.optional(v.nullable(v.string())),
-      priceMinor: v.optional(v.nullable(v.number())),
-      currency: v.optional(v.nullable(v.string())),
-      coverDriveKey: v.optional(v.nullable(v.string())),
-      tabIconDriveKey: v.optional(v.nullable(v.string())),
-      stickerCount: v.optional(v.nullable(v.number())),
-      createdAt: v.optional(v.nullable(v.number())),
-      updatedAt: v.optional(v.nullable(v.number())),
-    }),
-    delete: v.object({
-      id: v.string(),
-    }),
-  },
   chat: {
     insert: v.object({
       id: v.string(),
       type: v.string(),
+      name: v.optional(v.nullable(v.string())),
+      image: v.optional(v.nullable(v.string())),
+      description: v.optional(v.nullable(v.string())),
+      inviteCode: v.optional(v.nullable(v.string())),
+      requireApproval: v.optional(v.nullable(v.number())),
+      albumCount: v.optional(v.nullable(v.number())),
+      noteCount: v.optional(v.nullable(v.number())),
       lastMessageId: v.optional(v.nullable(v.string())),
       lastMessageAt: v.optional(v.nullable(v.number())),
       createdAt: v.number(),
@@ -62,6 +21,13 @@ export const mutationValidators = {
     update: v.object({
       id: v.string(),
       type: v.optional(v.nullable(v.string())),
+      name: v.optional(v.nullable(v.string())),
+      image: v.optional(v.nullable(v.string())),
+      description: v.optional(v.nullable(v.string())),
+      inviteCode: v.optional(v.nullable(v.string())),
+      requireApproval: v.optional(v.nullable(v.number())),
+      albumCount: v.optional(v.nullable(v.number())),
+      noteCount: v.optional(v.nullable(v.number())),
       lastMessageId: v.optional(v.nullable(v.string())),
       lastMessageAt: v.optional(v.nullable(v.number())),
       createdAt: v.optional(v.nullable(v.number())),
@@ -77,12 +43,41 @@ export const mutationValidators = {
       member2Id: v.string(),
       createdAt: v.number(),
     }),
+    findOrCreateDirectChat: v.object({
+      friendUserId: v.string(),
+      chatId: v.string(),
+      member1Id: v.string(),
+      member2Id: v.string(),
+    }),
+    createGroupChat: v.object({
+      chatId: v.string(),
+      name: v.string(),
+      image: v.optional(v.string()),
+      memberIds: v.array(v.string()),
+      requireApproval: v.boolean(),
+      createdAt: v.number(),
+    }),
+    updateGroupInfo: v.object({
+      chatId: v.string(),
+      name: v.optional(v.string()),
+      image: v.optional(v.string()),
+      description: v.optional(v.string()),
+      requireApproval: v.optional(v.boolean()),
+    }),
+    generateInviteLink: v.object({
+      chatId: v.string(),
+    }),
+    revokeInviteLink: v.object({
+      chatId: v.string(),
+    }),
   },
   chatMember: {
     insert: v.object({
       id: v.string(),
       chatId: v.string(),
       userId: v.optional(v.nullable(v.string())),
+      role: v.optional(v.nullable(v.string())),
+      status: v.optional(v.nullable(v.string())),
       lastReadMessageId: v.optional(v.nullable(v.string())),
       lastReadAt: v.optional(v.nullable(v.number())),
       joinedAt: v.number(),
@@ -92,6 +87,8 @@ export const mutationValidators = {
       id: v.string(),
       chatId: v.optional(v.nullable(v.string())),
       userId: v.optional(v.nullable(v.string())),
+      role: v.optional(v.nullable(v.string())),
+      status: v.optional(v.nullable(v.string())),
       lastReadMessageId: v.optional(v.nullable(v.string())),
       lastReadAt: v.optional(v.nullable(v.number())),
       joinedAt: v.optional(v.nullable(v.number())),
@@ -105,7 +102,35 @@ export const mutationValidators = {
       lastReadMessageId: v.string(),
       lastReadAt: v.number(),
     }),
+    addMembers: v.object({
+      chatId: v.string(),
+      userIds: v.array(v.string()),
+      createdAt: v.number(),
+    }),
+    removeMember: v.object({
+      chatId: v.string(),
+      targetUserId: v.string(),
+    }),
+    leaveGroup: v.object({
+      chatId: v.string(),
+    }),
+    transferOwnership: v.object({
+      chatId: v.string(),
+      newOwnerId: v.string(),
+    }),
+    joinViaInvite: v.object({
+      inviteCode: v.string(),
+      createdAt: v.number(),
+    }),
+    acceptInvite: v.object({
+      chatId: v.string(),
+    }),
+    declineInvite: v.object({
+      chatId: v.string(),
+    }),
   },
+  creatorProfile: {},
+  entitlement: {},
   friendship: {
     insert: v.object({
       id: v.string(),
@@ -174,7 +199,21 @@ export const mutationValidators = {
       type: v.string(),
       createdAt: v.number(),
     }),
+    sendSticker: v.object({
+      senderId: v.optional(v.nullable(v.string())),
+      text: v.optional(v.nullable(v.string())),
+      metadata: v.optional(v.nullable(v.string())),
+      replyToMessageId: v.optional(v.nullable(v.string())),
+      oaId: v.optional(v.nullable(v.string())),
+      id: v.string(),
+      chatId: v.string(),
+      senderType: v.string(),
+      type: v.string(),
+      createdAt: v.number(),
+    }),
   },
+  stickerAsset: {},
+  stickerPackage: {},
   todo: {
     insert: v.object({
       id: v.string(),
