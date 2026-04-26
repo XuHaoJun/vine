@@ -284,8 +284,8 @@ export const creatorLaunchNotification = pgTable(
     packageId: text('packageId').notNull(),
     status: text('status')
       .notNull()
-      .$type<'pending' | 'sent' | 'failed'>()
-      .default('pending'),
+      .$type<'unread' | 'read'>()
+      .default('unread'),
     createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
     readAt: timestamp('readAt', { mode: 'string' }),
   },

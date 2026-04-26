@@ -15,7 +15,9 @@ describe('createLaunchNotificationService', () => {
           })),
         })),
         insert: vi.fn(() => ({
-          values: vi.fn().mockResolvedValue(undefined),
+          values: vi.fn(() => ({
+            onConflictDoNothing: vi.fn().mockResolvedValue({ rowCount: 3 }),
+          })),
         })),
       }
       const now = new Date('2026-04-26T00:00:00Z')
@@ -75,7 +77,9 @@ describe('createLaunchNotificationService', () => {
           })),
         })),
         insert: vi.fn(() => ({
-          values: vi.fn().mockResolvedValue(undefined),
+          values: vi.fn(() => ({
+            onConflictDoNothing: vi.fn().mockResolvedValue({ rowCount: 3 }),
+          })),
         })),
       }
       const service = createLaunchNotificationService({

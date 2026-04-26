@@ -204,6 +204,25 @@ export function createDiscoveryService(deps: {
     return map
   }
 
+  async function loadCreatorNameMap(packages: any[]): Promise<Record<string, string>> {
+    const creatorIds = [
+      ...new Set(packages.map((p: any) => p.creatorId).filter(Boolean)),
+    ] as string[]
+    const creatorNameMap: Record<string, string> = {}
+    const creatorRepo = deps.creatorRepo
+    if (!creatorRepo) return creatorNameMap
+
+    const creatorProfiles = await Promise.all(
+      creatorIds.map((id: string) =>
+        creatorRepo.findById(deps.db, id).then((p: any) => [id, p] as const),
+      ),
+    )
+    for (const [id, profile] of creatorProfiles) {
+      creatorNameMap[id] = profile?.displayName ?? ''
+    }
+    return creatorNameMap
+  }
+
   async function searchOnSalePackages(
     db: any,
     input: {
@@ -216,15 +235,30 @@ export function createDiscoveryService(deps: {
       sort?: string
       pageSize: number
       pageToken?: string
+      userId?: string
+      ownedOnly?: boolean
     },
   ): Promise<{ rows: any[]; nextCursor: string | undefined; totalCount: number }> {
-    let query = db.select().from(stickerPackage)
     const conditions: any[] = [sql`${stickerPackage.status} = 'on_sale'`]
 
     if (input.query) {
       const like = `%${input.query}%`
       conditions.push(
-        sql`(${stickerPackage.name} ILIKE ${like} OR ${stickerPackage.description} ILIKE ${like})`,
+        sql`(
+          ${stickerPackage.name} ILIKE ${like}
+          OR ${stickerPackage.description} ILIKE ${like}
+          OR ${stickerPackage.tags} ILIKE ${like}
+          OR EXISTS (
+            SELECT 1 FROM "creatorProfile"
+            WHERE "creatorProfile"."id" = ${stickerPackage.creatorId}
+              AND "creatorProfile"."displayName" ILIKE ${like}
+          )
+          OR EXISTS (
+            SELECT 1 FROM "stickerAsset"
+            WHERE "stickerAsset"."packageId" = ${stickerPackage.id}
+              AND "stickerAsset"."keywords" ILIKE ${like}
+          )
+        )`,
       )
     }
     if (input.stickerType) {
@@ -232,6 +266,18 @@ export function createDiscoveryService(deps: {
     }
     if (input.creatorId) {
       conditions.push(eq(stickerPackage.creatorId, input.creatorId))
+    }
+    if (input.locale) {
+      conditions.push(eq(stickerPackage.locale, input.locale))
+    }
+    if (input.ownedOnly && input.userId) {
+      conditions.push(
+        sql`EXISTS (
+          SELECT 1 FROM "entitlement"
+          WHERE "entitlement"."packageId" = ${stickerPackage.id}
+            AND "entitlement"."userId" = ${input.userId}
+        )`,
+      )
     }
     if (input.priceMin !== undefined && input.priceMin > 0) {
       conditions.push(gte(stickerPackage.priceMinor, input.priceMin))
@@ -251,6 +297,14 @@ export function createDiscoveryService(deps: {
     else if (input.sort === 'price_desc') order = desc(stickerPackage.priceMinor)
     else if (input.sort === 'name') order = asc(stickerPackage.name)
     else if (input.sort === 'newest') order = desc(stickerPackage.publishedAt)
+    else if (input.sort === 'rating') {
+      order = desc(sql`(
+        SELECT COALESCE(AVG("stickerPackageReview"."rating"), 0)
+        FROM "stickerPackageReview"
+        WHERE "stickerPackageReview"."packageId" = ${stickerPackage.id}
+          AND "stickerPackageReview"."status" = 'approved'
+      )`)
+    }
 
     let cursor: { publishedAt: string; id: string } | undefined
     if (input.pageToken) {
@@ -337,7 +391,7 @@ export function createDiscoveryService(deps: {
       const creatorProfiles = await Promise.all(
         creatorIds.map((id: string) =>
           deps.creatorRepo
-            ? deps.creatorRepo.findByUserId(deps.db, id).then((p: any) => [id, p] as const)
+            ? deps.creatorRepo.findById(deps.db, id).then((p: any) => [id, p] as const)
             : Promise.resolve([id, null] as const),
         ),
       )
@@ -505,12 +559,13 @@ export function createDiscoveryService(deps: {
         sort: input.sort,
         pageSize,
         pageToken: input.pageToken || undefined,
+        userId: input.userId,
+        ownedOnly: input.ownedOnly,
       })
 
-      const allIds = rows.map((r: any) => r.id)
-      const onSaleMap = new Map(rows.map((r: any) => [r.id, r]))
       const onSalePackages = rows
-      const enriched = await enrichCards(onSalePackages, input.userId, {})
+      const creatorNameMap = await loadCreatorNameMap(onSalePackages)
+      const enriched = await enrichCards(onSalePackages, input.userId, creatorNameMap)
 
       return {
         results: enriched,

@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, lte, gte } from 'drizzle-orm'
+import { and, desc, eq, inArray, sql } from 'drizzle-orm'
 import { stickerFeaturedShelf, stickerFeaturedShelfItem } from '@vine/db/schema-private'
 
 export type FeaturedShelfRow = {
@@ -31,8 +31,8 @@ export function createFeaturedShelfRepository() {
         .where(
           and(
             eq(stickerFeaturedShelf.status, 'published'),
-            lte(stickerFeaturedShelf.startsAt, now),
-            gte(stickerFeaturedShelf.endsAt, now),
+            sql`(${stickerFeaturedShelf.startsAt} IS NULL OR ${stickerFeaturedShelf.startsAt} <= ${now})`,
+            sql`(${stickerFeaturedShelf.endsAt} IS NULL OR ${stickerFeaturedShelf.endsAt} >= ${now})`,
           ),
         )
         .orderBy(desc(stickerFeaturedShelf.createdAt))

@@ -1,5 +1,5 @@
 import { and, eq } from 'drizzle-orm'
-import { stickerPackageReview } from '@vine/db/schema-public'
+import { entitlement, stickerPackageReview } from '@vine/db/schema-public'
 
 export type UserReviewRow = {
   id: string
@@ -59,6 +59,7 @@ export function createReviewRepository() {
           set: {
             rating: input.rating,
             body: input.body,
+            status: 'approved',
             updatedAt: input.now,
           },
         })
@@ -71,15 +72,36 @@ export function createReviewRepository() {
       packageId: string,
       userId: string,
     ): Promise<boolean> {
-      const result = await db
-        .delete(stickerPackageReview)
+      const [row] = await db
+        .update(stickerPackageReview)
+        .set({ status: 'rejected' })
         .where(
           and(
             eq(stickerPackageReview.packageId, packageId),
             eq(stickerPackageReview.userId, userId),
+            eq(stickerPackageReview.status, 'approved'),
           ),
         )
-      return (result as any).rowCount > 0
+        .returning({ id: stickerPackageReview.id })
+      return Boolean(row)
+    },
+
+    async findEntitlement(
+      db: any,
+      packageId: string,
+      userId: string,
+    ): Promise<{ id: string } | undefined> {
+      const [row] = await db
+        .select({ id: entitlement.id })
+        .from(entitlement)
+        .where(
+          and(
+            eq(entitlement.packageId, packageId),
+            eq(entitlement.userId, userId),
+          ),
+        )
+        .limit(1)
+      return row
     },
   }
 }

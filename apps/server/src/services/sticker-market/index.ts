@@ -91,6 +91,7 @@ export function createStickerMarketServices(deps: { db: any; uploadRoot: string 
     follow: createFollowService({
       db: deps.db,
       followRepo,
+      creatorRepo,
       now: () => new Date(),
       createId: () => randomUUID(),
     }),

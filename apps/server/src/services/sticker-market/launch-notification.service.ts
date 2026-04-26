@@ -29,8 +29,16 @@ export function createLaunchNotificationService(deps: {
         createdAt: now,
       }))
 
-      await db.insert(creatorLaunchNotification).values(values)
-      return values.length
+      const result = await db
+        .insert(creatorLaunchNotification)
+        .values(values)
+        .onConflictDoNothing({
+          target: [
+            creatorLaunchNotification.recipientUserId,
+            creatorLaunchNotification.packageId,
+          ],
+        })
+      return (result as any).rowCount ?? values.length
     },
 
     async listNotifications(input: {
@@ -99,7 +107,7 @@ export function createLaunchNotificationService(deps: {
     async markRead(userId: string, notificationId: string) {
       const [row] = await deps.db
         .update(creatorLaunchNotification)
-        .set({ readAt: deps.now().toISOString() })
+        .set({ status: 'read', readAt: deps.now().toISOString() })
         .where(
           and(
             eq(creatorLaunchNotification.id, notificationId),

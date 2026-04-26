@@ -72,12 +72,16 @@ describe('createDiscoveryService', () => {
       discoveryRepo.findBestsellers.mockResolvedValue([])
       discoveryRepo.findLatestReleases.mockResolvedValue([])
       currencyDisplay.getDisplayPrice.mockResolvedValue({ priceMinor: 100, currency: 'TWD' })
+      const creatorRepo = {
+        findById: vi.fn().mockResolvedValue({ id: 'creator_1', displayName: 'Creator One' }),
+      }
 
       const service = createDiscoveryService({
         db,
         discoveryRepo,
         featuredShelfRepo,
         currencyDisplay,
+        creatorRepo: creatorRepo as any,
       })
 
       const result = await service.getStoreHome()
@@ -87,6 +91,8 @@ describe('createDiscoveryService', () => {
       expect(result.featuredShelves[0].title).toBe('Summer Picks')
       expect(result.featuredShelves[0].packages).toHaveLength(1)
       expect(result.featuredShelves[0].packages[0].id).toBe('pkg_1')
+      expect(result.featuredShelves[0].packages[0].creatorDisplayName).toBe('Creator One')
+      expect(creatorRepo.findById).toHaveBeenCalledWith(db, 'creator_1')
       expect(featuredShelfRepo.findActiveShelves).toHaveBeenCalled()
     })
 

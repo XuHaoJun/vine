@@ -18,7 +18,7 @@ CREATE TABLE "stickerPackageReview" (
   "userId" text NOT NULL,
   "rating" integer NOT NULL CHECK ("rating" >= 1 AND "rating" <= 5),
   "body" text NOT NULL DEFAULT '',
-  "status" text NOT NULL DEFAULT 'pending',
+  "status" text NOT NULL DEFAULT 'unread',
   "createdAt" timestamp DEFAULT now() NOT NULL,
   "updatedAt" timestamp DEFAULT now() NOT NULL
 );

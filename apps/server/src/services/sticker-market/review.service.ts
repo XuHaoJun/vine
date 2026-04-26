@@ -1,6 +1,9 @@
+import { Code, ConnectError } from '@connectrpc/connect'
+
 export function createReviewService(deps: {
   db: any
   packageRepo: any
+  creatorRepo?: any
   reviewRepo?: any
   launchNotification?: any
   now: () => Date
@@ -50,12 +53,30 @@ export function createReviewService(deps: {
     }) {
       const repo = deps.reviewRepo
       if (!repo) throw new Error('reviewRepo not configured')
+      const pkg = await deps.packageRepo.findById(deps.db, input.packageId)
+      if (!pkg || pkg.status !== 'on_sale') {
+        throw new ConnectError('package not found or not on sale', Code.NotFound)
+      }
+      const entitlement = await repo.findEntitlement(deps.db, input.packageId, input.userId)
+      if (!entitlement) {
+        throw new ConnectError('package ownership required to review', Code.FailedPrecondition)
+      }
+      if (deps.creatorRepo && pkg.creatorId) {
+        const creator = await deps.creatorRepo.findByUserId(deps.db, input.userId)
+        if (creator?.id === pkg.creatorId) {
+          throw new ConnectError('creator cannot review own package', Code.FailedPrecondition)
+        }
+      }
+      const body = input.body.trim()
+      if (body.length > 280) {
+        throw new ConnectError('review body must be 280 characters or fewer', Code.InvalidArgument)
+      }
       return repo.upsert(deps.db, {
         id: deps.createId(),
         packageId: input.packageId,
         userId: input.userId,
         rating: input.rating,
-        body: input.body,
+        body,
         now: deps.now().toISOString(),
       })
     },

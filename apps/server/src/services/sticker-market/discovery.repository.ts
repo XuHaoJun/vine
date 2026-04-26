@@ -145,7 +145,12 @@ export function createDiscoveryRepository() {
         })
         .from(stickerPackage)
         .leftJoin(creatorProfile, eq(stickerPackage.creatorId, creatorProfile.id))
-        .where(eq(stickerPackage.id, packageId))
+        .where(
+          and(
+            eq(stickerPackage.id, packageId),
+            eq(stickerPackage.status, 'on_sale'),
+          ),
+        )
         .limit(1)
       return row
     },
@@ -231,7 +236,12 @@ export function createDiscoveryRepository() {
           reviewCount: count().as('review_count'),
         })
         .from(stickerPackageReview)
-        .where(eq(stickerPackageReview.packageId, packageId))
+        .where(
+          and(
+            eq(stickerPackageReview.packageId, packageId),
+            eq(stickerPackageReview.status, 'approved'),
+          ),
+        )
       return {
         averageRating: Number(row?.averageRating ?? 0),
         reviewCount: Number(row?.reviewCount ?? 0),
@@ -252,7 +262,12 @@ export function createDiscoveryRepository() {
           createdAt: stickerPackageReview.createdAt,
         })
         .from(stickerPackageReview)
-        .where(eq(stickerPackageReview.packageId, packageId))
+        .where(
+          and(
+            eq(stickerPackageReview.packageId, packageId),
+            eq(stickerPackageReview.status, 'approved'),
+          ),
+        )
         .orderBy(desc(stickerPackageReview.createdAt))
         .limit(limit)
     },
@@ -275,6 +290,7 @@ export function createDiscoveryRepository() {
           and(
             eq(stickerPackageReview.packageId, packageId),
             eq(stickerPackageReview.userId, userId),
+            eq(stickerPackageReview.status, 'approved'),
           ),
         )
         .limit(1)
