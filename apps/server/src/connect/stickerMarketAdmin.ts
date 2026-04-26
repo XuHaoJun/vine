@@ -30,6 +30,7 @@ export type StickerMarketAdminHandlerDeps = {
       problemAssetNumbers: number[]
     }): Promise<any>
   }
+  payout: any
 }
 
 function requireAdmin(ctx: HandlerContext) {
@@ -123,6 +124,76 @@ export function createStickerMarketAdminHandler(deps: StickerMarketAdminHandlerD
         problemAssetNumbers: req.problemAssetNumbers ?? [],
       })
       return { package: mapStickerPackageDraft(pkg) }
+    },
+
+    async listPayoutRequests(req: any, ctx: HandlerContext) {
+      requireAdmin(ctx)
+      const requests = await deps.payout.listPendingRequests({ limit: req.limit ?? 100 })
+      return { requests }
+    },
+
+    async approvePayoutRequest(req: any, ctx: HandlerContext) {
+      const auth = requireAuthData(ctx)
+      requireAdmin(ctx)
+      const result = await deps.payout.approveRequest({
+        actorUserId: auth.id,
+        requestId: req.payoutRequestId,
+      })
+      return { status: result.status }
+    },
+
+    async rejectPayoutRequest(req: any, ctx: HandlerContext) {
+      const auth = requireAuthData(ctx)
+      requireAdmin(ctx)
+      const result = await deps.payout.rejectRequest({
+        actorUserId: auth.id,
+        requestId: req.payoutRequestId,
+        reason: req.reason,
+      })
+      return { status: result.status }
+    },
+
+    async createPayoutBatch(req: any, ctx: HandlerContext) {
+      const auth = requireAuthData(ctx)
+      requireAdmin(ctx)
+      const batch = await deps.payout.createBatch({
+        actorUserId: auth.id,
+        requestIds: req.payoutRequestIds,
+      })
+      return { batchId: batch.id }
+    },
+
+    async exportPayoutBatch(req: any, ctx: HandlerContext) {
+      const auth = requireAuthData(ctx)
+      requireAdmin(ctx)
+      const csv = await deps.payout.exportBatchCsv({
+        actorUserId: auth.id,
+        batchId: req.batchId,
+      })
+      return { fileName: `vine-payout-${req.batchId}.csv`, contentType: 'text/csv', csv }
+    },
+
+    async markPayoutPaid(req: any, ctx: HandlerContext) {
+      const auth = requireAuthData(ctx)
+      requireAdmin(ctx)
+      const result = await deps.payout.markPaid({
+        actorUserId: auth.id,
+        requestId: req.payoutRequestId,
+        bankTransactionId: req.bankTransactionId,
+        paidAt: req.paidAt,
+      })
+      return { status: result.status }
+    },
+
+    async markPayoutFailed(req: any, ctx: HandlerContext) {
+      const auth = requireAuthData(ctx)
+      requireAdmin(ctx)
+      const result = await deps.payout.markFailed({
+        actorUserId: auth.id,
+        requestId: req.payoutRequestId,
+        reason: req.reason,
+      })
+      return { status: result.status }
     },
   }
 }

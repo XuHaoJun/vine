@@ -44,10 +44,25 @@ function makeDeps() {
       approve: vi.fn().mockResolvedValue({}),
       reject: vi.fn().mockResolvedValue({}),
     },
+    payout: {} as any,
   }
 }
 
 describe('createStickerMarketAdminHandler', () => {
+  it('rejects non-admin payout queue access with PermissionDenied', async () => {
+    const handler = createStickerMarketAdminHandler({
+      refund: {} as any,
+      reconciliation: {} as any,
+      review: {} as any,
+      payout: { listPendingRequests: vi.fn() },
+    })
+
+    await expect(
+      handler.listPayoutRequests({ limit: 10 }, makeAuthCtx({ id: 'user-1' })),
+    ).rejects.toMatchObject({ code: Code.PermissionDenied })
+  })
+
+
   it('rejects non-admin refund with PermissionDenied', async () => {
     const handler = createStickerMarketAdminHandler(makeDeps())
     await expect(
