@@ -16,7 +16,7 @@
 6. [定價機制](#6-定價機制)
 7. [購買流程（用戶側）](#7-購買流程用戶側)
 8. [支付層：Hyperswitch 整合](#8-支付層hyperswitch-整合)
-9. [創作者分潤與 Payout 機制](#9-創作者分潤與-payout-機制)
+9. [創作者分潤與 Manual Payout 機制](#9-創作者分潤與-manual-payout-機制)
 10. [貼圖授權與使用機制（App 內）](#10-貼圖授權與使用機制app-內)
 11. [商店與曝光機制](#11-商店與曝光機制)
 12. [數據與報表](#12-數據與報表)
@@ -380,17 +380,21 @@ On Sale
 
 ### 8.4 Payout 層
 
-Hyperswitch 也提供 **Payout API**，可用於創作者收款，支援：
+Phase 2.5 的創作者出款先採 **manual payout**。Hyperswitch 仍是用戶付款的收單層,但不作為初版創作者打款執行層。
 
-- 銀行轉帳（多國 SWIFT / 本地清算）
-- PayPal
-- 其他錢包
+初版出款執行方式：
 
-建議以 Hyperswitch Payout 作為月結批次打款的執行層。
+- 系統建立月結 ledger 與 payout request
+- 營運審核後建立 payout batch,鎖定該批次金額
+- 後台匯出 CSV,交由營運在銀行或金流後台人工匯款
+- 匯款完成後由營運回填銀行交易序號、付款日期、成功 / 失敗原因
+- 創作者收到站內通知與 Email,並可在 Dashboard 查看狀態
+
+> 未來升級路徑：若 hyperswitch-prism 後續完整支援 Stripe payouts,可在同一個 batch / ledger 架構下新增 automated payout executor。Manual executor 產生 CSV,automated executor 呼叫 hyperswitch-prism `PayoutClient` 或 Stripe Connect API,避免重寫創作者端流程。
 
 ---
 
-## 9. 創作者分潤與 Payout 機制
+## 9. 創作者分潤與 Manual Payout 機制
 
 ### 9.1 分潤結構
 
@@ -413,22 +417,50 @@ Hyperswitch 也提供 **Payout API**，可用於創作者收款，支援：
 | 每月最後一天 | 系統結算當月所有已完成訂單 |
 | 次月 5 日前 | 計算各創作者分潤，寄發結算報告 Email |
 | 次月 10 日 | 創作者於 Dashboard 確認金額並申請 Payout |
-| 次月 15–20 日 | 平台批次執行 Payout（Hyperswitch Payout API）|
-| 打款完成 | 站內通知 + Email 通知 |
+| 次月 15–20 日 | 營運審核 payout request,建立批次,下載 CSV,人工匯款 |
+| 打款完成 | 營運回填結果,系統發送站內通知 + Email 通知 |
 
 ### 9.3 最低 Payout 門檻
 
 | 項目 | 建議值 |
 |------|--------|
-| 最低申請門檻 | **USD $10** |
+| 最低申請門檻 | 產品目標 **USD $10 等值**；Phase 2.5 TWD 初版用 **NT$300** |
 | 未達門檻 | 累積至次月，不自動打款 |
 | 最高單次打款上限 | **USD $10,000**（超過需人工審核）|
 
-### 9.4 支援的收款方式（依地區）
+### 9.4 支援的收款方式
 
-- 銀行轉帳（SWIFT 或本地清算）
-- PayPal
-- 其他 Hyperswitch Payout 支援的方式
+Phase 2.5 初版只支援銀行轉帳。
+
+創作者需在 Tier 2 KYC 填寫：
+
+- 收款人法定姓名 / 戶名
+- 銀行代碼、銀行名稱、分行資訊
+- 銀行帳號
+- 收款幣別與居住地
+
+創作者可在收款申請頁新增或修改銀行轉帳資料。每次修改會停用舊的 active account 並建立新的 active account；已建立的 payout request 仍保留當時選用的 `payoutAccountId`。完整銀行帳號只存於 server/private 欄位與營運 CSV 匯出檔,前台只顯示銀行名稱與末四碼,且儲存後不回傳完整帳號。PayPal 或其他 payout method 暫不列入 Phase 2.5,避免在人工匯款流程中同時支援多套營運規則。
+
+### 9.4.1 Payout request 狀態
+
+| 狀態 | 說明 |
+|------|------|
+| available | 已結算且達最低門檻,可申請 |
+| requested | 創作者已送出申請,等待營運審核 |
+| approved | 營運已核准,等待建立批次 |
+| exported | 已納入 payout batch 並匯出 CSV,金額鎖定 |
+| paid | 營運已回填匯款完成 |
+| rejected | 審核退件,需補資料或重新申請 |
+| failed | 銀行匯款失敗,需更新收款資訊後重排批次 |
+
+### 9.4.2 Payout batch 與 CSV 匯出
+
+每個 payout batch 需記錄 `batchId`、建立者、建立時間、匯出時間、匯出者、付款日期、狀態與 audit log。CSV 至少包含：
+
+- batch ID、payout request ID、creator ID、creator display name
+- 收款人法定姓名、銀行代碼、銀行名稱、分行、完整銀行帳號、帳號末四碼
+- 幣別、gross amount、tax withholding、transfer fee、net amount
+- internal reference、memo / notes
 
 ### 9.5 稅務處理
 
@@ -443,7 +475,8 @@ Hyperswitch 也提供 **Payout API**，可用於創作者收款，支援：
 |----------|----------|
 | 用戶退款（Chargeback） | 從該創作者下月分潤中扣除 |
 | 疑似刷量購買 | 凍結該筆分潤，人工調查 |
-| Payout 打款失敗 | 系統重試，持續失敗則 Email 通知創作者更新收款資訊 |
+| Payout 審核退件 | 營運標記 rejected,填寫原因,通知創作者補資料後重新申請 |
+| 人工匯款失敗 | 營運標記 failed,填寫銀行退件原因,通知創作者更新收款資訊後重排批次 |
 | 帳號封鎖 | 凍結未打款分潤，待申訴解除後釋出 |
 
 ---

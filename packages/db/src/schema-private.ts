@@ -1,4 +1,5 @@
-import { index, integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
+import { index, integer, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
 
 import type { InferSelectModel } from 'drizzle-orm'
 import { stickerPackage } from './schema-public'
@@ -124,4 +125,123 @@ export const stickerReviewEvent = pgTable(
     createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
   },
   (table) => [index('stickerReviewEvent_packageId_idx').on(table.packageId)],
+)
+
+export const creatorPayoutAccount = pgTable(
+  'creatorPayoutAccount',
+  {
+    id: text('id').primaryKey(),
+    creatorId: text('creatorId').notNull(),
+    legalName: text('legalName').notNull(),
+    bankCode: text('bankCode').notNull(),
+    bankName: text('bankName').notNull(),
+    branchName: text('branchName').notNull().default(''),
+    accountNumber: text('accountNumber').notNull(),
+    accountLast4: text('accountLast4').notNull(),
+    currency: text('currency').notNull().$type<'TWD'>().default('TWD'),
+    status: text('status').notNull().$type<'active' | 'disabled'>().default('active'),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('creatorPayoutAccount_creatorId_idx').on(table.creatorId),
+    uniqueIndex('creatorPayoutAccount_creatorId_active_unique')
+      .on(table.creatorId)
+      .where(sql`${table.status} = 'active'`),
+  ],
+)
+
+export const creatorPayoutLedger = pgTable(
+  'creatorPayoutLedger',
+  {
+    id: text('id').primaryKey(),
+    creatorId: text('creatorId').notNull(),
+    month: text('month').notNull(),
+    currency: text('currency').notNull().$type<'TWD'>().default('TWD'),
+    grossAmountMinor: integer('grossAmountMinor').notNull(),
+    refundedAmountMinor: integer('refundedAmountMinor').notNull().default(0),
+    platformFeeMinor: integer('platformFeeMinor').notNull(),
+    creatorShareMinor: integer('creatorShareMinor').notNull(),
+    taxWithholdingMinor: integer('taxWithholdingMinor').notNull().default(0),
+    transferFeeMinor: integer('transferFeeMinor').notNull().default(0),
+    netAmountMinor: integer('netAmountMinor').notNull(),
+    status: text('status')
+      .notNull()
+      .$type<'available' | 'requested' | 'locked' | 'paid' | 'void'>()
+      .default('available'),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('creatorPayoutLedger_creator_month_unique').on(table.creatorId, table.month),
+    index('creatorPayoutLedger_status_idx').on(table.status),
+  ],
+)
+
+export const creatorPayoutBatch = pgTable(
+  'creatorPayoutBatch',
+  {
+    id: text('id').primaryKey(),
+    status: text('status')
+      .notNull()
+      .$type<'draft' | 'exported' | 'paid' | 'closed'>()
+      .default('draft'),
+    exportedAt: timestamp('exportedAt', { mode: 'string' }),
+    exportedByUserId: text('exportedByUserId'),
+    paidAt: timestamp('paidAt', { mode: 'string' }),
+    createdByUserId: text('createdByUserId').notNull(),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [index('creatorPayoutBatch_status_idx').on(table.status)],
+)
+
+export const creatorPayoutRequest = pgTable(
+  'creatorPayoutRequest',
+  {
+    id: text('id').primaryKey(),
+    ledgerIdsJson: text('ledgerIdsJson').notNull().default('[]'),
+    creatorId: text('creatorId').notNull(),
+    payoutAccountId: text('payoutAccountId').notNull(),
+    batchId: text('batchId'),
+    currency: text('currency').notNull().$type<'TWD'>().default('TWD'),
+    grossAmountMinor: integer('grossAmountMinor').notNull(),
+    taxWithholdingMinor: integer('taxWithholdingMinor').notNull().default(0),
+    transferFeeMinor: integer('transferFeeMinor').notNull().default(0),
+    netAmountMinor: integer('netAmountMinor').notNull(),
+    status: text('status')
+      .notNull()
+      .$type<'requested' | 'approved' | 'exported' | 'paid' | 'rejected' | 'failed'>()
+      .default('requested'),
+    rejectReason: text('rejectReason'),
+    failureReason: text('failureReason'),
+    bankTransactionId: text('bankTransactionId'),
+    paidAt: timestamp('paidAt', { mode: 'string' }),
+    requestedAt: timestamp('requestedAt', { mode: 'string' }).defaultNow().notNull(),
+    reviewedAt: timestamp('reviewedAt', { mode: 'string' }),
+    reviewedByUserId: text('reviewedByUserId'),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('creatorPayoutRequest_creatorId_idx').on(table.creatorId),
+    index('creatorPayoutRequest_status_idx').on(table.status),
+    index('creatorPayoutRequest_batchId_idx').on(table.batchId),
+  ],
+)
+
+export const creatorPayoutAuditEvent = pgTable(
+  'creatorPayoutAuditEvent',
+  {
+    id: text('id').primaryKey(),
+    payoutRequestId: text('payoutRequestId'),
+    payoutBatchId: text('payoutBatchId'),
+    actorUserId: text('actorUserId').notNull(),
+    action: text('action').notNull(),
+    metadataJson: text('metadataJson').notNull().default('{}'),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('creatorPayoutAuditEvent_request_idx').on(table.payoutRequestId),
+    index('creatorPayoutAuditEvent_batch_idx').on(table.payoutBatchId),
+  ],
 )

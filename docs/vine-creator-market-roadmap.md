@@ -24,7 +24,7 @@
 | D | 商店瀏覽 / 搜尋 / 詳情 | §6, §7.1, §11 | U1, U2, U3, U8 |
 | E | 付款 — Hyperswitch / ECPay 整合 | §7.3, §8 | U4 |
 | F | 購買後授權 + 聊天室整合 | §10 | U5, U6 |
-| G | 銷售報表 + Payout + 稅務 | §9, §12 | C7, C8 |
+| G | 銷售報表 + Manual Payout + 稅務 | §9, §12 | C7, C8 |
 | H | 追蹤創作者 + 推薦 + 評價 | §11 延伸 | U7, U8 延伸 |
 | I | DMCA / 違規處理 / 治理 | §13, §14 | (後台) |
 
@@ -119,20 +119,26 @@
 
 ---
 
-### Phase 2.5 — Payout + 稅務
+### Phase 2.5 — Manual Payout + 稅務
 
-**目標**:創作者能把錢領出來。
+**目標**:創作者能申請領款,營運能用 CSV 匯出批次並人工匯款。
 
 - **包含子系統**:G 完整(Payout、稅務)、B 延伸 Tier 2 KYC
 - **依賴**:Phase 2B 有真銷售數字可結算
+- **Design spec**:[`docs/superpowers/specs/2026-04-26-vine-creator-market-manual-payout-design.md`](./superpowers/specs/2026-04-26-vine-creator-market-manual-payout-design.md)
+- **Implementation plan**:[`docs/superpowers/plans/2026-04-26-vine-creator-market-manual-payout.md`](./superpowers/plans/2026-04-26-vine-creator-market-manual-payout.md)
 
 **關鍵工作**:
-- Hyperswitch Payout API 整合(prism 的 `PayoutClient`)
-- 月結流程(對映 spec §9.2):每月 1 日結算 → 5 日寄報告 → 10 日可申請 → 15–20 日打款
-- 最低門檻(USD $10)、上限($10,000)
-- Tier 2 KYC:政府 ID、銀行帳戶驗證、W-8BEN(對映 uiux C9)
+- Manual Payout ledger:結算月份、銷售額、退款扣回、平台分潤、創作者分潤、稅務預扣、轉帳手續費、實際應付金額
+- 月結流程(對映 spec §9.2):每月 1 日結算 → 5 日寄報告 → 10 日可申請 → 15–20 日營運人工匯款
+- Payout request 狀態機:`available → requested → approved → exported → paid / rejected / failed`
+- Admin 批次處理:篩選待付款、審核、建立 payout batch、鎖定金額、下載 CSV、回填匯款結果
+- CSV 匯出欄位:batch ID、request ID、creator ID、收款人戶名、銀行代碼、分行、完整帳號、幣別、net amount、稅額、手續費、memo
+- 最低門檻(產品目標 USD $10 等值;Phase 2.5 TWD 初版用 NT$300)、上限($10,000)
+- Tier 2 KYC:政府 ID、銀行帳戶驗證、W-8BEN(對映 uiux C9)。完整銀行帳號只存 server/private 欄位,前台只顯示銀行名稱與末四碼
 - 稅務預扣計算(依居住地)
 - Payout 頁(對映 uiux C8)
+- 未來升級路徑:保留 `PayoutExecutor` 邊界。Phase 2.5 先用 manual executor 產生 CSV;若 hyperswitch-prism 後續完整支援 Stripe payouts,可新增 automated executor 取代人工匯款步驟,ledger / batch / audit model 不重寫
 
 ---
 
@@ -196,7 +202,7 @@
         └───────────┬─────────────┘
                     │
         ┌───────────▼─────────────┐
-        │ Phase 2.5  Payout 稅務  │
+        │ Phase 2.5  Manual Payout│
         │   G 完整 + B Tier 2     │
         └───────────┬─────────────┘
                     │

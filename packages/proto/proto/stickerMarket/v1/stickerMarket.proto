@@ -14,6 +14,13 @@ service StickerMarketAdminService {
   rpc GetStickerReviewDetail(GetStickerReviewDetailRequest) returns (GetStickerReviewDetailResponse);
   rpc ApproveStickerPackage(ApproveStickerPackageRequest) returns (ApproveStickerPackageResponse);
   rpc RejectStickerPackage(RejectStickerPackageRequest) returns (RejectStickerPackageResponse);
+  rpc ListPayoutRequests(ListPayoutRequestsRequest) returns (ListPayoutRequestsResponse);
+  rpc ApprovePayoutRequest(ApprovePayoutRequestRequest) returns (ApprovePayoutRequestResponse);
+  rpc RejectPayoutRequest(RejectPayoutRequestRequest) returns (RejectPayoutRequestResponse);
+  rpc CreatePayoutBatch(CreatePayoutBatchRequest) returns (CreatePayoutBatchResponse);
+  rpc ExportPayoutBatch(ExportPayoutBatchRequest) returns (ExportPayoutBatchResponse);
+  rpc MarkPayoutPaid(MarkPayoutPaidRequest) returns (MarkPayoutPaidResponse);
+  rpc MarkPayoutFailed(MarkPayoutFailedRequest) returns (MarkPayoutFailedResponse);
 }
 
 enum RefundStatus {
@@ -106,6 +113,9 @@ service StickerMarketCreatorService {
   rpc SubmitStickerPackageReview(SubmitStickerPackageReviewRequest) returns (SubmitStickerPackageReviewResponse);
   rpc PublishApprovedStickerPackage(PublishApprovedStickerPackageRequest) returns (PublishApprovedStickerPackageResponse);
   rpc GetCreatorSalesReport(GetCreatorSalesReportRequest) returns (GetCreatorSalesReportResponse);
+  rpc GetCreatorPayoutOverview(GetCreatorPayoutOverviewRequest) returns (GetCreatorPayoutOverviewResponse);
+  rpc UpsertCreatorPayoutAccount(UpsertCreatorPayoutAccountRequest) returns (UpsertCreatorPayoutAccountResponse);
+  rpc RequestCreatorPayout(RequestCreatorPayoutRequest) returns (RequestCreatorPayoutResponse);
 }
 
 enum StickerPackageStatus {
@@ -282,3 +292,82 @@ message RejectStickerPackageRequest {
   repeated int32 problem_asset_numbers = 5;
 }
 message RejectStickerPackageResponse { StickerPackageDraft package = 1; }
+
+message CreatorPayoutBankAccountSummary {
+  string id = 1;
+  string bank_name = 2;
+  string account_last4 = 3;
+}
+
+message CreatorPayoutHistoryRow {
+  string id = 1;
+  string status = 2;
+  int32 net_amount_minor = 3;
+  string currency = 4;
+  string requested_at = 5;
+  string paid_at = 6;
+  string failure_reason = 7;
+  string reject_reason = 8;
+}
+
+message GetCreatorPayoutOverviewRequest {}
+message GetCreatorPayoutOverviewResponse {
+  int32 available_net_amount_minor = 1;
+  string currency = 2;
+  CreatorPayoutBankAccountSummary bank_account = 3;
+  repeated CreatorPayoutHistoryRow history = 4;
+}
+
+message UpsertCreatorPayoutAccountRequest {
+  string legal_name = 1;
+  string bank_code = 2;
+  string bank_name = 3;
+  string branch_name = 4;
+  string account_number = 5;
+  string account_number_confirmation = 6;
+}
+
+message UpsertCreatorPayoutAccountResponse {
+  CreatorPayoutBankAccountSummary bank_account = 1;
+}
+
+message RequestCreatorPayoutRequest {}
+message RequestCreatorPayoutResponse {
+  string payout_request_id = 1;
+  string status = 2;
+}
+
+message ListPayoutRequestsRequest { int32 limit = 1; }
+message ListPayoutRequestsResponse { repeated CreatorPayoutHistoryRow requests = 1; }
+
+message ApprovePayoutRequestRequest { string payout_request_id = 1; }
+message ApprovePayoutRequestResponse { string status = 1; }
+
+message RejectPayoutRequestRequest {
+  string payout_request_id = 1;
+  string reason = 2;
+}
+message RejectPayoutRequestResponse { string status = 1; }
+
+message CreatePayoutBatchRequest { repeated string payout_request_ids = 1; }
+message CreatePayoutBatchResponse { string batch_id = 1; }
+
+message ExportPayoutBatchRequest { string batch_id = 1; }
+message ExportPayoutBatchResponse {
+  string file_name = 1;
+  string content_type = 2;
+  string csv = 3;
+}
+
+message MarkPayoutPaidRequest {
+  string payout_request_id = 1;
+  string bank_transaction_id = 2;
+  string paid_at = 3;
+}
+message MarkPayoutPaidResponse { string status = 1; }
+
+message MarkPayoutFailedRequest {
+  string payout_request_id = 1;
+  string reason = 2;
+}
+message MarkPayoutFailedResponse { string status = 1; }

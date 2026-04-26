@@ -17,6 +17,9 @@ export function CreatorShell() {
         <Link href={'/creator/sales' as any}>
           <SizableText>銷售報表</SizableText>
         </Link>
+        <Link href={'/creator/payouts' as any}>
+          <SizableText>收款申請</SizableText>
+        </Link>
         <Link href={'/creator/packages/new' as any}>
           <SizableText>建立新貼圖組</SizableText>
         </Link>

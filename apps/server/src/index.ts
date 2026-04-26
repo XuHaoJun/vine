@@ -97,11 +97,13 @@ await app.register(fastifyConnectPlugin, {
       refund: payments.refund,
       reconciliation: payments.reconciliation,
       review: stickerMarket.review,
+      payout: stickerMarket.payout,
     },
     stickerMarketCreator: {
       creatorRepo: stickerMarket.creatorRepo,
       submission: stickerMarket.submission,
       salesReport: stickerMarket.salesReport,
+      payout: stickerMarket.payout,
       db,
     },
   }),

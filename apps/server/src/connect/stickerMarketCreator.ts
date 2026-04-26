@@ -7,6 +7,7 @@ export type StickerMarketCreatorHandlerDeps = {
   creatorRepo: any
   submission: any
   salesReport: any
+  payout: any
   db: any
 }
 
@@ -83,6 +84,31 @@ export function createStickerMarketCreatorHandler(deps: StickerMarketCreatorHand
         }
         throw err
       }
+    },
+
+    async getCreatorPayoutOverview(_req: any, ctx: HandlerContext) {
+      const auth = requireAuthData(ctx)
+      return deps.payout.getCreatorPayoutOverview({ userId: auth.id })
+    },
+
+    async requestCreatorPayout(_req: any, ctx: HandlerContext) {
+      const auth = requireAuthData(ctx)
+      const request = await deps.payout.requestCreatorPayout({ userId: auth.id })
+      return { payoutRequestId: request.id, status: request.status }
+    },
+
+    async upsertCreatorPayoutAccount(req: any, ctx: HandlerContext) {
+      const auth = requireAuthData(ctx)
+      const bankAccount = await deps.payout.upsertCreatorPayoutAccount({
+        userId: auth.id,
+        legalName: req.legalName,
+        bankCode: req.bankCode,
+        bankName: req.bankName,
+        branchName: req.branchName,
+        accountNumber: req.accountNumber,
+        accountNumberConfirmation: req.accountNumberConfirmation,
+      })
+      return { bankAccount }
     },
   }
 }
