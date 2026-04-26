@@ -1,18 +1,28 @@
 import { expect, test } from '@playwright/test'
-import { loginAsDemo } from './helpers'
+import { BASE_URL, loginAsDemo } from './helpers'
+
+import type { Page } from '@playwright/test'
+
+async function ensureCreatorProfile(page: Page) {
+  const response = await page.request.post(
+    `${BASE_URL}/stickerMarket.v1.StickerMarketCreatorService/UpsertCreatorProfile`,
+    {
+      data: {
+        displayName: 'Test Creator',
+        country: 'TW',
+        bio: '',
+      },
+    },
+  )
+  expect(response.ok()).toBe(true)
+}
 
 test.describe('creator submission', () => {
   test('creator submits package for review', async ({ page }) => {
     test.setTimeout(45000)
 
     await loginAsDemo(page)
-
-    // Set up creator profile
-    await page.goto('/creator')
-    await page.getByPlaceholder('創作者名稱').fill('Test Creator')
-    await page.getByPlaceholder('國家或地區').fill('TW')
-    await page.getByRole('button', { name: '儲存資料' }).click({ force: true })
-    await page.waitForTimeout(1000)
+    await ensureCreatorProfile(page)
 
     // Create new package
     await page.goto('/creator/packages/new')
@@ -30,13 +40,16 @@ test.describe('creator submission', () => {
     await page.getByRole('button', { name: '提交審核' }).click()
 
     // Should redirect to packages list showing in-review status
-    await expect(page.getByText('審核中')).toBeVisible()
+    await expect(
+      page.getByRole('link', { name: /Playwright Cats.*審核中/ }),
+    ).toBeVisible()
   })
 
   test('invalid zip blocks review submission', async ({ page }) => {
     test.setTimeout(45000)
 
     await loginAsDemo(page)
+    await ensureCreatorProfile(page)
     await page.goto('/creator/packages/new')
 
     // Fill step 1 and proceed

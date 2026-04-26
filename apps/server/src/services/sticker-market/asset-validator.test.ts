@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { zip, zlibSync } from 'fflate'
+import { readFileSync } from 'node:fs'
 import { validateStickerZip } from './asset-validator'
 
 async function makeTestZip(files: Record<string, Uint8Array>): Promise<Uint8Array> {
@@ -98,6 +99,13 @@ describe('validateStickerZip', () => {
     expect(result.files!.cover).toBeDefined()
     expect(result.files!.tabIcon).toBeDefined()
     expect(result.items.every((item) => item.level === 'ok')).toBe(true)
+  })
+
+  it('validates the creator submission integration fixture', async () => {
+    const zipFile = readFileSync('../web/src/test/fixtures/sticker-valid-8.zip')
+    const result = await validateStickerZip({ zipFile, stickerCount: 8 })
+
+    expect(result.valid).toBe(true)
   })
 
   it('rejects tab icon PNGs that are not 60x60', async () => {
