@@ -77,7 +77,7 @@
 
 ---
 
-### Phase 2A — Creator Submission MVP
+### Phase 2A — Creator Submission MVP (✅ Completed 2026-04-26)
 
 **目標**:讓真實創作者能建立帳號、提交第一個貼圖組、通過人工審核後上架到既有商店付款閉環。
 
@@ -87,6 +87,7 @@
 - **成功標準**:創作者提交 ZIP → admin approve → package 進入 store → 用戶可購買 → entitlement 可在聊天室使用
 - **詳細設計**:[`docs/superpowers/specs/2026-04-25-vine-creator-market-submission-mvp-design.md`](./superpowers/specs/2026-04-25-vine-creator-market-submission-mvp-design.md)
 - **Implementation plan**:[`docs/superpowers/plans/2026-04-25-vine-creator-market-submission-mvp.md`](./superpowers/plans/2026-04-25-vine-creator-market-submission-mvp.md)
+- **完成 commit range**: `83dab73..HEAD`
 
 **關鍵工作**:
 - `stickerPackage` schema 擴充(從 seed 演進到真 table) + `stickerAsset` 子表(keywords、stickerResourceType、依 spec §10.3)
@@ -182,7 +183,7 @@
         └───────────┬─────────────┘
                     │
         ┌───────────▼─────────────┐
-        │ Phase 2A Creator Submit │  ← 下一階段
+        │ Phase 2A Creator Submit │  ✅ Completed 2026-04-26
         │   B + C + A 完整        │
         └───────────┬─────────────┘
                     │
