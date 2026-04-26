@@ -30,7 +30,10 @@ export function CreatorSalesReport() {
           銷售報表
         </SizableText>
         <XStack items="center" gap="$2">
-          <Button variant="outlined" onPress={() => setMonth(shiftReportMonth(month, -1))}>
+          <Button
+            variant="outlined"
+            onPress={() => setMonth(shiftReportMonth(month, -1))}
+          >
             上個月
           </Button>
           <SizableText minW={84} text="center" fontWeight="600">
@@ -48,7 +51,10 @@ export function CreatorSalesReport() {
       {data && (
         <>
           <XStack gap="$3" flexWrap="wrap">
-            <MetricCard label="本月銷售" value={formatTwdMinor(data.summary?.grossSalesMinor ?? 0)} />
+            <MetricCard
+              label="本月銷售"
+              value={formatTwdMinor(data.summary?.grossSalesMinor ?? 0)}
+            />
             <MetricCard
               label="預估分潤"
               value={formatTwdMinor(data.summary?.confirmedRevenueMinor ?? 0)}
@@ -70,12 +76,29 @@ export function CreatorSalesReport() {
             <SizableText size="$4" fontWeight="700">
               每日銷售趨勢
             </SizableText>
-            <XStack height={160} items="flex-end" gap="$1" px="$2" py="$2" bg="$color2" rounded="$4">
+            <XStack
+              height={160}
+              items="flex-end"
+              gap="$1"
+              px="$2"
+              py="$2"
+              bg="$color2"
+              rounded="$4"
+            >
               {data.dailyRows.map((row) => {
-                const height = row.grossSalesMinor === 0 ? 4 : Math.max(8, (row.grossSalesMinor / maxDailyGross) * 132)
+                const height =
+                  row.grossSalesMinor === 0
+                    ? 4
+                    : Math.max(8, (row.grossSalesMinor / maxDailyGross) * 132)
                 return (
                   <YStack key={row.date} flex={1} minW={6} items="center" gap="$1">
-                    <YStack width="100%" maxW={18} height={height} bg="$green9" rounded="$2" />
+                    <YStack
+                      width="100%"
+                      maxW={18}
+                      height={height}
+                      bg="$green9"
+                      rounded="$2"
+                    />
                     <SizableText size="$1" color="$color10">
                       {Number(row.date.slice(8, 10))}
                     </SizableText>

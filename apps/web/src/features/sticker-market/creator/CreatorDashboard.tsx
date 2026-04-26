@@ -41,7 +41,8 @@ export function CreatorDashboard() {
   const reportMonth = getCurrentReportMonth()
   const salesReport = useTanQuery({
     queryKey: creatorSalesReportQueryKey(reportMonth),
-    queryFn: () => stickerMarketCreatorClient.getCreatorSalesReport({ month: reportMonth }),
+    queryFn: () =>
+      stickerMarketCreatorClient.getCreatorSalesReport({ month: reportMonth }),
     enabled: Boolean(profile?.id),
   })
 

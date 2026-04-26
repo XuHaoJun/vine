@@ -39,11 +39,39 @@ describe('SalesReportRepository DB integration', () => {
         400,
         '2026-04-03T13:00:00Z',
       )
-      await insertOrder(db, 'order_created', 'pkg_a', 'created', 500, '2026-04-03T14:00:00Z')
-      await insertOrder(db, 'order_failed', 'pkg_a', 'failed', 600, '2026-04-03T15:00:00Z')
-      await insertOrder(db, 'order_other_creator', 'pkg_b', 'paid', 700, '2026-04-03T16:00:00Z')
+      await insertOrder(
+        db,
+        'order_created',
+        'pkg_a',
+        'created',
+        500,
+        '2026-04-03T14:00:00Z',
+      )
+      await insertOrder(
+        db,
+        'order_failed',
+        'pkg_a',
+        'failed',
+        600,
+        '2026-04-03T15:00:00Z',
+      )
+      await insertOrder(
+        db,
+        'order_other_creator',
+        'pkg_b',
+        'paid',
+        700,
+        '2026-04-03T16:00:00Z',
+      )
       await insertOrder(db, 'order_seed', 'pkg_seed', 'paid', 800, '2026-04-03T17:00:00Z')
-      await insertOrder(db, 'order_other_month', 'pkg_a', 'paid', 900, '2026-05-01T00:00:00Z')
+      await insertOrder(
+        db,
+        'order_other_month',
+        'pkg_a',
+        'paid',
+        900,
+        '2026-05-01T00:00:00Z',
+      )
 
       const rows = await repo.listReportableOrders(db, {
         creatorId: 'creator_a',
