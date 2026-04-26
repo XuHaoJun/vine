@@ -105,6 +105,7 @@ service StickerMarketCreatorService {
   rpc UploadStickerPackageAssets(UploadStickerPackageAssetsRequest) returns (UploadStickerPackageAssetsResponse);
   rpc SubmitStickerPackageReview(SubmitStickerPackageReviewRequest) returns (SubmitStickerPackageReviewResponse);
   rpc PublishApprovedStickerPackage(PublishApprovedStickerPackageRequest) returns (PublishApprovedStickerPackageResponse);
+  rpc GetCreatorSalesReport(GetCreatorSalesReportRequest) returns (GetCreatorSalesReportResponse);
 }
 
 enum StickerPackageStatus {
@@ -217,6 +218,44 @@ message SubmitStickerPackageReviewResponse { StickerPackageDraft package = 1; }
 
 message PublishApprovedStickerPackageRequest { string package_id = 1; }
 message PublishApprovedStickerPackageResponse { StickerPackageDraft package = 1; }
+
+message GetCreatorSalesReportRequest {
+  string month = 1;
+}
+
+message SalesReportSummary {
+  int32 gross_sales_minor = 1;
+  int32 confirmed_revenue_minor = 2;
+  int32 sold_count = 3;
+  int32 refunded_count = 4;
+  int32 refunded_minor = 5;
+  int32 refund_pending_count = 6;
+  int32 refund_pending_minor = 7;
+  string currency = 8;
+}
+
+message SalesReportDailyRow {
+  string date = 1;
+  int32 gross_sales_minor = 2;
+  int32 confirmed_revenue_minor = 3;
+  int32 sold_count = 4;
+}
+
+message SalesReportPackageRow {
+  string package_id = 1;
+  string package_name = 2;
+  int32 gross_sales_minor = 3;
+  int32 confirmed_revenue_minor = 4;
+  int32 sold_count = 5;
+  int32 refunded_count = 6;
+}
+
+message GetCreatorSalesReportResponse {
+  string month = 1;
+  SalesReportSummary summary = 2;
+  repeated SalesReportDailyRow daily_rows = 3;
+  repeated SalesReportPackageRow package_rows = 4;
+}
 
 message ListStickerReviewQueueRequest {
   int32 limit = 1;
