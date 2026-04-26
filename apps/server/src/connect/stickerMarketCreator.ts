@@ -6,6 +6,7 @@ import { requireAuthData } from './auth-context'
 export type StickerMarketCreatorHandlerDeps = {
   creatorRepo: any
   submission: any
+  salesReport: any
   db: any
 }
 
@@ -68,6 +69,21 @@ export function createStickerMarketCreatorHandler(deps: StickerMarketCreatorHand
       })
       return { package: mapStickerPackageDraft(pkg) }
     },
+    async getCreatorSalesReport(req: { month: string }, ctx: HandlerContext) {
+      const auth = requireAuthData(ctx)
+      try {
+        const report = await deps.salesReport.getCreatorSalesReport({
+          userId: auth.id,
+          month: req.month,
+        })
+        return mapCreatorSalesReport(report)
+      } catch (err) {
+        if (err instanceof Error && err.message === 'invalid report month') {
+          throw new ConnectError('invalid report month', Code.InvalidArgument)
+        }
+        throw err
+      }
+    },
   }
 }
 
@@ -115,6 +131,36 @@ function parseNumberArray(value: unknown): number[] {
       .split(',')
       .map((item) => Number(item.trim()))
       .filter((item) => Number.isInteger(item))
+  }
+}
+
+function mapCreatorSalesReport(report: any) {
+  return {
+    month: report.month,
+    summary: {
+      grossSalesMinor: report.summary.grossSalesMinor,
+      confirmedRevenueMinor: report.summary.confirmedRevenueMinor,
+      soldCount: report.summary.soldCount,
+      refundedCount: report.summary.refundedCount,
+      refundedMinor: report.summary.refundedMinor,
+      refundPendingCount: report.summary.refundPendingCount,
+      refundPendingMinor: report.summary.refundPendingMinor,
+      currency: report.summary.currency,
+    },
+    dailyRows: report.dailyRows.map((row: any) => ({
+      date: row.date,
+      grossSalesMinor: row.grossSalesMinor,
+      confirmedRevenueMinor: row.confirmedRevenueMinor,
+      soldCount: row.soldCount,
+    })),
+    packageRows: report.packageRows.map((row: any) => ({
+      packageId: row.packageId,
+      packageName: row.packageName,
+      grossSalesMinor: row.grossSalesMinor,
+      confirmedRevenueMinor: row.confirmedRevenueMinor,
+      soldCount: row.soldCount,
+      refundedCount: row.refundedCount,
+    })),
   }
 }
 

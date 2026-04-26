@@ -99,13 +99,16 @@
 
 ---
 
-### Phase 2B — Creator Sales Reporting
+### Phase 2B — Creator Sales Reporting (✅ Completed 2026-04-26)
 
 **目標**:在 Phase 2A 已有真實創作者與真實銷售後,讓創作者能看到最小可用的銷售與分潤報表。
 
 - **包含子系統**:G 的最小版(銷售報表)、訂單 creator ownership 歸因、退款扣回顯示
 - **不含**:Payout 申請、稅務文件、Tier 2 KYC、年度憑證
 - **依賴**:Phase 2A 有已上架 package 與真實訂單
+- **詳細設計**:[`docs/superpowers/specs/2026-04-26-vine-creator-market-sales-reporting-design.md`](./superpowers/specs/2026-04-26-vine-creator-market-sales-reporting-design.md)
+- **Implementation plan**:[`docs/superpowers/plans/2026-04-26-vine-creator-market-sales-reporting.md`](./superpowers/plans/2026-04-26-vine-creator-market-sales-reporting.md)
+- **交付物**:`GetCreatorSalesReport` ConnectRPC endpoint、creator-scoped sales report service/repository、`/creator/sales` 報表頁、Dashboard 本月銷售 / 預估分潤卡片、UTC 月份選擇 helper 與 regression test
 
 **關鍵工作**:
 - 銷售報表(對映 uiux C7)
@@ -189,7 +192,7 @@
                     │
         ┌───────────▼─────────────┐
         │ Phase 2B Sales Reports  │
-        │   G 最小                │
+        │   G 最小                │  ✅ Completed 2026-04-26
         └───────────┬─────────────┘
                     │
         ┌───────────▼─────────────┐
@@ -254,4 +257,4 @@
 
 ---
 
-*最後更新:2026-04-25*
+*最後更新:2026-04-26*

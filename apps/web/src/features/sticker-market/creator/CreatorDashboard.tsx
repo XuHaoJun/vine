@@ -10,10 +10,15 @@ import { Input } from '~/interface/forms/Input'
 import { TextArea } from '~/interface/forms/TextArea'
 import { showToast } from '~/interface/toast/Toast'
 import { useAuth } from '~/features/auth/client/authClient'
-import { stickerMarketCreatorClient } from '~/features/sticker-market/creator/client'
+import {
+  creatorSalesReportQueryKey,
+  formatTwdMinor,
+  getCurrentReportMonth,
+  stickerMarketCreatorClient,
+} from '~/features/sticker-market/creator/client'
 import { creatorProfileSchema } from '~/features/sticker-market/creator/schema'
 import { useZeroQuery } from '~/zero/client'
-import { useTanMutation } from '~/query'
+import { useTanMutation, useTanQuery } from '~/query'
 
 import type { CreatorProfileFormData } from '~/features/sticker-market/creator/schema'
 
@@ -32,6 +37,14 @@ export function CreatorDashboard() {
     { creatorId: profile?.id ?? '' },
     { enabled: Boolean(profile?.id) },
   )
+
+  const reportMonth = getCurrentReportMonth()
+  const salesReport = useTanQuery({
+    queryKey: creatorSalesReportQueryKey(reportMonth),
+    queryFn: () =>
+      stickerMarketCreatorClient.getCreatorSalesReport({ month: reportMonth }),
+    enabled: Boolean(profile?.id),
+  })
 
   const stats = useMemo(() => {
     const list = packages ?? []
@@ -53,6 +66,22 @@ export function CreatorDashboard() {
       <XStack gap="$3" flexWrap="wrap">
         <YStack flex={1} minW={140} p="$3" bg="$color2" rounded="$4" gap="$1">
           <SizableText size="$2" color="$color10">
+            本月銷售
+          </SizableText>
+          <SizableText size="$7" fontWeight="700">
+            {formatTwdMinor(salesReport.data?.summary?.grossSalesMinor ?? 0)}
+          </SizableText>
+        </YStack>
+        <YStack flex={1} minW={140} p="$3" bg="$color2" rounded="$4" gap="$1">
+          <SizableText size="$2" color="$color10">
+            預估分潤
+          </SizableText>
+          <SizableText size="$7" fontWeight="700">
+            {formatTwdMinor(salesReport.data?.summary?.confirmedRevenueMinor ?? 0)}
+          </SizableText>
+        </YStack>
+        <YStack flex={1} minW={140} p="$3" bg="$color2" rounded="$4" gap="$1">
+          <SizableText size="$2" color="$color10">
             作品總數
           </SizableText>
           <SizableText size="$7" fontWeight="700">
@@ -67,22 +96,7 @@ export function CreatorDashboard() {
             {stats.inReviewCount}
           </SizableText>
         </YStack>
-        <YStack flex={1} minW={140} p="$3" bg="$color2" rounded="$4" gap="$1">
-          <SizableText size="$2" color="$color10">
-            未通過
-          </SizableText>
-          <SizableText size="$7" fontWeight="700">
-            {stats.rejectedCount}
-          </SizableText>
-        </YStack>
       </XStack>
-
-      <YStack p="$3" bg="$color2" rounded="$4" gap="$1">
-        <SizableText size="$3" fontWeight="600">
-          銷售報表
-        </SizableText>
-        <SizableText color="$color10">銷售報表將在 Phase 2B 開放</SizableText>
-      </YStack>
     </YStack>
   )
 }
