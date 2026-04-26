@@ -64,7 +64,12 @@ export function createPayoutRepository() {
       await db
         .update(creatorPayoutLedger)
         .set({ status: 'requested', updatedAt: input.now })
-        .where(inArray(creatorPayoutLedger.id, input.ledgerIds))
+        .where(
+          and(
+            inArray(creatorPayoutLedger.id, input.ledgerIds),
+            eq(creatorPayoutLedger.status, 'available'),
+          ),
+        )
       return request
     },
 
@@ -115,8 +120,14 @@ export function createPayoutRepository() {
           reviewedByUserId: input.actorUserId,
           updatedAt: input.now,
         })
-        .where(eq(creatorPayoutRequest.id, input.requestId))
+        .where(
+          and(
+            eq(creatorPayoutRequest.id, input.requestId),
+            eq(creatorPayoutRequest.status, 'requested'),
+          ),
+        )
         .returning()
+      if (!request) throw new Error('payout request not found or not in requested status')
       return request
     },
 
@@ -130,8 +141,14 @@ export function createPayoutRepository() {
           reviewedByUserId: input.actorUserId,
           updatedAt: input.now,
         })
-        .where(eq(creatorPayoutRequest.id, input.requestId))
+        .where(
+          and(
+            eq(creatorPayoutRequest.id, input.requestId),
+            eq(creatorPayoutRequest.status, 'requested'),
+          ),
+        )
         .returning()
+      if (!request) throw new Error('payout request not found or not in requested status')
       return request
     },
 
