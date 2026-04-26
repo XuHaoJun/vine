@@ -83,6 +83,7 @@ export function AdminPayoutsPage() {
       stickerMarketAdminClient.exportPayoutBatch({ batchId: bid }),
     onSuccess: (res, bid) => {
       downloadCsv(`vine-payout-${bid}.csv`, res.csv)
+      setBatchId(null)
       showToast('已下載 CSV', { type: 'success' })
     },
     onError: () => showToast('匯出失敗', { type: 'error' }),
@@ -132,13 +133,18 @@ export function AdminPayoutsPage() {
       <ScrollView flex={1}>
         <YStack p="$4" gap="$3">
           {isLoading && (
-            <SizableText size="$4" color="$color10" text="center" mt="$8">
+            <SizableText size="$4" color="$color10" mt="$8">
               載入中...
+            </SizableText>
+          )}
+          {!isLoading && requests.length === 0 && (
+            <SizableText size="$4" color="$color10" mt="$8">
+              尚無待處理申請
             </SizableText>
           )}
 
           {!isLoading && requests.length === 0 && (
-            <SizableText size="$4" color="$color10" text="center" mt="$8">
+            <SizableText size="$4" color="$color10" mt="$8">
               尚無匯款申請
             </SizableText>
           )}
