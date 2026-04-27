@@ -221,14 +221,14 @@ describe('createStickerMarketUserHandler', () => {
   })
 
   it('reports sticker packages through trust service', async () => {
-    const deps = makeDeps()
-    deps.trust = {
+    const { deps: handlerDeps } = makeDeps()
+    handlerDeps.trust = {
       reportStickerPackage: vi.fn().mockResolvedValue({
         id: 'report-1',
         status: 'open',
       }),
     } as any
-    const handler = createStickerMarketUserHandler(deps)
+    const handler = createStickerMarketUserHandler(handlerDeps)
 
     const result = await handler.reportStickerPackage(
       {
@@ -240,11 +240,27 @@ describe('createStickerMarketUserHandler', () => {
     )
 
     expect(result.reportId).toBe('report-1')
-    expect(deps.trust.reportStickerPackage).toHaveBeenCalledWith({
+    expect(handlerDeps.trust.reportStickerPackage).toHaveBeenCalledWith({
       packageId: 'pkg-1',
       reporterUserId: 'user-1',
       reasonCategory: 'copyright',
       reasonText: 'This looks copied from my artwork.',
     })
+  })
+
+  it('throws Internal if trust service is not configured', async () => {
+    const { deps } = makeDeps()
+    const handler = createStickerMarketUserHandler(deps)
+
+    await expect(
+      handler.reportStickerPackage(
+        {
+          packageId: 'pkg-1',
+          reasonCategory: 'copyright',
+          reasonText: 'This looks copied from my artwork.',
+        },
+        makeAuthCtx('user-1'),
+      ),
+    ).rejects.toMatchObject({ code: Code.Internal })
   })
 })
