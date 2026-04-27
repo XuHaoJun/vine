@@ -162,21 +162,25 @@
 
 ---
 
-### Phase 4 — 信任與治理
+### Phase 4A — Trust Ops Minimum
 
-**目標**:處理真實上線後會出現的侵權、違規、詐欺。
+**目標**:MVP / Public Beta 前補一個人工治理安全閥。重點不是建立完整法律流程產品,而是讓營運在侵權、違規、詐欺疑慮出現時可以手動止血、留紀錄、暫停付款。
 
-- **包含子系統**:I(DMCA / 申訴 / 違規)、C 的 AI 審核輔助
-- **依賴**:Phase 2A 上線一段時間、累積 edge case
+- **包含子系統**:I 的最小版(投訴收件、人工下架、audit log、manual payout hold)
+- **依賴**:Phase 2.5 有 payout ledger / request 後,才能對爭議款項做 hold;Phase 2A 有真實創作者內容後,投訴與下架才有意義
+- **不含**:完整 DMCA / Counter Notice 狀態機、帳號警告 / 暫停 / 終止治理系統、AI 輔助審核、年度稅務憑證自動生成
 
 **關鍵工作**:
-- DMCA 投訴表單 + 48h 暫時下架流程(對映 spec §13.3)
-- Counter Notice(反駁)機制
-- 違規處分層級(警告 / 下架 / 暫停 / 終止,對映 spec §14.1)
-- 分潤凍結(暫停期間累積不可提領)
-- 申訴流程(5 工作天回覆)
-- AI 輔助審核(降低人工成本,對映 spec §5.2)
-- 年度稅務憑證自動生成
+- Report intake:用戶 / 權利人可回報 sticker package,原因包含侵權、違禁內容、詐欺或其他
+- Admin review queue:營運可查看待處理 report、關聯 package / creator / order / payout 資訊
+- Force unlist:admin 可強制下架 sticker package,填寫 reason,保留 audit log;已購買用戶是否仍可使用沿用既有授權規則
+- Creator notification:通知創作者 package 已被人工下架與原因,先不做完整申訴狀態機
+- Manual payout hold:admin 可對 creator 或 payout request 加 hold reason,爭議期間阻止匯出 / 標記 paid
+- Audit trail:所有下架、解除下架、hold、解除 hold 都記錄操作者、時間、原因與前後狀態
+
+**Future backlog(不是 MVP)**:
+- Phase 4B — Formal Disputes:DMCA 48h 暫時下架、7 天 Counter Notice、14 天等待期、5 工作天申訴 SLA
+- Phase 4C — Governance Automation:AI 輔助審核、違規分級自動化、年度稅務憑證自動生成
 
 ---
 
@@ -211,8 +215,8 @@
            ┌────────┴────────┐
            ▼                 ▼
 ┌──────────────┐  ┌──────────────┐
-    │ Phase 3 成長 │  │ Phase 4 治理  │
-    │   D + H      │  │   I + AI 審核 │
+    │ Phase 3 成長 │  │ Phase 4A     │
+    │   D + H      │  │ Trust Ops 最小│
     └──────✅───────┘  └──────────────┘
    (可並行,依資源)
 ```
@@ -221,10 +225,11 @@
 - Phase 2A 需要 Phase 1 + Phase 1.5(付款、refund、對帳已穩),否則創作者上架後共同付款 bug 會回流到 creator 流程
 - Phase 2B 需要 Phase 2A(有真實創作者、package ownership、訂單歸因後才有報表意義)
 - Phase 2.5 需要 Phase 2B(有真實銷售與分潤數字才能結算)
-- Phase 3/4 需要 Phase 2A 以上(有真內容才能推薦 / 治理)
+- Phase 3 需要 Phase 2A 以上(有真內容才能推薦 / 發現)
+- Phase 4A 需要 Phase 2A 以上(有真內容才能投訴 / 下架),其中 payout hold 需要 Phase 2.5 的 payout ledger / request
 
 **軟依賴**:
-- Phase 3 與 4 內部子項可重排
+- Phase 3 與 Phase 4A 可依營運風險重排;若 beta 前已有真實創作者招募,Phase 4A 應優先於更重的 discovery automation
 
 ---
 
