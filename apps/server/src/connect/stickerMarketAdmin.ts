@@ -130,8 +130,8 @@ export function createStickerMarketAdminHandler(deps: StickerMarketAdminHandlerD
 
     async listPayoutRequests(req: any, ctx: HandlerContext) {
       requireAdmin(ctx)
-      const requests = await deps.payout.listPendingRequests({ limit: req.limit ?? 100 })
-      return { requests }
+      const rows = await deps.payout.listPendingRequests({ limit: req.limit ?? 100 })
+      return { requests: rows.map(mapPayoutRequest) }
     },
 
     async approvePayoutRequest(req: any, ctx: HandlerContext) {
@@ -475,6 +475,15 @@ function mapCreatorPayoutHold(row: any) {
     heldAt: row.payoutHoldAt ?? '',
     heldByUserId: row.payoutHoldByUserId ?? '',
     reason: row.payoutHoldReason ?? '',
+  }
+}
+
+function mapPayoutRequest(row: any) {
+  return {
+    ...row,
+    payoutHold: mapCreatorPayoutHold(row),
+    creatorId: row.creatorId ?? '',
+    creatorDisplayName: row.creatorDisplayName ?? '',
   }
 }
 

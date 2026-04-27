@@ -165,6 +165,14 @@ export function AdminPayoutsPage() {
                 </YStack>
               </XStack>
 
+              {req.payoutHold?.held && (
+                <YStack bg="$red3" rounded="$3" p="$2">
+                  <SizableText size="$3" color="$red11">
+                    提領暫停：{req.payoutHold?.reason}
+                  </SizableText>
+                </YStack>
+              )}
+
               <XStack gap="$2" items="center">
                 <SizableText size="$3" color="$color10">
                   {req.currency} {(req.netAmountMinor / 100).toFixed(2)}
@@ -179,7 +187,7 @@ export function AdminPayoutsPage() {
                   <Button
                     size="$3"
                     theme="green"
-                    disabled={approveMutation.isPending}
+                    disabled={Boolean(req.payoutHold?.held) || approveMutation.isPending}
                     onPress={() => approveMutation.mutate(req.id)}
                   >
                     核准
@@ -229,6 +237,7 @@ export function AdminPayoutsPage() {
                 <Button
                   size="$3"
                   variant={selectedIds.has(req.id) ? 'default' : 'outlined'}
+                  disabled={Boolean(req.payoutHold?.held)}
                   onPress={() => toggleSelect(req.id)}
                 >
                   {selectedIds.has(req.id) ? '已選取' : '選取'}
@@ -240,7 +249,7 @@ export function AdminPayoutsPage() {
                   <Button
                     size="$3"
                     theme="green"
-                    disabled={markPaidMutation.isPending}
+                    disabled={Boolean(req.payoutHold?.held) || markPaidMutation.isPending}
                     onPress={() => {
                       const bankTransactionId = prompt('輸入銀行交易序號')
                       if (!bankTransactionId) return
