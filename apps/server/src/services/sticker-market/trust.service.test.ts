@@ -220,9 +220,9 @@ describe('createTrustService', () => {
     deps.repo.getReportDetail.mockResolvedValue(undefined)
     const service = createTrustService(deps)
 
-    await expect(
-      service.getReportDetail({ reportId: 'missing' }),
-    ).rejects.toMatchObject({ code: Code.NotFound })
+    await expect(service.getReportDetail({ reportId: 'missing' })).rejects.toMatchObject({
+      code: Code.NotFound,
+    })
   })
 
   it('marks an open report as reviewing', async () => {
@@ -283,7 +283,10 @@ describe('createTrustService', () => {
     expect(result.status).toBe('resolved')
     expect(deps.repo.transitionReport).toHaveBeenCalledWith(
       deps.db,
-      expect.objectContaining({ status: 'resolved', fromStatuses: ['open', 'reviewing'] }),
+      expect.objectContaining({
+        status: 'resolved',
+        fromStatuses: ['open', 'reviewing'],
+      }),
     )
   })
 
@@ -307,7 +310,10 @@ describe('createTrustService', () => {
     expect(result.status).toBe('dismissed')
     expect(deps.repo.transitionReport).toHaveBeenCalledWith(
       deps.db,
-      expect.objectContaining({ status: 'dismissed', fromStatuses: ['open', 'reviewing'] }),
+      expect.objectContaining({
+        status: 'dismissed',
+        fromStatuses: ['open', 'reviewing'],
+      }),
     )
   })
 

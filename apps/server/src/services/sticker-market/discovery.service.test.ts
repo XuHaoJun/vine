@@ -666,14 +666,12 @@ describe('createDiscoveryService', () => {
         featuredShelfRepo,
         currencyDisplay,
         creatorRepo: {
-          findById: vi
-            .fn()
-            .mockResolvedValue({
-              id: 'creator_1',
-              displayName: 'Creator',
-              bio: '',
-              avatarDriveKey: null,
-            }),
+          findById: vi.fn().mockResolvedValue({
+            id: 'creator_1',
+            displayName: 'Creator',
+            bio: '',
+            avatarDriveKey: null,
+          }),
           findByUserId: vi.fn(),
         } as any,
       })

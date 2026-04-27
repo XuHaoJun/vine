@@ -1,6 +1,10 @@
 import { Code, ConnectError } from '@connectrpc/connect'
 import type { HandlerContext } from '@connectrpc/connect'
-import { RefundStatus, StickerPackageStatus, TrustReportStatus } from '@vine/proto/stickerMarket'
+import {
+  RefundStatus,
+  StickerPackageStatus,
+  TrustReportStatus,
+} from '@vine/proto/stickerMarket'
 import { requireAuthData } from './auth-context'
 
 const DEFAULT_RECONCILE_SINCE_MS = 24 * 60 * 60 * 1000
@@ -32,7 +36,7 @@ export type StickerMarketAdminHandlerDeps = {
   }
   payout: any
   featuredShelf: any
-  trust: any
+  trust?: any
 }
 
 function requireAdmin(ctx: HandlerContext) {

@@ -195,10 +195,7 @@ describe('createStickerMarketUserHandler', () => {
       const handler = createStickerMarketUserHandler(deps)
 
       await expect(
-        handler.createCheckout(
-          { packageId: 'pkg-1', simulatePaid: false },
-          authCtx,
-        ),
+        handler.createCheckout({ packageId: 'pkg-1', simulatePaid: false }, authCtx),
       ).rejects.toMatchObject({ code: Code.FailedPrecondition })
     })
   })
@@ -249,12 +246,12 @@ describe('createStickerMarketUserHandler', () => {
 
   it('reports sticker packages through trust service', async () => {
     const { deps: handlerDeps } = makeDeps()
-    handlerDeps.trust = {
+    ;(handlerDeps as any).trust = {
       reportStickerPackage: vi.fn().mockResolvedValue({
         id: 'report-1',
         status: 'open',
       }),
-    } as any
+    }
     const handler = createStickerMarketUserHandler(handlerDeps)
 
     const result = await handler.reportStickerPackage(
@@ -267,7 +264,7 @@ describe('createStickerMarketUserHandler', () => {
     )
 
     expect(result.reportId).toBe('report-1')
-    expect(handlerDeps.trust.reportStickerPackage).toHaveBeenCalledWith({
+    expect((handlerDeps as any).trust.reportStickerPackage).toHaveBeenCalledWith({
       packageId: 'pkg-1',
       reporterUserId: 'user-1',
       reasonCategory: 'copyright',

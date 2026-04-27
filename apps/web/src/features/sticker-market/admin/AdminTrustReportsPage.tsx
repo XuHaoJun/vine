@@ -33,7 +33,13 @@ export function AdminTrustReportsPage() {
 
   return (
     <YStack flex={1} bg="$background">
-      <XStack px="$4" py="$3" items="center" borderBottomWidth={1} borderBottomColor="$color4">
+      <XStack
+        px="$4"
+        py="$3"
+        items="center"
+        borderBottomWidth={1}
+        borderBottomColor="$color4"
+      >
         <SizableText size="$6" fontWeight="700" color="$color12">
           信任與安全回報
         </SizableText>

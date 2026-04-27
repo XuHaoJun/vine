@@ -203,7 +203,8 @@ export function createStickerMarketUserHandler(deps: StickerMarketUserHandlerDep
       ctx: HandlerContext,
     ) {
       const auth = requireAuthData(ctx)
-      if (!deps.trust) throw new ConnectError('trust service not configured', Code.Internal)
+      if (!deps.trust)
+        throw new ConnectError('trust service not configured', Code.Internal)
       const report = await deps.trust.reportStickerPackage({
         packageId: req.packageId,
         reporterUserId: auth.id,

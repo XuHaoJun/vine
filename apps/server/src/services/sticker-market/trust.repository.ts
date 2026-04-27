@@ -1,16 +1,9 @@
 import { and, desc, eq, inArray } from 'drizzle-orm'
 import { creatorProfile, stickerAsset, stickerPackage } from '@vine/db/schema-public'
-import {
-  stickerTrustActionEvent,
-  stickerTrustReport,
-} from '@vine/db/schema-private'
+import { stickerTrustActionEvent, stickerTrustReport } from '@vine/db/schema-private'
 
 export type TrustReportStatus = 'open' | 'reviewing' | 'resolved' | 'dismissed'
-export type TrustReasonCategory =
-  | 'copyright'
-  | 'prohibited_content'
-  | 'fraud'
-  | 'other'
+export type TrustReasonCategory = 'copyright' | 'prohibited_content' | 'fraud' | 'other'
 
 export function createTrustRepository() {
   return {
@@ -66,8 +59,7 @@ export function createTrustRepository() {
       const filtered = input.status
         ? query.where(eq(stickerTrustReport.status, input.status))
         : query
-      return filtered.orderBy(desc(stickerTrustReport.createdAt))
-        .limit(input.limit)
+      return filtered.orderBy(desc(stickerTrustReport.createdAt)).limit(input.limit)
     },
 
     async getReportDetail(db: any, reportId: string) {

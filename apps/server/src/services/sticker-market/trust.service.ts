@@ -1,11 +1,6 @@
 import { Code, ConnectError } from '@connectrpc/connect'
 
-const reasonCategories = new Set([
-  'copyright',
-  'prohibited_content',
-  'fraud',
-  'other',
-])
+const reasonCategories = new Set(['copyright', 'prohibited_content', 'fraud', 'other'])
 
 function requireReason(value: string, min = 1) {
   const trimmed = value.trim()
@@ -13,7 +8,10 @@ function requireReason(value: string, min = 1) {
     throw new ConnectError('reason is required', Code.InvalidArgument)
   }
   if (trimmed.length > 1000) {
-    throw new ConnectError('reason must be 1000 characters or fewer', Code.InvalidArgument)
+    throw new ConnectError(
+      'reason must be 1000 characters or fewer',
+      Code.InvalidArgument,
+    )
   }
   return trimmed
 }
@@ -68,7 +66,8 @@ export function createTrustService(deps: {
 
     listReports(input: { status?: string; limit: number }) {
       const status =
-        input.status && ['open', 'reviewing', 'resolved', 'dismissed'].includes(input.status)
+        input.status &&
+        ['open', 'reviewing', 'resolved', 'dismissed'].includes(input.status)
           ? input.status
           : undefined
       return deps.repo.listReports(deps.db, {

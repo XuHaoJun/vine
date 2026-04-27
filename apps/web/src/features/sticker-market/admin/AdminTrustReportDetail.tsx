@@ -127,9 +127,18 @@ export function AdminTrustReportDetail({ reportId }: AdminTrustReportDetailProps
 
   return (
     <YStack flex={1} bg="$background">
-      <XStack px="$4" py="$3" items="center" gap="$3" borderBottomWidth={1} borderBottomColor="$color4">
+      <XStack
+        px="$4"
+        py="$3"
+        items="center"
+        gap="$3"
+        borderBottomWidth={1}
+        borderBottomColor="$color4"
+      >
         <YStack cursor="pointer" onPress={() => router.back()}>
-          <SizableText size="$5" color="$color12">‹</SizableText>
+          <SizableText size="$5" color="$color12">
+            ‹
+          </SizableText>
         </YStack>
         <SizableText size="$5" fontWeight="700" color="$color12" flex={1}>
           回報詳情
@@ -157,8 +166,20 @@ export function AdminTrustReportDetail({ reportId }: AdminTrustReportDetailProps
 
               <XStack flexWrap="wrap" gap="$2">
                 {data.assets.map((asset) => (
-                  <YStack key={asset.id} width={72} height={88} rounded="$3" bg="$color2" items="center" justify="center">
-                    <img src={`/uploads/${asset.driveKey}`} alt={`${asset.number}`} style={{ width: 64, height: 64, objectFit: 'contain' }} />
+                  <YStack
+                    key={asset.id}
+                    width={72}
+                    height={88}
+                    rounded="$3"
+                    bg="$color2"
+                    items="center"
+                    justify="center"
+                  >
+                    <img
+                      src={`/uploads/${asset.driveKey}`}
+                      alt={`${asset.number}`}
+                      style={{ width: 64, height: 64, objectFit: 'contain' }}
+                    />
                   </YStack>
                 ))}
               </XStack>
@@ -171,25 +192,49 @@ export function AdminTrustReportDetail({ reportId }: AdminTrustReportDetailProps
               </YStack>
 
               <XStack gap="$2" flexWrap="wrap">
-                <Button disabled={!canAct || markReviewing.isPending} onPress={() => markReviewing.mutate()}>
+                <Button
+                  disabled={!canAct || markReviewing.isPending}
+                  onPress={() => markReviewing.mutate()}
+                >
                   標記處理中
                 </Button>
-                <Button disabled={!canAct || resolve.isPending} onPress={() => resolve.mutate()}>
+                <Button
+                  disabled={!canAct || resolve.isPending}
+                  onPress={() => resolve.mutate()}
+                >
                   結案
                 </Button>
-                <Button disabled={!canAct || dismiss.isPending} variant="outlined" onPress={() => dismiss.mutate()}>
+                <Button
+                  disabled={!canAct || dismiss.isPending}
+                  variant="outlined"
+                  onPress={() => dismiss.mutate()}
+                >
                   不處理
                 </Button>
-                <Button disabled={!canAct || remove.isPending} theme="red" onPress={() => remove.mutate()}>
+                <Button
+                  disabled={!canAct || remove.isPending}
+                  theme="red"
+                  onPress={() => remove.mutate()}
+                >
                   強制下架
                 </Button>
-                <Button disabled={!canAct || restore.isPending} onPress={() => restore.mutate()}>
+                <Button
+                  disabled={!canAct || restore.isPending}
+                  onPress={() => restore.mutate()}
+                >
                   恢復上架
                 </Button>
-                <Button disabled={!canAct || hold.isPending || !data.report.creatorId} theme="red" onPress={() => hold.mutate()}>
+                <Button
+                  disabled={!canAct || hold.isPending || !data.report.creatorId}
+                  theme="red"
+                  onPress={() => hold.mutate()}
+                >
                   暫停提領
                 </Button>
-                <Button disabled={!canAct || clearHold.isPending || !data.report.creatorId} onPress={() => clearHold.mutate()}>
+                <Button
+                  disabled={!canAct || clearHold.isPending || !data.report.creatorId}
+                  onPress={() => clearHold.mutate()}
+                >
                   解除提領暫停
                 </Button>
               </XStack>
@@ -200,9 +245,17 @@ export function AdminTrustReportDetail({ reportId }: AdminTrustReportDetailProps
                 </SizableText>
                 {data.events.map((event) => (
                   <YStack key={event.id} bg="$color2" rounded="$3" p="$2">
-                    <SizableText size="$3" color="$color12">{event.action}</SizableText>
-                    <SizableText size="$2" color="$color10">{event.createdAt}</SizableText>
-                    {event.reasonText ? <SizableText size="$3" color="$color11">{event.reasonText}</SizableText> : null}
+                    <SizableText size="$3" color="$color12">
+                      {event.action}
+                    </SizableText>
+                    <SizableText size="$2" color="$color10">
+                      {event.createdAt}
+                    </SizableText>
+                    {event.reasonText ? (
+                      <SizableText size="$3" color="$color11">
+                        {event.reasonText}
+                      </SizableText>
+                    ) : null}
                   </YStack>
                 ))}
               </YStack>
