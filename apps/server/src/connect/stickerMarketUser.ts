@@ -4,7 +4,7 @@ import { and, eq } from 'drizzle-orm'
 import { stickerPackage, entitlement } from '@vine/db/schema-public'
 import { stickerOrder } from '@vine/db/schema-private'
 import type { PaymentsService } from '@vine/pay'
-import { OrderStatus } from '@vine/proto/stickerMarket'
+import { OrderStatus, TrustReportStatus } from '@vine/proto/stickerMarket'
 import { requireAuthData } from './auth-context'
 
 export type StickerMarketUserHandlerDeps = {
@@ -17,6 +17,14 @@ export type StickerMarketUserHandlerDeps = {
   follow: any
   review: any
   launchNotification: any
+  trust?: {
+    reportStickerPackage(input: {
+      packageId: string
+      reporterUserId: string
+      reasonCategory: string
+      reasonText: string
+    }): Promise<any>
+  }
 }
 
 export function createStickerMarketUserHandler(deps: StickerMarketUserHandlerDeps) {
@@ -189,6 +197,39 @@ export function createStickerMarketUserHandler(deps: StickerMarketUserHandlerDep
       await deps.launchNotification.markRead(userId, req.notificationId)
       return {}
     },
+
+    async reportStickerPackage(
+      req: { packageId: string; reasonCategory: string; reasonText: string },
+      ctx: HandlerContext,
+    ) {
+      const auth = requireAuthData(ctx)
+      if (!deps.trust) throw new ConnectError('trust service not configured', Code.Internal)
+      const report = await deps.trust.reportStickerPackage({
+        packageId: req.packageId,
+        reporterUserId: auth.id,
+        reasonCategory: req.reasonCategory,
+        reasonText: req.reasonText,
+      })
+      return {
+        reportId: report.id,
+        status: trustReportStatusToProto(report.status),
+      }
+    },
+  }
+}
+
+function trustReportStatusToProto(status: string): TrustReportStatus {
+  switch (status) {
+    case 'open':
+      return TrustReportStatus.OPEN
+    case 'reviewing':
+      return TrustReportStatus.REVIEWING
+    case 'resolved':
+      return TrustReportStatus.RESOLVED
+    case 'dismissed':
+      return TrustReportStatus.DISMISSED
+    default:
+      return TrustReportStatus.UNSPECIFIED
   }
 }
 

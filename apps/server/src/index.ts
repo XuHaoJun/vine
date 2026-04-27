@@ -95,6 +95,7 @@ await app.register(fastifyConnectPlugin, {
       follow: stickerMarket.follow,
       review: stickerMarket.review,
       launchNotification: stickerMarket.launchNotification,
+      trust: stickerMarket.trust,
     },
     stickerMarketAdmin: {
       refund: payments.refund,
@@ -102,6 +103,7 @@ await app.register(fastifyConnectPlugin, {
       review: stickerMarket.review,
       payout: stickerMarket.payout,
       featuredShelf: stickerMarket.featuredShelf,
+      trust: stickerMarket.trust,
     },
     stickerMarketCreator: {
       creatorRepo: stickerMarket.creatorRepo,

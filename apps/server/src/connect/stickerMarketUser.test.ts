@@ -219,4 +219,32 @@ describe('createStickerMarketUserHandler', () => {
       ).rejects.toMatchObject({ code: Code.NotFound })
     })
   })
+
+  it('reports sticker packages through trust service', async () => {
+    const deps = makeDeps()
+    deps.trust = {
+      reportStickerPackage: vi.fn().mockResolvedValue({
+        id: 'report-1',
+        status: 'open',
+      }),
+    } as any
+    const handler = createStickerMarketUserHandler(deps)
+
+    const result = await handler.reportStickerPackage(
+      {
+        packageId: 'pkg-1',
+        reasonCategory: 'copyright',
+        reasonText: 'This looks copied from my artwork.',
+      },
+      makeAuthCtx('user-1'),
+    )
+
+    expect(result.reportId).toBe('report-1')
+    expect(deps.trust.reportStickerPackage).toHaveBeenCalledWith({
+      packageId: 'pkg-1',
+      reporterUserId: 'user-1',
+      reasonCategory: 'copyright',
+      reasonText: 'This looks copied from my artwork.',
+    })
+  })
 })
