@@ -47,18 +47,14 @@ export function createLaunchNotificationService(deps: {
       pageToken: string
     }) {
       const pageSize =
-        input.pageSize > 0 && input.pageSize <= 100
-          ? input.pageSize
-          : DEFAULT_PAGE_SIZE
+        input.pageSize > 0 && input.pageSize <= 100 ? input.pageSize : DEFAULT_PAGE_SIZE
 
       const conditions = [eq(creatorLaunchNotification.recipientUserId, input.userId)]
 
       let cursor: { createdAt: string; id: string } | undefined
       if (input.pageToken) {
         try {
-          cursor = JSON.parse(
-            Buffer.from(input.pageToken, 'base64url').toString(),
-          )
+          cursor = JSON.parse(Buffer.from(input.pageToken, 'base64url').toString())
         } catch {
           cursor = undefined
         }

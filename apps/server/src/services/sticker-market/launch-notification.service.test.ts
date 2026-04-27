@@ -7,11 +7,13 @@ describe('createLaunchNotificationService', () => {
       const db = {
         select: vi.fn(() => ({
           from: vi.fn(() => ({
-            where: vi.fn(() => Promise.resolve([
-              { userId: 'user_1' },
-              { userId: 'user_2' },
-              { userId: 'user_3' },
-            ])),
+            where: vi.fn(() =>
+              Promise.resolve([
+                { userId: 'user_1' },
+                { userId: 'user_2' },
+                { userId: 'user_3' },
+              ]),
+            ),
           })),
         })),
         insert: vi.fn(() => ({
@@ -69,11 +71,13 @@ describe('createLaunchNotificationService', () => {
       const db = {
         select: vi.fn(() => ({
           from: vi.fn(() => ({
-            where: vi.fn(() => Promise.resolve([
-              { userId: 'user_1' },
-              { userId: 'creator_user' },
-              { userId: 'user_2' },
-            ])),
+            where: vi.fn(() =>
+              Promise.resolve([
+                { userId: 'user_1' },
+                { userId: 'creator_user' },
+                { userId: 'user_2' },
+              ]),
+            ),
           })),
         })),
         insert: vi.fn(() => ({
@@ -106,11 +110,19 @@ describe('createLaunchNotificationService', () => {
           from: vi.fn(() => ({
             where: vi.fn(() => ({
               orderBy: vi.fn(() => ({
-                limit: vi.fn(() => Promise.resolve([
-                  { id: 'n1', recipientUserId: 'user_1', creatorId: 'c1',
-                    packageId: 'pkg_1', status: 'unread',
-                    createdAt: '2026-04-26T00:00:00Z', readAt: null },
-                ])),
+                limit: vi.fn(() =>
+                  Promise.resolve([
+                    {
+                      id: 'n1',
+                      recipientUserId: 'user_1',
+                      creatorId: 'c1',
+                      packageId: 'pkg_1',
+                      status: 'unread',
+                      createdAt: '2026-04-26T00:00:00Z',
+                      readAt: null,
+                    },
+                  ]),
+                ),
               })),
             })),
           })),
@@ -139,9 +151,9 @@ describe('createLaunchNotificationService', () => {
         update: vi.fn(() => ({
           set: vi.fn(() => ({
             where: vi.fn(() => ({
-              returning: vi.fn().mockResolvedValue([
-                { id: 'n1', readAt: '2026-04-26T01:00:00.000Z' },
-              ]),
+              returning: vi
+                .fn()
+                .mockResolvedValue([{ id: 'n1', readAt: '2026-04-26T01:00:00.000Z' }]),
             })),
           })),
         })),

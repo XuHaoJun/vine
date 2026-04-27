@@ -1,5 +1,11 @@
 import { and, asc, between, count, desc, eq, gte, inArray, sql, sum } from 'drizzle-orm'
-import { stickerPackage, creatorProfile, entitlement, creatorFollow, stickerPackageReview } from '@vine/db/schema-public'
+import {
+  stickerPackage,
+  creatorProfile,
+  entitlement,
+  creatorFollow,
+  stickerPackageReview,
+} from '@vine/db/schema-public'
 import { stickerOrder, currencyDisplayRate } from '@vine/db/schema-private'
 
 export type OnSalePackageRow = {
@@ -42,10 +48,7 @@ export type ReviewRow = {
 
 export function createDiscoveryRepository() {
   return {
-    async findOnSalePackages(
-      db: any,
-      packageIds: string[],
-    ): Promise<OnSalePackageRow[]> {
+    async findOnSalePackages(db: any, packageIds: string[]): Promise<OnSalePackageRow[]> {
       if (packageIds.length === 0) return []
       return db
         .select({
@@ -93,10 +96,7 @@ export function createDiscoveryRepository() {
         .limit(limit)
     },
 
-    async findLatestReleases(
-      db: any,
-      limit: number,
-    ): Promise<OnSalePackageRow[]> {
+    async findLatestReleases(db: any, limit: number): Promise<OnSalePackageRow[]> {
       return db
         .select({
           id: stickerPackage.id,
@@ -146,10 +146,7 @@ export function createDiscoveryRepository() {
         .from(stickerPackage)
         .leftJoin(creatorProfile, eq(stickerPackage.creatorId, creatorProfile.id))
         .where(
-          and(
-            eq(stickerPackage.id, packageId),
-            eq(stickerPackage.status, 'on_sale'),
-          ),
+          and(eq(stickerPackage.id, packageId), eq(stickerPackage.status, 'on_sale')),
         )
         .limit(1)
       return row
@@ -198,12 +195,7 @@ export function createDiscoveryRepository() {
       const [row] = await db
         .select({ id: entitlement.id })
         .from(entitlement)
-        .where(
-          and(
-            eq(entitlement.userId, userId),
-            eq(entitlement.packageId, packageId),
-          ),
-        )
+        .where(and(eq(entitlement.userId, userId), eq(entitlement.packageId, packageId)))
         .limit(1)
       return row
     },
@@ -217,19 +209,13 @@ export function createDiscoveryRepository() {
         .select({ id: creatorFollow.id })
         .from(creatorFollow)
         .where(
-          and(
-            eq(creatorFollow.userId, userId),
-            eq(creatorFollow.creatorId, creatorId),
-          ),
+          and(eq(creatorFollow.userId, userId), eq(creatorFollow.creatorId, creatorId)),
         )
         .limit(1)
       return row
     },
 
-    async getRatingSummary(
-      db: any,
-      packageId: string,
-    ): Promise<RatingSummaryRow> {
+    async getRatingSummary(db: any, packageId: string): Promise<RatingSummaryRow> {
       const [row] = await db
         .select({
           averageRating: sql<number>`COALESCE(AVG(${stickerPackageReview.rating}), 0)`,

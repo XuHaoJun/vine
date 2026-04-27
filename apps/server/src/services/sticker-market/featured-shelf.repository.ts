@@ -152,21 +152,26 @@ export function createFeaturedShelfRepository() {
       })
     },
 
-    async publish(db: any, id: string, now: string): Promise<FeaturedShelfRow | undefined> {
+    async publish(
+      db: any,
+      id: string,
+      now: string,
+    ): Promise<FeaturedShelfRow | undefined> {
       const [row] = await db
         .update(stickerFeaturedShelf)
         .set({ status: 'published', updatedAt: now })
         .where(
-          and(
-            eq(stickerFeaturedShelf.id, id),
-            eq(stickerFeaturedShelf.status, 'draft'),
-          ),
+          and(eq(stickerFeaturedShelf.id, id), eq(stickerFeaturedShelf.status, 'draft')),
         )
         .returning()
       return row
     },
 
-    async archive(db: any, id: string, now: string): Promise<FeaturedShelfRow | undefined> {
+    async archive(
+      db: any,
+      id: string,
+      now: string,
+    ): Promise<FeaturedShelfRow | undefined> {
       const [row] = await db
         .update(stickerFeaturedShelf)
         .set({ status: 'archived', updatedAt: now })

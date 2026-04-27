@@ -65,9 +65,17 @@ export function CreatorPublicPage({ creatorId }: CreatorPublicPageProps) {
         borderBottomColor="$color4"
       >
         <YStack cursor="pointer" onPress={() => router.back()}>
-          <SizableText size="$5" color="$color12">‹</SizableText>
+          <SizableText size="$5" color="$color12">
+            ‹
+          </SizableText>
         </YStack>
-        <SizableText size="$5" fontWeight="700" color="$color12" flex={1} numberOfLines={1}>
+        <SizableText
+          size="$5"
+          fontWeight="700"
+          color="$color12"
+          flex={1}
+          numberOfLines={1}
+        >
           {profile?.displayName ?? '創作者'}
         </SizableText>
       </XStack>
@@ -164,11 +172,17 @@ export function CreatorPublicPage({ creatorId }: CreatorPublicPageProps) {
                   />
                 </YStack>
                 <YStack p="$3" gap="$1">
-                  <SizableText size="$3" fontWeight="700" color="$color12" numberOfLines={1}>
+                  <SizableText
+                    size="$3"
+                    fontWeight="700"
+                    color="$color12"
+                    numberOfLines={1}
+                  >
                     {pkg.name}
                   </SizableText>
                   <SizableText size="$2" color="$color10">
-                    {pkg.displayCurrency}{pkg.displayPriceMinor ?? pkg.priceMinor}
+                    {pkg.displayCurrency}
+                    {pkg.displayPriceMinor ?? pkg.priceMinor}
                   </SizableText>
                   {pkg.averageRating > 0 && (
                     <SizableText size="$2" color="$color10">

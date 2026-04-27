@@ -42,38 +42,50 @@ describe('createDiscoveryService', () => {
       const featuredShelfRepo = makeFeaturedShelfRepo()
       const currencyDisplay = makeCurrencyDisplayService()
 
-      discoveryRepo.findOnSalePackages.mockImplementation(
-        (_db: any, ids: string[]) =>
-          ids.map((id: string) => ({
-            id,
-            name: `Package ${id}`,
-            priceMinor: 100,
-            currency: 'TWD',
-            coverDriveKey: 'cover.jpg',
-            stickerType: 'static',
-            stickerCount: 8,
-            status: 'on_sale',
-            publishedAt: '2026-04-01T00:00:00Z',
-            creatorId: 'creator_1',
-          })),
+      discoveryRepo.findOnSalePackages.mockImplementation((_db: any, ids: string[]) =>
+        ids.map((id: string) => ({
+          id,
+          name: `Package ${id}`,
+          priceMinor: 100,
+          currency: 'TWD',
+          coverDriveKey: 'cover.jpg',
+          stickerType: 'static',
+          stickerCount: 8,
+          status: 'on_sale',
+          publishedAt: '2026-04-01T00:00:00Z',
+          creatorId: 'creator_1',
+        })),
       )
 
       featuredShelfRepo.findActiveShelves.mockResolvedValue([
-        { id: 'shelf_1', slug: 'summer', title: 'Summer Picks', items: [{ packageId: 'pkg_1' }] },
+        {
+          id: 'shelf_1',
+          slug: 'summer',
+          title: 'Summer Picks',
+          items: [{ packageId: 'pkg_1' }],
+        },
       ])
       featuredShelfRepo.findShelfItems.mockResolvedValue([
         { shelfId: 'shelf_1', packageId: 'pkg_1', position: 0 },
       ])
 
       discoveryRepo.countFollowers.mockResolvedValue(42)
-      discoveryRepo.getRatingSummary.mockResolvedValue({ averageRating: 4.5, reviewCount: 10 })
+      discoveryRepo.getRatingSummary.mockResolvedValue({
+        averageRating: 4.5,
+        reviewCount: 10,
+      })
       discoveryRepo.checkEntitlement.mockResolvedValue(undefined)
       discoveryRepo.checkFollow.mockResolvedValue(undefined)
       discoveryRepo.findBestsellers.mockResolvedValue([])
       discoveryRepo.findLatestReleases.mockResolvedValue([])
-      currencyDisplay.getDisplayPrice.mockResolvedValue({ priceMinor: 100, currency: 'TWD' })
+      currencyDisplay.getDisplayPrice.mockResolvedValue({
+        priceMinor: 100,
+        currency: 'TWD',
+      })
       const creatorRepo = {
-        findById: vi.fn().mockResolvedValue({ id: 'creator_1', displayName: 'Creator One' }),
+        findById: vi
+          .fn()
+          .mockResolvedValue({ id: 'creator_1', displayName: 'Creator One' }),
       }
 
       const service = createDiscoveryService({
@@ -103,11 +115,27 @@ describe('createDiscoveryService', () => {
       const currencyDisplay = makeCurrencyDisplayService()
 
       discoveryRepo.findOnSalePackages.mockResolvedValue([
-        { id: 'pkg_1', name: 'P1', status: 'on_sale', currency: 'TWD', priceMinor: 100, coverDriveKey: '', stickerType: 'static', stickerCount: 8, publishedAt: '', creatorId: 'c1' },
+        {
+          id: 'pkg_1',
+          name: 'P1',
+          status: 'on_sale',
+          currency: 'TWD',
+          priceMinor: 100,
+          coverDriveKey: '',
+          stickerType: 'static',
+          stickerCount: 8,
+          publishedAt: '',
+          creatorId: 'c1',
+        },
       ])
 
       featuredShelfRepo.findActiveShelves.mockResolvedValue([
-        { id: 'shelf_1', slug: 's1', title: 'Shelf', items: [{ packageId: 'pkg_1' }, { packageId: 'invalid_pkg' }] },
+        {
+          id: 'shelf_1',
+          slug: 's1',
+          title: 'Shelf',
+          items: [{ packageId: 'pkg_1' }, { packageId: 'invalid_pkg' }],
+        },
       ])
       featuredShelfRepo.findShelfItems.mockResolvedValue([
         { shelfId: 'shelf_1', packageId: 'pkg_1', position: 0 },
@@ -115,12 +143,23 @@ describe('createDiscoveryService', () => {
       ])
 
       discoveryRepo.countFollowers.mockResolvedValue(0)
-      discoveryRepo.getRatingSummary.mockResolvedValue({ averageRating: 0, reviewCount: 0 })
+      discoveryRepo.getRatingSummary.mockResolvedValue({
+        averageRating: 0,
+        reviewCount: 0,
+      })
       discoveryRepo.findBestsellers.mockResolvedValue([])
       discoveryRepo.findLatestReleases.mockResolvedValue([])
-      currencyDisplay.getDisplayPrice.mockResolvedValue({ priceMinor: 100, currency: 'TWD' })
+      currencyDisplay.getDisplayPrice.mockResolvedValue({
+        priceMinor: 100,
+        currency: 'TWD',
+      })
 
-      const service = createDiscoveryService({ db, discoveryRepo, featuredShelfRepo, currencyDisplay })
+      const service = createDiscoveryService({
+        db,
+        discoveryRepo,
+        featuredShelfRepo,
+        currencyDisplay,
+      })
       const result = await service.getStoreHome()
 
       expect(result.featuredShelves[0].packages).toHaveLength(1)
@@ -143,16 +182,40 @@ describe('createDiscoveryService', () => {
 
       discoveryRepo.findOnSalePackages.mockImplementation((_db: any, ids: string[]) =>
         ids.length > 0
-          ? [{ id: 'pkg_1', name: 'Top Seller', priceMinor: 100, currency: 'TWD', coverDriveKey: '', stickerType: 'static', stickerCount: 8, status: 'on_sale', publishedAt: '', creatorId: 'c1' }]
+          ? [
+              {
+                id: 'pkg_1',
+                name: 'Top Seller',
+                priceMinor: 100,
+                currency: 'TWD',
+                coverDriveKey: '',
+                stickerType: 'static',
+                stickerCount: 8,
+                status: 'on_sale',
+                publishedAt: '',
+                creatorId: 'c1',
+              },
+            ]
           : [],
       )
 
       discoveryRepo.countFollowers.mockResolvedValue(0)
-      discoveryRepo.getRatingSummary.mockResolvedValue({ averageRating: 0, reviewCount: 0 })
+      discoveryRepo.getRatingSummary.mockResolvedValue({
+        averageRating: 0,
+        reviewCount: 0,
+      })
       discoveryRepo.findLatestReleases.mockResolvedValue([])
-      currencyDisplay.getDisplayPrice.mockResolvedValue({ priceMinor: 100, currency: 'TWD' })
+      currencyDisplay.getDisplayPrice.mockResolvedValue({
+        priceMinor: 100,
+        currency: 'TWD',
+      })
 
-      const service = createDiscoveryService({ db, discoveryRepo, featuredShelfRepo, currencyDisplay })
+      const service = createDiscoveryService({
+        db,
+        discoveryRepo,
+        featuredShelfRepo,
+        currencyDisplay,
+      })
       const result = await service.getStoreHome()
 
       expect(result.bestseller7d).toBeDefined()
@@ -171,9 +234,15 @@ describe('createDiscoveryService', () => {
       featuredShelfRepo.findShelfItems.mockResolvedValue([])
       discoveryRepo.findOnSalePackages.mockResolvedValue([])
       discoveryRepo.countFollowers.mockResolvedValue(0)
-      discoveryRepo.getRatingSummary.mockResolvedValue({ averageRating: 0, reviewCount: 0 })
+      discoveryRepo.getRatingSummary.mockResolvedValue({
+        averageRating: 0,
+        reviewCount: 0,
+      })
       discoveryRepo.findLatestReleases.mockResolvedValue([])
-      currencyDisplay.getDisplayPrice.mockResolvedValue({ priceMinor: 100, currency: 'TWD' })
+      currencyDisplay.getDisplayPrice.mockResolvedValue({
+        priceMinor: 100,
+        currency: 'TWD',
+      })
 
       discoveryRepo.findBestsellers.mockImplementation(
         async (_db: any, _days: number) => {
@@ -184,15 +253,27 @@ describe('createDiscoveryService', () => {
         },
       )
 
-      discoveryRepo.findOnSalePackages.mockImplementation(
-        (_db: any, ids: string[]) =>
-          ids.map((id: string) => ({
-            id, name: `Pkg ${id}`, priceMinor: 100, currency: 'TWD',
-            coverDriveKey: '', stickerType: 'static', stickerCount: 8, status: 'on_sale', publishedAt: '', creatorId: 'c1',
-          })),
+      discoveryRepo.findOnSalePackages.mockImplementation((_db: any, ids: string[]) =>
+        ids.map((id: string) => ({
+          id,
+          name: `Pkg ${id}`,
+          priceMinor: 100,
+          currency: 'TWD',
+          coverDriveKey: '',
+          stickerType: 'static',
+          stickerCount: 8,
+          status: 'on_sale',
+          publishedAt: '',
+          creatorId: 'c1',
+        })),
       )
 
-      const service = createDiscoveryService({ db, discoveryRepo, featuredShelfRepo, currencyDisplay })
+      const service = createDiscoveryService({
+        db,
+        discoveryRepo,
+        featuredShelfRepo,
+        currencyDisplay,
+      })
       const result = await service.getStoreHome()
 
       expect(result.bestseller30d).toBeDefined()
@@ -210,30 +291,50 @@ describe('createDiscoveryService', () => {
       featuredShelfRepo.findShelfItems.mockResolvedValue([])
       discoveryRepo.findOnSalePackages.mockResolvedValue([])
       discoveryRepo.countFollowers.mockResolvedValue(0)
-      discoveryRepo.getRatingSummary.mockResolvedValue({ averageRating: 0, reviewCount: 0 })
+      discoveryRepo.getRatingSummary.mockResolvedValue({
+        averageRating: 0,
+        reviewCount: 0,
+      })
       discoveryRepo.findLatestReleases.mockResolvedValue([])
-      currencyDisplay.getDisplayPrice.mockResolvedValue({ priceMinor: 100, currency: 'TWD' })
+      currencyDisplay.getDisplayPrice.mockResolvedValue({
+        priceMinor: 100,
+        currency: 'TWD',
+      })
 
       discoveryRepo.findBestsellers.mockResolvedValue([
         { packageId: 'pkg_1', salesCount: 15, amountMinorSum: 1500 },
       ])
 
-      discoveryRepo.findOnSalePackages.mockImplementation(
-        (_db: any, ids: string[]) =>
-          ids.map((id: string) => ({
-            id, name: `Pkg ${id}`, priceMinor: 100, currency: 'TWD',
-            coverDriveKey: '', stickerType: 'static', stickerCount: 8, status: 'on_sale', publishedAt: '', creatorId: 'c1',
-          })),
+      discoveryRepo.findOnSalePackages.mockImplementation((_db: any, ids: string[]) =>
+        ids.map((id: string) => ({
+          id,
+          name: `Pkg ${id}`,
+          priceMinor: 100,
+          currency: 'TWD',
+          coverDriveKey: '',
+          stickerType: 'static',
+          stickerCount: 8,
+          status: 'on_sale',
+          publishedAt: '',
+          creatorId: 'c1',
+        })),
       )
 
-      const service = createDiscoveryService({ db, discoveryRepo, featuredShelfRepo, currencyDisplay })
+      const service = createDiscoveryService({
+        db,
+        discoveryRepo,
+        featuredShelfRepo,
+        currencyDisplay,
+      })
       const result = await service.getStoreHome()
 
       expect(result.bestseller7d).toBeDefined()
       expect(result.bestseller7d!.packages).toHaveLength(1)
 
       expect(discoveryRepo.findBestsellers).toHaveBeenCalledWith(
-        db, 7, expect.any(Number),
+        db,
+        7,
+        expect.any(Number),
       )
     })
 
@@ -246,24 +347,63 @@ describe('createDiscoveryService', () => {
       featuredShelfRepo.findActiveShelves.mockResolvedValue([])
       featuredShelfRepo.findShelfItems.mockResolvedValue([])
       discoveryRepo.countFollowers.mockResolvedValue(0)
-      discoveryRepo.getRatingSummary.mockResolvedValue({ averageRating: 0, reviewCount: 0 })
-      currencyDisplay.getDisplayPrice.mockResolvedValue({ priceMinor: 100, currency: 'TWD' })
+      discoveryRepo.getRatingSummary.mockResolvedValue({
+        averageRating: 0,
+        reviewCount: 0,
+      })
+      currencyDisplay.getDisplayPrice.mockResolvedValue({
+        priceMinor: 100,
+        currency: 'TWD',
+      })
 
       discoveryRepo.findLatestReleases.mockResolvedValue([
-        { id: 'pkg_2', name: 'Newer', publishedAt: '2026-04-10T00:00:00Z', priceMinor: 100, currency: 'TWD', coverDriveKey: '', stickerType: 'static', stickerCount: 8, status: 'on_sale', creatorId: 'c1' },
-        { id: 'pkg_1', name: 'Older', publishedAt: '2026-04-01T00:00:00Z', priceMinor: 100, currency: 'TWD', coverDriveKey: '', stickerType: 'static', stickerCount: 8, status: 'on_sale', creatorId: 'c1' },
+        {
+          id: 'pkg_2',
+          name: 'Newer',
+          publishedAt: '2026-04-10T00:00:00Z',
+          priceMinor: 100,
+          currency: 'TWD',
+          coverDriveKey: '',
+          stickerType: 'static',
+          stickerCount: 8,
+          status: 'on_sale',
+          creatorId: 'c1',
+        },
+        {
+          id: 'pkg_1',
+          name: 'Older',
+          publishedAt: '2026-04-01T00:00:00Z',
+          priceMinor: 100,
+          currency: 'TWD',
+          coverDriveKey: '',
+          stickerType: 'static',
+          stickerCount: 8,
+          status: 'on_sale',
+          creatorId: 'c1',
+        },
       ])
       discoveryRepo.findBestsellers.mockResolvedValue([])
-      discoveryRepo.findOnSalePackages.mockImplementation(
-        (_db: any, ids: string[]) =>
-          ids.map((id: string) => ({
-            id, name: id === 'pkg_2' ? 'Newer' : 'Older', priceMinor: 100, currency: 'TWD',
-            coverDriveKey: '', stickerType: 'static', stickerCount: 8, status: 'on_sale',
-            publishedAt: id === 'pkg_2' ? '2026-04-10T00:00:00Z' : '2026-04-01T00:00:00Z', creatorId: 'c1',
-          })),
+      discoveryRepo.findOnSalePackages.mockImplementation((_db: any, ids: string[]) =>
+        ids.map((id: string) => ({
+          id,
+          name: id === 'pkg_2' ? 'Newer' : 'Older',
+          priceMinor: 100,
+          currency: 'TWD',
+          coverDriveKey: '',
+          stickerType: 'static',
+          stickerCount: 8,
+          status: 'on_sale',
+          publishedAt: id === 'pkg_2' ? '2026-04-10T00:00:00Z' : '2026-04-01T00:00:00Z',
+          creatorId: 'c1',
+        })),
       )
 
-      const service = createDiscoveryService({ db, discoveryRepo, featuredShelfRepo, currencyDisplay })
+      const service = createDiscoveryService({
+        db,
+        discoveryRepo,
+        featuredShelfRepo,
+        currencyDisplay,
+      })
       const result = await service.getStoreHome()
 
       expect(result.latestReleases).toBeDefined()
@@ -281,22 +421,51 @@ describe('createDiscoveryService', () => {
       featuredShelfRepo.findActiveShelves.mockResolvedValue([])
       featuredShelfRepo.findShelfItems.mockResolvedValue([])
       discoveryRepo.countFollowers.mockResolvedValue(0)
-      discoveryRepo.getRatingSummary.mockResolvedValue({ averageRating: 0, reviewCount: 0 })
+      discoveryRepo.getRatingSummary.mockResolvedValue({
+        averageRating: 0,
+        reviewCount: 0,
+      })
 
       discoveryRepo.findLatestReleases.mockResolvedValue([
-        { id: 'pkg_1', name: 'Test', priceMinor: 100, currency: 'TWD', coverDriveKey: '', stickerType: 'static', stickerCount: 8, status: 'on_sale', publishedAt: '2026-04-01T00:00:00Z', creatorId: 'c1' },
+        {
+          id: 'pkg_1',
+          name: 'Test',
+          priceMinor: 100,
+          currency: 'TWD',
+          coverDriveKey: '',
+          stickerType: 'static',
+          stickerCount: 8,
+          status: 'on_sale',
+          publishedAt: '2026-04-01T00:00:00Z',
+          creatorId: 'c1',
+        },
       ])
       discoveryRepo.findBestsellers.mockResolvedValue([])
-      discoveryRepo.findOnSalePackages.mockImplementation(
-        (_db: any, ids: string[]) =>
-          ids.map((id: string) => ({
-            id, name: 'Test', priceMinor: 100, currency: 'TWD',
-            coverDriveKey: '', stickerType: 'static', stickerCount: 8, status: 'on_sale', publishedAt: '2026-04-01T00:00:00Z', creatorId: 'c1',
-          })),
+      discoveryRepo.findOnSalePackages.mockImplementation((_db: any, ids: string[]) =>
+        ids.map((id: string) => ({
+          id,
+          name: 'Test',
+          priceMinor: 100,
+          currency: 'TWD',
+          coverDriveKey: '',
+          stickerType: 'static',
+          stickerCount: 8,
+          status: 'on_sale',
+          publishedAt: '2026-04-01T00:00:00Z',
+          creatorId: 'c1',
+        })),
       )
-      currencyDisplay.getDisplayPrice.mockResolvedValue({ priceMinor: 100, currency: 'TWD' })
+      currencyDisplay.getDisplayPrice.mockResolvedValue({
+        priceMinor: 100,
+        currency: 'TWD',
+      })
 
-      const service = createDiscoveryService({ db, discoveryRepo, featuredShelfRepo, currencyDisplay })
+      const service = createDiscoveryService({
+        db,
+        discoveryRepo,
+        featuredShelfRepo,
+        currencyDisplay,
+      })
       const result = await service.getStoreHome()
 
       const pkg = result.latestReleases!.packages[0]
@@ -330,18 +499,36 @@ describe('createDiscoveryService', () => {
         creatorAvatarDriveKey: 'avatar.jpg',
       })
 
-      discoveryRepo.getRatingSummary.mockResolvedValue({ averageRating: 4.2, reviewCount: 15 })
+      discoveryRepo.getRatingSummary.mockResolvedValue({
+        averageRating: 4.2,
+        reviewCount: 15,
+      })
       discoveryRepo.getRecentReviews.mockResolvedValue([
-        { id: 'rev_1', userId: 'u1', userName: 'User', rating: 5, body: 'Great!', createdAt: '2026-04-15T00:00:00Z' },
+        {
+          id: 'rev_1',
+          userId: 'u1',
+          userName: 'User',
+          rating: 5,
+          body: 'Great!',
+          createdAt: '2026-04-15T00:00:00Z',
+        },
       ])
       discoveryRepo.countFollowers.mockResolvedValue(100)
       discoveryRepo.findPackagesByCreatorId.mockResolvedValue([])
       discoveryRepo.checkEntitlement.mockResolvedValue(undefined)
       discoveryRepo.checkFollow.mockResolvedValue(undefined)
       discoveryRepo.getUserReview.mockResolvedValue(undefined)
-      currencyDisplay.getDisplayPrice.mockResolvedValue({ priceMinor: 100, currency: 'TWD' })
+      currencyDisplay.getDisplayPrice.mockResolvedValue({
+        priceMinor: 100,
+        currency: 'TWD',
+      })
 
-      const service = createDiscoveryService({ db, discoveryRepo, featuredShelfRepo, currencyDisplay })
+      const service = createDiscoveryService({
+        db,
+        discoveryRepo,
+        featuredShelfRepo,
+        currencyDisplay,
+      })
       const result = await service.getPackageDetail({ packageId: 'pkg_1' })
 
       expect(result!.id).toBe('pkg_1')
@@ -361,24 +548,53 @@ describe('createDiscoveryService', () => {
       const currencyDisplay = makeCurrencyDisplayService()
 
       discoveryRepo.findPackageWithCreator.mockResolvedValue({
-        id: 'pkg_1', name: 'Test', description: '', priceMinor: 100,
-        currency: 'TWD', coverDriveKey: '', stickerType: 'static', stickerCount: 8,
-        status: 'on_sale', publishedAt: '', tags: '[]', creatorId: 'creator_1',
-        creatorDisplayName: 'Creator', creatorBio: '', creatorAvatarDriveKey: null,
+        id: 'pkg_1',
+        name: 'Test',
+        description: '',
+        priceMinor: 100,
+        currency: 'TWD',
+        coverDriveKey: '',
+        stickerType: 'static',
+        stickerCount: 8,
+        status: 'on_sale',
+        publishedAt: '',
+        tags: '[]',
+        creatorId: 'creator_1',
+        creatorDisplayName: 'Creator',
+        creatorBio: '',
+        creatorAvatarDriveKey: null,
       })
-      discoveryRepo.getRatingSummary.mockResolvedValue({ averageRating: 0, reviewCount: 0 })
+      discoveryRepo.getRatingSummary.mockResolvedValue({
+        averageRating: 0,
+        reviewCount: 0,
+      })
       discoveryRepo.getRecentReviews.mockResolvedValue([])
       discoveryRepo.countFollowers.mockResolvedValue(0)
       discoveryRepo.findPackagesByCreatorId.mockResolvedValue([])
       discoveryRepo.checkEntitlement.mockResolvedValue({ id: 'ent_1' } as any)
       discoveryRepo.checkFollow.mockResolvedValue({ id: 'fol_1' } as any)
       discoveryRepo.getUserReview.mockResolvedValue({
-        id: 'rev_1', userId: 'user_1', rating: 4, body: 'Nice', createdAt: '2026-04-10T00:00:00Z',
+        id: 'rev_1',
+        userId: 'user_1',
+        rating: 4,
+        body: 'Nice',
+        createdAt: '2026-04-10T00:00:00Z',
       })
-      currencyDisplay.getDisplayPrice.mockResolvedValue({ priceMinor: 100, currency: 'TWD' })
+      currencyDisplay.getDisplayPrice.mockResolvedValue({
+        priceMinor: 100,
+        currency: 'TWD',
+      })
 
-      const service = createDiscoveryService({ db, discoveryRepo, featuredShelfRepo, currencyDisplay })
-      const result = await service.getPackageDetail({ packageId: 'pkg_1', userId: 'user_1' })
+      const service = createDiscoveryService({
+        db,
+        discoveryRepo,
+        featuredShelfRepo,
+        currencyDisplay,
+      })
+      const result = await service.getPackageDetail({
+        packageId: 'pkg_1',
+        userId: 'user_1',
+      })
 
       expect(result!.owned).toBe(true)
       expect(result!.creator!.followedByMe).toBe(true)
@@ -399,20 +615,46 @@ describe('createDiscoveryService', () => {
       )
       discoveryRepo.countFollowers.mockResolvedValue(50)
       discoveryRepo.findPackagesByCreatorId.mockResolvedValue([
-        { id: 'pkg_1', name: 'P1', status: 'on_sale', priceMinor: 100, currency: 'TWD',
-          coverDriveKey: '', stickerType: 'static', stickerCount: 8, publishedAt: '2026-04-01T00:00:00Z', creatorId: 'creator_1' },
+        {
+          id: 'pkg_1',
+          name: 'P1',
+          status: 'on_sale',
+          priceMinor: 100,
+          currency: 'TWD',
+          coverDriveKey: '',
+          stickerType: 'static',
+          stickerCount: 8,
+          publishedAt: '2026-04-01T00:00:00Z',
+          creatorId: 'creator_1',
+        },
       ])
-      discoveryRepo.getRatingSummary.mockResolvedValue({ averageRating: 0, reviewCount: 0 })
+      discoveryRepo.getRatingSummary.mockResolvedValue({
+        averageRating: 0,
+        reviewCount: 0,
+      })
       discoveryRepo.checkEntitlement.mockResolvedValue(undefined)
       discoveryRepo.checkFollow.mockResolvedValue(undefined)
       discoveryRepo.getRecentReviews.mockResolvedValue([])
       discoveryRepo.getUserReview.mockResolvedValue(undefined)
-      currencyDisplay.getDisplayPrice.mockResolvedValue({ priceMinor: 100, currency: 'TWD' })
+      currencyDisplay.getDisplayPrice.mockResolvedValue({
+        priceMinor: 100,
+        currency: 'TWD',
+      })
 
       const service = createDiscoveryService({
-        db, discoveryRepo, featuredShelfRepo, currencyDisplay,
+        db,
+        discoveryRepo,
+        featuredShelfRepo,
+        currencyDisplay,
         creatorRepo: {
-          findById: vi.fn().mockResolvedValue({ id: 'creator_1', displayName: 'Creator', bio: '', avatarDriveKey: null }),
+          findById: vi
+            .fn()
+            .mockResolvedValue({
+              id: 'creator_1',
+              displayName: 'Creator',
+              bio: '',
+              avatarDriveKey: null,
+            }),
           findByUserId: vi.fn(),
         } as any,
       })
@@ -436,9 +678,7 @@ describe('createDiscoveryService', () => {
                 limit: vi.fn(() => Promise.resolve([])),
               })),
             })),
-            then: vi.fn((resolve: any) =>
-              resolve([{ c: 0 }]),
-            ),
+            then: vi.fn((resolve: any) => resolve([{ c: 0 }])),
           })),
         })),
       }
@@ -448,16 +688,31 @@ describe('createDiscoveryService', () => {
 
       discoveryRepo.findOnSalePackages.mockResolvedValue([])
       discoveryRepo.countFollowers.mockResolvedValue(0)
-      discoveryRepo.getRatingSummary.mockResolvedValue({ averageRating: 0, reviewCount: 0 })
+      discoveryRepo.getRatingSummary.mockResolvedValue({
+        averageRating: 0,
+        reviewCount: 0,
+      })
       discoveryRepo.checkEntitlement.mockResolvedValue(undefined)
       discoveryRepo.checkFollow.mockResolvedValue(undefined)
       discoveryRepo.getRecentReviews.mockResolvedValue([])
       discoveryRepo.getUserReview.mockResolvedValue(undefined)
       featuredShelfRepo.findActiveShelves.mockResolvedValue([])
-      currencyDisplay.getDisplayPrice.mockResolvedValue({ priceMinor: 100, currency: 'TWD' })
+      currencyDisplay.getDisplayPrice.mockResolvedValue({
+        priceMinor: 100,
+        currency: 'TWD',
+      })
 
-      const service = createDiscoveryService({ db, discoveryRepo, featuredShelfRepo, currencyDisplay })
-      const result = await service.searchPackages({ query: 'test', pageSize: 20, pageToken: '' })
+      const service = createDiscoveryService({
+        db,
+        discoveryRepo,
+        featuredShelfRepo,
+        currencyDisplay,
+      })
+      const result = await service.searchPackages({
+        query: 'test',
+        pageSize: 20,
+        pageToken: '',
+      })
 
       expect(result.results).toEqual([])
       expect(result.totalCount).toBe(0)
@@ -472,9 +727,7 @@ describe('createDiscoveryService', () => {
                 limit: vi.fn(() => Promise.resolve([])),
               })),
             })),
-            then: vi.fn((resolve: any) =>
-              resolve([{ c: 0 }]),
-            ),
+            then: vi.fn((resolve: any) => resolve([{ c: 0 }])),
           })),
         })),
       }
@@ -484,16 +737,31 @@ describe('createDiscoveryService', () => {
 
       discoveryRepo.findOnSalePackages.mockResolvedValue([])
       discoveryRepo.countFollowers.mockResolvedValue(0)
-      discoveryRepo.getRatingSummary.mockResolvedValue({ averageRating: 0, reviewCount: 0 })
+      discoveryRepo.getRatingSummary.mockResolvedValue({
+        averageRating: 0,
+        reviewCount: 0,
+      })
       discoveryRepo.checkEntitlement.mockResolvedValue(undefined)
       discoveryRepo.checkFollow.mockResolvedValue(undefined)
       discoveryRepo.getRecentReviews.mockResolvedValue([])
       discoveryRepo.getUserReview.mockResolvedValue(undefined)
       featuredShelfRepo.findActiveShelves.mockResolvedValue([])
-      currencyDisplay.getDisplayPrice.mockResolvedValue({ priceMinor: 100, currency: 'TWD' })
+      currencyDisplay.getDisplayPrice.mockResolvedValue({
+        priceMinor: 100,
+        currency: 'TWD',
+      })
 
-      const service = createDiscoveryService({ db, discoveryRepo, featuredShelfRepo, currencyDisplay })
-      const result = await service.searchPackages({ stickerType: 'static', pageSize: 20, pageToken: '' })
+      const service = createDiscoveryService({
+        db,
+        discoveryRepo,
+        featuredShelfRepo,
+        currencyDisplay,
+      })
+      const result = await service.searchPackages({
+        stickerType: 'static',
+        pageSize: 20,
+        pageToken: '',
+      })
 
       expect(result.results).toEqual([])
     })
@@ -507,9 +775,7 @@ describe('createDiscoveryService', () => {
                 limit: vi.fn(() => Promise.resolve([])),
               })),
             })),
-            then: vi.fn((resolve: any) =>
-              resolve([{ c: 0 }]),
-            ),
+            then: vi.fn((resolve: any) => resolve([{ c: 0 }])),
           })),
         })),
       }
@@ -519,16 +785,32 @@ describe('createDiscoveryService', () => {
 
       discoveryRepo.findOnSalePackages.mockResolvedValue([])
       discoveryRepo.countFollowers.mockResolvedValue(0)
-      discoveryRepo.getRatingSummary.mockResolvedValue({ averageRating: 0, reviewCount: 0 })
+      discoveryRepo.getRatingSummary.mockResolvedValue({
+        averageRating: 0,
+        reviewCount: 0,
+      })
       discoveryRepo.checkEntitlement.mockResolvedValue(undefined)
       discoveryRepo.checkFollow.mockResolvedValue(undefined)
       discoveryRepo.getRecentReviews.mockResolvedValue([])
       discoveryRepo.getUserReview.mockResolvedValue(undefined)
       featuredShelfRepo.findActiveShelves.mockResolvedValue([])
-      currencyDisplay.getDisplayPrice.mockResolvedValue({ priceMinor: 100, currency: 'TWD' })
+      currencyDisplay.getDisplayPrice.mockResolvedValue({
+        priceMinor: 100,
+        currency: 'TWD',
+      })
 
-      const service = createDiscoveryService({ db, discoveryRepo, featuredShelfRepo, currencyDisplay })
-      const result = await service.searchPackages({ priceMin: 50, priceMax: 200, pageSize: 20, pageToken: '' })
+      const service = createDiscoveryService({
+        db,
+        discoveryRepo,
+        featuredShelfRepo,
+        currencyDisplay,
+      })
+      const result = await service.searchPackages({
+        priceMin: 50,
+        priceMax: 200,
+        pageSize: 20,
+        pageToken: '',
+      })
 
       expect(result.results).toEqual([])
     })
@@ -542,9 +824,7 @@ describe('createDiscoveryService', () => {
                 limit: vi.fn(() => Promise.resolve([])),
               })),
             })),
-            then: vi.fn((resolve: any) =>
-              resolve([{ c: 0 }]),
-            ),
+            then: vi.fn((resolve: any) => resolve([{ c: 0 }])),
           })),
         })),
       }
@@ -554,16 +834,31 @@ describe('createDiscoveryService', () => {
 
       discoveryRepo.findOnSalePackages.mockResolvedValue([])
       discoveryRepo.countFollowers.mockResolvedValue(0)
-      discoveryRepo.getRatingSummary.mockResolvedValue({ averageRating: 0, reviewCount: 0 })
+      discoveryRepo.getRatingSummary.mockResolvedValue({
+        averageRating: 0,
+        reviewCount: 0,
+      })
       discoveryRepo.checkEntitlement.mockResolvedValue(undefined)
       discoveryRepo.checkFollow.mockResolvedValue(undefined)
       discoveryRepo.getRecentReviews.mockResolvedValue([])
       discoveryRepo.getUserReview.mockResolvedValue(undefined)
       featuredShelfRepo.findActiveShelves.mockResolvedValue([])
-      currencyDisplay.getDisplayPrice.mockResolvedValue({ priceMinor: 100, currency: 'TWD' })
+      currencyDisplay.getDisplayPrice.mockResolvedValue({
+        priceMinor: 100,
+        currency: 'TWD',
+      })
 
-      const service = createDiscoveryService({ db, discoveryRepo, featuredShelfRepo, currencyDisplay })
-      const result = await service.searchPackages({ sort: 'price_asc', pageSize: 20, pageToken: '' })
+      const service = createDiscoveryService({
+        db,
+        discoveryRepo,
+        featuredShelfRepo,
+        currencyDisplay,
+      })
+      const result = await service.searchPackages({
+        sort: 'price_asc',
+        pageSize: 20,
+        pageToken: '',
+      })
 
       expect(result.results).toEqual([])
     })

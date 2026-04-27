@@ -48,25 +48,31 @@ export type PackageDetailResult = {
   owned: boolean
   displayPriceMinor: number
   displayCurrency: string
-  creator: {
-    id: string
-    displayName: string
-    bio: string
-    avatarDriveKey: string | null
-    followerCount: number
-    followedByMe: boolean
-  } | undefined
-  rating: {
-    averageRating: number
-    totalCount: number
-    currentUserReview: {
-      id: string
-      userId: string
-      rating: number
-      body: string
-      createdAt: string
-    } | undefined
-  } | undefined
+  creator:
+    | {
+        id: string
+        displayName: string
+        bio: string
+        avatarDriveKey: string | null
+        followerCount: number
+        followedByMe: boolean
+      }
+    | undefined
+  rating:
+    | {
+        averageRating: number
+        totalCount: number
+        currentUserReview:
+          | {
+              id: string
+              userId: string
+              rating: number
+              body: string
+              createdAt: string
+            }
+          | undefined
+      }
+    | undefined
   recentReviews: Array<{
     id: string
     userId: string
@@ -78,14 +84,16 @@ export type PackageDetailResult = {
 }
 
 export type CreatorPublicProfileResult = {
-  profile: {
-    id: string
-    displayName: string
-    bio: string
-    avatarDriveKey: string | null
-    followerCount: number
-    followedByMe: boolean
-  } | undefined
+  profile:
+    | {
+        id: string
+        displayName: string
+        bio: string
+        avatarDriveKey: string | null
+        followerCount: number
+        followedByMe: boolean
+      }
+    | undefined
   packages: PackageCardResult[]
 }
 
@@ -120,7 +128,10 @@ export function createDiscoveryService(deps: {
   discoveryRepo: any
   featuredShelfRepo: any
   currencyDisplay: any
-  creatorRepo?: { findByUserId: (db: any, userId: string) => Promise<any>; findById: (db: any, id: string) => Promise<any> }
+  creatorRepo?: {
+    findByUserId: (db: any, userId: string) => Promise<any>
+    findById: (db: any, id: string) => Promise<any>
+  }
 }) {
   async function enrichPackageCard(
     pkg: any,
@@ -130,10 +141,9 @@ export function createDiscoveryService(deps: {
       deps.discoveryRepo.getRatingSummary(deps.db, pkg.id),
       deps.currencyDisplay.getDisplayPrice(pkg.priceMinor, pkg.currency),
     ])
-    const owned =
-      userId
-        ? !!(await deps.discoveryRepo.checkEntitlement(deps.db, userId, pkg.id))
-        : false
+    const owned = userId
+      ? !!(await deps.discoveryRepo.checkEntitlement(deps.db, userId, pkg.id))
+      : false
     return buildCard(pkg, rating, displayPrice, '', owned)
   }
 
@@ -148,12 +158,17 @@ export function createDiscoveryService(deps: {
     const [ratingsMap, displayPricesMap, entitlementsMap] = await Promise.all([
       loadRatings(pkgIds),
       loadDisplayPrices(packages),
-      userId ? loadEntitlements(userId, pkgIds) : Promise.resolve(new Map<string, boolean>()),
+      userId
+        ? loadEntitlements(userId, pkgIds)
+        : Promise.resolve(new Map<string, boolean>()),
     ])
 
     return packages.map((pkg) => {
       const rating = ratingsMap.get(pkg.id) ?? { averageRating: 0, reviewCount: 0 }
-      const displayPrice = displayPricesMap.get(pkg.id) ?? { priceMinor: pkg.priceMinor, currency: pkg.currency }
+      const displayPrice = displayPricesMap.get(pkg.id) ?? {
+        priceMinor: pkg.priceMinor,
+        currency: pkg.currency,
+      }
       return buildCard(
         pkg,
         rating,
@@ -164,11 +179,15 @@ export function createDiscoveryService(deps: {
     })
   }
 
-  async function loadRatings(pkgIds: string[]): Promise<Map<string, { averageRating: number; reviewCount: number }>> {
+  async function loadRatings(
+    pkgIds: string[],
+  ): Promise<Map<string, { averageRating: number; reviewCount: number }>> {
     const map = new Map<string, { averageRating: number; reviewCount: number }>()
     const results = await Promise.all(
       pkgIds.map((id: string) =>
-        deps.discoveryRepo.getRatingSummary(deps.db, id).then((r: any) => [id, r] as const),
+        deps.discoveryRepo
+          .getRatingSummary(deps.db, id)
+          .then((r: any) => [id, r] as const),
       ),
     )
     for (const [id, r] of results) {
@@ -177,7 +196,9 @@ export function createDiscoveryService(deps: {
     return map
   }
 
-  async function loadDisplayPrices(packages: any[]): Promise<Map<string, { priceMinor: number; currency: string }>> {
+  async function loadDisplayPrices(
+    packages: any[],
+  ): Promise<Map<string, { priceMinor: number; currency: string }>> {
     const map = new Map<string, { priceMinor: number; currency: string }>()
     const results = await Promise.all(
       packages.map((pkg: any) =>
@@ -192,7 +213,10 @@ export function createDiscoveryService(deps: {
     return map
   }
 
-  async function loadEntitlements(userId: string, pkgIds: string[]): Promise<Map<string, boolean>> {
+  async function loadEntitlements(
+    userId: string,
+    pkgIds: string[],
+  ): Promise<Map<string, boolean>> {
     const map = new Map<string, boolean>()
     const results = await Promise.all(
       pkgIds.map((id: string) =>
@@ -309,9 +333,7 @@ export function createDiscoveryService(deps: {
     let cursor: { publishedAt: string; id: string } | undefined
     if (input.pageToken) {
       try {
-        cursor = JSON.parse(
-          Buffer.from(input.pageToken, 'base64url').toString(),
-        )
+        cursor = JSON.parse(Buffer.from(input.pageToken, 'base64url').toString())
       } catch {
         cursor = undefined
       }
@@ -374,20 +396,32 @@ export function createDiscoveryService(deps: {
       ])
 
       const featuredPackageIds = [
-        ...new Set(activeShelves.flatMap((s: any) => s.items.map((i: any) => i.packageId))),
+        ...new Set(
+          activeShelves.flatMap((s: any) => s.items.map((i: any) => i.packageId)),
+        ),
       ]
       const bestseller7dIds = bestsellers7d.map((b: any) => b.packageId)
       const bestseller30dIds = bestsellers30d.map((b: any) => b.packageId)
       const latestIds = latestReleases.map((p: any) => p.id)
 
       const allOnSaleIds = [
-        ...new Set([...featuredPackageIds, ...bestseller7dIds, ...bestseller30dIds, ...latestIds]),
+        ...new Set([
+          ...featuredPackageIds,
+          ...bestseller7dIds,
+          ...bestseller30dIds,
+          ...latestIds,
+        ]),
       ]
 
-      const onSalePackages = await deps.discoveryRepo.findOnSalePackages(deps.db, allOnSaleIds)
+      const onSalePackages = await deps.discoveryRepo.findOnSalePackages(
+        deps.db,
+        allOnSaleIds,
+      )
       const onSaleMap = new Map(onSalePackages.map((p: any) => [p.id, p]))
 
-      const creatorIds = [...new Set(onSalePackages.map((p: any) => p.creatorId).filter(Boolean))] as string[]
+      const creatorIds = [
+        ...new Set(onSalePackages.map((p: any) => p.creatorId).filter(Boolean)),
+      ] as string[]
       const creatorProfiles = await Promise.all(
         creatorIds.map((id: string) =>
           deps.creatorRepo
@@ -431,15 +465,30 @@ export function createDiscoveryService(deps: {
 
       return {
         featuredShelves,
-        bestseller7d: bestseller7dPackages.length > 0
-          ? { id: 'bestseller_7d', title: '7-Day Bestsellers', packages: bestseller7dPackages }
-          : undefined,
-        bestseller30d: bestseller30dPackages.length > 0
-          ? { id: 'bestseller_30d', title: '30-Day Bestsellers', packages: bestseller30dPackages }
-          : undefined,
-        latestReleases: latestPackages.length > 0
-          ? { id: 'latest_releases', title: 'Latest Releases', packages: latestPackages }
-          : undefined,
+        bestseller7d:
+          bestseller7dPackages.length > 0
+            ? {
+                id: 'bestseller_7d',
+                title: '7-Day Bestsellers',
+                packages: bestseller7dPackages,
+              }
+            : undefined,
+        bestseller30d:
+          bestseller30dPackages.length > 0
+            ? {
+                id: 'bestseller_30d',
+                title: '30-Day Bestsellers',
+                packages: bestseller30dPackages,
+              }
+            : undefined,
+        latestReleases:
+          latestPackages.length > 0
+            ? {
+                id: 'latest_releases',
+                title: 'Latest Releases',
+                packages: latestPackages,
+              }
+            : undefined,
       }
     },
 
@@ -546,7 +595,11 @@ export function createDiscoveryService(deps: {
       pageSize: number
       pageToken: string
       userId?: string
-    }): Promise<{ results: PackageCardResult[]; nextPageToken: string; totalCount: number }> {
+    }): Promise<{
+      results: PackageCardResult[]
+      nextPageToken: string
+      totalCount: number
+    }> {
       const pageSize = input.pageSize > 0 && input.pageSize <= 100 ? input.pageSize : 20
 
       const { rows, nextCursor, totalCount } = await searchOnSalePackages(deps.db, {

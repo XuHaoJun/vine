@@ -90,7 +90,11 @@ export function StickerPicker({ onSelect }: Props) {
     }
   }, [ownedPackages.length, tab])
 
-  if (tab === 'discovery' && ownedPackages.length === 0 && discoveryPackages.length === 0) {
+  if (
+    tab === 'discovery' &&
+    ownedPackages.length === 0 &&
+    discoveryPackages.length === 0
+  ) {
     return (
       <YStack height={180} items="center" justify="center" bg="$background" gap="$3">
         <SizableText size="$3" color="$color10">
@@ -118,7 +122,11 @@ export function StickerPicker({ onSelect }: Props) {
           cursor="pointer"
           onPress={() => setTab('owned')}
         >
-          <SizableText size="$3" fontWeight={tab === 'owned' ? '700' : '400'} color="$color12">
+          <SizableText
+            size="$3"
+            fontWeight={tab === 'owned' ? '700' : '400'}
+            color="$color12"
+          >
             我的貼圖
           </SizableText>
         </YStack>
@@ -131,7 +139,11 @@ export function StickerPicker({ onSelect }: Props) {
           cursor="pointer"
           onPress={() => setTab('discovery')}
         >
-          <SizableText size="$3" fontWeight={tab === 'discovery' ? '700' : '400'} color="$color12">
+          <SizableText
+            size="$3"
+            fontWeight={tab === 'discovery' ? '700' : '400'}
+            color="$color12"
+          >
             發現
           </SizableText>
         </YStack>
@@ -156,7 +168,9 @@ export function StickerPicker({ onSelect }: Props) {
                   px="$2"
                   py="$1.5"
                   borderBottomWidth={2}
-                  borderBottomColor={activePackage?.id === pkg.id ? '$color12' : 'transparent'}
+                  borderBottomColor={
+                    activePackage?.id === pkg.id ? '$color12' : 'transparent'
+                  }
                   cursor="pointer"
                 >
                   <img
@@ -180,27 +194,31 @@ export function StickerPicker({ onSelect }: Props) {
           {activePackage && (
             <ScrollView flex={1}>
               <XStack flexWrap="wrap" p="$2" gap="$1">
-                {Array.from({ length: stickerCount }, (_, i) => i + 1).map((stickerId) => (
-                  <YStack
-                    key={stickerId}
-                    onPress={() => activePackage && onSelect(activePackage.id, stickerId)}
-                    width={64}
-                    height={64}
-                    rounded="$3"
-                    items="center"
-                    justify="center"
-                    cursor="pointer"
-                    hoverStyle={{ bg: '$color3' }}
-                  >
-                    <img
-                      src={`/uploads/stickers/${activePackage.id}/${stickerId}.png`}
-                      width={52}
-                      height={52}
-                      alt={`sticker ${stickerId}`}
-                      style={{ objectFit: 'contain' }}
-                    />
-                  </YStack>
-                ))}
+                {Array.from({ length: stickerCount }, (_, i) => i + 1).map(
+                  (stickerId) => (
+                    <YStack
+                      key={stickerId}
+                      onPress={() =>
+                        activePackage && onSelect(activePackage.id, stickerId)
+                      }
+                      width={64}
+                      height={64}
+                      rounded="$3"
+                      items="center"
+                      justify="center"
+                      cursor="pointer"
+                      hoverStyle={{ bg: '$color3' }}
+                    >
+                      <img
+                        src={`/uploads/stickers/${activePackage.id}/${stickerId}.png`}
+                        width={52}
+                        height={52}
+                        alt={`sticker ${stickerId}`}
+                        style={{ objectFit: 'contain' }}
+                      />
+                    </YStack>
+                  ),
+                )}
               </XStack>
             </ScrollView>
           )}
@@ -214,11 +232,7 @@ export function StickerPicker({ onSelect }: Props) {
               <SizableText size="$3" color="$color10">
                 探索更多貼圖！
               </SizableText>
-              <Button
-                size="$3"
-                mt="$3"
-                onPress={() => router.push('/store' as any)}
-              >
+              <Button size="$3" mt="$3" onPress={() => router.push('/store' as any)}>
                 前往商店
               </Button>
             </YStack>
@@ -243,11 +257,17 @@ export function StickerPicker({ onSelect }: Props) {
                   />
                 </YStack>
                 <YStack p="$2" gap="$1">
-                  <SizableText size="$2" fontWeight="700" color="$color12" numberOfLines={1}>
+                  <SizableText
+                    size="$2"
+                    fontWeight="700"
+                    color="$color12"
+                    numberOfLines={1}
+                  >
                     {pkg.name}
                   </SizableText>
                   <SizableText size="$2" color="$color10">
-                    {pkg.displayCurrency}{pkg.displayPriceMinor ?? pkg.priceMinor}
+                    {pkg.displayCurrency}
+                    {pkg.displayPriceMinor ?? pkg.priceMinor}
                   </SizableText>
                 </YStack>
               </YStack>

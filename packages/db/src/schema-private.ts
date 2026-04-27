@@ -1,5 +1,12 @@
 import { sql } from 'drizzle-orm'
-import { index, integer, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
+import {
+  index,
+  integer,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+} from 'drizzle-orm/pg-core'
 
 import type { InferSelectModel } from 'drizzle-orm'
 import { stickerPackage } from './schema-public'
@@ -173,7 +180,10 @@ export const creatorPayoutLedger = pgTable(
     updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
   },
   (table) => [
-    uniqueIndex('creatorPayoutLedger_creator_month_unique').on(table.creatorId, table.month),
+    uniqueIndex('creatorPayoutLedger_creator_month_unique').on(
+      table.creatorId,
+      table.month,
+    ),
     index('creatorPayoutLedger_status_idx').on(table.status),
   ],
 )
@@ -247,7 +257,11 @@ export const stickerFeaturedShelf = pgTable(
   },
   (table) => [
     uniqueIndex('stickerFeaturedShelf_slug_unique').on(table.slug),
-    index('stickerFeaturedShelf_status_starts_ends_idx').on(table.status, table.startsAt, table.endsAt),
+    index('stickerFeaturedShelf_status_starts_ends_idx').on(
+      table.status,
+      table.startsAt,
+      table.endsAt,
+    ),
   ],
 )
 
@@ -261,8 +275,14 @@ export const stickerFeaturedShelfItem = pgTable(
     createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
   },
   (table) => [
-    uniqueIndex('stickerFeaturedShelfItem_shelf_package_unique').on(table.shelfId, table.packageId),
-    uniqueIndex('stickerFeaturedShelfItem_shelf_position_unique').on(table.shelfId, table.position),
+    uniqueIndex('stickerFeaturedShelfItem_shelf_package_unique').on(
+      table.shelfId,
+      table.packageId,
+    ),
+    uniqueIndex('stickerFeaturedShelfItem_shelf_position_unique').on(
+      table.shelfId,
+      table.position,
+    ),
   ],
 )
 
@@ -278,8 +298,15 @@ export const currencyDisplayRate = pgTable(
     createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
   },
   (table) => [
-    uniqueIndex('currencyDisplayRate_base_quote_date_unique').on(table.baseCurrency, table.quoteCurrency, table.effectiveDate),
-    index('currencyDisplayRate_quote_date_idx').on(table.quoteCurrency, table.effectiveDate),
+    uniqueIndex('currencyDisplayRate_base_quote_date_unique').on(
+      table.baseCurrency,
+      table.quoteCurrency,
+      table.effectiveDate,
+    ),
+    index('currencyDisplayRate_quote_date_idx').on(
+      table.quoteCurrency,
+      table.effectiveDate,
+    ),
   ],
 )
 

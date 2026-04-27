@@ -58,7 +58,11 @@ export function SearchResultsPage() {
 
   const handleSearch = () => {
     const q = query.trim()
-    window.history.replaceState(null, '', `/store/search${q ? `?q=${encodeURIComponent(q)}` : ''}`)
+    window.history.replaceState(
+      null,
+      '',
+      `/store/search${q ? `?q=${encodeURIComponent(q)}` : ''}`,
+    )
     setParams((prev) => ({ ...prev, q }))
     setPageToken('')
     setAllResults([])
@@ -87,7 +91,9 @@ export function SearchResultsPage() {
         borderBottomColor="$color4"
       >
         <YStack cursor="pointer" onPress={() => router.back()}>
-          <SizableText size="$5" color="$color12">‹</SizableText>
+          <SizableText size="$5" color="$color12">
+            ‹
+          </SizableText>
         </YStack>
         <SizableText size="$5" fontWeight="700" color="$color12" flex={1}>
           搜尋結果
@@ -150,7 +156,12 @@ export function SearchResultsPage() {
                   />
                 </YStack>
                 <YStack flex={1} p="$3" justify="center" gap="$1">
-                  <SizableText size="$4" fontWeight="700" color="$color12" numberOfLines={1}>
+                  <SizableText
+                    size="$4"
+                    fontWeight="700"
+                    color="$color12"
+                    numberOfLines={1}
+                  >
                     {pkg.name}
                   </SizableText>
                   <SizableText size="$3" color="$color10" numberOfLines={1}>
@@ -159,11 +170,14 @@ export function SearchResultsPage() {
                   <XStack items="center" gap="$2">
                     {pkg.owned ? (
                       <YStack bg="$green8" rounded="$2" px="$2" py="$1">
-                        <SizableText size="$2" color="white">已擁有</SizableText>
+                        <SizableText size="$2" color="white">
+                          已擁有
+                        </SizableText>
                       </YStack>
                     ) : (
                       <SizableText size="$4" fontWeight="700" color="$color12">
-                        {pkg.displayCurrency}{pkg.displayPriceMinor ?? pkg.priceMinor}
+                        {pkg.displayCurrency}
+                        {pkg.displayPriceMinor ?? pkg.priceMinor}
                       </SizableText>
                     )}
                     {pkg.averageRating > 0 && (
@@ -178,11 +192,7 @@ export function SearchResultsPage() {
           ))}
 
           {data?.nextPageToken && (
-            <Button
-              variant="outlined"
-              onPress={handleLoadMore}
-              disabled={isFetching}
-            >
+            <Button variant="outlined" onPress={handleLoadMore} disabled={isFetching}>
               載入更多
             </Button>
           )}

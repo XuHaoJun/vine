@@ -1,8 +1,6 @@
 import type { HandlerContext } from '@connectrpc/connect'
 import { Code, ConnectError } from '@connectrpc/connect'
-import {
-  StickerMarketDiscoveryService,
-} from '@vine/proto/stickerMarket'
+import { StickerMarketDiscoveryService } from '@vine/proto/stickerMarket'
 import type { DriveService } from '@vine/drive'
 import type { AuthServer } from '@take-out/better-auth-utils/server'
 import { tryGetAuthData } from './auth-context'
@@ -14,7 +12,9 @@ export type StickerMarketDiscoveryHandlerDeps = {
   discovery: any
 }
 
-export function createStickerMarketDiscoveryHandler(deps: StickerMarketDiscoveryHandlerDeps) {
+export function createStickerMarketDiscoveryHandler(
+  deps: StickerMarketDiscoveryHandlerDeps,
+) {
   async function resolveCoverUrls(cards: any[]): Promise<any[]> {
     return Promise.all(
       cards.map(async (p: any) => ({
@@ -37,9 +37,15 @@ export function createStickerMarketDiscoveryHandler(deps: StickerMarketDiscovery
 
       return {
         featuredShelves: await Promise.all(result.featuredShelves.map(mapShelf)),
-        bestseller7d: result.bestseller7d ? await mapShelf(result.bestseller7d) : undefined,
-        bestseller30d: result.bestseller30d ? await mapShelf(result.bestseller30d) : undefined,
-        latestReleases: result.latestReleases ? await mapShelf(result.latestReleases) : undefined,
+        bestseller7d: result.bestseller7d
+          ? await mapShelf(result.bestseller7d)
+          : undefined,
+        bestseller30d: result.bestseller30d
+          ? await mapShelf(result.bestseller30d)
+          : undefined,
+        latestReleases: result.latestReleases
+          ? await mapShelf(result.latestReleases)
+          : undefined,
       }
     },
 

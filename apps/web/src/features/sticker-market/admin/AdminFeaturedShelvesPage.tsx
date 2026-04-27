@@ -138,11 +138,7 @@ export function AdminFeaturedShelvesPage() {
                 onChangeText={setNewSlug}
                 placeholder="Slug (例如: summer-2026)"
               />
-              <Input
-                value={newTitle}
-                onChangeText={setNewTitle}
-                placeholder="標題"
-              />
+              <Input value={newTitle} onChangeText={setNewTitle} placeholder="標題" />
               <Input
                 value={newPackageIds}
                 onChangeText={setNewPackageIds}
@@ -159,10 +155,7 @@ export function AdminFeaturedShelvesPage() {
                 placeholder="結束時間 (ISO)"
               />
               <XStack gap="$2">
-                <Button
-                  variant="outlined"
-                  onPress={() => setEditingShelf(null)}
-                >
+                <Button variant="outlined" onPress={() => setEditingShelf(null)}>
                   取消
                 </Button>
                 <Button
@@ -176,13 +169,7 @@ export function AdminFeaturedShelvesPage() {
           )}
 
           {shelves.map((shelf: any) => (
-            <YStack
-              key={shelf.id}
-              bg="$color2"
-              rounded="$4"
-              p="$3"
-              gap="$2"
-            >
+            <YStack key={shelf.id} bg="$color2" rounded="$4" p="$3" gap="$2">
               <XStack justify="space-between" items="center">
                 <YStack flex={1}>
                   <SizableText size="$4" fontWeight="700" color="$color12">
@@ -199,7 +186,11 @@ export function AdminFeaturedShelvesPage() {
                   py="$1"
                 >
                   <SizableText size="$2" color="$color11">
-                    {shelf.status === 'published' ? '已發布' : shelf.status === 'archived' ? '已封存' : '草稿'}
+                    {shelf.status === 'published'
+                      ? '已發布'
+                      : shelf.status === 'archived'
+                        ? '已封存'
+                        : '草稿'}
                   </SizableText>
                 </YStack>
               </XStack>

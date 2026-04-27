@@ -69,7 +69,6 @@ describe('createStickerMarketAdminHandler', () => {
     ).rejects.toMatchObject({ code: Code.PermissionDenied })
   })
 
-
   it('rejects non-admin refund with PermissionDenied', async () => {
     const handler = createStickerMarketAdminHandler(makeDeps())
     await expect(

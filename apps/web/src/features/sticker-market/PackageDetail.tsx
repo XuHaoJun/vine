@@ -13,8 +13,14 @@ type PackageDetailProps = {
   packageId: string
 }
 
-function StarRating({ rating, interactive, onChange }: {
-  rating: number; interactive?: boolean; onChange?: (r: number) => void
+function StarRating({
+  rating,
+  interactive,
+  onChange,
+}: {
+  rating: number
+  interactive?: boolean
+  onChange?: (r: number) => void
 }) {
   return (
     <XStack gap="$1">
@@ -46,13 +52,16 @@ export function PackageDetail({ packageId }: PackageDetailProps) {
   })
 
   const invalidateDetail = () => {
-    queryClient.invalidateQueries({ queryKey: ['sticker-market', 'package-detail', packageId] })
+    queryClient.invalidateQueries({
+      queryKey: ['sticker-market', 'package-detail', packageId],
+    })
   }
 
   const pkg = data?.package
 
   const followMutation = useTanMutation({
-    mutationFn: () => stickerMarketUserClient.followCreator({ creatorId: pkg!.creator!.id }),
+    mutationFn: () =>
+      stickerMarketUserClient.followCreator({ creatorId: pkg!.creator!.id }),
     onSuccess: () => {
       invalidateDetail()
       showToast('已追蹤創作者', { type: 'success' })
@@ -60,7 +69,8 @@ export function PackageDetail({ packageId }: PackageDetailProps) {
   })
 
   const unfollowMutation = useTanMutation({
-    mutationFn: () => stickerMarketUserClient.unfollowCreator({ creatorId: pkg!.creator!.id }),
+    mutationFn: () =>
+      stickerMarketUserClient.unfollowCreator({ creatorId: pkg!.creator!.id }),
     onSuccess: () => {
       invalidateDetail()
       showToast('已取消追蹤', { type: 'success' })
@@ -116,9 +126,17 @@ export function PackageDetail({ packageId }: PackageDetailProps) {
         borderBottomColor="$color4"
       >
         <YStack cursor="pointer" onPress={() => router.back()}>
-          <SizableText size="$5" color="$color12">‹</SizableText>
+          <SizableText size="$5" color="$color12">
+            ‹
+          </SizableText>
         </YStack>
-        <SizableText size="$5" fontWeight="700" color="$color12" flex={1} numberOfLines={1}>
+        <SizableText
+          size="$5"
+          fontWeight="700"
+          color="$color12"
+          flex={1}
+          numberOfLines={1}
+        >
           {pkg.name}
         </SizableText>
       </XStack>
@@ -177,7 +195,13 @@ export function PackageDetail({ packageId }: PackageDetailProps) {
                 hoverStyle={{ bg: '$color3' }}
               >
                 <XStack items="center" gap="$3">
-                  <YStack width={44} height={44} rounded={100} bg="$color4" overflow="hidden">
+                  <YStack
+                    width={44}
+                    height={44}
+                    rounded={100}
+                    bg="$color4"
+                    overflow="hidden"
+                  >
                     {creator.avatarUrl ? (
                       <img
                         src={creator.avatarUrl}
@@ -289,9 +313,7 @@ export function PackageDetail({ packageId }: PackageDetailProps) {
                       multiline
                     />
                     <Button
-                      disabled={
-                        reviewRating === 0 || reviewMutation.isPending
-                      }
+                      disabled={reviewRating === 0 || reviewMutation.isPending}
                       onPress={() =>
                         reviewMutation.mutate({ rating: reviewRating, body: reviewBody })
                       }
@@ -331,11 +353,17 @@ export function PackageDetail({ packageId }: PackageDetailProps) {
                           />
                         </YStack>
                         <YStack p="$2">
-                          <SizableText size="$2" fontWeight="700" color="$color12" numberOfLines={1}>
+                          <SizableText
+                            size="$2"
+                            fontWeight="700"
+                            color="$color12"
+                            numberOfLines={1}
+                          >
                             {sp.name}
                           </SizableText>
                           <SizableText size="$2" color="$color10">
-                            {sp.displayCurrency}{sp.displayPriceMinor ?? sp.priceMinor}
+                            {sp.displayCurrency}
+                            {sp.displayPriceMinor ?? sp.priceMinor}
                           </SizableText>
                         </YStack>
                       </YStack>
@@ -367,7 +395,11 @@ export function PackageDetail({ packageId }: PackageDetailProps) {
       </YStack>
 
       {pkg && (
-        <CheckoutSheet pkg={pkg as any} open={checkoutOpen} onOpenChange={setCheckoutOpen} />
+        <CheckoutSheet
+          pkg={pkg as any}
+          open={checkoutOpen}
+          onOpenChange={setCheckoutOpen}
+        />
       )}
     </YStack>
   )

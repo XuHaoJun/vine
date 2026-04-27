@@ -67,11 +67,7 @@ export function createReviewRepository() {
       return row
     },
 
-    async delete(
-      db: any,
-      packageId: string,
-      userId: string,
-    ): Promise<boolean> {
+    async delete(db: any, packageId: string, userId: string): Promise<boolean> {
       const [row] = await db
         .update(stickerPackageReview)
         .set({ status: 'rejected' })
@@ -94,12 +90,7 @@ export function createReviewRepository() {
       const [row] = await db
         .select({ id: entitlement.id })
         .from(entitlement)
-        .where(
-          and(
-            eq(entitlement.packageId, packageId),
-            eq(entitlement.userId, userId),
-          ),
-        )
+        .where(and(eq(entitlement.packageId, packageId), eq(entitlement.userId, userId)))
         .limit(1)
       return row
     },

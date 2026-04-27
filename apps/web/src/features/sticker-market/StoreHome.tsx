@@ -11,7 +11,22 @@ const TYPE_CHIPS = [
   { key: 'static', label: '靜態' },
 ]
 
-function PackageCard({ pkg }: { pkg: { id: string; name: string; coverUrl: string; creatorDisplayName: string; priceMinor: number; currency: string; owned: boolean; stickerCount: number; displayPriceMinor: number; displayCurrency: string } }) {
+function PackageCard({
+  pkg,
+}: {
+  pkg: {
+    id: string
+    name: string
+    coverUrl: string
+    creatorDisplayName: string
+    priceMinor: number
+    currency: string
+    owned: boolean
+    stickerCount: number
+    displayPriceMinor: number
+    displayCurrency: string
+  }
+}) {
   return (
     <YStack
       width={160}
@@ -40,11 +55,14 @@ function PackageCard({ pkg }: { pkg: { id: string; name: string; coverUrl: strin
         <XStack items="center" gap="$1">
           {pkg.owned ? (
             <YStack bg="$green8" rounded="$2" px="$2" py="$1">
-              <SizableText size="$2" color="white">已擁有</SizableText>
+              <SizableText size="$2" color="white">
+                已擁有
+              </SizableText>
             </YStack>
           ) : (
             <SizableText size="$3" fontWeight="700" color="$color12">
-              {pkg.displayCurrency}{pkg.displayPriceMinor ?? pkg.priceMinor}
+              {pkg.displayCurrency}
+              {pkg.displayPriceMinor ?? pkg.priceMinor}
             </SizableText>
           )}
         </XStack>
@@ -122,7 +140,7 @@ export function StoreHome() {
                 const params = new URLSearchParams()
                 if (chip.key) params.set('type', chip.key)
                 const qs = params.toString()
-                router.push(qs ? `${base}?${qs}` : base as any)
+                router.push(qs ? `${base}?${qs}` : (base as any))
               }}
             >
               <SizableText size="$3" color="$color12">
@@ -144,11 +162,24 @@ export function StoreHome() {
           {!isLoading && data && (
             <YStack gap="$5" pt="$2">
               {data.featuredShelves?.map((shelf: any) => (
-                <ShelfSection key={shelf.id} title={shelf.title} packages={shelf.packages} />
+                <ShelfSection
+                  key={shelf.id}
+                  title={shelf.title}
+                  packages={shelf.packages}
+                />
               ))}
-              <ShelfSection title="7 日熱銷" packages={data.bestseller7d?.packages ?? []} />
-              <ShelfSection title="30 日熱銷" packages={data.bestseller30d?.packages ?? []} />
-              <ShelfSection title="最新發布" packages={data.latestReleases?.packages ?? []} />
+              <ShelfSection
+                title="7 日熱銷"
+                packages={data.bestseller7d?.packages ?? []}
+              />
+              <ShelfSection
+                title="30 日熱銷"
+                packages={data.bestseller30d?.packages ?? []}
+              />
+              <ShelfSection
+                title="最新發布"
+                packages={data.latestReleases?.packages ?? []}
+              />
             </YStack>
           )}
 

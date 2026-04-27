@@ -245,7 +245,10 @@ export const creatorFollow = pgTable(
     createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
   },
   (table) => [
-    uniqueIndex('creatorFollow_userId_creatorId_unique').on(table.userId, table.creatorId),
+    uniqueIndex('creatorFollow_userId_creatorId_unique').on(
+      table.userId,
+      table.creatorId,
+    ),
     index('creatorFollow_creatorId_idx').on(table.creatorId),
     index('creatorFollow_userId_idx').on(table.userId),
   ],
@@ -267,11 +270,17 @@ export const stickerPackageReview = pgTable(
     updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
   },
   (table) => [
-    uniqueIndex('stickerPackageReview_packageId_userId_unique').on(table.packageId, table.userId),
+    uniqueIndex('stickerPackageReview_packageId_userId_unique').on(
+      table.packageId,
+      table.userId,
+    ),
     index('stickerPackageReview_packageId_idx').on(table.packageId),
     index('stickerPackageReview_userId_idx').on(table.userId),
     index('stickerPackageReview_packageId_status_idx').on(table.packageId, table.status),
-    check('stickerPackageReview_rating_check', sql`${table.rating} >= 1 AND ${table.rating} <= 5`),
+    check(
+      'stickerPackageReview_rating_check',
+      sql`${table.rating} >= 1 AND ${table.rating} <= 5`,
+    ),
   ],
 )
 
@@ -282,16 +291,20 @@ export const creatorLaunchNotification = pgTable(
     recipientUserId: text('recipientUserId').notNull(),
     creatorId: text('creatorId').notNull(),
     packageId: text('packageId').notNull(),
-    status: text('status')
-      .notNull()
-      .$type<'unread' | 'read'>()
-      .default('unread'),
+    status: text('status').notNull().$type<'unread' | 'read'>().default('unread'),
     createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
     readAt: timestamp('readAt', { mode: 'string' }),
   },
   (table) => [
-    uniqueIndex('creatorLaunchNotification_recipient_package_unique').on(table.recipientUserId, table.packageId),
-    index('creatorLaunchNotification_recipient_status_created_idx').on(table.recipientUserId, table.status, table.createdAt),
+    uniqueIndex('creatorLaunchNotification_recipient_package_unique').on(
+      table.recipientUserId,
+      table.packageId,
+    ),
+    index('creatorLaunchNotification_recipient_status_created_idx').on(
+      table.recipientUserId,
+      table.status,
+      table.createdAt,
+    ),
     index('creatorLaunchNotification_creatorId_idx').on(table.creatorId),
   ],
 )

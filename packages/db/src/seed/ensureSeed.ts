@@ -94,8 +94,20 @@ const TEST_USERS = [
 ] as const
 
 const CURRENCY_DISPLAY_RATES = [
-  { baseCurrency: 'TWD', quoteCurrency: 'USD', rate: '0.031', source: 'seed', effectiveDate: '2026-04-26T00:00:00Z' },
-  { baseCurrency: 'TWD', quoteCurrency: 'JPY', rate: '4.67', source: 'seed', effectiveDate: '2026-04-26T00:00:00Z' },
+  {
+    baseCurrency: 'TWD',
+    quoteCurrency: 'USD',
+    rate: '0.031',
+    source: 'seed',
+    effectiveDate: '2026-04-26T00:00:00Z',
+  },
+  {
+    baseCurrency: 'TWD',
+    quoteCurrency: 'JPY',
+    rate: '4.67',
+    source: 'seed',
+    effectiveDate: '2026-04-26T00:00:00Z',
+  },
 ] as const
 
 const STICKER_PACKAGE_SEEDS = [
@@ -580,9 +592,13 @@ export async function ensureSeed(pool: Pool, db: any, drive?: SeedDrive) {
         effectiveDate: rate.effectiveDate,
         createdAt: now,
       })
-      console.info(`[seed] Created currency rate ${rate.baseCurrency} -> ${rate.quoteCurrency}`)
+      console.info(
+        `[seed] Created currency rate ${rate.baseCurrency} -> ${rate.quoteCurrency}`,
+      )
     } else {
-      console.info(`[seed] Currency rate ${rate.baseCurrency} -> ${rate.quoteCurrency} already exists`)
+      console.info(
+        `[seed] Currency rate ${rate.baseCurrency} -> ${rate.quoteCurrency} already exists`,
+      )
     }
   }
 

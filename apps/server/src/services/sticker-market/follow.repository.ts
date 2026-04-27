@@ -26,10 +26,7 @@ export function createFollowRepository() {
       const result = await db
         .delete(creatorFollow)
         .where(
-          and(
-            eq(creatorFollow.userId, userId),
-            eq(creatorFollow.creatorId, creatorId),
-          ),
+          and(eq(creatorFollow.userId, userId), eq(creatorFollow.creatorId, creatorId)),
         )
       return (result as any).rowCount > 0
     },
@@ -43,10 +40,7 @@ export function createFollowRepository() {
         .select()
         .from(creatorFollow)
         .where(
-          and(
-            eq(creatorFollow.userId, userId),
-            eq(creatorFollow.creatorId, creatorId),
-          ),
+          and(eq(creatorFollow.userId, userId), eq(creatorFollow.creatorId, creatorId)),
         )
         .limit(1)
       return row

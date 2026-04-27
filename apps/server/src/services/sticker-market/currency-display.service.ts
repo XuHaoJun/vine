@@ -1,7 +1,4 @@
-export function createCurrencyDisplayService(deps: {
-  db: any
-  discoveryRepo: any
-}) {
+export function createCurrencyDisplayService(deps: { db: any; discoveryRepo: any }) {
   return {
     async getDisplayPrice(
       priceMinor: number,

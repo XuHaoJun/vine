@@ -90,8 +90,11 @@ export function AdminPayoutsPage() {
   })
 
   const markPaidMutation = useTanMutation({
-    mutationFn: (params: { payoutRequestId: string; bankTransactionId: string; paidAt: string }) =>
-      stickerMarketAdminClient.markPayoutPaid(params),
+    mutationFn: (params: {
+      payoutRequestId: string
+      bankTransactionId: string
+      paidAt: string
+    }) => stickerMarketAdminClient.markPayoutPaid(params),
     onSuccess: () => {
       invalidate()
       showToast('已標記匯款', { type: 'success' })
@@ -150,13 +153,7 @@ export function AdminPayoutsPage() {
           )}
 
           {requests.map((req) => (
-            <YStack
-              key={req.id}
-              bg="$color2"
-              rounded="$4"
-              p="$3"
-              gap="$2"
-            >
+            <YStack key={req.id} bg="$color2" rounded="$4" p="$3" gap="$2">
               <XStack justify="space-between" items="center">
                 <SizableText size="$4" fontWeight="700" color="$color12">
                   {req.id}
@@ -187,11 +184,7 @@ export function AdminPayoutsPage() {
                   >
                     核准
                   </Button>
-                  <Button
-                    size="$3"
-                    theme="red"
-                    onPress={() => setRejectingId(req.id)}
-                  >
+                  <Button size="$3" theme="red" onPress={() => setRejectingId(req.id)}>
                     退件
                   </Button>
                 </XStack>
