@@ -174,6 +174,33 @@ describe('createStickerMarketUserHandler', () => {
         handler.createCheckout({ packageId: 'pkg-1', simulatePaid: true }, authCtx),
       ).rejects.toMatchObject({ code: Code.InvalidArgument })
     })
+
+    it('rejects checkout for removed packages', async () => {
+      const { deps } = makeDeps()
+      deps.db.select.mockReturnValue({
+        from: () => ({
+          where: () => ({
+            limit: () =>
+              Promise.resolve([
+                {
+                  id: 'pkg-1',
+                  status: 'removed',
+                  priceMinor: 30,
+                  currency: 'TWD',
+                },
+              ]),
+          }),
+        }),
+      } as any)
+      const handler = createStickerMarketUserHandler(deps)
+
+      await expect(
+        handler.createCheckout(
+          { packageId: 'pkg-1', simulatePaid: false },
+          authCtx,
+        ),
+      ).rejects.toMatchObject({ code: Code.FailedPrecondition })
+    })
   })
 
   describe('getOrder', () => {
