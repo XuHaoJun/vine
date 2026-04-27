@@ -8,9 +8,7 @@ function makeDeps() {
     insertActionEvent: vi.fn(),
     listReports: vi.fn(),
     getReportDetail: vi.fn(),
-    markReportReviewing: vi.fn(),
-    resolveReport: vi.fn(),
-    dismissReport: vi.fn(),
+    transitionReport: vi.fn(),
     holdCreatorPayouts: vi.fn(),
     clearCreatorPayoutHold: vi.fn(),
   }
@@ -173,5 +171,264 @@ describe('createTrustService', () => {
         reasonText: 'Rights verified.',
       }),
     )
+  })
+
+  it('lists reports with status filter', async () => {
+    const deps = makeDeps()
+    deps.repo.listReports.mockResolvedValue([{ id: 'report-1', status: 'open' }])
+    const service = createTrustService(deps)
+
+    const result = await service.listReports({ status: 'open', limit: 50 })
+
+    expect(deps.repo.listReports).toHaveBeenCalledWith(deps.db, {
+      status: 'open',
+      limit: 50,
+    })
+    expect(result).toHaveLength(1)
+  })
+
+  it('lists reports without status filter when status is invalid', async () => {
+    const deps = makeDeps()
+    deps.repo.listReports.mockResolvedValue([])
+    const service = createTrustService(deps)
+
+    await service.listReports({ status: 'bogus', limit: 10 })
+
+    expect(deps.repo.listReports).toHaveBeenCalledWith(deps.db, {
+      status: undefined,
+      limit: 10,
+    })
+  })
+
+  it('returns report detail', async () => {
+    const deps = makeDeps()
+    deps.repo.getReportDetail.mockResolvedValue({
+      report: { id: 'report-1' },
+      package: { id: 'pkg-1' },
+      assets: [],
+      events: [],
+    })
+    const service = createTrustService(deps)
+
+    const result = await service.getReportDetail({ reportId: 'report-1' })
+
+    expect(result.report.id).toBe('report-1')
+  })
+
+  it('throws NotFound for missing report detail', async () => {
+    const deps = makeDeps()
+    deps.repo.getReportDetail.mockResolvedValue(undefined)
+    const service = createTrustService(deps)
+
+    await expect(
+      service.getReportDetail({ reportId: 'missing' }),
+    ).rejects.toMatchObject({ code: Code.NotFound })
+  })
+
+  it('marks an open report as reviewing', async () => {
+    const deps = makeDeps()
+    deps.createId.mockReset()
+    deps.createId.mockReturnValue('event-1')
+    deps.repo.transitionReport.mockResolvedValue({
+      id: 'report-1',
+      packageId: 'pkg-1',
+      status: 'reviewing',
+    })
+    const service = createTrustService(deps)
+
+    const result = await service.markReviewing({
+      reportId: 'report-1',
+      actorUserId: 'admin-1',
+      note: 'Investigating.',
+    })
+
+    expect(result.status).toBe('reviewing')
+    expect(deps.repo.transitionReport).toHaveBeenCalledWith(
+      deps.db,
+      expect.objectContaining({ status: 'reviewing', fromStatuses: ['open'] }),
+    )
+  })
+
+  it('throws FailedPrecondition if report is not open when marking reviewing', async () => {
+    const deps = makeDeps()
+    deps.repo.transitionReport.mockResolvedValue(undefined)
+    const service = createTrustService(deps)
+
+    await expect(
+      service.markReviewing({
+        reportId: 'report-1',
+        actorUserId: 'admin-1',
+        note: '',
+      }),
+    ).rejects.toMatchObject({ code: Code.FailedPrecondition })
+  })
+
+  it('resolves an open or reviewing report', async () => {
+    const deps = makeDeps()
+    deps.createId.mockReset()
+    deps.createId.mockReturnValue('event-1')
+    deps.repo.transitionReport.mockResolvedValue({
+      id: 'report-1',
+      packageId: 'pkg-1',
+      status: 'resolved',
+    })
+    const service = createTrustService(deps)
+
+    const result = await service.resolveReport({
+      reportId: 'report-1',
+      actorUserId: 'admin-1',
+      resolutionText: 'Issue resolved after review.',
+    })
+
+    expect(result.status).toBe('resolved')
+    expect(deps.repo.transitionReport).toHaveBeenCalledWith(
+      deps.db,
+      expect.objectContaining({ status: 'resolved', fromStatuses: ['open', 'reviewing'] }),
+    )
+  })
+
+  it('dismisses an open or reviewing report', async () => {
+    const deps = makeDeps()
+    deps.createId.mockReset()
+    deps.createId.mockReturnValue('event-1')
+    deps.repo.transitionReport.mockResolvedValue({
+      id: 'report-1',
+      packageId: 'pkg-1',
+      status: 'dismissed',
+    })
+    const service = createTrustService(deps)
+
+    const result = await service.dismissReport({
+      reportId: 'report-1',
+      actorUserId: 'admin-1',
+      resolutionText: 'No violation found.',
+    })
+
+    expect(result.status).toBe('dismissed')
+    expect(deps.repo.transitionReport).toHaveBeenCalledWith(
+      deps.db,
+      expect.objectContaining({ status: 'dismissed', fromStatuses: ['open', 'reviewing'] }),
+    )
+  })
+
+  it('throws FailedPrecondition if resolve/dismiss transition returns no report', async () => {
+    const deps = makeDeps()
+    deps.repo.transitionReport.mockResolvedValue(undefined)
+    const service = createTrustService(deps)
+
+    await expect(
+      service.resolveReport({
+        reportId: 'report-1',
+        actorUserId: 'admin-1',
+        resolutionText: 'Not applicable.',
+      }),
+    ).rejects.toMatchObject({ code: Code.FailedPrecondition })
+  })
+
+  it('holds creator payouts and writes audit event', async () => {
+    const deps = makeDeps()
+    deps.createId.mockReset()
+    deps.createId.mockReturnValue('event-1')
+    deps.repo.holdCreatorPayouts.mockResolvedValue({
+      id: 'creator-1',
+      payoutHoldAt: '2026-04-27T00:00:00.000Z',
+    })
+    const service = createTrustService(deps)
+
+    await service.holdCreatorPayouts({
+      actorUserId: 'admin-1',
+      creatorId: 'creator-1',
+      reportId: 'report-1',
+      packageId: 'pkg-1',
+      reasonText: 'Under investigation.',
+    })
+
+    expect(deps.repo.holdCreatorPayouts).toHaveBeenCalled()
+    expect(deps.repo.insertActionEvent).toHaveBeenCalledWith(
+      deps.db,
+      expect.objectContaining({ action: 'creator_payout_hold_enabled' }),
+    )
+  })
+
+  it('throws NotFound when holding payouts for missing creator', async () => {
+    const deps = makeDeps()
+    deps.repo.holdCreatorPayouts.mockResolvedValue(undefined)
+    const service = createTrustService(deps)
+
+    await expect(
+      service.holdCreatorPayouts({
+        actorUserId: 'admin-1',
+        creatorId: 'missing',
+        reasonText: 'Investigation.',
+      }),
+    ).rejects.toMatchObject({ code: Code.NotFound })
+  })
+
+  it('clears creator payout hold and writes audit event', async () => {
+    const deps = makeDeps()
+    deps.createId.mockReset()
+    deps.createId.mockReturnValue('event-1')
+    deps.repo.clearCreatorPayoutHold.mockResolvedValue({
+      id: 'creator-1',
+      payoutHoldAt: null,
+    })
+    const service = createTrustService(deps)
+
+    await service.clearCreatorPayoutHold({
+      actorUserId: 'admin-1',
+      creatorId: 'creator-1',
+      reasonText: 'Investigation complete.',
+    })
+
+    expect(deps.repo.clearCreatorPayoutHold).toHaveBeenCalled()
+    expect(deps.repo.insertActionEvent).toHaveBeenCalledWith(
+      deps.db,
+      expect.objectContaining({ action: 'creator_payout_hold_cleared' }),
+    )
+  })
+
+  it('rejects force remove with empty reason text', async () => {
+    const deps = makeDeps()
+    const service = createTrustService(deps)
+
+    await expect(
+      service.forceRemovePackage({
+        actorUserId: 'admin-1',
+        packageId: 'pkg-1',
+        reasonText: '',
+      }),
+    ).rejects.toMatchObject({ code: Code.InvalidArgument })
+  })
+
+  it('rejects restore with empty reason text', async () => {
+    const deps = makeDeps()
+    const service = createTrustService(deps)
+
+    await expect(
+      service.restorePackage({
+        actorUserId: 'admin-1',
+        packageId: 'pkg-1',
+        reasonText: '',
+      }),
+    ).rejects.toMatchObject({ code: Code.InvalidArgument })
+  })
+
+  it('rejects report with long reason text', async () => {
+    const deps = makeDeps()
+    deps.packageRepo.findById.mockResolvedValue({
+      id: 'pkg-1',
+      creatorId: 'creator-1',
+      status: 'on_sale',
+    })
+    const service = createTrustService(deps)
+
+    await expect(
+      service.reportStickerPackage({
+        packageId: 'pkg-1',
+        reporterUserId: 'user-1',
+        reasonCategory: 'copyright',
+        reasonText: 'x'.repeat(1001),
+      }),
+    ).rejects.toMatchObject({ code: Code.InvalidArgument })
   })
 })
