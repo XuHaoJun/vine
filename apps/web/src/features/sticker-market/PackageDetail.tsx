@@ -8,6 +8,7 @@ import { showToast } from '~/interface/toast/Toast'
 import { useTanQuery, useTanMutation, useTanQueryClient } from '~/query'
 import { stickerMarketDiscoveryClient, stickerMarketUserClient } from './client'
 import { CheckoutSheet } from './CheckoutSheet'
+import { ReportStickerPackageDialog } from './ReportStickerPackageDialog'
 
 type PackageDetailProps = {
   packageId: string
@@ -45,6 +46,7 @@ export function PackageDetail({ packageId }: PackageDetailProps) {
   const [checkoutOpen, setCheckoutOpen] = useState(false)
   const [reviewRating, setReviewRating] = useState(0)
   const [reviewBody, setReviewBody] = useState('')
+  const [reportOpen, setReportOpen] = useState(false)
 
   const { data, isLoading } = useTanQuery({
     queryKey: ['sticker-market', 'package-detail', packageId],
@@ -383,15 +385,20 @@ export function PackageDetail({ packageId }: PackageDetailProps) {
         borderTopColor="$color4"
         bg="$background"
       >
-        {pkg.owned ? (
-          <Button disabled>
-            <SizableText>已擁有</SizableText>
+        <YStack gap="$2">
+          <Button size="$2" variant="transparent" onPress={() => setReportOpen(true)}>
+            回報
           </Button>
-        ) : (
-          <Button theme="accent" onPress={() => setCheckoutOpen(true)}>
-            立即購買 {priceDisplay}
-          </Button>
-        )}
+          {pkg.owned ? (
+            <Button disabled>
+              <SizableText>已擁有</SizableText>
+            </Button>
+          ) : (
+            <Button theme="accent" onPress={() => setCheckoutOpen(true)}>
+              立即購買 {priceDisplay}
+            </Button>
+          )}
+        </YStack>
       </YStack>
 
       {pkg && (
@@ -401,6 +408,12 @@ export function PackageDetail({ packageId }: PackageDetailProps) {
           onOpenChange={setCheckoutOpen}
         />
       )}
+
+      <ReportStickerPackageDialog
+        packageId={packageId}
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+      />
     </YStack>
   )
 }

@@ -18,6 +18,8 @@ import { createFollowService } from './follow.service'
 import { createReviewRepository } from './review.repository'
 import { createLaunchNotificationService } from './launch-notification.service'
 import { createCurrencyDisplayService } from './currency-display.service'
+import { createTrustRepository } from './trust.repository'
+import { createTrustService } from './trust.service'
 
 export function createStickerMarketServices(deps: { db: any; uploadRoot: string }) {
   const creatorRepo = createCreatorRepository()
@@ -28,6 +30,7 @@ export function createStickerMarketServices(deps: { db: any; uploadRoot: string 
   const featuredShelfRepo = createFeaturedShelfRepository()
   const followRepo = createFollowRepository()
   const reviewRepo = createReviewRepository()
+  const trustRepo = createTrustRepository()
 
   const currencyDisplay = createCurrencyDisplayService({
     db: deps.db,
@@ -96,5 +99,12 @@ export function createStickerMarketServices(deps: { db: any; uploadRoot: string 
       createId: () => randomUUID(),
     }),
     launchNotification,
+    trust: createTrustService({
+      db: deps.db,
+      repo: trustRepo,
+      packageRepo,
+      now: () => new Date(),
+      createId: () => randomUUID(),
+    }),
   }
 }

@@ -326,3 +326,63 @@ export const creatorPayoutAuditEvent = pgTable(
     index('creatorPayoutAuditEvent_batch_idx').on(table.payoutBatchId),
   ],
 )
+
+export const stickerTrustReport = pgTable(
+  'stickerTrustReport',
+  {
+    id: text('id').primaryKey(),
+    packageId: text('packageId')
+      .notNull()
+      .references(() => stickerPackage.id),
+    reporterUserId: text('reporterUserId').notNull(),
+    reasonCategory: text('reasonCategory')
+      .notNull()
+      .$type<'copyright' | 'prohibited_content' | 'fraud' | 'other'>(),
+    reasonText: text('reasonText').notNull(),
+    status: text('status')
+      .notNull()
+      .$type<'open' | 'reviewing' | 'resolved' | 'dismissed'>()
+      .default('open'),
+    reviewedByUserId: text('reviewedByUserId'),
+    resolutionText: text('resolutionText'),
+    resolvedAt: timestamp('resolvedAt', { mode: 'string' }),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('stickerTrustReport_packageId_idx').on(table.packageId),
+    index('stickerTrustReport_reporterUserId_idx').on(table.reporterUserId),
+    index('stickerTrustReport_status_idx').on(table.status),
+  ],
+)
+
+export const stickerTrustActionEvent = pgTable(
+  'stickerTrustActionEvent',
+  {
+    id: text('id').primaryKey(),
+    reportId: text('reportId').references(() => stickerTrustReport.id),
+    packageId: text('packageId').references(() => stickerPackage.id),
+    creatorId: text('creatorId'),
+    actorUserId: text('actorUserId').notNull(),
+    action: text('action')
+      .notNull()
+      .$type<
+        | 'report_created'
+        | 'report_reviewing'
+        | 'report_resolved'
+        | 'report_dismissed'
+        | 'package_removed'
+        | 'package_restored'
+        | 'creator_payout_hold_enabled'
+        | 'creator_payout_hold_cleared'
+      >(),
+    reasonText: text('reasonText').notNull().default(''),
+    metadataJson: text('metadataJson').notNull().default('{}'),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('stickerTrustActionEvent_reportId_idx').on(table.reportId),
+    index('stickerTrustActionEvent_packageId_idx').on(table.packageId),
+    index('stickerTrustActionEvent_creatorId_idx').on(table.creatorId),
+  ],
+)

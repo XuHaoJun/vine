@@ -174,6 +174,30 @@ describe('createStickerMarketUserHandler', () => {
         handler.createCheckout({ packageId: 'pkg-1', simulatePaid: true }, authCtx),
       ).rejects.toMatchObject({ code: Code.InvalidArgument })
     })
+
+    it('rejects checkout for removed packages', async () => {
+      const { deps } = makeDeps()
+      deps.db.select.mockReturnValue({
+        from: () => ({
+          where: () => ({
+            limit: () =>
+              Promise.resolve([
+                {
+                  id: 'pkg-1',
+                  status: 'removed',
+                  priceMinor: 30,
+                  currency: 'TWD',
+                },
+              ]),
+          }),
+        }),
+      } as any)
+      const handler = createStickerMarketUserHandler(deps)
+
+      await expect(
+        handler.createCheckout({ packageId: 'pkg-1', simulatePaid: false }, authCtx),
+      ).rejects.toMatchObject({ code: Code.FailedPrecondition })
+    })
   })
 
   describe('getOrder', () => {
@@ -218,5 +242,49 @@ describe('createStickerMarketUserHandler', () => {
         handler.getOrder({ orderId: 'MISSING' }, authCtx),
       ).rejects.toMatchObject({ code: Code.NotFound })
     })
+  })
+
+  it('reports sticker packages through trust service', async () => {
+    const { deps: handlerDeps } = makeDeps()
+    ;(handlerDeps as any).trust = {
+      reportStickerPackage: vi.fn().mockResolvedValue({
+        id: 'report-1',
+        status: 'open',
+      }),
+    }
+    const handler = createStickerMarketUserHandler(handlerDeps)
+
+    const result = await handler.reportStickerPackage(
+      {
+        packageId: 'pkg-1',
+        reasonCategory: 'copyright',
+        reasonText: 'This looks copied from my artwork.',
+      },
+      makeAuthCtx('user-1'),
+    )
+
+    expect(result.reportId).toBe('report-1')
+    expect((handlerDeps as any).trust.reportStickerPackage).toHaveBeenCalledWith({
+      packageId: 'pkg-1',
+      reporterUserId: 'user-1',
+      reasonCategory: 'copyright',
+      reasonText: 'This looks copied from my artwork.',
+    })
+  })
+
+  it('throws Internal if trust service is not configured', async () => {
+    const { deps } = makeDeps()
+    const handler = createStickerMarketUserHandler(deps)
+
+    await expect(
+      handler.reportStickerPackage(
+        {
+          packageId: 'pkg-1',
+          reasonCategory: 'copyright',
+          reasonText: 'This looks copied from my artwork.',
+        },
+        makeAuthCtx('user-1'),
+      ),
+    ).rejects.toMatchObject({ code: Code.Internal })
   })
 })

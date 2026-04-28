@@ -34,6 +34,15 @@ function makeCurrencyDisplayService() {
   }
 }
 
+function makeDeps() {
+  return {
+    db: makeMockDb(),
+    discoveryRepo: makeDiscoveryRepo(),
+    featuredShelfRepo: makeFeaturedShelfRepo(),
+    currencyDisplay: makeCurrencyDisplayService(),
+  }
+}
+
 describe('createDiscoveryService', () => {
   describe('getStoreHome', () => {
     it('returns featured shelves with on_sale packages', async () => {
@@ -475,6 +484,16 @@ describe('createDiscoveryService', () => {
   })
 
   describe('getPackageDetail', () => {
+    it('omits removed packages from public package detail', async () => {
+      const deps = makeDeps()
+      deps.discoveryRepo.findPackageWithCreator.mockResolvedValue(undefined)
+      const service = createDiscoveryService(deps)
+
+      await expect(
+        service.getPackageDetail({ packageId: 'removed-pkg', userId: undefined }),
+      ).resolves.toBeUndefined()
+    })
+
     it('returns package details with creator profile', async () => {
       const db = makeMockDb()
       const discoveryRepo = makeDiscoveryRepo()
@@ -647,14 +666,12 @@ describe('createDiscoveryService', () => {
         featuredShelfRepo,
         currencyDisplay,
         creatorRepo: {
-          findById: vi
-            .fn()
-            .mockResolvedValue({
-              id: 'creator_1',
-              displayName: 'Creator',
-              bio: '',
-              avatarDriveKey: null,
-            }),
+          findById: vi.fn().mockResolvedValue({
+            id: 'creator_1',
+            displayName: 'Creator',
+            bio: '',
+            avatarDriveKey: null,
+          }),
           findByUserId: vi.fn(),
         } as any,
       })

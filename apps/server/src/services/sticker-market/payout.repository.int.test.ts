@@ -51,6 +51,12 @@ describe('createPayoutRepository', () => {
 
   it('keeps approved and exported requests in the admin payout queue', async () => {
     await withRollbackDb(async (db) => {
+      await db.insert(creatorProfile).values({
+        id: 'creator_1',
+        userId: 'user_1',
+        displayName: 'Studio',
+        country: 'TW',
+      })
       await db.insert(creatorPayoutRequest).values([
         {
           id: 'req_requested',

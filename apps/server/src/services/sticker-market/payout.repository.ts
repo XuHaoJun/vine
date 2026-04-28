@@ -131,12 +131,81 @@ export function createPayoutRepository() {
 
     listPendingRequests(db: any, input: { limit: number }) {
       return db
-        .select()
+        .select({
+          id: creatorPayoutRequest.id,
+          ledgerIdsJson: creatorPayoutRequest.ledgerIdsJson,
+          creatorId: creatorPayoutRequest.creatorId,
+          payoutAccountId: creatorPayoutRequest.payoutAccountId,
+          batchId: creatorPayoutRequest.batchId,
+          currency: creatorPayoutRequest.currency,
+          grossAmountMinor: creatorPayoutRequest.grossAmountMinor,
+          taxWithholdingMinor: creatorPayoutRequest.taxWithholdingMinor,
+          transferFeeMinor: creatorPayoutRequest.transferFeeMinor,
+          netAmountMinor: creatorPayoutRequest.netAmountMinor,
+          status: creatorPayoutRequest.status,
+          rejectReason: creatorPayoutRequest.rejectReason,
+          failureReason: creatorPayoutRequest.failureReason,
+          bankTransactionId: creatorPayoutRequest.bankTransactionId,
+          paidAt: creatorPayoutRequest.paidAt,
+          requestedAt: creatorPayoutRequest.requestedAt,
+          reviewedAt: creatorPayoutRequest.reviewedAt,
+          reviewedByUserId: creatorPayoutRequest.reviewedByUserId,
+          updatedAt: creatorPayoutRequest.updatedAt,
+          creatorDisplayName: creatorProfile.displayName,
+          payoutHoldAt: creatorProfile.payoutHoldAt,
+          payoutHoldByUserId: creatorProfile.payoutHoldByUserId,
+          payoutHoldReason: creatorProfile.payoutHoldReason,
+        })
         .from(creatorPayoutRequest)
+        .innerJoin(creatorProfile, eq(creatorPayoutRequest.creatorId, creatorProfile.id))
         .where(
           inArray(creatorPayoutRequest.status, ['requested', 'approved', 'exported']),
         )
         .limit(input.limit)
+    },
+
+    async findRequestCreatorHold(db: any, requestId: string) {
+      const [row] = await db
+        .select({
+          requestId: creatorPayoutRequest.id,
+          creatorId: creatorPayoutRequest.creatorId,
+          payoutHoldAt: creatorProfile.payoutHoldAt,
+          payoutHoldReason: creatorProfile.payoutHoldReason,
+        })
+        .from(creatorPayoutRequest)
+        .innerJoin(creatorProfile, eq(creatorPayoutRequest.creatorId, creatorProfile.id))
+        .where(eq(creatorPayoutRequest.id, requestId))
+        .limit(1)
+      return row
+    },
+
+    async findAnyHeldCreatorInRequests(db: any, requestIds: string[]) {
+      if (requestIds.length === 0) return undefined
+      const [row] = await db
+        .select({
+          requestId: creatorPayoutRequest.id,
+          creatorId: creatorPayoutRequest.creatorId,
+          payoutHoldAt: creatorProfile.payoutHoldAt,
+          payoutHoldReason: creatorProfile.payoutHoldReason,
+        })
+        .from(creatorPayoutRequest)
+        .innerJoin(creatorProfile, eq(creatorPayoutRequest.creatorId, creatorProfile.id))
+        .where(inArray(creatorPayoutRequest.id, requestIds))
+      return row?.payoutHoldAt ? row : undefined
+    },
+
+    async findAnyHeldCreatorInBatch(db: any, batchId: string) {
+      const [row] = await db
+        .select({
+          requestId: creatorPayoutRequest.id,
+          creatorId: creatorPayoutRequest.creatorId,
+          payoutHoldAt: creatorProfile.payoutHoldAt,
+          payoutHoldReason: creatorProfile.payoutHoldReason,
+        })
+        .from(creatorPayoutRequest)
+        .innerJoin(creatorProfile, eq(creatorPayoutRequest.creatorId, creatorProfile.id))
+        .where(eq(creatorPayoutRequest.batchId, batchId))
+      return row?.payoutHoldAt ? row : undefined
     },
 
     async approveRequest(db: any, input: any) {
