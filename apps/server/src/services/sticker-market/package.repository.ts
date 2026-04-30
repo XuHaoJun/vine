@@ -337,6 +337,42 @@ export function createPackageRepository() {
         .limit(input.limit)
     },
 
+    async forceRemove(
+      db: any,
+      input: { packageId: string; now: string },
+    ): Promise<StickerPackageRow> {
+      const [row] = await db
+        .update(stickerPackage)
+        .set({ status: 'removed', updatedAt: input.now })
+        .where(
+          and(
+            eq(stickerPackage.id, input.packageId),
+            inArray(stickerPackage.status, ['on_sale', 'unlisted', 'approved']),
+          ),
+        )
+        .returning()
+      if (!row) throw new Error('package not found or not removable')
+      return row
+    },
+
+    async restoreRemoved(
+      db: any,
+      input: { packageId: string; now: string },
+    ): Promise<StickerPackageRow> {
+      const [row] = await db
+        .update(stickerPackage)
+        .set({ status: 'on_sale', updatedAt: input.now })
+        .where(
+          and(
+            eq(stickerPackage.id, input.packageId),
+            eq(stickerPackage.status, 'removed'),
+          ),
+        )
+        .returning()
+      if (!row) throw new Error('package not found or not removed')
+      return row
+    },
+
     async findByIdWithAssets(
       db: any,
       packageId: string,

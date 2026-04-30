@@ -175,4 +175,51 @@ describe('createStickerMarketAdminHandler', () => {
       },
     ])
   })
+
+  it('rejects non-admin trust report queue access with PermissionDenied', async () => {
+    const handler = createStickerMarketAdminHandler({
+      ...makeDeps(),
+      trust: { listReports: vi.fn() },
+    } as any)
+
+    await expect(
+      handler.listTrustReports({ limit: 50 }, makeAuthCtx({ id: 'user-1' })),
+    ).rejects.toMatchObject({ code: Code.PermissionDenied })
+  })
+
+  it('calls trust service for admin force remove', async () => {
+    const deps = {
+      ...makeDeps(),
+      trust: {
+        forceRemovePackage: vi.fn().mockResolvedValue({
+          id: 'pkg-1',
+          creatorId: 'creator-1',
+          name: 'Pack',
+          description: '',
+          priceMinor: 30,
+          currency: 'TWD',
+          stickerCount: 8,
+          status: 'removed',
+          tags: '[]',
+        }),
+      },
+    } as any
+    const handler = createStickerMarketAdminHandler(deps)
+
+    await handler.forceRemoveStickerPackage(
+      {
+        packageId: 'pkg-1',
+        reportId: 'report-1',
+        reasonText: 'Confirmed infringement.',
+      },
+      makeAuthCtx({ id: 'admin-1', role: 'admin' }),
+    )
+
+    expect(deps.trust.forceRemovePackage).toHaveBeenCalledWith({
+      actorUserId: 'admin-1',
+      packageId: 'pkg-1',
+      reportId: 'report-1',
+      reasonText: 'Confirmed infringement.',
+    })
+  })
 })

@@ -33,6 +33,9 @@ function makeService(overrides: Partial<any> = {}) {
       accountLast4: '9012',
     }),
     listPendingRequests: vi.fn().mockResolvedValue([]),
+    findRequestCreatorHold: vi.fn().mockResolvedValue(undefined),
+    findAnyHeldCreatorInRequests: vi.fn().mockResolvedValue(undefined),
+    findAnyHeldCreatorInBatch: vi.fn().mockResolvedValue(undefined),
     approveRequest: vi.fn().mockResolvedValue({ id: 'req_1', status: 'approved' }),
     rejectRequest: vi.fn().mockResolvedValue({ id: 'req_1', status: 'rejected' }),
     createBatchFromApprovedRequests: vi.fn().mockResolvedValue({ id: 'batch_1' }),
@@ -121,6 +124,99 @@ describe('createPayoutService', () => {
         accountNumberConfirmation: '999999999999',
       }),
     ).rejects.toThrow('account number confirmation mismatch')
+  })
+
+  it('blocks creator payout requests while creator is held', async () => {
+    const { service } = makeService({
+      repo: {
+        getCreatorPayoutOverview: vi.fn().mockResolvedValue({
+          creator: {
+            id: 'creator-1',
+            payoutHoldAt: '2026-04-27T00:00:00.000Z',
+            payoutHoldReason: 'Investigating infringement.',
+          },
+          account: { id: 'account-1' },
+          availableLedgers: [{ id: 'ledger-1', netAmountMinor: 30000 }],
+          history: [],
+        }),
+      },
+    })
+
+    await expect(service.requestCreatorPayout({ userId: 'user-1' })).rejects.toThrow(
+      'creator payouts are on hold',
+    )
+  })
+
+  it('blocks approving held creator payout requests', async () => {
+    const { repo, service } = makeService({
+      repo: {
+        findRequestCreatorHold: vi.fn().mockResolvedValue({
+          creatorId: 'creator-1',
+          payoutHoldAt: '2026-04-27T00:00:00.000Z',
+        }),
+      },
+    })
+
+    await expect(
+      service.approveRequest({ actorUserId: 'admin-1', requestId: 'request-1' }),
+    ).rejects.toThrow('creator payouts are on hold')
+  })
+
+  it('allows rejecting held creator payout requests', async () => {
+    const { repo, service } = makeService({
+      repo: {
+        rejectRequest: vi.fn().mockResolvedValue({ id: 'request-1', status: 'rejected' }),
+      },
+    })
+
+    await expect(
+      service.rejectRequest({
+        actorUserId: 'admin-1',
+        requestId: 'request-1',
+        reason: 'Missing information.',
+      }),
+    ).resolves.toMatchObject({ status: 'rejected' })
+    expect(repo.findRequestCreatorHold).not.toHaveBeenCalled()
+  })
+
+  it('blocks creating a batch when any selected payout request creator is held', async () => {
+    const { repo, service } = makeService({
+      repo: {
+        findAnyHeldCreatorInRequests: vi.fn().mockResolvedValue({
+          requestId: 'request-2',
+          creatorId: 'creator-2',
+          payoutHoldAt: '2026-04-27T00:00:00.000Z',
+        }),
+      },
+    })
+
+    await expect(
+      service.createBatch({
+        actorUserId: 'admin-1',
+        requestIds: ['request-1', 'request-2'],
+      }),
+    ).rejects.toThrow('creator payouts are on hold')
+    expect(repo.createBatchFromApprovedRequests).not.toHaveBeenCalled()
+  })
+
+  it('blocks exporting a batch when any batch payout request creator is held', async () => {
+    const { repo, service } = makeService({
+      repo: {
+        findAnyHeldCreatorInBatch: vi.fn().mockResolvedValue({
+          requestId: 'request-2',
+          creatorId: 'creator-2',
+          payoutHoldAt: '2026-04-27T00:00:00.000Z',
+        }),
+      },
+    })
+
+    await expect(
+      service.exportBatchCsv({
+        actorUserId: 'admin-1',
+        batchId: 'batch-1',
+      }),
+    ).rejects.toThrow('creator payouts are on hold')
+    expect(repo.exportBatchRows).not.toHaveBeenCalled()
   })
 
   it('exports CSV with full account number only for admin batch export', async () => {

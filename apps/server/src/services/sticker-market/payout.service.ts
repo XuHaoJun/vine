@@ -6,6 +6,21 @@ export function createPayoutService(deps: {
   createId: () => string
   now: () => Date
 }) {
+  async function assertRequestCreatorNotHeld(requestId: string) {
+    const hold = await deps.repo.findRequestCreatorHold?.(deps.db, requestId)
+    if (hold?.payoutHoldAt) throw new Error('creator payouts are on hold')
+  }
+
+  async function assertRequestIdsNotHeld(requestIds: string[]) {
+    const hold = await deps.repo.findAnyHeldCreatorInRequests?.(deps.db, requestIds)
+    if (hold?.payoutHoldAt) throw new Error('creator payouts are on hold')
+  }
+
+  async function assertBatchCreatorsNotHeld(batchId: string) {
+    const hold = await deps.repo.findAnyHeldCreatorInBatch?.(deps.db, batchId)
+    if (hold?.payoutHoldAt) throw new Error('creator payouts are on hold')
+  }
+
   return {
     async getCreatorPayoutOverview(input: { userId: string }) {
       const overview = await deps.repo.getCreatorPayoutOverview(deps.db, input)
@@ -30,6 +45,9 @@ export function createPayoutService(deps: {
 
     async requestCreatorPayout(input: { userId: string }) {
       const overview = await deps.repo.getCreatorPayoutOverview(deps.db, input)
+      if (overview.creator?.payoutHoldAt) {
+        throw new Error('creator payouts are on hold')
+      }
       if (!overview.account) throw new Error('payout account required')
       const availableNetAmountMinor = overview.availableLedgers.reduce(
         (sum: number, row: any) => sum + row.netAmountMinor,
@@ -107,7 +125,8 @@ export function createPayoutService(deps: {
       return deps.repo.listPendingRequests(deps.db, input)
     },
 
-    approveRequest(input: { actorUserId: string; requestId: string }) {
+    async approveRequest(input: { actorUserId: string; requestId: string }) {
+      await assertRequestCreatorNotHeld(input.requestId)
       return deps.repo.approveRequest(deps.db, {
         ...input,
         now: deps.now().toISOString(),
@@ -118,7 +137,8 @@ export function createPayoutService(deps: {
       return deps.repo.rejectRequest(deps.db, { ...input, now: deps.now().toISOString() })
     },
 
-    createBatch(input: { actorUserId: string; requestIds: string[] }) {
+    async createBatch(input: { actorUserId: string; requestIds: string[] }) {
+      await assertRequestIdsNotHeld(input.requestIds)
       return deps.repo.createBatchFromApprovedRequests(deps.db, {
         id: deps.createId(),
         ...input,
@@ -127,6 +147,7 @@ export function createPayoutService(deps: {
     },
 
     async exportBatchCsv(input: { actorUserId: string; batchId: string }) {
+      await assertBatchCreatorsNotHeld(input.batchId)
       const rows = await deps.repo.exportBatchRows(deps.db, {
         ...input,
         now: deps.now().toISOString(),
@@ -134,12 +155,13 @@ export function createPayoutService(deps: {
       return encodeCsv(rows)
     },
 
-    markPaid(input: {
+    async markPaid(input: {
       actorUserId: string
       requestId: string
       bankTransactionId: string
       paidAt: string
     }) {
+      await assertRequestCreatorNotHeld(input.requestId)
       return deps.repo.markRequestPaid(deps.db, {
         ...input,
         now: deps.now().toISOString(),

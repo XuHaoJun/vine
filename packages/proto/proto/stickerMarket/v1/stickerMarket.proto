@@ -11,6 +11,7 @@ service StickerMarketUserService {
   rpc DeleteStickerPackageReview(DeleteStickerPackageReviewRequest) returns (DeleteStickerPackageReviewResponse);
   rpc ListLaunchNotifications(ListLaunchNotificationsRequest) returns (ListLaunchNotificationsResponse);
   rpc MarkLaunchNotificationRead(MarkLaunchNotificationReadRequest) returns (MarkLaunchNotificationReadResponse);
+  rpc ReportStickerPackage(ReportStickerPackageRequest) returns (ReportStickerPackageResponse);
 }
 
 // --- Public discovery (no auth required) ---
@@ -39,6 +40,15 @@ service StickerMarketAdminService {
   rpc UpsertFeaturedShelf(UpsertFeaturedShelfRequest) returns (UpsertFeaturedShelfResponse);
   rpc PublishFeaturedShelf(PublishFeaturedShelfRequest) returns (PublishFeaturedShelfResponse);
   rpc ArchiveFeaturedShelf(ArchiveFeaturedShelfRequest) returns (ArchiveFeaturedShelfResponse);
+  rpc ListTrustReports(ListTrustReportsRequest) returns (ListTrustReportsResponse);
+  rpc GetTrustReportDetail(GetTrustReportDetailRequest) returns (GetTrustReportDetailResponse);
+  rpc MarkTrustReportReviewing(MarkTrustReportReviewingRequest) returns (MarkTrustReportReviewingResponse);
+  rpc ResolveTrustReport(ResolveTrustReportRequest) returns (ResolveTrustReportResponse);
+  rpc DismissTrustReport(DismissTrustReportRequest) returns (DismissTrustReportResponse);
+  rpc ForceRemoveStickerPackage(ForceRemoveStickerPackageRequest) returns (ForceRemoveStickerPackageResponse);
+  rpc RestoreStickerPackage(RestoreStickerPackageRequest) returns (RestoreStickerPackageResponse);
+  rpc HoldCreatorPayouts(HoldCreatorPayoutsRequest) returns (HoldCreatorPayoutsResponse);
+  rpc ClearCreatorPayoutHold(ClearCreatorPayoutHoldRequest) returns (ClearCreatorPayoutHoldResponse);
 }
 
 enum RefundStatus {
@@ -326,6 +336,9 @@ message CreatorPayoutHistoryRow {
   string paid_at = 6;
   string failure_reason = 7;
   string reject_reason = 8;
+  string creator_id = 9;
+  string creator_display_name = 10;
+  CreatorPayoutHold payout_hold = 11;
 }
 
 message GetCreatorPayoutOverviewRequest {}
@@ -588,3 +601,127 @@ message PublishFeaturedShelfResponse { FeaturedShelf shelf = 1; }
 
 message ArchiveFeaturedShelfRequest { string id = 1; }
 message ArchiveFeaturedShelfResponse { FeaturedShelf shelf = 1; }
+
+// --- Trust & safety messages ---
+
+enum TrustReportStatus {
+  TRUST_REPORT_STATUS_UNSPECIFIED = 0;
+  TRUST_REPORT_STATUS_OPEN = 1;
+  TRUST_REPORT_STATUS_REVIEWING = 2;
+  TRUST_REPORT_STATUS_RESOLVED = 3;
+  TRUST_REPORT_STATUS_DISMISSED = 4;
+}
+
+message ReportStickerPackageRequest {
+  string package_id = 1;
+  string reason_category = 2;
+  string reason_text = 3;
+}
+
+message ReportStickerPackageResponse {
+  string report_id = 1;
+  TrustReportStatus status = 2;
+}
+
+message TrustReportSummary {
+  string id = 1;
+  string package_id = 2;
+  string package_name = 3;
+  StickerPackageStatus package_status = 4;
+  string creator_id = 5;
+  string creator_display_name = 6;
+  string reporter_user_id = 7;
+  string reason_category = 8;
+  string reason_text = 9;
+  TrustReportStatus status = 10;
+  string created_at = 11;
+}
+
+message TrustActionEvent {
+  string id = 1;
+  string report_id = 2;
+  string package_id = 3;
+  string creator_id = 4;
+  string actor_user_id = 5;
+  string action = 6;
+  string reason_text = 7;
+  string metadata_json = 8;
+  string created_at = 9;
+}
+
+message CreatorPayoutHold {
+  bool held = 1;
+  string held_at = 2;
+  string held_by_user_id = 3;
+  string reason = 4;
+}
+
+message ListTrustReportsRequest {
+  TrustReportStatus status = 1;
+  int32 limit = 2;
+}
+
+message ListTrustReportsResponse {
+  repeated TrustReportSummary reports = 1;
+}
+
+message GetTrustReportDetailRequest {
+  string report_id = 1;
+}
+
+message GetTrustReportDetailResponse {
+  TrustReportSummary report = 1;
+  StickerPackageDraft package = 2;
+  CreatorProfile creator = 3;
+  CreatorPayoutHold payout_hold = 4;
+  repeated StickerAsset assets = 5;
+  repeated TrustActionEvent events = 6;
+}
+
+message MarkTrustReportReviewingRequest {
+  string report_id = 1;
+  string note = 2;
+}
+message MarkTrustReportReviewingResponse { TrustReportSummary report = 1; }
+
+message ResolveTrustReportRequest {
+  string report_id = 1;
+  string resolution_text = 2;
+}
+message ResolveTrustReportResponse { TrustReportSummary report = 1; }
+
+message DismissTrustReportRequest {
+  string report_id = 1;
+  string resolution_text = 2;
+}
+message DismissTrustReportResponse { TrustReportSummary report = 1; }
+
+message ForceRemoveStickerPackageRequest {
+  string package_id = 1;
+  string reason_text = 2;
+  string report_id = 3;
+}
+message ForceRemoveStickerPackageResponse { StickerPackageDraft package = 1; }
+
+message RestoreStickerPackageRequest {
+  string package_id = 1;
+  string reason_text = 2;
+  string report_id = 3;
+}
+message RestoreStickerPackageResponse { StickerPackageDraft package = 1; }
+
+message HoldCreatorPayoutsRequest {
+  string creator_id = 1;
+  string reason_text = 2;
+  string report_id = 3;
+  string package_id = 4;
+}
+message HoldCreatorPayoutsResponse { CreatorPayoutHold payout_hold = 1; }
+
+message ClearCreatorPayoutHoldRequest {
+  string creator_id = 1;
+  string reason_text = 2;
+  string report_id = 3;
+  string package_id = 4;
+}
+message ClearCreatorPayoutHoldResponse { CreatorPayoutHold payout_hold = 1; }
