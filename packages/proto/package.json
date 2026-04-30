@@ -16,11 +16,11 @@
     "proto:generate": "buf generate && oxfmt gen"
   },
   "dependencies": {
-    "@bufbuild/protobuf": "^2.0.0"
+    "@bufbuild/protobuf": "^2.12.0"
   },
   "devDependencies": {
-    "@bufbuild/buf": "^1.68.2",
-    "@bufbuild/protoc-gen-es": "^2.0.0",
+    "@bufbuild/buf": "^1.69.0",
+    "@bufbuild/protoc-gen-es": "^2.12.0",
     "oxfmt": "^0.16.0"
   }
 }
