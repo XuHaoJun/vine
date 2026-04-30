@@ -89,6 +89,17 @@ For repo-specific workflows, prefer the project skills below instead of inventin
 | `vine-testing` | test scope, unit vs integration decisions, where tests live, what not to test |
 | `vine-data-fetching` | choosing between Zero, React Query, ConnectRPC, or raw `fetch()` |
 
+### Manual gstack-style review gates
+
+These skills are project-scoped adapters of selected gstack workflows. They are manual gates, not always-on routing. Use them only when the user explicitly invokes the slash command or asks for the exact workflow.
+
+| Skill | Use when |
+| --- | --- |
+| `autoplan` | user invokes `/autoplan` after a superpowers brainstorming/spec phase and wants a product/scope review gate |
+| `plan-eng-review` | user invokes `/plan-eng-review` after `superpowers:writing-plans` and human review, before implementation |
+| `investigate` | user invokes `/investigate` for a gstack-style root-cause debugging report |
+| `review` | user invokes `/review` for a pre-landing diff/PR audit |
+
 ### Existing project skills
 
 | Skill | Use when |
@@ -100,6 +111,36 @@ For repo-specific workflows, prefer the project skills below instead of inventin
 | `connect` | ConnectRPC proto, handlers, auth wrappers, clients, transport |
 | `git-commit` | user explicitly asks for a git commit |
 
+### Superpowers vs gstack division
+
+Superpowers owns the default development lifecycle:
+
+```text
+idea/change request
+  -> superpowers:brainstorming
+  -> superpowers:writing-plans
+  -> implementation workflow
+  -> superpowers verification/review before completion
+```
+
+gstack-style skills are optional manual review gates inserted by the user:
+
+```text
+after brainstorming/spec approval
+  -> /autoplan for product, scope, and acceptance-criteria review
+
+after writing-plans and human review
+  -> /plan-eng-review for architecture, data-flow, failure-mode, and test-plan review
+
+when debugging needs an explicit investigation report
+  -> /investigate
+
+before landing a branch
+  -> /review
+```
+
+Do not let gstack skills replace superpowers. Use superpowers for default process discipline, TDD/debugging/review mechanics, and implementation flow. Use gstack skills only as explicit extra gates when the user asks for that gate.
+
 ## Always-On Rules
 
 - Frontend work in `apps/web`, `~/interface/`, or other Tamagui-based surfaces must read the `tamagui` skill first
@@ -109,6 +150,7 @@ For repo-specific workflows, prefer the project skills below instead of inventin
 - Use `useAuth()` for auth gating and frontend auth state, not `useUser()`
 - Zero mutations require caller-generated IDs and timestamps
 - Zero relationships live in `packages/zero-schema/src/relationships.ts`
+- Do not auto-invoke `autoplan`, `plan-eng-review`, `investigate`, or `review`; they are manual gstack-style commands unless the user explicitly asks for them
 
 ## Architecture
 
@@ -188,4 +230,3 @@ Important notes:
 - Keep commits atomic
 - Never commit secrets, keys, or `.env` files
 - Run relevant checks before committing
-
