@@ -162,9 +162,9 @@
 
 ---
 
-### Phase 4A — Trust Ops Minimum
+### Phase 4A — Trust Ops Minimum (✅ Completed 2026-04-30)
 
-**目標**:MVP / Public Beta 前補一個人工治理安全閥。重點不是建立完整法律流程產品,而是讓營運在侵權、違規、詐欺疑慮出現時可以手動止血、留紀錄、暫停付款。
+**目標**:MVP / Public Beta 前補一個人工治理安全閥。
 
 - **包含子系統**:I 的最小版(投訴收件、人工下架、audit log、manual payout hold)
 - **依賴**:Phase 2.5 有 payout ledger / request 後,才能對爭議款項做 hold;Phase 2A 有真實創作者內容後,投訴與下架才有意義
@@ -177,6 +177,8 @@
 - Creator notification:通知創作者 package 已被人工下架與原因,先不做完整申訴狀態機
 - Manual payout hold:admin 可對 creator 或 payout request 加 hold reason,爭議期間阻止匯出 / 標記 paid
 - Audit trail:所有下架、解除下架、hold、解除 hold 都記錄操作者、時間、原因與前後狀態
+
+**完成 commit**: `7d45a10 feat(creator-market): phase 4a trust ops minimum (#61)`
 
 **Future backlog(不是 MVP)**:
 - Phase 4B — Formal Disputes:DMCA 48h 暫時下架、7 天 Counter Notice、14 天等待期、5 工作天申訴 SLA
@@ -217,7 +219,7 @@
 ┌──────────────┐  ┌──────────────┐
     │ Phase 3 成長 │  │ Phase 4A     │
     │   D + H      │  │ Trust Ops 最小│
-    └──────✅───────┘  └──────────────┘
+    └──────✅───────┘  └──────✅───────┘
    (可並行,依資源)
 ```
 
@@ -270,4 +272,4 @@
 
 ---
 
-*最後更新:2026-04-27*
+*最後更新:2026-04-30*
