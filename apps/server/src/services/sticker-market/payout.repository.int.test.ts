@@ -102,6 +102,106 @@ describe('createPayoutRepository', () => {
     })
   })
 
+  it('finds a held creator across multiple payout request ids', async () => {
+    await withRollbackDb(async (db) => {
+      await db.insert(creatorProfile).values([
+        {
+          id: 'creator_unheld',
+          userId: 'user_unheld',
+          displayName: 'Unheld Studio',
+          country: 'TW',
+        },
+        {
+          id: 'creator_held',
+          userId: 'user_held',
+          displayName: 'Held Studio',
+          country: 'TW',
+          payoutHoldAt: '2026-04-27T00:00:00.000Z',
+          payoutHoldReason: 'Investigation.',
+        },
+      ])
+      await db.insert(creatorPayoutRequest).values([
+        {
+          id: 'req_unheld',
+          creatorId: 'creator_unheld',
+          payoutAccountId: 'acct_unheld',
+          grossAmountMinor: 1000,
+          netAmountMinor: 700,
+          status: 'approved',
+        },
+        {
+          id: 'req_held',
+          creatorId: 'creator_held',
+          payoutAccountId: 'acct_held',
+          grossAmountMinor: 1000,
+          netAmountMinor: 700,
+          status: 'approved',
+        },
+      ])
+
+      const held = await repo.findAnyHeldCreatorInRequests(db, ['req_unheld', 'req_held'])
+
+      expect(held).toMatchObject({
+        requestId: 'req_held',
+        creatorId: 'creator_held',
+      })
+      expect(held?.payoutHoldAt).toBeTruthy()
+    })
+  })
+
+  it('finds a held creator across multiple payout requests in a batch', async () => {
+    await withRollbackDb(async (db) => {
+      await db.insert(creatorProfile).values([
+        {
+          id: 'creator_unheld',
+          userId: 'user_unheld',
+          displayName: 'Unheld Studio',
+          country: 'TW',
+        },
+        {
+          id: 'creator_held',
+          userId: 'user_held',
+          displayName: 'Held Studio',
+          country: 'TW',
+          payoutHoldAt: '2026-04-27T00:00:00.000Z',
+          payoutHoldReason: 'Investigation.',
+        },
+      ])
+      await db.insert(creatorPayoutBatch).values({
+        id: 'batch_mixed',
+        createdByUserId: 'admin_1',
+      })
+      await db.insert(creatorPayoutRequest).values([
+        {
+          id: 'req_unheld',
+          creatorId: 'creator_unheld',
+          payoutAccountId: 'acct_unheld',
+          batchId: 'batch_mixed',
+          grossAmountMinor: 1000,
+          netAmountMinor: 700,
+          status: 'exported',
+        },
+        {
+          id: 'req_held',
+          creatorId: 'creator_held',
+          payoutAccountId: 'acct_held',
+          batchId: 'batch_mixed',
+          grossAmountMinor: 1000,
+          netAmountMinor: 700,
+          status: 'exported',
+        },
+      ])
+
+      const held = await repo.findAnyHeldCreatorInBatch(db, 'batch_mixed')
+
+      expect(held).toMatchObject({
+        requestId: 'req_held',
+        creatorId: 'creator_held',
+      })
+      expect(held?.payoutHoldAt).toBeTruthy()
+    })
+  })
+
   it('releases ledger rows and writes an audit event when rejecting a request', async () => {
     await withRollbackDb(async (db) => {
       await db.insert(creatorPayoutLedger).values({

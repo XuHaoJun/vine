@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createTrustService } from './trust.service'
 
 function makeDeps() {
+  const tx = { tx: true }
   const repo = {
     createReport: vi.fn(),
     insertActionEvent: vi.fn(),
@@ -18,7 +19,8 @@ function makeDeps() {
     restoreRemoved: vi.fn(),
   }
   const deps = {
-    db: {},
+    db: { transaction: vi.fn((fn: (tx: any) => Promise<any>) => fn(tx)) },
+    tx,
     repo,
     packageRepo,
     createId: vi.fn(),
@@ -58,7 +60,8 @@ describe('createTrustService', () => {
     })
 
     expect(report.id).toBe('report-1')
-    expect(deps.repo.createReport).toHaveBeenCalledWith(deps.db, {
+    expect(deps.db.transaction).toHaveBeenCalled()
+    expect(deps.repo.createReport).toHaveBeenCalledWith(deps.tx, {
       id: 'report-1',
       packageId: 'pkg-1',
       reporterUserId: 'user-1',
@@ -66,7 +69,7 @@ describe('createTrustService', () => {
       reasonText: 'This looks copied from my artwork.',
       now: '2026-04-27T00:00:00.000Z',
     })
-    expect(deps.repo.insertActionEvent).toHaveBeenCalledWith(deps.db, {
+    expect(deps.repo.insertActionEvent).toHaveBeenCalledWith(deps.tx, {
       id: 'event-1',
       reportId: 'report-1',
       packageId: 'pkg-1',
@@ -135,9 +138,14 @@ describe('createTrustService', () => {
       reasonText: 'Confirmed infringement.',
     })
 
+    expect(deps.db.transaction).toHaveBeenCalled()
+    expect(deps.packageRepo.forceRemove).toHaveBeenCalledWith(deps.tx, {
+      packageId: 'pkg-1',
+      now: '2026-04-27T00:00:00.000Z',
+    })
     expect(deps.packageRepo.forceRemove).toHaveBeenCalled()
     expect(deps.repo.insertActionEvent).toHaveBeenCalledWith(
-      deps.db,
+      deps.tx,
       expect.objectContaining({
         action: 'package_removed',
         reasonText: 'Confirmed infringement.',
@@ -163,9 +171,14 @@ describe('createTrustService', () => {
       reasonText: 'Rights verified.',
     })
 
+    expect(deps.db.transaction).toHaveBeenCalled()
+    expect(deps.packageRepo.restoreRemoved).toHaveBeenCalledWith(deps.tx, {
+      packageId: 'pkg-1',
+      now: '2026-04-27T00:00:00.000Z',
+    })
     expect(deps.packageRepo.restoreRemoved).toHaveBeenCalled()
     expect(deps.repo.insertActionEvent).toHaveBeenCalledWith(
-      deps.db,
+      deps.tx,
       expect.objectContaining({
         action: 'package_restored',
         reasonText: 'Rights verified.',
@@ -243,8 +256,9 @@ describe('createTrustService', () => {
     })
 
     expect(result.status).toBe('reviewing')
+    expect(deps.db.transaction).toHaveBeenCalled()
     expect(deps.repo.transitionReport).toHaveBeenCalledWith(
-      deps.db,
+      deps.tx,
       expect.objectContaining({ status: 'reviewing', fromStatuses: ['open'] }),
     )
   })
@@ -281,8 +295,9 @@ describe('createTrustService', () => {
     })
 
     expect(result.status).toBe('resolved')
+    expect(deps.db.transaction).toHaveBeenCalled()
     expect(deps.repo.transitionReport).toHaveBeenCalledWith(
-      deps.db,
+      deps.tx,
       expect.objectContaining({
         status: 'resolved',
         fromStatuses: ['open', 'reviewing'],
@@ -308,8 +323,9 @@ describe('createTrustService', () => {
     })
 
     expect(result.status).toBe('dismissed')
+    expect(deps.db.transaction).toHaveBeenCalled()
     expect(deps.repo.transitionReport).toHaveBeenCalledWith(
-      deps.db,
+      deps.tx,
       expect.objectContaining({
         status: 'dismissed',
         fromStatuses: ['open', 'reviewing'],
@@ -349,9 +365,14 @@ describe('createTrustService', () => {
       reasonText: 'Under investigation.',
     })
 
+    expect(deps.db.transaction).toHaveBeenCalled()
+    expect(deps.repo.holdCreatorPayouts).toHaveBeenCalledWith(
+      deps.tx,
+      expect.objectContaining({ creatorId: 'creator-1' }),
+    )
     expect(deps.repo.holdCreatorPayouts).toHaveBeenCalled()
     expect(deps.repo.insertActionEvent).toHaveBeenCalledWith(
-      deps.db,
+      deps.tx,
       expect.objectContaining({ action: 'creator_payout_hold_enabled' }),
     )
   })
@@ -386,9 +407,14 @@ describe('createTrustService', () => {
       reasonText: 'Investigation complete.',
     })
 
+    expect(deps.db.transaction).toHaveBeenCalled()
+    expect(deps.repo.clearCreatorPayoutHold).toHaveBeenCalledWith(
+      deps.tx,
+      expect.objectContaining({ creatorId: 'creator-1' }),
+    )
     expect(deps.repo.clearCreatorPayoutHold).toHaveBeenCalled()
     expect(deps.repo.insertActionEvent).toHaveBeenCalledWith(
-      deps.db,
+      deps.tx,
       expect.objectContaining({ action: 'creator_payout_hold_cleared' }),
     )
   })

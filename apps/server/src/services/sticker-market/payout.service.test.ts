@@ -179,6 +179,46 @@ describe('createPayoutService', () => {
     expect(repo.findRequestCreatorHold).not.toHaveBeenCalled()
   })
 
+  it('blocks creating a batch when any selected payout request creator is held', async () => {
+    const { repo, service } = makeService({
+      repo: {
+        findAnyHeldCreatorInRequests: vi.fn().mockResolvedValue({
+          requestId: 'request-2',
+          creatorId: 'creator-2',
+          payoutHoldAt: '2026-04-27T00:00:00.000Z',
+        }),
+      },
+    })
+
+    await expect(
+      service.createBatch({
+        actorUserId: 'admin-1',
+        requestIds: ['request-1', 'request-2'],
+      }),
+    ).rejects.toThrow('creator payouts are on hold')
+    expect(repo.createBatchFromApprovedRequests).not.toHaveBeenCalled()
+  })
+
+  it('blocks exporting a batch when any batch payout request creator is held', async () => {
+    const { repo, service } = makeService({
+      repo: {
+        findAnyHeldCreatorInBatch: vi.fn().mockResolvedValue({
+          requestId: 'request-2',
+          creatorId: 'creator-2',
+          payoutHoldAt: '2026-04-27T00:00:00.000Z',
+        }),
+      },
+    })
+
+    await expect(
+      service.exportBatchCsv({
+        actorUserId: 'admin-1',
+        batchId: 'batch-1',
+      }),
+    ).rejects.toThrow('creator payouts are on hold')
+    expect(repo.exportBatchRows).not.toHaveBeenCalled()
+  })
+
   it('exports CSV with full account number only for admin batch export', async () => {
     const { service, repo } = makeService({
       repo: {

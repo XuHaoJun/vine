@@ -42,26 +42,28 @@ export function createTrustService(deps: {
         throw new ConnectError('package is not reportable', Code.FailedPrecondition)
       }
       const now = nowIso()
-      const report = await deps.repo.createReport(deps.db, {
-        id: deps.createId(),
-        packageId: input.packageId,
-        reporterUserId: input.reporterUserId,
-        reasonCategory: input.reasonCategory,
-        reasonText,
-        now,
+      return deps.db.transaction(async (tx: any) => {
+        const report = await deps.repo.createReport(tx, {
+          id: deps.createId(),
+          packageId: input.packageId,
+          reporterUserId: input.reporterUserId,
+          reasonCategory: input.reasonCategory,
+          reasonText,
+          now,
+        })
+        await deps.repo.insertActionEvent(tx, {
+          id: deps.createId(),
+          reportId: report.id,
+          packageId: input.packageId,
+          creatorId: pkg.creatorId,
+          actorUserId: input.reporterUserId,
+          action: 'report_created',
+          reasonText,
+          metadataJson: JSON.stringify({ reasonCategory: input.reasonCategory }),
+          now,
+        })
+        return report
       })
-      await deps.repo.insertActionEvent(deps.db, {
-        id: deps.createId(),
-        reportId: report.id,
-        packageId: input.packageId,
-        creatorId: pkg.creatorId,
-        actorUserId: input.reporterUserId,
-        action: 'report_created',
-        reasonText,
-        metadataJson: JSON.stringify({ reasonCategory: input.reasonCategory }),
-        now,
-      })
-      return report
     },
 
     listReports(input: { status?: string; limit: number }) {
@@ -84,25 +86,27 @@ export function createTrustService(deps: {
 
     async markReviewing(input: { reportId: string; actorUserId: string; note: string }) {
       const now = nowIso()
-      const report = await deps.repo.transitionReport(deps.db, {
-        reportId: input.reportId,
-        actorUserId: input.actorUserId,
-        status: 'reviewing',
-        fromStatuses: ['open'],
-        now,
+      return deps.db.transaction(async (tx: any) => {
+        const report = await deps.repo.transitionReport(tx, {
+          reportId: input.reportId,
+          actorUserId: input.actorUserId,
+          status: 'reviewing',
+          fromStatuses: ['open'],
+          now,
+        })
+        if (!report) throw new ConnectError('report is not open', Code.FailedPrecondition)
+        await deps.repo.insertActionEvent(tx, {
+          id: deps.createId(),
+          reportId: report.id,
+          packageId: report.packageId,
+          actorUserId: input.actorUserId,
+          action: 'report_reviewing',
+          reasonText: input.note.trim(),
+          metadataJson: '{}',
+          now,
+        })
+        return report
       })
-      if (!report) throw new ConnectError('report is not open', Code.FailedPrecondition)
-      await deps.repo.insertActionEvent(deps.db, {
-        id: deps.createId(),
-        reportId: report.id,
-        packageId: report.packageId,
-        actorUserId: input.actorUserId,
-        action: 'report_reviewing',
-        reasonText: input.note.trim(),
-        metadataJson: '{}',
-        now,
-      })
-      return report
     },
 
     async resolveReport(input: {
@@ -129,22 +133,24 @@ export function createTrustService(deps: {
     }) {
       const reasonText = requireReason(input.reasonText)
       const now = nowIso()
-      const pkg = await deps.packageRepo.forceRemove(deps.db, {
-        packageId: input.packageId,
-        now,
+      return deps.db.transaction(async (tx: any) => {
+        const pkg = await deps.packageRepo.forceRemove(tx, {
+          packageId: input.packageId,
+          now,
+        })
+        await deps.repo.insertActionEvent(tx, {
+          id: deps.createId(),
+          reportId: input.reportId || null,
+          packageId: pkg.id,
+          creatorId: pkg.creatorId,
+          actorUserId: input.actorUserId,
+          action: 'package_removed',
+          reasonText,
+          metadataJson: '{}',
+          now,
+        })
+        return pkg
       })
-      await deps.repo.insertActionEvent(deps.db, {
-        id: deps.createId(),
-        reportId: input.reportId || null,
-        packageId: pkg.id,
-        creatorId: pkg.creatorId,
-        actorUserId: input.actorUserId,
-        action: 'package_removed',
-        reasonText,
-        metadataJson: '{}',
-        now,
-      })
-      return pkg
     },
 
     async restorePackage(input: {
@@ -155,22 +161,24 @@ export function createTrustService(deps: {
     }) {
       const reasonText = requireReason(input.reasonText)
       const now = nowIso()
-      const pkg = await deps.packageRepo.restoreRemoved(deps.db, {
-        packageId: input.packageId,
-        now,
+      return deps.db.transaction(async (tx: any) => {
+        const pkg = await deps.packageRepo.restoreRemoved(tx, {
+          packageId: input.packageId,
+          now,
+        })
+        await deps.repo.insertActionEvent(tx, {
+          id: deps.createId(),
+          reportId: input.reportId || null,
+          packageId: pkg.id,
+          creatorId: pkg.creatorId,
+          actorUserId: input.actorUserId,
+          action: 'package_restored',
+          reasonText,
+          metadataJson: '{}',
+          now,
+        })
+        return pkg
       })
-      await deps.repo.insertActionEvent(deps.db, {
-        id: deps.createId(),
-        reportId: input.reportId || null,
-        packageId: pkg.id,
-        creatorId: pkg.creatorId,
-        actorUserId: input.actorUserId,
-        action: 'package_restored',
-        reasonText,
-        metadataJson: '{}',
-        now,
-      })
-      return pkg
     },
 
     async holdCreatorPayouts(input: {
@@ -182,24 +190,26 @@ export function createTrustService(deps: {
     }) {
       const reasonText = requireReason(input.reasonText)
       const now = nowIso()
-      const creator = await deps.repo.holdCreatorPayouts(deps.db, {
-        ...input,
-        reasonText,
-        now,
+      return deps.db.transaction(async (tx: any) => {
+        const creator = await deps.repo.holdCreatorPayouts(tx, {
+          ...input,
+          reasonText,
+          now,
+        })
+        if (!creator) throw new ConnectError('creator not found', Code.NotFound)
+        await deps.repo.insertActionEvent(tx, {
+          id: deps.createId(),
+          reportId: input.reportId || null,
+          packageId: input.packageId || null,
+          creatorId: input.creatorId,
+          actorUserId: input.actorUserId,
+          action: 'creator_payout_hold_enabled',
+          reasonText,
+          metadataJson: '{}',
+          now,
+        })
+        return creator
       })
-      if (!creator) throw new ConnectError('creator not found', Code.NotFound)
-      await deps.repo.insertActionEvent(deps.db, {
-        id: deps.createId(),
-        reportId: input.reportId || null,
-        packageId: input.packageId || null,
-        creatorId: input.creatorId,
-        actorUserId: input.actorUserId,
-        action: 'creator_payout_hold_enabled',
-        reasonText,
-        metadataJson: '{}',
-        now,
-      })
-      return creator
     },
 
     async clearCreatorPayoutHold(input: {
@@ -211,24 +221,26 @@ export function createTrustService(deps: {
     }) {
       const reasonText = requireReason(input.reasonText)
       const now = nowIso()
-      const creator = await deps.repo.clearCreatorPayoutHold(deps.db, {
-        ...input,
-        reasonText,
-        now,
+      return deps.db.transaction(async (tx: any) => {
+        const creator = await deps.repo.clearCreatorPayoutHold(tx, {
+          ...input,
+          reasonText,
+          now,
+        })
+        if (!creator) throw new ConnectError('creator not found', Code.NotFound)
+        await deps.repo.insertActionEvent(tx, {
+          id: deps.createId(),
+          reportId: input.reportId || null,
+          packageId: input.packageId || null,
+          creatorId: input.creatorId,
+          actorUserId: input.actorUserId,
+          action: 'creator_payout_hold_cleared',
+          reasonText,
+          metadataJson: '{}',
+          now,
+        })
+        return creator
       })
-      if (!creator) throw new ConnectError('creator not found', Code.NotFound)
-      await deps.repo.insertActionEvent(deps.db, {
-        id: deps.createId(),
-        reportId: input.reportId || null,
-        packageId: input.packageId || null,
-        creatorId: input.creatorId,
-        actorUserId: input.actorUserId,
-        action: 'creator_payout_hold_cleared',
-        reasonText,
-        metadataJson: '{}',
-        now,
-      })
-      return creator
     },
   }
 
@@ -239,27 +251,29 @@ export function createTrustService(deps: {
   ) {
     const resolutionText = requireReason(input.resolutionText)
     const now = nowIso()
-    const report = await deps.repo.transitionReport(deps.db, {
-      reportId: input.reportId,
-      actorUserId: input.actorUserId,
-      status,
-      fromStatuses: ['open', 'reviewing'],
-      resolutionText,
-      now,
+    return deps.db.transaction(async (tx: any) => {
+      const report = await deps.repo.transitionReport(tx, {
+        reportId: input.reportId,
+        actorUserId: input.actorUserId,
+        status,
+        fromStatuses: ['open', 'reviewing'],
+        resolutionText,
+        now,
+      })
+      if (!report) {
+        throw new ConnectError('report is not open or reviewing', Code.FailedPrecondition)
+      }
+      await deps.repo.insertActionEvent(tx, {
+        id: deps.createId(),
+        reportId: report.id,
+        packageId: report.packageId,
+        actorUserId: input.actorUserId,
+        action,
+        reasonText: resolutionText,
+        metadataJson: '{}',
+        now,
+      })
+      return report
     })
-    if (!report) {
-      throw new ConnectError('report is not open or reviewing', Code.FailedPrecondition)
-    }
-    await deps.repo.insertActionEvent(deps.db, {
-      id: deps.createId(),
-      reportId: report.id,
-      packageId: report.packageId,
-      actorUserId: input.actorUserId,
-      action,
-      reasonText: resolutionText,
-      metadataJson: '{}',
-      now,
-    })
-    return report
   }
 }

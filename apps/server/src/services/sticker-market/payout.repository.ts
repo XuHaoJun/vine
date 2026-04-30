@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { and, eq, inArray } from 'drizzle-orm'
+import { and, eq, inArray, isNotNull } from 'drizzle-orm'
 import { creatorProfile } from '@vine/db/schema-public'
 import {
   creatorPayoutAccount,
@@ -190,8 +190,14 @@ export function createPayoutRepository() {
         })
         .from(creatorPayoutRequest)
         .innerJoin(creatorProfile, eq(creatorPayoutRequest.creatorId, creatorProfile.id))
-        .where(inArray(creatorPayoutRequest.id, requestIds))
-      return row?.payoutHoldAt ? row : undefined
+        .where(
+          and(
+            inArray(creatorPayoutRequest.id, requestIds),
+            isNotNull(creatorProfile.payoutHoldAt),
+          ),
+        )
+        .limit(1)
+      return row
     },
 
     async findAnyHeldCreatorInBatch(db: any, batchId: string) {
@@ -204,8 +210,14 @@ export function createPayoutRepository() {
         })
         .from(creatorPayoutRequest)
         .innerJoin(creatorProfile, eq(creatorPayoutRequest.creatorId, creatorProfile.id))
-        .where(eq(creatorPayoutRequest.batchId, batchId))
-      return row?.payoutHoldAt ? row : undefined
+        .where(
+          and(
+            eq(creatorPayoutRequest.batchId, batchId),
+            isNotNull(creatorProfile.payoutHoldAt),
+          ),
+        )
+        .limit(1)
+      return row
     },
 
     async approveRequest(db: any, input: any) {
