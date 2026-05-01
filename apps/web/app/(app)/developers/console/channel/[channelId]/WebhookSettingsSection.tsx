@@ -59,6 +59,9 @@ export function WebhookSettingsSection({ channelId }: { channelId: string }) {
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey })
+      void queryClient.invalidateQueries({
+        queryKey: ['oa', 'webhook', channelId],
+      })
       showToast('Webhook settings saved', { type: 'success' })
     },
     onError: () => showToast('Failed to save webhook settings', { type: 'error' }),

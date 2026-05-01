@@ -495,6 +495,21 @@ export function oaHandler(deps: OAHandlerDeps) {
             Code.FailedPrecondition,
           )
         }
+        if (result.kind === 'oa-not-found') {
+          throw new ConnectError('Official account not found', Code.NotFound)
+        }
+        if (result.kind === 'webhook-not-ready') {
+          throw new ConnectError(
+            'Webhook is not configured or not verified',
+            Code.FailedPrecondition,
+          )
+        }
+        if (result.kind === 'delivery-failed') {
+          throw new ConnectError(
+            `Webhook redelivery failed: ${result.detail}`,
+            Code.Internal,
+          )
+        }
         const refreshed = await deps.webhookDelivery.getDelivery({
           oaId: req.officialAccountId,
           deliveryId: req.deliveryId,

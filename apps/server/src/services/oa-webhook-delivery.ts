@@ -343,11 +343,13 @@ export function createOAWebhookDeliveryService(deps: OAWebhookDeliveryDeps) {
     })
     const statusCode = sent.responseStatus ?? 0
     const reason = sent.ok ? 'OK' : sent.detail
-    await deps.oa.recordWebhookVerifyResult(input.oaId, {
-      statusCode,
-      reason,
-      verified: sent.ok,
-    })
+    if (!input.endpointOverride) {
+      await deps.oa.recordWebhookVerifyResult(input.oaId, {
+        statusCode,
+        reason,
+        verified: sent.ok,
+      })
+    }
     return { success: sent.ok, statusCode, reason, timestamp: now() }
   }
 
