@@ -150,3 +150,44 @@ describe('oa messaging retry-key lookup', () => {
     expect(result).toMatchObject({ ok: true })
   })
 })
+
+describe('oa messaging delivery creation', () => {
+  it('creates one delivery per recipient with deterministic message ids', async () => {
+    const deliveryRows: unknown[] = []
+    const db = {
+      insert: vi.fn().mockReturnValue({
+        values: vi.fn((rows: unknown[]) => {
+          deliveryRows.push(...rows)
+          return { onConflictDoNothing: vi.fn().mockResolvedValue(undefined) }
+        }),
+      }),
+    } as any
+    const service = createOAMessagingService({
+      db,
+      instanceId: 'test',
+      now: () => new Date('2026-05-01T00:00:00.000Z'),
+    })
+
+    await service.createDeliveryRows({
+      requestId: 'request-1',
+      oaId: 'oa-1',
+      userIds: ['user-1', 'user-2'],
+      messageCount: 2,
+    })
+
+    expect(deliveryRows).toEqual([
+      expect.objectContaining({
+        requestId: 'request-1',
+        oaId: 'oa-1',
+        userId: 'user-1',
+        messageIdsJson: ['oa:req:request-1:user-1:0', 'oa:req:request-1:user-1:1'],
+      }),
+      expect.objectContaining({
+        requestId: 'request-1',
+        oaId: 'oa-1',
+        userId: 'user-2',
+        messageIdsJson: ['oa:req:request-1:user-2:0', 'oa:req:request-1:user-2:1'],
+      }),
+    ])
+  })
+})
