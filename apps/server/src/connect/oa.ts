@@ -3,6 +3,7 @@ import { Code, ConnectError, ConnectRouter } from '@connectrpc/connect'
 import type { AuthServer } from '@take-out/better-auth-utils/server'
 import { AccessTokenType, OAService, OAStatus, WebhookStatus } from '@vine/proto/oa'
 import type { createOAService } from '../services/oa'
+import type { createOAWebhookDeliveryService } from '../services/oa-webhook-delivery'
 import type { DriveService } from '@vine/drive'
 
 import { requireAuthData, withAuthService } from './auth-context'
@@ -11,6 +12,7 @@ type OAHandlerDeps = {
   oa: ReturnType<typeof createOAService>
   auth: AuthServer
   drive: DriveService
+  webhookDelivery: ReturnType<typeof createOAWebhookDeliveryService>
 }
 
 async function assertProviderOwnedByUser(
@@ -122,6 +124,51 @@ function toProtoWebhook(
     status: dbWebhookStatusToProto(db.status),
     lastVerifiedAt: db.lastVerifiedAt ?? undefined,
     createdAt: db.createdAt,
+  }
+}
+
+function toProtoWebhookSettings(
+  db: Awaited<ReturnType<ReturnType<typeof createOAService>['getWebhook']>>,
+) {
+  return {
+    webhook: toProtoWebhook(db),
+    useWebhook: db?.useWebhook ?? true,
+    webhookRedeliveryEnabled: db?.webhookRedeliveryEnabled ?? false,
+    errorStatisticsEnabled: db?.errorStatisticsEnabled ?? false,
+    lastVerifyStatusCode: db?.lastVerifyStatusCode ?? undefined,
+    lastVerifyReason: db?.lastVerifyReason ?? undefined,
+  }
+}
+
+function toProtoDeliverySummary(row: any) {
+  return {
+    id: row.id,
+    webhookEventId: row.webhookEventId,
+    eventType: row.eventType,
+    status: row.status,
+    reason: row.reason ?? undefined,
+    detail: row.detail ?? undefined,
+    responseStatus: row.responseStatus ?? undefined,
+    attemptCount: row.attemptCount,
+    isRedelivery: row.isRedelivery,
+    createdAt: row.createdAt,
+    lastAttemptedAt: row.lastAttemptedAt ?? undefined,
+    deliveredAt: row.deliveredAt ?? undefined,
+  }
+}
+
+function toProtoAttempt(row: any) {
+  return {
+    id: row.id,
+    attemptNumber: row.attemptNumber,
+    isRedelivery: row.isRedelivery,
+    requestUrl: row.requestUrl,
+    responseStatus: row.responseStatus ?? undefined,
+    responseBodyExcerpt: row.responseBodyExcerpt ?? undefined,
+    reason: row.reason ?? undefined,
+    detail: row.detail ?? undefined,
+    startedAt: row.startedAt,
+    completedAt: row.completedAt ?? undefined,
   }
 }
 
@@ -355,6 +402,130 @@ export function oaHandler(deps: OAHandlerDeps) {
         await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
         const webhook = await deps.oa.getWebhook(req.officialAccountId)
         return { webhook: toProtoWebhook(webhook) }
+      },
+      async getWebhookSettings(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const webhook = await deps.oa.getWebhook(req.officialAccountId)
+        return { settings: toProtoWebhookSettings(webhook) }
+      },
+      async updateWebhookSettings(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        let webhook
+        try {
+          webhook = await deps.oa.updateWebhookSettings(req.officialAccountId, {
+            url: req.url,
+            useWebhook: req.useWebhook,
+            webhookRedeliveryEnabled: req.webhookRedeliveryEnabled,
+            errorStatisticsEnabled: req.errorStatisticsEnabled,
+          })
+        } catch (error) {
+          if (error instanceof Error && error.message.includes('Webhook URL')) {
+            throw new ConnectError(error.message, Code.InvalidArgument)
+          }
+          throw error
+        }
+        return { settings: toProtoWebhookSettings(webhook) }
+      },
+      async verifyWebhookEndpoint(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        let result
+        try {
+          result = await deps.webhookDelivery.verifyWebhook({
+            oaId: req.officialAccountId,
+            endpointOverride: req.endpointOverride,
+          })
+        } catch (error) {
+          if (error instanceof Error && error.message.includes('Webhook URL')) {
+            throw new ConnectError(error.message, Code.InvalidArgument)
+          }
+          throw error
+        }
+        return { result }
+      },
+      async listWebhookDeliveries(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const result = await deps.webhookDelivery.listDeliveries({
+          oaId: req.officialAccountId,
+          pageSize: req.pageSize > 0 ? req.pageSize : 50,
+          cursor: req.cursor,
+          statusFilter: req.statusFilter,
+        })
+        return {
+          deliveries: result.deliveries.map(toProtoDeliverySummary),
+          nextCursor: result.nextCursor,
+        }
+      },
+      async getWebhookDelivery(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const result = await deps.webhookDelivery.getDelivery({
+          oaId: req.officialAccountId,
+          deliveryId: req.deliveryId,
+        })
+        if (!result) throw new ConnectError('Webhook delivery not found', Code.NotFound)
+        return {
+          delivery: toProtoDeliverySummary(result.delivery),
+          payloadJson: JSON.stringify(result.delivery.payloadJson, null, 2),
+          attempts: result.attempts.map(toProtoAttempt),
+        }
+      },
+      async redeliverWebhook(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const result = await deps.webhookDelivery.redeliver({
+          oaId: req.officialAccountId,
+          deliveryId: req.deliveryId,
+        })
+        if (result.kind === 'redelivery-disabled') {
+          throw new ConnectError(
+            'Webhook redelivery is disabled',
+            Code.FailedPrecondition,
+          )
+        }
+        if (result.kind === 'delivery-not-found') {
+          throw new ConnectError('Webhook delivery not found', Code.NotFound)
+        }
+        if (result.kind === 'delivery-not-failed') {
+          throw new ConnectError(
+            'Webhook delivery is not failed',
+            Code.FailedPrecondition,
+          )
+        }
+        if (result.kind === 'oa-not-found') {
+          throw new ConnectError('Official account not found', Code.NotFound)
+        }
+        if (result.kind === 'webhook-not-ready') {
+          throw new ConnectError(
+            'Webhook is not configured or not verified',
+            Code.FailedPrecondition,
+          )
+        }
+        if (result.kind === 'delivery-failed') {
+          throw new ConnectError(
+            `Webhook redelivery failed: ${result.detail}`,
+            Code.Internal,
+          )
+        }
+        const refreshed = await deps.webhookDelivery.getDelivery({
+          oaId: req.officialAccountId,
+          deliveryId: req.deliveryId,
+        })
+        if (!refreshed)
+          throw new ConnectError('Webhook delivery not found', Code.NotFound)
+        return { delivery: toProtoDeliverySummary(refreshed.delivery) }
+      },
+      async sendTestWebhookEvent(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const result = await deps.webhookDelivery.sendTestWebhookEvent({
+          oaId: req.officialAccountId,
+          text: req.text || 'Webhook test from Vine',
+        })
+        return { result }
       },
       async issueAccessToken(req, ctx) {
         const auth = requireAuthData(ctx)

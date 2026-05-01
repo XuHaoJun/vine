@@ -28,6 +28,7 @@ Before you begin, ensure you have:
 - **Node** `24.3.0` (matches `engines.node`)
 - **Docker** — [Install Docker](https://docs.docker.com/get-docker/) (on macOS, [OrbStack](https://orbstack.dev) is recommended)
 - **Git** — for version control
+- **uv** — [Install uv](https://docs.astral.sh/uv/getting-started/installation/), then run `uv tool install code-review-graph`
 
 For mobile development:
 

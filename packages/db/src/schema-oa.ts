@@ -6,6 +6,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
 
@@ -52,10 +53,17 @@ export const oaWebhook = pgTable(
       .references(() => officialAccount.id, { onDelete: 'cascade' }),
     url: text('url').notNull(),
     status: text('status').notNull().default('pending'),
+    useWebhook: boolean('useWebhook').notNull().default(true),
+    webhookRedeliveryEnabled: boolean('webhookRedeliveryEnabled')
+      .notNull()
+      .default(false),
+    errorStatisticsEnabled: boolean('errorStatisticsEnabled').notNull().default(false),
+    lastVerifyStatusCode: integer('lastVerifyStatusCode'),
+    lastVerifyReason: text('lastVerifyReason'),
     lastVerifiedAt: timestamp('lastVerifiedAt', { mode: 'string' }),
     createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
   },
-  (table) => [index('oaWebhook_oaId_idx').on(table.oaId)],
+  (table) => [uniqueIndex('oaWebhook_oaId_unique_idx').on(table.oaId)],
 )
 
 export const oaFriendship = pgTable(

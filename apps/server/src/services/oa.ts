@@ -266,6 +266,95 @@ export function createOAService(deps: OADeps) {
     return createHmac('SHA256', channelSecret).update(body).digest('base64')
   }
 
+  function validateWebhookUrl(url: string): void {
+    if (url.length > 500) {
+      throw new Error('Webhook URL must be 500 characters or fewer')
+    }
+    let parsed: URL
+    try {
+      parsed = new URL(url)
+    } catch {
+      throw new Error('Webhook URL must be a valid HTTPS URL')
+    }
+    if (parsed.protocol !== 'https:') {
+      throw new Error('Webhook URL must use HTTPS')
+    }
+  }
+
+  async function updateWebhookSettings(
+    oaId: string,
+    input: {
+      url?: string | undefined
+      useWebhook?: boolean | undefined
+      webhookRedeliveryEnabled?: boolean | undefined
+      errorStatisticsEnabled?: boolean | undefined
+    },
+  ) {
+    const [existing] = await db
+      .select()
+      .from(oaWebhook)
+      .where(eq(oaWebhook.oaId, oaId))
+      .limit(1)
+
+    const values = {
+      oaId,
+      url: input.url ?? existing?.url ?? '',
+      status:
+        input.url && input.url !== existing?.url
+          ? 'pending'
+          : (existing?.status ?? 'pending'),
+      useWebhook: input.useWebhook ?? existing?.useWebhook ?? true,
+      webhookRedeliveryEnabled:
+        input.webhookRedeliveryEnabled ?? existing?.webhookRedeliveryEnabled ?? false,
+      errorStatisticsEnabled:
+        input.errorStatisticsEnabled ?? existing?.errorStatisticsEnabled ?? false,
+      lastVerifiedAt:
+        input.url && input.url !== existing?.url
+          ? null
+          : (existing?.lastVerifiedAt ?? null),
+      lastVerifyStatusCode:
+        input.url && input.url !== existing?.url
+          ? null
+          : (existing?.lastVerifyStatusCode ?? null),
+      lastVerifyReason:
+        input.url && input.url !== existing?.url
+          ? null
+          : (existing?.lastVerifyReason ?? null),
+    }
+
+    if (!values.url) {
+      throw new Error('Webhook URL is required')
+    }
+    validateWebhookUrl(values.url)
+
+    const [webhook] = await db
+      .insert(oaWebhook)
+      .values(values)
+      .onConflictDoUpdate({
+        target: oaWebhook.oaId,
+        set: values,
+      })
+      .returning()
+    return webhook
+  }
+
+  async function recordWebhookVerifyResult(
+    oaId: string,
+    input: { statusCode: number; reason: string; verified: boolean },
+  ) {
+    const [webhook] = await db
+      .update(oaWebhook)
+      .set({
+        status: input.verified ? 'verified' : 'failed',
+        lastVerifiedAt: new Date().toISOString(),
+        lastVerifyStatusCode: input.statusCode,
+        lastVerifyReason: input.reason,
+      })
+      .where(eq(oaWebhook.oaId, oaId))
+      .returning()
+    return webhook
+  }
+
   function generateReplyToken() {
     return randomUUID().replace(/-/g, '')
   }
@@ -1019,6 +1108,9 @@ export function createOAService(deps: OADeps) {
     revokeAccessToken,
     revokeAllAccessTokens,
     generateWebhookSignature,
+    validateWebhookUrl,
+    updateWebhookSettings,
+    recordWebhookVerifyResult,
     generateReplyToken,
     buildMessageEvent,
     buildFollowEvent,

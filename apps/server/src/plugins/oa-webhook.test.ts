@@ -18,7 +18,6 @@ const channelSecret = 'secret'
 type AppOpts = {
   account?: unknown
   webhook?: unknown
-  fetchImpl?: typeof fetch
   /** chatMember rows returned for the user lookup. Defaults to a single
    *  matching row so the membership check passes. */
   chatMember?: Array<{ id: string }>
@@ -80,13 +79,20 @@ function createTestApp(opts: AppOpts = {}) {
     }),
   }
 
-  if (opts.fetchImpl) {
-    vi.stubGlobal('fetch', opts.fetchImpl)
-  }
   const auth = {} as any
+  const webhookDelivery = {
+    deliverRealEvent: vi.fn().mockResolvedValue({ kind: 'ok' }),
+    verifyWebhook: vi.fn(),
+    sendTestWebhookEvent: vi.fn(),
+    listDeliveries: vi.fn(),
+    getDelivery: vi.fn(),
+    redeliver: vi.fn(),
+    cleanupExpiredDeliveries: vi.fn(),
+  }
+
   const app = Fastify()
-  app.register(oaWebhookPlugin, { oa: oa as any, db: db as any, auth })
-  return { app, oa, db }
+  app.register(oaWebhookPlugin, { oa: oa as any, db: db as any, auth, webhookDelivery })
+  return { app, oa, db, webhookDelivery }
 }
 
 beforeEach(() => {
@@ -101,14 +107,10 @@ afterEach(() => {
 })
 
 describe('POST /api/oa/internal/dispatch-postback', () => {
-  it('dispatches a postback event to the OA webhook with x-line-signature', async () => {
-    const fetchSpy = vi
-      .fn()
-      .mockResolvedValue(new Response(JSON.stringify({}), { status: 200 }))
-    const { app, oa } = createTestApp({
+  it('dispatches a postback event to the OA webhook via delivery service', async () => {
+    const { app, oa, webhookDelivery } = createTestApp({
       account: { id: oaId, channelSecret },
       webhook: { oaId, url: 'https://hook.example/bot', status: 'verified' },
-      fetchImpl: fetchSpy as any,
     })
     await app.ready()
 
@@ -122,25 +124,20 @@ describe('POST /api/oa/internal/dispatch-postback', () => {
     expect(res.statusCode).toBe(200)
     expect(JSON.parse(res.body)).toEqual({ success: true })
 
-    // Identity is derived from the session, not the request body.
+    expect(webhookDelivery.deliverRealEvent).toHaveBeenCalledWith({
+      oaId,
+      buildPayload: expect.any(Function),
+    })
+
+    const buildPayload = webhookDelivery.deliverRealEvent.mock.calls[0]![0].buildPayload
+    const payload = await buildPayload()
     expect(oa.registerReplyToken).toHaveBeenCalledWith({
       oaId,
       userId,
       chatId,
       messageId: null,
     })
-    expect(oa.buildPostbackEvent).toHaveBeenCalledWith({
-      oaId,
-      userId,
-      replyToken: 'reply-token-xyz',
-      data: 'action=buy&id=1',
-      params: undefined,
-    })
-    expect(oa.generateWebhookSignature).toHaveBeenCalledTimes(1)
-    const [signedBody, signedSecret] = (oa.generateWebhookSignature as any).mock.calls[0]!
-    expect(signedSecret).toBe(channelSecret)
-    expect(typeof signedBody).toBe('string')
-    expect(JSON.parse(signedBody)).toMatchObject({
+    expect(payload).toEqual({
       destination: oaId,
       events: [
         {
@@ -151,21 +148,12 @@ describe('POST /api/oa/internal/dispatch-postback', () => {
         },
       ],
     })
-    expect(fetchSpy).toHaveBeenCalledTimes(1)
-    const [url, init] = fetchSpy.mock.calls[0]!
-    expect(url).toBe('https://hook.example/bot')
-    expect((init as RequestInit).headers).toMatchObject({
-      'Content-Type': 'application/json; charset=utf-8',
-      'x-line-signature': 'sig-fake',
-    })
   })
 
   it('forwards datetimepicker params', async () => {
-    const fetchSpy = vi.fn().mockResolvedValue(new Response('{}', { status: 200 }))
-    const { app, oa } = createTestApp({
+    const { app, oa, webhookDelivery } = createTestApp({
       account: { id: oaId, channelSecret },
       webhook: { oaId, url: 'https://hook.example/bot', status: 'verified' },
-      fetchImpl: fetchSpy as any,
     })
     await app.ready()
 
@@ -181,18 +169,30 @@ describe('POST /api/oa/internal/dispatch-postback', () => {
     })
     await app.close()
 
-    expect(oa.buildPostbackEvent).toHaveBeenCalledWith({
+    const buildPayload = webhookDelivery.deliverRealEvent.mock.calls[0]![0].buildPayload
+    const payload = await buildPayload()
+    expect(oa.registerReplyToken).toHaveBeenCalledWith({
       oaId,
       userId,
-      replyToken: 'reply-token-xyz',
-      data: 'action=pick',
-      params: { datetime: '2026-04-19T14:30' },
+      chatId,
+      messageId: null,
+    })
+    expect(payload).toEqual({
+      destination: oaId,
+      events: [
+        {
+          type: 'postback',
+          replyToken: 'reply-token-xyz',
+          source: { type: 'user', userId },
+          postback: { data: 'action=pick', params: { datetime: '2026-04-19T14:30' } },
+        },
+      ],
     })
   })
 
   it('returns 401 when there is no session', async () => {
     mockedAuth.mockResolvedValue(null as any)
-    const { app, oa } = createTestApp({
+    const { app, oa, webhookDelivery } = createTestApp({
       account: { id: oaId, channelSecret },
       webhook: { oaId, url: 'https://hook.example/bot', status: 'verified' },
     })
@@ -207,12 +207,11 @@ describe('POST /api/oa/internal/dispatch-postback', () => {
     expect(res.statusCode).toBe(401)
     // Critical: no side effects when unauthenticated.
     expect(oa.registerReplyToken).not.toHaveBeenCalled()
-    expect(oa.buildPostbackEvent).not.toHaveBeenCalled()
-    expect(oa.generateWebhookSignature).not.toHaveBeenCalled()
+    expect(webhookDelivery.deliverRealEvent).not.toHaveBeenCalled()
   })
 
   it('returns 403 when the session user is not a member of chatId', async () => {
-    const { app, oa } = createTestApp({
+    const { app, oa, webhookDelivery } = createTestApp({
       account: { id: oaId, channelSecret },
       webhook: { oaId, url: 'https://hook.example/bot', status: 'verified' },
       chatMember: [], // membership lookup returns no rows
@@ -228,12 +227,12 @@ describe('POST /api/oa/internal/dispatch-postback', () => {
     expect(res.statusCode).toBe(403)
     // Critical: no postback dispatched when membership check fails.
     expect(oa.registerReplyToken).not.toHaveBeenCalled()
-    expect(oa.buildPostbackEvent).not.toHaveBeenCalled()
-    expect(oa.generateWebhookSignature).not.toHaveBeenCalled()
+    expect(webhookDelivery.deliverRealEvent).not.toHaveBeenCalled()
   })
 
   it('returns 404 when OA does not exist', async () => {
-    const { app } = createTestApp({ account: null })
+    const { app, webhookDelivery } = createTestApp()
+    webhookDelivery.deliverRealEvent.mockResolvedValueOnce({ kind: 'oa-not-found' })
     await app.ready()
 
     const res = await app.inject({
@@ -246,10 +245,8 @@ describe('POST /api/oa/internal/dispatch-postback', () => {
   })
 
   it('returns 400 when webhook is not configured', async () => {
-    const { app } = createTestApp({
-      account: { id: oaId, channelSecret },
-      webhook: null,
-    })
+    const { app, webhookDelivery } = createTestApp()
+    webhookDelivery.deliverRealEvent.mockResolvedValueOnce({ kind: 'webhook-not-ready' })
     await app.ready()
 
     const res = await app.inject({
@@ -262,10 +259,8 @@ describe('POST /api/oa/internal/dispatch-postback', () => {
   })
 
   it('returns 400 when webhook is not verified', async () => {
-    const { app } = createTestApp({
-      account: { id: oaId, channelSecret },
-      webhook: { oaId, url: 'https://hook.example', status: 'failed' },
-    })
+    const { app, webhookDelivery } = createTestApp()
+    webhookDelivery.deliverRealEvent.mockResolvedValueOnce({ kind: 'webhook-not-ready' })
     await app.ready()
 
     const res = await app.inject({
@@ -278,11 +273,12 @@ describe('POST /api/oa/internal/dispatch-postback', () => {
   })
 
   it('returns 502 when webhook delivery fails (non-2xx)', async () => {
-    const fetchSpy = vi.fn().mockResolvedValue(new Response('nope', { status: 500 }))
-    const { app, db } = createTestApp({
-      account: { id: oaId, channelSecret },
-      webhook: { oaId, url: 'https://hook.example/bot', status: 'verified' },
-      fetchImpl: fetchSpy as any,
+    const { app, webhookDelivery } = createTestApp()
+    webhookDelivery.deliverRealEvent.mockResolvedValueOnce({
+      kind: 'delivery-failed',
+      reason: 'error_status_code',
+      detail: 'HTTP 500',
+      statusCode: 500,
     })
     await app.ready()
 
@@ -293,19 +289,18 @@ describe('POST /api/oa/internal/dispatch-postback', () => {
     })
     await app.close()
     expect(res.statusCode).toBe(502)
-
-    // Side effect: webhook is marked failed so future dispatches short-circuit at the verified-check.
-    expect(db.update).toHaveBeenCalledTimes(1)
-    const setMock = (db.update as any).mock.results[0]!.value.set
-    expect(setMock).toHaveBeenCalledWith({ status: 'failed' })
+    expect(JSON.parse(res.body)).toEqual({
+      message: 'Webhook delivery failed',
+      status: 500,
+    })
   })
 
   it('returns 504 when webhook fetch throws / times out', async () => {
-    const fetchSpy = vi.fn().mockRejectedValue(new Error('aborted'))
-    const { app } = createTestApp({
-      account: { id: oaId, channelSecret },
-      webhook: { oaId, url: 'https://hook.example/bot', status: 'verified' },
-      fetchImpl: fetchSpy as any,
+    const { app, webhookDelivery } = createTestApp()
+    webhookDelivery.deliverRealEvent.mockResolvedValueOnce({
+      kind: 'delivery-failed',
+      reason: 'request_timeout',
+      detail: 'Request timeout',
     })
     await app.ready()
 
@@ -316,16 +311,15 @@ describe('POST /api/oa/internal/dispatch-postback', () => {
     })
     await app.close()
     expect(res.statusCode).toBe(504)
+    expect(JSON.parse(res.body)).toEqual({ message: 'Webhook delivery timeout' })
   })
 })
 
 describe('POST /api/oa/internal/dispatch (message events)', () => {
   it('dispatches with session-derived userId, ignoring any body userId', async () => {
-    const fetchSpy = vi.fn().mockResolvedValue(new Response('{}', { status: 200 }))
-    const { app, oa } = createTestApp({
+    const { app, oa, webhookDelivery } = createTestApp({
       account: { id: oaId, channelSecret },
       webhook: { oaId, url: 'https://hook.example/bot', status: 'verified' },
-      fetchImpl: fetchSpy as any,
     })
     await app.ready()
 
@@ -344,24 +338,35 @@ describe('POST /api/oa/internal/dispatch (message events)', () => {
     await app.close()
     expect(res.statusCode).toBe(200)
 
+    expect(webhookDelivery.deliverRealEvent).toHaveBeenCalledWith({
+      oaId,
+      buildPayload: expect.any(Function),
+    })
+
+    const buildPayload = webhookDelivery.deliverRealEvent.mock.calls[0]![0].buildPayload
+    const payload = await buildPayload()
     expect(oa.registerReplyToken).toHaveBeenCalledWith({
       oaId,
       userId, // session id, NOT 'attacker-spoofed-id'
       chatId,
       messageId: 'msg-1',
     })
-    expect(oa.buildMessageEvent).toHaveBeenCalledWith({
-      oaId,
-      userId,
-      messageId: 'msg-1',
-      text: 'hello',
-      replyToken: 'reply-token-xyz',
+    expect(payload).toEqual({
+      destination: oaId,
+      events: [
+        {
+          type: 'message',
+          replyToken: 'reply-token-xyz',
+          source: { type: 'user', userId },
+          message: { type: 'text', id: 'msg-1', text: 'hello' },
+        },
+      ],
     })
   })
 
   it('returns 401 when there is no session', async () => {
     mockedAuth.mockResolvedValue(null as any)
-    const { app, oa } = createTestApp({
+    const { app, oa, webhookDelivery } = createTestApp({
       account: { id: oaId, channelSecret },
       webhook: { oaId, url: 'https://hook.example/bot', status: 'verified' },
     })
@@ -375,10 +380,11 @@ describe('POST /api/oa/internal/dispatch (message events)', () => {
     await app.close()
     expect(res.statusCode).toBe(401)
     expect(oa.registerReplyToken).not.toHaveBeenCalled()
+    expect(webhookDelivery.deliverRealEvent).not.toHaveBeenCalled()
   })
 
   it('returns 403 when the session user is not a member of chatId', async () => {
-    const { app, oa } = createTestApp({
+    const { app, oa, webhookDelivery } = createTestApp({
       account: { id: oaId, channelSecret },
       webhook: { oaId, url: 'https://hook.example/bot', status: 'verified' },
       chatMember: [],
@@ -392,6 +398,23 @@ describe('POST /api/oa/internal/dispatch (message events)', () => {
     })
     await app.close()
     expect(res.statusCode).toBe(403)
+    expect(oa.registerReplyToken).not.toHaveBeenCalled()
+    expect(webhookDelivery.deliverRealEvent).not.toHaveBeenCalled()
+  })
+
+  it('acks internal dispatch when webhook delivery is disabled', async () => {
+    const { app, oa, webhookDelivery } = createTestApp()
+    webhookDelivery.deliverRealEvent.mockResolvedValueOnce({ kind: 'webhook-disabled' })
+    await app.ready()
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/oa/internal/dispatch',
+      payload: { oaId, chatId, messageId: 'm1', text: 'hello' },
+    })
+    await app.close()
+    expect(res.statusCode).toBe(200)
+    expect(JSON.parse(res.body)).toEqual({ success: true, skipped: true })
     expect(oa.registerReplyToken).not.toHaveBeenCalled()
   })
 })

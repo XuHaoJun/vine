@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
 import {
+  boolean,
   index,
   integer,
   jsonb,
@@ -472,5 +473,72 @@ export const oaRetryKey = pgTable(
   (table) => [
     uniqueIndex('oaRetryKey_oaId_retryKey_idx').on(table.oaId, table.retryKey),
     index('oaRetryKey_expiresAt_idx').on(table.expiresAt),
+  ],
+)
+
+export const oaWebhookDelivery = pgTable(
+  'oaWebhookDelivery',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    oaId: uuid('oaId')
+      .notNull()
+      .references(() => officialAccount.id, { onDelete: 'cascade' }),
+    webhookEventId: text('webhookEventId').notNull(),
+    eventType: text('eventType').notNull(),
+    payloadJson: jsonb('payloadJson').notNull(),
+    status: text('status').notNull().default('pending'),
+    reason: text('reason'),
+    detail: text('detail'),
+    responseStatus: integer('responseStatus'),
+    responseBodyExcerpt: text('responseBodyExcerpt'),
+    attemptCount: integer('attemptCount').notNull().default(0),
+    isRedelivery: boolean('isRedelivery').notNull().default(false),
+    developerVisible: boolean('developerVisible').notNull().default(true),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    lastAttemptedAt: timestamp('lastAttemptedAt', { mode: 'string' }),
+    deliveredAt: timestamp('deliveredAt', { mode: 'string' }),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('oaWebhookDelivery_oaId_createdAt_idx').on(table.oaId, table.createdAt),
+    index('oaWebhookDelivery_oaId_status_createdAt_idx').on(
+      table.oaId,
+      table.status,
+      table.createdAt,
+    ),
+    uniqueIndex('oaWebhookDelivery_oaId_eventId_idx').on(
+      table.oaId,
+      table.webhookEventId,
+    ),
+  ],
+)
+
+export const oaWebhookAttempt = pgTable(
+  'oaWebhookAttempt',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    deliveryId: uuid('deliveryId')
+      .notNull()
+      .references(() => oaWebhookDelivery.id, { onDelete: 'cascade' }),
+    oaId: uuid('oaId')
+      .notNull()
+      .references(() => officialAccount.id, { onDelete: 'cascade' }),
+    attemptNumber: integer('attemptNumber').notNull(),
+    isRedelivery: boolean('isRedelivery').notNull().default(false),
+    requestUrl: text('requestUrl').notNull(),
+    requestBodyJson: jsonb('requestBodyJson').notNull(),
+    responseStatus: integer('responseStatus'),
+    responseBodyExcerpt: text('responseBodyExcerpt'),
+    reason: text('reason'),
+    detail: text('detail'),
+    startedAt: timestamp('startedAt', { mode: 'string' }).defaultNow().notNull(),
+    completedAt: timestamp('completedAt', { mode: 'string' }),
+  },
+  (table) => [
+    index('oaWebhookAttempt_delivery_attempt_idx').on(
+      table.deliveryId,
+      table.attemptNumber,
+    ),
+    index('oaWebhookAttempt_oaId_startedAt_idx').on(table.oaId, table.startedAt),
   ],
 )
