@@ -39,14 +39,14 @@ Each task should be committed independently after its verification passes.
 
 ### Modify
 
-- `packages/db/src/schema-oa.ts` — add Drizzle table definitions for the three new operational tables.
+- `packages/db/src/schema-private.ts` — add Drizzle table definitions for the three new operational tables so the Zero publication rebuild excludes them automatically.
 - `apps/server/src/plugins/oa-messaging.ts` — convert to thin REST adapter, add broadcast, enforce retry-key support matrix, use `/api/oa/v2`.
 - `apps/server/src/plugins/oa-messaging.test.ts` — update route paths and add route-level behavior tests.
 - `apps/server/src/plugins/oa-webhook-endpoint.ts` — move routes from `/v2/...` to `/api/oa/v2/...` and add namespace comment.
 - `apps/server/src/plugins/oa-webhook-endpoint.test.ts` — cover namespace behavior for webhook endpoint settings.
 - `apps/server/src/plugins/oa-richmenu.ts` — move public REST routes from `/v2/...` to `/api/oa/v2/...`.
 - `apps/server/src/plugins/oa-richmenu.test.ts` — update route paths and assert root `/v2/...` is not registered.
-- `apps/server/src/services/oa.ts` — remove send-request business logic that moves to `oa-messaging.ts` only if it can be done without disrupting Connect OA management methods; otherwise keep small existing helpers and call them from the new service.
+- `apps/server/src/services/oa.ts` — keep OA management methods; do not use `resolveReplyToken`/`markReplyTokenUsed` for Messaging API v1 transaction boundaries.
 - `apps/server/src/index.ts` — construct and inject the new messaging service, wire recovery loop with explicit deps.
 - `apps/server/src/test/integration-db.ts` — no planned changes; use it from `oa-messaging.int.test.ts`.
 
@@ -329,12 +329,37 @@ git commit -m "refactor(oa): standardize public api namespace"
 ## Task 2: DB Schema And Migration For Durable Messaging
 
 **Files:**
-- Modify: `packages/db/src/schema-oa.ts`
+- Modify: `packages/db/src/schema-private.ts`
 - Create: `packages/db/src/migrations/20260501000001_oa_message_outbox.ts`
 
 - [ ] **Step 1: Add Drizzle tables**
 
-Append to `packages/db/src/schema-oa.ts` after `oaReplyToken`:
+Operational messaging tables must not enter Zero. `packages/db/src/migrate.ts`
+derives the Zero publication exclusion list from `packages/db/src/schema-private.ts`,
+so add these tables there instead of `schema-oa.ts`.
+
+In `packages/db/src/schema-private.ts`, extend the `drizzle-orm/pg-core` import so it includes:
+
+```ts
+import {
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+} from 'drizzle-orm/pg-core'
+```
+
+Add this import near the other schema imports:
+
+```ts
+import { officialAccount } from './schema-oa'
+```
+
+Append to `packages/db/src/schema-private.ts` after the existing table definitions:
 
 ```ts
 export const oaMessageRequest = pgTable(
@@ -365,7 +390,7 @@ export const oaMessageRequest = pgTable(
       table.createdAt,
     ),
     index('oaMessageRequest_status_idx').on(table.status),
-    index('oaMessageRequest_acceptedRequestId_idx').on(table.acceptedRequestId),
+    uniqueIndex('oaMessageRequest_acceptedRequestId_idx').on(table.acceptedRequestId),
   ],
 )
 
@@ -393,6 +418,7 @@ export const oaMessageDelivery = pgTable(
     deliveredAt: timestamp('deliveredAt', { mode: 'string' }),
   },
   (table) => [
+    uniqueIndex('oaMessageDelivery_request_user_idx').on(table.requestId, table.userId),
     index('oaMessageDelivery_status_lockedAt_idx').on(table.status, table.lockedAt),
     index('oaMessageDelivery_oaId_userId_idx').on(table.oaId, table.userId),
     index('oaMessageDelivery_requestId_idx').on(table.requestId),
@@ -416,7 +442,7 @@ export const oaRetryKey = pgTable(
     createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
   },
   (table) => [
-    index('oaRetryKey_oaId_retryKey_idx').on(table.oaId, table.retryKey),
+    uniqueIndex('oaRetryKey_oaId_retryKey_idx').on(table.oaId, table.retryKey),
     index('oaRetryKey_expiresAt_idx').on(table.expiresAt),
   ],
 )
@@ -529,10 +555,21 @@ bun run --cwd apps/server typecheck
 
 Expected: PASS.
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 4: Verify outbox tables are excluded from Zero publication**
+
+Run after migration in a local database:
 
 ```bash
-git add packages/db/src/schema-oa.ts packages/db/src/migrations/20260501000001_oa_message_outbox.ts
+docker compose up -d pgdb migrate
+docker compose exec pgdb psql -U user -d postgres -c "SELECT tablename FROM pg_publication_tables WHERE pubname = 'zero_takeout' AND tablename IN ('oaMessageRequest', 'oaMessageDelivery', 'oaRetryKey');"
+```
+
+Expected: zero rows.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add packages/db/src/schema-private.ts packages/db/src/migrations/20260501000001_oa_message_outbox.ts
 git commit -m "feat(oa): add messaging outbox schema"
 ```
 
@@ -696,7 +733,7 @@ git commit -m "feat(oa): add messaging request utilities"
 
 ---
 
-## Task 4: Retry-Key Acceptance And Request Rows
+## Task 4: Retry-Key Validation And Lookup Helpers
 
 **Files:**
 - Modify: `apps/server/src/services/oa-messaging.ts`
@@ -708,43 +745,27 @@ Append to `apps/server/src/services/oa-messaging.test.ts`:
 
 ```ts
 import { vi } from 'vitest'
-import { createOAMessagingService } from './oa-messaging'
+import { checkRetryKeyForRequest, createRequestHash } from './oa-messaging'
 
-function makeMockDbForRetryKey(existingRetryRows: unknown[] = []) {
+function makeMockDbForRetryKeyLookup(existingRetryRows: unknown[] = []) {
   const retryLimit = vi.fn().mockResolvedValue(existingRetryRows)
-  const requestReturning = vi.fn().mockResolvedValue([
-    {
-      id: 'request-1',
-      oaId: 'oa-1',
-      requestType: 'push',
-      requestHash: 'hash',
-      acceptedRequestId: 'acc_existing',
-      status: 'accepted',
-      messagesJson: [],
-    },
-  ])
-  const insertValues = vi.fn().mockReturnValue({ returning: requestReturning })
   const db = {
     select: vi.fn().mockReturnValue({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({ limit: retryLimit }),
       }),
     }),
-    insert: vi.fn().mockReturnValue({ values: insertValues }),
   } as any
-  return { db, retryLimit, insertValues }
+  return { db, retryLimit }
 }
 
-describe('oa messaging retry-key acceptance', () => {
+describe('oa messaging retry-key lookup', () => {
   it('rejects retry key on reply', async () => {
-    const { db } = makeMockDbForRetryKey()
-    const service = createOAMessagingService({
-      db,
-      instanceId: 'test',
-      now: () => new Date('2026-05-01T00:00:00.000Z'),
-    })
+    const { db } = makeMockDbForRetryKeyLookup()
 
-    const result = await service.acceptSendRequest({
+    const result = await checkRetryKeyForRequest({
+      db,
+      now: () => new Date('2026-05-01T00:00:00.000Z'),
       oaId: 'oa-1',
       requestType: 'reply',
       retryKey: '123e4567-e89b-12d3-a456-426614174000',
@@ -756,8 +777,9 @@ describe('oa messaging retry-key acceptance', () => {
   })
 
   it('returns duplicate accepted retry-key response', async () => {
-    const { db } = makeMockDbForRetryKey([
+    const { db } = makeMockDbForRetryKeyLookup([
       {
+        requestId: 'request-original',
         oaId: 'oa-1',
         retryKey: '123e4567-e89b-12d3-a456-426614174000',
         requestHash: createRequestHash({
@@ -769,13 +791,10 @@ describe('oa messaging retry-key acceptance', () => {
         expiresAt: '2026-05-02T00:00:00.000Z',
       },
     ])
-    const service = createOAMessagingService({
-      db,
-      instanceId: 'test',
-      now: () => new Date('2026-05-01T00:00:00.000Z'),
-    })
 
-    const result = await service.acceptSendRequest({
+    const result = await checkRetryKeyForRequest({
+      db,
+      now: () => new Date('2026-05-01T00:00:00.000Z'),
       oaId: 'oa-1',
       requestType: 'push',
       retryKey: '123e4567-e89b-12d3-a456-426614174000',
@@ -786,25 +805,23 @@ describe('oa messaging retry-key acceptance', () => {
     expect(result).toMatchObject({
       ok: false,
       code: 'RETRY_KEY_ACCEPTED',
+      requestId: 'request-original',
       acceptedRequestId: 'acc_original',
     })
   })
 
   it('rejects retry-key reuse with a different body', async () => {
-    const { db } = makeMockDbForRetryKey([
+    const { db } = makeMockDbForRetryKeyLookup([
       {
         requestHash: 'different-hash',
         acceptedRequestId: 'acc_original',
         expiresAt: '2026-05-02T00:00:00.000Z',
       },
     ])
-    const service = createOAMessagingService({
-      db,
-      instanceId: 'test',
-      now: () => new Date('2026-05-01T00:00:00.000Z'),
-    })
 
-    const result = await service.acceptSendRequest({
+    const result = await checkRetryKeyForRequest({
+      db,
+      now: () => new Date('2026-05-01T00:00:00.000Z'),
       oaId: 'oa-1',
       requestType: 'push',
       retryKey: '123e4567-e89b-12d3-a456-426614174000',
@@ -817,6 +834,22 @@ describe('oa messaging retry-key acceptance', () => {
       code: 'RETRY_KEY_CONFLICT',
     })
   })
+
+  it('ignores expired retry-key rows so the key can be accepted again', async () => {
+    const { db } = makeMockDbForRetryKeyLookup([])
+
+    const result = await checkRetryKeyForRequest({
+      db,
+      now: () => new Date('2026-05-01T00:00:00.000Z'),
+      oaId: 'oa-1',
+      requestType: 'push',
+      retryKey: '123e4567-e89b-12d3-a456-426614174000',
+      target: { to: 'user-1' },
+      messages: [{ type: 'text', text: 'hello' }],
+    })
+
+    expect(result).toMatchObject({ ok: true })
+  })
 })
 ```
 
@@ -828,15 +861,15 @@ Run:
 bun run --cwd apps/server test:unit -- src/services/oa-messaging.test.ts
 ```
 
-Expected: FAIL because `acceptSendRequest` is not implemented.
+Expected: FAIL because `checkRetryKeyForRequest` is not implemented.
 
-- [ ] **Step 3: Implement `acceptSendRequest`**
+- [ ] **Step 3: Implement retry-key lookup without accepting a request**
 
 In `apps/server/src/services/oa-messaging.ts`, add imports:
 
 ```ts
 import { and, eq, gt } from 'drizzle-orm'
-import { oaMessageRequest, oaRetryKey } from '@vine/db/schema-oa'
+import { oaRetryKey } from '@vine/db/schema-private'
 ```
 
 Add types before the factory:
@@ -844,7 +877,9 @@ Add types before the factory:
 ```ts
 export type SendRequestType = 'reply' | 'push' | 'broadcast'
 
-export type AcceptSendRequestInput = {
+export type RetryKeyCheckInput = {
+  db: NodePgDatabase<typeof schema>
+  now: () => Date
   oaId: string
   requestType: SendRequestType
   retryKey?: string | undefined
@@ -852,28 +887,30 @@ export type AcceptSendRequestInput = {
   messages: unknown[]
 }
 
-export type AcceptSendRequestResult =
+export type RetryKeyCheckResult =
   | {
       ok: true
-      request: typeof oaMessageRequest.$inferSelect
       httpRequestId: string
-      acceptedRequestId: string
       requestHash: string
     }
   | {
       ok: false
       code: 'INVALID_RETRY_KEY' | 'RETRY_KEY_ACCEPTED' | 'RETRY_KEY_CONFLICT'
       httpRequestId: string
+      requestId?: string
       acceptedRequestId?: string
     }
 ```
 
-Inside `createOAMessagingService`, replace the return body:
+Add a top-level helper. This helper only validates and looks up existing active
+retry keys. It does not insert `oaMessageRequest` or `oaRetryKey`; acceptance is
+done later inside one transaction with recipient snapshot, quota, and delivery
+rows.
 
 ```ts
-async function acceptSendRequest(
-  input: AcceptSendRequestInput,
-): Promise<AcceptSendRequestResult> {
+export async function checkRetryKeyForRequest(
+  input: RetryKeyCheckInput,
+): Promise<RetryKeyCheckResult> {
   const httpRequestId = createHttpRequestId()
   if (input.requestType === 'reply' && input.retryKey) {
     return { ok: false, code: 'INVALID_RETRY_KEY', httpRequestId }
@@ -889,14 +926,14 @@ async function acceptSendRequest(
   })
 
   if (input.retryKey) {
-    const [existing] = await deps.db
+    const [existing] = await input.db
       .select()
       .from(oaRetryKey)
       .where(
         and(
           eq(oaRetryKey.oaId, input.oaId),
           eq(oaRetryKey.retryKey, input.retryKey),
-          gt(oaRetryKey.expiresAt, now().toISOString()),
+          gt(oaRetryKey.expiresAt, input.now().toISOString()),
         ),
       )
       .limit(1)
@@ -907,6 +944,7 @@ async function acceptSendRequest(
           ok: false,
           code: 'RETRY_KEY_ACCEPTED',
           httpRequestId,
+          requestId: existing.requestId,
           acceptedRequestId: existing.acceptedRequestId,
         }
       }
@@ -919,50 +957,18 @@ async function acceptSendRequest(
     }
   }
 
-  const acceptedRequestId = createAcceptedRequestId()
-  const expiresAt = input.retryKey
-    ? new Date(now().getTime() + RETRY_KEY_TTL_MS).toISOString()
-    : null
-
-  const [request] = await deps.db
-    .insert(oaMessageRequest)
-    .values({
-      oaId: input.oaId,
-      requestType: input.requestType,
-      retryKey: input.retryKey,
-      requestHash,
-      acceptedRequestId,
-      status: 'accepted',
-      messagesJson: input.messages,
-      targetJson: input.target as Record<string, unknown>,
-      expiresAt,
-      updatedAt: now().toISOString(),
-    })
-    .returning()
-
-  if (input.retryKey && expiresAt) {
-    await deps.db.insert(oaRetryKey).values({
-      oaId: input.oaId,
-      retryKey: input.retryKey,
-      requestId: request.id,
-      requestHash,
-      acceptedRequestId,
-      expiresAt,
-    })
-  }
-
-  return {
-    ok: true,
-    request,
-    httpRequestId,
-    acceptedRequestId,
-    requestHash,
-  }
+  return { ok: true, httpRequestId, requestHash }
 }
+```
 
+Inside `createOAMessagingService`, return the helper for unit tests and for the
+high-level send methods:
+
+```ts
 return {
   now,
-  acceptSendRequest,
+  checkRetryKeyForRequest: (input: Omit<RetryKeyCheckInput, 'db' | 'now'>) =>
+    checkRetryKeyForRequest({ ...input, db: deps.db, now }),
 }
 ```
 
@@ -980,7 +986,7 @@ Expected: PASS.
 
 ```bash
 git add apps/server/src/services/oa-messaging.ts apps/server/src/services/oa-messaging.test.ts
-git commit -m "feat(oa): add messaging retry key acceptance"
+git commit -m "feat(oa): add messaging retry key lookup"
 ```
 
 ---
@@ -1044,20 +1050,22 @@ describe('oa messaging delivery creation', () => {
 In `apps/server/src/services/oa-messaging.ts`, import:
 
 ```ts
-import { oaMessageDelivery } from '@vine/db/schema-oa'
+import { oaMessageDelivery } from '@vine/db/schema-private'
 ```
 
 Add inside the factory:
 
 ```ts
 async function createDeliveryRows(input: {
+  db?: typeof deps.db
   requestId: string
   oaId: string
   userIds: string[]
   messageCount: number
 }) {
   if (input.userIds.length === 0) return
-  await deps.db
+  const db = input.db ?? deps.db
+  await db
     .insert(oaMessageDelivery)
     .values(
       input.userIds.map((userId) => ({
@@ -1087,12 +1095,8 @@ Create `apps/server/src/services/oa-messaging.int.test.ts`:
 import { describe, expect, it } from 'vitest'
 import { eq } from 'drizzle-orm'
 import { chat, chatMember, message } from '@vine/db/schema-public'
-import {
-  officialAccount,
-  oaMessageDelivery,
-  oaMessageRequest,
-  oaProvider,
-} from '@vine/db/schema-oa'
+import { oaMessageDelivery, oaMessageRequest } from '@vine/db/schema-private'
+import { officialAccount, oaProvider } from '@vine/db/schema-oa'
 import { withRollbackDb } from '../test/integration-db'
 import { createOAMessagingService } from './oa-messaging'
 
@@ -1153,10 +1157,89 @@ describe('oa messaging delivery recovery', () => {
         .where(eq(message.id, `oa:req:${request.id}:user-1:0`))
       expect(rows).toHaveLength(1)
 
+      const [updatedRequest] = await db
+        .select()
+        .from(oaMessageRequest)
+        .where(eq(oaMessageRequest.id, request.id))
+        .limit(1)
+      expect(updatedRequest.status).toBe('completed')
+      expect(updatedRequest.completedAt).not.toBeNull()
+
       const chats = await db.select().from(chat)
       const members = await db.select().from(chatMember)
       expect(chats).toHaveLength(1)
       expect(members).toHaveLength(2)
+    })
+  })
+
+  it('does not double-claim deliveries across concurrent processors', async () => {
+    await withRollbackDb(async (db) => {
+      const now = '2026-05-01T00:00:00.000Z'
+      const [provider] = await db
+        .insert(oaProvider)
+        .values({ name: 'Provider 2', ownerId: 'owner-1' })
+        .returning()
+      const [oa] = await db
+        .insert(officialAccount)
+        .values({
+          providerId: provider.id,
+          name: 'OA 2',
+          uniqueId: 'oa-skip-locked-test',
+          channelSecret: 'secret',
+        })
+        .returning()
+      const [request] = await db
+        .insert(oaMessageRequest)
+        .values({
+          oaId: oa.id,
+          requestType: 'broadcast',
+          requestHash: 'hash-2',
+          acceptedRequestId: 'acc_skip_locked',
+          messagesJson: [{ type: 'text', text: 'hello' }],
+          status: 'processing',
+          updatedAt: now,
+        })
+        .returning()
+      await db.insert(oaMessageDelivery).values([
+        {
+          requestId: request.id,
+          oaId: oa.id,
+          userId: 'user-1',
+          status: 'pending',
+          messageIdsJson: [`oa:req:${request.id}:user-1:0`],
+          updatedAt: now,
+        },
+        {
+          requestId: request.id,
+          oaId: oa.id,
+          userId: 'user-2',
+          status: 'pending',
+          messageIdsJson: [`oa:req:${request.id}:user-2:0`],
+          updatedAt: now,
+        },
+      ])
+      const serviceA = createOAMessagingService({
+        db,
+        instanceId: 'worker-a',
+        now: () => new Date(now),
+      })
+      const serviceB = createOAMessagingService({
+        db,
+        instanceId: 'worker-b',
+        now: () => new Date(now),
+      })
+
+      await Promise.all([
+        serviceA.processPendingDeliveries({ batchSize: 1, staleAfterMs: 0 }),
+        serviceB.processPendingDeliveries({ batchSize: 1, staleAfterMs: 0 }),
+      ])
+
+      const deliveries = await db
+        .select()
+        .from(oaMessageDelivery)
+        .where(eq(oaMessageDelivery.requestId, request.id))
+      expect(deliveries.every((delivery) => delivery.attemptCount === 1)).toBe(true)
+      expect(deliveries.every((delivery) => delivery.status === 'delivered')).toBe(true)
     })
   })
 })
@@ -1288,8 +1371,47 @@ async function processPendingDeliveries(input: {
         .where(eq(oaMessageDelivery.id, delivery.id))
     }
 
+    const touchedRequestIds = [...new Set(deliveries.map((delivery) => delivery.requestId))]
+    for (const requestId of touchedRequestIds) {
+      await updateRequestStatus(tx, requestId)
+    }
+
     return { processed: deliveries.length }
   })
+}
+```
+
+Add this helper above `processPendingDeliveries`:
+
+```ts
+async function updateRequestStatus(tx: any, requestId: string) {
+  const rows = await tx
+    .select({ status: oaMessageDelivery.status })
+    .from(oaMessageDelivery)
+    .where(eq(oaMessageDelivery.requestId, requestId))
+
+  if (rows.length === 0) return
+
+  const delivered = rows.filter((row) => row.status === 'delivered').length
+  const failed = rows.filter((row) => row.status === 'failed').length
+  const pending = rows.length - delivered - failed
+  const nextStatus =
+    pending > 0
+      ? 'processing'
+      : failed === 0
+        ? 'completed'
+        : delivered > 0
+          ? 'partially_failed'
+          : 'failed'
+
+  await tx
+    .update(oaMessageRequest)
+    .set({
+      status: nextStatus,
+      updatedAt: now().toISOString(),
+      completedAt: pending === 0 ? now().toISOString() : null,
+    })
+    .where(eq(oaMessageRequest.id, requestId))
 }
 ```
 
@@ -1330,155 +1452,470 @@ git commit -m "feat(oa): add durable message delivery processing"
 **Files:**
 - Modify: `apps/server/src/services/oa-messaging.ts`
 - Modify: `apps/server/src/services/oa-messaging.test.ts`
+- Modify: `apps/server/src/services/oa-messaging.int.test.ts`
 
-- [ ] **Step 1: Add tests for high-level send methods**
+- [ ] **Step 1: Add integration tests for transactional acceptance**
 
-Append tests to `apps/server/src/services/oa-messaging.test.ts` that assert the service calls `acceptSendRequest`, creates delivery rows, and uses quota deltas. Keep mocked DB narrow:
+At the top of `apps/server/src/services/oa-messaging.int.test.ts`, extend imports:
 
 ```ts
-describe('oa messaging high-level send methods', () => {
-  it('uses recipient count times message count for broadcast quota', async () => {
-    const quota = vi.fn().mockResolvedValue(true)
-    const db = makeDbThatAcceptsRequestAndDeliveries({
-      friends: [{ userId: 'user-1' }, { userId: 'user-2' }],
-    })
-    const service = createOAMessagingService({
-      db: db as any,
-      instanceId: 'test',
-      checkAndIncrementUsage: quota,
-      now: () => new Date('2026-05-01T00:00:00.000Z'),
-    } as any)
+import { oaFriendship, oaQuota } from '@vine/db/schema-oa'
+import { oaRetryKey } from '@vine/db/schema-private'
+```
 
-    const result = await service.broadcast({
-      oaId: 'oa-1',
-      retryKey: '123e4567-e89b-12d3-a456-426614174000',
-      messages: [
-        { type: 'text', text: 'one' },
-        { type: 'text', text: 'two' },
-      ],
-    })
+Then append these helpers and tests below the existing imports:
 
-    expect(result.ok).toBe(true)
-    expect(quota).toHaveBeenCalledWith('oa-1', 4)
+```ts
+
+async function seedOA(db: any, uniqueId: string) {
+  const [provider] = await db
+    .insert(oaProvider)
+    .values({ name: 'Provider', ownerId: 'owner-1' })
+    .returning()
+  const [oa] = await db
+    .insert(officialAccount)
+    .values({
+      providerId: provider.id,
+      name: 'OA',
+      uniqueId,
+      channelSecret: 'secret',
+    })
+    .returning()
+  return oa
+}
+
+describe('oa messaging transactional acceptance', () => {
+  it('does not accept retry key or delivery rows when quota fails', async () => {
+    await withRollbackDb(async (db) => {
+      const now = '2026-05-01T00:00:00.000Z'
+      const oa = await seedOA(db, 'oa-quota-fail-test')
+      await db.insert(oaFriendship).values({
+        oaId: oa.id,
+        userId: 'user-1',
+        status: 'friend',
+      })
+      await db.insert(oaQuota).values({
+        oaId: oa.id,
+        monthlyLimit: 1,
+        currentUsage: 1,
+        resetAt: now,
+      })
+
+      const service = createOAMessagingService({
+        db,
+        instanceId: 'test',
+        now: () => new Date(now),
+      })
+
+      const result = await service.push({
+        oaId: oa.id,
+        retryKey: '123e4567-e89b-12d3-a456-426614174000',
+        to: 'user-1',
+        messages: [{ type: 'text', text: 'hello' }],
+      })
+
+      expect(result).toMatchObject({ ok: false, code: 'QUOTA_EXCEEDED' })
+      expect(await db.select().from(oaRetryKey)).toHaveLength(0)
+      expect(await db.select().from(oaMessageRequest)).toHaveLength(0)
+      expect(await db.select().from(oaMessageDelivery)).toHaveLength(0)
+    })
+  })
+
+  it('keeps broadcast recipient snapshot stable across retry', async () => {
+    await withRollbackDb(async (db) => {
+      const now = '2026-05-01T00:00:00.000Z'
+      const oa = await seedOA(db, 'oa-broadcast-snapshot-test')
+      await db.insert(oaFriendship).values([
+        { oaId: oa.id, userId: 'user-1', status: 'friend' },
+        { oaId: oa.id, userId: 'user-2', status: 'friend' },
+      ])
+      const service = createOAMessagingService({
+        db,
+        instanceId: 'test',
+        now: () => new Date(now),
+      })
+
+      await service.broadcast({
+        oaId: oa.id,
+        retryKey: '123e4567-e89b-12d3-a456-426614174000',
+        messages: [{ type: 'text', text: 'hello' }],
+      })
+      await db.insert(oaFriendship).values({
+        oaId: oa.id,
+        userId: 'user-3',
+        status: 'friend',
+      })
+      const retry = await service.broadcast({
+        oaId: oa.id,
+        retryKey: '123e4567-e89b-12d3-a456-426614174000',
+        messages: [{ type: 'text', text: 'hello' }],
+      })
+
+      expect(retry).toMatchObject({ ok: false, code: 'RETRY_KEY_ACCEPTED' })
+      const deliveries = await db.select().from(oaMessageDelivery)
+      expect(deliveries.map((row) => row.userId).sort()).toEqual(['user-1', 'user-2'])
+    })
   })
 })
 ```
 
-Define `makeDbThatAcceptsRequestAndDeliveries` in the test file as a local mock helper. It should return rows for retry-key lookup, request insert, friendship select, and delivery insert. Use the existing mock style from `oa-messaging.test.ts`.
-
 - [ ] **Step 2: Extend service deps**
 
-In `apps/server/src/services/oa-messaging.ts`, extend `OAMessagingDeps`:
+In `apps/server/src/services/oa-messaging.ts`, keep service deps transaction-local.
+Do not pass `checkAndIncrementUsage`, `resolveReplyToken`, or `markReplyTokenUsed`
+from `createOAService`; those helpers use the root DB handle and cannot participate
+in the Messaging API acceptance transaction.
 
 ```ts
 export type OAMessagingDeps = {
   db: NodePgDatabase<typeof schema>
   instanceId: string
   now?: () => Date
-  checkAndIncrementUsage?: (oaId: string, delta: number) => Promise<boolean>
-  resolveReplyToken?: (token: string) => Promise<
-    | { valid: true; record: { id: string; oaId: string; userId: string; chatId: string } }
-    | { valid: false; reason: 'not_found' | 'already_used' | 'expired' }
-  >
-  markReplyTokenUsed?: (id: string) => Promise<void>
 }
 ```
 
-- [ ] **Step 3: Implement high-level methods**
+- [ ] **Step 3: Implement transactional acceptance helpers**
+
+In `apps/server/src/services/oa-messaging.ts`, import:
+
+```ts
+import { sql } from 'drizzle-orm'
+import { oaFriendship, oaQuota, oaReplyToken } from '@vine/db/schema-oa'
+import { oaMessageDelivery, oaMessageRequest, oaRetryKey } from '@vine/db/schema-private'
+```
+
+Add this error class above `createOAMessagingService`:
+
+```ts
+class RetryKeyRaceError extends Error {
+  constructor(
+    readonly input: RetryKeyCheckInput,
+    readonly httpRequestId: string,
+  ) {
+    super('Retry key was accepted by another transaction')
+  }
+}
+```
+
+Add these helpers inside the factory:
+
+```ts
+function monthStart(value: Date) {
+  return new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), 1))
+}
+
+async function reserveQuota(tx: any, oaId: string, delta: number, nowIso: string) {
+  const [quota] = await tx.select().from(oaQuota).where(eq(oaQuota.oaId, oaId)).limit(1)
+  if (!quota || quota.monthlyLimit === 0) return true
+
+  const resetAt = new Date(quota.resetAt)
+  const start = monthStart(new Date(nowIso))
+  if (resetAt < start) {
+    await tx
+      .update(oaQuota)
+      .set({ currentUsage: 0, resetAt: start.toISOString() })
+      .where(eq(oaQuota.oaId, oaId))
+  }
+
+  const [updated] = await tx
+    .update(oaQuota)
+    .set({ currentUsage: sql`${oaQuota.currentUsage} + ${delta}` })
+    .where(
+      and(
+        eq(oaQuota.oaId, oaId),
+        sql`${oaQuota.currentUsage} + ${delta} <= ${oaQuota.monthlyLimit}`,
+      ),
+    )
+    .returning({ oaId: oaQuota.oaId })
+  return !!updated
+}
+
+async function claimReplyToken(tx: any, input: {
+  oaId: string
+  replyToken: string
+  nowIso: string
+}) {
+  const [record] = await tx
+    .update(oaReplyToken)
+    .set({ used: true })
+    .where(
+      and(
+        eq(oaReplyToken.oaId, input.oaId),
+        eq(oaReplyToken.token, input.replyToken),
+        eq(oaReplyToken.used, false),
+        gt(oaReplyToken.expiresAt, input.nowIso),
+      ),
+    )
+    .returning()
+  return record ?? null
+}
+
+async function insertAcceptedRequest(tx: any, input: {
+  oaId: string
+  requestType: SendRequestType
+  retryKey?: string
+  requestHash: string
+  acceptedRequestId: string
+  messages: unknown[]
+  target: unknown
+  nowIso: string
+}) {
+  const expiresAt = input.retryKey
+    ? new Date(new Date(input.nowIso).getTime() + RETRY_KEY_TTL_MS).toISOString()
+    : null
+  const [request] = await tx
+    .insert(oaMessageRequest)
+    .values({
+      oaId: input.oaId,
+      requestType: input.requestType,
+      retryKey: input.retryKey,
+      requestHash: input.requestHash,
+      acceptedRequestId: input.acceptedRequestId,
+      status: 'processing',
+      messagesJson: input.messages,
+      targetJson: input.target as Record<string, unknown>,
+      expiresAt,
+      updatedAt: input.nowIso,
+    })
+    .returning()
+
+  if (input.retryKey && expiresAt) {
+    const inserted = await tx
+      .insert(oaRetryKey)
+      .values({
+        oaId: input.oaId,
+        retryKey: input.retryKey,
+        requestId: request.id,
+        requestHash: input.requestHash,
+        acceptedRequestId: input.acceptedRequestId,
+        expiresAt,
+      })
+      .onConflictDoNothing()
+      .returning({ id: oaRetryKey.id })
+    if (inserted.length === 0) {
+      throw new RetryKeyRaceError(
+        {
+          db: tx,
+          now,
+          oaId: input.oaId,
+          requestType: input.requestType,
+          retryKey: input.retryKey,
+          target: input.target,
+          messages: input.messages,
+        },
+        createHttpRequestId(),
+      )
+    }
+  }
+
+  return request
+}
+```
+
+- [ ] **Step 4: Implement high-level send methods on top of the transaction**
 
 Add these methods inside the factory:
 
 ```ts
+type NormalizedMessage = { type: string; text?: string | null; metadata?: string | null }
+
+async function loadSentMessagesForAcceptedRequest(requestId: string) {
+  const deliveries = await deps.db
+    .select({ messageIdsJson: oaMessageDelivery.messageIdsJson })
+    .from(oaMessageDelivery)
+    .where(eq(oaMessageDelivery.requestId, requestId))
+  const ids = deliveries.flatMap((delivery) => delivery.messageIdsJson as string[])
+  return ids.map((id) => ({ id }))
+}
+
+async function acceptMessagingExecution(input: {
+  oaId: string
+  requestType: SendRequestType
+  retryKey?: string
+  target: unknown
+  messages: NormalizedMessage[]
+  resolveRecipients: (tx: any, nowIso: string) => Promise<string[] | { error: string }>
+}) {
+  const checked = await checkRetryKeyForRequest({
+    db: deps.db,
+    now,
+    oaId: input.oaId,
+    requestType: input.requestType,
+    retryKey: input.retryKey,
+    target: input.target,
+    messages: input.messages,
+  })
+  if (!checked.ok) {
+    if (checked.code === 'RETRY_KEY_ACCEPTED' && checked.requestId) {
+      return {
+        ...checked,
+        sentMessages: await loadSentMessagesForAcceptedRequest(checked.requestId),
+      }
+    }
+    return checked
+  }
+
+  try {
+    return await deps.db.transaction(async (tx) => {
+      const nowIso = now().toISOString()
+      const recipients = await input.resolveRecipients(tx, nowIso)
+      if (!Array.isArray(recipients)) {
+        return {
+          ok: false as const,
+          code: recipients.error,
+          httpRequestId: checked.httpRequestId,
+        }
+      }
+
+      const quotaDelta = recipients.length * input.messages.length
+      const allowed = await reserveQuota(tx, input.oaId, quotaDelta, nowIso)
+      if (!allowed) {
+        return { ok: false as const, code: 'QUOTA_EXCEEDED', httpRequestId: checked.httpRequestId }
+      }
+
+      const acceptedRequestId = createAcceptedRequestId()
+      const request = await insertAcceptedRequest(tx, {
+        oaId: input.oaId,
+        requestType: input.requestType,
+        retryKey: input.retryKey,
+        requestHash: checked.requestHash,
+        acceptedRequestId,
+        messages: input.messages,
+        target: input.target,
+        nowIso,
+      })
+      await createDeliveryRows({
+        db: tx,
+        requestId: request.id,
+        oaId: input.oaId,
+        userIds: recipients,
+        messageCount: input.messages.length,
+      })
+
+      return {
+        ok: true as const,
+        accepted: {
+          request,
+          httpRequestId: checked.httpRequestId,
+          acceptedRequestId,
+        },
+        recipientCount: recipients.length,
+      }
+    })
+  } catch (err) {
+    if (err instanceof RetryKeyRaceError) {
+      return checkRetryKeyForRequest({ ...err.input, db: deps.db, now })
+    }
+    throw err
+  }
+}
+
 async function push(input: {
   oaId: string
   retryKey?: string
   to: string
-  messages: Array<{ type: string; text?: string | null; metadata?: string | null }>
+  messages: NormalizedMessage[]
 }) {
-  const accepted = await acceptSendRequest({
+  const accepted = await acceptMessagingExecution({
     oaId: input.oaId,
     requestType: 'push',
     retryKey: input.retryKey,
     target: { to: input.to },
     messages: input.messages,
+    resolveRecipients: async (tx) => {
+      const [friendship] = await tx
+        .select()
+        .from(oaFriendship)
+        .where(
+          and(
+            eq(oaFriendship.oaId, input.oaId),
+            eq(oaFriendship.userId, input.to),
+            eq(oaFriendship.status, 'friend'),
+          ),
+        )
+        .limit(1)
+      return friendship ? [input.to] : { error: 'NOT_FRIEND' }
+    },
   })
   if (!accepted.ok) return accepted
-
-  const allowed = await deps.checkAndIncrementUsage?.(
-    input.oaId,
-    input.messages.length,
-  )
-  if (allowed === false) {
-    return { ok: false as const, code: 'QUOTA_EXCEEDED', httpRequestId: accepted.httpRequestId }
-  }
-
-  await createDeliveryRows({
-    requestId: accepted.request.id,
-    oaId: input.oaId,
-    userIds: [input.to],
-    messageCount: input.messages.length,
-  })
   const processed = await processPendingDeliveries({ batchSize: 25, staleAfterMs: 30_000 })
-  return { ok: true as const, accepted, processed }
+  return { ok: true as const, ...accepted, processed }
 }
 
 async function broadcast(input: {
   oaId: string
   retryKey?: string
-  messages: Array<{ type: string; text?: string | null; metadata?: string | null }>
+  messages: NormalizedMessage[]
 }) {
-  const accepted = await acceptSendRequest({
+  const accepted = await acceptMessagingExecution({
     oaId: input.oaId,
     requestType: 'broadcast',
     retryKey: input.retryKey,
     target: { audience: 'all_friends' },
     messages: input.messages,
+    resolveRecipients: async (tx) => {
+      const friends = await tx
+        .select({ userId: oaFriendship.userId })
+        .from(oaFriendship)
+        .where(and(eq(oaFriendship.oaId, input.oaId), eq(oaFriendship.status, 'friend')))
+      return friends.map((friend) => friend.userId)
+    },
   })
   if (!accepted.ok) return accepted
-
-  const friends = await deps.db
-    .select({ userId: oaFriendship.userId })
-    .from(oaFriendship)
-    .where(and(eq(oaFriendship.oaId, input.oaId), eq(oaFriendship.status, 'friend')))
-  const userIds = friends.map((f) => f.userId)
-
-  const allowed = await deps.checkAndIncrementUsage?.(
-    input.oaId,
-    userIds.length * input.messages.length,
-  )
-  if (allowed === false) {
-    return { ok: false as const, code: 'QUOTA_EXCEEDED', httpRequestId: accepted.httpRequestId }
-  }
-
-  await createDeliveryRows({
-    requestId: accepted.request.id,
-    oaId: input.oaId,
-    userIds,
-    messageCount: input.messages.length,
-  })
   const processed = await processPendingDeliveries({ batchSize: 100, staleAfterMs: 30_000 })
-  return { ok: true as const, accepted, processed, recipientCount: userIds.length }
+  return { ok: true as const, ...accepted, processed }
+}
+
+async function reply(input: {
+  oaId: string
+  replyToken: string
+  messages: NormalizedMessage[]
+}) {
+  const accepted = await acceptMessagingExecution({
+    oaId: input.oaId,
+    requestType: 'reply',
+    target: { replyToken: input.replyToken },
+    messages: input.messages,
+    resolveRecipients: async (tx, nowIso) => {
+      const token = await claimReplyToken(tx, {
+        oaId: input.oaId,
+        replyToken: input.replyToken,
+        nowIso,
+      })
+      return token ? [token.userId] : { error: 'INVALID_REPLY_TOKEN' }
+    },
+  })
+  if (!accepted.ok) return accepted
+  const processed = await processPendingDeliveries({ batchSize: 25, staleAfterMs: 30_000 })
+  return { ok: true as const, ...accepted, processed }
 }
 ```
 
-Add `reply` using `resolveReplyToken` and `markReplyTokenUsed`; wrap request creation, delivery creation, and token mark in one transaction when moving from test mock to final implementation.
+Return `reply`, `push`, `broadcast`, and `acceptMessagingExecution`.
 
-Return `reply`, `push`, and `broadcast`.
+- [ ] **Step 5: Run tests**
 
-- [ ] **Step 4: Run unit tests**
-
-Run:
+Run unit:
 
 ```bash
 bun run --cwd apps/server test:unit -- src/services/oa-messaging.test.ts
 ```
 
-Expected: PASS.
-
-- [ ] **Step 5: Commit**
+Run DB integration:
 
 ```bash
-git add apps/server/src/services/oa-messaging.ts apps/server/src/services/oa-messaging.test.ts
+docker compose up -d pgdb migrate
+ZERO_UPSTREAM_DB=postgresql://user:password@localhost:5533/postgres bun run --cwd apps/server test:integration -- src/services/oa-messaging.int.test.ts
+```
+
+Expected: PASS.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add apps/server/src/services/oa-messaging.ts \
+  apps/server/src/services/oa-messaging.test.ts \
+  apps/server/src/services/oa-messaging.int.test.ts
 git commit -m "feat(oa): add messaging send orchestration"
 ```
 
@@ -1529,6 +1966,7 @@ it('returns 409 with accepted request id for duplicate push retry key', async ()
     code: 'RETRY_KEY_ACCEPTED',
     httpRequestId: 'req_retry',
     acceptedRequestId: 'acc_original',
+    sentMessages: [{ id: 'oa:req:request-1:user-1:0' }],
   })
   await app.ready()
 
@@ -1546,6 +1984,10 @@ it('returns 409 with accepted request id for duplicate push retry key', async ()
   expect(res.statusCode).toBe(409)
   expect(res.headers['x-line-request-id']).toBe('req_retry')
   expect(res.headers['x-line-accepted-request-id']).toBe('acc_original')
+  expect(JSON.parse(res.body)).toEqual({
+    message: 'The retry key is already accepted',
+    sentMessages: [{ id: 'oa:req:request-1:user-1:0' }],
+  })
 })
 
 it('sends broadcast through the messaging service', async () => {
@@ -1629,7 +2071,10 @@ function sendMessagingResult(reply: FastifyReply, result: any) {
     if (result.acceptedRequestId)
       reply.header('x-line-accepted-request-id', result.acceptedRequestId)
     if (result.code === 'RETRY_KEY_ACCEPTED') {
-      return reply.code(409).send({ message: 'The retry key is already accepted' })
+      return reply.code(409).send({
+        message: 'The retry key is already accepted',
+        ...(result.sentMessages?.length ? { sentMessages: result.sentMessages } : {}),
+      })
     }
     if (result.code === 'RETRY_KEY_CONFLICT') {
       return reply.code(409).send({ message: 'The retry key conflicts with another request' })
@@ -1665,9 +2110,6 @@ After `const oa = createOAService(...)`, create:
 const oaMessaging = createOAMessagingService({
   db,
   instanceId: process.env['HOSTNAME'] ?? `server-${process.pid}`,
-  checkAndIncrementUsage: oa.checkAndIncrementUsage,
-  resolveReplyToken: oa.resolveReplyToken,
-  markReplyTokenUsed: oa.markReplyTokenUsed,
 })
 ```
 
@@ -1729,10 +2171,16 @@ In `apps/server/src/index.ts`, after registering plugins and before `app.listen`
 ```ts
 await oaMessaging.processPendingDeliveries({ batchSize: 100, staleAfterMs: 60_000 })
 
+let oaMessagingRecoveryRunning = false
 const oaMessagingRecoveryInterval = setInterval(() => {
+  if (oaMessagingRecoveryRunning) return
+  oaMessagingRecoveryRunning = true
   void oaMessaging
     .processPendingDeliveries({ batchSize: 100, staleAfterMs: 60_000 })
     .catch((err) => logger.error({ err }, '[oa-messaging] recovery failed'))
+    .finally(() => {
+      oaMessagingRecoveryRunning = false
+    })
 }, 10_000)
 
 app.addHook('onClose', async () => {
