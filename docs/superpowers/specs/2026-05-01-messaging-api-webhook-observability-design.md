@@ -75,6 +75,8 @@ simple, deterministic operator model that is easy to test.
 - No full bot IDE or Bot Designer clone.
 - No automatic redelivery scheduler in this phase. The schema and settings
   should support it later, but this phase only requires manual redelivery.
+- No full closed-loop bot sandbox with a dedicated test chat, usable reply token,
+  and visible chat result. That belongs in a later end-to-end bot sandbox phase.
 - No exact LINE retry interval or retry-count compatibility.
 - No TSV export in the first slice.
 - No email or notification-center alerts.
@@ -163,13 +165,16 @@ Manual Redeliver:
 Provide a small tool, not a bot builder:
 
 - Verify current endpoint: sends `{ destination, events: [] }`.
-- Send sample message event: sends a Vine-generated text message event to the
-  current endpoint with a test user/source and a real signed payload.
+- Send diagnostic sample message event: sends a Vine-generated text message
+  event to the current endpoint with a test user/source and a real signed
+  payload.
 - Show the latest test result inline.
 
 Sample test deliveries should not appear in Webhook errors unless they are
 explicitly created as real `oaWebhookDelivery` rows in a later phase. For this
-phase, they are diagnostics inside the Test webhook panel.
+phase, they are diagnostics inside the Test webhook panel. The diagnostic sample
+message does not create a usable reply token and does not write a visible chat
+message result back into Vine.
 
 ## Data Model
 
@@ -256,6 +261,26 @@ lastVerifiedAt                timestamp nullable
 
 If the existing `oaWebhook.status` remains the source of verified/failed status,
 these fields should supplement it rather than replace it.
+
+## Privacy and Retention
+
+Webhook payloads can contain user IDs, message text, postback data, and bot
+server response excerpts. Treat delivery logs as OA-manager operational data,
+not public Messaging API data.
+
+Rules:
+
+- Delivery list/detail RPCs must require the logged-in user to have access to
+  the OA's provider.
+- OA access tokens must not grant access to webhook delivery logs.
+- Store full request payload JSON only for real webhook deliveries, not verify
+  or diagnostic test sends.
+- Cap response body excerpts at 4 KB.
+- Do not store response headers in this phase.
+- Keep delivery and attempt rows for 30 days by default.
+- If retention cleanup is not implemented in the first engineering slice, add a
+  tracked follow-up before landing so retained payload data does not become an
+  unbounded product behavior.
 
 ## Server Architecture
 
@@ -414,6 +439,19 @@ developer clicks Verify
 
 No `oaWebhookDelivery` row is created.
 
+### Diagnostic Sample Webhook
+
+```text
+developer sends sample message event
+  -> ConnectRPC SendTestWebhookEvent
+  -> service signs a generated text-message event
+  -> service POSTs to endpoint
+  -> service returns status, reason, and timestamp
+```
+
+No `oaWebhookDelivery` row is created. The generated event is for endpoint
+diagnostics only, so its reply token is omitted or clearly marked unusable.
+
 ### Manual Redelivery
 
 ```text
@@ -473,12 +511,16 @@ Playwright:
   reason/detail, response status, attempt count, and payload.
 - A failed webhook appears in the Webhook errors table when Error statistics
   aggregation was enabled at event time.
+- New delivery rows created while Error statistics aggregation is off do not
+  appear in the developer-facing Webhook errors table.
 - A developer can manually redeliver a failed webhook and see the attempt count
   and status update.
 - Redelivered payloads keep the original webhook event ID and set
   `deliveryContext.isRedelivery = true`.
-- Test webhook can send an empty verify payload and a sample message event from
-  the console.
+- Test webhook can send an empty verify payload and a diagnostic sample message
+  event from the console without creating webhook delivery log rows.
+- Delivery logs are visible only to authorized OA/provider managers and are
+  covered by a 30-day retention policy.
 - No new root `/v2/...` routes are added.
 - No LINE-hosted APIs are called.
 
