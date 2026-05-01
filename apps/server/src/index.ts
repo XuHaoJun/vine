@@ -147,6 +147,24 @@ await liffPublicPlugin(app, { liff, auth, db })
 
 app.get('/healthz', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))
 
+await oaMessaging.processPendingDeliveries({ batchSize: 100, staleAfterMs: 60_000 })
+
+let oaMessagingRecoveryRunning = false
+const oaMessagingRecoveryInterval = setInterval(() => {
+  if (oaMessagingRecoveryRunning) return
+  oaMessagingRecoveryRunning = true
+  void oaMessaging
+    .processPendingDeliveries({ batchSize: 100, staleAfterMs: 60_000 })
+    .catch((err) => logger.error({ err }, '[oa-messaging] recovery failed'))
+    .finally(() => {
+      oaMessagingRecoveryRunning = false
+    })
+}, 10_000)
+
+app.addHook('onClose', async () => {
+  clearInterval(oaMessagingRecoveryInterval)
+})
+
 const port = Number(process.env['PORT'] ?? 3001)
 await app.listen({ port, host: '0.0.0.0' })
 logger.info(`[server] listening on http://localhost:${port}`)

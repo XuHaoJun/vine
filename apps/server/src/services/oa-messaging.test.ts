@@ -151,6 +151,18 @@ describe('oa messaging retry-key lookup', () => {
   })
 })
 
+describe('oa messaging recovery', () => {
+  it('exposes processPendingDeliveries for startup recovery', () => {
+    const service = createOAMessagingService({
+      db: {} as any,
+      instanceId: 'test',
+      now: () => new Date('2026-05-01T00:00:00.000Z'),
+    })
+
+    expect(typeof service.processPendingDeliveries).toBe('function')
+  })
+})
+
 describe('oa messaging delivery creation', () => {
   it('creates one delivery per recipient with deterministic message ids', async () => {
     const deliveryRows: unknown[] = []
