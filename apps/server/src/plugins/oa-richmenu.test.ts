@@ -459,7 +459,9 @@ describe('oaRichMenuPlugin — Link Rich Menu to User', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: oaApiPath('/bot/user/U1234567890abcdef1234567890abcdef/richmenu/richmenu-test123'),
+      url: oaApiPath(
+        '/bot/user/U1234567890abcdef1234567890abcdef/richmenu/richmenu-test123',
+      ),
       headers: { authorization: `Bearer ${validToken}` },
     })
 

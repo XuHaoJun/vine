@@ -232,7 +232,9 @@ function sendMessagingResult(reply: FastifyReply, result: any) {
       })
     }
     if (result.code === 'RETRY_KEY_CONFLICT') {
-      return reply.code(409).send({ message: 'The retry key conflicts with another request' })
+      return reply
+        .code(409)
+        .send({ message: 'The retry key conflicts with another request' })
     }
     if (result.code === 'QUOTA_EXCEEDED') {
       return reply.code(429).send({

@@ -171,7 +171,9 @@ describe('oa messaging delivery recovery', () => {
         }
       }
       if (requestId) {
-        await db.delete(oaMessageDelivery).where(eq(oaMessageDelivery.requestId, requestId))
+        await db
+          .delete(oaMessageDelivery)
+          .where(eq(oaMessageDelivery.requestId, requestId))
         await db.delete(oaMessageRequest).where(eq(oaMessageRequest.id, requestId))
       }
       if (oaId) {
@@ -270,7 +272,10 @@ describe('oa messaging transactional acceptance', () => {
 
       expect(retry).toMatchObject({ ok: false, code: 'RETRY_KEY_ACCEPTED' })
       const deliveries = await db.select().from(oaMessageDelivery)
-      expect(deliveries.map((row: { userId: string }) => row.userId).sort()).toEqual(['user-1', 'user-2'])
+      expect(deliveries.map((row: { userId: string }) => row.userId).sort()).toEqual([
+        'user-1',
+        'user-2',
+      ])
     })
   })
 
@@ -324,10 +329,16 @@ describe('oa messaging transactional acceptance', () => {
 
       expect(result.ok).toBe(true)
       expect(result).toHaveProperty('accepted')
-      const retryRows = await db.select().from(oaRetryKey).where(eq(oaRetryKey.retryKey, retryKey))
+      const retryRows = await db
+        .select()
+        .from(oaRetryKey)
+        .where(eq(oaRetryKey.retryKey, retryKey))
       expect(retryRows).toHaveLength(1)
       expect(retryRows[0].acceptedRequestId).not.toBe('acc_old_expired')
-      const requests = await db.select().from(oaMessageRequest).where(eq(oaMessageRequest.oaId, oa.id))
+      const requests = await db
+        .select()
+        .from(oaMessageRequest)
+        .where(eq(oaMessageRequest.oaId, oa.id))
       expect(requests).toHaveLength(2)
       const deliveries = await db.select().from(oaMessageDelivery)
       expect(deliveries).toHaveLength(1)

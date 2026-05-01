@@ -180,7 +180,12 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
       .onConflictDoNothing()
   }
 
-  async function findOrCreateOAChat(tx: any, oaId: string, userId: string, createdAt: string) {
+  async function findOrCreateOAChat(
+    tx: any,
+    oaId: string,
+    userId: string,
+    createdAt: string,
+  ) {
     const userChatSubquery = tx
       .select({ chatId: chatMember.chatId })
       .from(chatMember)
@@ -218,8 +223,12 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
 
     if (rows.length === 0) return
 
-    const delivered = rows.filter((row: { status: string }) => row.status === 'delivered').length
-    const failed = rows.filter((row: { status: string }) => row.status === 'failed').length
+    const delivered = rows.filter(
+      (row: { status: string }) => row.status === 'delivered',
+    ).length
+    const failed = rows.filter(
+      (row: { status: string }) => row.status === 'failed',
+    ).length
     const pending = rows.length - delivered - failed
     const nextStatus =
       pending > 0
@@ -252,7 +261,10 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
         .where(
           and(
             inArray(oaMessageDelivery.status, ['pending', 'processing']),
-            or(isNull(oaMessageDelivery.lockedAt), lt(oaMessageDelivery.lockedAt, staleBefore)),
+            or(
+              isNull(oaMessageDelivery.lockedAt),
+              lt(oaMessageDelivery.lockedAt, staleBefore),
+            ),
           ),
         )
         .orderBy(oaMessageDelivery.createdAt)
@@ -283,7 +295,12 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
           metadata?: string | null
         }>
         const messageIds = delivery.messageIdsJson as string[]
-        const chatId = await findOrCreateOAChat(tx, delivery.oaId, delivery.userId, lockedAt)
+        const chatId = await findOrCreateOAChat(
+          tx,
+          delivery.oaId,
+          delivery.userId,
+          lockedAt,
+        )
 
         for (let index = 0; index < messages.length; index++) {
           await tx
@@ -320,7 +337,9 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
           .where(eq(oaMessageDelivery.id, delivery.id))
       }
 
-      const touchedRequestIds = [...new Set(deliveries.map((delivery) => delivery.requestId))]
+      const touchedRequestIds = [
+        ...new Set(deliveries.map((delivery) => delivery.requestId)),
+      ]
       for (const requestId of touchedRequestIds) {
         await updateRequestStatus(tx, requestId)
       }
@@ -513,7 +532,11 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
         const quotaDelta = recipients.length * input.messages.length
         const allowed = await reserveQuota(tx, input.oaId, quotaDelta, nowIso)
         if (!allowed) {
-          return { ok: false as const, code: 'QUOTA_EXCEEDED', httpRequestId: checked.httpRequestId }
+          return {
+            ok: false as const,
+            code: 'QUOTA_EXCEEDED',
+            httpRequestId: checked.httpRequestId,
+          }
         }
 
         const acceptedRequestId = createAcceptedRequestId()
@@ -581,7 +604,10 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
       },
     })
     if (!accepted.ok) return accepted
-    const processed = await processPendingDeliveries({ batchSize: 25, staleAfterMs: 30_000 })
+    const processed = await processPendingDeliveries({
+      batchSize: 25,
+      staleAfterMs: 30_000,
+    })
     return { ...accepted, processed }
   }
 
@@ -600,12 +626,17 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
         const friends = await tx
           .select({ userId: oaFriendship.userId })
           .from(oaFriendship)
-          .where(and(eq(oaFriendship.oaId, input.oaId), eq(oaFriendship.status, 'friend')))
+          .where(
+            and(eq(oaFriendship.oaId, input.oaId), eq(oaFriendship.status, 'friend')),
+          )
         return friends.map((friend: { userId: string }) => friend.userId)
       },
     })
     if (!accepted.ok) return accepted
-    const processed = await processPendingDeliveries({ batchSize: 100, staleAfterMs: 30_000 })
+    const processed = await processPendingDeliveries({
+      batchSize: 100,
+      staleAfterMs: 30_000,
+    })
     return { ...accepted, processed }
   }
 
@@ -629,7 +660,10 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
       },
     })
     if (!accepted.ok) return accepted
-    const processed = await processPendingDeliveries({ batchSize: 25, staleAfterMs: 30_000 })
+    const processed = await processPendingDeliveries({
+      batchSize: 25,
+      staleAfterMs: 30_000,
+    })
     return { ...accepted, processed }
   }
 
