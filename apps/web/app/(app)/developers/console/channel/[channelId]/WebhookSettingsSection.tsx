@@ -68,9 +68,12 @@ export function WebhookSettingsSection({ channelId }: { channelId: string }) {
     mutationFn: () => oaClient.verifyWebhookEndpoint({ officialAccountId: channelId }),
     onSuccess: (res) => {
       void queryClient.invalidateQueries({ queryKey })
-      showToast(res.result?.success ? 'Webhook verified' : 'Webhook verification failed', {
-        type: res.result?.success ? 'success' : 'error',
-      })
+      showToast(
+        res.result?.success ? 'Webhook verified' : 'Webhook verification failed',
+        {
+          type: res.result?.success ? 'success' : 'error',
+        },
+      )
     },
     onError: () => showToast('Failed to verify webhook', { type: 'error' }),
   })
@@ -104,33 +107,33 @@ export function WebhookSettingsSection({ channelId }: { channelId: string }) {
         )}
       />
 
-      {(['useWebhook', 'webhookRedeliveryEnabled', 'errorStatisticsEnabled'] as const).map(
-        (name) => (
-          <Controller
-            key={name}
-            control={form.control}
-            name={name}
-            render={({ field: { value, onChange } }) => (
-              <XStack justify="space-between" items="center">
-                <SizableText size="$3" color="$color11">
-                  {name === 'useWebhook'
-                    ? 'Use webhook'
-                    : name === 'webhookRedeliveryEnabled'
-                      ? 'Webhook redelivery'
-                      : 'Error statistics aggregation'}
-                </SizableText>
-                <Button
-                  size="$2"
-                  variant={value ? undefined : 'outlined'}
-                  onPress={() => onChange(!value)}
-                >
-                  {value ? 'On' : 'Off'}
-                </Button>
-              </XStack>
-            )}
-          />
-        ),
-      )}
+      {(
+        ['useWebhook', 'webhookRedeliveryEnabled', 'errorStatisticsEnabled'] as const
+      ).map((name) => (
+        <Controller
+          key={name}
+          control={form.control}
+          name={name}
+          render={({ field: { value, onChange } }) => (
+            <XStack justify="space-between" items="center">
+              <SizableText size="$3" color="$color11">
+                {name === 'useWebhook'
+                  ? 'Use webhook'
+                  : name === 'webhookRedeliveryEnabled'
+                    ? 'Webhook redelivery'
+                    : 'Error statistics aggregation'}
+              </SizableText>
+              <Button
+                size="$2"
+                variant={value ? undefined : 'outlined'}
+                onPress={() => onChange(!value)}
+              >
+                {value ? 'On' : 'Off'}
+              </Button>
+            </XStack>
+          )}
+        />
+      ))}
 
       <XStack justify="space-between" items="center">
         <SizableText size="$2" color="$color10">

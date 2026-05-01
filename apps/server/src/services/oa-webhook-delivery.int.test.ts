@@ -9,7 +9,10 @@ import { randomUUID } from 'crypto'
 
 async function seedOA(db: Parameters<typeof createOAService>[0]['db']) {
   const oa = createOAService({ db, database: {} as any })
-  const provider = await oa.createProvider({ name: 'Webhook Test Provider', ownerId: 'user_1' })
+  const provider = await oa.createProvider({
+    name: 'Webhook Test Provider',
+    ownerId: 'user_1',
+  })
   const account = await oa.createOfficialAccount({
     providerId: provider.id,
     name: 'Webhook Test OA',
@@ -35,7 +38,11 @@ describe('oa webhook delivery service integration', () => {
       const service = createOAWebhookDeliveryService({
         db,
         oa,
-        fetchFn: vi.fn().mockResolvedValue(new Response('bad', { status: 500 })) as unknown as typeof fetch,
+        fetchFn: vi
+          .fn()
+          .mockResolvedValue(
+            new Response('bad', { status: 500 }),
+          ) as unknown as typeof fetch,
         now: () => '2026-05-01T00:00:00.000Z',
       })
 
@@ -87,7 +94,11 @@ describe('oa webhook delivery service integration', () => {
       const service = createOAWebhookDeliveryService({
         db,
         oa,
-        fetchFn: vi.fn().mockResolvedValue(new Response(null, { status: 204 })) as unknown as typeof fetch,
+        fetchFn: vi
+          .fn()
+          .mockResolvedValue(
+            new Response(null, { status: 204 }),
+          ) as unknown as typeof fetch,
         now: () => '2026-05-01T00:00:00.000Z',
       })
 
@@ -143,7 +154,11 @@ describe('oa webhook delivery service integration', () => {
       const service = createOAWebhookDeliveryService({
         db,
         oa,
-        fetchFn: vi.fn().mockResolvedValue(new Response(null, { status: 204 })) as unknown as typeof fetch,
+        fetchFn: vi
+          .fn()
+          .mockResolvedValue(
+            new Response(null, { status: 204 }),
+          ) as unknown as typeof fetch,
         now: () => '2026-05-01T00:00:00.000Z',
       })
 
@@ -205,7 +220,9 @@ describe('oa webhook delivery service integration', () => {
       const fetchFn = vi
         .fn()
         .mockResolvedValueOnce(new Response('bad', { status: 500 }))
-        .mockResolvedValueOnce(new Response(null, { status: 204 })) as unknown as typeof fetch
+        .mockResolvedValueOnce(
+          new Response(null, { status: 204 }),
+        ) as unknown as typeof fetch
       const service = createOAWebhookDeliveryService({
         db,
         oa,
@@ -251,10 +268,7 @@ describe('oa webhook delivery service integration', () => {
         webhookRedeliveryEnabled: true,
       })
 
-      const rows = await db
-        .select()
-        .from(oaWebhook)
-        .where(eq(oaWebhook.oaId, account.id))
+      const rows = await db.select().from(oaWebhook).where(eq(oaWebhook.oaId, account.id))
       expect(rows).toHaveLength(1)
       expect(rows[0]).toMatchObject({
         url: 'https://example.test/two',

@@ -299,18 +299,27 @@ export function createOAService(deps: OADeps) {
     const values = {
       oaId,
       url: input.url ?? existing?.url ?? '',
-      status: input.url && input.url !== existing?.url ? 'pending' : existing?.status ?? 'pending',
+      status:
+        input.url && input.url !== existing?.url
+          ? 'pending'
+          : (existing?.status ?? 'pending'),
       useWebhook: input.useWebhook ?? existing?.useWebhook ?? true,
       webhookRedeliveryEnabled:
         input.webhookRedeliveryEnabled ?? existing?.webhookRedeliveryEnabled ?? false,
       errorStatisticsEnabled:
         input.errorStatisticsEnabled ?? existing?.errorStatisticsEnabled ?? false,
       lastVerifiedAt:
-        input.url && input.url !== existing?.url ? null : existing?.lastVerifiedAt ?? null,
+        input.url && input.url !== existing?.url
+          ? null
+          : (existing?.lastVerifiedAt ?? null),
       lastVerifyStatusCode:
-        input.url && input.url !== existing?.url ? null : existing?.lastVerifyStatusCode ?? null,
+        input.url && input.url !== existing?.url
+          ? null
+          : (existing?.lastVerifyStatusCode ?? null),
       lastVerifyReason:
-        input.url && input.url !== existing?.url ? null : existing?.lastVerifyReason ?? null,
+        input.url && input.url !== existing?.url
+          ? null
+          : (existing?.lastVerifyReason ?? null),
     }
 
     if (!values.url) {

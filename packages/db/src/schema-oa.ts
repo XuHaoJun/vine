@@ -57,9 +57,7 @@ export const oaWebhook = pgTable(
     webhookRedeliveryEnabled: boolean('webhookRedeliveryEnabled')
       .notNull()
       .default(false),
-    errorStatisticsEnabled: boolean('errorStatisticsEnabled')
-      .notNull()
-      .default(false),
+    errorStatisticsEnabled: boolean('errorStatisticsEnabled').notNull().default(false),
     lastVerifyStatusCode: integer('lastVerifyStatusCode'),
     lastVerifyReason: text('lastVerifyReason'),
     lastVerifiedAt: timestamp('lastVerifiedAt', { mode: 'string' }),

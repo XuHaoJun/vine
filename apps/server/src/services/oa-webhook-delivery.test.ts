@@ -42,8 +42,9 @@ describe('webhook delivery helpers', () => {
   })
 
   it('throws when payload is missing webhookEventId', () => {
-    expect(() => extractFirstWebhookEvent({ destination: 'oa_1', events: [{}] }))
-      .toThrow('Webhook payload is missing webhookEventId')
+    expect(() => extractFirstWebhookEvent({ destination: 'oa_1', events: [{}] })).toThrow(
+      'Webhook payload is missing webhookEventId',
+    )
   })
 
   it('marks every event in a redelivery payload as redelivery', () => {
@@ -138,7 +139,9 @@ describe('createOAWebhookDeliveryService persistence failure', () => {
         validateWebhookUrl: vi.fn(),
         recordWebhookVerifyResult: vi.fn(),
       } as any,
-      fetchFn: vi.fn(() => Promise.resolve(new Response(null, { status: 200 }))) as unknown as typeof fetch,
+      fetchFn: vi.fn(() =>
+        Promise.resolve(new Response(null, { status: 200 })),
+      ) as unknown as typeof fetch,
       now: () => '2026-05-01T00:00:00.000Z',
       logger,
     })

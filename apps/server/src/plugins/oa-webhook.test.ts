@@ -289,7 +289,10 @@ describe('POST /api/oa/internal/dispatch-postback', () => {
     })
     await app.close()
     expect(res.statusCode).toBe(502)
-    expect(JSON.parse(res.body)).toEqual({ message: 'Webhook delivery failed', status: 500 })
+    expect(JSON.parse(res.body)).toEqual({
+      message: 'Webhook delivery failed',
+      status: 500,
+    })
   })
 
   it('returns 504 when webhook fetch throws / times out', async () => {
