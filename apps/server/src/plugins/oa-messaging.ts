@@ -9,6 +9,7 @@ import { ImagemapMessageSchema } from '@vine/imagemap-schema'
 import * as v from 'valibot'
 import type { DriveService } from '@vine/drive'
 import type { createOAService } from '../services/oa'
+import { oaApiPath } from './oa-routes'
 
 const CONTENT_TYPE_MAP: Record<string, { ext: string; mimeTypes: string[] }> = {
   image: { ext: 'jpg', mimeTypes: ['image/jpeg', 'image/png'] },
@@ -227,7 +228,7 @@ export async function oaMessagingPlugin(
 
   // Reply Messages
   fastify.post(
-    '/api/oa/v2/bot/message/reply',
+    oaApiPath('/bot/message/reply'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const oaId = await extractOaFromToken(request, db)
@@ -305,7 +306,7 @@ export async function oaMessagingPlugin(
 
   // Push Messages
   fastify.post(
-    '/api/oa/v2/bot/message/push',
+    oaApiPath('/bot/message/push'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const oaId = await extractOaFromToken(request, db)
@@ -383,7 +384,7 @@ export async function oaMessagingPlugin(
 
   // Get Profile
   fastify.get(
-    '/api/oa/v2/bot/profile/:userId',
+    oaApiPath('/bot/profile/:userId'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         await extractOaFromToken(request, db)
@@ -407,7 +408,7 @@ export async function oaMessagingPlugin(
 
   // Get Quota
   fastify.get(
-    '/api/oa/v2/bot/message/quota',
+    oaApiPath('/bot/message/quota'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const oaId = await extractOaFromToken(request, db)
@@ -436,7 +437,7 @@ export async function oaMessagingPlugin(
 
   // Get Quota Consumption
   fastify.get(
-    '/api/oa/v2/bot/message/quota/consumption',
+    oaApiPath('/bot/message/quota/consumption'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const oaId = await extractOaFromToken(request, db)
@@ -465,7 +466,7 @@ export async function oaMessagingPlugin(
 
   // Upload Message Content (image/video/audio)
   fastify.post(
-    '/api/oa/v2/bot/message/:messageId/content',
+    oaApiPath('/bot/message/:messageId/content'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const oaId = await extractOaFromToken(request, db)
@@ -526,7 +527,7 @@ export async function oaMessagingPlugin(
 
   // Get Message Content (image/video/audio)
   fastify.get(
-    '/api/oa/v2/bot/message/:messageId/content',
+    oaApiPath('/bot/message/:messageId/content'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const oaId = await extractOaFromToken(request, db)
@@ -586,7 +587,7 @@ export async function oaMessagingPlugin(
 
   // OAuth: Issue Access Token (short-lived)
   fastify.post(
-    '/api/oa/v2/oauth/accessToken',
+    oaApiPath('/oauth/accessToken'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const body = request.body as Record<string, string>
@@ -622,7 +623,7 @@ export async function oaMessagingPlugin(
 
   // OAuth: Revoke Access Token
   fastify.post(
-    '/api/oa/v2/oauth/revoke',
+    oaApiPath('/oauth/revoke'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const body = request.body as { access_token: string }

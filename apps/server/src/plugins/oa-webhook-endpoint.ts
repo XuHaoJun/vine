@@ -4,6 +4,7 @@ import type { schema } from '@vine/db'
 import { oaAccessToken } from '@vine/db/schema-oa'
 import { eq } from 'drizzle-orm'
 import type { createOAService } from '../services/oa'
+import { oaApiPath } from './oa-routes'
 
 class MissingBearerTokenError extends Error {}
 class InvalidAccessTokenError extends Error {}
@@ -64,7 +65,7 @@ export async function oaWebhookEndpointPlugin(
   })
 
   fastify.put(
-    '/v2/bot/channel/webhook/endpoint',
+    oaApiPath('/bot/channel/webhook/endpoint'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
       const body = request.body as { endpoint?: string }
@@ -90,7 +91,7 @@ export async function oaWebhookEndpointPlugin(
   )
 
   fastify.get(
-    '/v2/bot/channel/webhook/endpoint',
+    oaApiPath('/bot/channel/webhook/endpoint'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
 
@@ -107,7 +108,7 @@ export async function oaWebhookEndpointPlugin(
   )
 
   fastify.post(
-    '/v2/bot/channel/webhook/test',
+    oaApiPath('/bot/channel/webhook/test'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
       const body = request.body as { endpoint?: string }

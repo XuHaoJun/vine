@@ -1,5 +1,6 @@
 import { describe, expect, it, afterAll, vi } from 'vitest'
 import Fastify from 'fastify'
+import { oaApiPath } from './oa-routes'
 import { oaMessagingPlugin } from './oa-messaging'
 
 const validToken = 'valid-test-token'
@@ -110,7 +111,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/push',
+        url: oaApiPath('/bot/message/push'),
         payload: { to: userId, messages: [{ type: 'text', text: 'hello' }] },
       })
 
@@ -128,7 +129,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/push',
+        url: oaApiPath('/bot/message/push'),
         headers: { authorization: `Bearer invalid-token` },
         payload: { to: userId, messages: [{ type: 'text', text: 'hello' }] },
       })
@@ -138,6 +139,22 @@ describe('oaMessagingPlugin — Push Message', () => {
       const body = JSON.parse(res.body)
       expect(body.code).toBe('INVALID_TOKEN')
       expect(body.message).toBe('Invalid access token')
+    })
+
+    it('does not register the root /v2 push route', async () => {
+      const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+      const { app } = createTestApp(mockDb)
+      await app.ready()
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/v2/bot/message/push',
+        headers: { authorization: `Bearer ${validToken}` },
+        payload: { to: userId, messages: [{ type: 'text', text: 'hello' }] },
+      })
+
+      await app.close()
+      expect(res.statusCode).toBe(404)
     })
   })
 
@@ -149,7 +166,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/push',
+        url: oaApiPath('/bot/message/push'),
         headers: { authorization: `Bearer ${validToken}` },
         payload: { messages: [{ type: 'text', text: 'hello' }] },
       })
@@ -167,7 +184,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/push',
+        url: oaApiPath('/bot/message/push'),
         headers: { authorization: `Bearer ${validToken}` },
         payload: { to: userId },
       })
@@ -188,7 +205,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/push',
+        url: oaApiPath('/bot/message/push'),
         headers: { authorization: `Bearer ${validToken}` },
         payload: { to: userId, messages: [{ type: 'text' }] },
       })
@@ -210,7 +227,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/push',
+        url: oaApiPath('/bot/message/push'),
         headers: { authorization: `Bearer ${validToken}` },
         payload: {
           to: userId,
@@ -243,7 +260,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/push',
+        url: oaApiPath('/bot/message/push'),
         headers: { authorization: `Bearer ${validToken}` },
         payload: { to: userId, messages: [{ type: 'custom' }] },
       })
@@ -264,7 +281,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/push',
+        url: oaApiPath('/bot/message/push'),
         headers: { authorization: `Bearer ${validToken}` },
         payload: { to: userId, messages: [{ type: 'text', text: 'hello' }] },
       })
@@ -285,7 +302,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/push',
+        url: oaApiPath('/bot/message/push'),
         headers: { authorization: `Bearer ${validToken}` },
         payload: { to: userId, messages: [{ type: 'text', text: 'hello' }] },
       })
@@ -311,7 +328,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/push',
+        url: oaApiPath('/bot/message/push'),
         headers: { authorization: `Bearer ${validToken}` },
         payload: { to: userId, messages: [{ type: 'text', text: 'hello world' }] },
       })
@@ -351,7 +368,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/push',
+        url: oaApiPath('/bot/message/push'),
         headers: { authorization: `Bearer ${validToken}` },
         payload: { to: userId, messages: [flexMessage] },
       })
@@ -380,7 +397,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/push',
+        url: oaApiPath('/bot/message/push'),
         headers: { authorization: `Bearer ${validToken}` },
         payload: {
           to: userId,
@@ -413,7 +430,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/push',
+        url: oaApiPath('/bot/message/push'),
         headers: { authorization: `Bearer ${validToken}` },
         payload: { to: userId, messages: [{ type: 'text', text: 'hello' }] },
       })
@@ -437,7 +454,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/push',
+        url: oaApiPath('/bot/message/push'),
         headers: { authorization: `Bearer ${validToken}` },
         payload: { to: userId, messages: [{ type: 'text', text: 'hello' }] },
       })
@@ -457,7 +474,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/reply',
+        url: oaApiPath('/bot/message/reply'),
         headers: { authorization: `Bearer ${validToken}` },
         payload: {
           replyToken: 'reply-1',
@@ -479,7 +496,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
       const res = await app.inject({
         method: 'GET',
-        url: '/api/oa/v2/bot/message/quota',
+        url: oaApiPath('/bot/message/quota'),
         headers: { authorization: `Bearer ${validToken}` },
       })
 
@@ -502,7 +519,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
       const res = await app.inject({
         method: 'GET',
-        url: '/api/oa/v2/bot/message/quota',
+        url: oaApiPath('/bot/message/quota'),
         headers: { authorization: `Bearer ${validToken}` },
       })
 
@@ -527,7 +544,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
       const res = await app.inject({
         method: 'GET',
-        url: '/api/oa/v2/bot/message/quota/consumption',
+        url: oaApiPath('/bot/message/quota/consumption'),
         headers: { authorization: `Bearer ${validToken}` },
       })
 
@@ -544,7 +561,7 @@ describe('oaMessagingPlugin — Push Message', () => {
 
       const res = await app.inject({
         method: 'GET',
-        url: '/api/oa/v2/bot/message/quota',
+        url: oaApiPath('/bot/message/quota'),
       })
 
       await app.close()
@@ -562,7 +579,7 @@ describe('oaMessagingPlugin — Reply Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/reply',
+        url: oaApiPath('/bot/message/reply'),
         payload: { replyToken: 'reply-1', messages: [{ type: 'text', text: 'hello' }] },
       })
 
@@ -579,7 +596,7 @@ describe('oaMessagingPlugin — Reply Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/reply',
+        url: oaApiPath('/bot/message/reply'),
         headers: { authorization: `Bearer ${validToken}` },
         payload: { messages: [{ type: 'text', text: 'hello' }] },
       })
@@ -597,7 +614,7 @@ describe('oaMessagingPlugin — Reply Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/reply',
+        url: oaApiPath('/bot/message/reply'),
         headers: { authorization: `Bearer ${validToken}` },
         payload: { replyToken: 'reply-1' },
       })
@@ -615,7 +632,7 @@ describe('oaMessagingPlugin — Reply Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/reply',
+        url: oaApiPath('/bot/message/reply'),
         headers: { authorization: `Bearer ${validToken}` },
         payload: { replyToken: 'reply-1', messages: [{ type: 'text' }] },
       })
@@ -633,7 +650,7 @@ describe('oaMessagingPlugin — Reply Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/reply',
+        url: oaApiPath('/bot/message/reply'),
         headers: { authorization: `Bearer ${validToken}` },
         payload: {
           replyToken: 'reply-1',
@@ -658,7 +675,7 @@ describe('oaMessagingPlugin — Reply Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/reply',
+        url: oaApiPath('/bot/message/reply'),
         headers: { authorization: `Bearer ${validToken}` },
         payload: {
           replyToken: 'reply-1',
@@ -699,7 +716,7 @@ describe('oaMessagingPlugin — Reply Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/reply',
+        url: oaApiPath('/bot/message/reply'),
         headers: { authorization: `Bearer ${validToken}` },
         payload: {
           replyToken: 'reply-1',
@@ -732,7 +749,7 @@ describe('oaMessagingPlugin — Reply Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/reply',
+        url: oaApiPath('/bot/message/reply'),
         headers: { authorization: `Bearer ${validToken}` },
         payload: {
           replyToken: 'unknown-token',
@@ -761,7 +778,7 @@ describe('oaMessagingPlugin — Reply Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/reply',
+        url: oaApiPath('/bot/message/reply'),
         headers: { authorization: `Bearer ${validToken}` },
         payload: {
           replyToken: 'expired-token',
@@ -790,7 +807,7 @@ describe('oaMessagingPlugin — Reply Message', () => {
 
       const res = await app.inject({
         method: 'POST',
-        url: '/api/oa/v2/bot/message/reply',
+        url: oaApiPath('/bot/message/reply'),
         headers: { authorization: `Bearer ${validToken}` },
         payload: {
           replyToken: 'used-token',
