@@ -6,11 +6,18 @@ import { oaClient } from '~/features/oa/client'
 import { Button } from '~/interface/buttons/Button'
 import { showToast } from '~/interface/toast/Toast'
 
+import {
+  getWebhookDeliveryDetailRows,
+  getWebhookDeliverySummaryCells,
+} from './WebhookErrorsSection.helpers'
+
 export function WebhookErrorsSection({ channelId }: { channelId: string }) {
   const queryClient = useTanQueryClient()
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined)
+  const [cursor, setCursor] = useState<string | undefined>(undefined)
   const settingsKey = ['oa', 'webhook-settings', channelId]
-  const listKey = ['oa', 'webhook-deliveries', channelId, 'failed']
+  const listRootKey = ['oa', 'webhook-deliveries', channelId]
+  const listKey = [...listRootKey, 'failed', cursor]
   const settings = useTanQuery({
     queryKey: settingsKey,
     queryFn: () => oaClient.getWebhookSettings({ officialAccountId: channelId }),
@@ -22,6 +29,7 @@ export function WebhookErrorsSection({ channelId }: { channelId: string }) {
       oaClient.listWebhookDeliveries({
         officialAccountId: channelId,
         pageSize: 50,
+        cursor,
         statusFilter: 'failed',
       }),
     enabled: !!channelId,
@@ -39,7 +47,7 @@ export function WebhookErrorsSection({ channelId }: { channelId: string }) {
     mutationFn: (deliveryId: string) =>
       oaClient.redeliverWebhook({ officialAccountId: channelId, deliveryId }),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: listKey })
+      void queryClient.invalidateQueries({ queryKey: listRootKey })
       if (selectedId) {
         void queryClient.invalidateQueries({
           queryKey: ['oa', 'webhook-delivery', channelId, selectedId],
@@ -59,45 +67,104 @@ export function WebhookErrorsSection({ channelId }: { channelId: string }) {
       {isLoading ? (
         <Spinner />
       ) : (
-        <YStack>
-          {(data?.deliveries ?? []).map((row) => (
-            <XStack
-              key={row.id}
-              py="$2"
-              gap="$3"
-              items="center"
-              borderBottomWidth={1}
-              borderColor="$borderColor"
-            >
-              <SizableText size="$2" color="$color10" width={160}>
-                {row.createdAt}
-              </SizableText>
-              <SizableText size="$2" color="$color12" width={90}>
-                {row.eventType}
-              </SizableText>
-              <SizableText size="$2" color="$color10" width={120}>
-                {row.reason ?? row.status}
-              </SizableText>
-              <SizableText size="$2" color="$color10" flex={1} numberOfLines={1}>
-                {row.detail ?? ''}
-              </SizableText>
-              <Button size="$2" variant="outlined" onPress={() => setSelectedId(row.id)}>
-                Detail
-              </Button>
-              <Button
-                size="$2"
-                variant={redeliveryEnabled ? undefined : 'outlined'}
-                onPress={() => redeliver.mutate(row.id)}
-                disabled={!redeliveryEnabled || redeliver.isPending}
+        <YStack gap="$2">
+          <XStack gap="$3" py="$1" items="center">
+            <SizableText size="$1" color="$color10" width={150}>
+              Time
+            </SizableText>
+            <SizableText size="$1" color="$color10" width={80}>
+              Event
+            </SizableText>
+            <SizableText size="$1" color="$color10" width={76}>
+              Status
+            </SizableText>
+            <SizableText size="$1" color="$color10" width={64}>
+              HTTP
+            </SizableText>
+            <SizableText size="$1" color="$color10" width={130}>
+              Reason
+            </SizableText>
+            <SizableText size="$1" color="$color10" width={64}>
+              Tries
+            </SizableText>
+            <SizableText size="$1" color="$color10" width={78}>
+              Redeliv.
+            </SizableText>
+            <SizableText size="$1" color="$color10" flex={1}>
+              Detail
+            </SizableText>
+            <YStack width={176} />
+          </XStack>
+          {(data?.deliveries ?? []).map((row) => {
+            const cells = getWebhookDeliverySummaryCells(row)
+            return (
+              <XStack
+                key={row.id}
+                py="$2"
+                gap="$3"
+                items="center"
+                borderBottomWidth={1}
+                borderColor="$borderColor"
               >
-                Redeliver
-              </Button>
-            </XStack>
-          ))}
+                <SizableText size="$2" color="$color10" width={150} numberOfLines={1}>
+                  {cells.createdAt}
+                </SizableText>
+                <SizableText size="$2" color="$color12" width={80}>
+                  {cells.eventType}
+                </SizableText>
+                <SizableText size="$2" color="$color10" width={76}>
+                  {cells.status}
+                </SizableText>
+                <SizableText size="$2" color="$color10" width={64}>
+                  {cells.responseStatus}
+                </SizableText>
+                <SizableText size="$2" color="$color10" width={130} numberOfLines={1}>
+                  {cells.reason}
+                </SizableText>
+                <SizableText size="$2" color="$color10" width={64}>
+                  {cells.attemptCount}
+                </SizableText>
+                <SizableText size="$2" color="$color10" width={78}>
+                  {cells.redelivery}
+                </SizableText>
+                <SizableText size="$2" color="$color10" flex={1} numberOfLines={1}>
+                  {cells.detail}
+                </SizableText>
+                <XStack gap="$2" width={176} justify="flex-end">
+                  <Button
+                    size="$2"
+                    variant="outlined"
+                    onPress={() => setSelectedId(row.id)}
+                  >
+                    Detail
+                  </Button>
+                  <Button
+                    size="$2"
+                    variant={redeliveryEnabled ? undefined : 'outlined'}
+                    onPress={() => redeliver.mutate(row.id)}
+                    disabled={!redeliveryEnabled || redeliver.isPending}
+                  >
+                    Redeliver
+                  </Button>
+                </XStack>
+              </XStack>
+            )
+          })}
           {(data?.deliveries ?? []).length === 0 && (
             <SizableText size="$2" color="$color10">
               No failed webhook deliveries.
             </SizableText>
+          )}
+          {data?.nextCursor && (
+            <XStack justify="flex-end" pt="$2">
+              <Button
+                size="$2"
+                variant="outlined"
+                onPress={() => setCursor(data.nextCursor)}
+              >
+                Older
+              </Button>
+            </XStack>
           )}
         </YStack>
       )}
@@ -106,7 +173,20 @@ export function WebhookErrorsSection({ channelId }: { channelId: string }) {
           <SizableText size="$3" fontWeight="700">
             Delivery detail
           </SizableText>
-          <SizableText size="$2" fontFamily="$mono">
+          {getWebhookDeliveryDetailRows(detail.data).map((row) => (
+            <XStack key={row.label} gap="$3">
+              <SizableText size="$2" color="$color10" width={150}>
+                {row.label}
+              </SizableText>
+              <SizableText size="$2" color="$color12" flex={1}>
+                {row.value}
+              </SizableText>
+            </XStack>
+          ))}
+          <SizableText size="$2" color="$color10">
+            Request payload JSON
+          </SizableText>
+          <SizableText size="$2" fontFamily="$mono" color="$color12">
             {detail.data.payloadJson}
           </SizableText>
         </YStack>

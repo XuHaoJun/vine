@@ -318,6 +318,42 @@ describe('oa webhook observability rpc', () => {
     })
   })
 
+  describe('listWebhookDeliveries', () => {
+    it('passes cursor through and returns the next cursor', async () => {
+      const { capturedImpl, webhookDelivery } = makeDeps({
+        webhookDelivery: {
+          verifyWebhook: vi.fn(),
+          listDeliveries: vi.fn().mockResolvedValue({
+            deliveries: [],
+            nextCursor: '2026-05-01T00:00:00.000Z',
+          }),
+          getDelivery: vi.fn(),
+          redeliver: vi.fn(),
+          sendTestWebhookEvent: vi.fn(),
+        },
+      })
+      mockedGetAuthDataFromRequest.mockResolvedValue({ id: 'user-1' } as any)
+
+      const result = await capturedImpl.listWebhookDeliveries(
+        {
+          officialAccountId: 'oa-1',
+          pageSize: 10,
+          cursor: '2026-05-02T00:00:00.000Z',
+          statusFilter: 'failed',
+        },
+        makeAuthCtx('user-1'),
+      )
+
+      expect(webhookDelivery.listDeliveries).toHaveBeenCalledWith({
+        oaId: 'oa-1',
+        pageSize: 10,
+        cursor: '2026-05-02T00:00:00.000Z',
+        statusFilter: 'failed',
+      })
+      expect(result.nextCursor).toBe('2026-05-01T00:00:00.000Z')
+    })
+  })
+
   describe('redeliverWebhook', () => {
     it('maps redelivery-disabled to FailedPrecondition', async () => {
       const { capturedImpl, webhookDelivery } = makeDeps({

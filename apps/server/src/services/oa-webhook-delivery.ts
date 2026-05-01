@@ -2,10 +2,7 @@ import { and, desc, eq, lt } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { schema } from '@vine/db'
 import { oaWebhook } from '@vine/db/schema-oa'
-import {
-  oaWebhookAttempt,
-  oaWebhookDelivery,
-} from '@vine/db/schema-private'
+import { oaWebhookAttempt, oaWebhookDelivery } from '@vine/db/schema-private'
 import type { createOAService } from './oa'
 import { randomUUID } from 'crypto'
 
@@ -215,7 +212,10 @@ export function createOAWebhookDeliveryService(deps: OAWebhookDeliveryDeps) {
     if (isRedelivery) {
       update.isRedelivery = true
     }
-    await tx.update(oaWebhookDelivery).set(update).where(eq(oaWebhookDelivery.id, deliveryId))
+    await tx
+      .update(oaWebhookDelivery)
+      .set(update)
+      .where(eq(oaWebhookDelivery.id, deliveryId))
   }
 
   async function deliverRealEvent(input: {
@@ -309,7 +309,8 @@ export function createOAWebhookDeliveryService(deps: OAWebhookDeliveryDeps) {
       }
     }
 
-    if (sent.ok) return { kind: 'ok', deliveryId: target.id, statusCode: sent.responseStatus }
+    if (sent.ok)
+      return { kind: 'ok', deliveryId: target.id, statusCode: sent.responseStatus }
     return {
       kind: 'delivery-failed',
       deliveryId: target.id,
@@ -321,10 +322,12 @@ export function createOAWebhookDeliveryService(deps: OAWebhookDeliveryDeps) {
 
   async function verifyWebhook(input: { oaId: string; endpointOverride?: string }) {
     const account = await deps.oa.getOfficialAccount(input.oaId)
-    if (!account) return { success: false, statusCode: 0, reason: 'Official account not found' }
+    if (!account)
+      return { success: false, statusCode: 0, reason: 'Official account not found' }
     const webhook = await deps.oa.getWebhook(input.oaId)
     const url = input.endpointOverride ?? webhook?.url
-    if (!url) return { success: false, statusCode: 0, reason: 'Webhook endpoint not found' }
+    if (!url)
+      return { success: false, statusCode: 0, reason: 'Webhook endpoint not found' }
     try {
       deps.oa.validateWebhookUrl(url)
     } catch (error: any) {
@@ -350,9 +353,11 @@ export function createOAWebhookDeliveryService(deps: OAWebhookDeliveryDeps) {
 
   async function sendTestWebhookEvent(input: { oaId: string; text: string }) {
     const account = await deps.oa.getOfficialAccount(input.oaId)
-    if (!account) return { success: false, statusCode: 0, reason: 'Official account not found' }
+    if (!account)
+      return { success: false, statusCode: 0, reason: 'Official account not found' }
     const webhook = await deps.oa.getWebhook(input.oaId)
-    if (!webhook) return { success: false, statusCode: 0, reason: 'Webhook endpoint not found' }
+    if (!webhook)
+      return { success: false, statusCode: 0, reason: 'Webhook endpoint not found' }
     const payload = {
       destination: input.oaId,
       events: [
@@ -385,12 +390,17 @@ export function createOAWebhookDeliveryService(deps: OAWebhookDeliveryDeps) {
   async function listDeliveries(input: {
     oaId: string
     pageSize: number
+    cursor?: string | undefined
     statusFilter?: string | undefined
   }) {
+    const pageSize = Math.max(1, input.pageSize)
     const conditions = [
       eq(oaWebhookDelivery.oaId, input.oaId),
       eq(oaWebhookDelivery.developerVisible, true),
     ]
+    if (input.cursor) {
+      conditions.push(lt(oaWebhookDelivery.createdAt, input.cursor))
+    }
     if (input.statusFilter) {
       conditions.push(eq(oaWebhookDelivery.status, input.statusFilter))
     }
@@ -399,8 +409,11 @@ export function createOAWebhookDeliveryService(deps: OAWebhookDeliveryDeps) {
       .from(oaWebhookDelivery)
       .where(and(...conditions))
       .orderBy(desc(oaWebhookDelivery.createdAt))
-      .limit(input.pageSize)
-    return { deliveries: rows as DeliveryListItem[] }
+      .limit(pageSize + 1)
+    const deliveries = rows.slice(0, pageSize) as DeliveryListItem[]
+    const nextCursor =
+      rows.length > pageSize ? deliveries[deliveries.length - 1]?.createdAt : undefined
+    return { deliveries, nextCursor }
   }
 
   async function getDelivery(input: { oaId: string; deliveryId: string }) {
@@ -424,7 +437,10 @@ export function createOAWebhookDeliveryService(deps: OAWebhookDeliveryDeps) {
     return { delivery, attempts }
   }
 
-  async function redeliver(input: { oaId: string; deliveryId: string }): Promise<WebhookDispatchResult> {
+  async function redeliver(input: {
+    oaId: string
+    deliveryId: string
+  }): Promise<WebhookDispatchResult> {
     const account = await deps.oa.getOfficialAccount(input.oaId)
     if (!account) return { kind: 'oa-not-found' }
     const webhook = await deps.oa.getWebhook(input.oaId)
@@ -433,7 +449,12 @@ export function createOAWebhookDeliveryService(deps: OAWebhookDeliveryDeps) {
     const [delivery] = await deps.db
       .select()
       .from(oaWebhookDelivery)
-      .where(and(eq(oaWebhookDelivery.oaId, input.oaId), eq(oaWebhookDelivery.id, input.deliveryId)))
+      .where(
+        and(
+          eq(oaWebhookDelivery.oaId, input.oaId),
+          eq(oaWebhookDelivery.id, input.deliveryId),
+        ),
+      )
       .limit(1)
     if (!delivery) return { kind: 'delivery-not-found' }
     if (delivery.status !== 'failed') return { kind: 'delivery-not-failed' }
@@ -471,7 +492,8 @@ export function createOAWebhookDeliveryService(deps: OAWebhookDeliveryDeps) {
         .set({
           status: 'failed',
           reason: 'unclassified',
-          detail: 'Webhook redelivery sent, but Vine failed to persist the attempt result',
+          detail:
+            'Webhook redelivery sent, but Vine failed to persist the attempt result',
           updatedAt: now(),
         })
         .where(eq(oaWebhookDelivery.id, delivery.id))
@@ -484,7 +506,8 @@ export function createOAWebhookDeliveryService(deps: OAWebhookDeliveryDeps) {
       }
     }
 
-    if (sent.ok) return { kind: 'ok', deliveryId: delivery.id, statusCode: sent.responseStatus }
+    if (sent.ok)
+      return { kind: 'ok', deliveryId: delivery.id, statusCode: sent.responseStatus }
     return {
       kind: 'delivery-failed',
       deliveryId: delivery.id,
@@ -495,7 +518,9 @@ export function createOAWebhookDeliveryService(deps: OAWebhookDeliveryDeps) {
   }
 
   async function cleanupExpiredDeliveries(input: { olderThanDays: number }) {
-    const cutoff = new Date(Date.parse(now()) - input.olderThanDays * 24 * 60 * 60 * 1000).toISOString()
+    const cutoff = new Date(
+      Date.parse(now()) - input.olderThanDays * 24 * 60 * 60 * 1000,
+    ).toISOString()
     const deleted = await deps.db
       .delete(oaWebhookDelivery)
       .where(lt(oaWebhookDelivery.createdAt, cutoff))

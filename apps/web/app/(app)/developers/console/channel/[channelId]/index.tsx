@@ -135,7 +135,7 @@ export const ChannelSettingsPage = () => {
               Basic information
             </SizableText>
             <SizableText size="$2" color="$color10">
-              You can change your app name and icon in LINE Official Account Manager.
+              You can manage this channel's Vine-facing profile here.
             </SizableText>
           </YStack>
 

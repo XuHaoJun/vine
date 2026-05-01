@@ -451,9 +451,13 @@ export function oaHandler(deps: OAHandlerDeps) {
         const result = await deps.webhookDelivery.listDeliveries({
           oaId: req.officialAccountId,
           pageSize: req.pageSize > 0 ? req.pageSize : 50,
+          cursor: req.cursor,
           statusFilter: req.statusFilter,
         })
-        return { deliveries: result.deliveries.map(toProtoDeliverySummary) }
+        return {
+          deliveries: result.deliveries.map(toProtoDeliverySummary),
+          nextCursor: result.nextCursor,
+        }
       },
       async getWebhookDelivery(req, ctx) {
         const auth = requireAuthData(ctx)
@@ -477,19 +481,26 @@ export function oaHandler(deps: OAHandlerDeps) {
           deliveryId: req.deliveryId,
         })
         if (result.kind === 'redelivery-disabled') {
-          throw new ConnectError('Webhook redelivery is disabled', Code.FailedPrecondition)
+          throw new ConnectError(
+            'Webhook redelivery is disabled',
+            Code.FailedPrecondition,
+          )
         }
         if (result.kind === 'delivery-not-found') {
           throw new ConnectError('Webhook delivery not found', Code.NotFound)
         }
         if (result.kind === 'delivery-not-failed') {
-          throw new ConnectError('Webhook delivery is not failed', Code.FailedPrecondition)
+          throw new ConnectError(
+            'Webhook delivery is not failed',
+            Code.FailedPrecondition,
+          )
         }
         const refreshed = await deps.webhookDelivery.getDelivery({
           oaId: req.officialAccountId,
           deliveryId: req.deliveryId,
         })
-        if (!refreshed) throw new ConnectError('Webhook delivery not found', Code.NotFound)
+        if (!refreshed)
+          throw new ConnectError('Webhook delivery not found', Code.NotFound)
         return { delivery: toProtoDeliverySummary(refreshed.delivery) }
       },
       async sendTestWebhookEvent(req, ctx) {

@@ -240,7 +240,8 @@ message VerifyWebhookEndpointResponse {
 message ListWebhookDeliveriesRequest {
   string official_account_id = 1;
   int32 page_size = 2;
-  optional string status_filter = 3;
+  optional string cursor = 3;
+  optional string status_filter = 4;
 }
 
 message WebhookDeliverySummary {
@@ -260,6 +261,7 @@ message WebhookDeliverySummary {
 
 message ListWebhookDeliveriesResponse {
   repeated WebhookDeliverySummary deliveries = 1;
+  optional string next_cursor = 2;
 }
 
 message GetWebhookDeliveryRequest {
