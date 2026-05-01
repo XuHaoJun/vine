@@ -1,10 +1,12 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
   createAcceptedRequestId,
   createHttpRequestId,
   createRequestHash,
   createDeterministicMessageIds,
   isValidLineRetryKey,
+  checkRetryKeyForRequest,
+  createOAMessagingService,
 } from './oa-messaging'
 
 describe('oa messaging request utilities', () => {
@@ -41,5 +43,110 @@ describe('oa messaging request utilities', () => {
   it('creates request ids with stable prefixes', () => {
     expect(createHttpRequestId()).toMatch(/^req_/)
     expect(createAcceptedRequestId()).toMatch(/^acc_/)
+  })
+})
+
+function makeMockDbForRetryKeyLookup(existingRetryRows: unknown[] = []) {
+  const retryLimit = vi.fn().mockResolvedValue(existingRetryRows)
+  const db = {
+    select: vi.fn().mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({ limit: retryLimit }),
+      }),
+    }),
+  } as any
+  return { db, retryLimit }
+}
+
+describe('oa messaging retry-key lookup', () => {
+  it('rejects retry key on reply', async () => {
+    const { db } = makeMockDbForRetryKeyLookup()
+
+    const result = await checkRetryKeyForRequest({
+      db,
+      now: () => new Date('2026-05-01T00:00:00.000Z'),
+      oaId: 'oa-1',
+      requestType: 'reply',
+      retryKey: '123e4567-e89b-12d3-a456-426614174000',
+      target: { replyToken: 'reply-1' },
+      messages: [{ type: 'text', text: 'hello' }],
+    })
+
+    expect(result).toMatchObject({ ok: false, code: 'INVALID_RETRY_KEY' })
+  })
+
+  it('returns duplicate accepted retry-key response', async () => {
+    const { db } = makeMockDbForRetryKeyLookup([
+      {
+        requestId: 'request-original',
+        oaId: 'oa-1',
+        retryKey: '123e4567-e89b-12d3-a456-426614174000',
+        requestHash: createRequestHash({
+          endpoint: 'push',
+          target: { to: 'user-1' },
+          messages: [{ type: 'text', text: 'hello' }],
+        }),
+        acceptedRequestId: 'acc_original',
+        expiresAt: '2026-05-02T00:00:00.000Z',
+      },
+    ])
+
+    const result = await checkRetryKeyForRequest({
+      db,
+      now: () => new Date('2026-05-01T00:00:00.000Z'),
+      oaId: 'oa-1',
+      requestType: 'push',
+      retryKey: '123e4567-e89b-12d3-a456-426614174000',
+      target: { to: 'user-1' },
+      messages: [{ type: 'text', text: 'hello' }],
+    })
+
+    expect(result).toMatchObject({
+      ok: false,
+      code: 'RETRY_KEY_ACCEPTED',
+      requestId: 'request-original',
+      acceptedRequestId: 'acc_original',
+    })
+  })
+
+  it('rejects retry-key reuse with a different body', async () => {
+    const { db } = makeMockDbForRetryKeyLookup([
+      {
+        requestHash: 'different-hash',
+        acceptedRequestId: 'acc_original',
+        expiresAt: '2026-05-02T00:00:00.000Z',
+      },
+    ])
+
+    const result = await checkRetryKeyForRequest({
+      db,
+      now: () => new Date('2026-05-01T00:00:00.000Z'),
+      oaId: 'oa-1',
+      requestType: 'push',
+      retryKey: '123e4567-e89b-12d3-a456-426614174000',
+      target: { to: 'user-1' },
+      messages: [{ type: 'text', text: 'hello' }],
+    })
+
+    expect(result).toMatchObject({
+      ok: false,
+      code: 'RETRY_KEY_CONFLICT',
+    })
+  })
+
+  it('ignores expired retry-key rows so the key can be accepted again', async () => {
+    const { db } = makeMockDbForRetryKeyLookup([])
+
+    const result = await checkRetryKeyForRequest({
+      db,
+      now: () => new Date('2026-05-01T00:00:00.000Z'),
+      oaId: 'oa-1',
+      requestType: 'push',
+      retryKey: '123e4567-e89b-12d3-a456-426614174000',
+      target: { to: 'user-1' },
+      messages: [{ type: 'text', text: 'hello' }],
+    })
+
+    expect(result).toMatchObject({ ok: true })
   })
 })
