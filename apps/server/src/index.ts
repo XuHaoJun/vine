@@ -20,6 +20,7 @@ import { oaWebhookPlugin } from './plugins/oa-webhook'
 import { oaWebhookEndpointPlugin } from './plugins/oa-webhook-endpoint'
 import { createOAService } from './services/oa'
 import { createOAMessagingService } from './services/oa-messaging'
+import { createOAWebhookDeliveryService } from './services/oa-webhook-delivery'
 import { createLiffService } from './services/liff'
 import { createStickerMarketServices } from './services/sticker-market'
 import { liffFixturesPublicPlugin } from './plugins/liff-fixtures-public'
@@ -60,6 +61,7 @@ const oaMessaging = createOAMessagingService({
   db,
   instanceId: process.env['HOSTNAME'] ?? `server-${process.pid}`,
 })
+const webhookDelivery = createOAWebhookDeliveryService({ db, oa, logger })
 const liff = createLiffService({ db })
 const auth = createAuthServer({ database, db })
 const drive = createFsDriveService({
@@ -87,6 +89,7 @@ await registerPaymentsWebhookRoutes(app, { ...payments, db })
 await app.register(fastifyConnectPlugin, {
   routes: connectRoutes({
     oa,
+    webhookDelivery,
     liff,
     auth,
     drive,
@@ -163,6 +166,20 @@ const oaMessagingRecoveryInterval = setInterval(() => {
 
 app.addHook('onClose', async () => {
   clearInterval(oaMessagingRecoveryInterval)
+})
+
+const cleanupWebhookDeliveries = () =>
+  webhookDelivery
+    .cleanupExpiredDeliveries({ olderThanDays: 30 })
+    .catch((err) => logger.error({ err }, '[oa-webhook] retention cleanup failed'))
+
+void cleanupWebhookDeliveries()
+const webhookRetentionInterval = setInterval(
+  () => void cleanupWebhookDeliveries(),
+  24 * 60 * 60 * 1000,
+)
+app.addHook('onClose', async () => {
+  clearInterval(webhookRetentionInterval)
 })
 
 const port = Number(process.env['PORT'] ?? 3001)

@@ -4,6 +4,7 @@ import { greeterHandler } from './greeter'
 import { oaHandler } from './oa'
 import { liffHandler } from './liff'
 import type { createOAService } from '../services/oa'
+import type { createOAWebhookDeliveryService } from '../services/oa-webhook-delivery'
 import type { createLiffService } from '../services/liff'
 import type { DriveService } from '@vine/drive'
 import {
@@ -24,6 +25,7 @@ import { withAuthService } from './auth-context'
 
 type ConnectDeps = {
   oa: ReturnType<typeof createOAService>
+  webhookDelivery: ReturnType<typeof createOAWebhookDeliveryService>
   liff: ReturnType<typeof createLiffService>
   auth: AuthServer
   drive: DriveService
