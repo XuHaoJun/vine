@@ -1,12 +1,5 @@
 {
   "mcpServers": {
-    "XcodeBuildMCP": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "xcodebuildmcp@1.15.1"
-      ]
-    },
     "code-review-graph": {
       "command": "uvx",
       "args": [
