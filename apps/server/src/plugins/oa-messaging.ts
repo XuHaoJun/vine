@@ -1,9 +1,9 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import { and, eq } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { schema } from '@vine/db'
 import { message } from '@vine/db/schema-public'
-import { oaAccessToken, oaFriendship } from '@vine/db/schema-oa'
+import { oaAccessToken } from '@vine/db/schema-oa'
 import { FlexMessageSchema, QuickReplySchema } from '@vine/flex-schema'
 import { ImagemapMessageSchema } from '@vine/imagemap-schema'
 import * as v from 'valibot'
@@ -240,6 +240,11 @@ function sendMessagingResult(reply: FastifyReply, result: any) {
         code: 'QUOTA_EXCEEDED',
       })
     }
+    if (result.code === 'NOT_FRIEND') {
+      return reply
+        .code(403)
+        .send({ message: 'User is not a friend of this OA', code: 'NOT_FRIEND' })
+    }
     return reply.code(400).send({ message: result.code, code: result.code })
   }
   const accepted = result.accepted
@@ -333,18 +338,6 @@ export async function oaMessagingPlugin(
           return await reply
             .code(400)
             .send({ message: 'to and messages are required', code: 'INVALID_REQUEST' })
-        }
-
-        const [friendship] = await db
-          .select()
-          .from(oaFriendship)
-          .where(and(eq(oaFriendship.oaId, oaId), eq(oaFriendship.userId, body.to)))
-          .limit(1)
-
-        if (!friendship || friendship.status !== 'friend') {
-          return await reply
-            .code(403)
-            .send({ message: 'User is not a friend of this OA', code: 'NOT_FRIEND' })
         }
 
         // Validate all messages first

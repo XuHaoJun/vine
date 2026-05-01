@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from 'crypto'
-import { and, eq, gt, inArray, isNull, lt, or, sql } from 'drizzle-orm'
+import { and, eq, gt, inArray, isNull, lt, lte, or, sql } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { schema } from '@vine/db'
 import { oaMessageDelivery, oaMessageRequest, oaRetryKey } from '@vine/db/schema-private'
@@ -398,6 +398,17 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
     const expiresAt = input.retryKey
       ? new Date(new Date(input.nowIso).getTime() + RETRY_KEY_TTL_MS).toISOString()
       : null
+    if (input.retryKey) {
+      await tx
+        .delete(oaRetryKey)
+        .where(
+          and(
+            eq(oaRetryKey.oaId, input.oaId),
+            eq(oaRetryKey.retryKey, input.retryKey),
+            lte(oaRetryKey.expiresAt, input.nowIso),
+          ),
+        )
+    }
     const [request] = await tx
       .insert(oaMessageRequest)
       .values({
@@ -448,9 +459,14 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
 
   async function loadSentMessagesForAcceptedRequest(requestId: string) {
     const deliveries = await deps.db
-      .select({ messageIdsJson: oaMessageDelivery.messageIdsJson })
+      .select({
+        messageIdsJson: oaMessageDelivery.messageIdsJson,
+        status: oaMessageDelivery.status,
+      })
       .from(oaMessageDelivery)
       .where(eq(oaMessageDelivery.requestId, requestId))
+    if (deliveries.length === 0) return []
+    if (deliveries.some((delivery) => delivery.status !== 'delivered')) return []
     const ids = deliveries.flatMap((delivery) => delivery.messageIdsJson as string[])
     return ids.map((id) => ({ id }))
   }

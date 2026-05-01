@@ -302,7 +302,13 @@ describe('oaMessagingPlugin — Push Message', () => {
   describe('friendship check', () => {
     it('returns 403 when user is not a friend', async () => {
       const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
-      const { app } = createTestApp(mockDb)
+      const { app } = createTestApp(mockDb, {
+        push: vi.fn().mockResolvedValue({
+          ok: false,
+          code: 'NOT_FRIEND',
+          httpRequestId: 'req_not_friend',
+        }),
+      })
       await app.ready()
 
       const res = await app.inject({
@@ -323,7 +329,13 @@ describe('oaMessagingPlugin — Push Message', () => {
         [{ oaId, token: validToken, expiresAt: null }],
         [{ oaId, userId, status: 'pending' }],
       )
-      const { app } = createTestApp(mockDb)
+      const { app } = createTestApp(mockDb, {
+        push: vi.fn().mockResolvedValue({
+          ok: false,
+          code: 'NOT_FRIEND',
+          httpRequestId: 'req_pending_friendship',
+        }),
+      })
       await app.ready()
 
       const res = await app.inject({
@@ -537,6 +549,33 @@ describe('oaMessagingPlugin — Push Message', () => {
         message: 'The retry key is already accepted',
         sentMessages: [{ id: 'oa:req:request-1:user-1:0' }],
       })
+    })
+
+    it('returns duplicate retry response even when user is no longer a friend', async () => {
+      const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+      const { app, mockMessaging } = createTestApp(mockDb)
+      mockMessaging.push.mockResolvedValue({
+        ok: false,
+        code: 'RETRY_KEY_ACCEPTED',
+        httpRequestId: 'req_retry_after_unfriend',
+        acceptedRequestId: 'acc_original',
+      })
+      await app.ready()
+
+      const res = await app.inject({
+        method: 'POST',
+        url: oaApiPath('/bot/message/push'),
+        headers: {
+          authorization: `Bearer ${validToken}`,
+          'x-line-retry-key': '123e4567-e89b-12d3-a456-426614174000',
+        },
+        payload: { to: userId, messages: [{ type: 'text', text: 'hello' }] },
+      })
+
+      await app.close()
+      expect(res.statusCode).toBe(409)
+      expect(res.headers['x-line-accepted-request-id']).toBe('acc_original')
+      expect(mockMessaging.push).toHaveBeenCalledOnce()
     })
   })
 
