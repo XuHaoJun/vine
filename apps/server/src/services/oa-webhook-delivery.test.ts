@@ -1,11 +1,13 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
   classifyWebhookError,
+  createOAWebhookDeliveryService,
   createRedeliveryPayload,
   excerptResponseBody,
   extractFirstWebhookEvent,
   shouldCreateDeveloperVisibleDelivery,
 } from './oa-webhook-delivery'
+import { oaWebhookAttempt, oaWebhookDelivery } from '@vine/db/schema-private'
 
 describe('webhook delivery helpers', () => {
   it('caps response body excerpts at 4096 characters', () => {
@@ -75,5 +77,87 @@ describe('webhook delivery helpers', () => {
     expect(shouldCreateDeveloperVisibleDelivery({ errorStatisticsEnabled: false })).toBe(
       false,
     )
+  })
+})
+
+describe('createOAWebhookDeliveryService persistence failure', () => {
+  it('returns delivery-failed with unclassified when attempt insert fails after fetch succeeds', async () => {
+    const logger = { error: vi.fn() }
+
+    const mockDb = {
+      insert: vi.fn((table) => {
+        const chain: any = {
+          values: vi.fn(() => chain),
+          onConflictDoNothing: vi.fn(() => chain),
+          returning: vi.fn(() => Promise.resolve([])),
+          set: vi.fn(() => chain),
+          where: vi.fn(() => Promise.resolve([])),
+        }
+        if (table === oaWebhookDelivery) {
+          chain.returning = vi.fn(() =>
+            Promise.resolve([{ id: 'del_1', attemptCount: 0 }]),
+          )
+        }
+        if (table === oaWebhookAttempt) {
+          chain.values = vi.fn(() => Promise.reject(new Error('DB error')))
+        }
+        return chain
+      }),
+      select: vi.fn(() => ({
+        from: vi.fn(() => ({
+          where: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve([])),
+          })),
+        })),
+      })),
+      update: vi.fn(() => ({
+        set: vi.fn(() => ({
+          where: vi.fn(() => Promise.resolve([])),
+        })),
+      })),
+      transaction: vi.fn(async (callback) => {
+        return callback(mockDb)
+      }),
+    }
+
+    const service = createOAWebhookDeliveryService({
+      db: mockDb as any,
+      oa: {
+        getOfficialAccount: vi.fn(() =>
+          Promise.resolve({ id: 'oa_1', channelSecret: 'secret' }),
+        ),
+        getWebhook: vi.fn(() =>
+          Promise.resolve({
+            url: 'https://example.test/webhook',
+            status: 'verified',
+            useWebhook: true,
+            errorStatisticsEnabled: true,
+          }),
+        ),
+        generateWebhookSignature: vi.fn(() => 'sig'),
+        validateWebhookUrl: vi.fn(),
+        recordWebhookVerifyResult: vi.fn(),
+      } as any,
+      fetchFn: vi.fn(() => Promise.resolve(new Response(null, { status: 200 }))) as unknown as typeof fetch,
+      now: () => '2026-05-01T00:00:00.000Z',
+      logger,
+    })
+
+    const result = await service.deliverRealEvent({
+      oaId: 'oa_1',
+      buildPayload: () => ({
+        destination: 'oa_1',
+        events: [{ type: 'message', webhookEventId: 'evt_1' }],
+      }),
+    })
+
+    expect(logger.error).toHaveBeenCalled()
+    expect(result).toEqual({
+      kind: 'delivery-failed',
+      deliveryId: 'del_1',
+      reason: 'unclassified',
+      detail: 'Webhook sent, but Vine failed to persist the attempt result',
+      statusCode: 200,
+    })
   })
 })
