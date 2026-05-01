@@ -1,14 +1,16 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import { and, eq } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { schema } from '@vine/db'
 import { message } from '@vine/db/schema-public'
-import { oaAccessToken, oaFriendship } from '@vine/db/schema-oa'
+import { oaAccessToken } from '@vine/db/schema-oa'
 import { FlexMessageSchema, QuickReplySchema } from '@vine/flex-schema'
 import { ImagemapMessageSchema } from '@vine/imagemap-schema'
 import * as v from 'valibot'
 import type { DriveService } from '@vine/drive'
 import type { createOAService } from '../services/oa'
+import type { createOAMessagingService } from '../services/oa-messaging'
+import { oaApiPath } from './oa-routes'
 
 const CONTENT_TYPE_MAP: Record<string, { ext: string; mimeTypes: string[] }> = {
   image: { ext: 'jpg', mimeTypes: ['image/jpeg', 'image/png'] },
@@ -25,6 +27,7 @@ function getExtensionForContentType(contentType: string, msgType: string): strin
 
 type MessagingPluginDeps = {
   oa: ReturnType<typeof createOAService>
+  messaging: ReturnType<typeof createOAMessagingService>
   db: NodePgDatabase<typeof schema>
   drive: DriveService
 }
@@ -215,6 +218,43 @@ async function extractOaFromToken(
   return tokenRecord.oaId
 }
 
+// ============ Result Helper ============
+
+function sendMessagingResult(reply: FastifyReply, result: any) {
+  if (result.httpRequestId) reply.header('x-line-request-id', result.httpRequestId)
+  if (!result.ok) {
+    if (result.acceptedRequestId)
+      reply.header('x-line-accepted-request-id', result.acceptedRequestId)
+    if (result.code === 'RETRY_KEY_ACCEPTED') {
+      return reply.code(409).send({
+        message: 'The retry key is already accepted',
+        ...(result.sentMessages?.length ? { sentMessages: result.sentMessages } : {}),
+      })
+    }
+    if (result.code === 'RETRY_KEY_CONFLICT') {
+      return reply.code(409).send({ message: 'The retry key conflicts with another request' })
+    }
+    if (result.code === 'QUOTA_EXCEEDED') {
+      return reply.code(429).send({
+        message: 'You have reached your monthly limit.',
+        code: 'QUOTA_EXCEEDED',
+      })
+    }
+    if (result.code === 'NOT_FRIEND') {
+      return reply
+        .code(403)
+        .send({ message: 'User is not a friend of this OA', code: 'NOT_FRIEND' })
+    }
+    return reply.code(400).send({ message: result.code, code: result.code })
+  }
+  const accepted = result.accepted
+  if (accepted?.httpRequestId) reply.header('x-line-request-id', accepted.httpRequestId)
+  if (result.processed && result.processed.processed === 0) {
+    return reply.code(202).send({ requestId: accepted.acceptedRequestId })
+  }
+  return reply.send({})
+}
+
 // ============ Plugin ============
 
 type MessageItem = { type: string; text?: string; [key: string]: unknown }
@@ -223,15 +263,22 @@ export async function oaMessagingPlugin(
   fastify: FastifyInstance,
   deps: MessagingPluginDeps,
 ) {
-  const { oa, db, drive } = deps
+  const { oa, messaging, db, drive } = deps
 
   // Reply Messages
   fastify.post(
-    '/api/oa/v2/bot/message/reply',
+    oaApiPath('/bot/message/reply'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const oaId = await extractOaFromToken(request, db)
         const body = request.body as { replyToken: string; messages: MessageItem[] }
+
+        if (request.headers['x-line-retry-key']) {
+          return reply.code(400).send({
+            message: 'X-Line-Retry-Key is not supported on reply messages',
+            code: 'INVALID_RETRY_KEY',
+          })
+        }
 
         if (!body.replyToken || !body.messages?.length) {
           return await reply.code(400).send({
@@ -241,11 +288,7 @@ export async function oaMessagingPlugin(
         }
 
         // Validate all messages first
-        const validated = body.messages.map((msg) => {
-          const result = validateMessage(msg)
-          if (!result.valid) return result
-          return result
-        })
+        const validated = body.messages.map((msg) => validateMessage(msg))
 
         const failed = validated.find((r) => !r.valid)
         if (failed && !failed.valid) {
@@ -255,33 +298,13 @@ export async function oaMessagingPlugin(
           })
         }
 
-        // Deliver messages
         const validMessages = validated as ValidationSuccess[]
-
-        const tokenResult = await oa.resolveReplyToken(body.replyToken)
-        if (!tokenResult.valid) {
-          const statusMap = {
-            not_found: 400,
-            already_used: 400,
-            expired: 400,
-          }
-          return await reply.code(statusMap[tokenResult.reason] ?? 400).send({
-            message: `Reply token ${tokenResult.reason}`,
-            code: 'INVALID_REPLY_TOKEN',
-          })
-        }
-
-        for (const msg of validMessages) {
-          await oa.sendOAMessage(oaId, tokenResult.record.userId, {
-            type: msg.type,
-            text: msg.text,
-            metadata: msg.metadata,
-          })
-        }
-
-        await oa.markReplyTokenUsed(tokenResult.record.id)
-
-        return await reply.send({})
+        const result = await messaging.reply({
+          oaId,
+          replyToken: body.replyToken,
+          messages: validMessages,
+        })
+        return sendMessagingResult(reply, result)
       } catch (err) {
         if (err instanceof Error && err.message === 'Missing Bearer token') {
           return reply
@@ -305,7 +328,7 @@ export async function oaMessagingPlugin(
 
   // Push Messages
   fastify.post(
-    '/api/oa/v2/bot/message/push',
+    oaApiPath('/bot/message/push'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const oaId = await extractOaFromToken(request, db)
@@ -315,27 +338,6 @@ export async function oaMessagingPlugin(
           return await reply
             .code(400)
             .send({ message: 'to and messages are required', code: 'INVALID_REQUEST' })
-        }
-
-        const [friendship] = await db
-          .select()
-          .from(oaFriendship)
-          .where(and(eq(oaFriendship.oaId, oaId), eq(oaFriendship.userId, body.to)))
-          .limit(1)
-
-        if (!friendship || friendship.status !== 'friend') {
-          return await reply
-            .code(403)
-            .send({ message: 'User is not a friend of this OA', code: 'NOT_FRIEND' })
-        }
-
-        // Check and increment quota
-        const allowed = await oa.checkAndIncrementUsage(oaId)
-        if (!allowed) {
-          return await reply.code(429).send({
-            message: 'You have reached your monthly limit.',
-            code: 'QUOTA_EXCEEDED',
-          })
         }
 
         // Validate all messages first
@@ -349,17 +351,67 @@ export async function oaMessagingPlugin(
           })
         }
 
-        // Deliver messages
         const validMessages = validated as ValidationSuccess[]
-        for (const msg of validMessages) {
-          await oa.sendOAMessage(oaId, body.to, {
-            type: msg.type,
-            text: msg.text,
-            metadata: msg.metadata,
+        const result = await messaging.push({
+          oaId,
+          retryKey: request.headers['x-line-retry-key'] as string | undefined,
+          to: body.to,
+          messages: validMessages,
+        })
+        return sendMessagingResult(reply, result)
+      } catch (err) {
+        if (err instanceof Error && err.message === 'Missing Bearer token') {
+          return reply
+            .code(401)
+            .send({ message: 'Missing Bearer token', code: 'INVALID_TOKEN' })
+        }
+        if (err instanceof Error && err.message === 'Invalid access token') {
+          return reply
+            .code(401)
+            .send({ message: 'Invalid access token', code: 'INVALID_TOKEN' })
+        }
+        if (err instanceof Error && err.message === 'Access token expired') {
+          return reply
+            .code(401)
+            .send({ message: 'Access token expired', code: 'TOKEN_EXPIRED' })
+        }
+        return reply.code(500).send({ message: 'Internal server error' })
+      }
+    },
+  )
+
+  // Broadcast Messages
+  fastify.post(
+    oaApiPath('/bot/message/broadcast'),
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const oaId = await extractOaFromToken(request, db)
+        const body = request.body as { messages: MessageItem[] }
+
+        if (!body.messages?.length) {
+          return await reply
+            .code(400)
+            .send({ message: 'messages are required', code: 'INVALID_REQUEST' })
+        }
+
+        // Validate all messages first
+        const validated = body.messages.map((msg) => validateMessage(msg))
+
+        const failed = validated.find((r) => !r.valid)
+        if (failed && !failed.valid) {
+          return await reply.code(400).send({
+            message: failed.error,
+            code: failed.code ?? 'INVALID_MESSAGE_TYPE',
           })
         }
 
-        return await reply.send({})
+        const validMessages = validated as ValidationSuccess[]
+        const result = await messaging.broadcast({
+          oaId,
+          retryKey: request.headers['x-line-retry-key'] as string | undefined,
+          messages: validMessages,
+        })
+        return sendMessagingResult(reply, result)
       } catch (err) {
         if (err instanceof Error && err.message === 'Missing Bearer token') {
           return reply
@@ -383,7 +435,7 @@ export async function oaMessagingPlugin(
 
   // Get Profile
   fastify.get(
-    '/api/oa/v2/bot/profile/:userId',
+    oaApiPath('/bot/profile/:userId'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         await extractOaFromToken(request, db)
@@ -407,7 +459,7 @@ export async function oaMessagingPlugin(
 
   // Get Quota
   fastify.get(
-    '/api/oa/v2/bot/message/quota',
+    oaApiPath('/bot/message/quota'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const oaId = await extractOaFromToken(request, db)
@@ -436,7 +488,7 @@ export async function oaMessagingPlugin(
 
   // Get Quota Consumption
   fastify.get(
-    '/api/oa/v2/bot/message/quota/consumption',
+    oaApiPath('/bot/message/quota/consumption'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const oaId = await extractOaFromToken(request, db)
@@ -465,7 +517,7 @@ export async function oaMessagingPlugin(
 
   // Upload Message Content (image/video/audio)
   fastify.post(
-    '/api/oa/v2/bot/message/:messageId/content',
+    oaApiPath('/bot/message/:messageId/content'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const oaId = await extractOaFromToken(request, db)
@@ -526,7 +578,7 @@ export async function oaMessagingPlugin(
 
   // Get Message Content (image/video/audio)
   fastify.get(
-    '/api/oa/v2/bot/message/:messageId/content',
+    oaApiPath('/bot/message/:messageId/content'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const oaId = await extractOaFromToken(request, db)
@@ -586,7 +638,7 @@ export async function oaMessagingPlugin(
 
   // OAuth: Issue Access Token (short-lived)
   fastify.post(
-    '/api/oa/v2/oauth/accessToken',
+    oaApiPath('/oauth/accessToken'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const body = request.body as Record<string, string>
@@ -622,7 +674,7 @@ export async function oaMessagingPlugin(
 
   // OAuth: Revoke Access Token
   fastify.post(
-    '/api/oa/v2/oauth/revoke',
+    oaApiPath('/oauth/revoke'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const body = request.body as { access_token: string }

@@ -1,5 +1,6 @@
 import { describe, expect, it, afterAll, vi } from 'vitest'
 import Fastify from 'fastify'
+import { oaApiPath } from './oa-routes'
 import { oaRichMenuPlugin } from './oa-richmenu'
 
 const validToken = 'valid-test-token'
@@ -172,7 +173,7 @@ describe('oaRichMenuPlugin — Auth', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/v2/bot/richmenu',
+      url: oaApiPath('/bot/richmenu'),
       payload: sampleRichMenuBody,
     })
 
@@ -187,7 +188,7 @@ describe('oaRichMenuPlugin — Auth', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/v2/bot/richmenu',
+      url: oaApiPath('/bot/richmenu'),
       headers: { authorization: 'Bearer invalid-token' },
       payload: sampleRichMenuBody,
     })
@@ -195,6 +196,20 @@ describe('oaRichMenuPlugin — Auth', () => {
     await app.close()
     expect(res.statusCode).toBe(401)
     expect(JSON.parse(res.body).code).toBe('INVALID_TOKEN')
+  })
+
+  it('does not register the root /v2 richmenu route', async () => {
+    const app = createTestApp()
+    await app.ready()
+
+    const res = await app.inject({
+      method: 'GET',
+      url: '/v2/bot/richmenu/list',
+      headers: { authorization: `Bearer ${validToken}` },
+    })
+
+    await app.close()
+    expect(res.statusCode).toBe(404)
   })
 })
 
@@ -205,7 +220,7 @@ describe('oaRichMenuPlugin — Create Rich Menu', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/v2/bot/richmenu',
+      url: oaApiPath('/bot/richmenu'),
       headers: { authorization: `Bearer ${validToken}` },
       payload: sampleRichMenuBody,
     })
@@ -222,7 +237,7 @@ describe('oaRichMenuPlugin — Create Rich Menu', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/v2/bot/richmenu',
+      url: oaApiPath('/bot/richmenu'),
       headers: { authorization: `Bearer ${validToken}` },
       payload: {
         selected: false,
@@ -243,7 +258,7 @@ describe('oaRichMenuPlugin — Create Rich Menu', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/v2/bot/richmenu',
+      url: oaApiPath('/bot/richmenu'),
       headers: { authorization: `Bearer ${validToken}` },
       payload: {
         size: { width: 500, height: 1686 },
@@ -265,7 +280,7 @@ describe('oaRichMenuPlugin — Create Rich Menu', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/v2/bot/richmenu',
+      url: oaApiPath('/bot/richmenu'),
       headers: { authorization: `Bearer ${validToken}` },
       payload: {
         size: { width: 2500, height: 1686 },
@@ -288,7 +303,7 @@ describe('oaRichMenuPlugin — Validate Rich Menu', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/v2/bot/richmenu/validate',
+      url: oaApiPath('/bot/richmenu/validate'),
       headers: { authorization: `Bearer ${validToken}` },
       payload: sampleRichMenuBody,
     })
@@ -304,7 +319,7 @@ describe('oaRichMenuPlugin — Validate Rich Menu', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/v2/bot/richmenu/validate',
+      url: oaApiPath('/bot/richmenu/validate'),
       headers: { authorization: `Bearer ${validToken}` },
       payload: { invalid: true },
     })
@@ -321,7 +336,7 @@ describe('oaRichMenuPlugin — Get Rich Menu', () => {
 
     const res = await app.inject({
       method: 'GET',
-      url: '/v2/bot/richmenu/richmenu-test123',
+      url: oaApiPath('/bot/richmenu/richmenu-test123'),
       headers: { authorization: `Bearer ${validToken}` },
     })
 
@@ -340,7 +355,7 @@ describe('oaRichMenuPlugin — Get Rich Menu List', () => {
 
     const res = await app.inject({
       method: 'GET',
-      url: '/v2/bot/richmenu/list',
+      url: oaApiPath('/bot/richmenu/list'),
       headers: { authorization: `Bearer ${validToken}` },
     })
 
@@ -359,7 +374,7 @@ describe('oaRichMenuPlugin — Delete Rich Menu', () => {
 
     const res = await app.inject({
       method: 'DELETE',
-      url: '/v2/bot/richmenu/richmenu-test123',
+      url: oaApiPath('/bot/richmenu/richmenu-test123'),
       headers: { authorization: `Bearer ${validToken}` },
     })
 
@@ -376,7 +391,7 @@ describe('oaRichMenuPlugin — Set Default Rich Menu', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/v2/bot/user/all/richmenu/richmenu-test123',
+      url: oaApiPath('/bot/user/all/richmenu/richmenu-test123'),
       headers: { authorization: `Bearer ${validToken}` },
     })
 
@@ -391,7 +406,7 @@ describe('oaRichMenuPlugin — Set Default Rich Menu', () => {
     const mockOa = (app as any).oa
     const res = await app.inject({
       method: 'POST',
-      url: '/v2/bot/user/all/richmenu/richmenu-nonexistent',
+      url: oaApiPath('/bot/user/all/richmenu/richmenu-nonexistent'),
       headers: { authorization: `Bearer ${validToken}` },
     })
 
@@ -409,7 +424,7 @@ describe('oaRichMenuPlugin — Clear Default Rich Menu', () => {
 
     const res = await app.inject({
       method: 'DELETE',
-      url: '/v2/bot/user/all/richmenu',
+      url: oaApiPath('/bot/user/all/richmenu'),
       headers: { authorization: `Bearer ${validToken}` },
     })
 
@@ -426,7 +441,7 @@ describe('oaRichMenuPlugin — Get Default Rich Menu ID', () => {
 
     const res = await app.inject({
       method: 'GET',
-      url: '/v2/bot/user/all/richmenu',
+      url: oaApiPath('/bot/user/all/richmenu'),
       headers: { authorization: `Bearer ${validToken}` },
     })
 
@@ -444,7 +459,7 @@ describe('oaRichMenuPlugin — Link Rich Menu to User', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/v2/bot/user/U1234567890abcdef1234567890abcdef/richmenu/richmenu-test123',
+      url: oaApiPath('/bot/user/U1234567890abcdef1234567890abcdef/richmenu/richmenu-test123'),
       headers: { authorization: `Bearer ${validToken}` },
     })
 
@@ -458,7 +473,7 @@ describe('oaRichMenuPlugin — Link Rich Menu to User', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/v2/bot/user/invalid-user/richmenu/richmenu-test123',
+      url: oaApiPath('/bot/user/invalid-user/richmenu/richmenu-test123'),
       headers: { authorization: `Bearer ${validToken}` },
     })
 
@@ -475,7 +490,7 @@ describe('oaRichMenuPlugin — Unlink Rich Menu from User', () => {
 
     const res = await app.inject({
       method: 'DELETE',
-      url: '/v2/bot/user/U1234567890abcdef1234567890abcdef/richmenu',
+      url: oaApiPath('/bot/user/U1234567890abcdef1234567890abcdef/richmenu'),
       headers: { authorization: `Bearer ${validToken}` },
     })
 
@@ -492,7 +507,7 @@ describe('oaRichMenuPlugin — Get Rich Menu ID of User', () => {
 
     const res = await app.inject({
       method: 'GET',
-      url: '/v2/bot/user/U1234567890abcdef1234567890abcdef/richmenu',
+      url: oaApiPath('/bot/user/U1234567890abcdef1234567890abcdef/richmenu'),
       headers: { authorization: `Bearer ${validToken}` },
     })
 
@@ -510,7 +525,7 @@ describe('oaRichMenuPlugin — Bulk Link Rich Menu', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/v2/bot/richmenu/bulk/link',
+      url: oaApiPath('/bot/richmenu/bulk/link'),
       headers: { authorization: `Bearer ${validToken}` },
       payload: {
         richMenuId: 'richmenu-test123',
@@ -528,7 +543,7 @@ describe('oaRichMenuPlugin — Bulk Link Rich Menu', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/v2/bot/richmenu/bulk/link',
+      url: oaApiPath('/bot/richmenu/bulk/link'),
       headers: { authorization: `Bearer ${validToken}` },
       payload: { userIds: ['U1234567890abcdef'] },
     })
@@ -545,7 +560,7 @@ describe('oaRichMenuPlugin — Bulk Unlink Rich Menu', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/v2/bot/richmenu/bulk/unlink',
+      url: oaApiPath('/bot/richmenu/bulk/unlink'),
       headers: { authorization: `Bearer ${validToken}` },
       payload: { userIds: ['U1234567890abcdef'] },
     })
@@ -562,7 +577,7 @@ describe('oaRichMenuPlugin — Create Rich Menu Alias', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/v2/bot/richmenu/alias',
+      url: oaApiPath('/bot/richmenu/alias'),
       headers: { authorization: `Bearer ${validToken}` },
       payload: {
         richMenuAliasId: 'richmenu-alias-a',
@@ -583,7 +598,7 @@ describe('oaRichMenuPlugin — Update Rich Menu Alias', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/v2/bot/richmenu/alias/richmenu-alias-a',
+      url: oaApiPath('/bot/richmenu/alias/richmenu-alias-a'),
       headers: { authorization: `Bearer ${validToken}` },
       payload: { richMenuId: 'richmenu-new' },
     })
@@ -601,7 +616,7 @@ describe('oaRichMenuPlugin — Delete Rich Menu Alias', () => {
 
     const res = await app.inject({
       method: 'DELETE',
-      url: '/v2/bot/richmenu/alias/richmenu-alias-a',
+      url: oaApiPath('/bot/richmenu/alias/richmenu-alias-a'),
       headers: { authorization: `Bearer ${validToken}` },
     })
 
@@ -618,7 +633,7 @@ describe('oaRichMenuPlugin — Get Rich Menu Alias', () => {
 
     const res = await app.inject({
       method: 'GET',
-      url: '/v2/bot/richmenu/alias/richmenu-alias-a',
+      url: oaApiPath('/bot/richmenu/alias/richmenu-alias-a'),
       headers: { authorization: `Bearer ${validToken}` },
     })
 
@@ -637,7 +652,7 @@ describe('oaRichMenuPlugin — Get Rich Menu Alias List', () => {
 
     const res = await app.inject({
       method: 'GET',
-      url: '/v2/bot/richmenu/alias/list',
+      url: oaApiPath('/bot/richmenu/alias/list'),
       headers: { authorization: `Bearer ${validToken}` },
     })
 
@@ -656,7 +671,7 @@ describe('oaRichMenuPlugin — Batch Control', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/v2/bot/richmenu/batch',
+      url: oaApiPath('/bot/richmenu/batch'),
       headers: { authorization: `Bearer ${validToken}` },
       payload: {
         operations: [{ type: 'link', from: 'richmenu-test123', to: 'richmenu-new' }],
@@ -679,7 +694,7 @@ describe('oaRichMenuPlugin — Batch Control', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/v2/bot/richmenu/batch',
+      url: oaApiPath('/bot/richmenu/batch'),
       headers: { authorization: `Bearer ${validToken}` },
       payload: { operations },
     })
@@ -696,7 +711,7 @@ describe('oaRichMenuPlugin — Batch Validate', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/v2/bot/richmenu/validate/batch',
+      url: oaApiPath('/bot/richmenu/validate/batch'),
       headers: { authorization: `Bearer ${validToken}` },
       payload: {
         operations: [{ type: 'link', from: 'richmenu-test123', to: 'richmenu-new' }],
@@ -715,7 +730,7 @@ describe('oaRichMenuPlugin — Batch Progress', () => {
 
     const res = await app.inject({
       method: 'GET',
-      url: '/v2/bot/richmenu/progress/batch?requestId=test-123',
+      url: oaApiPath('/bot/richmenu/progress/batch') + '?requestId=test-123',
       headers: { authorization: `Bearer ${validToken}` },
     })
 

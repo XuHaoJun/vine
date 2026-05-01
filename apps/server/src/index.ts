@@ -19,6 +19,7 @@ import { oaRichMenuPlugin } from './plugins/oa-richmenu'
 import { oaWebhookPlugin } from './plugins/oa-webhook'
 import { oaWebhookEndpointPlugin } from './plugins/oa-webhook-endpoint'
 import { createOAService } from './services/oa'
+import { createOAMessagingService } from './services/oa-messaging'
 import { createLiffService } from './services/liff'
 import { createStickerMarketServices } from './services/sticker-market'
 import { liffFixturesPublicPlugin } from './plugins/liff-fixtures-public'
@@ -55,6 +56,10 @@ if (path.resolve(uploadRoot) !== driveBasePath) {
 }
 
 const oa = createOAService({ db, database })
+const oaMessaging = createOAMessagingService({
+  db,
+  instanceId: process.env['HOSTNAME'] ?? `server-${process.pid}`,
+})
 const liff = createLiffService({ db })
 const auth = createAuthServer({ database, db })
 const drive = createFsDriveService({
@@ -133,7 +138,7 @@ await authPlugin(app, { auth, db })
 await zeroPlugin(app, { auth, zero })
 await mediaUploadPlugin(app, { auth, drive })
 await locationMapPlugin(app, { db, auth })
-await oaMessagingPlugin(app, { oa, db, drive })
+await oaMessagingPlugin(app, { oa, messaging: oaMessaging, db, drive })
 await oaRichMenuPlugin(app, { oa, db, drive })
 await oaWebhookPlugin(app, { oa, db, auth })
 await oaWebhookEndpointPlugin(app, { oa, db })
@@ -141,6 +146,24 @@ await liffFixturesPublicPlugin(app)
 await liffPublicPlugin(app, { liff, auth, db })
 
 app.get('/healthz', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))
+
+await oaMessaging.processPendingDeliveries({ batchSize: 100, staleAfterMs: 60_000 })
+
+let oaMessagingRecoveryRunning = false
+const oaMessagingRecoveryInterval = setInterval(() => {
+  if (oaMessagingRecoveryRunning) return
+  oaMessagingRecoveryRunning = true
+  void oaMessaging
+    .processPendingDeliveries({ batchSize: 100, staleAfterMs: 60_000 })
+    .catch((err) => logger.error({ err }, '[oa-messaging] recovery failed'))
+    .finally(() => {
+      oaMessagingRecoveryRunning = false
+    })
+}, 10_000)
+
+app.addHook('onClose', async () => {
+  clearInterval(oaMessagingRecoveryInterval)
+})
 
 const port = Number(process.env['PORT'] ?? 3001)
 await app.listen({ port, host: '0.0.0.0' })

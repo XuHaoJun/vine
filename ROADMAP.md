@@ -36,7 +36,7 @@ clone:
 
 The next major theme should be:
 
-**Official Account + Messaging API closed loop**
+**Official Account + Messaging API closed-loop hardening**
 
 The success criterion is:
 
@@ -44,33 +44,55 @@ The success criterion is:
 > webhook, add the OA as a friend, receive a user message, reply or push a rich
 > message, and see the result in a real Vine chat.
 
-This should come before voice calls, timeline-style feeds, or deeper social
-features because the repo already has the building blocks for OA, LIFF, Flex
-Messages, Rich Menus, stickers, and chat. Closing that loop creates a coherent
-developer platform faster than starting a new subsystem.
+The Messaging API v1 server baseline now exists under `/api/oa/v2`. The next
+roadmap work should make that loop easier to operate, observe, document, and
+use from real bot developers before starting a new major subsystem.
 
 ## Milestones
 
-### Milestone 1: Messaging API v1
+### Milestone 1: Messaging API v1 Baseline
+
+Status: implemented as the current server baseline.
 
 Goal: provide a minimal but real Vine-owned Messaging API for Official Accounts.
 
-Deliverables:
+Completed:
 
+- Public OA REST namespace is `/api/oa/v2`; root `/v2/...` is intentionally not
+  registered because Vine does not have a dedicated Messaging API domain.
 - Access-token authentication for OA API calls.
 - `reply`, `push`, and `broadcast` message operations.
-- Message support for text, sticker, image, location, imagemap, and flex.
-- Request limits: max messages per request, body-size checks, and basic rate limits.
-- Idempotency via retry keys.
-- Webhook event delivery logs.
-- Manual webhook redelivery from the developer console.
-- Tests around auth, validation, idempotency, and message insertion.
+- Message support for text, sticker, image, audio, video, location, template,
+  imagemap, flex, and quick reply metadata.
+- PostgreSQL-backed request, delivery, and retry-key ledgers.
+- Idempotency via LINE-compatible `X-Line-Retry-Key` semantics for push and
+  broadcast, including 24-hour expiry reuse and duplicate retry responses.
+- Durable delivery processing using deterministic message IDs and PostgreSQL
+  `FOR UPDATE SKIP LOCKED`, so restart/crash recovery does not double-send.
+- Broadcast recipient snapshots, quota accounting, and recovery tests.
+- Webhook endpoint and rich menu public routes moved under `/api/oa/v2`.
+- Tests around auth, validation, idempotency, delivery recovery, namespace
+  guardrails, and message insertion.
+
+Not completed yet / next hardening:
+
+- Developer-facing Messaging API docs and examples for Vine's `/api/oa/v2`
+  endpoint, including explicit differences from the official LINE cloud.
+- Operator views for accepted requests, delivery rows, retry-key state, and
+  failed recovery attempts.
+- Webhook delivery logs and manual redelivery from the developer console.
+- Message content retrieval backed by stored media for image/video/audio.
+- Production limits: body size, per-OA rate limiting, quota reset policy, and
+  retention cleanup for request/delivery/retry-key rows.
+- End-to-end bot sandbox that creates an OA, sends a user message, receives a
+  webhook, replies, pushes, broadcasts, and shows the resulting Vine chat.
 
 Out of scope:
 
 - Narrowcast.
 - Full audience management.
-- Production-grade async job queue for very large broadcasts.
+- External queue infrastructure such as RabbitMQ unless PostgreSQL outbox
+  contention or throughput becomes a measured bottleneck.
 
 ### Milestone 2: Interactive Messages
 
@@ -78,7 +100,7 @@ Goal: make bot messages feel useful inside Vine chat, not only valid as JSON.
 
 Deliverables:
 
-- Quick Reply rendering and action dispatch.
+- Quick Reply rendering and action dispatch from stored quick reply metadata.
 - Template messages: buttons, confirm, carousel, and image carousel.
 - Flex Message send flow from simulator into a real chat.
 - Imagemap tap handling with action dispatch.

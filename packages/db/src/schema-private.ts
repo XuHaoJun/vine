@@ -2,13 +2,16 @@ import { sql } from 'drizzle-orm'
 import {
   index,
   integer,
+  jsonb,
   pgTable,
   text,
   timestamp,
   uniqueIndex,
+  uuid,
 } from 'drizzle-orm/pg-core'
 
 import type { InferSelectModel } from 'drizzle-orm'
+import { officialAccount } from './schema-oa'
 import { stickerPackage } from './schema-public'
 
 export const user = pgTable('user', (t) => ({
@@ -384,5 +387,90 @@ export const stickerTrustActionEvent = pgTable(
     index('stickerTrustActionEvent_reportId_idx').on(table.reportId),
     index('stickerTrustActionEvent_packageId_idx').on(table.packageId),
     index('stickerTrustActionEvent_creatorId_idx').on(table.creatorId),
+  ],
+)
+
+export const oaMessageRequest = pgTable(
+  'oaMessageRequest',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    oaId: uuid('oaId')
+      .notNull()
+      .references(() => officialAccount.id, { onDelete: 'cascade' }),
+    requestType: text('requestType').notNull(),
+    retryKey: text('retryKey'),
+    requestHash: text('requestHash').notNull(),
+    acceptedRequestId: text('acceptedRequestId').notNull(),
+    status: text('status').notNull().default('accepted'),
+    messagesJson: jsonb('messagesJson').notNull(),
+    targetJson: jsonb('targetJson'),
+    errorCode: text('errorCode'),
+    errorMessage: text('errorMessage'),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+    completedAt: timestamp('completedAt', { mode: 'string' }),
+    expiresAt: timestamp('expiresAt', { mode: 'string' }),
+  },
+  (table) => [
+    index('oaMessageRequest_oaId_type_createdAt_idx').on(
+      table.oaId,
+      table.requestType,
+      table.createdAt,
+    ),
+    index('oaMessageRequest_status_idx').on(table.status),
+    uniqueIndex('oaMessageRequest_acceptedRequestId_idx').on(table.acceptedRequestId),
+  ],
+)
+
+export const oaMessageDelivery = pgTable(
+  'oaMessageDelivery',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    requestId: uuid('requestId')
+      .notNull()
+      .references(() => oaMessageRequest.id, { onDelete: 'cascade' }),
+    oaId: uuid('oaId')
+      .notNull()
+      .references(() => officialAccount.id, { onDelete: 'cascade' }),
+    userId: text('userId').notNull(),
+    chatId: text('chatId'),
+    status: text('status').notNull().default('pending'),
+    messageIdsJson: jsonb('messageIdsJson').notNull(),
+    attemptCount: integer('attemptCount').notNull().default(0),
+    lastErrorCode: text('lastErrorCode'),
+    lastErrorMessage: text('lastErrorMessage'),
+    lockedAt: timestamp('lockedAt', { mode: 'string' }),
+    lockedBy: text('lockedBy'),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+    deliveredAt: timestamp('deliveredAt', { mode: 'string' }),
+  },
+  (table) => [
+    uniqueIndex('oaMessageDelivery_request_user_idx').on(table.requestId, table.userId),
+    index('oaMessageDelivery_status_lockedAt_idx').on(table.status, table.lockedAt),
+    index('oaMessageDelivery_oaId_userId_idx').on(table.oaId, table.userId),
+    index('oaMessageDelivery_requestId_idx').on(table.requestId),
+  ],
+)
+
+export const oaRetryKey = pgTable(
+  'oaRetryKey',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    oaId: uuid('oaId')
+      .notNull()
+      .references(() => officialAccount.id, { onDelete: 'cascade' }),
+    retryKey: text('retryKey').notNull(),
+    requestId: uuid('requestId')
+      .notNull()
+      .references(() => oaMessageRequest.id, { onDelete: 'cascade' }),
+    requestHash: text('requestHash').notNull(),
+    acceptedRequestId: text('acceptedRequestId').notNull(),
+    expiresAt: timestamp('expiresAt', { mode: 'string' }).notNull(),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('oaRetryKey_oaId_retryKey_idx').on(table.oaId, table.retryKey),
+    index('oaRetryKey_expiresAt_idx').on(table.expiresAt),
   ],
 )

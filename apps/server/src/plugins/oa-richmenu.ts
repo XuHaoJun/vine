@@ -5,6 +5,7 @@ import type { schema } from '@vine/db'
 import { oaAccessToken } from '@vine/db/schema-oa'
 import type { DriveService } from '@vine/drive'
 import type { createOAService } from '../services/oa'
+import { oaApiPath } from './oa-routes'
 import { validateRichMenu } from '@vine/richmenu-schema'
 import type { RichMenuArea } from '@vine/richmenu-schema'
 
@@ -94,7 +95,7 @@ export async function oaRichMenuPlugin(
   })
 
   fastify.post(
-    '/v2/bot/richmenu',
+    oaApiPath('/bot/richmenu'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
       const body = request.body
@@ -120,7 +121,7 @@ export async function oaRichMenuPlugin(
   )
 
   fastify.post(
-    '/v2/bot/richmenu/validate',
+    oaApiPath('/bot/richmenu/validate'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       await extractOaFromToken(request, db)
       const body = request.body
@@ -139,7 +140,7 @@ export async function oaRichMenuPlugin(
   )
 
   fastify.post(
-    '/v2/bot/richmenu/:richMenuId/content',
+    oaApiPath('/bot/richmenu/:richMenuId/content'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
       const { richMenuId } = request.params as { richMenuId: string }
@@ -172,7 +173,7 @@ export async function oaRichMenuPlugin(
   )
 
   fastify.get(
-    '/v2/bot/richmenu/:richMenuId/content',
+    oaApiPath('/bot/richmenu/:richMenuId/content'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
       const { richMenuId } = request.params as { richMenuId: string }
@@ -206,7 +207,7 @@ export async function oaRichMenuPlugin(
   )
 
   fastify.get(
-    '/v2/bot/richmenu/list',
+    oaApiPath('/bot/richmenu/list'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
 
@@ -221,7 +222,7 @@ export async function oaRichMenuPlugin(
   )
 
   fastify.get(
-    '/v2/bot/richmenu/:richMenuId',
+    oaApiPath('/bot/richmenu/:richMenuId'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
       const { richMenuId } = request.params as { richMenuId: string }
@@ -239,7 +240,7 @@ export async function oaRichMenuPlugin(
   )
 
   fastify.delete(
-    '/v2/bot/richmenu/:richMenuId',
+    oaApiPath('/bot/richmenu/:richMenuId'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
       const { richMenuId } = request.params as { richMenuId: string }
@@ -260,7 +261,7 @@ export async function oaRichMenuPlugin(
   )
 
   fastify.post(
-    '/v2/bot/user/all/richmenu/:richMenuId',
+    oaApiPath('/bot/user/all/richmenu/:richMenuId'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
       const { richMenuId } = request.params as { richMenuId: string }
@@ -284,7 +285,7 @@ export async function oaRichMenuPlugin(
   )
 
   fastify.delete(
-    '/v2/bot/user/all/richmenu',
+    oaApiPath('/bot/user/all/richmenu'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
       await oa.clearDefaultRichMenu(oaId)
@@ -293,7 +294,7 @@ export async function oaRichMenuPlugin(
   )
 
   fastify.get(
-    '/v2/bot/user/all/richmenu',
+    oaApiPath('/bot/user/all/richmenu'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
       const defaultMenu = await oa.getDefaultRichMenu(oaId)
@@ -307,7 +308,7 @@ export async function oaRichMenuPlugin(
   )
 
   fastify.post(
-    '/v2/bot/user/:userId/richmenu/:richMenuId',
+    oaApiPath('/bot/user/:userId/richmenu/:richMenuId'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
       const { userId, richMenuId } = request.params as {
@@ -341,7 +342,7 @@ export async function oaRichMenuPlugin(
   )
 
   fastify.delete(
-    '/v2/bot/user/:userId/richmenu',
+    oaApiPath('/bot/user/:userId/richmenu'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
       const { userId } = request.params as { userId: string }
@@ -360,7 +361,7 @@ export async function oaRichMenuPlugin(
   )
 
   fastify.get(
-    '/v2/bot/user/:userId/richmenu',
+    oaApiPath('/bot/user/:userId/richmenu'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
       const { userId } = request.params as { userId: string }
@@ -383,7 +384,7 @@ export async function oaRichMenuPlugin(
   )
 
   fastify.post(
-    '/v2/bot/richmenu/bulk/link',
+    oaApiPath('/bot/richmenu/bulk/link'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
       const body = request.body as { richMenuId: string; userIds: string[] }
@@ -413,7 +414,7 @@ export async function oaRichMenuPlugin(
   )
 
   fastify.post(
-    '/v2/bot/richmenu/bulk/unlink',
+    oaApiPath('/bot/richmenu/bulk/unlink'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
       const body = request.body as { userIds: string[] }
@@ -434,7 +435,7 @@ export async function oaRichMenuPlugin(
   )
 
   fastify.post(
-    '/v2/bot/richmenu/alias',
+    oaApiPath('/bot/richmenu/alias'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
       const body = request.body as { richMenuAliasId: string; richMenuId: string }
@@ -472,7 +473,7 @@ export async function oaRichMenuPlugin(
   )
 
   fastify.post(
-    '/v2/bot/richmenu/alias/:richMenuAliasId',
+    oaApiPath('/bot/richmenu/alias/:richMenuAliasId'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
       const { richMenuAliasId } = request.params as { richMenuAliasId: string }
@@ -499,7 +500,7 @@ export async function oaRichMenuPlugin(
   )
 
   fastify.delete(
-    '/v2/bot/richmenu/alias/:richMenuAliasId',
+    oaApiPath('/bot/richmenu/alias/:richMenuAliasId'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
       const { richMenuAliasId } = request.params as { richMenuAliasId: string }
@@ -516,7 +517,7 @@ export async function oaRichMenuPlugin(
   )
 
   fastify.get(
-    '/v2/bot/richmenu/alias/list',
+    oaApiPath('/bot/richmenu/alias/list'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
 
@@ -532,7 +533,7 @@ export async function oaRichMenuPlugin(
   )
 
   fastify.get(
-    '/v2/bot/richmenu/alias/:richMenuAliasId',
+    oaApiPath('/bot/richmenu/alias/:richMenuAliasId'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
       const { richMenuAliasId } = request.params as { richMenuAliasId: string }
@@ -550,7 +551,7 @@ export async function oaRichMenuPlugin(
   )
 
   fastify.post(
-    '/v2/bot/richmenu/batch',
+    oaApiPath('/bot/richmenu/batch'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
       const body = request.body as {
@@ -629,7 +630,7 @@ export async function oaRichMenuPlugin(
   )
 
   fastify.get(
-    '/v2/bot/richmenu/progress/batch',
+    oaApiPath('/bot/richmenu/progress/batch'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       await extractOaFromToken(request, db)
       const { requestId } = request.query as { requestId?: string }
@@ -647,7 +648,7 @@ export async function oaRichMenuPlugin(
   )
 
   fastify.post(
-    '/v2/bot/richmenu/validate/batch',
+    oaApiPath('/bot/richmenu/validate/batch'),
     async (request: FastifyRequest, reply: FastifyReply) => {
       const oaId = await extractOaFromToken(request, db)
       const body = request.body as {
