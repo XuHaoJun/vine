@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { eq } from 'drizzle-orm'
 import { chat, chatMember, message } from '@vine/db/schema-public'
-import { oaMessageDelivery, oaMessageRequest } from '@vine/db/schema-private'
-import { officialAccount, oaProvider } from '@vine/db/schema-oa'
+import { oaMessageDelivery, oaMessageRequest, oaRetryKey } from '@vine/db/schema-private'
+import { officialAccount, oaFriendship, oaProvider, oaQuota } from '@vine/db/schema-oa'
 import { getIntegrationDb, withRollbackDb } from '../test/integration-db'
 import { createOAMessagingService } from './oa-messaging'
 
@@ -164,5 +164,96 @@ describe('oa messaging delivery recovery', () => {
       await db.delete(officialAccount).where(eq(officialAccount.id, oa.id))
       await db.delete(oaProvider).where(eq(oaProvider.id, provider.id))
     }
+  })
+})
+
+async function seedOA(db: any, uniqueId: string) {
+  const [provider] = await db
+    .insert(oaProvider)
+    .values({ name: 'Provider', ownerId: 'owner-1' })
+    .returning()
+  const [oa] = await db
+    .insert(officialAccount)
+    .values({
+      providerId: provider.id,
+      name: 'OA',
+      uniqueId,
+      channelSecret: 'secret',
+    })
+    .returning()
+  return oa
+}
+
+describe('oa messaging transactional acceptance', () => {
+  it('does not accept retry key or delivery rows when quota fails', async () => {
+    await withRollbackDb(async (db) => {
+      const now = '2026-05-01T00:00:00.000Z'
+      const oa = await seedOA(db, 'oa-quota-fail-test')
+      await db.insert(oaFriendship).values({
+        oaId: oa.id,
+        userId: 'user-1',
+        status: 'friend',
+      })
+      await db.insert(oaQuota).values({
+        oaId: oa.id,
+        monthlyLimit: 1,
+        currentUsage: 1,
+        resetAt: now,
+      })
+
+      const service = createOAMessagingService({
+        db,
+        instanceId: 'test',
+        now: () => new Date(now),
+      })
+
+      const result = await service.push({
+        oaId: oa.id,
+        retryKey: '123e4567-e89b-12d3-a456-426614174000',
+        to: 'user-1',
+        messages: [{ type: 'text', text: 'hello' }],
+      })
+
+      expect(result).toMatchObject({ ok: false, code: 'QUOTA_EXCEEDED' })
+      expect(await db.select().from(oaRetryKey)).toHaveLength(0)
+      expect(await db.select().from(oaMessageRequest)).toHaveLength(0)
+      expect(await db.select().from(oaMessageDelivery)).toHaveLength(0)
+    })
+  })
+
+  it('keeps broadcast recipient snapshot stable across retry', async () => {
+    await withRollbackDb(async (db) => {
+      const now = '2026-05-01T00:00:00.000Z'
+      const oa = await seedOA(db, 'oa-broadcast-snapshot-test')
+      await db.insert(oaFriendship).values([
+        { oaId: oa.id, userId: 'user-1', status: 'friend' },
+        { oaId: oa.id, userId: 'user-2', status: 'friend' },
+      ])
+      const service = createOAMessagingService({
+        db,
+        instanceId: 'test',
+        now: () => new Date(now),
+      })
+
+      await service.broadcast({
+        oaId: oa.id,
+        retryKey: '123e4567-e89b-12d3-a456-426614174000',
+        messages: [{ type: 'text', text: 'hello' }],
+      })
+      await db.insert(oaFriendship).values({
+        oaId: oa.id,
+        userId: 'user-3',
+        status: 'friend',
+      })
+      const retry = await service.broadcast({
+        oaId: oa.id,
+        retryKey: '123e4567-e89b-12d3-a456-426614174000',
+        messages: [{ type: 'text', text: 'hello' }],
+      })
+
+      expect(retry).toMatchObject({ ok: false, code: 'RETRY_KEY_ACCEPTED' })
+      const deliveries = await db.select().from(oaMessageDelivery)
+      expect(deliveries.map((row: { userId: string }) => row.userId).sort()).toEqual(['user-1', 'user-2'])
+    })
   })
 })

@@ -1,9 +1,10 @@
 import { createHash, randomUUID } from 'crypto'
-import { and, eq, gt, inArray, isNull, lt, or } from 'drizzle-orm'
+import { and, eq, gt, inArray, isNull, lt, or, sql } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { schema } from '@vine/db'
 import { oaMessageDelivery, oaMessageRequest, oaRetryKey } from '@vine/db/schema-private'
 import { chat, chatMember, message } from '@vine/db/schema-public'
+import { oaFriendship, oaQuota, oaReplyToken } from '@vine/db/schema-oa'
 
 export const RETRY_KEY_TTL_MS = 24 * 60 * 60 * 1000
 
@@ -136,6 +137,17 @@ export type OAMessagingDeps = {
   instanceId: string
   now?: () => Date
 }
+
+class RetryKeyRaceError extends Error {
+  constructor(
+    readonly input: RetryKeyCheckInput,
+    readonly httpRequestId: string,
+  ) {
+    super('Retry key was accepted by another transaction')
+  }
+}
+
+type NormalizedMessage = { type: string; text?: string | null; metadata?: string | null }
 
 export function createOAMessagingService(deps: OAMessagingDeps) {
   const now = deps.now ?? (() => new Date())
@@ -317,11 +329,303 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
     })
   }
 
+  function monthStart(value: Date) {
+    return new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), 1))
+  }
+
+  async function reserveQuota(tx: any, oaId: string, delta: number, nowIso: string) {
+    const [quota] = await tx.select().from(oaQuota).where(eq(oaQuota.oaId, oaId)).limit(1)
+    if (!quota || quota.monthlyLimit === 0) return true
+
+    const resetAt = new Date(quota.resetAt)
+    const start = monthStart(new Date(nowIso))
+    if (resetAt < start) {
+      await tx
+        .update(oaQuota)
+        .set({ currentUsage: 0, resetAt: start.toISOString() })
+        .where(eq(oaQuota.oaId, oaId))
+    }
+
+    const [updated] = await tx
+      .update(oaQuota)
+      .set({ currentUsage: sql`${oaQuota.currentUsage} + ${delta}` })
+      .where(
+        and(
+          eq(oaQuota.oaId, oaId),
+          sql`${oaQuota.currentUsage} + ${delta} <= ${oaQuota.monthlyLimit}`,
+        ),
+      )
+      .returning({ oaId: oaQuota.oaId })
+    return !!updated
+  }
+
+  async function claimReplyToken(
+    tx: any,
+    input: {
+      oaId: string
+      replyToken: string
+      nowIso: string
+    },
+  ) {
+    const [record] = await tx
+      .update(oaReplyToken)
+      .set({ used: true })
+      .where(
+        and(
+          eq(oaReplyToken.oaId, input.oaId),
+          eq(oaReplyToken.token, input.replyToken),
+          eq(oaReplyToken.used, false),
+          gt(oaReplyToken.expiresAt, input.nowIso),
+        ),
+      )
+      .returning()
+    return record ?? null
+  }
+
+  async function insertAcceptedRequest(
+    tx: any,
+    input: {
+      oaId: string
+      requestType: SendRequestType
+      retryKey?: string
+      requestHash: string
+      acceptedRequestId: string
+      messages: unknown[]
+      target: unknown
+      nowIso: string
+    },
+  ) {
+    const expiresAt = input.retryKey
+      ? new Date(new Date(input.nowIso).getTime() + RETRY_KEY_TTL_MS).toISOString()
+      : null
+    const [request] = await tx
+      .insert(oaMessageRequest)
+      .values({
+        oaId: input.oaId,
+        requestType: input.requestType,
+        retryKey: input.retryKey,
+        requestHash: input.requestHash,
+        acceptedRequestId: input.acceptedRequestId,
+        status: 'processing',
+        messagesJson: input.messages,
+        targetJson: input.target as Record<string, unknown>,
+        expiresAt,
+        updatedAt: input.nowIso,
+      })
+      .returning()
+
+    if (input.retryKey && expiresAt) {
+      const inserted = await tx
+        .insert(oaRetryKey)
+        .values({
+          oaId: input.oaId,
+          retryKey: input.retryKey,
+          requestId: request.id,
+          requestHash: input.requestHash,
+          acceptedRequestId: input.acceptedRequestId,
+          expiresAt,
+        })
+        .onConflictDoNothing()
+        .returning({ id: oaRetryKey.id })
+      if (inserted.length === 0) {
+        throw new RetryKeyRaceError(
+          {
+            db: tx,
+            now,
+            oaId: input.oaId,
+            requestType: input.requestType,
+            retryKey: input.retryKey,
+            target: input.target,
+            messages: input.messages,
+          },
+          createHttpRequestId(),
+        )
+      }
+    }
+
+    return request
+  }
+
+  async function loadSentMessagesForAcceptedRequest(requestId: string) {
+    const deliveries = await deps.db
+      .select({ messageIdsJson: oaMessageDelivery.messageIdsJson })
+      .from(oaMessageDelivery)
+      .where(eq(oaMessageDelivery.requestId, requestId))
+    const ids = deliveries.flatMap((delivery) => delivery.messageIdsJson as string[])
+    return ids.map((id) => ({ id }))
+  }
+
+  async function acceptMessagingExecution(input: {
+    oaId: string
+    requestType: SendRequestType
+    retryKey?: string
+    target: unknown
+    messages: NormalizedMessage[]
+    resolveRecipients: (tx: any, nowIso: string) => Promise<string[] | { error: string }>
+  }) {
+    const checked = await checkRetryKeyForRequest({
+      db: deps.db,
+      now,
+      oaId: input.oaId,
+      requestType: input.requestType,
+      retryKey: input.retryKey,
+      target: input.target,
+      messages: input.messages,
+    })
+    if (!checked.ok) {
+      if (checked.code === 'RETRY_KEY_ACCEPTED' && checked.requestId) {
+        return {
+          ...checked,
+          sentMessages: await loadSentMessagesForAcceptedRequest(checked.requestId),
+        }
+      }
+      return checked
+    }
+
+    try {
+      return await deps.db.transaction(async (tx) => {
+        const nowIso = now().toISOString()
+        const recipients = await input.resolveRecipients(tx, nowIso)
+        if (!Array.isArray(recipients)) {
+          return {
+            ok: false as const,
+            code: recipients.error,
+            httpRequestId: checked.httpRequestId,
+          }
+        }
+
+        const quotaDelta = recipients.length * input.messages.length
+        const allowed = await reserveQuota(tx, input.oaId, quotaDelta, nowIso)
+        if (!allowed) {
+          return { ok: false as const, code: 'QUOTA_EXCEEDED', httpRequestId: checked.httpRequestId }
+        }
+
+        const acceptedRequestId = createAcceptedRequestId()
+        const request = await insertAcceptedRequest(tx, {
+          oaId: input.oaId,
+          requestType: input.requestType,
+          retryKey: input.retryKey,
+          requestHash: checked.requestHash,
+          acceptedRequestId,
+          messages: input.messages,
+          target: input.target,
+          nowIso,
+        })
+        await createDeliveryRows({
+          db: tx,
+          requestId: request.id,
+          oaId: input.oaId,
+          userIds: recipients,
+          messageCount: input.messages.length,
+        })
+
+        return {
+          ok: true as const,
+          accepted: {
+            request,
+            httpRequestId: checked.httpRequestId,
+            acceptedRequestId,
+          },
+          recipientCount: recipients.length,
+        }
+      })
+    } catch (err) {
+      if (err instanceof RetryKeyRaceError) {
+        return checkRetryKeyForRequest({ ...err.input, db: deps.db, now })
+      }
+      throw err
+    }
+  }
+
+  async function push(input: {
+    oaId: string
+    retryKey?: string
+    to: string
+    messages: NormalizedMessage[]
+  }) {
+    const accepted = await acceptMessagingExecution({
+      oaId: input.oaId,
+      requestType: 'push',
+      retryKey: input.retryKey,
+      target: { to: input.to },
+      messages: input.messages,
+      resolveRecipients: async (tx) => {
+        const [friendship] = await tx
+          .select()
+          .from(oaFriendship)
+          .where(
+            and(
+              eq(oaFriendship.oaId, input.oaId),
+              eq(oaFriendship.userId, input.to),
+              eq(oaFriendship.status, 'friend'),
+            ),
+          )
+          .limit(1)
+        return friendship ? [input.to] : { error: 'NOT_FRIEND' }
+      },
+    })
+    if (!accepted.ok) return accepted
+    const processed = await processPendingDeliveries({ batchSize: 25, staleAfterMs: 30_000 })
+    return { ...accepted, processed }
+  }
+
+  async function broadcast(input: {
+    oaId: string
+    retryKey?: string
+    messages: NormalizedMessage[]
+  }) {
+    const accepted = await acceptMessagingExecution({
+      oaId: input.oaId,
+      requestType: 'broadcast',
+      retryKey: input.retryKey,
+      target: { audience: 'all_friends' },
+      messages: input.messages,
+      resolveRecipients: async (tx) => {
+        const friends = await tx
+          .select({ userId: oaFriendship.userId })
+          .from(oaFriendship)
+          .where(and(eq(oaFriendship.oaId, input.oaId), eq(oaFriendship.status, 'friend')))
+        return friends.map((friend: { userId: string }) => friend.userId)
+      },
+    })
+    if (!accepted.ok) return accepted
+    const processed = await processPendingDeliveries({ batchSize: 100, staleAfterMs: 30_000 })
+    return { ...accepted, processed }
+  }
+
+  async function reply(input: {
+    oaId: string
+    replyToken: string
+    messages: NormalizedMessage[]
+  }) {
+    const accepted = await acceptMessagingExecution({
+      oaId: input.oaId,
+      requestType: 'reply',
+      target: { replyToken: input.replyToken },
+      messages: input.messages,
+      resolveRecipients: async (tx, nowIso) => {
+        const token = await claimReplyToken(tx, {
+          oaId: input.oaId,
+          replyToken: input.replyToken,
+          nowIso,
+        })
+        return token ? [token.userId] : { error: 'INVALID_REPLY_TOKEN' }
+      },
+    })
+    if (!accepted.ok) return accepted
+    const processed = await processPendingDeliveries({ batchSize: 25, staleAfterMs: 30_000 })
+    return { ...accepted, processed }
+  }
+
   return {
     now,
     checkRetryKeyForRequest: (input: Omit<RetryKeyCheckInput, 'db' | 'now'>) =>
       checkRetryKeyForRequest({ ...input, db: deps.db, now }),
     createDeliveryRows,
     processPendingDeliveries,
+    acceptMessagingExecution,
+    reply,
+    push,
+    broadcast,
   }
 }
