@@ -73,6 +73,14 @@ Completed:
 - Webhook endpoint and rich menu public routes moved under `/api/oa/v2`.
 - Tests around auth, validation, idempotency, delivery recovery, namespace
   guardrails, and message insertion.
+- Webhook delivery logs (`oaWebhookDelivery`, `oaWebhookAttempt`) with LINE-like
+  failure classification, attempt history, and 30-day retention cleanup.
+- Manual redelivery of failed webhooks from the developer console, preserving
+  the original `webhookEventId` and setting `deliveryContext.isRedelivery`.
+- LINE-like webhook settings (Use webhook, Webhook redelivery, Error statistics
+  aggregation) and diagnostic verify/test tools in the console.
+- ConnectRPC management API for webhook settings, delivery listing, redelivery,
+  and test events (not exposed on public `/v2` routes).
 
 Not completed yet / next hardening:
 
@@ -80,7 +88,6 @@ Not completed yet / next hardening:
   endpoint, including explicit differences from the official LINE cloud.
 - Operator views for accepted requests, delivery rows, retry-key state, and
   failed recovery attempts.
-- Webhook delivery logs and manual redelivery from the developer console.
 - Message content retrieval backed by stored media for image/video/audio.
 - Production limits: body size, per-OA rate limiting, quota reset policy, and
   retention cleanup for request/delivery/retry-key rows.
