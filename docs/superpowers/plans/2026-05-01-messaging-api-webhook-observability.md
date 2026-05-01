@@ -34,21 +34,22 @@ Commit after each task once that task's checks pass.
 - `apps/server/src/services/oa-webhook-delivery.ts` — webhook delivery service factory, pure helpers, verify/test send, real delivery creation, manual redelivery, retention cleanup helper.
 - `apps/server/src/services/oa-webhook-delivery.test.ts` — unit tests for failure classification, response excerpt caps, diagnostic sends, visibility decisions, and redelivery payload mutation.
 - `apps/server/src/services/oa-webhook-delivery.int.test.ts` — DB integration tests for delivery/attempt persistence, duplicate event IDs, redelivery, retention cleanup, and authorization-adjacent query behavior.
-- `packages/db/src/migrations/20260501000002_oa_webhook_observability.ts` — migration for `oaWebhookDelivery`, `oaWebhookAttempt`, and new `oaWebhook` setting columns.
+- `packages/db/src/migrations/20260501000002_oa_webhook_observability.ts` — migration for `oaWebhookDelivery`, `oaWebhookAttempt`, new `oaWebhook` setting columns, and a unique `oaWebhook.oaId` index.
 - `apps/web/app/(app)/developers/console/channel/[channelId]/ChannelHeader.tsx` — reusable channel header/breadcrumb split from the route file.
 - `apps/web/app/(app)/developers/console/channel/[channelId]/MessagingApiTab.tsx` — Messaging API tab composition.
 - `apps/web/app/(app)/developers/console/channel/[channelId]/WebhookSettingsSection.tsx` — webhook settings form and verify action.
 - `apps/web/app/(app)/developers/console/channel/[channelId]/WebhookErrorsSection.tsx` — delivery list, detail expansion, redelivery action.
 - `apps/web/app/(app)/developers/console/channel/[channelId]/TestWebhookSection.tsx` — diagnostic sample webhook action.
-- `apps/web/src/test/unit/developers/channel-messaging-api-tab.test.tsx` — focused UI behavior tests if existing unit test setup supports rendering route components.
+- `apps/web/src/test/unit/developers/channel-messaging-api-tab.test.tsx` — focused render/hook behavior tests if existing unit test setup supports rendering route components.
 
 ### Modify
 
 - `packages/db/src/schema-private.ts` — add `oaWebhookDelivery` and `oaWebhookAttempt`.
-- `packages/db/src/schema-oa.ts` — add webhook settings/verify columns to `oaWebhook`.
+- `packages/db/src/schema-oa.ts` — add webhook settings/verify columns to `oaWebhook` and replace the non-unique `oaWebhook.oaId` index with a unique index.
 - `packages/proto/proto/oa/v1/oa.proto` — add webhook settings, delivery, and management RPC messages.
 - `packages/proto/package.json` — no new export expected because OA already exports `@vine/proto/oa`; verify after codegen.
 - `apps/server/src/connect/oa.ts` — map new proto messages and enforce OA/provider ownership for new RPCs.
+- `apps/server/src/connect/oa-webhook.test.ts` — Connect handler coverage for auth/ownership checks and redelivery disabled failures.
 - `apps/server/src/connect/routes.ts` — pass `webhookDelivery` dependency into `oaHandler`.
 - `apps/server/src/index.ts` — construct `createOAWebhookDeliveryService` and pass it into Connect routes and internal webhook plugin.
 - `apps/server/src/plugins/oa-webhook.ts` — replace direct fetch dispatch with the delivery service.
@@ -207,7 +208,13 @@ In `packages/db/src/schema-oa.ts`, add these columns to `oaWebhook` after `statu
     lastVerifyReason: text('lastVerifyReason'),
 ```
 
-`schema-oa.ts` already imports `boolean`, `integer`, `text`, and `timestamp`, so no import change should be needed.
+Also update the `drizzle-orm/pg-core` import to include `uniqueIndex` and replace the existing non-unique OA webhook index:
+
+```ts
+  (table) => [uniqueIndex('oaWebhook_oaId_unique_idx').on(table.oaId)],
+```
+
+This unique index is required because `setWebhook()` already uses `onConflictDoUpdate({ target: oaWebhook.oaId })`, and the new `updateWebhookSettings()` will use the same conflict target.
 
 - [ ] **Step 4: Add migration**
 
@@ -226,6 +233,17 @@ ALTER TABLE "oaWebhook" ADD COLUMN IF NOT EXISTS "errorStatisticsEnabled" boolea
 ALTER TABLE "oaWebhook" ADD COLUMN IF NOT EXISTS "lastVerifyStatusCode" integer;
 --> statement-breakpoint
 ALTER TABLE "oaWebhook" ADD COLUMN IF NOT EXISTS "lastVerifyReason" text;
+--> statement-breakpoint
+WITH ranked AS (
+  SELECT "id", ROW_NUMBER() OVER (PARTITION BY "oaId" ORDER BY "createdAt" DESC, "id" DESC) AS rn
+  FROM "oaWebhook"
+)
+DELETE FROM "oaWebhook"
+WHERE "id" IN (SELECT "id" FROM ranked WHERE rn > 1);
+--> statement-breakpoint
+DROP INDEX IF EXISTS "oaWebhook_oaId_idx";
+--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "oaWebhook_oaId_unique_idx" ON "oaWebhook" ("oaId");
 --> statement-breakpoint
 CREATE TABLE "oaWebhookDelivery" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -288,6 +306,8 @@ export async function down(client: PoolClient): Promise<void> {
   await client.query(`
     DROP TABLE IF EXISTS "oaWebhookAttempt";
     DROP TABLE IF EXISTS "oaWebhookDelivery";
+    DROP INDEX IF EXISTS "oaWebhook_oaId_unique_idx";
+    CREATE INDEX IF NOT EXISTS "oaWebhook_oaId_idx" ON "oaWebhook" ("oaId");
     ALTER TABLE "oaWebhook" DROP COLUMN IF EXISTS "lastVerifyReason";
     ALTER TABLE "oaWebhook" DROP COLUMN IF EXISTS "lastVerifyStatusCode";
     ALTER TABLE "oaWebhook" DROP COLUMN IF EXISTS "errorStatisticsEnabled";
@@ -535,7 +555,26 @@ git commit -m "feat(oa): add webhook delivery helpers"
 
 - [ ] **Step 1: Add OA webhook settings helpers**
 
-In `apps/server/src/services/oa.ts`, add these methods inside `createOAService` near existing webhook methods:
+In `apps/server/src/services/oa.ts`, add this helper near the existing webhook methods. Use it from both settings update and verify endpoint override paths so the Connect path does not rely on UI-only validation:
+
+```ts
+function validateWebhookUrl(url: string): void {
+  if (url.length > 500) {
+    throw new Error('Webhook URL must be 500 characters or fewer')
+  }
+  let parsed: URL
+  try {
+    parsed = new URL(url)
+  } catch {
+    throw new Error('Webhook URL must be a valid HTTPS URL')
+  }
+  if (parsed.protocol !== 'https:') {
+    throw new Error('Webhook URL must use HTTPS')
+  }
+}
+```
+
+Then add these methods inside `createOAService` near existing webhook methods:
 
 ```ts
   async function updateWebhookSettings(
@@ -573,6 +612,7 @@ In `apps/server/src/services/oa.ts`, add these methods inside `createOAService` 
     if (!values.url) {
       throw new Error('Webhook URL is required')
     }
+    validateWebhookUrl(values.url)
 
     const [webhook] = await db
       .insert(oaWebhook)
@@ -603,7 +643,7 @@ In `apps/server/src/services/oa.ts`, add these methods inside `createOAService` 
   }
 ```
 
-Add both methods to the returned service object at the end of `createOAService`.
+Add `validateWebhookUrl`, `updateWebhookSettings`, and `recordWebhookVerifyResult` to the returned service object at the end of `createOAService`.
 
 - [ ] **Step 2: Add failing DB integration tests**
 
@@ -638,6 +678,11 @@ describe('oa webhook delivery service integration', () => {
         useWebhook: true,
         errorStatisticsEnabled: true,
       })
+      await oa.recordWebhookVerifyResult(account.id, {
+        statusCode: 200,
+        reason: 'OK',
+        verified: true,
+      })
       const service = createOAWebhookDeliveryService({
         db,
         oa,
@@ -647,10 +692,10 @@ describe('oa webhook delivery service integration', () => {
 
       const result = await service.deliverRealEvent({
         oaId: account.id,
-        payload: {
+        buildPayload: () => ({
           destination: account.id,
           events: [{ type: 'message', webhookEventId: 'evt_failed' }],
-        },
+        }),
       })
 
       expect(result).toMatchObject({
@@ -685,6 +730,11 @@ describe('oa webhook delivery service integration', () => {
         useWebhook: true,
         errorStatisticsEnabled: false,
       })
+      await oa.recordWebhookVerifyResult(account.id, {
+        statusCode: 200,
+        reason: 'OK',
+        verified: true,
+      })
       const service = createOAWebhookDeliveryService({
         db,
         oa,
@@ -694,14 +744,42 @@ describe('oa webhook delivery service integration', () => {
 
       await service.deliverRealEvent({
         oaId: account.id,
-        payload: {
+        buildPayload: () => ({
           destination: account.id,
           events: [{ type: 'message', webhookEventId: 'evt_hidden' }],
-        },
+        }),
       })
 
       const visible = await service.listDeliveries({ oaId: account.id, pageSize: 20 })
       expect(visible.deliveries).toHaveLength(0)
+    })
+  })
+
+  it('does not build payloads before webhook preflight passes', async () => {
+    await withRollbackDb(async (db) => {
+      const { oa, account } = await seedOA(db)
+      await oa.updateWebhookSettings(account.id, {
+        url: 'https://example.test/webhook',
+        useWebhook: false,
+      })
+      const buildPayload = vi.fn(() => ({
+        destination: account.id,
+        events: [{ type: 'message', webhookEventId: 'evt_not_built' }],
+      }))
+      const service = createOAWebhookDeliveryService({
+        db,
+        oa,
+        fetchFn: vi.fn(),
+        now: () => '2026-05-01T00:00:00.000Z',
+      })
+
+      const result = await service.deliverRealEvent({
+        oaId: account.id,
+        buildPayload,
+      })
+
+      expect(result).toEqual({ kind: 'webhook-not-ready' })
+      expect(buildPayload).not.toHaveBeenCalled()
     })
   })
 
@@ -713,6 +791,11 @@ describe('oa webhook delivery service integration', () => {
         useWebhook: true,
         webhookRedeliveryEnabled: true,
         errorStatisticsEnabled: true,
+      })
+      await oa.recordWebhookVerifyResult(account.id, {
+        statusCode: 200,
+        reason: 'OK',
+        verified: true,
       })
       const fetchFn = vi
         .fn()
@@ -727,7 +810,7 @@ describe('oa webhook delivery service integration', () => {
 
       await service.deliverRealEvent({
         oaId: account.id,
-        payload: {
+        buildPayload: () => ({
           destination: account.id,
           events: [
             {
@@ -736,7 +819,7 @@ describe('oa webhook delivery service integration', () => {
               deliveryContext: { isRedelivery: false },
             },
           ],
-        },
+        }),
       })
       const [delivery] = await db
         .select()
@@ -748,6 +831,31 @@ describe('oa webhook delivery service integration', () => {
       const secondBody = JSON.parse(fetchFn.mock.calls[1][1].body)
       expect(secondBody.events[0].deliveryContext.isRedelivery).toBe(true)
       expect(secondBody.events[0].webhookEventId).toBe('evt_redeliver')
+    })
+  })
+
+  it('upserts one webhook settings row per official account', async () => {
+    await withRollbackDb(async (db) => {
+      const { oa, account } = await seedOA(db)
+      await oa.updateWebhookSettings(account.id, {
+        url: 'https://example.test/one',
+        useWebhook: true,
+      })
+      await oa.updateWebhookSettings(account.id, {
+        url: 'https://example.test/two',
+        webhookRedeliveryEnabled: true,
+      })
+
+      const rows = await db
+        .select()
+        .from(oaWebhook)
+        .where(eq(oaWebhook.oaId, account.id))
+      expect(rows).toHaveLength(1)
+      expect(rows[0]).toMatchObject({
+        url: 'https://example.test/two',
+        useWebhook: true,
+        webhookRedeliveryEnabled: true,
+      })
     })
   })
 
@@ -799,6 +907,7 @@ type OAWebhookDeliveryDeps = {
   oa: ReturnType<typeof createOAService>
   fetchFn?: typeof fetch
   now?: () => string
+  logger?: { error: (obj: unknown, message?: string) => void }
 }
 
 type DeliveryListItem = {
@@ -886,7 +995,7 @@ export function createOAWebhookDeliveryService(deps: OAWebhookDeliveryDeps) {
 
   async function deliverRealEvent(input: {
     oaId: string
-    payload: unknown
+    buildPayload: () => unknown | Promise<unknown>
   }): Promise<WebhookDispatchResult> {
     const account = await deps.oa.getOfficialAccount(input.oaId)
     if (!account) return { kind: 'oa-not-found' }
@@ -894,7 +1003,8 @@ export function createOAWebhookDeliveryService(deps: OAWebhookDeliveryDeps) {
     if (!webhook || webhook.status !== 'verified') return { kind: 'webhook-not-ready' }
     if (!webhook.useWebhook) return { kind: 'webhook-disabled' }
 
-    const event = extractFirstWebhookEvent(input.payload)
+    const payload = await input.buildPayload()
+    const event = extractFirstWebhookEvent(payload)
     const developerVisible = shouldCreateDeveloperVisibleDelivery({
       errorStatisticsEnabled: webhook.errorStatisticsEnabled,
     })
@@ -905,7 +1015,7 @@ export function createOAWebhookDeliveryService(deps: OAWebhookDeliveryDeps) {
         oaId: input.oaId,
         webhookEventId: event.webhookEventId,
         eventType: event.eventType,
-        payloadJson: input.payload,
+        payloadJson: payload,
         status: 'pending',
         developerVisible,
         createdAt: now(),
@@ -934,39 +1044,62 @@ export function createOAWebhookDeliveryService(deps: OAWebhookDeliveryDeps) {
       oaId: input.oaId,
       url: webhook.url,
       channelSecret: account.channelSecret,
-      payload: input.payload,
+      payload,
       isRedelivery: false,
     })
 
-    await deps.db.insert(oaWebhookAttempt).values({
-      deliveryId: target.id,
-      oaId: input.oaId,
-      attemptNumber,
-      isRedelivery: false,
-      requestUrl: webhook.url,
-      requestBodyJson: input.payload,
-      responseStatus: sent.responseStatus,
-      responseBodyExcerpt: sent.responseBodyExcerpt,
-      reason: sent.ok ? null : sent.reason,
-      detail: sent.ok ? null : sent.detail,
-      startedAt: sent.startedAt,
-      completedAt: sent.completedAt,
-    })
-
-    await deps.db
-      .update(oaWebhookDelivery)
-      .set({
-        status: sent.ok ? 'delivered' : 'failed',
-        reason: sent.ok ? null : sent.reason,
-        detail: sent.ok ? null : sent.detail,
+    try {
+      await deps.db.insert(oaWebhookAttempt).values({
+        deliveryId: target.id,
+        oaId: input.oaId,
+        attemptNumber,
+        isRedelivery: false,
+        requestUrl: webhook.url,
+        requestBodyJson: payload,
         responseStatus: sent.responseStatus,
         responseBodyExcerpt: sent.responseBodyExcerpt,
-        attemptCount: attemptNumber,
-        lastAttemptedAt: sent.completedAt,
-        deliveredAt: sent.ok ? sent.completedAt : null,
-        updatedAt: sent.completedAt,
+        reason: sent.ok ? null : sent.reason,
+        detail: sent.ok ? null : sent.detail,
+        startedAt: sent.startedAt,
+        completedAt: sent.completedAt,
       })
-      .where(eq(oaWebhookDelivery.id, target.id))
+
+      await deps.db
+        .update(oaWebhookDelivery)
+        .set({
+          status: sent.ok ? 'delivered' : 'failed',
+          reason: sent.ok ? null : sent.reason,
+          detail: sent.ok ? null : sent.detail,
+          responseStatus: sent.responseStatus,
+          responseBodyExcerpt: sent.responseBodyExcerpt,
+          attemptCount: attemptNumber,
+          lastAttemptedAt: sent.completedAt,
+          deliveredAt: sent.ok ? sent.completedAt : null,
+          updatedAt: sent.completedAt,
+        })
+        .where(eq(oaWebhookDelivery.id, target.id))
+    } catch (error) {
+      deps.logger?.error(
+        { err: error, deliveryId: target.id },
+        '[oa-webhook] failed to persist webhook attempt result',
+      )
+      await deps.db
+        .update(oaWebhookDelivery)
+        .set({
+          status: 'failed',
+          reason: 'unclassified',
+          detail: 'Webhook sent, but Vine failed to persist the attempt result',
+          updatedAt: now(),
+        })
+        .where(eq(oaWebhookDelivery.id, target.id))
+      return {
+        kind: 'delivery-failed',
+        deliveryId: target.id,
+        reason: 'unclassified',
+        detail: 'Webhook sent, but Vine failed to persist the attempt result',
+        statusCode: sent.responseStatus,
+      }
+    }
 
     if (sent.ok) return { kind: 'ok', deliveryId: target.id, statusCode: sent.responseStatus }
     return {
@@ -984,6 +1117,7 @@ export function createOAWebhookDeliveryService(deps: OAWebhookDeliveryDeps) {
     const webhook = await deps.oa.getWebhook(input.oaId)
     const url = input.endpointOverride ?? webhook?.url
     if (!url) return { success: false, statusCode: 0, reason: 'Webhook endpoint not found' }
+    deps.oa.validateWebhookUrl(url)
 
     const sent = await sendSigned({
       oaId: input.oaId,
@@ -999,7 +1133,7 @@ export function createOAWebhookDeliveryService(deps: OAWebhookDeliveryDeps) {
       reason,
       verified: sent.ok,
     })
-    return { success: sent.ok, statusCode, reason, timestamp: Date.now() }
+    return { success: sent.ok, statusCode, reason, timestamp: now() }
   }
 
   async function sendTestWebhookEvent(input: { oaId: string; text: string }) {
@@ -1032,7 +1166,7 @@ export function createOAWebhookDeliveryService(deps: OAWebhookDeliveryDeps) {
       success: sent.ok,
       statusCode: sent.responseStatus ?? 0,
       reason: sent.ok ? 'OK' : sent.detail,
-      timestamp: Date.now(),
+      timestamp: now(),
     }
   }
 
@@ -1102,35 +1236,58 @@ export function createOAWebhookDeliveryService(deps: OAWebhookDeliveryDeps) {
       isRedelivery: true,
     })
 
-    await deps.db.insert(oaWebhookAttempt).values({
-      deliveryId: delivery.id,
-      oaId: input.oaId,
-      attemptNumber,
-      isRedelivery: true,
-      requestUrl: webhook.url,
-      requestBodyJson: payload,
-      responseStatus: sent.responseStatus,
-      responseBodyExcerpt: sent.responseBodyExcerpt,
-      reason: sent.ok ? null : sent.reason,
-      detail: sent.ok ? null : sent.detail,
-      startedAt: sent.startedAt,
-      completedAt: sent.completedAt,
-    })
-    await deps.db
-      .update(oaWebhookDelivery)
-      .set({
-        status: sent.ok ? 'delivered' : 'failed',
-        reason: sent.ok ? null : sent.reason,
-        detail: sent.ok ? null : sent.detail,
+    try {
+      await deps.db.insert(oaWebhookAttempt).values({
+        deliveryId: delivery.id,
+        oaId: input.oaId,
+        attemptNumber,
+        isRedelivery: true,
+        requestUrl: webhook.url,
+        requestBodyJson: payload,
         responseStatus: sent.responseStatus,
         responseBodyExcerpt: sent.responseBodyExcerpt,
-        attemptCount: attemptNumber,
-        isRedelivery: true,
-        lastAttemptedAt: sent.completedAt,
-        deliveredAt: sent.ok ? sent.completedAt : null,
-        updatedAt: sent.completedAt,
+        reason: sent.ok ? null : sent.reason,
+        detail: sent.ok ? null : sent.detail,
+        startedAt: sent.startedAt,
+        completedAt: sent.completedAt,
       })
-      .where(eq(oaWebhookDelivery.id, delivery.id))
+      await deps.db
+        .update(oaWebhookDelivery)
+        .set({
+          status: sent.ok ? 'delivered' : 'failed',
+          reason: sent.ok ? null : sent.reason,
+          detail: sent.ok ? null : sent.detail,
+          responseStatus: sent.responseStatus,
+          responseBodyExcerpt: sent.responseBodyExcerpt,
+          attemptCount: attemptNumber,
+          isRedelivery: true,
+          lastAttemptedAt: sent.completedAt,
+          deliveredAt: sent.ok ? sent.completedAt : null,
+          updatedAt: sent.completedAt,
+        })
+        .where(eq(oaWebhookDelivery.id, delivery.id))
+    } catch (error) {
+      deps.logger?.error(
+        { err: error, deliveryId: delivery.id },
+        '[oa-webhook] failed to persist redelivery attempt result',
+      )
+      await deps.db
+        .update(oaWebhookDelivery)
+        .set({
+          status: 'failed',
+          reason: 'unclassified',
+          detail: 'Webhook redelivery sent, but Vine failed to persist the attempt result',
+          updatedAt: now(),
+        })
+        .where(eq(oaWebhookDelivery.id, delivery.id))
+      return {
+        kind: 'delivery-failed',
+        deliveryId: delivery.id,
+        reason: 'unclassified',
+        detail: 'Webhook redelivery sent, but Vine failed to persist the attempt result',
+        statusCode: sent.responseStatus,
+      }
+    }
 
     if (sent.ok) return { kind: 'ok', deliveryId: delivery.id, statusCode: sent.responseStatus }
     return {
@@ -1163,6 +1320,8 @@ export function createOAWebhookDeliveryService(deps: OAWebhookDeliveryDeps) {
 }
 ```
 
+Add a service-level test that forces the attempt insert or delivery update to reject after `fetchFn` resolves. Assert `logger.error` is called and the service returns `delivery-failed` with `reason: 'unclassified'`; this covers the external-success/DB-persistence-failure mode without needing to corrupt the integration database.
+
 - [ ] **Step 5: Run unit and integration tests**
 
 Run:
@@ -1188,6 +1347,7 @@ git commit -m "feat(oa): persist webhook delivery attempts"
 **Files:**
 - Modify: `packages/proto/proto/oa/v1/oa.proto`
 - Modify: `apps/server/src/connect/oa.ts`
+- Create: `apps/server/src/connect/oa-webhook.test.ts`
 - Modify: `apps/server/src/connect/routes.ts`
 - Modify: `apps/server/src/index.ts`
 - Modify: `apps/web/src/features/oa/client.ts`
@@ -1217,9 +1377,9 @@ message GetWebhookSettingsResponse {
 message UpdateWebhookSettingsRequest {
   string official_account_id = 1;
   optional string url = 2;
-  bool use_webhook = 3;
-  bool webhook_redelivery_enabled = 4;
-  bool error_statistics_enabled = 5;
+  optional bool use_webhook = 3;
+  optional bool webhook_redelivery_enabled = 4;
+  optional bool error_statistics_enabled = 5;
 }
 
 message UpdateWebhookSettingsResponse {
@@ -1235,7 +1395,7 @@ message WebhookTestResult {
   bool success = 1;
   int32 status_code = 2;
   string reason = 3;
-  int64 timestamp = 4;
+  string timestamp = 4;
 }
 
 message VerifyWebhookEndpointResponse {
@@ -1418,21 +1578,37 @@ Inside `oaServiceImpl`, add:
       async updateWebhookSettings(req, ctx) {
         const auth = requireAuthData(ctx)
         await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
-        const webhook = await deps.oa.updateWebhookSettings(req.officialAccountId, {
-          url: req.url,
-          useWebhook: req.useWebhook,
-          webhookRedeliveryEnabled: req.webhookRedeliveryEnabled,
-          errorStatisticsEnabled: req.errorStatisticsEnabled,
-        })
+        let webhook
+        try {
+          webhook = await deps.oa.updateWebhookSettings(req.officialAccountId, {
+            url: req.url,
+            useWebhook: req.useWebhook,
+            webhookRedeliveryEnabled: req.webhookRedeliveryEnabled,
+            errorStatisticsEnabled: req.errorStatisticsEnabled,
+          })
+        } catch (error) {
+          throw new ConnectError(
+            error instanceof Error ? error.message : 'Invalid webhook settings',
+            Code.InvalidArgument,
+          )
+        }
         return { settings: toProtoWebhookSettings(webhook) }
       },
       async verifyWebhookEndpoint(req, ctx) {
         const auth = requireAuthData(ctx)
         await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
-        const result = await deps.webhookDelivery.verifyWebhook({
-          oaId: req.officialAccountId,
-          endpointOverride: req.endpointOverride,
-        })
+        let result
+        try {
+          result = await deps.webhookDelivery.verifyWebhook({
+            oaId: req.officialAccountId,
+            endpointOverride: req.endpointOverride,
+          })
+        } catch (error) {
+          throw new ConnectError(
+            error instanceof Error ? error.message : 'Invalid webhook endpoint',
+            Code.InvalidArgument,
+          )
+        }
         return { result }
       },
       async listWebhookDeliveries(req, ctx) {
@@ -1504,26 +1680,55 @@ import { createOAWebhookDeliveryService } from './services/oa-webhook-delivery'
 ```
 
 ```ts
-const webhookDelivery = createOAWebhookDeliveryService({ db, oa })
+const webhookDelivery = createOAWebhookDeliveryService({ db, oa, logger })
+```
+
+Wire the 30-day retention acceptance criterion in `apps/server/src/index.ts` with a lightweight daily cleanup interval and close hook:
+
+```ts
+const cleanupWebhookDeliveries = () =>
+  webhookDelivery
+    .cleanupExpiredDeliveries({ olderThanDays: 30 })
+    .catch((err) => logger.error({ err }, '[oa-webhook] retention cleanup failed'))
+
+void cleanupWebhookDeliveries()
+const webhookRetentionInterval = setInterval(
+  () => void cleanupWebhookDeliveries(),
+  24 * 60 * 60 * 1000,
+)
+app.addHook('onClose', async () => {
+  clearInterval(webhookRetentionInterval)
+})
 ```
 
 Pass `webhookDelivery` into `connectRoutes(...)`.
 
-- [ ] **Step 7: Run proto/server typecheck**
+- [ ] **Step 7: Add Connect handler tests**
+
+Create `apps/server/src/connect/oa-webhook.test.ts` or extend an existing OA Connect test file if one exists during implementation. Cover:
+
+- unauthenticated calls to `getWebhookSettings`, `listWebhookDeliveries`, `getWebhookDelivery`, and `redeliverWebhook` return unauthenticated errors;
+- authenticated users who do not own the OA/provider cannot list, inspect, update, verify, test-send, or redeliver webhook rows;
+- `redeliverWebhook` maps `redelivery-disabled` to `Code.FailedPrecondition` and the UI can rely on that state.
+
+Keep these tests at the handler boundary with fake `oa` and `webhookDelivery` deps unless an existing Connect test harness makes full transport tests cheaper.
+
+- [ ] **Step 8: Run proto/server typecheck and Connect tests**
 
 Run:
 
 ```bash
 bun run --cwd apps/server typecheck
+bun run --cwd apps/server test:unit -- src/connect/oa-webhook.test.ts
 bun run --cwd apps/web typecheck
 ```
 
 Expected: PASS.
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
-git add packages/proto/proto/oa/v1/oa.proto packages/proto/gen packages/proto/package.json apps/server/src/connect/oa.ts apps/server/src/connect/routes.ts apps/server/src/index.ts apps/web/src/features/oa/client.ts
+git add packages/proto/proto/oa/v1/oa.proto packages/proto/gen packages/proto/package.json apps/server/src/connect/oa.ts apps/server/src/connect/oa-webhook.test.ts apps/server/src/connect/routes.ts apps/server/src/index.ts apps/web/src/features/oa/client.ts
 git commit -m "feat(oa): expose webhook observability rpc"
 ```
 
@@ -1559,25 +1764,26 @@ type WebhookPluginDeps = {
 
 Keep `authorizeChatMember`. Remove `dispatchSignedWebhook` and make internal routes call `webhookDelivery.deliverRealEvent`.
 
-For `/api/oa/internal/dispatch`, replace the `dispatchSignedWebhook` block with:
+For `/api/oa/internal/dispatch`, replace the `dispatchSignedWebhook` block with a lazy payload builder. The delivery service must do OA/webhook preflight before invoking `buildPayload`, so reply tokens are not created when the webhook is missing, disabled, or not verified:
 
 ```ts
-      const replyTokenRecord = await oa.registerReplyToken({
-        oaId: body.oaId,
-        userId,
-        chatId: body.chatId,
-        messageId: body.messageId,
-      })
-      const payload = oa.buildMessageEvent({
-        oaId: body.oaId,
-        userId,
-        messageId: body.messageId,
-        text: body.text,
-        replyToken: replyTokenRecord.token,
-      })
       const result = await deps.webhookDelivery.deliverRealEvent({
         oaId: body.oaId,
-        payload,
+        buildPayload: async () => {
+          const replyTokenRecord = await oa.registerReplyToken({
+            oaId: body.oaId,
+            userId,
+            chatId: body.chatId,
+            messageId: body.messageId,
+          })
+          return oa.buildMessageEvent({
+            oaId: body.oaId,
+            userId,
+            messageId: body.messageId,
+            text: body.text,
+            replyToken: replyTokenRecord.token,
+          })
+        },
       })
       return sendDispatchResult(reply, result)
 ```
@@ -1585,22 +1791,23 @@ For `/api/oa/internal/dispatch`, replace the `dispatchSignedWebhook` block with:
 For `/api/oa/internal/dispatch-postback`, replace with:
 
 ```ts
-      const replyTokenRecord = await oa.registerReplyToken({
-        oaId: body.oaId,
-        userId,
-        chatId: body.chatId,
-        messageId: null,
-      })
-      const payload = oa.buildPostbackEvent({
-        oaId: body.oaId,
-        userId,
-        replyToken: replyTokenRecord.token,
-        data: body.data,
-        params: body.params,
-      })
       const result = await deps.webhookDelivery.deliverRealEvent({
         oaId: body.oaId,
-        payload,
+        buildPayload: async () => {
+          const replyTokenRecord = await oa.registerReplyToken({
+            oaId: body.oaId,
+            userId,
+            chatId: body.chatId,
+            messageId: null,
+          })
+          return oa.buildPostbackEvent({
+            oaId: body.oaId,
+            userId,
+            replyToken: replyTokenRecord.token,
+            data: body.data,
+            params: body.params,
+          })
+        },
       })
       return sendDispatchResult(reply, result)
 ```
@@ -1636,12 +1843,11 @@ Assert that successful internal dispatch calls:
 ```ts
 expect(webhookDelivery.deliverRealEvent).toHaveBeenCalledWith({
   oaId,
-  payload: expect.objectContaining({
-    destination: oaId,
-    events: [expect.objectContaining({ type: 'message' })],
-  }),
+  buildPayload: expect.any(Function),
 })
 ```
+
+Invoke the captured `buildPayload` in the success test and assert it registers the reply token and returns the expected message payload. Add a separate skipped-delivery test that returns `{ kind: 'webhook-disabled' }` without invoking `buildPayload`, then assert `oa.registerReplyToken` was not called.
 
 Add a test for Use webhook disabled result:
 
@@ -1894,7 +2100,7 @@ export function WebhookSettingsSection({ channelId }: { channelId: string }) {
                 </SizableText>
                 <Button
                   size="$2"
-                  variant={value ? 'primary' : 'outlined'}
+                  variant={value ? undefined : 'outlined'}
                   onPress={() => onChange(!value)}
                 >
                   {value ? 'On' : 'Off'}
@@ -1922,8 +2128,6 @@ export function WebhookSettingsSection({ channelId }: { channelId: string }) {
 }
 ```
 
-If `Button` does not support `variant="primary"`, use the default variant for the on state and `outlined` for off.
-
 - [ ] **Step 4: Add webhook errors section**
 
 Create `WebhookErrorsSection.tsx`:
@@ -1940,7 +2144,13 @@ import { showToast } from '~/interface/toast/Toast'
 export function WebhookErrorsSection({ channelId }: { channelId: string }) {
   const queryClient = useTanQueryClient()
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined)
+  const settingsKey = ['oa', 'webhook-settings', channelId]
   const listKey = ['oa', 'webhook-deliveries', channelId, 'failed']
+  const settings = useTanQuery({
+    queryKey: settingsKey,
+    queryFn: () => oaClient.getWebhookSettings({ officialAccountId: channelId }),
+    enabled: !!channelId,
+  })
   const { data, isLoading } = useTanQuery({
     queryKey: listKey,
     queryFn: () =>
@@ -1974,6 +2184,7 @@ export function WebhookErrorsSection({ channelId }: { channelId: string }) {
     },
     onError: () => showToast('Failed to redeliver webhook', { type: 'error' }),
   })
+  const redeliveryEnabled = settings.data?.settings?.webhookRedeliveryEnabled ?? false
 
   return (
     <YStack gap="$3" p="$4" bw={1} boc="$borderColor" rounded="$2">
@@ -1990,8 +2201,8 @@ export function WebhookErrorsSection({ channelId }: { channelId: string }) {
               py="$2"
               gap="$3"
               items="center"
-              borderBottomWidth={1}
-              borderColor="$borderColor"
+              bbw={1}
+              boc="$borderColor"
             >
               <SizableText size="$2" color="$color10" w={160}>
                 {row.createdAt}
@@ -2010,8 +2221,9 @@ export function WebhookErrorsSection({ channelId }: { channelId: string }) {
               </Button>
               <Button
                 size="$2"
+                variant={redeliveryEnabled ? undefined : 'outlined'}
                 onPress={() => redeliver.mutate(row.id)}
-                disabled={redeliver.isPending}
+                disabled={!redeliveryEnabled || redeliver.isPending}
               >
                 Redeliver
               </Button>
@@ -2111,7 +2323,7 @@ Replace the header JSX with:
 Replace static tab labels with pressable labels:
 
 ```tsx
-<XStack gap="$6" borderBottomWidth={1} borderColor="$borderColor" pb="$2">
+<XStack gap="$6" bbw={1} boc="$borderColor" pb="$2">
   <SizableText
     size="$3"
     fontWeight={activeTab === 'basic' ? '700' : '400'}
@@ -2176,37 +2388,46 @@ git commit -m "feat(web): add messaging api webhook console"
 ## Task 7: Focused Frontend and Smoke Tests
 
 **Files:**
-- Create: `apps/web/src/test/unit/developers/channel-messaging-api-tab.test.tsx`
+- Optional create: `apps/web/src/test/unit/developers/channel-messaging-api-tab.test.tsx`
 - Optional create: `apps/web/src/test/integration/developer-console-messaging-api.test.ts`
 
-- [ ] **Step 1: Add unit test for the Messaging API tab if component render helpers are available**
+- [ ] **Step 1: Add a real Messaging API tab render/hook test if component render helpers are available**
 
-Create `apps/web/src/test/unit/developers/channel-messaging-api-tab.test.tsx`:
+Do not add a static query-key-only test. If the repo has a stable Tamagui/React Query render helper, create `apps/web/src/test/unit/developers/channel-messaging-api-tab.test.tsx` and cover real behavior:
 
 ```tsx
 import { describe, expect, it, vi } from 'vitest'
+import { render, screen } from '../../helpers/render'
+import { MessagingApiTab } from '../../../../app/(app)/developers/console/channel/[channelId]/MessagingApiTab'
 
 describe('developer console Messaging API tab', () => {
-  it('keeps webhook query keys stable for cache invalidation', () => {
-    const channelId = '550e8400-e29b-41d4-a716-446655440000'
-    expect(['oa', 'webhook-settings', channelId]).toEqual([
-      'oa',
-      'webhook-settings',
-      channelId,
-    ])
-    expect(['oa', 'webhook-deliveries', channelId, 'failed']).toEqual([
-      'oa',
-      'webhook-deliveries',
-      channelId,
-      'failed',
-    ])
+  it('renders webhook settings, errors, and test sections', async () => {
+    vi.mock('~/features/oa/client', () => ({
+      oaClient: {
+        getWebhookSettings: vi.fn().mockResolvedValue({
+          settings: {
+            webhook: { url: 'https://example.test/webhook', status: 'verified' },
+            useWebhook: true,
+            webhookRedeliveryEnabled: false,
+            errorStatisticsEnabled: true,
+          },
+        }),
+        listWebhookDeliveries: vi.fn().mockResolvedValue({ deliveries: [] }),
+      },
+    }))
+
+    render(<MessagingApiTab channelId="550e8400-e29b-41d4-a716-446655440000" />)
+
+    expect(await screen.findByText('Webhook settings')).toBeVisible()
+    expect(screen.getByText('Webhook errors')).toBeVisible()
+    expect(screen.getByText('Test webhook')).toBeVisible()
   })
 })
 ```
 
-This is intentionally minimal. If the repo has a stable React render helper during implementation, replace this with a real render test that asserts the tab labels and section headings.
+Adapt the imports to the actual test helper names. If no render helper exists, skip this unit test and rely on the web typecheck plus optional Playwright smoke instead of adding low-value assertions.
 
-- [ ] **Step 2: Run web unit tests**
+- [ ] **Step 2: Run web unit tests if the render test was added**
 
 Run:
 
@@ -2247,7 +2468,7 @@ git add apps/web/src/test/unit/developers/channel-messaging-api-tab.test.tsx app
 git commit -m "test(web): cover messaging api webhook console"
 ```
 
-If no Playwright test was added, omit that path from `git add`.
+If no frontend tests were added because neither render helpers nor stable Playwright data exist, skip this commit and document that Task 6's web typecheck is the verification for the UI slice.
 
 ---
 
@@ -2261,7 +2482,7 @@ If no Playwright test was added, omit that path from `git add`.
 Run:
 
 ```bash
-bun run --cwd apps/server test:unit -- src/services/oa-webhook-delivery.test.ts src/plugins/oa-webhook.test.ts
+bun run --cwd apps/server test:unit -- src/services/oa-webhook-delivery.test.ts src/plugins/oa-webhook.test.ts src/connect/oa-webhook.test.ts
 ```
 
 Expected: PASS.
@@ -2277,13 +2498,13 @@ ZERO_UPSTREAM_DB=postgresql://user:password@localhost:5533/postgres bun run --cw
 
 Expected: PASS.
 
-- [ ] **Step 3: Run web typecheck and focused unit test**
+- [ ] **Step 3: Run web typecheck and focused unit test if present**
 
 Run:
 
 ```bash
 bun run --cwd apps/web typecheck
-bun run --cwd apps/web test:unit -- src/test/unit/developers/channel-messaging-api-tab.test.tsx
+test ! -f apps/web/src/test/unit/developers/channel-messaging-api-tab.test.tsx || bun run --cwd apps/web test:unit -- src/test/unit/developers/channel-messaging-api-tab.test.tsx
 ```
 
 Expected: PASS.
