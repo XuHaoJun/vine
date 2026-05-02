@@ -120,9 +120,13 @@ bun run format                 # oxfmt
 bun run format:check           # oxfmt --check
 
 # testing
-bun run test                   # all tests via turbo
+bun run test                   # unit/package tests via turbo
 bun run test:unit              # unit tests only
-bun run test:integration       # integration tests (requires the docker stack)
+bun run test:integration       # full clean integration runner
+
+# manual integration debugging only
+bun run --cwd apps/server test:integration:db
+bun run --cwd apps/web test:integration:manual
 ```
 
 ## Database

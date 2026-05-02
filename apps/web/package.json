@@ -28,9 +28,10 @@
     "run:dev": "bun env:dev bun",
     "run:prod": "NODE_ENV=production dotenvx run -f ../../.env -f ../../.env.production -- bun",
     "run:test": "bun env:test bun",
-    "test:integration": "bun run env:dev bun --cwd=./src/test playwright test",
+    "test:integration": "bun -e \"console.error('apps/web test:integration is deprecated. Use root bun scripts/integration.ts for the full clean integration run, or bun run test:integration:manual here against a clean running stack.'); process.exit(1)\"",
+    "test:integration:manual": "bun run env:dev bun --cwd=./src/test playwright test",
     "test:unit": "bun run:dev vitest run -c ./src/test/vitest.config.ts",
-    "test": "bun run test:unit && bun run test:integration",
+    "test": "bun run test:unit",
     "typecheck": "tsc --noEmit",
     "up": "tko up",
     "zero:generate": "on-zero generate --after 'bun lint:fix'"

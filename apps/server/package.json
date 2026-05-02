@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "test": "bun run test:unit",
     "test:unit": "vitest run -c vitest.config.ts",
-    "test:integration": "vitest run -c vitest.integration.config.ts",
+    "test:integration": "bun -e \"console.error('apps/server test:integration is deprecated. Use root bun scripts/integration.ts for the full clean integration run, or bun run test:integration:db here after starting a clean Docker DB.'); process.exit(1)\"",
+    "test:integration:db": "vitest run -c vitest.integration.config.ts",
     "test:watch": "vitest"
   },
   "dependencies": {

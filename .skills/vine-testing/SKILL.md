@@ -12,9 +12,10 @@ Vine prefers focused tests that protect behavior without flooding the repo with 
 | Area | Runner | Command |
 | --- | --- | --- |
 | `apps/web` unit | Vitest | `bun run --cwd apps/web test:unit` |
-| `apps/web` integration | Playwright | `bun run --cwd apps/web test:integration` |
+| full integration | Docker Compose + Vitest + Playwright | `bun scripts/integration.ts` |
+| `apps/web` integration debug | Playwright | `bun run --cwd apps/web test:integration:manual` |
 | `apps/server` unit | Vitest | `bun run --cwd apps/server test:unit` |
-| `apps/server` DB integration | Vitest + PostgreSQL | `bun run --cwd apps/server test:integration` |
+| `apps/server` DB integration debug | Vitest + PostgreSQL | `bun run --cwd apps/server test:integration:db` |
 | packages | Vitest | `bun run --cwd packages/<name> test` |
 
 ## Where Tests Live
@@ -92,11 +93,19 @@ If the risk is route transitions, browser state, or a multi-step form flow, add 
 - Do not clean tables with broad `delete` statements for isolation unless a specific test cannot run in a rollback transaction.
 - When app code calls `db.transaction(...)`, pass the real transaction-scoped Drizzle DB from `withRollbackDb()` so nested transactions use PostgreSQL savepoints.
 - Local host tests connect to `postgresql://user:password@localhost:5533/postgres`; containers use `pgdb:5432`.
-- The full `scripts/integration.ts` runner starts Docker, waits for migrations, runs server DB integration tests, then starts backend/frontend and Playwright.
+- The full `scripts/integration.ts` runner starts from a clean Docker Compose state, waits for migrations, runs server DB integration tests, then starts backend/frontend and Playwright.
+- Use `bun scripts/integration.ts` for automated, CI, and agent-driven integration runs.
+- Treat `apps/server test:integration:db` and `apps/web test:integration:manual` as human debug commands only; they assume a clean, healthy stack already exists.
 
 ## Integration Prerequisites
 
-Before running Playwright or other integration checks, make sure the local stack is healthy:
+For automated integration checks, run the canonical runner:
+
+```bash
+bun scripts/integration.ts
+```
+
+Before running manual Playwright or DB integration debug commands, make sure the local stack is healthy:
 
 ```bash
 docker compose ps
@@ -118,7 +127,7 @@ For backend DB integration only:
 
 ```bash
 docker compose up -d pgdb migrate
-ZERO_UPSTREAM_DB=postgresql://user:password@localhost:5533/postgres bun run --cwd apps/server test:integration
+ZERO_UPSTREAM_DB=postgresql://user:password@localhost:5533/postgres bun run --cwd apps/server test:integration:db
 ```
 
 ## Test Patterns
@@ -186,6 +195,7 @@ describe('repository DB integration', () => {
 - using pglite/in-memory DB for server integration tests that need PostgreSQL semantics
 - adding backend DB integration tests without `withRollbackDb()`
 - running server DB integration before migrations have completed
+- using app-level manual integration commands for automated/agent verification instead of `bun scripts/integration.ts`
 - pointing host-run integration tests at `pgdb:5432` instead of `localhost:5533`
 - testing trivial UI wrappers instead of behavior-rich code
 - forgetting integration prerequisites and blaming the app for a stale local stack

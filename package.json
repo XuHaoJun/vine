@@ -17,7 +17,7 @@
     "clean": "turbo clean",
     "test": "turbo test",
     "test:unit": "turbo run test:unit",
-    "test:integration": "turbo run test:integration",
+    "test:integration": "bun scripts/integration.ts",
     "lint": "turbo lint",
     "format": "oxfmt",
     "format:check": "oxfmt --check",

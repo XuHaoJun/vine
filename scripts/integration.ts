@@ -183,7 +183,10 @@ async function main() {
 
   try {
     // clean start
-    await $('docker compose down', { silent: true, timeout: 60_000 }).catch(() => {})
+    await $('docker compose down -v --remove-orphans', {
+      silent: true,
+      timeout: 60_000,
+    }).catch(() => {})
 
     // build migrations
     console.info('\nbuilding migrations...')
@@ -198,7 +201,7 @@ async function main() {
     // migrated Docker PostgreSQL database and rollback every test transaction.
     console.info('\nrunning server db integration tests...')
     await $(
-      'ZERO_UPSTREAM_DB=postgresql://user:password@localhost:5533/postgres bun run --cwd apps/server test:integration',
+      'ZERO_UPSTREAM_DB=postgresql://user:password@localhost:5533/postgres bun run --cwd apps/server test:integration:db',
       { timeout: TEST_TIMEOUT },
     )
 
