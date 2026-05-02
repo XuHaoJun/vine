@@ -1,5 +1,5 @@
 import { number, string, table } from '@rocicorp/zero'
-import { mutations, serverWhere } from 'on-zero'
+import { serverWhere } from 'on-zero'
 
 export const schema = table('chatOaLoading')
   .columns({
@@ -14,5 +14,3 @@ export const schema = table('chatOaLoading')
 export const chatOaLoadingReadPermission = serverWhere('chatOaLoading', (eb, auth) => {
   return eb.exists('members', (q) => q.where('userId', auth?.id || ''))
 })
-
-export const mutate = mutations(schema, chatOaLoadingReadPermission)

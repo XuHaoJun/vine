@@ -15,7 +15,6 @@ export const schema = table('chatOaLoading')
   .primaryKey('id')
 
 // Only users who are members of the chat can read loading state
-export const permissions = serverWhere('chatOaLoading', (eb, auth) => {
+export const chatOaLoadingReadPermission = serverWhere('chatOaLoading', (eb, auth) => {
   return eb.exists('members', (q) => q.where('userId', auth?.id || ''))
 })
-
