@@ -3,6 +3,7 @@
 
 export { schema as chat } from '../models/chat'
 export { schema as chatMember } from '../models/chatMember'
+export { schema as chatOaLoading } from '../models/chatOaLoading'
 export { schema as friendship } from '../models/friendship'
 export { schema as message } from '../models/message'
 export { schema as todo } from '../models/todo'

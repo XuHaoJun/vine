@@ -7,6 +7,9 @@ export type ChatUpdate = TableUpdateRow<typeof schema.chat>
 export type ChatMember = TableInsertRow<typeof schema.chatMember>
 export type ChatMemberUpdate = TableUpdateRow<typeof schema.chatMember>
 
+export type ChatOaLoading = TableInsertRow<typeof schema.chatOaLoading>
+export type ChatOaLoadingUpdate = TableUpdateRow<typeof schema.chatOaLoading>
+
 export type Friendship = TableInsertRow<typeof schema.friendship>
 export type FriendshipUpdate = TableUpdateRow<typeof schema.friendship>
 
