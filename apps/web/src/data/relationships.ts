@@ -31,14 +31,17 @@ export const userStateRelationships = relationships(tables.userState, ({ one }) 
   }),
 }))
 
-export const chatOaLoadingRelationships = relationships(tables.chatOaLoading, ({ many }) => ({
-  // Used by chatOaLoadingReadPermission (eb.exists('members', ...))
-  members: many({
-    sourceField: ['chatId'],
-    destSchema: tables.chatMember,
-    destField: ['chatId'],
+export const chatOaLoadingRelationships = relationships(
+  tables.chatOaLoading,
+  ({ many }) => ({
+    // Used by chatOaLoadingReadPermission (eb.exists('members', ...))
+    members: many({
+      sourceField: ['chatId'],
+      destSchema: tables.chatMember,
+      destField: ['chatId'],
+    }),
   }),
-}))
+)
 
 export const allRelationships = [
   userRelationships,

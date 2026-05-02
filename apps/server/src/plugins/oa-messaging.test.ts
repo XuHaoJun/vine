@@ -1083,7 +1083,9 @@ describe('oaMessagingPlugin — Get Profile', () => {
   })
 
   it('returns 404 when user not found', async () => {
-    const mockLimit1 = vi.fn().mockResolvedValue([{ oaId, token: validToken, expiresAt: null }])
+    const mockLimit1 = vi
+      .fn()
+      .mockResolvedValue([{ oaId, token: validToken, expiresAt: null }])
     const mockLimit2 = vi.fn().mockResolvedValue([])
     let selectCallCount = 0
     const mockSelect = vi.fn().mockImplementation(() => {
@@ -1112,10 +1114,14 @@ describe('oaMessagingPlugin — Get Profile', () => {
   })
 
   it('returns real displayName and pictureUrl', async () => {
-    const mockLimit1 = vi.fn().mockResolvedValue([{ oaId, token: validToken, expiresAt: null }])
-    const mockLimit2 = vi.fn().mockResolvedValue([
-      { id: userId, name: 'Alice', image: 'https://example.com/pic.jpg' },
-    ])
+    const mockLimit1 = vi
+      .fn()
+      .mockResolvedValue([{ oaId, token: validToken, expiresAt: null }])
+    const mockLimit2 = vi
+      .fn()
+      .mockResolvedValue([
+        { id: userId, name: 'Alice', image: 'https://example.com/pic.jpg' },
+      ])
     let selectCallCount = 0
     const mockSelect = vi.fn().mockImplementation(() => {
       selectCallCount++
@@ -1147,8 +1153,12 @@ describe('oaMessagingPlugin — Get Profile', () => {
   })
 
   it('returns empty string for pictureUrl when image is null', async () => {
-    const mockLimit1 = vi.fn().mockResolvedValue([{ oaId, token: validToken, expiresAt: null }])
-    const mockLimit2 = vi.fn().mockResolvedValue([{ id: userId, name: 'Bob', image: null }])
+    const mockLimit1 = vi
+      .fn()
+      .mockResolvedValue([{ oaId, token: validToken, expiresAt: null }])
+    const mockLimit2 = vi
+      .fn()
+      .mockResolvedValue([{ id: userId, name: 'Bob', image: null }])
     let selectCallCount = 0
     const mockSelect = vi.fn().mockImplementation(() => {
       selectCallCount++
@@ -1184,7 +1194,8 @@ describe('oaMessagingPlugin — Loading Animation', () => {
     chatMember?: boolean
     chat?: { type: string }
   }) {
-    const tokenRow = opts.token !== false ? [{ oaId, token: validToken, expiresAt: null }] : []
+    const tokenRow =
+      opts.token !== false ? [{ oaId, token: validToken, expiresAt: null }] : []
     const chatMemberRow = opts.chatMember !== false ? [{ chatId: 'chat-1', oaId }] : []
     const chatRow = opts.chat ? [{ id: 'chat-1', type: opts.chat.type }] : []
 
@@ -1204,7 +1215,9 @@ describe('oaMessagingPlugin — Loading Animation', () => {
         onConflictDoUpdate: vi.fn().mockResolvedValue([]),
       }),
     })
-    const mockUpdate = vi.fn().mockReturnValue({ set: vi.fn().mockReturnThis(), where: vi.fn().mockReturnThis() })
+    const mockUpdate = vi
+      .fn()
+      .mockReturnValue({ set: vi.fn().mockReturnThis(), where: vi.fn().mockReturnThis() })
     return { mockSelect, mockInsert, mockUpdate }
   }
 

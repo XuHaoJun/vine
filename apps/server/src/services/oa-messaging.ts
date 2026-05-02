@@ -359,10 +359,7 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
         await tx
           .delete(chatOaLoading)
           .where(
-            and(
-              eq(chatOaLoading.chatId, chatId),
-              eq(chatOaLoading.oaId, delivery.oaId),
-            ),
+            and(eq(chatOaLoading.chatId, chatId), eq(chatOaLoading.oaId, delivery.oaId)),
           )
 
         await tx

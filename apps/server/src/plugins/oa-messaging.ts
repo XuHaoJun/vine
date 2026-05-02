@@ -2,7 +2,13 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { and, eq } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { schema } from '@vine/db'
-import { chatMember, chat, chatOaLoading, message, userPublic } from '@vine/db/schema-public'
+import {
+  chatMember,
+  chat,
+  chatOaLoading,
+  message,
+  userPublic,
+} from '@vine/db/schema-public'
 import { oaAccessToken } from '@vine/db/schema-oa'
 import { FlexMessageSchema, QuickReplySchema } from '@vine/flex-schema'
 import { ImagemapMessageSchema } from '@vine/imagemap-schema'
@@ -552,7 +558,11 @@ export async function oaMessagingPlugin(
         const body = request.body as { chatId: string; loadingSeconds: number }
 
         const loadingSeconds = Number(body.loadingSeconds)
-        if (!Number.isInteger(loadingSeconds) || loadingSeconds < 5 || loadingSeconds > 60) {
+        if (
+          !Number.isInteger(loadingSeconds) ||
+          loadingSeconds < 5 ||
+          loadingSeconds > 60
+        ) {
           return reply
             .code(400)
             .send({ message: 'loadingSeconds must be an integer between 5 and 60' })
@@ -575,9 +585,9 @@ export async function oaMessagingPlugin(
           .limit(1)
 
         if (!chatRow || chatRow.type !== 'oa') {
-          return reply
-            .code(400)
-            .send({ message: 'Loading animation is only supported for one-on-one OA chats' })
+          return reply.code(400).send({
+            message: 'Loading animation is only supported for one-on-one OA chats',
+          })
         }
 
         const expiresAt = Date.now() + loadingSeconds * 1000
