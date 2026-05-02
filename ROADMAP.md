@@ -46,19 +46,12 @@ admin diagnostics unless they are necessary for developer-facing LINE parity.
 
 The next major theme should be:
 
-**Interactive messages and rich bot interactions**
+**Rich Menu parity and OA manager surface**
 
-The success criterion is:
-
-> A developer can send a Quick Reply, Template, Flex, or Imagemap message
-> through the Messaging API, see it render in Vine chat, and have user
-> interactions (tap, postback) dispatched back through the webhook pipeline.
-
-Milestone 1 (Messaging API v1 Baseline) is now complete. The interactive
-messages milestone is the next highest-leverage step: it makes bot messages
-feel useful inside Vine chat and unlocks the developer-facing value of the
-Messaging API beyond plain text. Developer-facing work should favor chat-visible
-behavior, action dispatch, and console testing tools.
+Milestones 1 and 2 are now complete. Rich Menu parity is the next
+highest-leverage step: it surfaces bot interactions in a persistent,
+always-visible UI that OA managers and bot developers can configure through
+LINE-like workflows.
 
 ## Milestones
 
@@ -138,21 +131,26 @@ Out of scope:
 
 ### Milestone 2: Interactive Messages
 
+Status: complete.
+
 Goal: make bot messages feel useful inside Vine chat, not only valid as JSON.
 
-Deliverables:
+Completed:
 
 - Quick Reply rendering and action dispatch from stored quick reply metadata.
-- Template messages: buttons, confirm, carousel, and image carousel.
-- Flex Message send flow from simulator into a real chat.
+- Flex Message rendering (bubble and carousel) from simulator into a real chat.
 - Imagemap tap handling with action dispatch.
-- Postback events sent back through the OA webhook pipeline.
+- Postback events (postback, datetimepicker, clipboard, message, uri actions) sent back through the OA webhook pipeline.
 - UI behavior for quick reply disappearance after use, matching the practical LINE-style interaction model.
 
 Out of scope:
 
 - Perfect visual parity with every LINE client.
 - Legacy LINE-only behavior that has no value in a self-hosted LINE clone.
+
+Dropped:
+
+- Template messages (buttons, confirm, carousel, image carousel). LINE has been marginalizing Template Messages in favour of Flex Messages since 2019 and discourages new usage. Flex Messages cover every template layout with more flexibility and no separate rendering path. Vine will not implement a Template Message renderer; the `template` message type accepted by the Messaging API is stored as metadata but treated as unsupported in chat UI.
 
 ### Milestone 3: Rich Menu Parity
 
