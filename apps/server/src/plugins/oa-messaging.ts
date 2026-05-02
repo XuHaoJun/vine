@@ -602,6 +602,11 @@ export async function oaMessagingPlugin(
             .code(401)
             .send({ message: 'Invalid access token', code: 'INVALID_TOKEN' })
         }
+        if (err instanceof Error && err.message === 'Access token expired') {
+          return reply
+            .code(401)
+            .send({ message: 'Access token expired', code: 'TOKEN_EXPIRED' })
+        }
         return reply.code(500).send({ message: 'Internal server error' })
       }
     },
