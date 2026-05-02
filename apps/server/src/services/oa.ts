@@ -1016,10 +1016,7 @@ export function createOAService(deps: OADeps) {
       })
       .from(oaRichMenuClick)
       .where(
-        and(
-          eq(oaRichMenuClick.oaId, oaId),
-          eq(oaRichMenuClick.richMenuId, richMenuId),
-        ),
+        and(eq(oaRichMenuClick.oaId, oaId), eq(oaRichMenuClick.richMenuId, richMenuId)),
       )
       .groupBy(oaRichMenuClick.areaIndex)
     return rows

@@ -265,7 +265,14 @@ export const ChatRoomPage = memo(() => {
           break
       }
     },
-    [otherMemberOaId, richMenu?.richMenuId, sendMessage, dispatchAction, queryClient, chatId],
+    [
+      otherMemberOaId,
+      richMenu?.richMenuId,
+      sendMessage,
+      dispatchAction,
+      queryClient,
+      chatId,
+    ],
   )
 
   const handleQuickReplyAction = useCallback(

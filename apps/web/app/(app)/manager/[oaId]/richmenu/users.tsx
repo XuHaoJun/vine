@@ -75,7 +75,13 @@ export const RichMenuUsersPage = memo(() => {
           <Spinner size="large" />
         </YStack>
       ) : users.length === 0 ? (
-        <YStack py="$10" items="center" borderWidth={1} borderColor="$borderColor" rounded="$4">
+        <YStack
+          py="$10"
+          items="center"
+          borderWidth={1}
+          borderColor="$borderColor"
+          rounded="$4"
+        >
           <SizableText size="$4" color="$color11">
             No users have friended this account yet.
           </SizableText>

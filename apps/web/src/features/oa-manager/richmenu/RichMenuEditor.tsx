@@ -85,7 +85,9 @@ export const RichMenuEditor = memo((props: Props) => {
 
   const selectedArea = areas.find((a) => a.id === selectedAreaId) ?? null
 
-  const [actionType, setActionType] = useState<'message' | 'uri' | 'postback' | 'richmenuswitch'>('message')
+  const [actionType, setActionType] = useState<
+    'message' | 'uri' | 'postback' | 'richmenuswitch'
+  >('message')
   const [actionText, setActionText] = useState('')
   const [actionUri, setActionUri] = useState('')
   const [actionData, setActionData] = useState('')
@@ -132,7 +134,15 @@ export const RichMenuEditor = memo((props: Props) => {
       }
     }
     setAreas((prev) => prev.map((a) => (a.id === selectedAreaId ? { ...a, action } : a)))
-  }, [selectedAreaId, actionType, actionText, actionUri, actionData, actionDisplayText, actionRichMenuAliasId])
+  }, [
+    selectedAreaId,
+    actionType,
+    actionText,
+    actionUri,
+    actionData,
+    actionDisplayText,
+    actionRichMenuAliasId,
+  ])
 
   const handleUpdateBounds = useCallback((id: string, bounds: AreaBounds) => {
     setAreas((prev) => prev.map((a) => (a.id === id ? { ...a, bounds } : a)))
@@ -458,7 +468,9 @@ export const RichMenuEditor = memo((props: Props) => {
                 key={area.id}
                 area={area}
                 label={AREA_LABELS[i] ?? String(i + 1)}
-                clickCount={props.mode === 'edit' ? (props.clickCountsByArea?.[i] ?? 0) : 0}
+                clickCount={
+                  props.mode === 'edit' ? (props.clickCountsByArea?.[i] ?? 0) : 0
+                }
                 scaleFactor={scaleFactor}
                 isSelected={selectedAreaId === area.id}
                 canvasHeightPx={canvasHeightPx}
@@ -580,7 +592,11 @@ export const RichMenuEditor = memo((props: Props) => {
                   <SizableText size="$1" color="$color10">
                     Data
                   </SizableText>
-                  <Input value={actionData} onChangeText={setActionData} placeholder="tab=a" />
+                  <Input
+                    value={actionData}
+                    onChangeText={setActionData}
+                    placeholder="tab=a"
+                  />
                 </YStack>
               </>
             )}

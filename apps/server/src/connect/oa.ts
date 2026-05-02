@@ -861,13 +861,19 @@ export function oaHandler(deps: OAHandlerDeps) {
         const auth = requireAuthData(ctx)
         const isMember = await deps.oa.isUserChatMember(auth.id, req.chatId)
         if (!isMember) {
-          throw new ConnectError('Forbidden: not a member of this chat', Code.PermissionDenied)
+          throw new ConnectError(
+            'Forbidden: not a member of this chat',
+            Code.PermissionDenied,
+          )
         }
         const isFriend = await deps.oa.isOAFriend(auth.id, req.officialAccountId)
         if (!isFriend) {
           throw new ConnectError('Forbidden: not an OA friend', Code.PermissionDenied)
         }
-        const alias = await deps.oa.getRichMenuAlias(req.officialAccountId, req.richMenuAliasId)
+        const alias = await deps.oa.getRichMenuAlias(
+          req.officialAccountId,
+          req.richMenuAliasId,
+        )
         if (!alias) {
           return { status: 'RICHMENU_ALIAS_ID_NOTFOUND' }
         }
@@ -898,7 +904,10 @@ export function oaHandler(deps: OAHandlerDeps) {
             },
           })
           .catch((err) => {
-            logger.error({ err, oaId: req.officialAccountId, chatId: req.chatId }, '[oa] richmenuswitch webhook delivery failed')
+            logger.error(
+              { err, oaId: req.officialAccountId, chatId: req.chatId },
+              '[oa] richmenuswitch webhook delivery failed',
+            )
           })
         return { status: 'SUCCESS', newRichMenuAliasId: req.richMenuAliasId }
       },
@@ -917,7 +926,11 @@ export function oaHandler(deps: OAHandlerDeps) {
       async createRichMenuAlias(req, ctx) {
         const auth = requireAuthData(ctx)
         await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
-        if (!req.richMenuAliasId || req.richMenuAliasId.length > 32 || !/^[a-zA-Z0-9_-]+$/.test(req.richMenuAliasId)) {
+        if (
+          !req.richMenuAliasId ||
+          req.richMenuAliasId.length > 32 ||
+          !/^[a-zA-Z0-9_-]+$/.test(req.richMenuAliasId)
+        ) {
           throw new ConnectError('Invalid richMenuAliasId', Code.InvalidArgument)
         }
         const menu = await deps.oa.getRichMenu(req.officialAccountId, req.richMenuId)
@@ -948,7 +961,10 @@ export function oaHandler(deps: OAHandlerDeps) {
       async deleteRichMenuAliasManager(req, ctx) {
         const auth = requireAuthData(ctx)
         await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
-        const alias = await deps.oa.getRichMenuAlias(req.officialAccountId, req.richMenuAliasId)
+        const alias = await deps.oa.getRichMenuAlias(
+          req.officialAccountId,
+          req.richMenuAliasId,
+        )
         if (!alias) {
           throw new ConnectError('Rich menu alias not found', Code.NotFound)
         }
@@ -982,7 +998,11 @@ export function oaHandler(deps: OAHandlerDeps) {
         if (!menu) {
           throw new ConnectError('Rich menu not found', Code.NotFound)
         }
-        await deps.oa.linkRichMenuToUser(req.officialAccountId, req.userId, req.richMenuId)
+        await deps.oa.linkRichMenuToUser(
+          req.officialAccountId,
+          req.userId,
+          req.richMenuId,
+        )
         return {}
       },
       async unlinkRichMenuFromUserManager(req, ctx) {
@@ -1015,7 +1035,10 @@ export function oaHandler(deps: OAHandlerDeps) {
       async getRichMenuStats(req, ctx) {
         const auth = requireAuthData(ctx)
         await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
-        const stats = await deps.oa.getRichMenuClickStats(req.officialAccountId, req.richMenuId)
+        const stats = await deps.oa.getRichMenuClickStats(
+          req.officialAccountId,
+          req.richMenuId,
+        )
         return {
           stats: stats.map((s) => ({
             areaIndex: s.areaIndex,

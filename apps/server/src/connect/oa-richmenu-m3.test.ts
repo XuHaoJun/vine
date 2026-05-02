@@ -40,9 +40,20 @@ function makeDeps(oaOverrides: Partial<Record<string, any>> = {}) {
     isUserChatMember: vi.fn().mockResolvedValue(true),
     linkRichMenuToUser: vi.fn().mockResolvedValue(undefined),
     registerReplyToken: vi.fn().mockResolvedValue({ token: 'reply-token-1' }),
-    buildRichMenuSwitchPostbackEvent: vi.fn().mockReturnValue({ destination: 'oa-1', events: [] }),
+    buildRichMenuSwitchPostbackEvent: vi
+      .fn()
+      .mockReturnValue({ destination: 'oa-1', events: [] }),
     getRichMenuAliasList: vi.fn().mockResolvedValue([]),
-    createRichMenuAlias: vi.fn().mockResolvedValue({ richMenuAliasId: 'alias-new', richMenuId: 'rm-1', createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z', id: 'uuid', oaId: 'oa-1' }),
+    createRichMenuAlias: vi
+      .fn()
+      .mockResolvedValue({
+        richMenuAliasId: 'alias-new',
+        richMenuId: 'rm-1',
+        createdAt: '2026-01-01T00:00:00Z',
+        updatedAt: '2026-01-01T00:00:00Z',
+        id: 'uuid',
+        oaId: 'oa-1',
+      }),
     deleteRichMenuAlias: vi.fn().mockResolvedValue(undefined),
     unlinkRichMenuFromUser: vi.fn().mockResolvedValue(undefined),
     listOAUsersWithRichMenus: vi.fn().mockResolvedValue([]),
@@ -61,7 +72,9 @@ function makeDeps(oaOverrides: Partial<Record<string, any>> = {}) {
   }
   const capturedImpl: any = {}
   const mockRouter = {
-    service: (_desc: any, impl: any) => { Object.assign(capturedImpl, impl) },
+    service: (_desc: any, impl: any) => {
+      Object.assign(capturedImpl, impl)
+    },
   }
   oaHandler({ oa: oa as any, auth: {} as any, drive: {} as any, webhookDelivery })(
     mockRouter as any,
@@ -81,7 +94,12 @@ describe('switchRichMenu', () => {
     mockedGetAuthDataFromRequest.mockResolvedValue({ id: 'user-1' } as any)
     const ctx = makeAuthCtx('user-1')
     const result = await capturedImpl.switchRichMenu(
-      { officialAccountId: 'oa-1', chatId: 'chat-1', richMenuAliasId: 'alias-x', data: 'd' },
+      {
+        officialAccountId: 'oa-1',
+        chatId: 'chat-1',
+        richMenuAliasId: 'alias-x',
+        data: 'd',
+      },
       ctx,
     )
     expect(result.status).toBe('RICHMENU_ALIAS_ID_NOTFOUND')
@@ -90,13 +108,20 @@ describe('switchRichMenu', () => {
 
   it('returns RICHMENU_NOTFOUND when richMenuId in alias does not exist', async () => {
     const { capturedImpl, oa } = makeDeps({
-      getRichMenuAlias: vi.fn().mockResolvedValue({ richMenuAliasId: 'alias-a', richMenuId: 'rm-1' }),
+      getRichMenuAlias: vi
+        .fn()
+        .mockResolvedValue({ richMenuAliasId: 'alias-a', richMenuId: 'rm-1' }),
       getRichMenu: vi.fn().mockResolvedValue(null),
     })
     mockedGetAuthDataFromRequest.mockResolvedValue({ id: 'user-1' } as any)
     const ctx = makeAuthCtx('user-1')
     const result = await capturedImpl.switchRichMenu(
-      { officialAccountId: 'oa-1', chatId: 'chat-1', richMenuAliasId: 'alias-a', data: 'd' },
+      {
+        officialAccountId: 'oa-1',
+        chatId: 'chat-1',
+        richMenuAliasId: 'alias-a',
+        data: 'd',
+      },
       ctx,
     )
     expect(result.status).toBe('RICHMENU_NOTFOUND')
@@ -111,7 +136,12 @@ describe('switchRichMenu', () => {
     const ctx = makeAuthCtx('user-1')
     await expect(
       capturedImpl.switchRichMenu(
-        { officialAccountId: 'oa-1', chatId: 'chat-1', richMenuAliasId: 'alias-a', data: 'd' },
+        {
+          officialAccountId: 'oa-1',
+          chatId: 'chat-1',
+          richMenuAliasId: 'alias-a',
+          data: 'd',
+        },
         ctx,
       ),
     ).rejects.toMatchObject({ code: Code.PermissionDenied })
@@ -126,7 +156,12 @@ describe('switchRichMenu', () => {
     const ctx = makeAuthCtx('user-1')
     await expect(
       capturedImpl.switchRichMenu(
-        { officialAccountId: 'oa-1', chatId: 'chat-1', richMenuAliasId: 'alias-a', data: 'd' },
+        {
+          officialAccountId: 'oa-1',
+          chatId: 'chat-1',
+          richMenuAliasId: 'alias-a',
+          data: 'd',
+        },
         ctx,
       ),
     ).rejects.toMatchObject({ code: Code.PermissionDenied })
@@ -135,13 +170,20 @@ describe('switchRichMenu', () => {
 
   it('links rich menu and returns SUCCESS, fires webhook async', async () => {
     const { capturedImpl, oa, webhookDelivery } = makeDeps({
-      getRichMenuAlias: vi.fn().mockResolvedValue({ richMenuAliasId: 'alias-a', richMenuId: 'rm-1' }),
+      getRichMenuAlias: vi
+        .fn()
+        .mockResolvedValue({ richMenuAliasId: 'alias-a', richMenuId: 'rm-1' }),
       getRichMenu: vi.fn().mockResolvedValue({ richMenuId: 'rm-1', name: 'Menu A' }),
     })
     mockedGetAuthDataFromRequest.mockResolvedValue({ id: 'user-1' } as any)
     const ctx = makeAuthCtx('user-1')
     const result = await capturedImpl.switchRichMenu(
-      { officialAccountId: 'oa-1', chatId: 'chat-1', richMenuAliasId: 'alias-a', data: 'switch-data' },
+      {
+        officialAccountId: 'oa-1',
+        chatId: 'chat-1',
+        richMenuAliasId: 'alias-a',
+        data: 'switch-data',
+      },
       ctx,
     )
     expect(result.status).toBe('SUCCESS')
@@ -170,7 +212,12 @@ describe('switchRichMenu', () => {
     } as any
     await expect(
       capturedImpl.switchRichMenu(
-        { officialAccountId: 'oa-1', chatId: 'chat-1', richMenuAliasId: 'alias-a', data: 'd' },
+        {
+          officialAccountId: 'oa-1',
+          chatId: 'chat-1',
+          richMenuAliasId: 'alias-a',
+          data: 'd',
+        },
         ctx,
       ),
     ).rejects.toMatchObject({ code: Code.Unauthenticated })
@@ -191,12 +238,24 @@ describe('listRichMenuAliases', () => {
   it('returns alias list for owner', async () => {
     const { capturedImpl, oa } = makeDeps({
       getProvider: vi.fn().mockResolvedValue({ id: 'p-1', ownerId: 'user-1' }),
-      getRichMenuAliasList: vi.fn().mockResolvedValue([
-        { richMenuAliasId: 'alias-a', richMenuId: 'rm-1', createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z', id: 'u1', oaId: 'oa-1' },
-      ]),
+      getRichMenuAliasList: vi
+        .fn()
+        .mockResolvedValue([
+          {
+            richMenuAliasId: 'alias-a',
+            richMenuId: 'rm-1',
+            createdAt: '2026-01-01T00:00:00Z',
+            updatedAt: '2026-01-01T00:00:00Z',
+            id: 'u1',
+            oaId: 'oa-1',
+          },
+        ]),
     })
     const ctx = makeAuthCtx('user-1')
-    const result = await capturedImpl.listRichMenuAliases({ officialAccountId: 'oa-1' }, ctx)
+    const result = await capturedImpl.listRichMenuAliases(
+      { officialAccountId: 'oa-1' },
+      ctx,
+    )
     expect(result.aliases).toHaveLength(1)
     expect(result.aliases[0].richMenuAliasId).toBe('alias-a')
   })
@@ -256,7 +315,9 @@ describe('deleteRichMenuAliasManager', () => {
   it('deletes alias', async () => {
     const { capturedImpl, oa } = makeDeps({
       getProvider: vi.fn().mockResolvedValue({ id: 'p-1', ownerId: 'user-1' }),
-      getRichMenuAlias: vi.fn().mockResolvedValue({ richMenuAliasId: 'alias-a', richMenuId: 'rm-1' }),
+      getRichMenuAlias: vi
+        .fn()
+        .mockResolvedValue({ richMenuAliasId: 'alias-a', richMenuId: 'rm-1' }),
     })
     const ctx = makeAuthCtx('user-1')
     await capturedImpl.deleteRichMenuAliasManager(
@@ -271,9 +332,16 @@ describe('listOAUsersWithRichMenus', () => {
   it('returns users with their rich menu assignments', async () => {
     const { capturedImpl, oa } = makeDeps({
       getProvider: vi.fn().mockResolvedValue({ id: 'p-1', ownerId: 'user-1' }),
-      listOAUsersWithRichMenus: vi.fn().mockResolvedValue([
-        { userId: 'u-1', userName: 'Alice', userImage: null, assignedRichMenuId: 'rm-1' },
-      ]),
+      listOAUsersWithRichMenus: vi
+        .fn()
+        .mockResolvedValue([
+          {
+            userId: 'u-1',
+            userName: 'Alice',
+            userImage: null,
+            assignedRichMenuId: 'rm-1',
+          },
+        ]),
     })
     const ctx = makeAuthCtx('user-1')
     const result = await capturedImpl.listOAUsersWithRichMenus(

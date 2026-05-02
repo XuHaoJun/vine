@@ -30,8 +30,14 @@ describe('oa rich menu click stats', () => {
         sizeWidth: 2500,
         sizeHeight: 1686,
         areas: [
-          { bounds: { x: 0, y: 0, width: 100, height: 100 }, action: { type: 'message', text: 'a' } },
-          { bounds: { x: 100, y: 0, width: 100, height: 100 }, action: { type: 'message', text: 'b' } },
+          {
+            bounds: { x: 0, y: 0, width: 100, height: 100 },
+            action: { type: 'message', text: 'a' },
+          },
+          {
+            bounds: { x: 100, y: 0, width: 100, height: 100 },
+            action: { type: 'message', text: 'b' },
+          },
         ],
       })
 

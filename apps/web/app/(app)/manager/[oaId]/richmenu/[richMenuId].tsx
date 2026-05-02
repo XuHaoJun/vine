@@ -107,7 +107,11 @@ export const EditRichMenuPage = memo(() => {
       />
       <AliasesSection oaId={oaId} richMenuId={richMenuId} />
       <AssignedUsersSection oaId={oaId} richMenuId={richMenuId} />
-      <ClickStatsSection areaCount={areas.length} stats={stats} isLoading={statsLoading} />
+      <ClickStatsSection
+        areaCount={areas.length}
+        stats={stats}
+        isLoading={statsLoading}
+      />
     </YStack>
   )
 })
@@ -241,112 +245,115 @@ const ClickStatsSection = memo(
   },
 )
 
-const AliasesSection = memo(({ oaId, richMenuId }: { oaId: string; richMenuId: string }) => {
-  const qc = useTanQueryClient()
-  const [newAliasId, setNewAliasId] = useState('')
+const AliasesSection = memo(
+  ({ oaId, richMenuId }: { oaId: string; richMenuId: string }) => {
+    const qc = useTanQueryClient()
+    const [newAliasId, setNewAliasId] = useState('')
 
-  const { data, isLoading } = useTanQuery({
-    queryKey: ['oa', 'richmenu-aliases', oaId, richMenuId],
-    queryFn: () => oaClient.listRichMenuAliases({ officialAccountId: oaId }),
-    enabled: !!oaId && !!richMenuId,
-  })
+    const { data, isLoading } = useTanQuery({
+      queryKey: ['oa', 'richmenu-aliases', oaId, richMenuId],
+      queryFn: () => oaClient.listRichMenuAliases({ officialAccountId: oaId }),
+      enabled: !!oaId && !!richMenuId,
+    })
 
-  const createMutation = useTanMutation({
-    mutationFn: (aliasId: string) =>
-      oaClient.createRichMenuAlias({
-        officialAccountId: oaId,
-        richMenuAliasId: aliasId,
-        richMenuId,
-      }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['oa', 'richmenu-aliases', oaId, richMenuId] })
-      setNewAliasId('')
-      showToast('Alias created', { type: 'success' })
-    },
-    onError: (e) => showError(e, 'Failed to create alias'),
-  })
+    const createMutation = useTanMutation({
+      mutationFn: (aliasId: string) =>
+        oaClient.createRichMenuAlias({
+          officialAccountId: oaId,
+          richMenuAliasId: aliasId,
+          richMenuId,
+        }),
+      onSuccess: () => {
+        qc.invalidateQueries({ queryKey: ['oa', 'richmenu-aliases', oaId, richMenuId] })
+        setNewAliasId('')
+        showToast('Alias created', { type: 'success' })
+      },
+      onError: (e) => showError(e, 'Failed to create alias'),
+    })
 
-  const deleteMutation = useTanMutation({
-    mutationFn: (aliasId: string) =>
-      oaClient.deleteRichMenuAliasManager({
-        officialAccountId: oaId,
-        richMenuAliasId: aliasId,
-      }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['oa', 'richmenu-aliases', oaId, richMenuId] })
-      showToast('Alias deleted', { type: 'success' })
-    },
-    onError: (e) => showError(e, 'Failed to delete alias'),
-  })
+    const deleteMutation = useTanMutation({
+      mutationFn: (aliasId: string) =>
+        oaClient.deleteRichMenuAliasManager({
+          officialAccountId: oaId,
+          richMenuAliasId: aliasId,
+        }),
+      onSuccess: () => {
+        qc.invalidateQueries({ queryKey: ['oa', 'richmenu-aliases', oaId, richMenuId] })
+        showToast('Alias deleted', { type: 'success' })
+      },
+      onError: (e) => showError(e, 'Failed to delete alias'),
+    })
 
-  const aliases = data?.aliases ?? []
+    const aliases = data?.aliases ?? []
 
-  return (
-    <YStack gap="$3" borderWidth={1} borderColor="$borderColor" rounded="$3" p="$4">
-      <SizableText size="$5" fontWeight="700" color="$color12">
-        Aliases
-      </SizableText>
-      <SizableText size="$2" color="$color10">
-        Aliases let rich menu areas use the richmenuswitch action to switch between menus.
-      </SizableText>
-
-      {isLoading ? (
-        <Spinner size="small" />
-      ) : aliases.length === 0 ? (
-        <SizableText size="$2" color="$color9">
-          No aliases yet.
+    return (
+      <YStack gap="$3" borderWidth={1} borderColor="$borderColor" rounded="$3" p="$4">
+        <SizableText size="$5" fontWeight="700" color="$color12">
+          Aliases
         </SizableText>
-      ) : (
-        <YStack gap="$2">
-          {aliases.map((alias) => (
-            <XStack
-              key={alias.richMenuAliasId}
-              items="center"
-              justify="space-between"
-              borderWidth={1}
-              borderColor="$borderColor"
-              rounded="$2"
-              px="$3"
-              py="$2"
-            >
-              <SizableText size="$3" fontWeight="600" color="$color12">
-                {alias.richMenuAliasId}
-              </SizableText>
-              <Button
-                size="$2"
-                variant="outlined"
-                theme="red"
-                onPress={() => deleteMutation.mutate(alias.richMenuAliasId)}
-              >
-                Delete
-              </Button>
-            </XStack>
-          ))}
-        </YStack>
-      )}
+        <SizableText size="$2" color="$color10">
+          Aliases let rich menu areas use the richmenuswitch action to switch between
+          menus.
+        </SizableText>
 
-      <XStack gap="$2" items="flex-end">
-        <YStack flex={1} gap="$1">
-          <SizableText size="$1" color="$color10">
-            New alias ID
+        {isLoading ? (
+          <Spinner size="small" />
+        ) : aliases.length === 0 ? (
+          <SizableText size="$2" color="$color9">
+            No aliases yet.
           </SizableText>
-          <Input
-            value={newAliasId}
-            onChangeText={setNewAliasId}
-            placeholder="richmenu-alias-a"
-          />
-        </YStack>
-        <Button
-          onPress={() => {
-            if (newAliasId.trim()) createMutation.mutate(newAliasId.trim())
-          }}
-          disabled={!newAliasId.trim() || createMutation.isPending}
-        >
-          Add
-        </Button>
-      </XStack>
-    </YStack>
-  )
-})
+        ) : (
+          <YStack gap="$2">
+            {aliases.map((alias) => (
+              <XStack
+                key={alias.richMenuAliasId}
+                items="center"
+                justify="space-between"
+                borderWidth={1}
+                borderColor="$borderColor"
+                rounded="$2"
+                px="$3"
+                py="$2"
+              >
+                <SizableText size="$3" fontWeight="600" color="$color12">
+                  {alias.richMenuAliasId}
+                </SizableText>
+                <Button
+                  size="$2"
+                  variant="outlined"
+                  theme="red"
+                  onPress={() => deleteMutation.mutate(alias.richMenuAliasId)}
+                >
+                  Delete
+                </Button>
+              </XStack>
+            ))}
+          </YStack>
+        )}
+
+        <XStack gap="$2" items="flex-end">
+          <YStack flex={1} gap="$1">
+            <SizableText size="$1" color="$color10">
+              New alias ID
+            </SizableText>
+            <Input
+              value={newAliasId}
+              onChangeText={setNewAliasId}
+              placeholder="richmenu-alias-a"
+            />
+          </YStack>
+          <Button
+            onPress={() => {
+              if (newAliasId.trim()) createMutation.mutate(newAliasId.trim())
+            }}
+            disabled={!newAliasId.trim() || createMutation.isPending}
+          >
+            Add
+          </Button>
+        </XStack>
+      </YStack>
+    )
+  },
+)
 
 export default EditRichMenuPage
