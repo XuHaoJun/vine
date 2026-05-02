@@ -46,26 +46,25 @@ admin diagnostics unless they are necessary for developer-facing LINE parity.
 
 The next major theme should be:
 
-**Official Account + Messaging API LINE-parity hardening**
+**Interactive messages and rich bot interactions**
 
 The success criterion is:
 
-> A developer can create a Vine Official Account, issue an access token, set a
-> webhook, add the OA as a friend, receive a user message, reply or push a rich
-> message, and see the result in a real Vine chat.
+> A developer can send a Quick Reply, Template, Flex, or Imagemap message
+> through the Messaging API, see it render in Vine chat, and have user
+> interactions (tap, postback) dispatched back through the webhook pipeline.
 
-The Messaging API v1 server baseline now exists under `/api/oa/v2`. The next
-roadmap work should make that loop behave like a recognizable LINE Developers
-Messaging API channel before starting a new major subsystem. Developer-facing
-work should favor docs, examples, endpoint parity, console settings, bot
-testing, and chat-visible behavior. Vine-only operational internals should be
-kept as admin diagnostics, not the primary product surface.
+Milestone 1 (Messaging API v1 Baseline) is now complete. The interactive
+messages milestone is the next highest-leverage step: it makes bot messages
+feel useful inside Vine chat and unlocks the developer-facing value of the
+Messaging API beyond plain text. Developer-facing work should favor chat-visible
+behavior, action dispatch, and console testing tools.
 
 ## Milestones
 
 ### Milestone 1: Messaging API v1 Baseline
 
-Status: implemented as the current server baseline.
+Status: complete.
 
 Goal: provide a minimal but real Vine-owned Messaging API for Official Accounts.
 
@@ -74,15 +73,20 @@ Completed:
 - Public OA REST namespace is `/api/oa/v2`; root `/v2/...` is intentionally not
   registered because Vine does not have a dedicated Messaging API domain.
 - Access-token authentication for OA API calls.
-- `reply`, `push`, and `broadcast` message operations.
+- `reply`, `push`, `multicast`, and `broadcast` message operations.
 - Message support for text, sticker, image, audio, video, location, template,
   imagemap, flex, and quick reply metadata.
 - PostgreSQL-backed request, delivery, and retry-key ledgers.
-- Idempotency via LINE-compatible `X-Line-Retry-Key` semantics for push and
-  broadcast, including 24-hour expiry reuse and duplicate retry responses.
+- Idempotency via LINE-compatible `X-Line-Retry-Key` semantics for push,
+  multicast, and broadcast, including 24-hour expiry reuse and duplicate retry
+  responses.
 - Durable delivery processing using deterministic message IDs and PostgreSQL
   `FOR UPDATE SKIP LOCKED`, so restart/crash recovery does not double-send.
+- Recipient-count quota semantics matching LINE's "count by recipient, not by
+  message object" model.
 - Broadcast recipient snapshots, quota accounting, and recovery tests.
+- Multicast recipient resolution filters to current OA friends, accepts zero
+  eligible recipients with immediate completion, and rejects >500 recipients.
 - Webhook endpoint and rich menu public routes moved under `/api/oa/v2`.
 - Tests around auth, validation, idempotency, delivery recovery, namespace
   guardrails, and message insertion.
@@ -93,18 +97,19 @@ Completed:
 - LINE-like webhook settings (Use webhook, Webhook redelivery, Error statistics
   aggregation) and diagnostic verify/test tools in the console.
 - ConnectRPC management API for webhook settings, delivery listing, redelivery,
-  and test events (not exposed on public `/v2` routes).
+  test events, and messaging API quota summary (not exposed on public `/v2`
+  routes).
+- Developer-facing Messaging API docs (`docs/messaging-api-vine.md`) with
+  supported endpoints, retry-key semantics, curl examples, quota semantics, and
+  explicit differences from official LINE cloud.
+- LINE-like developer console Messaging API tab showing endpoint guidance,
+  supported send methods, and quota/consumption display.
 
-Not completed yet / next hardening:
+Remaining hardening (not blocking Milestone 1):
 
-- Developer-facing Messaging API docs and examples for Vine's `/api/oa/v2`
-  endpoint, including explicit differences from the official LINE cloud.
-- LINE-like developer console surface for channel settings, Messaging API
-  endpoint guidance, access tokens, webhook settings/errors, quota/consumption,
-  and a bot test console.
-- Messaging API parity gaps: multicast, profile/content API behavior, richer
-  quota and sent-message statistics, and request/response examples that match
-  LINE's developer expectations while using Vine-owned URLs.
+- LINE-like developer console surface for channel settings, access tokens, and
+  a bot test console.
+- Profile/content API behavior and richer sent-message statistics.
 - Message content upload/retrieval documentation and tests for image, video,
   and audio messages.
 - Production limits: body size, per-OA rate limiting, quota reset policy, and
