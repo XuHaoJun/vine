@@ -251,7 +251,7 @@ const AliasesSection = memo(
     const [newAliasId, setNewAliasId] = useState('')
 
     const { data, isLoading } = useTanQuery({
-      queryKey: ['oa', 'richmenu-aliases', oaId, richMenuId],
+      queryKey: ['oa', 'richmenu-aliases', oaId],
       queryFn: () => oaClient.listRichMenuAliases({ officialAccountId: oaId }),
       enabled: !!oaId && !!richMenuId,
     })
@@ -264,7 +264,7 @@ const AliasesSection = memo(
           richMenuId,
         }),
       onSuccess: () => {
-        qc.invalidateQueries({ queryKey: ['oa', 'richmenu-aliases', oaId, richMenuId] })
+        qc.invalidateQueries({ queryKey: ['oa', 'richmenu-aliases', oaId] })
         setNewAliasId('')
         showToast('Alias created', { type: 'success' })
       },
@@ -278,7 +278,7 @@ const AliasesSection = memo(
           richMenuAliasId: aliasId,
         }),
       onSuccess: () => {
-        qc.invalidateQueries({ queryKey: ['oa', 'richmenu-aliases', oaId, richMenuId] })
+        qc.invalidateQueries({ queryKey: ['oa', 'richmenu-aliases', oaId] })
         showToast('Alias deleted', { type: 'success' })
       },
       onError: (e) => showError(e, 'Failed to delete alias'),
@@ -315,9 +315,17 @@ const AliasesSection = memo(
                 px="$3"
                 py="$2"
               >
-                <SizableText size="$3" fontWeight="600" color="$color12">
-                  {alias.richMenuAliasId}
-                </SizableText>
+                <XStack flex={1} items="center" gap="$2">
+                  <SizableText size="$3" fontWeight="600" color="$color12">
+                    {alias.richMenuAliasId}
+                  </SizableText>
+                  <SizableText
+                    size="$2"
+                    color={alias.richMenuId === richMenuId ? '$color11' : '$color9'}
+                  >
+                    → {alias.richMenuId.slice(0, 8)}…
+                  </SizableText>
+                </XStack>
                 <Button
                   size="$2"
                   variant="outlined"

@@ -103,11 +103,18 @@ export const RichMenuEditor = memo((props: Props) => {
       setActionType(act.type as 'message' | 'uri' | 'postback' | 'richmenuswitch')
       setActionText(act.type === 'message' ? act.text : '')
       setActionUri(act.type === 'uri' ? act.uri : '')
-      setActionData(act.type === 'postback' ? act.data : '')
-      setActionDisplayText(act.type === 'postback' ? (act.displayText ?? '') : '')
       if (act.type === 'richmenuswitch') {
-        setActionRichMenuAliasId(act.richMenuAliasId ?? '')
         setActionData(act.data ?? '')
+        setActionDisplayText('')
+        setActionRichMenuAliasId(act.richMenuAliasId ?? '')
+      } else if (act.type === 'postback') {
+        setActionData(act.data ?? '')
+        setActionDisplayText(act.displayText ?? '')
+        setActionRichMenuAliasId('')
+      } else {
+        setActionData('')
+        setActionDisplayText('')
+        setActionRichMenuAliasId('')
       }
     },
     [areas],

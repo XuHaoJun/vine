@@ -44,16 +44,14 @@ function makeDeps(oaOverrides: Partial<Record<string, any>> = {}) {
       .fn()
       .mockReturnValue({ destination: 'oa-1', events: [] }),
     getRichMenuAliasList: vi.fn().mockResolvedValue([]),
-    createRichMenuAlias: vi
-      .fn()
-      .mockResolvedValue({
-        richMenuAliasId: 'alias-new',
-        richMenuId: 'rm-1',
-        createdAt: '2026-01-01T00:00:00Z',
-        updatedAt: '2026-01-01T00:00:00Z',
-        id: 'uuid',
-        oaId: 'oa-1',
-      }),
+    createRichMenuAlias: vi.fn().mockResolvedValue({
+      richMenuAliasId: 'alias-new',
+      richMenuId: 'rm-1',
+      createdAt: '2026-01-01T00:00:00Z',
+      updatedAt: '2026-01-01T00:00:00Z',
+      id: 'uuid',
+      oaId: 'oa-1',
+    }),
     deleteRichMenuAlias: vi.fn().mockResolvedValue(undefined),
     unlinkRichMenuFromUser: vi.fn().mockResolvedValue(undefined),
     listOAUsersWithRichMenus: vi.fn().mockResolvedValue([]),
@@ -238,18 +236,16 @@ describe('listRichMenuAliases', () => {
   it('returns alias list for owner', async () => {
     const { capturedImpl, oa } = makeDeps({
       getProvider: vi.fn().mockResolvedValue({ id: 'p-1', ownerId: 'user-1' }),
-      getRichMenuAliasList: vi
-        .fn()
-        .mockResolvedValue([
-          {
-            richMenuAliasId: 'alias-a',
-            richMenuId: 'rm-1',
-            createdAt: '2026-01-01T00:00:00Z',
-            updatedAt: '2026-01-01T00:00:00Z',
-            id: 'u1',
-            oaId: 'oa-1',
-          },
-        ]),
+      getRichMenuAliasList: vi.fn().mockResolvedValue([
+        {
+          richMenuAliasId: 'alias-a',
+          richMenuId: 'rm-1',
+          createdAt: '2026-01-01T00:00:00Z',
+          updatedAt: '2026-01-01T00:00:00Z',
+          id: 'u1',
+          oaId: 'oa-1',
+        },
+      ]),
     })
     const ctx = makeAuthCtx('user-1')
     const result = await capturedImpl.listRichMenuAliases(
@@ -332,16 +328,14 @@ describe('listOAUsersWithRichMenus', () => {
   it('returns users with their rich menu assignments', async () => {
     const { capturedImpl, oa } = makeDeps({
       getProvider: vi.fn().mockResolvedValue({ id: 'p-1', ownerId: 'user-1' }),
-      listOAUsersWithRichMenus: vi
-        .fn()
-        .mockResolvedValue([
-          {
-            userId: 'u-1',
-            userName: 'Alice',
-            userImage: null,
-            assignedRichMenuId: 'rm-1',
-          },
-        ]),
+      listOAUsersWithRichMenus: vi.fn().mockResolvedValue([
+        {
+          userId: 'u-1',
+          userName: 'Alice',
+          userImage: null,
+          assignedRichMenuId: 'rm-1',
+        },
+      ]),
     })
     const ctx = makeAuthCtx('user-1')
     const result = await capturedImpl.listOAUsersWithRichMenus(
