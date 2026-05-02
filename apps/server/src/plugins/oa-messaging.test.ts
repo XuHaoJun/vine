@@ -798,6 +798,62 @@ describe('oaMessagingPlugin — Multicast Message', () => {
     expect(res.statusCode).toBe(400)
     expect(JSON.parse(res.body).code).toBe('INVALID_REQUEST')
   })
+
+  it('returns 429 when multicast quota is exceeded', async () => {
+    const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+    const { app } = createTestApp(mockDb, {
+      multicast: vi.fn().mockResolvedValue({
+        ok: false,
+        code: 'QUOTA_EXCEEDED',
+        httpRequestId: 'req_q',
+      }),
+    })
+    await app.ready()
+
+    const res = await app.inject({
+      method: 'POST',
+      url: oaApiPath('/bot/message/multicast'),
+      headers: { authorization: `Bearer ${validToken}` },
+      payload: { to: [userId], messages: [{ type: 'text', text: 'hello' }] },
+    })
+
+    await app.close()
+    expect(res.statusCode).toBe(429)
+    expect(JSON.parse(res.body).code).toBe('QUOTA_EXCEEDED')
+  })
+
+  it('returns 409 with accepted request id for duplicate multicast retry key', async () => {
+    const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+    const { app } = createTestApp(mockDb, {
+      multicast: vi.fn().mockResolvedValue({
+        ok: false,
+        code: 'RETRY_KEY_ACCEPTED',
+        httpRequestId: 'req_retry',
+        acceptedRequestId: 'acc_original',
+        sentMessages: [{ id: 'oa:req:request-1:user-1:0' }],
+      }),
+    })
+    await app.ready()
+
+    const res = await app.inject({
+      method: 'POST',
+      url: oaApiPath('/bot/message/multicast'),
+      headers: {
+        authorization: `Bearer ${validToken}`,
+        'x-line-retry-key': '123e4567-e89b-12d3-a456-426614174000',
+      },
+      payload: { to: [userId], messages: [{ type: 'text', text: 'hello' }] },
+    })
+
+    await app.close()
+    expect(res.statusCode).toBe(409)
+    expect(res.headers['x-line-request-id']).toBe('req_retry')
+    expect(res.headers['x-line-accepted-request-id']).toBe('acc_original')
+    expect(JSON.parse(res.body)).toEqual({
+      message: 'The retry key is already accepted',
+      sentMessages: [{ id: 'oa:req:request-1:user-1:0' }],
+    })
+  })
 })
 
 describe('oaMessagingPlugin — Reply Message', () => {

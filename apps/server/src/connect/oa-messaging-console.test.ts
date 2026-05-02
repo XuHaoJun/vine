@@ -82,4 +82,21 @@ describe('OA connect messaging console', () => {
     ).rejects.toMatchObject({ code: Code.PermissionDenied })
     expect(oa.getQuota).not.toHaveBeenCalled()
   })
+
+  it('returns type none when no quota limit is set', async () => {
+    const { capturedImpl, oa } = makeDeps('user-1')
+    oa.getQuota.mockResolvedValue({ type: 'none', value: undefined, totalUsage: 0 })
+    mockedGetAuthDataFromRequest.mockResolvedValue({ id: 'user-1' } as any)
+
+    const result = await capturedImpl.getMessagingApiQuotaSummary(
+      { officialAccountId: 'oa-1' },
+      makeAuthCtx('user-1'),
+    )
+
+    expect(result).toEqual({
+      type: 'none',
+      monthlyLimit: undefined,
+      totalUsage: 0,
+    })
+  })
 })
