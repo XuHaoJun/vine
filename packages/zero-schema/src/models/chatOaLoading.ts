@@ -18,3 +18,6 @@ export const schema = table('chatOaLoading')
 export const chatOaLoadingReadPermission = serverWhere('chatOaLoading', (eb, auth) => {
   return eb.exists('members', (q) => q.where('userId', auth?.id || ''))
 })
+
+// Required by on-zero GenericModels contract for server-only (no mutate) models
+export const permissions = chatOaLoadingReadPermission
