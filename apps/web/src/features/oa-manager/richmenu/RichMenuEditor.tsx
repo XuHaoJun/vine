@@ -36,6 +36,7 @@ type EditorMode =
       oaId: string
       richMenuId: string
       initial: EditorState
+      clickCountsByArea?: Record<number, number>
       onSaved: () => void
     }
 
@@ -457,6 +458,7 @@ export const RichMenuEditor = memo((props: Props) => {
                 key={area.id}
                 area={area}
                 label={AREA_LABELS[i] ?? String(i + 1)}
+                clickCount={props.mode === 'edit' ? (props.clickCountsByArea?.[i] ?? 0) : 0}
                 scaleFactor={scaleFactor}
                 isSelected={selectedAreaId === area.id}
                 canvasHeightPx={canvasHeightPx}

@@ -27,6 +27,12 @@ export const EditRichMenuPage = memo(() => {
     enabled: !!oaId && !!richMenuId,
   })
 
+  const { data: statsData, isLoading: statsLoading } = useTanQuery({
+    queryKey: ['oa', 'richmenu-stats', oaId, richMenuId],
+    queryFn: () => oaClient.getRichMenuStats({ officialAccountId: oaId, richMenuId }),
+    enabled: !!oaId && !!richMenuId,
+  })
+
   const handleSaved = () => {
     qc.invalidateQueries({ queryKey: ['oa', 'richmenu-list', oaId] })
     qc.invalidateQueries({ queryKey: ['oa', 'richmenu', oaId, richMenuId] })
@@ -81,6 +87,11 @@ export const EditRichMenuPage = memo(() => {
     imageChanged: false,
   }
 
+  const stats = statsData?.stats ?? []
+  const clickCountsByArea = Object.fromEntries(
+    stats.map((s) => [s.areaIndex, s.clickCount]),
+  ) as Record<number, number>
+
   return (
     <YStack gap="$4">
       <SizableText size="$7" fontWeight="700" color="$color12">
@@ -91,10 +102,12 @@ export const EditRichMenuPage = memo(() => {
         oaId={oaId}
         richMenuId={richMenuId}
         initial={initial}
+        clickCountsByArea={clickCountsByArea}
         onSaved={handleSaved}
       />
       <AliasesSection oaId={oaId} richMenuId={richMenuId} />
       <AssignedUsersSection oaId={oaId} richMenuId={richMenuId} />
+      <ClickStatsSection areaCount={areas.length} stats={stats} isLoading={statsLoading} />
     </YStack>
   )
 })
@@ -165,6 +178,62 @@ const AssignedUsersSection = memo(
                 </Button>
               </XStack>
             ))}
+          </YStack>
+        )}
+      </YStack>
+    )
+  },
+)
+
+const ClickStatsSection = memo(
+  ({
+    areaCount,
+    stats,
+    isLoading,
+  }: {
+    areaCount: number
+    stats: Array<{ areaIndex: number; clickCount: number }>
+    isLoading: boolean
+  }) => {
+    const total = stats.reduce((sum, s) => sum + s.clickCount, 0)
+
+    const AREA_LABELS = 'ABCDEFGHIJKLMNOPQRST'
+
+    return (
+      <YStack gap="$3" borderWidth={1} borderColor="$borderColor" rounded="$3" p="$4">
+        <SizableText size="$5" fontWeight="700" color="$color12">
+          Click stats
+        </SizableText>
+
+        {isLoading ? (
+          <Spinner size="small" />
+        ) : stats.length === 0 ? (
+          <SizableText size="$2" color="$color9">
+            No clicks recorded yet.
+          </SizableText>
+        ) : (
+          <YStack gap="$1">
+            {Array.from({ length: areaCount }, (_, i) => {
+              const stat = stats.find((s) => s.areaIndex === i)
+              const count = stat?.clickCount ?? 0
+              const pct = total > 0 ? Math.round((count / total) * 100) : 0
+              return (
+                <XStack key={i} items="center" gap="$3" py="$1">
+                  <SizableText size="$2" fontWeight="600" color="$color11" width={24}>
+                    {AREA_LABELS[i] ?? String(i + 1)}
+                  </SizableText>
+                  <SizableText size="$2" color="$color12" width={48}>
+                    {count}
+                  </SizableText>
+                  <SizableText size="$1" color="$color9">
+                    {pct}%
+                  </SizableText>
+                </XStack>
+              )
+            })}
+            <SizableText size="$1" color="$color10" mt="$1">
+              Total: {total}
+            </SizableText>
           </YStack>
         )}
       </YStack>
