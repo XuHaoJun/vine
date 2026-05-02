@@ -94,9 +94,83 @@ export const EditRichMenuPage = memo(() => {
         onSaved={handleSaved}
       />
       <AliasesSection oaId={oaId} richMenuId={richMenuId} />
+      <AssignedUsersSection oaId={oaId} richMenuId={richMenuId} />
     </YStack>
   )
 })
+
+const AssignedUsersSection = memo(
+  ({ oaId, richMenuId }: { oaId: string; richMenuId: string }) => {
+    const qc = useTanQueryClient()
+
+    const { data, isLoading } = useTanQuery({
+      queryKey: ['oa', 'richmenu-users', oaId, richMenuId],
+      queryFn: () =>
+        oaClient.listOAUsersWithRichMenus({
+          officialAccountId: oaId,
+          richMenuId,
+        }),
+      enabled: !!oaId && !!richMenuId,
+    })
+
+    const unlinkMutation = useTanMutation({
+      mutationFn: (userId: string) =>
+        oaClient.unlinkRichMenuFromUserManager({ officialAccountId: oaId, userId }),
+      onSuccess: () => {
+        qc.invalidateQueries({ queryKey: ['oa', 'richmenu-users', oaId, richMenuId] })
+        showToast('User unlinked', { type: 'success' })
+      },
+      onError: (e) => showError(e, 'Failed to unlink user'),
+    })
+
+    const users = data?.users ?? []
+
+    return (
+      <YStack gap="$3" borderWidth={1} borderColor="$borderColor" rounded="$3" p="$4">
+        <SizableText size="$5" fontWeight="700" color="$color12">
+          Assigned users
+        </SizableText>
+        <SizableText size="$2" color="$color10">
+          Users with this menu assigned explicitly (overrides the default).
+        </SizableText>
+
+        {isLoading ? (
+          <Spinner size="small" />
+        ) : users.length === 0 ? (
+          <SizableText size="$2" color="$color9">
+            No users assigned to this menu.
+          </SizableText>
+        ) : (
+          <YStack gap="$2">
+            {users.map((u) => (
+              <XStack
+                key={u.userId}
+                items="center"
+                justify="space-between"
+                borderWidth={1}
+                borderColor="$borderColor"
+                rounded="$2"
+                px="$3"
+                py="$2"
+              >
+                <SizableText size="$3" color="$color12">
+                  {u.userName ?? u.userId}
+                </SizableText>
+                <Button
+                  size="$2"
+                  variant="outlined"
+                  onPress={() => unlinkMutation.mutate(u.userId)}
+                >
+                  Unlink
+                </Button>
+              </XStack>
+            ))}
+          </YStack>
+        )}
+      </YStack>
+    )
+  },
+)
 
 const AliasesSection = memo(({ oaId, richMenuId }: { oaId: string; richMenuId: string }) => {
   const qc = useTanQueryClient()
