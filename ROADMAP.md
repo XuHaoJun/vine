@@ -104,12 +104,19 @@ Completed:
   explicit differences from official LINE cloud.
 - LINE-like developer console Messaging API tab showing endpoint guidance,
   supported send methods, and quota/consumption display.
+- Channel access token issue/list/revoke UI in the developer console.
+- Profile API (`GET /api/oa/v2/bot/profile/:userId`) returns real user data
+  from `userPublic` with 404 on unknown user.
+- Loading animation endpoint (`POST /api/oa/v2/bot/chat/loading/start`) with
+  Zero-synced `chatOaLoading` state, chat typing indicator, client-side expiry
+  timer, and cleanup on message delivery and 60-second server interval.
 
 Remaining hardening (not blocking Milestone 1):
 
-- LINE-like developer console surface for channel settings, access tokens, and
-  a bot test console.
-- Profile/content API behavior and richer sent-message statistics.
+- LINE-like developer console surface for channel settings and a bot test
+  console.
+- Content API behavior (image/video/audio retrieval) and richer sent-message
+  statistics.
 - Message content upload/retrieval documentation and tests for image, video,
   and audio messages.
 - Production limits: body size, per-OA rate limiting, quota reset policy, and
