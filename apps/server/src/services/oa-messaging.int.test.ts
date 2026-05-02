@@ -204,6 +204,56 @@ async function seedOA(db: any, uniqueId: string) {
 }
 
 describe('oa messaging transactional acceptance', () => {
+  it('accepts multicast with zero eligible recipients and completes immediately', async () => {
+    await withRollbackDb(async (db) => {
+      const now = '2026-05-01T00:00:00.000Z'
+      const oa = await seedOA(db, 'oa-multicast-zero-test')
+      await db.insert(oaQuota).values({
+        oaId: oa.id,
+        monthlyLimit: 1000,
+        currentUsage: 0,
+        resetAt: now,
+      })
+
+      const service = createOAMessagingService({
+        db,
+        instanceId: 'test',
+        now: () => new Date(now),
+      })
+
+      const result = await service.multicast({
+        oaId: oa.id,
+        retryKey: '123e4567-e89b-12d3-a456-426614174000',
+        to: ['non-friend-1', 'non-friend-2'],
+        messages: [{ type: 'text', text: 'hello' }],
+      })
+
+      expect(result.ok).toBe(true)
+      expect(result).toHaveProperty('recipientCount', 0)
+
+      const requests = await db
+        .select()
+        .from(oaMessageRequest)
+        .where(eq(oaMessageRequest.oaId, oa.id))
+      expect(requests).toHaveLength(1)
+      expect(requests[0].requestType).toBe('multicast')
+      expect(requests[0].status).toBe('completed')
+      expect(requests[0].completedAt).not.toBeNull()
+
+      const retryRows = await db
+        .select()
+        .from(oaRetryKey)
+        .where(eq(oaRetryKey.oaId, oa.id))
+      expect(retryRows).toHaveLength(1)
+
+      const deliveries = await db
+        .select()
+        .from(oaMessageDelivery)
+        .where(eq(oaMessageDelivery.requestId, requests[0].id))
+      expect(deliveries).toHaveLength(0)
+    })
+  })
+
   it('does not accept retry key or delivery rows when quota fails', async () => {
     await withRollbackDb(async (db) => {
       const now = '2026-05-01T00:00:00.000Z'

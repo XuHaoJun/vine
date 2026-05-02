@@ -28,7 +28,7 @@ function stableJson(value: unknown): string {
 }
 
 export function createRequestHash(input: {
-  endpoint: 'reply' | 'push' | 'broadcast'
+  endpoint: SendRequestType
   target: unknown
   messages: unknown[]
 }): string {
@@ -54,7 +54,37 @@ export function createAcceptedRequestId(): string {
   return `acc_${randomUUID().replace(/-/g, '')}`
 }
 
-export type SendRequestType = 'reply' | 'push' | 'broadcast'
+export type SendRequestType = 'reply' | 'push' | 'multicast' | 'broadcast'
+
+export function calculateMessagingQuotaDelta(input: {
+  recipientCount: number
+  messageObjectCount: number
+}): number {
+  return input.recipientCount
+}
+
+export function getInitialAcceptedRequestStatus(input: {
+  recipientCount: number
+}): 'processing' | 'completed' {
+  return input.recipientCount === 0 ? 'completed' : 'processing'
+}
+
+export async function resolveMulticastRecipients(
+  tx: any,
+  input: { oaId: string; userIds: string[] },
+): Promise<string[]> {
+  const friendships = await tx
+    .select({ userId: oaFriendship.userId })
+    .from(oaFriendship)
+    .where(
+      and(
+        eq(oaFriendship.oaId, input.oaId),
+        inArray(oaFriendship.userId, input.userIds),
+        eq(oaFriendship.status, 'friend'),
+      ),
+    )
+  return friendships.map((row: { userId: string }) => row.userId)
+}
 
 export type RetryKeyCheckInput = {
   db: NodePgDatabase<typeof schema>
@@ -412,6 +442,7 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
       messages: unknown[]
       target: unknown
       nowIso: string
+      status: 'processing' | 'completed'
     },
   ) {
     const expiresAt = input.retryKey
@@ -436,10 +467,11 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
         retryKey: input.retryKey,
         requestHash: input.requestHash,
         acceptedRequestId: input.acceptedRequestId,
-        status: 'processing',
+        status: input.status,
         messagesJson: input.messages,
         targetJson: input.target as Record<string, unknown>,
         expiresAt,
+        completedAt: input.status === 'completed' ? input.nowIso : null,
         updatedAt: input.nowIso,
       })
       .returning()
@@ -529,7 +561,10 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
           }
         }
 
-        const quotaDelta = recipients.length * input.messages.length
+        const quotaDelta = calculateMessagingQuotaDelta({
+          recipientCount: recipients.length,
+          messageObjectCount: input.messages.length,
+        })
         const allowed = await reserveQuota(tx, input.oaId, quotaDelta, nowIso)
         if (!allowed) {
           return {
@@ -540,6 +575,9 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
         }
 
         const acceptedRequestId = createAcceptedRequestId()
+        const initialStatus = getInitialAcceptedRequestStatus({
+          recipientCount: recipients.length,
+        })
         const request = await insertAcceptedRequest(tx, {
           oaId: input.oaId,
           requestType: input.requestType,
@@ -549,6 +587,7 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
           messages: input.messages,
           target: input.target,
           nowIso,
+          status: initialStatus,
         })
         await createDeliveryRows({
           db: tx,
@@ -640,6 +679,33 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
     return { ...accepted, processed }
   }
 
+  async function multicast(input: {
+    oaId: string
+    retryKey?: string
+    to: string[]
+    messages: NormalizedMessage[]
+  }) {
+    const accepted = await acceptMessagingExecution({
+      oaId: input.oaId,
+      requestType: 'multicast',
+      retryKey: input.retryKey,
+      target: { to: input.to },
+      messages: input.messages,
+      resolveRecipients: async (tx) => {
+        return resolveMulticastRecipients(tx, {
+          oaId: input.oaId,
+          userIds: input.to,
+        })
+      },
+    })
+    if (!accepted.ok) return accepted
+    const processed = await processPendingDeliveries({
+      batchSize: 25,
+      staleAfterMs: 30_000,
+    })
+    return { ...accepted, processed }
+  }
+
   async function reply(input: {
     oaId: string
     replyToken: string
@@ -676,6 +742,7 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
     acceptMessagingExecution,
     reply,
     push,
+    multicast,
     broadcast,
   }
 }

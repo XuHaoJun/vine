@@ -575,6 +575,16 @@ export function oaHandler(deps: OAHandlerDeps) {
         )
         return { revokedCount: result.revoked_count }
       },
+      async getMessagingApiQuotaSummary(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const quota = await deps.oa.getQuota(req.officialAccountId)
+        return {
+          type: quota.type,
+          monthlyLimit: quota.value,
+          totalUsage: quota.totalUsage,
+        }
+      },
       async searchOfficialAccounts(req, ctx) {
         const auth = requireAuthData(ctx)
         const accounts = await deps.oa.searchOAsForOwner(auth.id, req.query)

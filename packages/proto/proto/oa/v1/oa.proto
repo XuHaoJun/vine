@@ -363,6 +363,18 @@ message RevokeAllAccessTokensResponse {
   int32 revoked_count = 1;
 }
 
+// ── Messaging API Console ──
+
+message GetMessagingApiQuotaSummaryRequest {
+  string official_account_id = 1;
+}
+
+message GetMessagingApiQuotaSummaryResponse {
+  string type = 1;
+  optional int32 monthly_limit = 2;
+  int32 total_usage = 3;
+}
+
 // ── Search ──
 
 message SearchOfficialAccountsRequest {
@@ -609,6 +621,7 @@ service OAService {
   rpc ListAccessTokens(ListAccessTokensRequest) returns (ListAccessTokensResponse);
   rpc RevokeAccessToken(RevokeAccessTokenRequest) returns (RevokeAccessTokenResponse);
   rpc RevokeAllAccessTokens(RevokeAllAccessTokensRequest) returns (RevokeAllAccessTokensResponse);
+  rpc GetMessagingApiQuotaSummary(GetMessagingApiQuotaSummaryRequest) returns (GetMessagingApiQuotaSummaryResponse);
   rpc SearchOfficialAccounts(SearchOfficialAccountsRequest) returns (SearchOfficialAccountsResponse);
   rpc RecommendOfficialAccounts(RecommendOfficialAccountsRequest) returns (RecommendOfficialAccountsResponse);
   rpc AddOAFriend(AddOAFriendRequest) returns (AddOAFriendResponse);

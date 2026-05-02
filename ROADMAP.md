@@ -5,38 +5,48 @@ official LINE platform and should not depend on LINE Developers Console,
 Messaging API, LINE Login channel IDs, or `api.line.me` unless a future scope
 explicitly asks for real LINE cloud integration.
 
-This roadmap uses LINE Developers feature areas as product inspiration, then
-maps them to Vine-owned server, sync, web, and mobile capabilities.
+This roadmap uses LINE Developers and LINE Official Account feature areas as
+the product target, then maps them to Vine-owned server, sync, web, and mobile
+capabilities. Vine should prefer LINE-like public behavior and management
+workflows over Vine-only operator surfaces unless the extra surface is needed
+to run a self-hosted deployment safely.
 
 ## Product Direction
 
-The next phase should focus on turning Vine from a chat clone into a platform
-clone:
+The next phase should focus on turning Vine from a chat clone into a closer
+LINE platform clone:
 
 1. Make the core chat experience feel complete.
-2. Close the Official Account and Messaging API loop.
-3. Productize rich interactive messages and rich menus.
+2. Close the LINE-like Official Account and Messaging API loop.
+3. Productize LINE-style rich interactive messages and rich menus.
 4. Extend LIFF-style mini apps once chat and OA flows are stable.
-5. Add heavier native and social features after the platform surface is useful.
+5. Add heavier native and social features after the LINE-parity surface is
+   useful.
+
+When a tradeoff appears, prefer the feature shape a LINE developer or OA
+manager would recognize: public API behavior, message objects, webhook settings,
+rich menus, LIFF, and OA management flows. Vine-specific implementation details
+such as outbox rows, retry-key ledgers, and delivery workers should stay behind
+admin diagnostics unless they are necessary for developer-facing LINE parity.
 
 ## Priority Roadmap
 
 | Priority | Area | Why | Scope |
 | --- | --- | --- | --- |
 | P0 | Chat core | Chat is the base surface for every OA, LIFF, sticker, and bot feature. | Reply/quote, mentions, search, media polish, notification behavior, chat settings, block/report flows. |
-| P1 | Official Account + Messaging API loop | Vine already has OA, webhook, access-token, Rich Menu, Flex simulator, and message-rendering foundations. This is the highest-leverage next platform milestone. | Reply, push, broadcast, webhook delivery logs, retries, idempotency, quota, bot test console, developer-facing API docs. |
+| P1 | Official Account + Messaging API parity | Vine already has OA, webhook, access-token, Rich Menu, Flex simulator, and message-rendering foundations. This is the highest-leverage next LINE-clone milestone. | LINE-like reply, push, multicast, broadcast, webhook settings/errors/redelivery, retry keys, quota/consumption, profile/content APIs, developer-facing API docs, and a bot test console. |
 | P1 | Interactive message pack | Rich bot interactions are one of LINE's most recognizable developer features. | Quick Reply, Template Message, Imagemap, Flex Message delivery into real chats, action dispatch for message/postback/URI/datetime/camera/camera roll/location/clipboard. |
-| P2 | Rich Menu builder | Rich menus are already partially modeled in Vine; the next step is making them usable by OA managers. | Image upload, tappable-area editor, default rich menu, tab switching, per-user rich menu, click analytics. |
+| P2 | Rich Menu parity | Rich menus are already partially modeled in Vine; the next step is making them usable through LINE-like manager and API flows. | Image upload, tappable-area editor, default rich menu, per-user rich menu, rich menu alias/tab switching, chat UI integration, and manager-side display/click insights where feasible. |
 | P2 | LIFF / Mini App platform | This turns Vine from chat-only into an app container inside conversations. | LIFF app registry, SDK parity for core methods, share target picker, permanent links, mini app gallery, developer playground. |
-| P3 | OA content and CRM | Official accounts become more useful when they can operate campaigns and customer journeys. | OA profile feed, announcements, coupons, event pages, membership card, basic audience segments. |
-| P3 | Business operations | Broadcast and CRM features need observability and guardrails before serious use. | Audience import, segment targeting, scheduled broadcast, message analytics, coupon redemption, A/B message experiments. |
+| P3 | OA Manager parity | Official accounts become more useful when managers can operate the familiar LINE OA surface. | OA profile/home, announcements, coupons, membership card, basic audience segments, scheduled broadcasts, and lightweight insights. |
+| P3 | Business operations | Broadcast, audience, and campaign features need LINE-like observability and guardrails before serious use. | Audience import, segment targeting, message analytics, coupon redemption, A/B message experiments, and admin-only operational diagnostics. |
 | P4 | Heavy native features | These are valuable but expensive, and should come after the messaging platform is coherent. | Voice/video calls, albums, notes, Keep-like saved items, desktop parity. |
 
 ## Recommended Next Theme
 
 The next major theme should be:
 
-**Official Account + Messaging API closed-loop hardening**
+**Official Account + Messaging API LINE-parity hardening**
 
 The success criterion is:
 
@@ -45,8 +55,11 @@ The success criterion is:
 > message, and see the result in a real Vine chat.
 
 The Messaging API v1 server baseline now exists under `/api/oa/v2`. The next
-roadmap work should make that loop easier to operate, observe, document, and
-use from real bot developers before starting a new major subsystem.
+roadmap work should make that loop behave like a recognizable LINE Developers
+Messaging API channel before starting a new major subsystem. Developer-facing
+work should favor docs, examples, endpoint parity, console settings, bot
+testing, and chat-visible behavior. Vine-only operational internals should be
+kept as admin diagnostics, not the primary product surface.
 
 ## Milestones
 
@@ -86,18 +99,28 @@ Not completed yet / next hardening:
 
 - Developer-facing Messaging API docs and examples for Vine's `/api/oa/v2`
   endpoint, including explicit differences from the official LINE cloud.
-- Operator views for accepted requests, delivery rows, retry-key state, and
-  failed recovery attempts.
-- Message content retrieval backed by stored media for image/video/audio.
+- LINE-like developer console surface for channel settings, Messaging API
+  endpoint guidance, access tokens, webhook settings/errors, quota/consumption,
+  and a bot test console.
+- Messaging API parity gaps: multicast, profile/content API behavior, richer
+  quota and sent-message statistics, and request/response examples that match
+  LINE's developer expectations while using Vine-owned URLs.
+- Message content upload/retrieval documentation and tests for image, video,
+  and audio messages.
 - Production limits: body size, per-OA rate limiting, quota reset policy, and
   retention cleanup for request/delivery/retry-key rows.
 - End-to-end bot sandbox that creates an OA, sends a user message, receives a
   webhook, replies, pushes, broadcasts, and shows the resulting Vine chat.
+- Admin-only diagnostics for accepted requests, delivery rows, retry-key state,
+  and failed recovery attempts. These help self-hosted operators, but should not
+  displace LINE-like developer/OA manager workflows.
 
 Out of scope:
 
-- Narrowcast.
-- Full audience management.
+- Narrowcast until basic multicast, broadcast, and audience primitives are
+  stable.
+- Full audience management beyond the subset needed for LINE-like multicast and
+  later narrowcast.
 - External queue infrastructure such as RabbitMQ unless PostgreSQL outbox
   contention or throughput becomes a measured bottleneck.
 
@@ -117,25 +140,29 @@ Deliverables:
 Out of scope:
 
 - Perfect visual parity with every LINE client.
-- Legacy LINE-only behavior that has no value in Vine.
+- Legacy LINE-only behavior that has no value in a self-hosted LINE clone.
 
-### Milestone 3: Rich Menu Builder
+### Milestone 3: Rich Menu Parity
 
-Goal: let OA managers create and operate rich menus without hand-writing JSON.
+Goal: let OA managers and bot developers create and operate rich menus through
+LINE-like manager and Messaging API workflows.
 
 Deliverables:
 
 - Rich menu image upload and validation.
-- Visual tappable-area editor.
-- Default rich menu assignment.
-- Rich menu tab switching via alias-style actions.
+- Visual tappable-area editor for manager-created rich menus.
+- Messaging API rich menu create/upload/set-default flow.
+- Per-user rich menu linking and unlinking.
+- Rich menu alias/tab switching.
 - Chat UI integration for active rich menus.
-- Click analytics for menu areas.
+- Manager-side display/click insights where feasible, with Messaging API rich
+  menu analytics treated separately to match LINE's product boundary.
 
 Out of scope:
 
 - Advanced scheduling.
-- Sophisticated per-segment personalization.
+- Sophisticated per-segment personalization beyond LINE-like per-user rich menu
+  assignment.
 
 ### Milestone 4: LIFF / Mini App MVP
 
@@ -164,8 +191,8 @@ These are useful but should wait until the platform loop is healthy:
 - Saved items / Keep-like collection.
 - OA feed and campaign center.
 - Membership cards and coupons.
-- Audience import and segmentation.
-- Scheduled broadcast and A/B testing.
+- Advanced audience import and segmentation.
+- A/B testing.
 - Desktop-specific chat polish.
 
 ## Explicit Non-Goals
@@ -175,6 +202,8 @@ These are useful but should wait until the platform loop is healthy:
 - Do not implement real LINE Login unless the requested scope is external LINE cloud integration.
 - Do not prioritize voice/video calls before the chat, OA, Messaging API, and rich message surfaces are coherent.
 - Do not build a generic social network feed before the messaging platform has clear end-to-end value.
+- Do not expose Vine's internal outbox, retry-key, and worker implementation as
+  primary developer-console features when a LINE-like product surface is enough.
 
 ## References In This Repo
 
@@ -182,6 +211,7 @@ These are useful but should wait until the platform loop is healthy:
 - `docs/line-clone-dev-notes.md`
 - `docs/line-clone-assessment.md`
 - `docs/vine-creator-market-roadmap.md`
+- `docs/messaging-api-vine.md`
 - `packages/proto/proto/oa/v1/oa.proto`
 - `packages/liff`
 - `packages/line-flex`
