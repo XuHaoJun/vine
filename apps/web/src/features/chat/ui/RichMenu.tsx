@@ -12,6 +12,8 @@ type RichMenuArea = {
     uri?: string
     data?: string
     text?: string
+    richMenuAliasId?: string
+    displayText?: string
   }
 }
 
@@ -20,7 +22,7 @@ type Props = {
   sizeWidth: number
   sizeHeight: number
   areas: RichMenuArea[]
-  onAreaTap: (area: RichMenuArea) => void
+  onAreaTap: (area: RichMenuArea & { areaIndex: number }) => void
 }
 
 export const RichMenu = memo(
@@ -51,7 +53,7 @@ export const RichMenu = memo(
         {areas.map((area, index) => (
           <Pressable
             key={index}
-            onPress={() => onAreaTap(area)}
+            onPress={() => onAreaTap({ ...area, areaIndex: index })}
             style={{
               position: 'absolute',
               left: `${(area.bounds.x / sizeWidth) * 100}%`,

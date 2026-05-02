@@ -12,6 +12,7 @@ import type { Area, AreaBounds } from './types'
 type Props = {
   area: Area
   label: string
+  clickCount?: number
   scaleFactor: number
   isSelected: boolean
   canvasHeightPx: number
@@ -24,6 +25,7 @@ export const AreaOverlay = memo(
   ({
     area,
     label,
+    clickCount,
     scaleFactor,
     isSelected,
     canvasHeightPx,
@@ -145,6 +147,22 @@ export const AreaOverlay = memo(
               ×
             </SizableText>
           </YStack>
+
+          {(clickCount ?? 0) > 0 && (
+            <YStack
+              position="absolute"
+              t={2}
+              l={2}
+              px="$1"
+              rounded="$2"
+              bg="$color9"
+              z={10}
+            >
+              <SizableText size="$1" color="white">
+                {clickCount}
+              </SizableText>
+            </YStack>
+          )}
 
           <YStack flex={1} items="center" justify="center">
             <SizableText size="$4" fontWeight="700" color={borderColor}>

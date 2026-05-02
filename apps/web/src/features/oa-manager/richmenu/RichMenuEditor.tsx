@@ -36,6 +36,7 @@ type EditorMode =
       oaId: string
       richMenuId: string
       initial: EditorState
+      clickCountsByArea?: Record<number, number>
       onSaved: () => void
     }
 
@@ -84,11 +85,14 @@ export const RichMenuEditor = memo((props: Props) => {
 
   const selectedArea = areas.find((a) => a.id === selectedAreaId) ?? null
 
-  const [actionType, setActionType] = useState<'message' | 'uri' | 'postback'>('message')
+  const [actionType, setActionType] = useState<
+    'message' | 'uri' | 'postback' | 'richmenuswitch'
+  >('message')
   const [actionText, setActionText] = useState('')
   const [actionUri, setActionUri] = useState('')
   const [actionData, setActionData] = useState('')
   const [actionDisplayText, setActionDisplayText] = useState('')
+  const [actionRichMenuAliasId, setActionRichMenuAliasId] = useState('')
 
   const handleSelectArea = useCallback(
     (id: string) => {
@@ -96,11 +100,22 @@ export const RichMenuEditor = memo((props: Props) => {
       const area = areas.find((a) => a.id === id)
       if (!area) return
       const act = area.action
-      setActionType(act.type as 'message' | 'uri' | 'postback')
+      setActionType(act.type as 'message' | 'uri' | 'postback' | 'richmenuswitch')
       setActionText(act.type === 'message' ? act.text : '')
       setActionUri(act.type === 'uri' ? act.uri : '')
-      setActionData(act.type === 'postback' ? act.data : '')
-      setActionDisplayText(act.type === 'postback' ? (act.displayText ?? '') : '')
+      if (act.type === 'richmenuswitch') {
+        setActionData(act.data ?? '')
+        setActionDisplayText('')
+        setActionRichMenuAliasId(act.richMenuAliasId ?? '')
+      } else if (act.type === 'postback') {
+        setActionData(act.data ?? '')
+        setActionDisplayText(act.displayText ?? '')
+        setActionRichMenuAliasId('')
+      } else {
+        setActionData('')
+        setActionDisplayText('')
+        setActionRichMenuAliasId('')
+      }
     },
     [areas],
   )
@@ -112,6 +127,12 @@ export const RichMenuEditor = memo((props: Props) => {
       action = { type: 'message', text: actionText }
     } else if (actionType === 'uri') {
       action = { type: 'uri', uri: actionUri }
+    } else if (actionType === 'richmenuswitch') {
+      action = {
+        type: 'richmenuswitch',
+        richMenuAliasId: actionRichMenuAliasId,
+        data: actionData,
+      }
     } else {
       action = {
         type: 'postback',
@@ -120,7 +141,15 @@ export const RichMenuEditor = memo((props: Props) => {
       }
     }
     setAreas((prev) => prev.map((a) => (a.id === selectedAreaId ? { ...a, action } : a)))
-  }, [selectedAreaId, actionType, actionText, actionUri, actionData, actionDisplayText])
+  }, [
+    selectedAreaId,
+    actionType,
+    actionText,
+    actionUri,
+    actionData,
+    actionDisplayText,
+    actionRichMenuAliasId,
+  ])
 
   const handleUpdateBounds = useCallback((id: string, bounds: AreaBounds) => {
     setAreas((prev) => prev.map((a) => (a.id === id ? { ...a, bounds } : a)))
@@ -207,6 +236,8 @@ export const RichMenuEditor = memo((props: Props) => {
           text: 'text' in a.action ? a.action.text : undefined,
           displayText:
             'displayText' in a.action ? (a.action as any).displayText : undefined,
+          richMenuAliasId:
+            'richMenuAliasId' in a.action ? (a.action as any).richMenuAliasId : undefined,
         },
       }))
 
@@ -444,6 +475,9 @@ export const RichMenuEditor = memo((props: Props) => {
                 key={area.id}
                 area={area}
                 label={AREA_LABELS[i] ?? String(i + 1)}
+                clickCount={
+                  props.mode === 'edit' ? (props.clickCountsByArea?.[i] ?? 0) : 0
+                }
                 scaleFactor={scaleFactor}
                 isSelected={selectedAreaId === area.id}
                 canvasHeightPx={canvasHeightPx}
@@ -479,14 +513,20 @@ export const RichMenuEditor = memo((props: Props) => {
                 Action type
               </SizableText>
               <XStack gap="$1" flexWrap="wrap">
-                {(['message', 'uri', 'postback'] as const).map((t) => (
+                {(['message', 'uri', 'postback', 'richmenuswitch'] as const).map((t) => (
                   <Button
                     key={t}
                     size="$2"
                     variant={actionType === t ? undefined : 'outlined'}
                     onPress={() => setActionType(t)}
                   >
-                    {t === 'message' ? 'Message' : t === 'uri' ? 'URI' : 'Postback'}
+                    {t === 'message'
+                      ? 'Message'
+                      : t === 'uri'
+                        ? 'URI'
+                        : t === 'postback'
+                          ? 'Postback'
+                          : 'Switch'}
                   </Button>
                 ))}
               </XStack>
@@ -538,6 +578,31 @@ export const RichMenuEditor = memo((props: Props) => {
                     value={actionDisplayText}
                     onChangeText={setActionDisplayText}
                     placeholder="Buy"
+                  />
+                </YStack>
+              </>
+            )}
+
+            {actionType === 'richmenuswitch' && (
+              <>
+                <YStack gap="$1">
+                  <SizableText size="$1" color="$color10">
+                    Alias ID
+                  </SizableText>
+                  <Input
+                    value={actionRichMenuAliasId}
+                    onChangeText={setActionRichMenuAliasId}
+                    placeholder="richmenu-alias-a"
+                  />
+                </YStack>
+                <YStack gap="$1">
+                  <SizableText size="$1" color="$color10">
+                    Data
+                  </SizableText>
+                  <Input
+                    value={actionData}
+                    onChangeText={setActionData}
+                    placeholder="tab=a"
                   />
                 </YStack>
               </>

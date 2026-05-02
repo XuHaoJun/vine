@@ -136,11 +136,19 @@ export const RichMenuListPage = memo(() => {
             Create custom menus shown in the chat screen
           </SizableText>
         </YStack>
-        <Button
-          onPress={() => router.navigate(`/manager/${oaId}/richmenu/create` as any)}
-        >
-          + Create
-        </Button>
+        <XStack gap="$2">
+          <Button
+            variant="outlined"
+            onPress={() => router.navigate(`/manager/${oaId}/richmenu/users` as any)}
+          >
+            Per-user
+          </Button>
+          <Button
+            onPress={() => router.navigate(`/manager/${oaId}/richmenu/create` as any)}
+          >
+            + Create
+          </Button>
+        </XStack>
       </XStack>
 
       {/* Empty state */}

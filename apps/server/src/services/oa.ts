@@ -14,9 +14,10 @@ import {
   oaDefaultRichMenu,
   oaQuota,
   oaReplyToken,
+  oaRichMenuClick,
 } from '@vine/db/schema-oa'
 import { createHmac, randomBytes, randomUUID } from 'crypto'
-import { chat, chatMember, message } from '@vine/db/schema-public'
+import { chat, chatMember, message, userPublic } from '@vine/db/schema-public'
 import { FLEX_SIMULATOR_OA_UNIQUE_ID } from '@vine/db/constants'
 
 type OADeps = {
@@ -442,6 +443,37 @@ export function createOAService(deps: OADeps) {
           postback: {
             data: input.data,
             ...(input.params ? { params: input.params } : {}),
+          },
+        },
+      ],
+    }
+  }
+
+  function buildRichMenuSwitchPostbackEvent(input: {
+    oaId: string
+    userId: string
+    replyToken: string
+    data: string
+    newRichMenuAliasId: string
+    status: 'SUCCESS' | 'RICHMENU_ALIAS_ID_NOTFOUND' | 'RICHMENU_NOTFOUND' | 'FAILED'
+  }) {
+    return {
+      destination: input.oaId,
+      events: [
+        {
+          type: 'postback' as const,
+          mode: 'active' as const,
+          timestamp: Date.now(),
+          source: { type: 'user' as const, userId: input.userId },
+          webhookEventId: randomUUID(),
+          deliveryContext: { isRedelivery: false },
+          replyToken: input.replyToken,
+          postback: {
+            data: input.data,
+            params: {
+              newRichMenuAliasId: input.newRichMenuAliasId,
+              status: input.status,
+            },
           },
         },
       ],
@@ -964,6 +996,69 @@ export function createOAService(deps: OADeps) {
     return db.select().from(oaRichMenuAlias).where(eq(oaRichMenuAlias.oaId, oaId))
   }
 
+  async function addRichMenuClick(input: {
+    oaId: string
+    richMenuId: string
+    areaIndex: number
+  }) {
+    await db.insert(oaRichMenuClick).values({
+      oaId: input.oaId,
+      richMenuId: input.richMenuId,
+      areaIndex: input.areaIndex,
+    })
+  }
+
+  async function getRichMenuClickStats(oaId: string, richMenuId: string) {
+    const rows = await db
+      .select({
+        areaIndex: oaRichMenuClick.areaIndex,
+        clickCount: sql<number>`cast(count(*) as int)`,
+      })
+      .from(oaRichMenuClick)
+      .where(
+        and(eq(oaRichMenuClick.oaId, oaId), eq(oaRichMenuClick.richMenuId, richMenuId)),
+      )
+      .groupBy(oaRichMenuClick.areaIndex)
+    return rows
+  }
+
+  async function isUserChatMember(userId: string, chatId: string) {
+    const [member] = await db
+      .select({ id: chatMember.id })
+      .from(chatMember)
+      .where(and(eq(chatMember.chatId, chatId), eq(chatMember.userId, userId)))
+      .limit(1)
+    return Boolean(member)
+  }
+
+  async function listOAUsersWithRichMenus(input: {
+    oaId: string
+    richMenuId?: string | undefined
+  }) {
+    const conditions = [eq(oaFriendship.oaId, input.oaId)]
+    if (input.richMenuId) {
+      conditions.push(eq(oaRichMenuUserLink.richMenuId, input.richMenuId))
+    }
+
+    return db
+      .select({
+        userId: oaFriendship.userId,
+        userName: userPublic.name,
+        userImage: userPublic.image,
+        assignedRichMenuId: oaRichMenuUserLink.richMenuId,
+      })
+      .from(oaFriendship)
+      .leftJoin(
+        oaRichMenuUserLink,
+        and(
+          eq(oaRichMenuUserLink.oaId, oaFriendship.oaId),
+          eq(oaRichMenuUserLink.userId, oaFriendship.userId),
+        ),
+      )
+      .leftJoin(userPublic, eq(userPublic.id, oaFriendship.userId))
+      .where(and(...conditions))
+  }
+
   function getStartOfMonth(): Date {
     const now = new Date()
     return new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0)
@@ -1116,6 +1211,7 @@ export function createOAService(deps: OADeps) {
     buildFollowEvent,
     buildUnfollowEvent,
     buildPostbackEvent,
+    buildRichMenuSwitchPostbackEvent,
     searchOAs,
     searchOAsForOwner,
     recommendOfficialAccounts,
@@ -1146,6 +1242,10 @@ export function createOAService(deps: OADeps) {
     deleteRichMenuAlias,
     getRichMenuAlias,
     getRichMenuAliasList,
+    addRichMenuClick,
+    getRichMenuClickStats,
+    isUserChatMember,
+    listOAUsersWithRichMenus,
     getQuota,
     getConsumption,
     checkAndIncrementUsage,

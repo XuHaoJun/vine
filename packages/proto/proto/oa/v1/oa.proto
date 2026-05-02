@@ -592,6 +592,110 @@ message UploadRichMenuImageRequest {
 
 message UploadRichMenuImageResponse {}
 
+// ── Rich Menu Switch ──
+
+message SwitchRichMenuRequest {
+  string official_account_id = 1;
+  string chat_id = 2;
+  string rich_menu_alias_id = 3;
+  string data = 4;
+}
+
+message SwitchRichMenuResponse {
+  string status = 1;
+  optional string new_rich_menu_alias_id = 2;
+}
+
+// ── Rich Menu Aliases (manager) ──
+
+message RichMenuAliasItem {
+  string rich_menu_alias_id = 1;
+  string rich_menu_id = 2;
+  string created_at = 3;
+}
+
+message ListRichMenuAliasesRequest {
+  string official_account_id = 1;
+}
+
+message ListRichMenuAliasesResponse {
+  repeated RichMenuAliasItem aliases = 1;
+}
+
+message CreateRichMenuAliasRequest {
+  string official_account_id = 1;
+  string rich_menu_alias_id = 2;
+  string rich_menu_id = 3;
+}
+
+message CreateRichMenuAliasResponse {
+  RichMenuAliasItem alias = 1;
+}
+
+message DeleteRichMenuAliasManagerRequest {
+  string official_account_id = 1;
+  string rich_menu_alias_id = 2;
+}
+
+message DeleteRichMenuAliasManagerResponse {}
+
+// ── Per-user Rich Menu (manager) ──
+
+message OAUserRichMenuInfo {
+  string user_id = 1;
+  optional string user_name = 2;
+  optional string user_image = 3;
+  optional string assigned_rich_menu_id = 4;
+}
+
+message ListOAUsersWithRichMenusRequest {
+  string official_account_id = 1;
+  optional string rich_menu_id = 2; // when set, return only users explicitly assigned to this menu
+}
+
+message ListOAUsersWithRichMenusResponse {
+  repeated OAUserRichMenuInfo users = 1;
+}
+
+message LinkRichMenuToUserManagerRequest {
+  string official_account_id = 1;
+  string user_id = 2;
+  string rich_menu_id = 3;
+}
+
+message LinkRichMenuToUserManagerResponse {}
+
+message UnlinkRichMenuFromUserManagerRequest {
+  string official_account_id = 1;
+  string user_id = 2;
+}
+
+message UnlinkRichMenuFromUserManagerResponse {}
+
+// ── Rich Menu Click Tracking ──
+
+message TrackRichMenuClickRequest {
+  string official_account_id = 1;
+  string rich_menu_id = 2;
+  int32 area_index = 3;
+}
+
+message TrackRichMenuClickResponse {}
+
+message RichMenuAreaStat {
+  int32 area_index = 1;
+  int32 click_count = 2;
+}
+
+message GetRichMenuStatsRequest {
+  string official_account_id = 1;
+  string rich_menu_id = 2;
+}
+
+message GetRichMenuStatsResponse {
+  repeated RichMenuAreaStat stats = 1;
+}
+
 // ── Service ──
 
 service OAService {
@@ -639,4 +743,13 @@ service OAService {
   rpc SetDefaultRichMenu(SetDefaultRichMenuRequest) returns (SetDefaultRichMenuResponse);
   rpc ClearDefaultRichMenu(ClearDefaultRichMenuRequest) returns (ClearDefaultRichMenuResponse);
   rpc UploadRichMenuImage(UploadRichMenuImageRequest) returns (UploadRichMenuImageResponse);
+  rpc SwitchRichMenu(SwitchRichMenuRequest) returns (SwitchRichMenuResponse);
+  rpc ListRichMenuAliases(ListRichMenuAliasesRequest) returns (ListRichMenuAliasesResponse);
+  rpc CreateRichMenuAlias(CreateRichMenuAliasRequest) returns (CreateRichMenuAliasResponse);
+  rpc DeleteRichMenuAliasManager(DeleteRichMenuAliasManagerRequest) returns (DeleteRichMenuAliasManagerResponse);
+  rpc ListOAUsersWithRichMenus(ListOAUsersWithRichMenusRequest) returns (ListOAUsersWithRichMenusResponse);
+  rpc LinkRichMenuToUserManager(LinkRichMenuToUserManagerRequest) returns (LinkRichMenuToUserManagerResponse);
+  rpc UnlinkRichMenuFromUserManager(UnlinkRichMenuFromUserManagerRequest) returns (UnlinkRichMenuFromUserManagerResponse);
+  rpc TrackRichMenuClick(TrackRichMenuClickRequest) returns (TrackRichMenuClickResponse);
+  rpc GetRichMenuStats(GetRichMenuStatsRequest) returns (GetRichMenuStatsResponse);
 }
