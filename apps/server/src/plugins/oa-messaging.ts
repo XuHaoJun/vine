@@ -1,8 +1,8 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { schema } from '@vine/db'
-import { message, userPublic } from '@vine/db/schema-public'
+import { chatMember, chat, chatOaLoading, message, userPublic } from '@vine/db/schema-public'
 import { oaAccessToken } from '@vine/db/schema-oa'
 import { FlexMessageSchema, QuickReplySchema } from '@vine/flex-schema'
 import { ImagemapMessageSchema } from '@vine/imagemap-schema'
@@ -537,6 +537,70 @@ export async function oaMessagingPlugin(
           return reply
             .code(401)
             .send({ message: 'Access token expired', code: 'TOKEN_EXPIRED' })
+        }
+        return reply.code(500).send({ message: 'Internal server error' })
+      }
+    },
+  )
+
+  // Loading animation
+  fastify.post(
+    oaApiPath('/bot/chat/loading/start'),
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const oaId = await extractOaFromToken(request, db)
+        const body = request.body as { chatId: string; loadingSeconds: number }
+
+        const loadingSeconds = Number(body.loadingSeconds)
+        if (!Number.isInteger(loadingSeconds) || loadingSeconds < 5 || loadingSeconds > 60) {
+          return reply
+            .code(400)
+            .send({ message: 'loadingSeconds must be an integer between 5 and 60' })
+        }
+
+        const [membership] = await db
+          .select()
+          .from(chatMember)
+          .where(and(eq(chatMember.chatId, body.chatId), eq(chatMember.oaId, oaId)))
+          .limit(1)
+
+        if (!membership) {
+          return reply.code(404).send({ message: 'Chat not found or OA is not a member' })
+        }
+
+        const [chatRow] = await db
+          .select()
+          .from(chat)
+          .where(eq(chat.id, body.chatId))
+          .limit(1)
+
+        if (!chatRow || chatRow.type !== 'oa') {
+          return reply
+            .code(400)
+            .send({ message: 'Loading animation is only supported for one-on-one OA chats' })
+        }
+
+        const expiresAt = Date.now() + loadingSeconds * 1000
+
+        await db
+          .insert(chatOaLoading)
+          .values({ id: `${body.chatId}_${oaId}`, chatId: body.chatId, oaId, expiresAt })
+          .onConflictDoUpdate({
+            target: chatOaLoading.id,
+            set: { expiresAt },
+          })
+
+        return reply.send({})
+      } catch (err) {
+        if (err instanceof Error && err.message === 'Missing Bearer token') {
+          return reply
+            .code(401)
+            .send({ message: 'Missing Bearer token', code: 'INVALID_TOKEN' })
+        }
+        if (err instanceof Error && err.message === 'Invalid access token') {
+          return reply
+            .code(401)
+            .send({ message: 'Invalid access token', code: 'INVALID_TOKEN' })
         }
         return reply.code(500).send({ message: 'Internal server error' })
       }

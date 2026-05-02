@@ -1177,3 +1177,115 @@ describe('oaMessagingPlugin — Get Profile', () => {
     expect(body.pictureUrl).toBe('')
   })
 })
+
+describe('oaMessagingPlugin — Loading Animation', () => {
+  function makeLoadingMockDb(opts: {
+    token?: boolean
+    chatMember?: boolean
+    chat?: { type: string }
+  }) {
+    const tokenRow = opts.token !== false ? [{ oaId, token: validToken, expiresAt: null }] : []
+    const chatMemberRow = opts.chatMember !== false ? [{ chatId: 'chat-1', oaId }] : []
+    const chatRow = opts.chat ? [{ id: 'chat-1', type: opts.chat.type }] : []
+
+    let selectCallCount = 0
+    const mockSelect = vi.fn().mockImplementation(() => {
+      selectCallCount++
+      const resultByCall: unknown[][] = [tokenRow, chatMemberRow, chatRow]
+      const result = resultByCall[selectCallCount - 1] ?? []
+      return {
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(result) }),
+        }),
+      }
+    })
+    const mockInsert = vi.fn().mockReturnValue({
+      values: vi.fn().mockReturnValue({
+        onConflictDoUpdate: vi.fn().mockResolvedValue([]),
+      }),
+    })
+    const mockUpdate = vi.fn().mockReturnValue({ set: vi.fn().mockReturnThis(), where: vi.fn().mockReturnThis() })
+    return { mockSelect, mockInsert, mockUpdate }
+  }
+
+  it('returns 401 when no Bearer token', async () => {
+    const { app } = createTestApp(makeLoadingMockDb({ token: false }))
+    await app.ready()
+    const res = await app.inject({
+      method: 'POST',
+      url: oaApiPath('/bot/chat/loading/start'),
+      payload: { chatId: 'chat-1', loadingSeconds: 5 },
+    })
+    await app.close()
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('returns 400 when loadingSeconds < 5', async () => {
+    const { app } = createTestApp(makeLoadingMockDb({ chat: { type: 'oa' } }))
+    await app.ready()
+    const res = await app.inject({
+      method: 'POST',
+      url: oaApiPath('/bot/chat/loading/start'),
+      headers: { authorization: `Bearer ${validToken}` },
+      payload: { chatId: 'chat-1', loadingSeconds: 4 },
+    })
+    await app.close()
+    expect(res.statusCode).toBe(400)
+  })
+
+  it('returns 400 when loadingSeconds > 60', async () => {
+    const { app } = createTestApp(makeLoadingMockDb({ chat: { type: 'oa' } }))
+    await app.ready()
+    const res = await app.inject({
+      method: 'POST',
+      url: oaApiPath('/bot/chat/loading/start'),
+      headers: { authorization: `Bearer ${validToken}` },
+      payload: { chatId: 'chat-1', loadingSeconds: 61 },
+    })
+    await app.close()
+    expect(res.statusCode).toBe(400)
+  })
+
+  it('returns 404 when OA is not a member of the chat', async () => {
+    const { app } = createTestApp(makeLoadingMockDb({ chatMember: false }))
+    await app.ready()
+    const res = await app.inject({
+      method: 'POST',
+      url: oaApiPath('/bot/chat/loading/start'),
+      headers: { authorization: `Bearer ${validToken}` },
+      payload: { chatId: 'chat-1', loadingSeconds: 5 },
+    })
+    await app.close()
+    expect(res.statusCode).toBe(404)
+  })
+
+  it('returns 400 when chat is not type oa', async () => {
+    const { app } = createTestApp(makeLoadingMockDb({ chat: { type: 'group' } }))
+    await app.ready()
+    const res = await app.inject({
+      method: 'POST',
+      url: oaApiPath('/bot/chat/loading/start'),
+      headers: { authorization: `Bearer ${validToken}` },
+      payload: { chatId: 'chat-1', loadingSeconds: 5 },
+    })
+    await app.close()
+    expect(res.statusCode).toBe(400)
+    const body = JSON.parse(res.body)
+    expect(body.message).toContain('one-on-one')
+  })
+
+  it('returns 200 and upserts row on success', async () => {
+    const mockDb = makeLoadingMockDb({ chat: { type: 'oa' } })
+    const { app } = createTestApp(mockDb)
+    await app.ready()
+    const res = await app.inject({
+      method: 'POST',
+      url: oaApiPath('/bot/chat/loading/start'),
+      headers: { authorization: `Bearer ${validToken}` },
+      payload: { chatId: 'chat-1', loadingSeconds: 10 },
+    })
+    await app.close()
+    expect(res.statusCode).toBe(200)
+    expect(mockDb.mockInsert).toHaveBeenCalled()
+  })
+})
