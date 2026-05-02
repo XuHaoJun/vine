@@ -7,6 +7,7 @@ import type { createOAWebhookDeliveryService } from '../services/oa-webhook-deli
 import type { DriveService } from '@vine/drive'
 
 import { requireAuthData, withAuthService } from './auth-context'
+import { logger } from '../lib/logger'
 
 type OAHandlerDeps = {
   oa: ReturnType<typeof createOAService>
@@ -855,6 +856,51 @@ export function oaHandler(deps: OAHandlerDeps) {
         await deps.drive.put(key, buffer, req.contentType)
         await deps.oa.setRichMenuImage(req.officialAccountId, req.richMenuId, true)
         return {}
+      },
+      async switchRichMenu(req, ctx) {
+        const auth = requireAuthData(ctx)
+        const isMember = await deps.oa.isUserChatMember(auth.id, req.chatId)
+        if (!isMember) {
+          throw new ConnectError('Forbidden: not a member of this chat', Code.PermissionDenied)
+        }
+        const isFriend = await deps.oa.isOAFriend(auth.id, req.officialAccountId)
+        if (!isFriend) {
+          throw new ConnectError('Forbidden: not an OA friend', Code.PermissionDenied)
+        }
+        const alias = await deps.oa.getRichMenuAlias(req.officialAccountId, req.richMenuAliasId)
+        if (!alias) {
+          return { status: 'RICHMENU_ALIAS_ID_NOTFOUND' }
+        }
+        const menu = await deps.oa.getRichMenu(req.officialAccountId, alias.richMenuId)
+        if (!menu) {
+          return { status: 'RICHMENU_NOTFOUND' }
+        }
+        await deps.oa.linkRichMenuToUser(req.officialAccountId, auth.id, alias.richMenuId)
+        // fire-and-forget webhook delivery — do not await
+        deps.webhookDelivery
+          .deliverRealEvent({
+            oaId: req.officialAccountId,
+            buildPayload: async () => {
+              const replyTokenRecord = await deps.oa.registerReplyToken({
+                oaId: req.officialAccountId,
+                userId: auth.id,
+                chatId: req.chatId,
+                messageId: null,
+              })
+              return deps.oa.buildRichMenuSwitchPostbackEvent({
+                oaId: req.officialAccountId,
+                userId: auth.id,
+                replyToken: replyTokenRecord.token,
+                data: req.data,
+                newRichMenuAliasId: req.richMenuAliasId,
+                status: 'SUCCESS',
+              })
+            },
+          })
+          .catch((err) => {
+            logger.error({ err, oaId: req.officialAccountId, chatId: req.chatId }, '[oa] richmenuswitch webhook delivery failed')
+          })
+        return { status: 'SUCCESS', newRichMenuAliasId: req.richMenuAliasId }
       },
     }
 
