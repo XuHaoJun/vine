@@ -49,6 +49,16 @@ const chat = {
   ),
 }
 
+const chatOaLoading = {
+  chatOaLoadingByChat: defineQuery(
+    v.object({
+      chatId: v.string(),
+      oaId: v.string(),
+    }),
+    ({ args }) => Queries.chatOaLoading.chatOaLoadingByChat(args),
+  ),
+}
+
 const creatorProfile = {
   creatorProfileByUserId: defineQuery(
     v.object({
@@ -165,6 +175,7 @@ const user = {
 
 export const queries = defineQueries({
   chat,
+  chatOaLoading,
   creatorProfile,
   entitlement,
   friendship,

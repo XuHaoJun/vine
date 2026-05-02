@@ -182,6 +182,17 @@ app.addHook('onClose', async () => {
   clearInterval(webhookRetentionInterval)
 })
 
+const cleanupLoadings = () =>
+  oaMessaging
+    .cleanupExpiredChatLoadings()
+    .catch((err) => logger.error({ err }, '[loading] cleanup failed'))
+
+void cleanupLoadings()
+const loadingCleanupInterval = setInterval(() => void cleanupLoadings(), 60_000)
+app.addHook('onClose', async () => {
+  clearInterval(loadingCleanupInterval)
+})
+
 const port = Number(process.env['PORT'] ?? 3001)
 await app.listen({ port, host: '0.0.0.0' })
 logger.info(`[server] listening on http://localhost:${port}`)

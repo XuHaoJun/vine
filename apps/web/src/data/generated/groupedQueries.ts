@@ -6,6 +6,7 @@
  * queries are typically small and few in number even in larger apps.
  */
 export * as chat from '../queries/chat'
+export * as entitlement from '../queries/entitlement'
 export * as friendship from '../queries/friendship'
 export * as message from '../queries/message'
 export * as todo from '../queries/todo'

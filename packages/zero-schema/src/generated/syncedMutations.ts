@@ -129,6 +129,23 @@ export const mutationValidators = {
       chatId: v.string(),
     }),
   },
+  chatOaLoading: {
+    insert: v.object({
+      id: v.string(),
+      chatId: v.string(),
+      oaId: v.string(),
+      expiresAt: v.number(),
+    }),
+    update: v.object({
+      id: v.string(),
+      chatId: v.optional(v.nullable(v.string())),
+      oaId: v.optional(v.nullable(v.string())),
+      expiresAt: v.optional(v.nullable(v.number())),
+    }),
+    delete: v.object({
+      id: v.string(),
+    }),
+  },
   creatorProfile: {},
   entitlement: {},
   friendship: {

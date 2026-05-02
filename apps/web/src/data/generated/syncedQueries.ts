@@ -19,6 +19,15 @@ const chat = {
   ),
 }
 
+const entitlement = {
+  entitlementsByUserId: defineQuery(
+    v.object({
+      userId: v.string(),
+    }),
+    ({ args }) => Queries.entitlement.entitlementsByUserId(args),
+  ),
+}
+
 const friendship = {
   friendsByUserId: defineQuery(
     v.object({
@@ -83,6 +92,7 @@ const user = {
 
 export const queries = defineQueries({
   chat,
+  entitlement,
   friendship,
   message,
   todo,

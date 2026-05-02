@@ -30,6 +30,7 @@ export const mutationValidators = {
       lastReadAt: v.number(),
     }),
   },
+  chatOaLoading: {},
   friendship: {
     insert: v.object({
       id: v.string(),

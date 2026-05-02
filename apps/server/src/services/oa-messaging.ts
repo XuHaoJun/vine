@@ -3,7 +3,7 @@ import { and, eq, gt, inArray, isNull, lt, lte, or, sql } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { schema } from '@vine/db'
 import { oaMessageDelivery, oaMessageRequest, oaRetryKey } from '@vine/db/schema-private'
-import { chat, chatMember, message } from '@vine/db/schema-public'
+import { chat, chatMember, chatOaLoading, message } from '@vine/db/schema-public'
 import { oaFriendship, oaQuota, oaReplyToken } from '@vine/db/schema-oa'
 
 export const RETRY_KEY_TTL_MS = 24 * 60 * 60 * 1000
@@ -355,6 +355,12 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
             lastMessageAt: lockedAt,
           })
           .where(eq(chat.id, chatId))
+
+        await tx
+          .delete(chatOaLoading)
+          .where(
+            and(eq(chatOaLoading.chatId, chatId), eq(chatOaLoading.oaId, delivery.oaId)),
+          )
 
         await tx
           .update(oaMessageDelivery)
@@ -733,6 +739,11 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
     return { ...accepted, processed }
   }
 
+  async function cleanupExpiredChatLoadings() {
+    const now = Date.now()
+    await deps.db.delete(chatOaLoading).where(lt(chatOaLoading.expiresAt, now))
+  }
+
   return {
     now,
     checkRetryKeyForRequest: (input: Omit<RetryKeyCheckInput, 'db' | 'now'>) =>
@@ -744,5 +755,6 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
     push,
     multicast,
     broadcast,
+    cleanupExpiredChatLoadings,
   }
 }

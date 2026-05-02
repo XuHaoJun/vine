@@ -18,6 +18,8 @@ import { useTanQuery } from '~/query'
 import { chatById } from '@vine/zero-schema/queries/chat'
 import { showToast } from '~/interface/toast/Toast'
 import { useRichMenu } from '~/features/chat/useRichMenu'
+import { chatOaLoadingByChat } from '@vine/zero-schema/queries/chatOaLoading'
+import { TypingIndicator } from '~/interface/message/TypingIndicator'
 import { RichMenu } from '~/features/chat/ui/RichMenu'
 import { RichMenuBar } from '~/features/chat/ui/RichMenuBar'
 import type { QuickReply, QuickReplyAction, QuickReplyItem } from '@vine/flex-schema'
@@ -79,6 +81,30 @@ export const ChatRoomPage = memo(() => {
 
   const { richMenu, imageUrl } = useRichMenu(otherMemberOaId ?? undefined)
   const hasRichMenu = !!richMenu && !!imageUrl
+
+  const [loadingRows] = useZeroQuery(
+    chatOaLoadingByChat,
+    { chatId: chatId!, oaId: otherMemberOaId! },
+    { enabled: Boolean(chatId && otherMemberOaId) },
+  )
+  const loadingRow = loadingRows?.[0] ?? null
+
+  const [isOaLoading, setIsOaLoading] = useState(false)
+
+  useEffect(() => {
+    if (!loadingRow) {
+      setIsOaLoading(false)
+      return
+    }
+    const remaining = loadingRow.expiresAt - Date.now()
+    if (remaining <= 0) {
+      setIsOaLoading(false)
+      return
+    }
+    setIsOaLoading(true)
+    const timer = setTimeout(() => setIsOaLoading(false), remaining)
+    return () => clearTimeout(timer)
+  }, [loadingRow])
 
   const [inputMode, setInputMode] = useState<'normal' | 'richmenu'>(
     hasRichMenu ? 'richmenu' : 'normal',
@@ -357,6 +383,12 @@ export const ChatRoomPage = memo(() => {
             onAreaTap={handleRichMenuAreaTap}
           />
         </YStack>
+      )}
+
+      {isOaLoading && (
+        <XStack px="$3" pb="$1">
+          <TypingIndicator />
+        </XStack>
       )}
 
       {activeQuickReply && inputMode !== 'richmenu' && (

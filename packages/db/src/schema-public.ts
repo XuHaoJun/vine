@@ -1,4 +1,5 @@
 import {
+  bigint,
   boolean,
   check,
   index,
@@ -145,6 +146,13 @@ export const message = pgTable(
     ),
   ],
 )
+
+export const chatOaLoading = pgTable('chatOaLoading', {
+  id: text('id').primaryKey(),
+  chatId: text('chatId').notNull(),
+  oaId: text('oaId').notNull(),
+  expiresAt: bigint('expiresAt', { mode: 'number' }).notNull(),
+})
 
 export const stickerPackage = pgTable(
   'stickerPackage',
