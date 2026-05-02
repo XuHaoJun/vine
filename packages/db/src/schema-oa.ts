@@ -166,6 +166,25 @@ export const oaDefaultRichMenu = pgTable('oaDefaultRichMenu', {
   updatedAt: timestamp('updatedAt', { mode: 'string' }).notNull(),
 })
 
+export const oaRichMenuClick = pgTable(
+  'oaRichMenuClick',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    oaId: uuid('oaId')
+      .notNull()
+      .references(() => officialAccount.id, { onDelete: 'cascade' }),
+    richMenuId: text('richMenuId').notNull(),
+    areaIndex: integer('areaIndex').notNull(),
+    clickedAt: timestamp('clickedAt', { withTimezone: true, mode: 'string' })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index('oaRichMenuClick_oaId_richMenuId_idx').on(table.oaId, table.richMenuId),
+    index('oaRichMenuClick_oaId_clickedAt_idx').on(table.oaId, table.clickedAt),
+  ],
+)
+
 export const oaQuota = pgTable('oaQuota', {
   oaId: uuid('oaId')
     .primaryKey()
