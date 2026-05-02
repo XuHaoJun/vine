@@ -17,10 +17,10 @@ export default {
   server: {
     allowedHosts: ['host.docker.internal'],
     proxy: {
-      '/api': 'http://localhost:3001',
-      '/oauth2': 'http://localhost:3001',
-      '/oa.v1.OAService': 'http://localhost:3001',
-      '/greeter.v1.GreeterService': 'http://localhost:3001',
+      '/api': process.env.ONE_SERVER_URL || 'http://localhost:3001',
+      '/oauth2': process.env.ONE_SERVER_URL || 'http://localhost:3001',
+      '/oa.v1.OAService': process.env.ONE_SERVER_URL || 'http://localhost:3001',
+      '/greeter.v1.GreeterService': process.env.ONE_SERVER_URL || 'http://localhost:3001',
     },
   },
 

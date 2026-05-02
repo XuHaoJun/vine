@@ -105,6 +105,7 @@ function createAuthServer(deps: AuthDeps) {
       `https://${DOMAIN}`,
       `http://localhost:${INTEGRATION_TEST_PROXY_PORT}`,
       `http://host.docker.internal:${INTEGRATION_TEST_PROXY_PORT}`,
+      `http://localhost:3000`,
       `${APP_SCHEME}://`,
       BETTER_AUTH_URL,
     ],

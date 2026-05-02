@@ -51,7 +51,7 @@ export const ZERO_SERVER_URL = (() => {
     return hostname ? `https://${hostname}` : 'https://zero.tamagui.dev'
   } else {
     const hostname = process.env.VITE_ZERO_HOSTNAME
-    return hostname ? `https://${hostname}` : 'http://localhost:4948'
+    return hostname ? `http://${hostname}` : 'http://localhost:4948'
   }
 })()
 
