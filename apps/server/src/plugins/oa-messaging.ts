@@ -2,7 +2,7 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { eq } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { schema } from '@vine/db'
-import { message } from '@vine/db/schema-public'
+import { message, userPublic } from '@vine/db/schema-public'
 import { oaAccessToken } from '@vine/db/schema-oa'
 import { FlexMessageSchema, QuickReplySchema } from '@vine/flex-schema'
 import { ImagemapMessageSchema } from '@vine/imagemap-schema'
@@ -507,16 +507,36 @@ export async function oaMessagingPlugin(
         await extractOaFromToken(request, db)
         const params = request.params as { userId: string }
 
+        const [user] = await db
+          .select()
+          .from(userPublic)
+          .where(eq(userPublic.id, params.userId))
+          .limit(1)
+
+        if (!user) {
+          return reply.code(404).send({ message: 'User not found' })
+        }
+
         return await reply.send({
-          userId: params.userId,
-          displayName: 'User',
-          pictureUrl: '',
+          userId: user.id,
+          displayName: user.name ?? '',
+          pictureUrl: user.image ?? '',
         })
       } catch (err) {
+        if (err instanceof Error && err.message === 'Missing Bearer token') {
+          return reply
+            .code(401)
+            .send({ message: 'Missing Bearer token', code: 'INVALID_TOKEN' })
+        }
         if (err instanceof Error && err.message === 'Invalid access token') {
           return reply
             .code(401)
             .send({ message: 'Invalid access token', code: 'INVALID_TOKEN' })
+        }
+        if (err instanceof Error && err.message === 'Access token expired') {
+          return reply
+            .code(401)
+            .send({ message: 'Access token expired', code: 'TOKEN_EXPIRED' })
         }
         return reply.code(500).send({ message: 'Internal server error' })
       }

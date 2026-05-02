@@ -1068,3 +1068,112 @@ describe('oaMessagingPlugin — Reply Message', () => {
     })
   })
 })
+
+describe('oaMessagingPlugin — Get Profile', () => {
+  it('returns 401 when no Bearer token', async () => {
+    const mockDb = makeMockDb([], [])
+    const { app } = createTestApp(mockDb)
+    await app.ready()
+    const res = await app.inject({
+      method: 'GET',
+      url: oaApiPath('/bot/profile/user-123'),
+    })
+    await app.close()
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('returns 404 when user not found', async () => {
+    const mockLimit1 = vi.fn().mockResolvedValue([{ oaId, token: validToken, expiresAt: null }])
+    const mockLimit2 = vi.fn().mockResolvedValue([])
+    let selectCallCount = 0
+    const mockSelect = vi.fn().mockImplementation(() => {
+      selectCallCount++
+      return {
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: selectCallCount === 1 ? mockLimit1 : mockLimit2,
+          }),
+        }),
+      }
+    })
+    const mockInsert = vi.fn().mockReturnValue({ values: vi.fn().mockReturnThis() })
+    const mockUpdate = vi
+      .fn()
+      .mockReturnValue({ set: vi.fn().mockReturnThis(), where: vi.fn().mockReturnThis() })
+    const { app } = createTestApp({ mockSelect, mockInsert, mockUpdate })
+    await app.ready()
+    const res = await app.inject({
+      method: 'GET',
+      url: oaApiPath('/bot/profile/user-missing'),
+      headers: { authorization: `Bearer ${validToken}` },
+    })
+    await app.close()
+    expect(res.statusCode).toBe(404)
+  })
+
+  it('returns real displayName and pictureUrl', async () => {
+    const mockLimit1 = vi.fn().mockResolvedValue([{ oaId, token: validToken, expiresAt: null }])
+    const mockLimit2 = vi.fn().mockResolvedValue([
+      { id: userId, name: 'Alice', image: 'https://example.com/pic.jpg' },
+    ])
+    let selectCallCount = 0
+    const mockSelect = vi.fn().mockImplementation(() => {
+      selectCallCount++
+      return {
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: selectCallCount === 1 ? mockLimit1 : mockLimit2,
+          }),
+        }),
+      }
+    })
+    const mockInsert = vi.fn().mockReturnValue({ values: vi.fn().mockReturnThis() })
+    const mockUpdate = vi
+      .fn()
+      .mockReturnValue({ set: vi.fn().mockReturnThis(), where: vi.fn().mockReturnThis() })
+    const { app } = createTestApp({ mockSelect, mockInsert, mockUpdate })
+    await app.ready()
+    const res = await app.inject({
+      method: 'GET',
+      url: oaApiPath(`/bot/profile/${userId}`),
+      headers: { authorization: `Bearer ${validToken}` },
+    })
+    await app.close()
+    expect(res.statusCode).toBe(200)
+    const body = JSON.parse(res.body)
+    expect(body.userId).toBe(userId)
+    expect(body.displayName).toBe('Alice')
+    expect(body.pictureUrl).toBe('https://example.com/pic.jpg')
+  })
+
+  it('returns empty string for pictureUrl when image is null', async () => {
+    const mockLimit1 = vi.fn().mockResolvedValue([{ oaId, token: validToken, expiresAt: null }])
+    const mockLimit2 = vi.fn().mockResolvedValue([{ id: userId, name: 'Bob', image: null }])
+    let selectCallCount = 0
+    const mockSelect = vi.fn().mockImplementation(() => {
+      selectCallCount++
+      return {
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: selectCallCount === 1 ? mockLimit1 : mockLimit2,
+          }),
+        }),
+      }
+    })
+    const mockInsert = vi.fn().mockReturnValue({ values: vi.fn().mockReturnThis() })
+    const mockUpdate = vi
+      .fn()
+      .mockReturnValue({ set: vi.fn().mockReturnThis(), where: vi.fn().mockReturnThis() })
+    const { app } = createTestApp({ mockSelect, mockInsert, mockUpdate })
+    await app.ready()
+    const res = await app.inject({
+      method: 'GET',
+      url: oaApiPath(`/bot/profile/${userId}`),
+      headers: { authorization: `Bearer ${validToken}` },
+    })
+    await app.close()
+    expect(res.statusCode).toBe(200)
+    const body = JSON.parse(res.body)
+    expect(body.pictureUrl).toBe('')
+  })
+})
