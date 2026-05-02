@@ -9,6 +9,10 @@ import { oaClient } from '~/features/oa/client'
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
 import { showToast } from '~/interface/toast/Toast'
+import { createRoute } from 'one'
+
+const route =
+  createRoute<'/(app)/developers/console/channel/[channelId]/WebhookSettingsSection'>()
 
 const schema = v.object({
   url: v.pipe(v.string(), v.url('Enter a valid URL')),

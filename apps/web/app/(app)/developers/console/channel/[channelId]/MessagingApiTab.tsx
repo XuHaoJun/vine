@@ -3,6 +3,10 @@ import { YStack } from 'tamagui'
 import { TestWebhookSection } from './TestWebhookSection'
 import { WebhookErrorsSection } from './WebhookErrorsSection'
 import { WebhookSettingsSection } from './WebhookSettingsSection'
+import { createRoute } from 'one'
+
+const route =
+  createRoute<'/(app)/developers/console/channel/[channelId]/MessagingApiTab'>()
 
 export function MessagingApiTab({ channelId }: { channelId: string }) {
   return (

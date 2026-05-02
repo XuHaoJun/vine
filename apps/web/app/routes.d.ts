@@ -9,7 +9,10 @@ declare module 'one' {
       StaticRoutes: 
         | `/`
         | `/(app)`
+        | `/(app)/admin/featured-shelves`
+        | `/(app)/admin/payouts`
         | `/(app)/admin/sticker-reviews`
+        | `/(app)/admin/trust-reports`
         | `/(app)/auth`
         | `/(app)/auth/consent`
         | `/(app)/auth/login`
@@ -19,6 +22,8 @@ declare module 'one' {
         | `/(app)/creator/`
         | `/(app)/creator/packages`
         | `/(app)/creator/packages/new`
+        | `/(app)/creator/payouts`
+        | `/(app)/creator/sales`
         | `/(app)/developers/console`
         | `/(app)/developers/console/`
         | `/(app)/developers/flex-simulator`
@@ -47,8 +52,12 @@ declare module 'one' {
         | `/(app)/pay/redirect`
         | `/(app)/pay/result`
         | `/(app)/store`
+        | `/(app)/store/search`
         | `/_sitemap`
+        | `/admin/featured-shelves`
+        | `/admin/payouts`
         | `/admin/sticker-reviews`
+        | `/admin/trust-reports`
         | `/auth`
         | `/auth/consent`
         | `/auth/login`
@@ -58,6 +67,8 @@ declare module 'one' {
         | `/creator/`
         | `/creator/packages`
         | `/creator/packages/new`
+        | `/creator/payouts`
+        | `/creator/sales`
         | `/developers/console`
         | `/developers/console/`
         | `/developers/flex-simulator`
@@ -87,11 +98,20 @@ declare module 'one' {
         | `/pay/redirect`
         | `/pay/result`
         | `/store`
+        | `/store/search`
       DynamicRoutes: 
         | `/(app)/admin/sticker-reviews/${OneRouter.SingleRoutePart<T>}`
+        | `/(app)/admin/trust-reports/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/auth/signup/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/creator/packages/${OneRouter.SingleRoutePart<T>}`
+        | `/(app)/creators/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/developers/console/channel/${OneRouter.SingleRoutePart<T>}`
+        | `/(app)/developers/console/channel/${OneRouter.SingleRoutePart<T>}/ChannelHeader`
+        | `/(app)/developers/console/channel/${OneRouter.SingleRoutePart<T>}/MessagingApiTab`
+        | `/(app)/developers/console/channel/${OneRouter.SingleRoutePart<T>}/TestWebhookSection`
+        | `/(app)/developers/console/channel/${OneRouter.SingleRoutePart<T>}/WebhookErrorsSection`
+        | `/(app)/developers/console/channel/${OneRouter.SingleRoutePart<T>}/WebhookErrorsSection.helpers`
+        | `/(app)/developers/console/channel/${OneRouter.SingleRoutePart<T>}/WebhookSettingsSection`
         | `/(app)/developers/console/login-channel/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/developers/console/login-channel/${OneRouter.SingleRoutePart<T>}/liff`
         | `/(app)/developers/console/provider/${OneRouter.SingleRoutePart<T>}`
@@ -104,9 +124,17 @@ declare module 'one' {
         | `/(app)/store/${OneRouter.SingleRoutePart<T>}`
         | `/(public)/invite/${OneRouter.SingleRoutePart<T>}/page`
         | `/admin/sticker-reviews/${OneRouter.SingleRoutePart<T>}`
+        | `/admin/trust-reports/${OneRouter.SingleRoutePart<T>}`
         | `/auth/signup/${OneRouter.SingleRoutePart<T>}`
         | `/creator/packages/${OneRouter.SingleRoutePart<T>}`
+        | `/creators/${OneRouter.SingleRoutePart<T>}`
         | `/developers/console/channel/${OneRouter.SingleRoutePart<T>}`
+        | `/developers/console/channel/${OneRouter.SingleRoutePart<T>}/ChannelHeader`
+        | `/developers/console/channel/${OneRouter.SingleRoutePart<T>}/MessagingApiTab`
+        | `/developers/console/channel/${OneRouter.SingleRoutePart<T>}/TestWebhookSection`
+        | `/developers/console/channel/${OneRouter.SingleRoutePart<T>}/WebhookErrorsSection`
+        | `/developers/console/channel/${OneRouter.SingleRoutePart<T>}/WebhookErrorsSection.helpers`
+        | `/developers/console/channel/${OneRouter.SingleRoutePart<T>}/WebhookSettingsSection`
         | `/developers/console/login-channel/${OneRouter.SingleRoutePart<T>}`
         | `/developers/console/login-channel/${OneRouter.SingleRoutePart<T>}/liff`
         | `/developers/console/provider/${OneRouter.SingleRoutePart<T>}`
@@ -120,9 +148,17 @@ declare module 'one' {
         | `/store/${OneRouter.SingleRoutePart<T>}`
       DynamicRouteTemplate: 
         | `/(app)/admin/sticker-reviews/[packageId]`
+        | `/(app)/admin/trust-reports/[reportId]`
         | `/(app)/auth/signup/[method]`
         | `/(app)/creator/packages/[packageId]`
+        | `/(app)/creators/[creatorId]`
         | `/(app)/developers/console/channel/[channelId]`
+        | `/(app)/developers/console/channel/[channelId]/ChannelHeader`
+        | `/(app)/developers/console/channel/[channelId]/MessagingApiTab`
+        | `/(app)/developers/console/channel/[channelId]/TestWebhookSection`
+        | `/(app)/developers/console/channel/[channelId]/WebhookErrorsSection`
+        | `/(app)/developers/console/channel/[channelId]/WebhookErrorsSection.helpers`
+        | `/(app)/developers/console/channel/[channelId]/WebhookSettingsSection`
         | `/(app)/developers/console/login-channel/[loginChannelId]`
         | `/(app)/developers/console/login-channel/[loginChannelId]/liff`
         | `/(app)/developers/console/provider/[providerId]`
@@ -135,9 +171,17 @@ declare module 'one' {
         | `/(app)/store/[packageId]`
         | `/(public)/invite/[inviteCode]/page`
         | `/admin/sticker-reviews/[packageId]`
+        | `/admin/trust-reports/[reportId]`
         | `/auth/signup/[method]`
         | `/creator/packages/[packageId]`
+        | `/creators/[creatorId]`
         | `/developers/console/channel/[channelId]`
+        | `/developers/console/channel/[channelId]/ChannelHeader`
+        | `/developers/console/channel/[channelId]/MessagingApiTab`
+        | `/developers/console/channel/[channelId]/TestWebhookSection`
+        | `/developers/console/channel/[channelId]/WebhookErrorsSection`
+        | `/developers/console/channel/[channelId]/WebhookErrorsSection.helpers`
+        | `/developers/console/channel/[channelId]/WebhookSettingsSection`
         | `/developers/console/login-channel/[loginChannelId]`
         | `/developers/console/login-channel/[loginChannelId]/liff`
         | `/developers/console/provider/[providerId]`
@@ -152,9 +196,17 @@ declare module 'one' {
       IsTyped: true
       RouteTypes: {
         '/(app)/admin/sticker-reviews/[packageId]': RouteInfo<{ packageId: string }>
+        '/(app)/admin/trust-reports/[reportId]': RouteInfo<{ reportId: string }>
         '/(app)/auth/signup/[method]': RouteInfo<{ method: string }>
         '/(app)/creator/packages/[packageId]': RouteInfo<{ packageId: string }>
+        '/(app)/creators/[creatorId]': RouteInfo<{ creatorId: string }>
         '/(app)/developers/console/channel/[channelId]': RouteInfo<{ channelId: string }>
+        '/(app)/developers/console/channel/[channelId]/ChannelHeader': RouteInfo<{ channelId: string }>
+        '/(app)/developers/console/channel/[channelId]/MessagingApiTab': RouteInfo<{ channelId: string }>
+        '/(app)/developers/console/channel/[channelId]/TestWebhookSection': RouteInfo<{ channelId: string }>
+        '/(app)/developers/console/channel/[channelId]/WebhookErrorsSection': RouteInfo<{ channelId: string }>
+        '/(app)/developers/console/channel/[channelId]/WebhookErrorsSection.helpers': RouteInfo<{ channelId: string }>
+        '/(app)/developers/console/channel/[channelId]/WebhookSettingsSection': RouteInfo<{ channelId: string }>
         '/(app)/developers/console/login-channel/[loginChannelId]': RouteInfo<{ loginChannelId: string }>
         '/(app)/developers/console/login-channel/[loginChannelId]/liff': RouteInfo<{ loginChannelId: string }>
         '/(app)/developers/console/provider/[providerId]': RouteInfo<{ providerId: string }>
@@ -167,9 +219,17 @@ declare module 'one' {
         '/(app)/store/[packageId]': RouteInfo<{ packageId: string }>
         '/(public)/invite/[inviteCode]/page': RouteInfo<{ inviteCode: string }>
         '/admin/sticker-reviews/[packageId]': RouteInfo<{ packageId: string }>
+        '/admin/trust-reports/[reportId]': RouteInfo<{ reportId: string }>
         '/auth/signup/[method]': RouteInfo<{ method: string }>
         '/creator/packages/[packageId]': RouteInfo<{ packageId: string }>
+        '/creators/[creatorId]': RouteInfo<{ creatorId: string }>
         '/developers/console/channel/[channelId]': RouteInfo<{ channelId: string }>
+        '/developers/console/channel/[channelId]/ChannelHeader': RouteInfo<{ channelId: string }>
+        '/developers/console/channel/[channelId]/MessagingApiTab': RouteInfo<{ channelId: string }>
+        '/developers/console/channel/[channelId]/TestWebhookSection': RouteInfo<{ channelId: string }>
+        '/developers/console/channel/[channelId]/WebhookErrorsSection': RouteInfo<{ channelId: string }>
+        '/developers/console/channel/[channelId]/WebhookErrorsSection.helpers': RouteInfo<{ channelId: string }>
+        '/developers/console/channel/[channelId]/WebhookSettingsSection': RouteInfo<{ channelId: string }>
         '/developers/console/login-channel/[loginChannelId]': RouteInfo<{ loginChannelId: string }>
         '/developers/console/login-channel/[loginChannelId]/liff': RouteInfo<{ loginChannelId: string }>
         '/developers/console/provider/[providerId]': RouteInfo<{ providerId: string }>

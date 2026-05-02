@@ -6,6 +6,10 @@ import { oaClient } from '~/features/oa/client'
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
 import { showToast } from '~/interface/toast/Toast'
+import { createRoute } from 'one'
+
+const route =
+  createRoute<'/(app)/developers/console/channel/[channelId]/TestWebhookSection'>()
 
 export function TestWebhookSection({ channelId }: { channelId: string }) {
   const [text, setText] = useState('Webhook test from Vine')

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { SizableText, Spinner, XStack, YStack } from 'tamagui'
+import { createRoute } from 'one'
 
 import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
 import { oaClient } from '~/features/oa/client'
@@ -10,6 +11,9 @@ import {
   getWebhookDeliveryDetailRows,
   getWebhookDeliverySummaryCells,
 } from './WebhookErrorsSection.helpers'
+
+const route =
+  createRoute<'/(app)/developers/console/channel/[channelId]/WebhookErrorsSection'>()
 
 export function WebhookErrorsSection({ channelId }: { channelId: string }) {
   const queryClient = useTanQueryClient()
