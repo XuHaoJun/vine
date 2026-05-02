@@ -382,6 +382,70 @@ export async function oaMessagingPlugin(
     },
   )
 
+  // Multicast Messages
+  fastify.post(
+    oaApiPath('/bot/message/multicast'),
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const oaId = await extractOaFromToken(request, db)
+        const body = request.body as { to: string[]; messages: MessageItem[] }
+
+        if (!Array.isArray(body.to) || body.to.length === 0 || !body.messages?.length) {
+          return await reply
+            .code(400)
+            .send({ message: 'to and messages are required', code: 'INVALID_REQUEST' })
+        }
+        if (body.to.length > 500) {
+          return await reply.code(400).send({
+            message: 'to must contain 500 or fewer user IDs',
+            code: 'INVALID_REQUEST',
+          })
+        }
+        if (new Set(body.to).size !== body.to.length) {
+          return await reply.code(400).send({
+            message: 'to must not contain duplicate user IDs',
+            code: 'INVALID_REQUEST',
+          })
+        }
+
+        const validated = body.messages.map((msg) => validateMessage(msg))
+        const failed = validated.find((r) => !r.valid)
+        if (failed && !failed.valid) {
+          return await reply.code(400).send({
+            message: failed.error,
+            code: failed.code ?? 'INVALID_MESSAGE_TYPE',
+          })
+        }
+
+        const validMessages = validated as ValidationSuccess[]
+        const result = await messaging.multicast({
+          oaId,
+          retryKey: request.headers['x-line-retry-key'] as string | undefined,
+          to: body.to,
+          messages: validMessages,
+        })
+        return sendMessagingResult(reply, result)
+      } catch (err) {
+        if (err instanceof Error && err.message === 'Missing Bearer token') {
+          return reply
+            .code(401)
+            .send({ message: 'Missing Bearer token', code: 'INVALID_TOKEN' })
+        }
+        if (err instanceof Error && err.message === 'Invalid access token') {
+          return reply
+            .code(401)
+            .send({ message: 'Invalid access token', code: 'INVALID_TOKEN' })
+        }
+        if (err instanceof Error && err.message === 'Access token expired') {
+          return reply
+            .code(401)
+            .send({ message: 'Access token expired', code: 'TOKEN_EXPIRED' })
+        }
+        return reply.code(500).send({ message: 'Internal server error' })
+      }
+    },
+  )
+
   // Broadcast Messages
   fastify.post(
     oaApiPath('/bot/message/broadcast'),

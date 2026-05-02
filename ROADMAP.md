@@ -211,6 +211,7 @@ These are useful but should wait until the platform loop is healthy:
 - `docs/line-clone-dev-notes.md`
 - `docs/line-clone-assessment.md`
 - `docs/vine-creator-market-roadmap.md`
+- `docs/messaging-api-vine.md`
 - `packages/proto/proto/oa/v1/oa.proto`
 - `packages/liff`
 - `packages/line-flex`

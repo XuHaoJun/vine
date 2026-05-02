@@ -1,12 +1,15 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
+  calculateMessagingQuotaDelta,
   createAcceptedRequestId,
   createHttpRequestId,
   createRequestHash,
   createDeterministicMessageIds,
+  getInitialAcceptedRequestStatus,
   isValidLineRetryKey,
   checkRetryKeyForRequest,
   createOAMessagingService,
+  resolveMulticastRecipients,
 } from './oa-messaging'
 
 describe('oa messaging request utilities', () => {
@@ -43,6 +46,21 @@ describe('oa messaging request utilities', () => {
   it('creates request ids with stable prefixes', () => {
     expect(createHttpRequestId()).toMatch(/^req_/)
     expect(createAcceptedRequestId()).toMatch(/^acc_/)
+  })
+
+  it('counts quota by recipient, not by message object', () => {
+    expect(
+      calculateMessagingQuotaDelta({
+        recipientCount: 1,
+        messageObjectCount: 5,
+      }),
+    ).toBe(1)
+    expect(
+      calculateMessagingQuotaDelta({
+        recipientCount: 3,
+        messageObjectCount: 2,
+      }),
+    ).toBe(3)
   })
 })
 
@@ -201,5 +219,62 @@ describe('oa messaging delivery creation', () => {
         messageIdsJson: ['oa:req:request-1:user-2:0', 'oa:req:request-1:user-2:1'],
       }),
     ])
+  })
+})
+
+describe('oa messaging multicast', () => {
+  it('resolves only requested users who are current OA friends', async () => {
+    const tx = {
+      select: vi.fn().mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([{ userId: 'user-1' }, { userId: 'user-2' }]),
+        }),
+      }),
+    } as any
+
+    await expect(
+      resolveMulticastRecipients(tx, {
+        oaId: 'oa-1',
+        userIds: ['user-1', 'user-2', 'blocked-user'],
+      }),
+    ).resolves.toEqual(['user-1', 'user-2'])
+  })
+
+  it('exposes multicast on the messaging service', () => {
+    const service = createOAMessagingService({
+      db: {} as any,
+      instanceId: 'test',
+      now: () => new Date('2026-05-01T00:00:00.000Z'),
+    })
+
+    expect(typeof service.multicast).toBe('function')
+  })
+
+  it('uses completed request status when no eligible recipients are resolved', () => {
+    expect(getInitialAcceptedRequestStatus({ recipientCount: 0 })).toBe('completed')
+    expect(getInitialAcceptedRequestStatus({ recipientCount: 1 })).toBe('processing')
+  })
+
+  it('keeps multicast retry-key hashes separate from push and broadcast', () => {
+    const multicast = createRequestHash({
+      endpoint: 'multicast',
+      target: { to: ['user-1', 'user-2'] },
+      messages: [{ type: 'text', text: 'hello' }],
+    })
+
+    expect(multicast).not.toBe(
+      createRequestHash({
+        endpoint: 'push',
+        target: { to: 'user-1' },
+        messages: [{ type: 'text', text: 'hello' }],
+      }),
+    )
+    expect(multicast).not.toBe(
+      createRequestHash({
+        endpoint: 'broadcast',
+        target: { audience: 'all_friends' },
+        messages: [{ type: 'text', text: 'hello' }],
+      }),
+    )
   })
 })

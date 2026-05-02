@@ -16,6 +16,7 @@ function createTestApp(
   mockMessagingOverrides?: {
     reply?: ReturnType<typeof vi.fn>
     push?: ReturnType<typeof vi.fn>
+    multicast?: ReturnType<typeof vi.fn>
     broadcast?: ReturnType<typeof vi.fn>
   },
 ) {
@@ -75,6 +76,14 @@ function createTestApp(
         accepted: { httpRequestId: 'req_push', acceptedRequestId: 'acc_push' },
         processed: { processed: 1 },
         recipientCount: 1,
+      }),
+    multicast:
+      mockMessagingOverrides?.multicast ??
+      vi.fn().mockResolvedValue({
+        ok: true,
+        accepted: { httpRequestId: 'req_multicast', acceptedRequestId: 'acc_multicast' },
+        processed: { processed: 2 },
+        recipientCount: 2,
       }),
     broadcast:
       mockMessagingOverrides?.broadcast ??
@@ -682,6 +691,112 @@ describe('oaMessagingPlugin — Push Message', () => {
         messages: [expect.objectContaining({ type: 'text', text: 'hello' })],
       })
     })
+  })
+})
+
+describe('oaMessagingPlugin — Multicast Message', () => {
+  it('does not register the root /v2 multicast route', async () => {
+    const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+    const { app } = createTestApp(mockDb)
+    await app.ready()
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/v2/bot/message/multicast',
+      headers: { authorization: `Bearer ${validToken}` },
+      payload: { to: [userId], messages: [{ type: 'text', text: 'hello' }] },
+    })
+
+    await app.close()
+    expect(res.statusCode).toBe(404)
+  })
+
+  it('passes validated multicast payload and retry key to the messaging service', async () => {
+    const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+    const multicast = vi.fn().mockResolvedValue({
+      ok: true,
+      accepted: { httpRequestId: 'req_multicast', acceptedRequestId: 'acc_multicast' },
+      processed: { processed: 1 },
+      recipientCount: 1,
+    })
+    const { app } = createTestApp(mockDb, { multicast })
+    await app.ready()
+
+    const res = await app.inject({
+      method: 'POST',
+      url: oaApiPath('/bot/message/multicast'),
+      headers: {
+        authorization: `Bearer ${validToken}`,
+        'x-line-retry-key': '123e4567-e89b-12d3-a456-426614174000',
+      },
+      payload: { to: [userId], messages: [{ type: 'text', text: 'hello' }] },
+    })
+
+    await app.close()
+    expect(res.statusCode).toBe(200)
+    expect(multicast).toHaveBeenCalledWith({
+      oaId,
+      retryKey: '123e4567-e89b-12d3-a456-426614174000',
+      to: [userId],
+      messages: [{ valid: true, type: 'text', text: 'hello', metadata: null }],
+    })
+  })
+
+  it('returns 400 when multicast recipients are missing', async () => {
+    const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+    const { app } = createTestApp(mockDb)
+    await app.ready()
+
+    const res = await app.inject({
+      method: 'POST',
+      url: oaApiPath('/bot/message/multicast'),
+      headers: { authorization: `Bearer ${validToken}` },
+      payload: { to: [], messages: [{ type: 'text', text: 'hello' }] },
+    })
+
+    await app.close()
+    expect(res.statusCode).toBe(400)
+    expect(JSON.parse(res.body).code).toBe('INVALID_REQUEST')
+  })
+
+  it('returns 400 when multicast has more than 500 recipients', async () => {
+    const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+    const { app } = createTestApp(mockDb)
+    await app.ready()
+
+    const res = await app.inject({
+      method: 'POST',
+      url: oaApiPath('/bot/message/multicast'),
+      headers: { authorization: `Bearer ${validToken}` },
+      payload: {
+        to: Array.from({ length: 501 }, (_, index) => `user-${index}`),
+        messages: [{ type: 'text', text: 'hello' }],
+      },
+    })
+
+    await app.close()
+    expect(res.statusCode).toBe(400)
+    expect(JSON.parse(res.body).code).toBe('INVALID_REQUEST')
+  })
+
+  it('returns 400 when multicast recipients contain duplicates', async () => {
+    const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+    const { app } = createTestApp(mockDb)
+    await app.ready()
+
+    const res = await app.inject({
+      method: 'POST',
+      url: oaApiPath('/bot/message/multicast'),
+      headers: { authorization: `Bearer ${validToken}` },
+      payload: {
+        to: [userId, userId],
+        messages: [{ type: 'text', text: 'hello' }],
+      },
+    })
+
+    await app.close()
+    expect(res.statusCode).toBe(400)
+    expect(JSON.parse(res.body).code).toBe('INVALID_REQUEST')
   })
 })
 
