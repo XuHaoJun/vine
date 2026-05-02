@@ -14,9 +14,8 @@ import { Avatar } from '~/interface/avatars/Avatar'
 import { Button } from '~/interface/buttons/Button'
 import { GroupInfoSheet } from '~/interface/dialogs/GroupInfoSheet'
 import { H3 } from '~/interface/text/Headings'
-import { useTanQuery } from '~/query'
+import { useTanQuery, useTanQueryClient } from '~/query'
 import { chatById } from '@vine/zero-schema/queries/chat'
-import { showToast } from '~/interface/toast/Toast'
 import { useRichMenu } from '~/features/chat/useRichMenu'
 import { chatOaLoadingByChat } from '@vine/zero-schema/queries/chatOaLoading'
 import { TypingIndicator } from '~/interface/message/TypingIndicator'
@@ -197,8 +196,35 @@ export const ChatRoomPage = memo(() => {
     }
   }, [])
 
+  const dispatchAction = useActionDispatcher({
+    chatId: chatId ?? '',
+    otherMemberOaId: otherMemberOaId ?? null,
+    sendMessage,
+  })
+
+  const queryClient = useTanQueryClient()
+
   const handleRichMenuAreaTap = useCallback(
-    (area: { action: { type: string; uri?: string; data?: string; text?: string } }) => {
+    (area: {
+      action: {
+        type: string
+        uri?: string
+        data?: string
+        text?: string
+        richMenuAliasId?: string
+        displayText?: string
+      }
+      areaIndex: number
+    }) => {
+      if (otherMemberOaId && richMenu?.richMenuId && area.areaIndex !== undefined) {
+        oaClient
+          .trackRichMenuClick({
+            officialAccountId: otherMemberOaId,
+            richMenuId: richMenu.richMenuId,
+            areaIndex: area.areaIndex,
+          })
+          .catch(() => {})
+      }
       const { action } = area
       switch (action.type) {
         case 'uri':
@@ -212,20 +238,35 @@ export const ChatRoomPage = memo(() => {
           }
           break
         case 'postback':
-          showToast('Postback action', { type: 'info' })
+          if (action.data && otherMemberOaId) {
+            dispatchAction({
+              type: 'postback',
+              data: action.data,
+              displayText: action.displayText,
+            })
+          }
           break
-        default:
-          showToast(`Action: ${action.type}`, { type: 'info' })
+        case 'richmenuswitch':
+          if (action.richMenuAliasId && otherMemberOaId) {
+            oaClient
+              .switchRichMenu({
+                officialAccountId: otherMemberOaId,
+                chatId: chatId ?? '',
+                richMenuAliasId: action.richMenuAliasId,
+                data: action.data ?? '',
+              })
+              .then(() => {
+                queryClient.invalidateQueries({
+                  queryKey: ['oa', 'richMenu', 'active', otherMemberOaId],
+                })
+              })
+              .catch(() => {})
+          }
+          break
       }
     },
-    [sendMessage],
+    [otherMemberOaId, richMenu?.richMenuId, sendMessage, dispatchAction, queryClient, chatId],
   )
-
-  const dispatchAction = useActionDispatcher({
-    chatId: chatId ?? '',
-    otherMemberOaId: otherMemberOaId ?? null,
-    sendMessage,
-  })
 
   const handleQuickReplyAction = useCallback(
     (action: QuickReplyAction) => {
