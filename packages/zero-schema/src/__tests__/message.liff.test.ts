@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { mutate } from './message'
+import { mutate } from '../models/message'
 
 function makeTx(overrides: Record<string, any> = {}) {
   const inserted: any[] = []

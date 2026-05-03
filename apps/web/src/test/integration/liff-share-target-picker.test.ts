@@ -84,6 +84,24 @@ async function setupLiffRoute(page: Page, testLiffId: string, endpointUrl: strin
       body: JSON.stringify(createLiffAppConfig(testLiffId, endpointUrl)),
     })
   })
+
+  // Mock /liff/v1/access-token — prevents real server call that would 404 for random test liffIds
+  await page.route('**/liff/v1/access-token', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ accessToken: 'mock-access-token', expiresIn: 900 }),
+    })
+  })
+
+  // Mock /liff/v1/launch-context — external context for preview launches
+  await page.route('**/liff/v1/launch-context**', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ contextType: 'external' }),
+    })
+  })
 }
 
 async function initFixture(page: Page, fixtureFrame: Frame) {
