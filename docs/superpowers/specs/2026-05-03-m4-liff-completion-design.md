@@ -60,6 +60,34 @@ cloud APIs, require LINE Developers Console channel IDs, or depend on
 
 ## Runtime Completion
 
+### 0. Host API Origin / SDK Bootstrap
+
+M4 must support real third-party LIFF endpoints, not only same-origin test
+fixtures. A LIFF app hosted at `https://app.example.com` still needs to call
+Vine-owned APIs such as `/liff/v1/apps/:liffId` and `/liff/v1/me`.
+
+The LIFF host injects a small bootstrap object before the app initializes:
+
+```ts
+window.VineLIFF = {
+  apiBaseUrl: "https://vine.example.com",
+  liffId: "1234567890-abcd",
+  endpointOrigin: "https://app.example.com",
+  chatId: "chat-id-or-undefined",
+  contextType: "utou", // "utou" | "group" | "external"
+  lineVersion: "14.0.0",
+}
+```
+
+`@vine/liff` reads `window.VineLIFF.apiBaseUrl` and uses it for Vine API calls.
+If the bootstrap object is absent, the SDK falls back to `window.location.origin`
+for existing same-origin fixtures and external-browser behavior.
+
+The host validates all child `postMessage` events against the configured
+endpoint origin. Messages from other origins are ignored. Native WebView
+handlers apply the same logical check against the configured endpoint URL before
+acting on `liff:*` messages.
+
 ### 1. Profile Endpoint
 
 Add `GET /liff/v1/me`.
@@ -109,8 +137,10 @@ under Vine's `/liff/{liffId}` namespace.
 `liff.sendMessages()` sends to the chat room where the LIFF app was opened.
 Vine must therefore know the source chat. M4 requires a chat-launched LIFF context:
 
-- The LIFF host route accepts a Vine-owned `chatId` context when a LIFF app is
+- The LIFF host route accepts a Vine-owned launch token when a LIFF app is
   opened from a chat.
+- The launch token is short-lived and resolves server-side to `{ liffId, chatId,
+  userId }`.
 - `LiffBrowser` exposes this context to the SDK via `window.VineLIFF`.
 - `liff.getContext()` returns `type: "utou" | "group"` when a valid chat context
   exists, and `type: "external"` otherwise.
@@ -120,6 +150,21 @@ Vine must therefore know the source chat. M4 requires a chat-launched LIFF conte
 
 If any condition is missing, `sendMessages` rejects. It must not send to a
 guessed chat.
+
+### 4. Launch Context
+
+M4 defines three launch modes:
+
+| Launch mode | Source | `getContext().type` | `sendMessages` |
+| --- | --- | --- | --- |
+| Chat launch | Vine opens `/liff/{liffId}` with a valid short-lived launch token from a direct or OA chat. | `utou` | Enabled |
+| Group launch | Vine opens `/liff/{liffId}` with a valid short-lived launch token from a group chat. | `group` | Enabled |
+| External launch | Developer preview, copied LIFF URL, permanent link without launch token, or any non-chat entry point. | `external` | Rejected with a stable permission error |
+
+`sendMessages` is enabled only for chat and group launches. External launches can
+still use `init`, `getProfile`, `getContext`, `shareTargetPicker`, permanent
+links, and `closeWindow`, but `sendMessages` rejects with a stable permission
+error.
 
 ---
 
@@ -146,7 +191,7 @@ Messaging API validation where possible, then apply LIFF-specific restrictions.
 | Type | Support | Notes |
 | --- | --- | --- |
 | `text` | Yes | Store `text`; reject `emojis` and `quoteToken`. |
-| `sticker` | Yes | Store `packageId` and numeric `stickerId` in metadata. Do not require paid sticker entitlement for LIFF-injected public sticker IDs unless existing policy already does. |
+| `sticker` | Yes | Store `packageId` and numeric `stickerId` in metadata. Require entitlement for Vine marketplace stickers. Allow only public/system sticker package IDs without entitlement. |
 | `image` | Yes | Store `originalContentUrl` / `previewImageUrl` metadata. URLs must be HTTPS. |
 | `video` | Yes | Store `originalContentUrl` / `previewImageUrl`; reject `trackingId`. URLs must be HTTPS. |
 | `audio` | Yes | Store `originalContentUrl` and optional `duration`. URL must be HTTPS. |
@@ -190,12 +235,13 @@ validation keeps its broader action support.
 adds host handlers in web and native `LiffBrowser`:
 
 1. Receive `{ type: "liff:sendMessages", messages }`.
-2. Validate LIFF context and `chat_message.write`.
-3. Validate the message array with the `sendMessages` matrix.
-4. Insert each message into Zero with `senderType: "user"` and the current user's
+2. Validate the message origin against the LIFF app endpoint origin.
+3. Validate LIFF context and `chat_message.write`.
+4. Validate the message array with the `sendMessages` matrix.
+5. Insert each message into Zero with `senderType: "user"` and the current user's
    ID.
-5. Update chat ordering through the existing Zero `message.send` mutator.
-6. Post a success or failure result back to the child frame/WebView.
+6. Update chat ordering through the existing Zero `message.send` mutator.
+7. Post a success or failure result back to the child frame/WebView.
 
 The SDK should resolve `sendMessages()` only after the host confirms insertion.
 
@@ -205,6 +251,9 @@ The SDK should resolve `sendMessages()` only after the host confirms insertion.
 use the same LIFF message conversion path as `sendMessages`, with the
 `shareTargetPicker` matrix. When a target is selected, each supported message is
 inserted into the selected chat or newly created direct chat.
+
+The host validates the `liff:shareTargetPicker` message origin before opening the
+picker. Invalid origins are ignored.
 
 The picker result remains LINE-like:
 
@@ -217,6 +266,9 @@ The picker result remains LINE-like:
 Existing close handling should be covered by integration tests. On web, closing
 can navigate back or dismiss the LIFF shell. On native, it should close the
 WebView surface according to existing navigation conventions.
+
+The host validates the `liff:closeWindow` message origin before closing the LIFF
+surface.
 
 ---
 
@@ -246,9 +298,17 @@ Keep console work narrow:
 - `/liff/v1/me` route:
   - returns current user's profile.
   - rejects unauthenticated requests.
+- SDK bootstrap:
+  - external endpoint apps call Vine APIs through `window.VineLIFF.apiBaseUrl`.
+  - same-origin fixtures continue to work without bootstrap.
+  - host ignores `liff:*` messages from non-endpoint origins.
 - Permanent-link resolver:
   - preserves bare `/liff/{liffId}` behavior.
   - appends path, query, and hash to endpoint URL.
+- Launch context:
+  - valid short-lived launch token resolves to chat or group context.
+  - missing or invalid launch context produces `external` context.
+  - `sendMessages` rejects in external context with a stable permission error.
 
 ### Integration Tests
 
@@ -268,13 +328,18 @@ Expand the LIFF fixture to cover:
 
 - A registered LIFF app can open through `/liff/{liffId}` and
   `/liff/{liffId}/path?query#hash`.
+- A third-party LIFF app hosted outside Vine can call `init`, `getProfile`, and
+  host-mediated APIs through the injected Vine API base URL.
 - `liff.getProfile()` returns the current Vine user's LIFF profile.
 - `liff.getContext()` distinguishes chat-launched and external launches.
+- External launches can use `getProfile` and `shareTargetPicker`; `sendMessages`
+  rejects with a stable permission error.
 - `liff.sendMessages()` sends supported message types to the source chat and
   rejects unsupported or invalid payloads.
 - `liff.shareTargetPicker()` shares supported message types to selected targets
   and rejects unsupported or invalid payloads.
+- The LIFF host ignores `liff:*` postMessages from origins other than the
+  configured endpoint origin.
 - Template and imagemap are explicitly rejected for LIFF send/share APIs.
 - Existing OA Messaging API behavior is unchanged.
 - M4 tests pass without relying on official LINE APIs.
-
