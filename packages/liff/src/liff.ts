@@ -258,7 +258,7 @@ class LiffImpl {
   }
 
   isInClient(): boolean {
-    return typeof window !== 'undefined' && !!(window as any).VineLIFF
+    return typeof window !== 'undefined' && (!!((window as any).VineLIFF) || Object.keys(this._bootstrap).length > 0)
   }
 
   isLoggedIn(): boolean {
@@ -349,7 +349,9 @@ class LiffImpl {
           data.requestId === requestId
         ) {
           window.removeEventListener('message', handler)
-          reject(new Error((data.error as string) ?? 'sendMessages failed'))
+          const err = data.error
+          const msg = typeof err === 'string' ? err : (err && typeof err === 'object' && 'message' in err) ? String((err as Record<string, unknown>).message) : 'sendMessages failed'
+          reject(new Error(msg))
         }
       }
       window.addEventListener('message', handler)

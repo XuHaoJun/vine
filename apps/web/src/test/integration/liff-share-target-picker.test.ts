@@ -31,7 +31,7 @@ function createLiffAppConfig(liffId: string, endpointUrl: string) {
 
 function liffIdFromAppsPath(url: string): string | undefined {
   const pathname = new URL(url).pathname
-  const match = /^\/liff\/v1\/apps\/([^/]+)\/?$/.exec(pathname)
+  const match = /^\/(?:api\/)?liff\/v1\/apps\/([^/]+)\/?$/.exec(pathname)
   return match?.[1] ? decodeURIComponent(match[1]) : undefined
 }
 
@@ -100,6 +100,20 @@ async function setupLiffRoute(page: Page, testLiffId: string, endpointUrl: strin
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ contextType: 'external' }),
+    })
+  })
+
+  // Mock /liff/v1/me — returns a fake profile for the demo user
+  await page.route('**/liff/v1/me**', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        userId: 'demo-user',
+        displayName: 'Demo User',
+        pictureUrl: null,
+        statusMessage: null,
+      }),
     })
   })
 }

@@ -44,7 +44,7 @@ export async function liffPublicPlugin(
   deps: LiffPublicDeps,
 ): Promise<void> {
   app.get<{ Params: { liffId: string } }>(
-    '/liff/v1/apps/:liffId',
+    '/api/liff/v1/apps/:liffId',
     async (request, reply) => {
       const { liffId } = request.params
       const appRecord = await deps.liff.getLiffApp(liffId)
@@ -64,7 +64,7 @@ export async function liffPublicPlugin(
   )
 
   app.get<{ Querystring: { liffId?: string } }>(
-    '/liff/v1/friendship',
+    '/api/liff/v1/friendship',
     async (request, reply) => {
       const liffId = request.query.liffId
       if (!liffId) {
@@ -97,7 +97,7 @@ export async function liffPublicPlugin(
     },
   )
 
-  app.get<{ Querystring: { liffId?: string } }>('/liff/v1/me', async (request, reply) => {
+  app.get<{ Querystring: { liffId?: string } }>('/api/liff/v1/me', async (request, reply) => {
     const liffId = request.query.liffId
     if (!liffId) {
       return reply.status(400).send({ error: 'liffId is required' })
@@ -107,10 +107,10 @@ export async function liffPublicPlugin(
     if (authHeader?.startsWith('Bearer ')) {
       const token = authHeader.slice(7)
       const ctx = deps.liffRuntimeToken.resolveAccessToken(token, liffId)
-      if (!ctx) {
-        return reply.status(401).send({ error: 'Unauthorized' })
+      if (ctx) {
+        return sendUserProfile(deps.db, ctx.userId, reply)
       }
-      return sendUserProfile(deps.db, ctx.userId, reply)
+      // Bearer token invalid — fall through to session auth for same-origin development
     }
 
     // Fallback: same-origin Vine session auth for development
@@ -123,7 +123,7 @@ export async function liffPublicPlugin(
   })
 
   app.post<{ Body: { liffId: string } }>(
-    '/liff/v1/access-token',
+    '/api/liff/v1/access-token',
     async (request, reply) => {
       const webReq = toWebRequest(request)
       const authData = await getAuthDataFromRequest(deps.auth, webReq)
@@ -148,7 +148,7 @@ export async function liffPublicPlugin(
   )
 
   app.post<{ Body: { liffId: string; chatId: string } }>(
-    '/liff/v1/launch',
+    '/api/liff/v1/launch',
     async (request, reply) => {
       const webReq = toWebRequest(request)
       const authData = await getAuthDataFromRequest(deps.auth, webReq)
@@ -201,7 +201,7 @@ export async function liffPublicPlugin(
 
   app.get<{
     Querystring: { liffId?: string; launchToken?: string }
-  }>('/liff/v1/launch-context', async (request, reply) => {
+  }>('/api/liff/v1/launch-context', async (request, reply) => {
     const { liffId, launchToken } = request.query
     if (!liffId || !launchToken) {
       return reply.status(400).send({ error: 'liffId and launchToken are required' })

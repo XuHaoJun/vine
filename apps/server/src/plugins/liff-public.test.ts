@@ -128,14 +128,14 @@ beforeEach(() => {
 })
 
 describe('liffPublicPlugin profile and launch routes', () => {
-  it('GET /liff/v1/me returns current Vine user profile for a valid LIFF access token', async () => {
+  it('GET /api/liff/v1/me returns current Vine user profile for a valid LIFF access token', async () => {
     const deps = createTestDeps()
     const app = createTestApp(deps)
     await app.ready()
 
     const res = await app.inject({
       method: 'GET',
-      url: `/liff/v1/me?liffId=${liffId}`,
+      url: `/api/liff/v1/me?liffId=${liffId}`,
       headers: { authorization: 'Bearer access-token-123' },
     })
     await app.close()
@@ -154,15 +154,16 @@ describe('liffPublicPlugin profile and launch routes', () => {
     )
   })
 
-  it('GET /liff/v1/me returns 401 without a valid LIFF access token', async () => {
+  it('GET /api/liff/v1/me returns 401 without a valid LIFF access token or session', async () => {
     const deps = createTestDeps()
     deps.liffRuntimeToken.resolveAccessToken.mockReturnValue(null)
+    mockedAuth.mockResolvedValue(null)
     const app = createTestApp(deps)
     await app.ready()
 
     const res = await app.inject({
       method: 'GET',
-      url: `/liff/v1/me?liffId=${liffId}`,
+      url: `/api/liff/v1/me?liffId=${liffId}`,
       headers: { authorization: 'Bearer bad-token' },
     })
     await app.close()
@@ -170,14 +171,14 @@ describe('liffPublicPlugin profile and launch routes', () => {
     expect(res.statusCode).toBe(401)
   })
 
-  it('POST /liff/v1/access-token returns an access token for an authenticated Vine user', async () => {
+  it('POST /api/liff/v1/access-token returns an access token for an authenticated Vine user', async () => {
     const deps = createTestDeps()
     const app = createTestApp(deps)
     await app.ready()
 
     const res = await app.inject({
       method: 'POST',
-      url: '/liff/v1/access-token',
+      url: '/api/liff/v1/access-token',
       payload: { liffId },
     })
     await app.close()
@@ -192,7 +193,7 @@ describe('liffPublicPlugin profile and launch routes', () => {
     })
   })
 
-  it('POST /liff/v1/launch returns a launch token for a chat member', async () => {
+  it('POST /api/liff/v1/launch returns a launch token for a chat member', async () => {
     const deps = createTestDeps({
       chatRow: { id: chatId, type: 'group', name: 'Test Group' },
       chatMemberRows: [{ id: 'cm-1', userId, chatId, status: 'accepted' }],
@@ -202,7 +203,7 @@ describe('liffPublicPlugin profile and launch routes', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/liff/v1/launch',
+      url: '/api/liff/v1/launch',
       payload: { liffId, chatId },
     })
     await app.close()
@@ -216,7 +217,7 @@ describe('liffPublicPlugin profile and launch routes', () => {
     })
   })
 
-  it('POST /liff/v1/launch returns 403 when the user is not a chat member', async () => {
+  it('POST /api/liff/v1/launch returns 403 when the user is not a chat member', async () => {
     const deps = createTestDeps({
       chatMemberRows: [],
     })
@@ -225,7 +226,7 @@ describe('liffPublicPlugin profile and launch routes', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/liff/v1/launch',
+      url: '/api/liff/v1/launch',
       payload: { liffId, chatId },
     })
     await app.close()
@@ -233,14 +234,14 @@ describe('liffPublicPlugin profile and launch routes', () => {
     expect(res.statusCode).toBe(403)
   })
 
-  it('GET /liff/v1/launch-context returns chat context for a valid launch token', async () => {
+  it('GET /api/liff/v1/launch-context returns chat context for a valid launch token', async () => {
     const deps = createTestDeps()
     const app = createTestApp(deps)
     await app.ready()
 
     const res = await app.inject({
       method: 'GET',
-      url: `/liff/v1/launch-context?liffId=${liffId}&launchToken=launch-token-123`,
+      url: `/api/liff/v1/launch-context?liffId=${liffId}&launchToken=launch-token-123`,
     })
     await app.close()
 
@@ -253,21 +254,21 @@ describe('liffPublicPlugin profile and launch routes', () => {
     )
   })
 
-  it('GET /liff/v1/launch-context returns 400 for missing query fields', async () => {
+  it('GET /api/liff/v1/launch-context returns 400 for missing query fields', async () => {
     const deps = createTestDeps()
     const app = createTestApp(deps)
     await app.ready()
 
     const res = await app.inject({
       method: 'GET',
-      url: '/liff/v1/launch-context',
+      url: '/api/liff/v1/launch-context',
     })
     await app.close()
 
     expect(res.statusCode).toBe(400)
   })
 
-  it('GET /liff/v1/launch-context returns 401 without a Vine session', async () => {
+  it('GET /api/liff/v1/launch-context returns 401 without a Vine session', async () => {
     mockedAuth.mockResolvedValue(null)
     const deps = createTestDeps()
     const app = createTestApp(deps)
@@ -275,14 +276,14 @@ describe('liffPublicPlugin profile and launch routes', () => {
 
     const res = await app.inject({
       method: 'GET',
-      url: `/liff/v1/launch-context?liffId=${liffId}&launchToken=tok`,
+      url: `/api/liff/v1/launch-context?liffId=${liffId}&launchToken=tok`,
     })
     await app.close()
 
     expect(res.statusCode).toBe(401)
   })
 
-  it('GET /liff/v1/launch-context returns 403 for token/user mismatch', async () => {
+  it('GET /api/liff/v1/launch-context returns 403 for token/user mismatch', async () => {
     const deps = createTestDeps()
     deps.liffRuntimeToken.resolveLaunchToken.mockReturnValue({
       kind: 'launch',
@@ -297,14 +298,14 @@ describe('liffPublicPlugin profile and launch routes', () => {
 
     const res = await app.inject({
       method: 'GET',
-      url: `/liff/v1/launch-context?liffId=${liffId}&launchToken=launch-token-123`,
+      url: `/api/liff/v1/launch-context?liffId=${liffId}&launchToken=launch-token-123`,
     })
     await app.close()
 
     expect(res.statusCode).toBe(403)
   })
 
-  it('GET /liff/v1/launch-context returns 404 for unknown LIFF app', async () => {
+  it('GET /api/liff/v1/launch-context returns 404 for unknown LIFF app', async () => {
     const deps = createTestDeps()
     deps.liff.getLiffApp.mockResolvedValue(null)
     const app = createTestApp(deps)
@@ -312,7 +313,7 @@ describe('liffPublicPlugin profile and launch routes', () => {
 
     const res = await app.inject({
       method: 'GET',
-      url: `/liff/v1/launch-context?liffId=unknown&launchToken=tok`,
+      url: `/api/liff/v1/launch-context?liffId=unknown&launchToken=tok`,
     })
     await app.close()
 
