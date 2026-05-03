@@ -57,14 +57,14 @@ describe('message.sendLiff', () => {
     ).rejects.toThrow('Unauthorized')
   })
 
-  it('rejects user sender spoofing', async () => {
+  it('rejects user sender spoofing (senderId overwritten, fails membership)', async () => {
     const { tx } = makeTx()
     await expect(
       mutate.sendLiff(
         { authData: { id: 'attacker' }, tx } as any,
         userMessage({ senderId: 'victim' }),
       ),
-    ).rejects.toThrow('Unauthorized')
+    ).rejects.toThrow('Not a member')
   })
 
   it('rejects sends into chats where the caller is not a member', async () => {

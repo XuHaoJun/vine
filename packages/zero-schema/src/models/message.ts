@@ -81,7 +81,7 @@ export const mutate = mutations(schema, messageReadPermission, {
   sendLiff: async ({ authData, tx }, message: Message) => {
     if (!authData) throw new Error('Unauthorized')
     if (message.senderType !== 'user') throw new Error('Unauthorized')
-    if (message.senderId !== authData.id) throw new Error('Unauthorized')
+    message.senderId = authData.id
 
     const query = tx.query as Record<string, any> | undefined
     if (!query?.chatMember) throw new Error('Not a member')
