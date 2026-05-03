@@ -68,9 +68,6 @@ function createTestDeps(overrides: {
     delete: vi.fn(),
   }
 
-  // Track which table the select is targeting by storing the `from` table reference
-  let currentTable: string | null = null
-
   // Track which table the select is targeting by comparing drizzle table references
   db.select.mockImplementation(() => ({
     from: vi.fn().mockImplementation((table: unknown) => {

@@ -1,4 +1,4 @@
-import { createHmac } from 'node:crypto'
+import { createHmac, timingSafeEqual } from 'node:crypto'
 
 export type LiffAccessTokenContext = {
   kind: 'access'
@@ -31,7 +31,9 @@ function verify<T>(token: string, secret: string): T | null {
   if (parts.length !== 2) return null
   const [body, sig] = parts as [string, string]
   const expected = createHmac('sha256', secret).update(body!).digest('base64url')
-  if (sig !== expected) return null
+  const sigBuf = Buffer.from(sig)
+  const expectedBuf = Buffer.from(expected)
+  if (sigBuf.length !== expectedBuf.length || !timingSafeEqual(sigBuf, expectedBuf)) return null
   return JSON.parse(Buffer.from(body!, 'base64url').toString()) as T
 }
 

@@ -16,6 +16,29 @@ type LiffPublicDeps = {
   liffRuntimeToken: ReturnType<typeof createLiffRuntimeTokenService>
 }
 
+const ACCESS_TOKEN_EXPIRES_IN = 15 * 60
+
+async function sendUserProfile(
+  db: NodePgDatabase<typeof schema>,
+  userId: string,
+  reply: import('fastify').FastifyReply,
+) {
+  const [row] = await db
+    .select()
+    .from(userPublic)
+    .where(eq(userPublic.id, userId))
+    .limit(1)
+  if (!row) {
+    return reply.status(404).send({ error: 'User not found' })
+  }
+  return reply.send({
+    userId: row.id,
+    displayName: row.name ?? '',
+    pictureUrl: row.image ?? '',
+    statusMessage: '',
+  })
+}
+
 export async function liffPublicPlugin(
   app: FastifyInstance,
   deps: LiffPublicDeps,
@@ -89,20 +112,7 @@ export async function liffPublicPlugin(
         if (!ctx) {
           return reply.status(401).send({ error: 'Unauthorized' })
         }
-        const [row] = await deps.db
-          .select()
-          .from(userPublic)
-          .where(eq(userPublic.id, ctx.userId))
-          .limit(1)
-        if (!row) {
-          return reply.status(404).send({ error: 'User not found' })
-        }
-        return reply.send({
-          userId: row.id,
-          displayName: row.name ?? '',
-          pictureUrl: row.image ?? '',
-          statusMessage: '',
-        })
+        return sendUserProfile(deps.db, ctx.userId, reply)
       }
 
       // Fallback: same-origin Vine session auth for development
@@ -111,20 +121,7 @@ export async function liffPublicPlugin(
       if (!authData?.id) {
         return reply.status(401).send({ error: 'Unauthorized' })
       }
-      const [row] = await deps.db
-        .select()
-        .from(userPublic)
-        .where(eq(userPublic.id, authData.id))
-        .limit(1)
-      if (!row) {
-        return reply.status(404).send({ error: 'User not found' })
-      }
-      return reply.send({
-        userId: row.id,
-        displayName: row.name ?? '',
-        pictureUrl: row.image ?? '',
-        statusMessage: '',
-      })
+      return sendUserProfile(deps.db, authData.id, reply)
     },
   )
 
@@ -149,7 +146,7 @@ export async function liffPublicPlugin(
         scopes: appRecord.scopes ?? [],
       })
 
-      return reply.send({ accessToken, expiresIn: 900 })
+      return reply.send({ accessToken, expiresIn: ACCESS_TOKEN_EXPIRES_IN })
     },
   )
 
@@ -189,7 +186,10 @@ export async function liffPublicPlugin(
         .where(eq(chat.id, chatId))
         .limit(1)
 
-      const contextType = chatRow?.type === 'group' ? 'group' : 'utou'
+      if (!chatRow) {
+        return reply.status(404).send({ error: 'Chat not found' })
+      }
+      const contextType = chatRow.type === 'group' ? 'group' : 'utou'
 
       const launchToken = deps.liffRuntimeToken.createLaunchToken({
         liffId,
