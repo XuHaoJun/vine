@@ -15,12 +15,14 @@ const userId = 'user-1'
 const liffId = 'channel-abc12345'
 const chatId = 'chat-1'
 
-function createTestDeps(overrides: {
-  liffApp?: Record<string, unknown> | null
-  userPublicRow?: Record<string, unknown> | null
-  chatRow?: Record<string, unknown> | null
-  chatMemberRows?: Array<Record<string, unknown>>
-} = {}) {
+function createTestDeps(
+  overrides: {
+    liffApp?: Record<string, unknown> | null
+    userPublicRow?: Record<string, unknown> | null
+    chatRow?: Record<string, unknown> | null
+    chatMemberRows?: Array<Record<string, unknown>>
+  } = {},
+) {
   const liffApp = overrides.liffApp ?? {
     liffId,
     loginChannelId: 'lc-1',
@@ -59,14 +61,16 @@ function createTestDeps(overrides: {
     name: 'Test Group',
   }
 
-  const memberRows = overrides.chatMemberRows ?? [{ id: 'cm-1', userId, chatId, status: 'accepted' }]
+  const memberRows = overrides.chatMemberRows ?? [
+    { id: 'cm-1', userId, chatId, status: 'accepted' },
+  ]
 
   const db = {
     select: vi.fn(),
     insert: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
-  }
+  } as any
 
   // Track which table the select is targeting by comparing drizzle table references
   db.select.mockImplementation(() => ({
@@ -144,7 +148,10 @@ describe('liffPublicPlugin profile and launch routes', () => {
       pictureUrl: 'https://example.com/avatar.png',
       statusMessage: '',
     })
-    expect(deps.liffRuntimeToken.resolveAccessToken).toHaveBeenCalledWith('access-token-123', liffId)
+    expect(deps.liffRuntimeToken.resolveAccessToken).toHaveBeenCalledWith(
+      'access-token-123',
+      liffId,
+    )
   })
 
   it('GET /liff/v1/me returns 401 without a valid LIFF access token', async () => {
@@ -202,7 +209,11 @@ describe('liffPublicPlugin profile and launch routes', () => {
 
     expect(res.statusCode).toBe(200)
     const body = JSON.parse(res.body)
-    expect(body).toEqual({ launchToken: 'launch-token-123', contextType: 'group', chatId })
+    expect(body).toEqual({
+      launchToken: 'launch-token-123',
+      contextType: 'group',
+      chatId,
+    })
   })
 
   it('POST /liff/v1/launch returns 403 when the user is not a chat member', async () => {
@@ -236,7 +247,10 @@ describe('liffPublicPlugin profile and launch routes', () => {
     expect(res.statusCode).toBe(200)
     const body = JSON.parse(res.body)
     expect(body).toEqual({ chatId, contextType: 'group' })
-    expect(deps.liffRuntimeToken.resolveLaunchToken).toHaveBeenCalledWith('launch-token-123', liffId)
+    expect(deps.liffRuntimeToken.resolveLaunchToken).toHaveBeenCalledWith(
+      'launch-token-123',
+      liffId,
+    )
   })
 
   it('GET /liff/v1/launch-context returns 400 for missing query fields', async () => {
