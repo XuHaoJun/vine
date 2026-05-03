@@ -1,3 +1,5 @@
+export const LIFF_LINE_VERSION = '14.0.0' as const
+
 export type LiffRuntimeContext = {
   apiBaseUrl: string
   liffId: string

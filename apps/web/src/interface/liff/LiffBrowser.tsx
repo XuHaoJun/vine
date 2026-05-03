@@ -5,6 +5,7 @@ import {
   createLiffBootstrap,
   isAllowedLiffMessageOrigin,
   canSendMessages,
+  LIFF_LINE_VERSION,
   type LiffRuntimeContext,
 } from '~/features/liff/liffRuntime'
 import { validateAndConvertLiffMessages } from '~/features/liff/liffMessage'
@@ -28,7 +29,6 @@ type LiffBrowserProps = {
   onClose?: (() => void) | undefined
   onMessage?: ((data: unknown) => void) | undefined
   onShareTargetPicker?: ((payload: ShareTargetPickerPayload) => void) | undefined
-  onSendMessages?: ((messages: unknown[]) => void) | undefined
   height?: number | string
 }
 
@@ -64,7 +64,7 @@ export const LiffBrowser = memo(
       chatId,
       contextType,
       scopes,
-      lineVersion: '14.0.0',
+      lineVersion: LIFF_LINE_VERSION,
     }
 
     const src = createLiffIframeSrc(context)
