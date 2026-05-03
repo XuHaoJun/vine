@@ -4,6 +4,8 @@ import { useAuth } from '~/features/auth/client/authClient'
 import { LiffBrowser } from '~/interface/liff/LiffBrowser'
 import { ShareTargetPicker } from '~/features/liff/ShareTargetPicker'
 import { resolveLiffPermanentUrl } from '~/features/liff/resolveLiffPermanentUrl'
+import { getEndpointOrigin } from '~/features/liff/liffRuntime'
+import { API_URL } from '~/constants/urls'
 
 type LiffAppConfig = {
   liffId: string
@@ -116,6 +118,10 @@ export const LiffRouteShell = memo(({ liffId, permanentPath, hash }: LiffRouteSh
       <LiffBrowser
         endpointUrl={resolvedUrl}
         liffId={liffId}
+        endpointOrigin={getEndpointOrigin(resolvedUrl)}
+        apiBaseUrl={API_URL}
+        contextType="external"
+        scopes={config.scopes}
         onShareTargetPicker={handleShareTargetPicker}
       />
       {pickerState.visible && (

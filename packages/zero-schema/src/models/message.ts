@@ -26,6 +26,8 @@ export const messageReadPermission = serverWhere('message', (eb, auth) => {
   return eb.exists('members', (q) => q.where('userId', auth?.id || ''))
 })
 
+const SYSTEM_PACKAGE_RE = /^\d+$/
+
 export const mutate = mutations(schema, messageReadPermission, {
   send: async ({ authData, tx }, message: Message) => {
     if (!authData) throw new Error('Unauthorized')
@@ -68,6 +70,45 @@ export const mutate = mutations(schema, messageReadPermission, {
       .where('packageId', meta.packageId)
       .run()
     if (owned.length === 0) throw new Error('entitlement required')
+
+    await tx.mutate.message.insert(message)
+    await tx.mutate.chat.update({
+      id: message.chatId,
+      lastMessageId: message.id,
+      lastMessageAt: message.createdAt,
+    })
+  },
+  sendLiff: async ({ authData, tx }, message: Message) => {
+    if (!authData) throw new Error('Unauthorized')
+    if (message.senderType !== 'user') throw new Error('Unauthorized')
+    if (message.senderId !== authData.id) throw new Error('Unauthorized')
+
+    const query = tx.query as Record<string, any> | undefined
+    if (!query?.chatMember) throw new Error('Not a member')
+    const members = await query.chatMember
+      .where('userId', authData.id)
+      .where('chatId', message.chatId)
+      .where('status', 'accepted')
+      .run()
+    if (members.length === 0) throw new Error('Not a member')
+
+    if (message.type === 'sticker') {
+      const meta = JSON.parse(message.metadata ?? '{}') as {
+        packageId?: string
+        stickerId?: number
+      }
+      if (!meta.packageId || typeof meta.stickerId !== 'number') {
+        throw new Error('Invalid sticker metadata')
+      }
+      if (!SYSTEM_PACKAGE_RE.test(meta.packageId)) {
+        if (!query?.entitlement) throw new Error('Unauthorized')
+        const owned = await query.entitlement
+          .where('userId', authData.id)
+          .where('packageId', meta.packageId)
+          .run()
+        if (owned.length === 0) throw new Error('entitlement required')
+      }
+    }
 
     await tx.mutate.message.insert(message)
     await tx.mutate.chat.update({
