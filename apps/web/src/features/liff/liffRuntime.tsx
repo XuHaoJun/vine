@@ -5,7 +5,11 @@ import { LiffBrowser } from '~/interface/liff/LiffBrowser'
 import { ShareTargetPicker } from '~/features/liff/ShareTargetPicker'
 import { resolveLiffPermanentUrl } from '~/features/liff/resolveLiffPermanentUrl'
 import { API_URL } from '~/constants/urls'
-import { getEndpointOrigin, buildLiffRuntimeContext, type LiffRuntimeContext } from './liffRuntimeHelpers'
+import {
+  getEndpointOrigin,
+  buildLiffRuntimeContext,
+  type LiffRuntimeContext,
+} from './liffRuntimeHelpers'
 
 export {
   LIFF_LINE_VERSION,

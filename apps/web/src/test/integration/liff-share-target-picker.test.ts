@@ -253,9 +253,7 @@ test.describe('LIFF shareTargetPicker', () => {
     expect(sendResult).toContain('chat context')
   })
 
-  test('chat-launch path: sendMessages inserts into source chat', async ({
-    page,
-  }) => {
+  test('chat-launch path: sendMessages inserts into source chat', async ({ page }) => {
     test.setTimeout(90000)
     await loginAsDemo(page)
 
@@ -302,10 +300,10 @@ test.describe('LIFF shareTargetPicker', () => {
       }
     })
 
-    await page.goto(
-      `${BASE_URL}/liff/${testLiffId}?launchToken=fake-launch-token`,
-      { waitUntil: 'domcontentloaded', timeout: 15000 },
-    )
+    await page.goto(`${BASE_URL}/liff/${testLiffId}?launchToken=fake-launch-token`, {
+      waitUntil: 'domcontentloaded',
+      timeout: 15000,
+    })
 
     const fixtureFrame = await waitForLiffFixtureFrame(page)
     await initFixture(page, fixtureFrame)
@@ -325,10 +323,7 @@ test.describe('LIFF shareTargetPicker', () => {
       .getByTestId('mock-liff-send-valid-result')
       .waitFor({ state: 'visible', timeout: 15000 })
 
-    const sendResult = await readResultText(
-      fixtureFrame,
-      'mock-liff-send-valid-result',
-    )
+    const sendResult = await readResultText(fixtureFrame, 'mock-liff-send-valid-result')
     expect(sendResult).toBe('sent')
   })
 
