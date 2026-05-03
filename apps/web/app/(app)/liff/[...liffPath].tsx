@@ -1,7 +1,9 @@
-import { useActiveParams } from 'one'
+import { useActiveParams, createRoute } from 'one'
 import { useEffect, useState } from 'react'
 import { isWeb } from 'tamagui'
 import { LiffRouteShell } from '~/features/liff/liffRuntime'
+
+const route = createRoute<'/(app)/liff/[...liffPath]'>()
 
 export default function LiffCatchAllPage() {
   const params = useActiveParams<{ liffPath: string[] }>()

@@ -201,4 +201,46 @@ export async function liffPublicPlugin(
       return reply.send({ launchToken, contextType, chatId })
     },
   )
+
+  app.get<{
+    Querystring: { liffId?: string; launchToken?: string }
+  }>('/liff/v1/launch-context', async (request, reply) => {
+    const { liffId, launchToken } = request.query
+    if (!liffId || !launchToken) {
+      return reply.status(400).send({ error: 'liffId and launchToken are required' })
+    }
+
+    const webReq = toWebRequest(request)
+    const authData = await getAuthDataFromRequest(deps.auth, webReq)
+    if (!authData?.id) {
+      return reply.status(401).send({ error: 'Unauthorized' })
+    }
+
+    const appRecord = await deps.liff.getLiffApp(liffId)
+    if (!appRecord) {
+      return reply.status(404).send({ error: 'LIFF app not found' })
+    }
+
+    const ctx = deps.liffRuntimeToken.resolveLaunchToken(launchToken, liffId)
+    if (!ctx || ctx.userId !== authData.id) {
+      return reply.status(403).send({ error: 'Invalid or mismatched launch token' })
+    }
+
+    const [member] = await deps.db
+      .select()
+      .from(chatMember)
+      .where(
+        and(
+          eq(chatMember.chatId, ctx.chatId),
+          eq(chatMember.userId, authData.id),
+          eq(chatMember.status, 'accepted'),
+        ),
+      )
+      .limit(1)
+    if (!member) {
+      return reply.status(403).send({ error: 'Not a chat member' })
+    }
+
+    return reply.send({ chatId: ctx.chatId, contextType: ctx.contextType })
+  })
 }

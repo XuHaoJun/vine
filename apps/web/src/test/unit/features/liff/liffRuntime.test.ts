@@ -1,10 +1,11 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi, beforeEach } from 'vitest'
 import {
   createLiffIframeSrc,
   createLiffBootstrap,
   getEndpointOrigin,
   isAllowedLiffMessageOrigin,
   canSendMessages,
+  buildLiffRuntimeContext,
   type LiffRuntimeContext,
 } from '~/features/liff/liffRuntime'
 
@@ -78,5 +79,99 @@ describe('LIFF runtime host helpers', () => {
     if (!result.ok) {
       expect(result.error).toContain('chat_message.write')
     }
+  })
+})
+
+const appConfig = {
+  liffId: 'liff-abc',
+  viewType: 'full',
+  endpointUrl: 'https://app.example.com/page',
+  moduleMode: false,
+  scopes: ['profile', 'chat_message.write'],
+  botPrompt: 'none',
+  qrCode: false,
+}
+
+function mockFetch(handler: (url: string, init?: RequestInit) => Response) {
+  const fn = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>(async (url, init) =>
+    handler(url, init),
+  )
+  vi.stubGlobal('fetch', fn)
+  return fn
+}
+
+describe('buildLiffRuntimeContext', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('uses external context without a launch token', async () => {
+    mockFetch((url) => {
+      if (url === 'https://api.example.com/liff/v1/apps/liff-abc') {
+        return Response.json(appConfig)
+      }
+      if (url === 'https://api.example.com/liff/v1/access-token') {
+        return Response.json({ accessToken: 'acc-tok', expiresIn: 900 })
+      }
+      return new Response('Not found', { status: 404 })
+    })
+
+    const ctx = await buildLiffRuntimeContext({
+      apiBaseUrl: 'https://api.example.com',
+      liffId: 'liff-abc',
+    })
+
+    expect(ctx.contextType).toBe('external')
+    expect(ctx.chatId).toBeUndefined()
+    expect(ctx.scopes).toEqual(['profile', 'chat_message.write'])
+    expect(ctx.accessToken).toBe('acc-tok')
+  })
+
+  it('uses launch context when the server resolves a valid token', async () => {
+    mockFetch((url) => {
+      if (url === 'https://api.example.com/liff/v1/apps/liff-abc') {
+        return Response.json(appConfig)
+      }
+      if (url === 'https://api.example.com/liff/v1/access-token') {
+        return Response.json({ accessToken: 'acc-tok', expiresIn: 900 })
+      }
+      if (url.startsWith('https://api.example.com/liff/v1/launch-context')) {
+        return Response.json({ chatId: 'chat-1', contextType: 'group' })
+      }
+      return new Response('Not found', { status: 404 })
+    })
+
+    const ctx = await buildLiffRuntimeContext({
+      apiBaseUrl: 'https://api.example.com',
+      liffId: 'liff-abc',
+      launchToken: 'valid-token',
+    })
+
+    expect(ctx.contextType).toBe('group')
+    expect(ctx.chatId).toBe('chat-1')
+  })
+
+  it('falls back to external context for invalid launch token responses', async () => {
+    mockFetch((url) => {
+      if (url === 'https://api.example.com/liff/v1/apps/liff-abc') {
+        return Response.json(appConfig)
+      }
+      if (url === 'https://api.example.com/liff/v1/access-token') {
+        return Response.json({ accessToken: 'acc-tok', expiresIn: 900 })
+      }
+      if (url.startsWith('https://api.example.com/liff/v1/launch-context')) {
+        return new Response('Forbidden', { status: 403 })
+      }
+      return new Response('Not found', { status: 404 })
+    })
+
+    const ctx = await buildLiffRuntimeContext({
+      apiBaseUrl: 'https://api.example.com',
+      liffId: 'liff-abc',
+      launchToken: 'bad-token',
+    })
+
+    expect(ctx.contextType).toBe('external')
+    expect(ctx.chatId).toBeUndefined()
   })
 })

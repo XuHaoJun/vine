@@ -221,4 +221,87 @@ describe('liffPublicPlugin profile and launch routes', () => {
 
     expect(res.statusCode).toBe(403)
   })
+
+  it('GET /liff/v1/launch-context returns chat context for a valid launch token', async () => {
+    const deps = createTestDeps()
+    const app = createTestApp(deps)
+    await app.ready()
+
+    const res = await app.inject({
+      method: 'GET',
+      url: `/liff/v1/launch-context?liffId=${liffId}&launchToken=launch-token-123`,
+    })
+    await app.close()
+
+    expect(res.statusCode).toBe(200)
+    const body = JSON.parse(res.body)
+    expect(body).toEqual({ chatId, contextType: 'group' })
+    expect(deps.liffRuntimeToken.resolveLaunchToken).toHaveBeenCalledWith('launch-token-123', liffId)
+  })
+
+  it('GET /liff/v1/launch-context returns 400 for missing query fields', async () => {
+    const deps = createTestDeps()
+    const app = createTestApp(deps)
+    await app.ready()
+
+    const res = await app.inject({
+      method: 'GET',
+      url: '/liff/v1/launch-context',
+    })
+    await app.close()
+
+    expect(res.statusCode).toBe(400)
+  })
+
+  it('GET /liff/v1/launch-context returns 401 without a Vine session', async () => {
+    mockedAuth.mockResolvedValue(null)
+    const deps = createTestDeps()
+    const app = createTestApp(deps)
+    await app.ready()
+
+    const res = await app.inject({
+      method: 'GET',
+      url: `/liff/v1/launch-context?liffId=${liffId}&launchToken=tok`,
+    })
+    await app.close()
+
+    expect(res.statusCode).toBe(401)
+  })
+
+  it('GET /liff/v1/launch-context returns 403 for token/user mismatch', async () => {
+    const deps = createTestDeps()
+    deps.liffRuntimeToken.resolveLaunchToken.mockReturnValue({
+      kind: 'launch',
+      liffId,
+      chatId,
+      userId: 'other-user',
+      contextType: 'group',
+      exp: Date.now() + 5 * 60 * 1000,
+    })
+    const app = createTestApp(deps)
+    await app.ready()
+
+    const res = await app.inject({
+      method: 'GET',
+      url: `/liff/v1/launch-context?liffId=${liffId}&launchToken=launch-token-123`,
+    })
+    await app.close()
+
+    expect(res.statusCode).toBe(403)
+  })
+
+  it('GET /liff/v1/launch-context returns 404 for unknown LIFF app', async () => {
+    const deps = createTestDeps()
+    deps.liff.getLiffApp.mockResolvedValue(null)
+    const app = createTestApp(deps)
+    await app.ready()
+
+    const res = await app.inject({
+      method: 'GET',
+      url: `/liff/v1/launch-context?liffId=unknown&launchToken=tok`,
+    })
+    await app.close()
+
+    expect(res.statusCode).toBe(404)
+  })
 })
