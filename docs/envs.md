@@ -48,6 +48,7 @@
 | `DEMO_EMAIL` | `demo@takeout.tamagui.dev` | 選填 | Demo 帳號 email，用於 afterCreateUser 自動設定 username |
 | `OA_BASE_URL` | `http://localhost:3001/api/oa` | 選填 | OA API 基礎 URL |
 | `OA_WEBHOOK_TIMEOUT_MS` | `10000` | 選填 | Webhook 發送逾時毫秒數 |
+| `LIFF_RUNTIME_TOKEN_SECRET` | 同 `BETTER_AUTH_SECRET` | 選填 | LIFF runtime token HMAC 簽名用 secret，prod 建議獨立設定 |
 
 ---
 
