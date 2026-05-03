@@ -7,7 +7,7 @@ import {
   canSendMessages,
   buildLiffRuntimeContext,
   type LiffRuntimeContext,
-} from '~/features/liff/liffRuntime'
+} from '~/features/liff/liffRuntimeHelpers'
 
 const BASE: LiffRuntimeContext = {
   apiBaseUrl: 'https://api.example.com',

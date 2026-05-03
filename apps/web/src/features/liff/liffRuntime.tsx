@@ -4,12 +4,22 @@ import { useAuth } from '~/features/auth/client/authClient'
 import { LiffBrowser } from '~/interface/liff/LiffBrowser'
 import { ShareTargetPicker } from '~/features/liff/ShareTargetPicker'
 import { resolveLiffPermanentUrl } from '~/features/liff/resolveLiffPermanentUrl'
-import {
-  getEndpointOrigin,
-  buildLiffRuntimeContext,
-  type LiffRuntimeContext,
-} from '~/features/liff/liffRuntime'
 import { API_URL } from '~/constants/urls'
+import { getEndpointOrigin, buildLiffRuntimeContext, type LiffRuntimeContext } from './liffRuntimeHelpers'
+
+export {
+  LIFF_LINE_VERSION,
+  createLiffIframeSrc,
+  createLiffBootstrap,
+  getEndpointOrigin,
+  isAllowedLiffMessageOrigin,
+  canSendMessages,
+  resolveLiffLaunchContext,
+  createLiffAccessToken,
+  buildLiffRuntimeContext,
+  type LiffAppConfig,
+  type LiffRuntimeContext,
+} from './liffRuntimeHelpers'
 
 type ShareTargetPickerState = {
   visible: boolean

@@ -7,7 +7,7 @@ import {
   canSendMessages,
   LIFF_LINE_VERSION,
   type LiffRuntimeContext,
-} from '~/features/liff/liffRuntime'
+} from '~/features/liff/liffRuntimeHelpers'
 import { validateAndConvertLiffMessages } from '~/features/liff/liffMessage'
 import { zero } from '~/zero/client'
 

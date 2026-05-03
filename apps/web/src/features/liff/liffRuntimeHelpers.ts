@@ -1,4 +1,3 @@
-export { LiffRouteShell } from './liffRuntime.tsx'
 export const LIFF_LINE_VERSION = '14.0.0' as const
 
 export type LiffAppConfig = {
