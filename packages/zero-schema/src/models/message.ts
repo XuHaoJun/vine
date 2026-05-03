@@ -81,7 +81,7 @@ export const mutate = mutations(schema, messageReadPermission, {
   sendLiff: async ({ authData, tx }, message: Message) => {
     if (!authData) throw new Error('Unauthorized')
     if (message.senderType !== 'user') throw new Error('Unauthorized')
-    message.senderId = authData.id
+    const liffMessage = { ...message, senderId: authData.id }
 
     const query = tx.query as Record<string, any> | undefined
     if (!query?.chatMember) throw new Error('Not a member')
@@ -110,11 +110,11 @@ export const mutate = mutations(schema, messageReadPermission, {
       }
     }
 
-    await tx.mutate.message.insert(message)
+    await tx.mutate.message.insert(liffMessage)
     await tx.mutate.chat.update({
-      id: message.chatId,
-      lastMessageId: message.id,
-      lastMessageAt: message.createdAt,
+      id: liffMessage.chatId,
+      lastMessageId: liffMessage.id,
+      lastMessageAt: liffMessage.createdAt,
     })
   },
 })
