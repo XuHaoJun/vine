@@ -65,7 +65,10 @@ const oaMessaging = createOAMessagingService({
 const webhookDelivery = createOAWebhookDeliveryService({ db, oa, logger })
 const liff = createLiffService({ db })
 const liffRuntimeToken = createLiffRuntimeTokenService({
-  secret: process.env['LIFF_RUNTIME_TOKEN_SECRET'] ?? process.env['BETTER_AUTH_SECRET'] ?? 'vine-dev-liff-runtime-token-secret',
+  secret:
+    process.env['LIFF_RUNTIME_TOKEN_SECRET'] ??
+    process.env['BETTER_AUTH_SECRET'] ??
+    'vine-dev-liff-runtime-token-secret',
 })
 const auth = createAuthServer({ database, db })
 const drive = createFsDriveService({

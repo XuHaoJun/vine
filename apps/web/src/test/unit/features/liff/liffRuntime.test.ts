@@ -51,13 +51,15 @@ describe('LIFF runtime host helpers', () => {
   })
 
   it('accepts host events from the endpoint origin', () => {
-    expect(isAllowedLiffMessageOrigin('https://app.example.com', 'https://app.example.com')).toBe(
-      true,
-    )
+    expect(
+      isAllowedLiffMessageOrigin('https://app.example.com', 'https://app.example.com'),
+    ).toBe(true)
   })
 
   it('ignores host events from a different origin', () => {
-    expect(isAllowedLiffMessageOrigin('https://evil.com', 'https://app.example.com')).toBe(false)
+    expect(
+      isAllowedLiffMessageOrigin('https://evil.com', 'https://app.example.com'),
+    ).toBe(false)
   })
 
   it('rejects sendMessages without chat context', () => {
@@ -93,8 +95,8 @@ const appConfig = {
 }
 
 function mockFetch(handler: (url: string, init?: RequestInit) => Response) {
-  const fn = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>(async (url, init) =>
-    handler(url, init),
+  const fn = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>(
+    async (url, init) => handler(url, init),
   )
   vi.stubGlobal('fetch', fn)
   return fn

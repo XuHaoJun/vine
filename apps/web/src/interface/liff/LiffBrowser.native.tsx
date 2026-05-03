@@ -92,9 +92,7 @@ export const LiffBrowser = memo(
       const type = parsed['type'] as string
       if (typeof type === 'string' && type.startsWith('liff:')) {
         const webViewOrigin = new URL(
-          typeof event.nativeEvent.url === 'string'
-            ? event.nativeEvent.url
-            : endpointUrl,
+          typeof event.nativeEvent.url === 'string' ? event.nativeEvent.url : endpointUrl,
         ).origin
         if (!isAllowedLiffMessageOrigin(webViewOrigin, endpointOrigin)) {
           return
@@ -134,7 +132,7 @@ export const LiffBrowser = memo(
 
         const now = Date.now()
         for (let i = 0; i < validated.messages.length; i++) {
-          const converted = validated.messages[i]
+          const converted = validated.messages[i]!
           zero.mutate.message.sendLiff({
             id: crypto.randomUUID(),
             chatId: chatId!,

@@ -135,7 +135,10 @@ class LiffImpl {
 
   getApiBaseUrl(): string {
     const bootstrap = this.getBootstrap()
-    return bootstrap.apiBaseUrl ?? (typeof window !== 'undefined' ? window.location.origin : '')
+    return (
+      bootstrap.apiBaseUrl ??
+      (typeof window !== 'undefined' ? window.location.origin : '')
+    )
   }
 
   private _requestBootstrap(liffId: string): Promise<VineLiffBootstrap> {
@@ -147,20 +150,14 @@ class LiffImpl {
       }, 3000)
       const handler = (event: MessageEvent) => {
         const data = event.data as Record<string, unknown> | undefined
-        if (
-          data?.type === 'liff:bootstrap:done' &&
-          data.requestId === requestId
-        ) {
+        if (data?.type === 'liff:bootstrap:done' && data.requestId === requestId) {
           clearTimeout(timeout)
           window.removeEventListener('message', handler)
           resolve((data.bootstrap as VineLiffBootstrap) ?? {})
         }
       }
       window.addEventListener('message', handler)
-      window.parent.postMessage(
-        { type: 'liff:bootstrap', requestId, liffId },
-        '*',
-      )
+      window.parent.postMessage({ type: 'liff:bootstrap', requestId, liffId }, '*')
     })
   }
 
@@ -344,10 +341,7 @@ class LiffImpl {
     return new Promise((resolve, reject) => {
       const handler = (event: MessageEvent) => {
         const data = event.data as Record<string, unknown> | undefined
-        if (
-          data?.type === 'liff:sendMessages:done' &&
-          data.requestId === requestId
-        ) {
+        if (data?.type === 'liff:sendMessages:done' && data.requestId === requestId) {
           window.removeEventListener('message', handler)
           resolve()
         } else if (
@@ -359,10 +353,7 @@ class LiffImpl {
         }
       }
       window.addEventListener('message', handler)
-      window.parent.postMessage(
-        { type: 'liff:sendMessages', requestId, messages },
-        '*',
-      )
+      window.parent.postMessage({ type: 'liff:sendMessages', requestId, messages }, '*')
     })
   }
 

@@ -173,9 +173,7 @@ describe('@vine/liff runtime bootstrap', () => {
       '*',
     )
 
-    expect(fetchSpy).toHaveBeenCalledWith(
-      'https://vine.parent.com/liff/v1/apps/liff-456',
-    )
+    expect(fetchSpy).toHaveBeenCalledWith('https://vine.parent.com/liff/v1/apps/liff-456')
 
     restore()
   })
@@ -216,9 +214,7 @@ describe('@vine/liff runtime bootstrap', () => {
 
     await liff.init({ liffId: 'liff-789' })
 
-    expect(fetchSpy).toHaveBeenCalledWith(
-      'https://app.example.com/liff/v1/apps/liff-789',
-    )
+    expect(fetchSpy).toHaveBeenCalledWith('https://app.example.com/liff/v1/apps/liff-789')
 
     restore()
   })
@@ -311,9 +307,9 @@ describe('@vine/liff runtime bootstrap', () => {
       }
     })
 
-    await expect(
-      liff.sendMessages([{ type: 'text', text: 'fail' }]),
-    ).rejects.toThrow('Host rejected messages')
+    await expect(liff.sendMessages([{ type: 'text', text: 'fail' }])).rejects.toThrow(
+      'Host rejected messages',
+    )
 
     restore()
   })
@@ -340,12 +336,8 @@ describe('@vine/liff runtime bootstrap', () => {
 
     await liff.init({ liffId: 'liff-perm' })
 
-    expect((globalThis as any).window.location.hash).toBe(
-      '#section=top&foo=bar',
-    )
-    expect(
-      (globalThis as any).window.history.replaceState,
-    ).not.toHaveBeenCalled()
+    expect((globalThis as any).window.location.hash).toBe('#section=top&foo=bar')
+    expect((globalThis as any).window.history.replaceState).not.toHaveBeenCalled()
 
     restore()
   })

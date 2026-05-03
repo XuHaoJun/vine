@@ -60,18 +60,18 @@ describe('ShareTargetPicker LIFF messages', () => {
     expect(result1.ok).toBe(true)
     if (result1.ok) {
       expect(result1.messages).toHaveLength(3)
-      expect(result1.messages[0].type).toBe('text')
-      expect(result1.messages[0].text).toBe('Hello')
-      expect(result1.messages[1].type).toBe('image')
-      expect(result1.messages[2].type).toBe('video')
+      expect(result1.messages[0]!.type).toBe('text')
+      expect(result1.messages[0]!.text).toBe('Hello')
+      expect(result1.messages[1]!.type).toBe('image')
+      expect(result1.messages[2]!.type).toBe('video')
     }
 
     expect(result2.ok).toBe(true)
     if (result2.ok) {
       expect(result2.messages).toHaveLength(3)
-      expect(result2.messages[0].type).toBe('audio')
-      expect(result2.messages[1].type).toBe('location')
-      expect(result2.messages[2].type).toBe('flex')
+      expect(result2.messages[0]!.type).toBe('audio')
+      expect(result2.messages[1]!.type).toBe('location')
+      expect(result2.messages[2]!.type).toBe('flex')
     }
   })
 

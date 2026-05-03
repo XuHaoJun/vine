@@ -27,8 +27,23 @@ function isHttpsUrl(v: unknown): v is string {
   return typeof v === 'string' && v.startsWith('https://')
 }
 
-const SEND_MESSAGES_ALLOWED = new Set(['text', 'sticker', 'image', 'video', 'audio', 'location', 'flex'])
-const SHARE_TARGET_ALLOWED = new Set(['text', 'image', 'video', 'audio', 'location', 'flex'])
+const SEND_MESSAGES_ALLOWED = new Set([
+  'text',
+  'sticker',
+  'image',
+  'video',
+  'audio',
+  'location',
+  'flex',
+])
+const SHARE_TARGET_ALLOWED = new Set([
+  'text',
+  'image',
+  'video',
+  'audio',
+  'location',
+  'flex',
+])
 const DISALLOWED_KEYS = new Set(['quickReply', 'quoteToken'])
 const SYSTEM_PACKAGE_RE = /^\d+$/
 
@@ -67,7 +82,11 @@ function containsNonUriAction(node: unknown): boolean {
 function convertMessage(msg: Record<string, unknown>): ConvertedLiffMessage | null {
   const type = msg.type as string
   if (type === 'text') {
-    return { type: 'text', text: typeof msg.text === 'string' ? msg.text : null, metadata: null }
+    return {
+      type: 'text',
+      text: typeof msg.text === 'string' ? msg.text : null,
+      metadata: null,
+    }
   }
   if (type === 'sticker') {
     return {
@@ -147,7 +166,10 @@ export function validateAndConvertLiffMessages(input: {
     }
 
     if (hasDisallowedKeys(raw)) {
-      return err('INVALID_ARGUMENT', 'message contains unsupported properties (quickReply/quoteToken)')
+      return err(
+        'INVALID_ARGUMENT',
+        'message contains unsupported properties (quickReply/quoteToken)',
+      )
     }
     if (hasTextEmojis(raw)) {
       return err('INVALID_ARGUMENT', 'text.emojis is not supported in LIFF messages')
@@ -162,7 +184,10 @@ export function validateAndConvertLiffMessages(input: {
     }
     if (!allowed.has(type)) {
       if (type === 'sticker' && method === 'shareTargetPicker') {
-        return err('UNSUPPORTED_MESSAGE', 'sticker is not supported for shareTargetPicker')
+        return err(
+          'UNSUPPORTED_MESSAGE',
+          'sticker is not supported for shareTargetPicker',
+        )
       }
       return err('UNSUPPORTED_MESSAGE', `message type "${type}" is not supported`)
     }

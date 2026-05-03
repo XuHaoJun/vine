@@ -21,5 +21,5 @@ export default function LiffCatchAllPage() {
   const [liffId, ...rest] = liffPath
   const permanentPath = rest.length > 0 ? '/' + rest.join('/') : undefined
 
-  return <LiffRouteShell liffId={liffId} permanentPath={permanentPath} hash={hash} />
+  return <LiffRouteShell liffId={liffId!} permanentPath={permanentPath} hash={hash} />
 }

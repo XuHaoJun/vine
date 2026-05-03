@@ -33,7 +33,8 @@ function verify<T>(token: string, secret: string): T | null {
   const expected = createHmac('sha256', secret).update(body!).digest('base64url')
   const sigBuf = Buffer.from(sig)
   const expectedBuf = Buffer.from(expected)
-  if (sigBuf.length !== expectedBuf.length || !timingSafeEqual(sigBuf, expectedBuf)) return null
+  if (sigBuf.length !== expectedBuf.length || !timingSafeEqual(sigBuf, expectedBuf))
+    return null
   return JSON.parse(Buffer.from(body!, 'base64url').toString()) as T
 }
 
@@ -55,7 +56,10 @@ export function createLiffRuntimeTokenService(input: {
     return sign(payload, secret)
   }
 
-  function resolveAccessToken(token: string, liffId: string): LiffAccessTokenContext | null {
+  function resolveAccessToken(
+    token: string,
+    liffId: string,
+  ): LiffAccessTokenContext | null {
     const ctx = verify<LiffAccessTokenContext>(token, secret)
     if (!ctx) return null
     if (ctx.kind !== 'access') return null

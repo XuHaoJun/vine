@@ -184,7 +184,7 @@ export const ShareTargetPicker = memo(
           if (!chatId) continue
 
           for (let i = 0; i < validated.messages.length; i++) {
-            const converted = validated.messages[i]
+            const converted = validated.messages[i]!
             zero.mutate.message.sendLiff({
               id: crypto.randomUUID(),
               chatId,

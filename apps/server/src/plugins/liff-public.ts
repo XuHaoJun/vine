@@ -97,33 +97,30 @@ export async function liffPublicPlugin(
     },
   )
 
-  app.get<{ Querystring: { liffId?: string } }>(
-    '/liff/v1/me',
-    async (request, reply) => {
-      const liffId = request.query.liffId
-      if (!liffId) {
-        return reply.status(400).send({ error: 'liffId is required' })
-      }
+  app.get<{ Querystring: { liffId?: string } }>('/liff/v1/me', async (request, reply) => {
+    const liffId = request.query.liffId
+    if (!liffId) {
+      return reply.status(400).send({ error: 'liffId is required' })
+    }
 
-      const authHeader = request.headers.authorization
-      if (authHeader?.startsWith('Bearer ')) {
-        const token = authHeader.slice(7)
-        const ctx = deps.liffRuntimeToken.resolveAccessToken(token, liffId)
-        if (!ctx) {
-          return reply.status(401).send({ error: 'Unauthorized' })
-        }
-        return sendUserProfile(deps.db, ctx.userId, reply)
-      }
-
-      // Fallback: same-origin Vine session auth for development
-      const webReq = toWebRequest(request)
-      const authData = await getAuthDataFromRequest(deps.auth, webReq)
-      if (!authData?.id) {
+    const authHeader = request.headers.authorization
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.slice(7)
+      const ctx = deps.liffRuntimeToken.resolveAccessToken(token, liffId)
+      if (!ctx) {
         return reply.status(401).send({ error: 'Unauthorized' })
       }
-      return sendUserProfile(deps.db, authData.id, reply)
-    },
-  )
+      return sendUserProfile(deps.db, ctx.userId, reply)
+    }
+
+    // Fallback: same-origin Vine session auth for development
+    const webReq = toWebRequest(request)
+    const authData = await getAuthDataFromRequest(deps.auth, webReq)
+    if (!authData?.id) {
+      return reply.status(401).send({ error: 'Unauthorized' })
+    }
+    return sendUserProfile(deps.db, authData.id, reply)
+  })
 
   app.post<{ Body: { liffId: string } }>(
     '/liff/v1/access-token',

@@ -105,9 +105,7 @@ export const LiffBrowser = memo(
           const requestId = msg['requestId'] as string
           const messages = msg['messages'] as unknown[]
 
-          const sendAck = (
-            ack: Record<string, unknown>,
-          ) => {
+          const sendAck = (ack: Record<string, unknown>) => {
             iframeRef.current?.contentWindow?.postMessage(ack, endpointOrigin)
           }
 
@@ -136,7 +134,7 @@ export const LiffBrowser = memo(
 
           const now = Date.now()
           for (let i = 0; i < validated.messages.length; i++) {
-            const converted = validated.messages[i]
+            const converted = validated.messages[i]!
             zero.mutate.message.sendLiff({
               id: crypto.randomUUID(),
               chatId: chatId!,
@@ -157,7 +155,16 @@ export const LiffBrowser = memo(
       }
       window.addEventListener('message', handler)
       return () => window.removeEventListener('message', handler)
-    }, [endpointOrigin, apiBaseUrl, liffId, chatId, contextType, scopes, accessToken, endpointUrl])
+    }, [
+      endpointOrigin,
+      apiBaseUrl,
+      liffId,
+      chatId,
+      contextType,
+      scopes,
+      accessToken,
+      endpointUrl,
+    ])
 
     return (
       <YStack flex={1} style={{ height }}>

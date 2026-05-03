@@ -6,6 +6,10 @@ import { oaClient } from '~/features/oa/client'
 import { Button } from '~/interface/buttons/Button'
 import { showToast } from '~/interface/toast/Toast'
 import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
+import { createRoute } from 'one'
+
+const route =
+  createRoute<'/(app)/developers/console/channel/[channelId]/AccessTokenSection'>()
 
 type Props = { channelId: string }
 

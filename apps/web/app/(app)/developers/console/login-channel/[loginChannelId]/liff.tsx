@@ -323,7 +323,9 @@ export const LiffAppsPage = memo(() => {
                   <Button
                     size="$1"
                     variant="outlined"
-                    onPress={() => window.open(`/liff/${app.liffId}`, '_blank', 'noopener,noreferrer')}
+                    onPress={() =>
+                      window.open(`/liff/${app.liffId}`, '_blank', 'noopener,noreferrer')
+                    }
                     iconAfter={<ArrowUpRightIcon size={12} />}
                   >
                     Open

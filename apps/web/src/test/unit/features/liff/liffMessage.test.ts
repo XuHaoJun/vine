@@ -101,9 +101,9 @@ describe('validateAndConvertLiffMessages', () => {
       expect(result.ok).toBe(true)
       if (result.ok) {
         expect(result.messages).toHaveLength(1)
-        expect(result.messages[0].type).toBe('text')
-        expect(result.messages[0].text).toBe('hi')
-        expect(result.messages[0].metadata).toBeNull()
+        expect(result.messages[0]!.type).toBe('text')
+        expect(result.messages[0]!.text).toBe('hi')
+        expect(result.messages[0]!.metadata).toBeNull()
       }
     })
 
@@ -114,7 +114,7 @@ describe('validateAndConvertLiffMessages', () => {
       })
       expect(result.ok).toBe(true)
       if (result.ok) {
-        expect(result.messages[0].type).toBe('sticker')
+        expect(result.messages[0]!.type).toBe('sticker')
       }
     })
 
@@ -125,7 +125,7 @@ describe('validateAndConvertLiffMessages', () => {
       })
       expect(result.ok).toBe(true)
       if (result.ok) {
-        expect(result.messages[0].type).toBe('image')
+        expect(result.messages[0]!.type).toBe('image')
       }
     })
 
@@ -136,7 +136,7 @@ describe('validateAndConvertLiffMessages', () => {
       })
       expect(result.ok).toBe(true)
       if (result.ok) {
-        expect(result.messages[0].type).toBe('video')
+        expect(result.messages[0]!.type).toBe('video')
       }
     })
 
@@ -147,7 +147,7 @@ describe('validateAndConvertLiffMessages', () => {
       })
       expect(result.ok).toBe(true)
       if (result.ok) {
-        expect(result.messages[0].type).toBe('audio')
+        expect(result.messages[0]!.type).toBe('audio')
       }
     })
 
@@ -158,7 +158,7 @@ describe('validateAndConvertLiffMessages', () => {
       })
       expect(result.ok).toBe(true)
       if (result.ok) {
-        expect(result.messages[0].type).toBe('location')
+        expect(result.messages[0]!.type).toBe('location')
       }
     })
 
@@ -169,7 +169,7 @@ describe('validateAndConvertLiffMessages', () => {
       })
       expect(result.ok).toBe(true)
       if (result.ok) {
-        expect(result.messages[0].type).toBe('flex')
+        expect(result.messages[0]!.type).toBe('flex')
       }
     })
   })
@@ -284,7 +284,13 @@ describe('validateAndConvertLiffMessages', () => {
     it('rejects text emojis', () => {
       const result = validateAndConvertLiffMessages({
         method: 'sendMessages',
-        messages: [{ type: 'text', text: 'hi', emojis: [{ index: 0, productId: 'p', emojiId: 'e' }] }],
+        messages: [
+          {
+            type: 'text',
+            text: 'hi',
+            emojis: [{ index: 0, productId: 'p', emojiId: 'e' }],
+          },
+        ],
       })
       expect(result.ok).toBe(false)
       if (!result.ok) {
@@ -308,7 +314,9 @@ describe('validateAndConvertLiffMessages', () => {
     it('rejects template for sendMessages', () => {
       const result = validateAndConvertLiffMessages({
         method: 'sendMessages',
-        messages: [{ type: 'template', altText: 't', template: { type: 'buttons', actions: [] } }],
+        messages: [
+          { type: 'template', altText: 't', template: { type: 'buttons', actions: [] } },
+        ],
       })
       expect(result.ok).toBe(false)
       if (!result.ok) {
@@ -319,7 +327,9 @@ describe('validateAndConvertLiffMessages', () => {
     it('rejects template for shareTargetPicker', () => {
       const result = validateAndConvertLiffMessages({
         method: 'shareTargetPicker',
-        messages: [{ type: 'template', altText: 't', template: { type: 'buttons', actions: [] } }],
+        messages: [
+          { type: 'template', altText: 't', template: { type: 'buttons', actions: [] } },
+        ],
       })
       expect(result.ok).toBe(false)
       if (!result.ok) {
@@ -330,7 +340,15 @@ describe('validateAndConvertLiffMessages', () => {
     it('rejects imagemap for sendMessages', () => {
       const result = validateAndConvertLiffMessages({
         method: 'sendMessages',
-        messages: [{ type: 'imagemap', baseUrl: 'https://example.com', baseSize: { width: 1040, height: 1040 }, altText: 'im', actions: [] }],
+        messages: [
+          {
+            type: 'imagemap',
+            baseUrl: 'https://example.com',
+            baseSize: { width: 1040, height: 1040 },
+            altText: 'im',
+            actions: [],
+          },
+        ],
       })
       expect(result.ok).toBe(false)
       if (!result.ok) {
@@ -341,7 +359,15 @@ describe('validateAndConvertLiffMessages', () => {
     it('rejects imagemap for shareTargetPicker', () => {
       const result = validateAndConvertLiffMessages({
         method: 'shareTargetPicker',
-        messages: [{ type: 'imagemap', baseUrl: 'https://example.com', baseSize: { width: 1040, height: 1040 }, altText: 'im', actions: [] }],
+        messages: [
+          {
+            type: 'imagemap',
+            baseUrl: 'https://example.com',
+            baseSize: { width: 1040, height: 1040 },
+            altText: 'im',
+            actions: [],
+          },
+        ],
       })
       expect(result.ok).toBe(false)
       if (!result.ok) {
@@ -398,7 +424,12 @@ describe('validateAndConvertLiffMessages', () => {
                 contents: [
                   {
                     type: 'button',
-                    action: { type: 'datetimepicker', label: 'Pick', data: 'd', mode: 'date' },
+                    action: {
+                      type: 'datetimepicker',
+                      label: 'Pick',
+                      data: 'd',
+                      mode: 'date',
+                    },
                   },
                 ],
               },
@@ -507,7 +538,7 @@ describe('validateAndConvertLiffMessages', () => {
       })
       expect(result.ok).toBe(true)
       if (result.ok) {
-        const msg = result.messages[0]
+        const msg = result.messages[0]!
         expect(msg.type).toBe('sticker')
         expect(msg.text).toBeNull()
         const meta = JSON.parse(msg.metadata!)
@@ -522,7 +553,7 @@ describe('validateAndConvertLiffMessages', () => {
       })
       expect(result.ok).toBe(true)
       if (result.ok) {
-        const msg = result.messages[0]
+        const msg = result.messages[0]!
         expect(msg.type).toBe('image')
         expect(msg.text).toBeNull()
         const meta = JSON.parse(msg.metadata!)
@@ -538,7 +569,7 @@ describe('validateAndConvertLiffMessages', () => {
       })
       expect(result.ok).toBe(true)
       if (result.ok) {
-        const msg = result.messages[0]
+        const msg = result.messages[0]!
         expect(msg.type).toBe('video')
         const meta = JSON.parse(msg.metadata!)
         expect(meta.originalContentUrl).toBe(HTTPS_VIDEO)
@@ -552,7 +583,7 @@ describe('validateAndConvertLiffMessages', () => {
       })
       expect(result.ok).toBe(true)
       if (result.ok) {
-        const msg = result.messages[0]
+        const msg = result.messages[0]!
         expect(msg.type).toBe('audio')
         const meta = JSON.parse(msg.metadata!)
         expect(meta.originalContentUrl).toBe(HTTPS_AUDIO)
@@ -567,7 +598,7 @@ describe('validateAndConvertLiffMessages', () => {
       })
       expect(result.ok).toBe(true)
       if (result.ok) {
-        const msg = result.messages[0]
+        const msg = result.messages[0]!
         expect(msg.type).toBe('location')
         const meta = JSON.parse(msg.metadata!)
         expect(meta.title).toBe('Station')
@@ -584,7 +615,7 @@ describe('validateAndConvertLiffMessages', () => {
       })
       expect(result.ok).toBe(true)
       if (result.ok) {
-        const msg = result.messages[0]
+        const msg = result.messages[0]!
         expect(msg.type).toBe('flex')
         expect(msg.text).toBeNull()
         const meta = JSON.parse(msg.metadata!)

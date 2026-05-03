@@ -79,7 +79,9 @@ describe('message.sendLiff', () => {
       query: {
         chatMember: {
           where: vi.fn().mockReturnThis(),
-          run: vi.fn().mockResolvedValue([{ id: 'cm-1', userId: 'user-1', chatId: 'chat-1' }]),
+          run: vi
+            .fn()
+            .mockResolvedValue([{ id: 'cm-1', userId: 'user-1', chatId: 'chat-1' }]),
         },
       },
     })
@@ -96,7 +98,9 @@ describe('message.sendLiff', () => {
       query: {
         chatMember: {
           where: vi.fn().mockReturnThis(),
-          run: vi.fn().mockResolvedValue([{ id: 'cm-1', userId: 'user-1', chatId: 'chat-1' }]),
+          run: vi
+            .fn()
+            .mockResolvedValue([{ id: 'cm-1', userId: 'user-1', chatId: 'chat-1' }]),
         },
       },
     })
@@ -114,7 +118,9 @@ describe('message.sendLiff', () => {
       query: {
         chatMember: {
           where: vi.fn().mockReturnThis(),
-          run: vi.fn().mockResolvedValue([{ id: 'cm-1', userId: 'user-1', chatId: 'chat-1' }]),
+          run: vi
+            .fn()
+            .mockResolvedValue([{ id: 'cm-1', userId: 'user-1', chatId: 'chat-1' }]),
         },
         entitlement: {
           where: vi.fn().mockReturnThis(),
@@ -137,7 +143,9 @@ describe('message.sendLiff', () => {
       query: {
         chatMember: {
           where: vi.fn().mockReturnThis(),
-          run: vi.fn().mockResolvedValue([{ id: 'cm-1', userId: 'user-1', chatId: 'chat-1' }]),
+          run: vi
+            .fn()
+            .mockResolvedValue([{ id: 'cm-1', userId: 'user-1', chatId: 'chat-1' }]),
         },
       },
     })
