@@ -322,6 +322,7 @@ describe('@vine/liff runtime bootstrap', () => {
     const { restore } = setupWindow()
 
     ;(globalThis as any).window.location.hash = '#section=top&foo=bar'
+    ;(globalThis as any).window.VineLIFF = {}
 
     vi.spyOn(globalThis, 'fetch' as any).mockResolvedValue(
       new Response(

@@ -128,7 +128,7 @@ class LiffImpl {
 
   getBootstrap(): VineLiffBootstrap {
     if (typeof window === 'undefined') return {}
-    const w = window as Record<string, unknown>
+    const w = window as any
     if (w['VineLIFF']) return w['VineLIFF'] as VineLiffBootstrap
     return this._bootstrap
   }
@@ -168,7 +168,7 @@ class LiffImpl {
     this._liffId = config.liffId
 
     if (typeof window !== 'undefined') {
-      const w = window as Record<string, unknown>
+      const w = window as any
       if (!w['VineLIFF']) {
         this._bootstrap = await this._requestBootstrap(config.liffId)
       }
@@ -388,7 +388,7 @@ class LiffImpl {
     const bootstrap = this.getBootstrap()
     const cfg = this._appConfig
     return {
-      type: bootstrap.contextType ?? (this._initialized ? 'external' : 'external'),
+      type: bootstrap.contextType ?? 'external',
       userId: this.getDecodedIDToken()?.sub,
       liffId: this._liffId ?? '',
       viewType: (cfg?.viewType as LiffContext['viewType']) ?? 'full',
