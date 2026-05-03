@@ -154,25 +154,36 @@ Dropped:
 
 ### Milestone 3: Rich Menu Parity
 
+Status: complete.
+
 Goal: let OA managers and bot developers create and operate rich menus through
 LINE-like manager and Messaging API workflows.
 
-Deliverables:
+Completed:
 
 - Rich menu image upload and validation.
 - Visual tappable-area editor for manager-created rich menus.
 - Messaging API rich menu create/upload/set-default flow.
-- Per-user rich menu linking and unlinking.
-- Rich menu alias/tab switching.
-- Chat UI integration for active rich menus.
-- Manager-side display/click insights where feasible, with Messaging API rich
-  menu analytics treated separately to match LINE's product boundary.
+- Chat UI integration for active rich menus (rendering, area tap handling,
+  postback/URI/message actions).
+- Server-side ConnectRPC foundations for rich menu CRUD, alias management,
+  per-user linking, and click tracking (proto definitions and handlers wired).
+- Rich menu `postback` action dispatch in chat.
+- `richmenuswitch` action handling in chat with `switchRichMenu` RPC.
+- Alias management UI in manager edit page.
+- Per-user rich menu manager UI from both menu and user views.
+- Per-area click insights UI with click recording and stats display.
 
 Out of scope:
 
 - Advanced scheduling.
 - Sophisticated per-segment personalization beyond LINE-like per-user rich menu
   assignment.
+- Time-based click filtering (last 7 / 30 days) in insights UI.
+- Click analytics in the public Messaging API (`/api/oa/v2`).
+- Rich menu impression tracking (only taps are tracked).
+- `richmenuswitch` action support in Flex Messages or quick replies (LINE spec:
+  rich menu only).
 
 ### Milestone 4: LIFF / Mini App MVP
 
