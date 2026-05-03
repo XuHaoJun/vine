@@ -3,9 +3,6 @@ import type {
   WebhookDeliveryAttempt,
   WebhookDeliverySummary,
 } from '@vine/proto/oa'
-import { createRoute } from 'one'
-
-const route = createRoute<'/(app)/developers/console/channel/[channelId]/WebhookErrorsSection.helpers'>()
 
 type WebhookDeliverySummaryLike = Pick<
   WebhookDeliverySummary,
