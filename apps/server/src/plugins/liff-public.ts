@@ -97,30 +97,33 @@ export async function liffPublicPlugin(
     },
   )
 
-  app.get<{ Querystring: { liffId?: string } }>('/api/liff/v1/me', async (request, reply) => {
-    const liffId = request.query.liffId
-    if (!liffId) {
-      return reply.status(400).send({ error: 'liffId is required' })
-    }
-
-    const authHeader = request.headers.authorization
-    if (authHeader?.startsWith('Bearer ')) {
-      const token = authHeader.slice(7)
-      const ctx = deps.liffRuntimeToken.resolveAccessToken(token, liffId)
-      if (ctx) {
-        return sendUserProfile(deps.db, ctx.userId, reply)
+  app.get<{ Querystring: { liffId?: string } }>(
+    '/api/liff/v1/me',
+    async (request, reply) => {
+      const liffId = request.query.liffId
+      if (!liffId) {
+        return reply.status(400).send({ error: 'liffId is required' })
       }
-      // Bearer token invalid — fall through to session auth for same-origin development
-    }
 
-    // Fallback: same-origin Vine session auth for development
-    const webReq = toWebRequest(request)
-    const authData = await getAuthDataFromRequest(deps.auth, webReq)
-    if (!authData?.id) {
-      return reply.status(401).send({ error: 'Unauthorized' })
-    }
-    return sendUserProfile(deps.db, authData.id, reply)
-  })
+      const authHeader = request.headers.authorization
+      if (authHeader?.startsWith('Bearer ')) {
+        const token = authHeader.slice(7)
+        const ctx = deps.liffRuntimeToken.resolveAccessToken(token, liffId)
+        if (ctx) {
+          return sendUserProfile(deps.db, ctx.userId, reply)
+        }
+        // Bearer token invalid — fall through to session auth for same-origin development
+      }
+
+      // Fallback: same-origin Vine session auth for development
+      const webReq = toWebRequest(request)
+      const authData = await getAuthDataFromRequest(deps.auth, webReq)
+      if (!authData?.id) {
+        return reply.status(401).send({ error: 'Unauthorized' })
+      }
+      return sendUserProfile(deps.db, authData.id, reply)
+    },
+  )
 
   app.post<{ Body: { liffId: string } }>(
     '/api/liff/v1/access-token',
