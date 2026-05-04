@@ -42,4 +42,14 @@ describe('resolveLiffPermanentUrl', () => {
     })
     expect(result).toBe('https://app.example.com/base/extra')
   })
+
+  it('handles endpoint URL with query string and permanent path', () => {
+    const result = resolveLiffPermanentUrl({
+      endpointUrl: 'https://app.example.com/fixtures/liff/app?liffId=test-123',
+      permanentPath: '/foo',
+      search: '?x=1',
+      hash: '#bar',
+    })
+    expect(result).toBe('https://app.example.com/fixtures/liff/app/foo?x=1#bar')
+  })
 })

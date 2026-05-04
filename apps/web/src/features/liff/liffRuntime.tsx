@@ -35,10 +35,11 @@ export type LiffRouteShellProps = {
   liffId: string
   permanentPath?: string
   hash?: string
+  search?: string
 }
 
 export const LiffRouteShell = memo(
-  ({ liffId, permanentPath, hash }: LiffRouteShellProps) => {
+  ({ liffId, permanentPath, hash, search }: LiffRouteShellProps) => {
     const { state } = useAuth()
     const [error, setError] = useState<string | null>(null)
     const [runtimeCtx, setRuntimeCtx] = useState<LiffRuntimeContext | null>(null)
@@ -124,6 +125,7 @@ export const LiffRouteShell = memo(
       endpointUrl: runtimeCtx.endpointUrl,
       permanentPath,
       hash,
+      search,
     })
 
     return (
