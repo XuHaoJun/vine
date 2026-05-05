@@ -110,3 +110,24 @@ export const miniAppRecent = pgTable(
     index('miniAppRecent_userId_lastOpened_idx').on(table.userId, table.lastOpenedAt),
   ],
 )
+
+import { jsonb } from 'drizzle-orm/pg-core'
+
+export const miniAppServiceMessageTemplate = pgTable(
+  'miniAppServiceMessageTemplate',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    miniAppId: uuid('miniAppId')
+      .notNull()
+      .references(() => miniApp.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    kind: text('kind').notNull(),
+    languageTag: text('languageTag').notNull(),
+    flexJson: jsonb('flexJson').notNull(),
+    paramsSchema: jsonb('paramsSchema').notNull(),
+    useCase: text('useCase').notNull().default(''),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [index('miniAppSMT_miniAppId_idx').on(table.miniAppId)],
+)
