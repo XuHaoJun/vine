@@ -22,6 +22,7 @@ import { createOAService } from './services/oa'
 import { createOAMessagingService } from './services/oa-messaging'
 import { createOAWebhookDeliveryService } from './services/oa-webhook-delivery'
 import { createLiffService } from './services/liff'
+import { createMiniAppService } from './services/mini-app'
 import { createLiffRuntimeTokenService } from './services/liff-runtime-token'
 import { createStickerMarketServices } from './services/sticker-market'
 import { liffFixturesPublicPlugin } from './plugins/liff-fixtures-public'
@@ -64,6 +65,7 @@ const oaMessaging = createOAMessagingService({
 })
 const webhookDelivery = createOAWebhookDeliveryService({ db, oa, logger })
 const liff = createLiffService({ db })
+const miniApp = createMiniAppService({ db })
 const liffRuntimeToken = createLiffRuntimeTokenService({
   secret:
     process.env['LIFF_RUNTIME_TOKEN_SECRET'] ??
@@ -98,6 +100,7 @@ await app.register(fastifyConnectPlugin, {
     oa,
     webhookDelivery,
     liff,
+    miniApp,
     auth,
     drive,
     stickerMarketUser: {
