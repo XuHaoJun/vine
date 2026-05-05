@@ -87,7 +87,7 @@ describe('LIFF runtime host helpers', () => {
   it('builds native ack JS with an object literal for data', () => {
     const ack = { type: 'liff:sendMessages:done', requestId: 'req-1' }
     const js = buildNativeAckJavaScript(ack)
-    expect(js).toContain("data: {\"")
+    expect(js).toContain('data: {"')
     expect(js).not.toContain('data: "{')
   })
 })

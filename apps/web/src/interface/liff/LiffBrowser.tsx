@@ -67,7 +67,16 @@ export const LiffBrowser = memo(
         scopes,
         lineVersion: LIFF_LINE_VERSION,
       }),
-      [apiBaseUrl, liffId, endpointUrl, endpointOrigin, accessToken, chatId, contextType, scopes],
+      [
+        apiBaseUrl,
+        liffId,
+        endpointUrl,
+        endpointOrigin,
+        accessToken,
+        chatId,
+        contextType,
+        scopes,
+      ],
     )
 
     const src = createLiffIframeSrc(context)
