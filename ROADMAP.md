@@ -46,12 +46,12 @@ admin diagnostics unless they are necessary for developer-facing LINE parity.
 
 The next major theme should be:
 
-**Rich Menu parity and OA manager surface**
+**OA Manager parity**
 
-Milestones 1 and 2 are now complete. Rich Menu parity is the next
-highest-leverage step: it surfaces bot interactions in a persistent,
-always-visible UI that OA managers and bot developers can configure through
-LINE-like workflows.
+Milestones 1 through 4 are now complete. OA Manager parity is the next
+highest-leverage step: it turns the existing Messaging API, webhook, and rich
+menu foundations into a recognizable LINE-like operator surface that OA managers
+can use to run their accounts without relying on console-only workflows.
 
 ## Milestones
 
@@ -187,15 +187,30 @@ Out of scope:
 
 ### Milestone 4: LIFF / Mini App MVP
 
+Status: complete.
+
 Goal: let lightweight web apps run inside Vine conversations with useful context.
 
-Deliverables:
+Completed:
 
 - LIFF app registry under the developer console.
-- Core SDK methods: `init`, `ready`, `getProfile`, `getContext`, `sendMessages`, `shareTargetPicker`, and `closeWindow`.
-- Permanent links into LIFF apps.
-- Mini app container inside the Vine app.
-- Developer playground and fixture apps for integration tests.
+- Core SDK methods: `init`, `ready`, `getProfile`, `getContext`, `sendMessages`, `shareTargetPicker`, `closeWindow`, and `permanentLink.createUrlBy`.
+- Host-mediated `postMessage` runtime with origin validation and bootstrap handshake for web iframe and native WebView.
+- Public LIFF profile endpoint (`GET /api/liff/v1/me`) with short-lived Bearer access tokens.
+- Chat launch context via short-lived launch tokens: `utou`/`group` context for chat opens, `external` for preview/permanent-link opens.
+- Permanent-link route resolution (`/liff/{liffId}/path?query#hash`).
+- Shared LIFF message validator/converter enforcing LINE-like limits: max 5 messages, no quickReply/quoteToken/emojis/trackingId, no template/imagemap, sticker only for `sendMessages`, flex URI-only actions.
+- `sendMessages` insertion into source chat via Zero `message.sendLiff` with membership and sticker entitlement checks.
+- `shareTargetPicker` support for text, image, video, audio, location, and flex URI messages into selected chats.
+- Developer console LIFF URL display, copy actions, and preview open.
+- LIFF fixture app and integration coverage for init, profile, context, sendMessages, shareTargetPicker, closeWindow, invalid messages, origin spoofing, and permanent links.
+
+Remaining hardening (not blocking Milestone 4):
+
+- Mini app gallery / marketplace discovery surface.
+- LIFF app review and approval workflow.
+- Payments inside mini apps.
+- Full `LiffError` parity for every official LINE error code.
 
 Out of scope:
 
