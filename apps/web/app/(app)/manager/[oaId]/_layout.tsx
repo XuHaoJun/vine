@@ -1,11 +1,12 @@
 import { Slot, usePathname, useRouter, Link, useActiveParams } from 'one'
 import { useEffect } from 'react'
-import { SizableText, Spinner, XStack, YStack } from 'tamagui'
+import { SizableText, Spinner, Stack, Text, XStack, YStack } from 'tamagui'
 
 import { showError } from '~/interface/dialogs/actions'
 import { Pressable } from '~/interface/buttons/Pressable'
 import { useTanQuery } from '~/query'
 import { oaClient } from '~/features/oa/client'
+import { miniAppClient } from '~/features/mini-app/client'
 
 function normalizePath(path: string) {
   return path.replace(/\/$/, '') || '/'
@@ -45,6 +46,12 @@ export default function ManagerLayout() {
 
   const oa = accountData?.account
   const isRichMenuActive = path.includes('/richmenu')
+
+  const linkedApps = useTanQuery({
+    queryKey: ['miniApp', 'linkedToOa', oaId],
+    queryFn: () => miniAppClient.listLinkedToOa({ oaId: oaId! }),
+    enabled: !!oaId,
+  })
 
   return (
     <YStack
@@ -109,6 +116,36 @@ export default function ManagerLayout() {
               </Pressable>
             </Link>
           </YStack>
+
+          {linkedApps.data?.miniApps.length ? (
+            <YStack gap="$1" mt="$3">
+              <Text size="$1" fontWeight="700" color="$color9" textTransform="uppercase" mb="$2">
+                Linked Mini Apps
+              </Text>
+              {linkedApps.data.miniApps.map((m) => (
+                <Pressable
+                  key={m.id}
+                  py="$2"
+                  px="$3"
+                  rounded="$3"
+                  hoverStyle={{ bg: '$color2' }}
+                  onPress={() => router.push(`/m/${m.id}` as any)}
+                >
+                  <XStack items="center" gap="$2">
+                    <Stack w={20} h={20} rounded="$1" overflow="hidden" bg="$color3">
+                      {m.iconUrl && <img src={m.iconUrl} width={20} height={20} alt="" />}
+                    </Stack>
+                    <Text size="$2" fontWeight="500" color="$color11">
+                      {m.name}
+                    </Text>
+                  </XStack>
+                </Pressable>
+              ))}
+              <Text size="$1" color="$color9" px="$3" mt="$1">
+                To edit linked Mini Apps, go to the developer console for the Mini App.
+              </Text>
+            </YStack>
+          ) : null}
         </YStack>
 
         {/* Main content */}

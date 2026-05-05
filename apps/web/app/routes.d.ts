@@ -35,12 +35,14 @@ declare module 'one' {
         | `/(app)/home/(tabs)`
         | `/(app)/home/(tabs)/main`
         | `/(app)/home/(tabs)/main/`
+        | `/(app)/home/(tabs)/main/mini-apps`
         | `/(app)/home/(tabs)/main/settings`
         | `/(app)/home/(tabs)/talks`
         | `/(app)/home/(tabs)/talks/`
         | `/(app)/home/(tabs)/talks/requests`
         | `/(app)/home/main`
         | `/(app)/home/main/`
+        | `/(app)/home/main/mini-apps`
         | `/(app)/home/main/settings`
         | `/(app)/home/talks`
         | `/(app)/home/talks/`
@@ -54,6 +56,7 @@ declare module 'one' {
         | `/(app)/pay/result`
         | `/(app)/store`
         | `/(app)/store/search`
+        | `/(public)/mini-apps`
         | `/_sitemap`
         | `/admin/featured-shelves`
         | `/admin/payouts`
@@ -82,12 +85,14 @@ declare module 'one' {
         | `/home/(tabs)`
         | `/home/(tabs)/main`
         | `/home/(tabs)/main/`
+        | `/home/(tabs)/main/mini-apps`
         | `/home/(tabs)/main/settings`
         | `/home/(tabs)/talks`
         | `/home/(tabs)/talks/`
         | `/home/(tabs)/talks/requests`
         | `/home/main`
         | `/home/main/`
+        | `/home/main/mini-apps`
         | `/home/main/settings`
         | `/home/talks`
         | `/home/talks/`
@@ -97,6 +102,7 @@ declare module 'one' {
         | `/manager/[oaId]/richmenu/create`
         | `/manager/[oaId]/richmenu/users`
         | `/manager/create`
+        | `/mini-apps`
         | `/pay/redirect`
         | `/pay/result`
         | `/store`
@@ -120,6 +126,10 @@ declare module 'one' {
         | `/(app)/developers/console/login-channel/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/developers/console/login-channel/${OneRouter.SingleRoutePart<T>}/liff`
         | `/(app)/developers/console/provider/${OneRouter.SingleRoutePart<T>}`
+        | `/(app)/developers/console/provider/${OneRouter.SingleRoutePart<T>}/mini-app`
+        | `/(app)/developers/console/provider/${OneRouter.SingleRoutePart<T>}/mini-app/${OneRouter.SingleRoutePart<T>}`
+        | `/(app)/developers/console/provider/${OneRouter.SingleRoutePart<T>}/mini-app/${OneRouter.SingleRoutePart<T>}/oa-links`
+        | `/(app)/developers/console/provider/${OneRouter.SingleRoutePart<T>}/mini-app/new`
         | `/(app)/home/(tabs)/talks/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/home/talks/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/liff/${OneRouter.SingleRoutePart<T>}`
@@ -130,6 +140,8 @@ declare module 'one' {
         | `/(app)/oa/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/store/${OneRouter.SingleRoutePart<T>}`
         | `/(public)/invite/${OneRouter.SingleRoutePart<T>}/page`
+        | `/(public)/m/${OneRouter.SingleRoutePart<T>}`
+        | `/(public)/m/${OneRouter.SingleRoutePart<T>}/${string}`
         | `/admin/sticker-reviews/${OneRouter.SingleRoutePart<T>}`
         | `/admin/trust-reports/${OneRouter.SingleRoutePart<T>}`
         | `/auth/signup/${OneRouter.SingleRoutePart<T>}`
@@ -148,12 +160,18 @@ declare module 'one' {
         | `/developers/console/login-channel/${OneRouter.SingleRoutePart<T>}`
         | `/developers/console/login-channel/${OneRouter.SingleRoutePart<T>}/liff`
         | `/developers/console/provider/${OneRouter.SingleRoutePart<T>}`
+        | `/developers/console/provider/${OneRouter.SingleRoutePart<T>}/mini-app`
+        | `/developers/console/provider/${OneRouter.SingleRoutePart<T>}/mini-app/${OneRouter.SingleRoutePart<T>}`
+        | `/developers/console/provider/${OneRouter.SingleRoutePart<T>}/mini-app/${OneRouter.SingleRoutePart<T>}/oa-links`
+        | `/developers/console/provider/${OneRouter.SingleRoutePart<T>}/mini-app/new`
         | `/home/(tabs)/talks/${OneRouter.SingleRoutePart<T>}`
         | `/home/talks/${OneRouter.SingleRoutePart<T>}`
         | `/invite/${OneRouter.SingleRoutePart<T>}/page`
         | `/liff/${OneRouter.SingleRoutePart<T>}`
         | `/liff/${OneRouter.SingleRoutePart<T>}/${OneRouter.SingleRoutePart<T>}`
         | `/liff/${string}`
+        | `/m/${OneRouter.SingleRoutePart<T>}`
+        | `/m/${OneRouter.SingleRoutePart<T>}/${string}`
         | `/manager/${OneRouter.SingleRoutePart<T>}`
         | `/manager/${OneRouter.SingleRoutePart<T>}/richmenu/${OneRouter.SingleRoutePart<T>}`
         | `/oa/${OneRouter.SingleRoutePart<T>}`
@@ -177,6 +195,10 @@ declare module 'one' {
         | `/(app)/developers/console/login-channel/[loginChannelId]`
         | `/(app)/developers/console/login-channel/[loginChannelId]/liff`
         | `/(app)/developers/console/provider/[providerId]`
+        | `/(app)/developers/console/provider/[providerId]/mini-app`
+        | `/(app)/developers/console/provider/[providerId]/mini-app/[miniAppId]`
+        | `/(app)/developers/console/provider/[providerId]/mini-app/[miniAppId]/oa-links`
+        | `/(app)/developers/console/provider/[providerId]/mini-app/new`
         | `/(app)/home/(tabs)/talks/[chatId]`
         | `/(app)/home/talks/[chatId]`
         | `/(app)/liff/[...liffPath]`
@@ -187,6 +209,8 @@ declare module 'one' {
         | `/(app)/oa/[oaId]`
         | `/(app)/store/[packageId]`
         | `/(public)/invite/[inviteCode]/page`
+        | `/(public)/m/[miniAppId]`
+        | `/(public)/m/[miniAppId]/[...rest]`
         | `/admin/sticker-reviews/[packageId]`
         | `/admin/trust-reports/[reportId]`
         | `/auth/signup/[method]`
@@ -205,12 +229,18 @@ declare module 'one' {
         | `/developers/console/login-channel/[loginChannelId]`
         | `/developers/console/login-channel/[loginChannelId]/liff`
         | `/developers/console/provider/[providerId]`
+        | `/developers/console/provider/[providerId]/mini-app`
+        | `/developers/console/provider/[providerId]/mini-app/[miniAppId]`
+        | `/developers/console/provider/[providerId]/mini-app/[miniAppId]/oa-links`
+        | `/developers/console/provider/[providerId]/mini-app/new`
         | `/home/(tabs)/talks/[chatId]`
         | `/home/talks/[chatId]`
         | `/invite/[inviteCode]/page`
         | `/liff/[...liffPath]`
         | `/liff/[liffId]`
         | `/liff/[liffId]/[permanentPath]`
+        | `/m/[miniAppId]`
+        | `/m/[miniAppId]/[...rest]`
         | `/manager/[oaId]`
         | `/manager/[oaId]/richmenu/[richMenuId]`
         | `/oa/[oaId]`
@@ -235,6 +265,10 @@ declare module 'one' {
         '/(app)/developers/console/login-channel/[loginChannelId]': RouteInfo<{ loginChannelId: string }>
         '/(app)/developers/console/login-channel/[loginChannelId]/liff': RouteInfo<{ loginChannelId: string }>
         '/(app)/developers/console/provider/[providerId]': RouteInfo<{ providerId: string }>
+        '/(app)/developers/console/provider/[providerId]/mini-app': RouteInfo<{ providerId: string }>
+        '/(app)/developers/console/provider/[providerId]/mini-app/[miniAppId]': RouteInfo<{ providerId: string; miniAppId: string }>
+        '/(app)/developers/console/provider/[providerId]/mini-app/[miniAppId]/oa-links': RouteInfo<{ providerId: string; miniAppId: string }>
+        '/(app)/developers/console/provider/[providerId]/mini-app/new': RouteInfo<{ providerId: string }>
         '/(app)/home/(tabs)/talks/[chatId]': RouteInfo<{ chatId: string }>
         '/(app)/home/talks/[chatId]': RouteInfo<{ chatId: string }>
         '/(app)/liff/[...liffPath]': RouteInfo<{ liffPath: string[] }>
@@ -245,6 +279,8 @@ declare module 'one' {
         '/(app)/oa/[oaId]': RouteInfo<{ oaId: string }>
         '/(app)/store/[packageId]': RouteInfo<{ packageId: string }>
         '/(public)/invite/[inviteCode]/page': RouteInfo<{ inviteCode: string }>
+        '/(public)/m/[miniAppId]': RouteInfo<{ miniAppId: string }>
+        '/(public)/m/[miniAppId]/[...rest]': RouteInfo<{ miniAppId: string; rest: string[] }>
         '/admin/sticker-reviews/[packageId]': RouteInfo<{ packageId: string }>
         '/admin/trust-reports/[reportId]': RouteInfo<{ reportId: string }>
         '/auth/signup/[method]': RouteInfo<{ method: string }>
@@ -263,12 +299,18 @@ declare module 'one' {
         '/developers/console/login-channel/[loginChannelId]': RouteInfo<{ loginChannelId: string }>
         '/developers/console/login-channel/[loginChannelId]/liff': RouteInfo<{ loginChannelId: string }>
         '/developers/console/provider/[providerId]': RouteInfo<{ providerId: string }>
+        '/developers/console/provider/[providerId]/mini-app': RouteInfo<{ providerId: string }>
+        '/developers/console/provider/[providerId]/mini-app/[miniAppId]': RouteInfo<{ providerId: string; miniAppId: string }>
+        '/developers/console/provider/[providerId]/mini-app/[miniAppId]/oa-links': RouteInfo<{ providerId: string; miniAppId: string }>
+        '/developers/console/provider/[providerId]/mini-app/new': RouteInfo<{ providerId: string }>
         '/home/(tabs)/talks/[chatId]': RouteInfo<{ chatId: string }>
         '/home/talks/[chatId]': RouteInfo<{ chatId: string }>
         '/invite/[inviteCode]/page': RouteInfo<{ inviteCode: string }>
         '/liff/[...liffPath]': RouteInfo<{ liffPath: string[] }>
         '/liff/[liffId]': RouteInfo<{ liffId: string }>
         '/liff/[liffId]/[permanentPath]': RouteInfo<{ liffId: string; permanentPath: string }>
+        '/m/[miniAppId]': RouteInfo<{ miniAppId: string }>
+        '/m/[miniAppId]/[...rest]': RouteInfo<{ miniAppId: string; rest: string[] }>
         '/manager/[oaId]': RouteInfo<{ oaId: string }>
         '/manager/[oaId]/richmenu/[richMenuId]': RouteInfo<{ oaId: string; richMenuId: string }>
         '/oa/[oaId]': RouteInfo<{ oaId: string }>
