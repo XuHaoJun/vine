@@ -72,6 +72,50 @@ Vine counts sent message usage by recipient, not by the number of message
 objects in a request. A push request containing five message objects to one
 user counts as one usage unit.
 
+## Mini App Service Messages
+
+```text
+POST /api/oa/v2/mini-app/notifier/send
+```
+
+Headers:
+
+```text
+Authorization: Bearer {loginChannelAccessToken}
+```
+
+Body:
+
+```json
+{
+  "liffAccessToken": "...",
+  "templateName": "reservation_confirmation_en",
+  "params": { "name": "Noah", "button_uri_1": "https://..." }
+}
+```
+
+Responses:
+
+| Status | Body | Reason |
+| --- | --- | --- |
+| `200` | `{ "status": "sent", "messageId": "..." }` | Success |
+| `401` | `{ "error": "Invalid or missing Login Channel access token" }` | Invalid or missing Login Channel access token |
+| `401` | `{ "error": "..." }` | Invalid LIFF access token |
+| `403` | `{ "error": "..." }` | Mini App not published, template not in this Mini App, or token-channel mismatch |
+| `404` | `{ "error": "..." }` | Mini App or template not found |
+| `422` | `{ "error": "..." }` | Parameter validation or Flex Message validation failure |
+| `429` | `{ "error": "...", "retryAfterSec": 86400 }` | Rate limit exceeded: 5 messages per 24 hours per (miniAppId, userId) |
+
+### Differences from official LINE
+
+- No service-notification-token chain. Each send is one-shot. Rate-limited to
+  5 messages per 24 hours per (miniAppId, userId) instead of LINE's stateful
+  `remainingCount` / 1-year session model.
+- No region-specific notice chats. All Service Messages from all Mini Apps in
+  the Vine instance land in a single per-user "Mini App 通知" chat.
+- No verified-vs-unverified split. Any published Mini App may send Service
+  Messages.
+
 ## Differences From Official LINE Cloud
 
 - Vine uses `/api/oa/v2`, not `https://api.line.me/v2`.
