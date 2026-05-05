@@ -1,13 +1,17 @@
 import { router } from 'one'
-import { ScrollView, Stack, Text, XStack, YStack } from 'tamagui'
+import { ScrollView, Text, XStack, YStack } from 'tamagui'
 
 import { miniAppClient } from '~/features/mini-app/client'
 import { useTanQuery } from '~/query'
 
-function Card({ m }: { m: { id: string; name: string; iconUrl?: string; category?: string } }) {
+function Card({
+  m,
+}: {
+  m: { id: string; name: string; iconUrl?: string; category?: string }
+}) {
   return (
     <YStack
-      w={120}
+      width={120}
       gap="$1"
       p="$2"
       rounded="$3"
@@ -15,9 +19,9 @@ function Card({ m }: { m: { id: string; name: string; iconUrl?: string; category
       cursor="pointer"
       onPress={() => router.push(`/m/${m.id}` as any)}
     >
-      <Stack
-        w={104}
-        h={104}
+      <YStack
+        width={104}
+        height={104}
         rounded="$3"
         items="center"
         justify="center"
@@ -31,7 +35,7 @@ function Card({ m }: { m: { id: string; name: string; iconUrl?: string; category
             📱
           </Text>
         )}
-      </Stack>
+      </YStack>
       <Text fontWeight="600" numberOfLines={1} fontSize={13}>
         {m.name}
       </Text>

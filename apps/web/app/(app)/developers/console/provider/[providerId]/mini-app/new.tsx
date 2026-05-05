@@ -11,7 +11,8 @@ import { Input } from '~/interface/forms/Input'
 import { Select } from '~/interface/forms/Select'
 import { showToast } from '~/interface/toast/Toast'
 
-const route = createRoute<'/(app)/developers/console/provider/[providerId]/mini-app/new'>()
+const route =
+  createRoute<'/(app)/developers/console/provider/[providerId]/mini-app/new'>()
 
 export const NewMiniAppPage = memo(() => {
   const params = useActiveParams<{ providerId: string }>()
@@ -34,10 +35,16 @@ export const NewMiniAppPage = memo(() => {
 
   // 2. Fetch LIFF apps for all login channels
   const { data: liffAppsData, isLoading: liffAppsLoading } = useTanQuery({
-    queryKey: ['liff', 'apps', 'all', providerId, loginChannels.map((c) => c.id).join(',')],
+    queryKey: [
+      'liff',
+      'apps',
+      'all',
+      providerId,
+      loginChannels.map((c) => c.id).join(','),
+    ],
     queryFn: async () => {
       const results = await Promise.all(
-        loginChannels.map((ch) => liffClient.listLiffApps({ loginChannelId: ch.id }))
+        loginChannels.map((ch) => liffClient.listLiffApps({ loginChannelId: ch.id })),
       )
       return results.flatMap((r) => r.apps)
     },
@@ -52,11 +59,11 @@ export const NewMiniAppPage = memo(() => {
   })
 
   const usedLiffAppIds = new Set(
-    (existingMiniAppsData?.miniApps ?? []).map((m) => m.liffAppId)
+    (existingMiniAppsData?.miniApps ?? []).map((m) => m.liffAppId),
   )
 
   const availableLiffApps = (liffAppsData ?? []).filter(
-    (app) => !usedLiffAppIds.has(app.liffId)
+    (app) => !usedLiffAppIds.has(app.liffId),
   )
 
   const isLoading = channelsLoading || liffAppsLoading
@@ -81,12 +88,10 @@ export const NewMiniAppPage = memo(() => {
       const newId = data.miniApp?.id
       if (newId) {
         router.push(
-          `/developers/console/provider/${providerId}/mini-app/${newId}` as never
+          `/developers/console/provider/${providerId}/mini-app/${newId}` as never,
         )
       } else {
-        router.push(
-          `/developers/console/provider/${providerId}/mini-app` as never
-        )
+        router.push(`/developers/console/provider/${providerId}/mini-app` as never)
       }
     },
     onError: () => {
@@ -106,7 +111,7 @@ export const NewMiniAppPage = memo(() => {
   }
 
   return (
-    <YStack gap="$6" maxWidth={480}>
+    <YStack gap="$6" maxW={480}>
       {/* Breadcrumb */}
       <XStack items="center" gap="$2">
         <Button
@@ -152,9 +157,7 @@ export const NewMiniAppPage = memo(() => {
             size="$2"
             variant="outlined"
             onPress={() =>
-              router.push(
-                `/developers/console/provider/${providerId}` as never
-              )
+              router.push(`/developers/console/provider/${providerId}` as never)
             }
           >
             Go to Provider

@@ -98,5 +98,11 @@ export function createLiffRuntimeTokenService(input: {
     return ctx
   }
 
-  return { createAccessToken, resolveAccessToken, resolveAccessTokenAny, createLaunchToken, resolveLaunchToken }
+  return {
+    createAccessToken,
+    resolveAccessToken,
+    resolveAccessTokenAny,
+    createLaunchToken,
+    resolveLaunchToken,
+  }
 }

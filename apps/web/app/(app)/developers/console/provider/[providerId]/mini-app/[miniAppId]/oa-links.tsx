@@ -19,7 +19,11 @@ export const MiniAppOaLinksPage = memo(() => {
   const qc = useTanQueryClient()
   const { miniAppId } = params
 
-  const { data: miniAppData, isLoading: isLoadingMiniApp, isError: isMiniAppError } = useTanQuery({
+  const {
+    data: miniAppData,
+    isLoading: isLoadingMiniApp,
+    isError: isMiniAppError,
+  } = useTanQuery({
     queryKey: ['mini-app', 'detail', miniAppId],
     queryFn: () => miniAppClient.getMiniApp({ id: miniAppId }),
     enabled: !!miniAppId,
@@ -55,7 +59,7 @@ export const MiniAppOaLinksPage = memo(() => {
   const isLoading = isLoadingMiniApp || isLoadingOas
 
   return (
-    <YStack gap="$6" maxWidth={560}>
+    <YStack gap="$6" maxW={560}>
       {/* Breadcrumb */}
       <XStack items="center" gap="$2">
         <Button
@@ -94,8 +98,8 @@ export const MiniAppOaLinksPage = memo(() => {
               {miniApp.name}
             </SizableText>
             <SizableText size="$3" color="$color10">
-              Linked OAs surface this Mini App on their profile and in users' 'From your OAs'
-              gallery.
+              Linked OAs surface this Mini App on their profile and in users' 'From your
+              OAs' gallery.
             </SizableText>
           </YStack>
 
@@ -148,7 +152,9 @@ export const MiniAppOaLinksPage = memo(() => {
                       variant={isLinked ? 'outlined' : undefined}
                       disabled={isPending}
                       onPress={() =>
-                        isLinked ? unlinkMutation.mutate(oa.id) : linkMutation.mutate(oa.id)
+                        isLinked
+                          ? unlinkMutation.mutate(oa.id)
+                          : linkMutation.mutate(oa.id)
                       }
                     >
                       {isLinked ? 'Unlink' : 'Link'}

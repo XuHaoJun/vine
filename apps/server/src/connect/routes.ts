@@ -47,7 +47,12 @@ export function connectRoutes(deps: ConnectDeps) {
     greeterHandler(router)
     oaHandler(deps)(router)
     liffHandler(deps)(router)
-    miniAppHandler({ miniApp: deps.miniApp, template: deps.miniAppTemplate, serviceMessage: deps.miniAppSvcMsg, auth: deps.auth })(router)
+    miniAppHandler({
+      miniApp: deps.miniApp,
+      template: deps.miniAppTemplate,
+      serviceMessage: deps.miniAppSvcMsg,
+      auth: deps.auth,
+    })(router)
     router.service(
       StickerMarketUserService,
       withAuthService(

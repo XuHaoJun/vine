@@ -202,7 +202,7 @@ export const LiffBrowser = memo(
       }
       window.addEventListener('message', handler)
       return () => window.removeEventListener('message', handler)
-    }, [context, endpointOrigin])
+    }, [context, endpointOrigin, miniApp])
 
     return (
       <YStack flex={1} style={{ height }}>

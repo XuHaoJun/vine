@@ -14,7 +14,11 @@ type Props = {
   onShareToChat: () => void
 }
 
-export function MiniAppActionMenu({ miniApp: _miniApp, permanentLink, onShareToChat }: Props) {
+export function MiniAppActionMenu({
+  miniApp: _miniApp,
+  permanentLink,
+  onShareToChat,
+}: Props) {
   const [open, setOpen] = useState(false)
 
   const handleShareToChat = () => {

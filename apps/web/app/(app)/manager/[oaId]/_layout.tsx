@@ -1,6 +1,6 @@
 import { Slot, usePathname, useRouter, Link, useActiveParams } from 'one'
 import { useEffect } from 'react'
-import { SizableText, Spinner, Stack, Text, XStack, YStack } from 'tamagui'
+import { SizableText, Spinner, XStack, YStack } from 'tamagui'
 
 import { showError } from '~/interface/dialogs/actions'
 import { Pressable } from '~/interface/buttons/Pressable'
@@ -29,6 +29,12 @@ export default function ManagerLayout() {
     enabled: !!oaId,
   })
 
+  const linkedApps = useTanQuery({
+    queryKey: ['miniApp', 'linkedToOa', oaId],
+    queryFn: () => miniAppClient.listLinkedToOa({ oaId: oaId! }),
+    enabled: !!oaId,
+  })
+
   useEffect(() => {
     if (isError) {
       showError(new Error('Account not found or access denied'))
@@ -46,12 +52,6 @@ export default function ManagerLayout() {
 
   const oa = accountData?.account
   const isRichMenuActive = path.includes('/richmenu')
-
-  const linkedApps = useTanQuery({
-    queryKey: ['miniApp', 'linkedToOa', oaId],
-    queryFn: () => miniAppClient.listLinkedToOa({ oaId: oaId! }),
-    enabled: !!oaId,
-  })
 
   return (
     <YStack
@@ -119,9 +119,15 @@ export default function ManagerLayout() {
 
           {linkedApps.data?.miniApps.length ? (
             <YStack gap="$1" mt="$3">
-              <Text size="$1" fontWeight="700" color="$color9" textTransform="uppercase" mb="$2">
+              <SizableText
+                size="$1"
+                fontWeight="700"
+                color="$color9"
+                textTransform="uppercase"
+                mb="$2"
+              >
                 Linked Mini Apps
-              </Text>
+              </SizableText>
               {linkedApps.data.miniApps.map((m) => (
                 <Pressable
                   key={m.id}
@@ -132,18 +138,18 @@ export default function ManagerLayout() {
                   onPress={() => router.push(`/m/${m.id}` as any)}
                 >
                   <XStack items="center" gap="$2">
-                    <Stack w={20} h={20} rounded="$1" overflow="hidden" bg="$color3">
+                    <YStack width={20} height={20} rounded="$1" overflow="hidden" bg="$color3">
                       {m.iconUrl && <img src={m.iconUrl} width={20} height={20} alt="" />}
-                    </Stack>
-                    <Text size="$2" fontWeight="500" color="$color11">
+                    </YStack>
+                    <SizableText size="$2" fontWeight="500" color="$color11">
                       {m.name}
-                    </Text>
+                    </SizableText>
                   </XStack>
                 </Pressable>
               ))}
-              <Text size="$1" color="$color9" px="$3" mt="$1">
+              <SizableText size="$1" color="$color9" px="$3" mt="$1">
                 To edit linked Mini Apps, go to the developer console for the Mini App.
-              </Text>
+              </SizableText>
             </YStack>
           ) : null}
         </YStack>

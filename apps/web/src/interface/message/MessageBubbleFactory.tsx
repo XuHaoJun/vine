@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react'
-import { SizableText, XStack, YStack, Stack, Text } from 'tamagui'
+import { SizableText, XStack, YStack, Text } from 'tamagui'
 import { LfBubble, LfCarousel } from '@vine/line-flex'
 import type { LFexBubble, LFexCarousel } from '@vine/line-flex'
 import type { ImagemapAction, ImagemapVideo } from '@vine/imagemap-schema'
@@ -154,9 +154,9 @@ function ServiceMessageFooter({ miniAppId }: { miniAppId: string }) {
       onPress={() => router.push(`/m/${miniAppId}` as any)}
     >
       {meta.data.iconUrl && (
-        <Stack w={20} h={20} rounded="$1" overflow="hidden">
+        <YStack width={20} height={20} rounded="$1" overflow="hidden">
           <img src={meta.data.iconUrl} width={20} height={20} alt="" />
-        </Stack>
+        </YStack>
       )}
       <Text fontSize={12} color="$color11" numberOfLines={1}>
         {meta.data.name}

@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createMiniAppTemplateService, BUILTIN_TEMPLATE_KINDS } from './mini-app-service-message-templates'
+import {
+  createMiniAppTemplateService,
+  BUILTIN_TEMPLATE_KINDS,
+} from './mini-app-service-message-templates'
 
 describe('createMiniAppTemplateService', () => {
   it('caps templates per mini app at 20', async () => {

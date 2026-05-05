@@ -2,19 +2,14 @@ import { useParams, createRoute } from 'one'
 import { useState } from 'react'
 import { useTanQuery, useTanMutation, useTanQueryClient } from '~/query'
 import { miniAppClient } from '~/features/mini-app/client'
-import {
-  Button,
-  Input,
-  ScrollView,
-  Select,
-  Stack,
-  Text,
-  XStack,
-  YStack,
-} from 'tamagui'
+import { ScrollView, Text, XStack, YStack } from 'tamagui'
+import { Button } from '~/interface/buttons/Button'
+import { Input } from '~/interface/forms/Input'
+import { Select } from '~/interface/forms/Select'
 import { showToast } from '~/interface/toast/Toast'
 
-const route = createRoute<'/(app)/developers/console/provider/[providerId]/mini-app/[miniAppId]/service-templates'>()
+const route =
+  createRoute<'/(app)/developers/console/provider/[providerId]/mini-app/[miniAppId]/service-templates'>()
 
 const KINDS = [
   'reservation_confirmation',
@@ -34,7 +29,7 @@ export default function ServiceTemplatesPage() {
   })
 
   const [showAdd, setShowAdd] = useState(false)
-  const [kind, setKind] = useState(KINDS[0])
+  const [kind, setKind] = useState<string>(KINDS[0]!)
   const [language, setLanguage] = useState('en')
   const [name, setName] = useState('')
   const [flexJson, setFlexJson] = useState('{ "type": "bubble" }')
@@ -70,12 +65,15 @@ export default function ServiceTemplatesPage() {
   const test = useTanMutation({
     mutationFn: (templateId: string) =>
       miniAppClient.sendTestServiceMessage({ templateId, params: {} }),
-    onSuccess: () => showToast('Test message sent — check your "Mini App 通知" chat', { type: 'success' }),
+    onSuccess: () =>
+      showToast('Test message sent — check your "Mini App 通知" chat', {
+        type: 'success',
+      }),
     onError: (e) => showToast(`Failed: ${(e as Error).message}`, { type: 'error' }),
   })
 
   return (
-    <YStack p="$4" gap="$4" maxWidth={720}>
+    <YStack p="$4" gap="$4" maxW={720}>
       <XStack justify="space-between" items="center">
         <Text fontSize={20} fontWeight="700" color="$color12">
           Service Message Templates
@@ -86,36 +84,38 @@ export default function ServiceTemplatesPage() {
       </XStack>
 
       {showAdd && (
-        <YStack
-          p="$3"
-          rounded="$3"
-          borderWidth={1}
-          borderColor="$borderColor"
-          gap="$2"
-        >
-          <Text fontSize={14} fontWeight="600">Kind</Text>
-          <Select value={kind} onValueChange={setKind}>
-            <Select.Trigger><Select.Value /></Select.Trigger>
-            <Select.Content>
-              {KINDS.map((k) => (
-                <Select.Item key={k} value={k}>
-                  <Select.ItemText>{k}</Select.ItemText>
-                </Select.Item>
-              ))}
-            </Select.Content>
-          </Select>
+        <YStack p="$3" rounded="$3" borderWidth={1} borderColor="$borderColor" gap="$2">
+          <Text fontSize={14} fontWeight="600">
+            Kind
+          </Text>
+          <Select
+            value={kind}
+            onValueChange={(v) => setKind(v)}
+            options={KINDS.map((k) => ({ label: k, value: k }))}
+            placeholder="Select kind..."
+          />
 
-          <Text fontSize={14} fontWeight="600">Language</Text>
-          <Input value={language} onChangeText={setLanguage} placeholder="en, zh-Hant, ..." />
+          <Text fontSize={14} fontWeight="600">
+            Language
+          </Text>
+          <Input
+            value={language}
+            onChangeText={setLanguage}
+            placeholder="en, zh-Hant, ..."
+          />
 
-          <Text fontSize={14} fontWeight="600">Template name</Text>
+          <Text fontSize={14} fontWeight="600">
+            Template name
+          </Text>
           <Input
             value={name}
             onChangeText={setName}
             placeholder={`${kind}_${language}`}
           />
 
-          <Text fontSize={14} fontWeight="600">Flex JSON</Text>
+          <Text fontSize={14} fontWeight="600">
+            Flex JSON
+          </Text>
           <Input
             multiline
             numberOfLines={8}
@@ -123,11 +123,12 @@ export default function ServiceTemplatesPage() {
             onChangeText={setFlexJson}
           />
 
-          <Text fontSize={14} fontWeight="600">Use case</Text>
+          <Text fontSize={14} fontWeight="600">
+            Use case
+          </Text>
           <Input value={useCase} onChangeText={setUseCase} />
 
           <Button
-            theme="active"
             disabled={!name || create.isPending}
             onPress={() => create.mutate()}
           >
@@ -138,7 +139,7 @@ export default function ServiceTemplatesPage() {
 
       <YStack gap="$2">
         {list.data?.templates.map((t) => (
-          <Stack
+          <YStack
             key={t.id}
             p="$3"
             rounded="$3"
@@ -161,16 +162,12 @@ export default function ServiceTemplatesPage() {
                 <Button size="$2" onPress={() => test.mutate(t.id)}>
                   Send test
                 </Button>
-                <Button
-                  size="$2"
-                  theme="red"
-                  onPress={() => remove.mutate(t.id)}
-                >
+                <Button size="$2" theme="red" onPress={() => remove.mutate(t.id)}>
                   Delete
                 </Button>
               </XStack>
             </XStack>
-          </Stack>
+          </YStack>
         ))}
         {list.data?.templates.length === 0 && (
           <Text color="$color10">No templates yet.</Text>

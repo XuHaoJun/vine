@@ -1,5 +1,5 @@
 import { router } from 'one'
-import { ScrollView, Stack, Text, XStack, YStack } from 'tamagui'
+import { ScrollView, Text, XStack, YStack } from 'tamagui'
 
 import { Avatar } from '~/interface/avatars/Avatar'
 import { Button } from '~/interface/buttons/Button'
@@ -383,7 +383,12 @@ export function OADetailContent({
 
             {linkedApps.data?.miniApps.length ? (
               <YStack gap="$2" mb="$4">
-                <Text fontSize={12} fontWeight="600" color="$color10" textTransform="uppercase">
+                <Text
+                  fontSize={12}
+                  fontWeight="600"
+                  color="$color10"
+                  textTransform="uppercase"
+                >
                   Mini Apps
                 </Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -391,18 +396,18 @@ export function OADetailContent({
                     {linkedApps.data.miniApps.map((m) => (
                       <YStack
                         key={m.id}
-                        w={80}
+                        width={80}
                         items="center"
                         cursor="pointer"
                         onPress={() => router.push(`/m/${m.id}` as any)}
                       >
-                        <Stack w={56} h={56} rounded="$3" overflow="hidden" bg="$color3">
+                        <YStack width={56} height={56} rounded="$3" overflow="hidden" bg="$color3">
                           {m.iconUrl ? (
                             <img src={m.iconUrl} width={56} height={56} alt="" />
                           ) : (
                             <Text fontSize={24}>📱</Text>
                           )}
-                        </Stack>
+                        </YStack>
                         <Text fontSize={12} numberOfLines={1} color="$color11">
                           {m.name}
                         </Text>

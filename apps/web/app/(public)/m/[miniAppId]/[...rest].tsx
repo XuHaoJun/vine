@@ -72,7 +72,8 @@ export default function MiniAppPathSuffixPage() {
     )
   }
 
-  const forwardPath = '/' + restPath + (search ? (search.startsWith('?') ? search : '?' + search) : '')
+  const forwardPath =
+    '/' + restPath + (search ? (search.startsWith('?') ? search : '?' + search) : '')
 
   return <MiniAppShell miniApp={miniApp} forwardPath={forwardPath} />
 }

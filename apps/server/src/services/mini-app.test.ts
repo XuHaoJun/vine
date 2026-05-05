@@ -91,16 +91,24 @@ describe('createMiniAppService', () => {
       .mockReturnValueOnce({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([makeRow({ iconUrl: 'https://x', isPublished: false })]),
+            limit: vi
+              .fn()
+              .mockResolvedValue([makeRow({ iconUrl: 'https://x', isPublished: false })]),
           }),
         }),
       })
       .mockReturnValueOnce({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([
-              makeRow({ iconUrl: 'https://x', isPublished: false, publishedAt: '2026-05-05T00:00:00Z' }),
-            ]),
+            limit: vi
+              .fn()
+              .mockResolvedValue([
+                makeRow({
+                  iconUrl: 'https://x',
+                  isPublished: false,
+                  publishedAt: '2026-05-05T00:00:00Z',
+                }),
+              ]),
           }),
         }),
       })
@@ -109,9 +117,11 @@ describe('createMiniAppService', () => {
         if (values.publishedAt) storedPublishedAt = values.publishedAt
         return {
           where: vi.fn().mockReturnValue({
-            returning: vi.fn().mockResolvedValue([
-              makeRow({ isPublished: true, publishedAt: storedPublishedAt }),
-            ]),
+            returning: vi
+              .fn()
+              .mockResolvedValue([
+                makeRow({ isPublished: true, publishedAt: storedPublishedAt }),
+              ]),
           }),
         }
       }),

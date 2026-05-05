@@ -51,7 +51,9 @@ function toProtoTemplate(row: any) {
   }
 }
 
-export function miniAppImpl(deps: MiniAppHandlerDeps): ServiceImpl<typeof MiniAppService> {
+export function miniAppImpl(
+  deps: MiniAppHandlerDeps,
+): ServiceImpl<typeof MiniAppService> {
   return {
     async listMiniApps(req, ctx) {
       requireAuthData(ctx)
@@ -198,18 +200,24 @@ export function miniAppImpl(deps: MiniAppHandlerDeps): ServiceImpl<typeof MiniAp
 
     async listServiceTemplates(req, ctx) {
       requireAuthData(ctx)
-      if (!req.miniAppId) throw new ConnectError('miniAppId required', Code.InvalidArgument)
+      if (!req.miniAppId)
+        throw new ConnectError('miniAppId required', Code.InvalidArgument)
       const rows = await deps.template.listTemplates(req.miniAppId)
       return { templates: rows.map(toProtoTemplate) }
     },
 
     async createServiceTemplate(req, ctx) {
       requireAuthData(ctx)
-      if (!req.miniAppId) throw new ConnectError('miniAppId required', Code.InvalidArgument)
+      if (!req.miniAppId)
+        throw new ConnectError('miniAppId required', Code.InvalidArgument)
       if (!req.name) throw new ConnectError('name required', Code.InvalidArgument)
       if (!req.kind) throw new ConnectError('kind required', Code.InvalidArgument)
       let flex: unknown
-      try { flex = JSON.parse(req.flexJson) } catch { throw new ConnectError('Invalid flexJson', Code.InvalidArgument) }
+      try {
+        flex = JSON.parse(req.flexJson)
+      } catch {
+        throw new ConnectError('Invalid flexJson', Code.InvalidArgument)
+      }
       try {
         const row = await deps.template.createTemplate({
           miniAppId: req.miniAppId,
@@ -234,7 +242,11 @@ export function miniAppImpl(deps: MiniAppHandlerDeps): ServiceImpl<typeof MiniAp
       if (!req.id) throw new ConnectError('id required', Code.InvalidArgument)
       let flex: unknown | undefined
       if (req.flexJson) {
-        try { flex = JSON.parse(req.flexJson) } catch { throw new ConnectError('Invalid flexJson', Code.InvalidArgument) }
+        try {
+          flex = JSON.parse(req.flexJson)
+        } catch {
+          throw new ConnectError('Invalid flexJson', Code.InvalidArgument)
+        }
       }
       const row = await deps.template.updateTemplate(req.id, {
         flexJson: flex,
@@ -255,7 +267,8 @@ export function miniAppImpl(deps: MiniAppHandlerDeps): ServiceImpl<typeof MiniAp
 
     async sendTestServiceMessage(req, ctx) {
       const auth = requireAuthData(ctx)
-      if (!req.templateId) throw new ConnectError('templateId required', Code.InvalidArgument)
+      if (!req.templateId)
+        throw new ConnectError('templateId required', Code.InvalidArgument)
       const tpl = await deps.template.getTemplate(req.templateId)
       if (!tpl) throw new ConnectError('Template not found', Code.NotFound)
       const params = Object.fromEntries(Object.entries(req.params ?? {}))
@@ -290,6 +303,9 @@ export function miniAppImpl(deps: MiniAppHandlerDeps): ServiceImpl<typeof MiniAp
 
 export function miniAppHandler(deps: MiniAppHandlerDeps) {
   return (router: ConnectRouter) => {
-    router.service(MiniAppService, withAuthService(MiniAppService, deps.auth, miniAppImpl(deps)))
+    router.service(
+      MiniAppService,
+      withAuthService(MiniAppService, deps.auth, miniAppImpl(deps)),
+    )
   }
 }

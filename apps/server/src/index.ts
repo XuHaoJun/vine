@@ -103,18 +103,18 @@ const paymentsEnv = {
 const payments = createPayments(paymentsEnv, db, app.log)
 await registerPaymentsWebhookRoutes(app, { ...payments, db })
 
-  // ConnectRPC routes (GreeterService, OAService, LIFFService, StickerMarketUserService, etc.)
-  await app.register(fastifyConnectPlugin, {
-    routes: connectRoutes({
-      oa,
-      webhookDelivery,
-      liff,
-      miniApp,
-      miniAppTemplate,
-      miniAppSvcMsg,
-      auth,
-      drive,
-      stickerMarketUser: {
+// ConnectRPC routes (GreeterService, OAService, LIFFService, StickerMarketUserService, etc.)
+await app.register(fastifyConnectPlugin, {
+  routes: connectRoutes({
+    oa,
+    webhookDelivery,
+    liff,
+    miniApp,
+    miniAppTemplate,
+    miniAppSvcMsg,
+    auth,
+    drive,
+    stickerMarketUser: {
       db,
       pay: payments.pay,
       mode: paymentsEnv.PAYMENTS_ECPAY_MODE,
@@ -176,7 +176,11 @@ await app.register((instance) =>
     serviceMessage: miniAppSvcMsg,
     auth: {
       validateLoginChannelAccessToken: async (token: string) => {
-        const [record] = await db.select().from(oaAccessToken).where(eq(oaAccessToken.token, token)).limit(1)
+        const [record] = await db
+          .select()
+          .from(oaAccessToken)
+          .where(eq(oaAccessToken.token, token))
+          .limit(1)
         if (!record) return null
         if (record.expiresAt && new Date(record.expiresAt) < new Date()) return null
         const [channel] = await db

@@ -53,7 +53,7 @@ export const MiniAppListPage = memo(() => {
           size="$2"
           onPress={() =>
             router.push(
-              `/developers/console/provider/${providerId}/mini-app/new` as never
+              `/developers/console/provider/${providerId}/mini-app/new` as never,
             )
           }
         >
@@ -75,8 +75,8 @@ export const MiniAppListPage = memo(() => {
       ) : miniApps.length === 0 ? (
         <YStack items="center" py="$10" gap="$3">
           <SizableText size="$3" color="$color10" text="center">
-            No Mini Apps yet. Create one to wrap an existing LIFF app with a
-            gallery-ready presence.
+            No Mini Apps yet. Create one to wrap an existing LIFF app with a gallery-ready
+            presence.
           </SizableText>
         </YStack>
       ) : (
@@ -94,7 +94,7 @@ export const MiniAppListPage = memo(() => {
               hoverStyle={{ shadowColor: '$shadowColor', shadowRadius: 8 }}
               onPress={() =>
                 router.push(
-                  `/developers/console/provider/${providerId}/mini-app/${m.id}` as never
+                  `/developers/console/provider/${providerId}/mini-app/${m.id}` as never,
                 )
               }
             >

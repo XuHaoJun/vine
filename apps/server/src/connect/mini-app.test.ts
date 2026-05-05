@@ -64,21 +64,42 @@ function fakeCtx(authData: { id: string } | null) {
 
 describe('miniAppImpl', () => {
   it('createMiniApp rejects empty providerId', async () => {
-    const impl = miniAppImpl({ miniApp: fakeService(), template: fakeTemplateService(), serviceMessage: fakeServiceMessageService(), auth: fakeAuth() })
+    const impl = miniAppImpl({
+      miniApp: fakeService(),
+      template: fakeTemplateService(),
+      serviceMessage: fakeServiceMessageService(),
+      auth: fakeAuth(),
+    })
     await expect(
-      impl.createMiniApp({ providerId: '', liffAppId: 'l', name: 'n' } as any, fakeCtx({ id: 'u' })),
+      impl.createMiniApp(
+        { providerId: '', liffAppId: 'l', name: 'n' } as any,
+        fakeCtx({ id: 'u' }),
+      ),
     ).rejects.toThrow(/providerId/)
   })
 
   it('createMiniApp rejects empty liffAppId', async () => {
-    const impl = miniAppImpl({ miniApp: fakeService(), template: fakeTemplateService(), serviceMessage: fakeServiceMessageService(), auth: fakeAuth() })
+    const impl = miniAppImpl({
+      miniApp: fakeService(),
+      template: fakeTemplateService(),
+      serviceMessage: fakeServiceMessageService(),
+      auth: fakeAuth(),
+    })
     await expect(
-      impl.createMiniApp({ providerId: 'p', liffAppId: '', name: 'n' } as any, fakeCtx({ id: 'u' })),
+      impl.createMiniApp(
+        { providerId: 'p', liffAppId: '', name: 'n' } as any,
+        fakeCtx({ id: 'u' }),
+      ),
     ).rejects.toThrow(/liffAppId/)
   })
 
   it('createMiniApp returns proto-shaped MiniApp', async () => {
-    const impl = miniAppImpl({ miniApp: fakeService(), template: fakeTemplateService(), serviceMessage: fakeServiceMessageService(), auth: fakeAuth() })
+    const impl = miniAppImpl({
+      miniApp: fakeService(),
+      template: fakeTemplateService(),
+      serviceMessage: fakeServiceMessageService(),
+      auth: fakeAuth(),
+    })
     const res = await impl.createMiniApp(
       { providerId: 'prov-1', liffAppId: 'liff-app-1', name: 'Pizza' } as any,
       fakeCtx({ id: 'u-1' }),

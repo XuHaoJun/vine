@@ -1,6 +1,7 @@
 import { useActiveParams, useRouter, createRoute } from 'one'
 import { memo, useState, useEffect } from 'react'
-import { SizableText, Spinner, Switch, XStack, YStack } from 'tamagui'
+import { SizableText, Spinner, XStack, YStack } from 'tamagui'
+import { Switch } from '~/interface/forms/Switch'
 
 import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
 import { miniAppClient } from '~/features/mini-app/client'
@@ -120,7 +121,7 @@ export const MiniAppSettingsPage = memo(() => {
   const miniAppLink = `/m/${miniAppId}`
 
   return (
-    <YStack gap="$6" maxWidth={560}>
+    <YStack gap="$6" maxW={560}>
       {/* Breadcrumb */}
       <XStack items="center" gap="$2">
         <Button
@@ -167,9 +168,7 @@ export const MiniAppSettingsPage = memo(() => {
                 checked={miniApp.isPublished}
                 onCheckedChange={handleTogglePublish}
                 disabled={isPendingToggle}
-              >
-                <Switch.Thumb animation="quick" />
-              </Switch>
+              />
             </XStack>
           </XStack>
 

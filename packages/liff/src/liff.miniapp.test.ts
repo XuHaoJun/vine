@@ -36,7 +36,10 @@ describe('liff.miniApp.getInfo()', () => {
 describe('liff.permanentLink.createUrlBy()', () => {
   it('returns mini app URL when miniAppId is provided', () => {
     const instance = new LiffImpl({ apiBaseUrl: 'https://vine.example.com' })
-    const url = instance.permanentLink.createUrlBy({ miniAppId: 'ma-1', path: '/orders/123' })
+    const url = instance.permanentLink.createUrlBy({
+      miniAppId: 'ma-1',
+      path: '/orders/123',
+    })
     expect(url).toBe('https://vine.example.com/m/ma-1/orders/123')
   })
 

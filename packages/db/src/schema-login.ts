@@ -101,9 +101,7 @@ export const miniAppRecent = pgTable(
     miniAppId: uuid('miniAppId')
       .notNull()
       .references(() => miniApp.id, { onDelete: 'cascade' }),
-    lastOpenedAt: timestamp('lastOpenedAt', { mode: 'string' })
-      .defaultNow()
-      .notNull(),
+    lastOpenedAt: timestamp('lastOpenedAt', { mode: 'string' }).defaultNow().notNull(),
   },
   (table) => [
     primaryKey({ columns: [table.userId, table.miniAppId] }),

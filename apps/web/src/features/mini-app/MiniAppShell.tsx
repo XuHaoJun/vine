@@ -78,7 +78,9 @@ export function MiniAppShell({ miniApp, forwardPath }: Props) {
 
   const handleShareToChat = () => {
     const link = `${typeof location !== 'undefined' ? location.origin : ''}/m/${miniApp.id}`
-    router.push(`/home?shareUrl=${encodeURIComponent(link)}` as Parameters<typeof router.push>[0])
+    router.push(
+      `/home?shareUrl=${encodeURIComponent(link)}` as Parameters<typeof router.push>[0],
+    )
   }
 
   const handleShareTargetPicker = (payload: {
@@ -108,26 +110,24 @@ export function MiniAppShell({ miniApp, forwardPath }: Props) {
       ? `${location.origin}/m/${miniApp.id}${forwardPath ?? ''}`
       : `/m/${miniApp.id}${forwardPath ?? ''}`
 
-  const endpointDomain =
-    runtimeCtx?.endpointOrigin
-      ? (() => {
-          try {
-            return new URL(runtimeCtx.endpointOrigin).hostname
-          } catch {
-            return runtimeCtx.endpointOrigin
-          }
-        })()
-      : typeof location !== 'undefined'
-        ? location.hostname
-        : ''
+  const endpointDomain = runtimeCtx?.endpointOrigin
+    ? (() => {
+        try {
+          return new URL(runtimeCtx.endpointOrigin).hostname
+        } catch {
+          return runtimeCtx.endpointOrigin
+        }
+      })()
+    : typeof location !== 'undefined'
+      ? location.hostname
+      : ''
 
-  const resolvedUrl =
-    runtimeCtx
-      ? resolveLiffPermanentUrl({
-          endpointUrl: runtimeCtx.endpointUrl,
-          permanentPath: forwardPath,
-        })
-      : null
+  const resolvedUrl = runtimeCtx
+    ? resolveLiffPermanentUrl({
+        endpointUrl: runtimeCtx.endpointUrl,
+        permanentPath: forwardPath,
+      })
+    : null
 
   return (
     <YStack flex={1} bg="$background">
@@ -188,12 +188,7 @@ export function MiniAppShell({ miniApp, forwardPath }: Props) {
       {/* Loading bar */}
       {!loaded && (
         <YStack height={3} bg="$color1">
-          <YStack
-            height="100%"
-            bg="$green9"
-            width="60%"
-            style={{ animation: 'none' }}
-          />
+          <YStack height="100%" bg="$green9" width="60%" style={{ animation: 'none' }} />
         </YStack>
       )}
 

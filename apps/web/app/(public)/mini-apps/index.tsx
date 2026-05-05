@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { router } from 'one'
-import { Button, Input, ScrollView, Stack, Text, XStack, YStack } from 'tamagui'
+import { ScrollView, Text, XStack, YStack } from 'tamagui'
+import { Button } from '~/interface/buttons/Button'
+import { Input } from '~/interface/forms/Input'
 
 import { miniAppClient } from '~/features/mini-app/client'
 import { useTanQuery } from '~/query'
@@ -41,7 +43,6 @@ export default function PublicDirectoryPage() {
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <XStack gap="$2">
           <Button
-            theme={!category ? 'active' : undefined}
             size="$2"
             onPress={() => {
               setCategory(undefined)
@@ -53,7 +54,6 @@ export default function PublicDirectoryPage() {
           {categories.map((c) => (
             <Button
               key={c}
-              theme={category === c ? 'active' : undefined}
               size="$2"
               onPress={() => {
                 setCategory(c)
@@ -78,9 +78,9 @@ export default function PublicDirectoryPage() {
             cursor="pointer"
             onPress={() => router.push(`/m/${m.id}` as any)}
           >
-            <Stack
-              w={56}
-              h={56}
+            <YStack
+              width={56}
+              height={56}
               rounded="$3"
               items="center"
               justify="center"
@@ -92,7 +92,7 @@ export default function PublicDirectoryPage() {
               ) : (
                 <Text fontSize={24}>📱</Text>
               )}
-            </Stack>
+            </YStack>
             <YStack flex={1}>
               <Text fontWeight="600" fontSize={16} color="$color12">
                 {m.name}

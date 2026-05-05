@@ -25,6 +25,14 @@ CREATE TABLE "miniAppOaLink" (
   PRIMARY KEY ("miniAppId", "oaId")
 );
 CREATE INDEX "miniAppOaLink_oaId_idx" ON "miniAppOaLink"("oaId");
+
+CREATE TABLE "miniAppRecent" (
+  "userId" text NOT NULL,
+  "miniAppId" uuid NOT NULL REFERENCES "miniApp"("id") ON DELETE CASCADE,
+  "lastOpenedAt" timestamptz DEFAULT now() NOT NULL,
+  PRIMARY KEY ("userId", "miniAppId")
+);
+CREATE INDEX "miniAppRecent_userId_lastOpened_idx" ON "miniAppRecent"("userId", "lastOpenedAt" DESC);
 `
 
 export async function up(client: PoolClient): Promise<void> {
@@ -33,6 +41,7 @@ export async function up(client: PoolClient): Promise<void> {
 
 export async function down(client: PoolClient): Promise<void> {
   await client.query(`
+    DROP TABLE IF EXISTS "miniAppRecent";
     DROP TABLE IF EXISTS "miniAppOaLink";
     DROP TABLE IF EXISTS "miniApp";
   `)

@@ -129,6 +129,7 @@ declare module 'one' {
         | `/(app)/developers/console/provider/${OneRouter.SingleRoutePart<T>}/mini-app`
         | `/(app)/developers/console/provider/${OneRouter.SingleRoutePart<T>}/mini-app/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/developers/console/provider/${OneRouter.SingleRoutePart<T>}/mini-app/${OneRouter.SingleRoutePart<T>}/oa-links`
+        | `/(app)/developers/console/provider/${OneRouter.SingleRoutePart<T>}/mini-app/${OneRouter.SingleRoutePart<T>}/service-templates`
         | `/(app)/developers/console/provider/${OneRouter.SingleRoutePart<T>}/mini-app/new`
         | `/(app)/home/(tabs)/talks/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/home/talks/${OneRouter.SingleRoutePart<T>}`
@@ -163,6 +164,7 @@ declare module 'one' {
         | `/developers/console/provider/${OneRouter.SingleRoutePart<T>}/mini-app`
         | `/developers/console/provider/${OneRouter.SingleRoutePart<T>}/mini-app/${OneRouter.SingleRoutePart<T>}`
         | `/developers/console/provider/${OneRouter.SingleRoutePart<T>}/mini-app/${OneRouter.SingleRoutePart<T>}/oa-links`
+        | `/developers/console/provider/${OneRouter.SingleRoutePart<T>}/mini-app/${OneRouter.SingleRoutePart<T>}/service-templates`
         | `/developers/console/provider/${OneRouter.SingleRoutePart<T>}/mini-app/new`
         | `/home/(tabs)/talks/${OneRouter.SingleRoutePart<T>}`
         | `/home/talks/${OneRouter.SingleRoutePart<T>}`
@@ -198,6 +200,7 @@ declare module 'one' {
         | `/(app)/developers/console/provider/[providerId]/mini-app`
         | `/(app)/developers/console/provider/[providerId]/mini-app/[miniAppId]`
         | `/(app)/developers/console/provider/[providerId]/mini-app/[miniAppId]/oa-links`
+        | `/(app)/developers/console/provider/[providerId]/mini-app/[miniAppId]/service-templates`
         | `/(app)/developers/console/provider/[providerId]/mini-app/new`
         | `/(app)/home/(tabs)/talks/[chatId]`
         | `/(app)/home/talks/[chatId]`
@@ -232,6 +235,7 @@ declare module 'one' {
         | `/developers/console/provider/[providerId]/mini-app`
         | `/developers/console/provider/[providerId]/mini-app/[miniAppId]`
         | `/developers/console/provider/[providerId]/mini-app/[miniAppId]/oa-links`
+        | `/developers/console/provider/[providerId]/mini-app/[miniAppId]/service-templates`
         | `/developers/console/provider/[providerId]/mini-app/new`
         | `/home/(tabs)/talks/[chatId]`
         | `/home/talks/[chatId]`
@@ -268,6 +272,7 @@ declare module 'one' {
         '/(app)/developers/console/provider/[providerId]/mini-app': RouteInfo<{ providerId: string }>
         '/(app)/developers/console/provider/[providerId]/mini-app/[miniAppId]': RouteInfo<{ providerId: string; miniAppId: string }>
         '/(app)/developers/console/provider/[providerId]/mini-app/[miniAppId]/oa-links': RouteInfo<{ providerId: string; miniAppId: string }>
+        '/(app)/developers/console/provider/[providerId]/mini-app/[miniAppId]/service-templates': RouteInfo<{ providerId: string; miniAppId: string }>
         '/(app)/developers/console/provider/[providerId]/mini-app/new': RouteInfo<{ providerId: string }>
         '/(app)/home/(tabs)/talks/[chatId]': RouteInfo<{ chatId: string }>
         '/(app)/home/talks/[chatId]': RouteInfo<{ chatId: string }>
@@ -302,6 +307,7 @@ declare module 'one' {
         '/developers/console/provider/[providerId]/mini-app': RouteInfo<{ providerId: string }>
         '/developers/console/provider/[providerId]/mini-app/[miniAppId]': RouteInfo<{ providerId: string; miniAppId: string }>
         '/developers/console/provider/[providerId]/mini-app/[miniAppId]/oa-links': RouteInfo<{ providerId: string; miniAppId: string }>
+        '/developers/console/provider/[providerId]/mini-app/[miniAppId]/service-templates': RouteInfo<{ providerId: string; miniAppId: string }>
         '/developers/console/provider/[providerId]/mini-app/new': RouteInfo<{ providerId: string }>
         '/home/(tabs)/talks/[chatId]': RouteInfo<{ chatId: string }>
         '/home/talks/[chatId]': RouteInfo<{ chatId: string }>

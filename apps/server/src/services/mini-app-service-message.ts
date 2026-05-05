@@ -51,9 +51,7 @@ export function validateParams(
           throw new TemplateValidationError(`Param ${spec.name} must be a uri string`)
         }
         if (!/^https:\/\//.test(v)) {
-          throw new TemplateValidationError(
-            `Param ${spec.name} must be an https URI`,
-          )
+          throw new TemplateValidationError(`Param ${spec.name} must be an https URI`)
         }
       }
     }
@@ -76,7 +74,10 @@ function deepReplace(node: unknown, params: Record<string, unknown>): unknown {
   return node
 }
 
-export function renderTemplate(flexJson: unknown, params: Record<string, unknown>): unknown {
+export function renderTemplate(
+  flexJson: unknown,
+  params: Record<string, unknown>,
+): unknown {
   return deepReplace(flexJson, params)
 }
 

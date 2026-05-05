@@ -31,7 +31,14 @@ export const BUILTIN_DEFAULTS: Record<
   reservation_confirmation: {
     flexJson: { type: 'bubble', body: { type: 'box', layout: 'vertical', contents: [] } },
     paramsSchema: [
-      { name: 'title', required: true, kind: 'text', recommended: 10, soft: 36, hard: 50 },
+      {
+        name: 'title',
+        required: true,
+        kind: 'text',
+        recommended: 10,
+        soft: 36,
+        hard: 50,
+      },
       { name: 'date', required: true, kind: 'text' },
       { name: 'button_uri_1', required: true, kind: 'uri' },
     ],
