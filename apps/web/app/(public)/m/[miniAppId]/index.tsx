@@ -20,12 +20,8 @@ export async function loader({ params }: { params: { miniAppId: string } }) {
   const baseUrl = process.env.ONE_SERVER_URL || 'http://localhost:3001'
   const res = await fetch(`${baseUrl}/api/liff/v1/mini-app/${miniAppId}`)
 
-  if (res.status === 404) {
-    return Response.json({ error: 'not found' }, { status: 404 })
-  }
-
-  if (!res.ok) {
-    return Response.json({ error: 'server error' }, { status: 500 })
+  if (res.status === 404 || !res.ok) {
+    return { miniApp: null, allowed: false }
   }
 
   const miniApp: MiniAppData = await res.json()
@@ -39,8 +35,9 @@ export async function loader({ params }: { params: { miniAppId: string } }) {
 
 export default function MiniAppPage() {
   const data = useLoader(loader)
+  const { miniApp, allowed } = data
 
-  if (!data || 'error' in data) {
+  if (miniApp === null) {
     return (
       <div style={{ padding: 32, textAlign: 'center' }}>
         <h2>Mini App not found</h2>
@@ -48,8 +45,6 @@ export default function MiniAppPage() {
       </div>
     )
   }
-
-  const { miniApp, allowed } = data as { miniApp: MiniAppData; allowed: boolean }
 
   if (!allowed) {
     return (
