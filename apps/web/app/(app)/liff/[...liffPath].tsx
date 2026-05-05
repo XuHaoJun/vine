@@ -1,34 +1,17 @@
 import { useActiveParams, createRoute } from 'one'
-import { useEffect, useState } from 'react'
-import { isWeb } from 'tamagui'
-import { LiffRouteShell } from '~/features/liff/liffRuntime'
+
+import { LiffPermanentRouteEntry } from '~/features/liff/LiffPermanentRouteEntry'
 
 const route = createRoute<'/(app)/liff/[...liffPath]'>()
 
 export default function LiffCatchAllPage() {
   const params = useActiveParams<{ liffPath: string[] }>()
   const { liffPath } = params
-  const [hash, setHash] = useState<string | undefined>(undefined)
-  const [search, setSearch] = useState<string | undefined>(undefined)
-
-  useEffect(() => {
-    if (isWeb) {
-      setHash(window.location.hash || undefined)
-      setSearch(window.location.search || undefined)
-    }
-  }, [])
 
   if (!liffPath || liffPath.length === 0) return null
 
   const [liffId, ...rest] = liffPath
   const permanentPath = rest.length > 0 ? '/' + rest.join('/') : undefined
 
-  return (
-    <LiffRouteShell
-      liffId={liffId!}
-      permanentPath={permanentPath}
-      hash={hash}
-      search={search}
-    />
-  )
+  return <LiffPermanentRouteEntry liffId={liffId} permanentPath={permanentPath} />
 }
