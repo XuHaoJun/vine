@@ -1,0 +1,150 @@
+import type { ServiceImpl } from '@connectrpc/connect'
+import { Code, ConnectError, ConnectRouter } from '@connectrpc/connect'
+import type { AuthServer } from '@take-out/better-auth-utils/server'
+import { MiniAppService } from '@vine/proto/mini-app'
+import type { createMiniAppService } from '../services/mini-app'
+import { requireAuthData, withAuthService } from './auth-context'
+
+type MiniAppHandlerDeps = {
+  miniApp: ReturnType<typeof createMiniAppService>
+  auth: AuthServer
+}
+
+async function toProtoMiniApp(
+  deps: MiniAppHandlerDeps,
+  row: NonNullable<Awaited<ReturnType<typeof deps.miniApp.getMiniApp>>>,
+) {
+  const linkedOaIds = await deps.miniApp.listLinkedOaIds(row.id)
+  return {
+    id: row.id,
+    providerId: row.providerId,
+    liffAppId: row.liffAppId,
+    name: row.name,
+    iconUrl: row.iconUrl ?? undefined,
+    description: row.description ?? undefined,
+    category: row.category ?? undefined,
+    isPublished: row.isPublished,
+    publishedAt: row.publishedAt ?? undefined,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    linkedOaIds,
+  }
+}
+
+export function miniAppImpl(deps: MiniAppHandlerDeps): ServiceImpl<typeof MiniAppService> {
+  return {
+    async listMiniApps(req, ctx) {
+      requireAuthData(ctx)
+      if (!req.providerId)
+        throw new ConnectError('providerId required', Code.InvalidArgument)
+      const rows = await deps.miniApp.listMiniApps(req.providerId)
+      const miniApps = await Promise.all(rows.map((r) => toProtoMiniApp(deps, r)))
+      return { miniApps }
+    },
+
+    async getMiniApp(req, ctx) {
+      requireAuthData(ctx)
+      if (!req.id) throw new ConnectError('id required', Code.InvalidArgument)
+      const row = await deps.miniApp.getMiniApp(req.id)
+      if (!row) throw new ConnectError('Mini App not found', Code.NotFound)
+      return { miniApp: await toProtoMiniApp(deps, row) }
+    },
+
+    async createMiniApp(req, ctx) {
+      requireAuthData(ctx)
+      if (!req.providerId)
+        throw new ConnectError('providerId required', Code.InvalidArgument)
+      if (!req.liffAppId)
+        throw new ConnectError('liffAppId required', Code.InvalidArgument)
+      if (!req.name) throw new ConnectError('name required', Code.InvalidArgument)
+      try {
+        const existing = await deps.miniApp.getMiniAppByLiffAppId(req.liffAppId)
+        if (existing) {
+          throw new ConnectError(
+            'This LIFF app is already wrapped by another Mini App',
+            Code.AlreadyExists,
+          )
+        }
+        const row = await deps.miniApp.createMiniApp({
+          providerId: req.providerId,
+          liffAppId: req.liffAppId,
+          name: req.name,
+          iconUrl: req.iconUrl,
+          description: req.description,
+          category: req.category,
+        })
+        return { miniApp: await toProtoMiniApp(deps, row) }
+      } catch (e) {
+        if (e instanceof ConnectError) throw e
+        const msg = e instanceof Error ? e.message : 'create failed'
+        throw new ConnectError(msg, Code.InvalidArgument)
+      }
+    },
+
+    async updateMiniApp(req, ctx) {
+      requireAuthData(ctx)
+      if (!req.id) throw new ConnectError('id required', Code.InvalidArgument)
+      const row = await deps.miniApp.updateMiniApp(req.id, {
+        name: req.name,
+        iconUrl: req.iconUrl,
+        description: req.description,
+        category: req.category,
+      })
+      if (!row) throw new ConnectError('Mini App not found', Code.NotFound)
+      return { miniApp: await toProtoMiniApp(deps, row) }
+    },
+
+    async publishMiniApp(req, ctx) {
+      requireAuthData(ctx)
+      if (!req.id) throw new ConnectError('id required', Code.InvalidArgument)
+      try {
+        const row = await deps.miniApp.publishMiniApp(req.id)
+        if (!row) throw new ConnectError('Mini App not found', Code.NotFound)
+        return { miniApp: await toProtoMiniApp(deps, row) }
+      } catch (e) {
+        if (e instanceof ConnectError) throw e
+        const msg = e instanceof Error ? e.message : 'publish failed'
+        throw new ConnectError(msg, Code.FailedPrecondition)
+      }
+    },
+
+    async unpublishMiniApp(req, ctx) {
+      requireAuthData(ctx)
+      if (!req.id) throw new ConnectError('id required', Code.InvalidArgument)
+      const row = await deps.miniApp.unpublishMiniApp(req.id)
+      if (!row) throw new ConnectError('Mini App not found', Code.NotFound)
+      return { miniApp: await toProtoMiniApp(deps, row) }
+    },
+
+    async deleteMiniApp(req, ctx) {
+      requireAuthData(ctx)
+      if (!req.id) throw new ConnectError('id required', Code.InvalidArgument)
+      await deps.miniApp.deleteMiniApp(req.id)
+      return {}
+    },
+
+    async linkOa(req, ctx) {
+      requireAuthData(ctx)
+      if (!req.miniAppId)
+        throw new ConnectError('miniAppId required', Code.InvalidArgument)
+      if (!req.oaId) throw new ConnectError('oaId required', Code.InvalidArgument)
+      await deps.miniApp.linkOa({ miniAppId: req.miniAppId, oaId: req.oaId })
+      return {}
+    },
+
+    async unlinkOa(req, ctx) {
+      requireAuthData(ctx)
+      if (!req.miniAppId)
+        throw new ConnectError('miniAppId required', Code.InvalidArgument)
+      if (!req.oaId) throw new ConnectError('oaId required', Code.InvalidArgument)
+      await deps.miniApp.unlinkOa({ miniAppId: req.miniAppId, oaId: req.oaId })
+      return {}
+    },
+  }
+}
+
+export function miniAppHandler(deps: MiniAppHandlerDeps) {
+  return (router: ConnectRouter) => {
+    router.service(MiniAppService, withAuthService(MiniAppService, deps.auth, miniAppImpl(deps)))
+  }
+}

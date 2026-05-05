@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package miniapp.v1;
+
+message MiniApp {
+  string id = 1;
+  string provider_id = 2;
+  string liff_app_id = 3;
+  string name = 4;
+  optional string icon_url = 5;
+  optional string description = 6;
+  optional string category = 7;
+  bool is_published = 8;
+  optional string published_at = 9;
+  string created_at = 10;
+  string updated_at = 11;
+  repeated string linked_oa_ids = 12;
+}
+
+message ListMiniAppsRequest { string provider_id = 1; }
+message ListMiniAppsResponse { repeated MiniApp mini_apps = 1; }
+
+message GetMiniAppRequest { string id = 1; }
+message GetMiniAppResponse { MiniApp mini_app = 1; }
+
+message CreateMiniAppRequest {
+  string provider_id = 1;
+  string liff_app_id = 2;
+  string name = 3;
+  optional string icon_url = 4;
+  optional string description = 5;
+  optional string category = 6;
+}
+message CreateMiniAppResponse { MiniApp mini_app = 1; }
+
+message UpdateMiniAppRequest {
+  string id = 1;
+  optional string name = 2;
+  optional string icon_url = 3;
+  optional string description = 4;
+  optional string category = 5;
+}
+message UpdateMiniAppResponse { MiniApp mini_app = 1; }
+
+message PublishMiniAppRequest { string id = 1; }
+message PublishMiniAppResponse { MiniApp mini_app = 1; }
+
+message UnpublishMiniAppRequest { string id = 1; }
+message UnpublishMiniAppResponse { MiniApp mini_app = 1; }
+
+message DeleteMiniAppRequest { string id = 1; }
+message DeleteMiniAppResponse {}
+
+message LinkOaRequest { string mini_app_id = 1; string oa_id = 2; }
+message LinkOaResponse {}
+
+message UnlinkOaRequest { string mini_app_id = 1; string oa_id = 2; }
+message UnlinkOaResponse {}
+
+service MiniAppService {
+  rpc ListMiniApps(ListMiniAppsRequest) returns (ListMiniAppsResponse);
+  rpc GetMiniApp(GetMiniAppRequest) returns (GetMiniAppResponse);
+  rpc CreateMiniApp(CreateMiniAppRequest) returns (CreateMiniAppResponse);
+  rpc UpdateMiniApp(UpdateMiniAppRequest) returns (UpdateMiniAppResponse);
+  rpc PublishMiniApp(PublishMiniAppRequest) returns (PublishMiniAppResponse);
+  rpc UnpublishMiniApp(UnpublishMiniAppRequest) returns (UnpublishMiniAppResponse);
+  rpc DeleteMiniApp(DeleteMiniAppRequest) returns (DeleteMiniAppResponse);
+  rpc LinkOa(LinkOaRequest) returns (LinkOaResponse);
+  rpc UnlinkOa(UnlinkOaRequest) returns (UnlinkOaResponse);
+}
