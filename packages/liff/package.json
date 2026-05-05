@@ -8,7 +8,11 @@
   },
   "scripts": {
     "build": "echo 'liff package - no build step'",
-    "dev": "echo 'liff package - no dev step'"
+    "dev": "echo 'liff package - no dev step'",
+    "test": "vitest run"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "devDependencies": {
+    "vitest": "^4.1.5"
+  }
 }

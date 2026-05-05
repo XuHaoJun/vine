@@ -1,5 +1,20 @@
 export type LiffOS = 'ios' | 'android' | 'web'
 
+export type MiniAppBootstrap = {
+  name: string
+  iconUrl: string | null
+  description: string | null
+  category: string | null
+}
+
+export type MiniAppInfo = {
+  id: string
+  name: string
+  iconUrl: string | null
+  description: string | null
+  category: string | null
+}
+
 export type VineLiffBootstrap = {
   apiBaseUrl?: string
   liffId?: string
@@ -8,6 +23,8 @@ export type VineLiffBootstrap = {
   chatId?: string
   contextType?: 'utou' | 'group' | 'external'
   lineVersion?: string
+  miniAppId?: string
+  miniApp?: MiniAppBootstrap
 }
 
 export type LiffAvailability = {
@@ -108,7 +125,7 @@ async function computeAccessTokenHash(token: string): Promise<string> {
   return ''
 }
 
-class LiffImpl {
+export class LiffImpl {
   private _liffId: string | null = null
   private _initialized = false
   private _accessToken: string | null = null
@@ -120,14 +137,15 @@ class LiffImpl {
 
   readonly ready: Promise<void>
 
-  constructor() {
+  constructor(bootstrap?: VineLiffBootstrap) {
+    if (bootstrap) this._bootstrap = bootstrap
     this.ready = new Promise<void>((resolve) => {
       this._readyResolve = resolve
     })
   }
 
   getBootstrap(): VineLiffBootstrap {
-    if (typeof window === 'undefined') return {}
+    if (typeof window === 'undefined') return this._bootstrap
     const w = window as any
     if (w['VineLIFF']) return w['VineLIFF'] as VineLiffBootstrap
     return this._bootstrap
@@ -451,17 +469,44 @@ class LiffImpl {
     return map[apiName] ?? false
   }
 
-  permanentLink = {
-    createUrlBy: (url: string): string => {
-      if (typeof window === 'undefined') return url
-      const apiBase = this.getApiBaseUrl()
-      const liffBase = `${apiBase}/liff/${this._liffId ?? ''}`
-      try {
-        const target = new URL(url, window.location.href)
-        return `${liffBase}${target.pathname}${target.search}${target.hash}`
-      } catch {
-        return liffBase
+  miniApp = {
+    getInfo: (): MiniAppInfo | null => {
+      const bootstrap = this.getBootstrap()
+      if (!bootstrap.miniAppId || !bootstrap.miniApp) return null
+      return {
+        id: bootstrap.miniAppId,
+        name: bootstrap.miniApp.name,
+        iconUrl: bootstrap.miniApp.iconUrl,
+        description: bootstrap.miniApp.description,
+        category: bootstrap.miniApp.category,
       }
+    },
+  }
+
+  permanentLink = {
+    createUrlBy: (params: string | { path: string; miniAppId?: string }): string => {
+      if (typeof params === 'string') {
+        // legacy string overload
+        if (typeof window === 'undefined') return params
+        const apiBase = this.getApiBaseUrl()
+        const liffBase = `${apiBase}/liff/${this._liffId ?? ''}`
+        try {
+          const target = new URL(params, window.location.href)
+          return `${liffBase}${target.pathname}${target.search}${target.hash}`
+        } catch {
+          return liffBase
+        }
+      }
+      const { path, miniAppId } = params
+      const apiBase = this.getApiBaseUrl()
+      if (miniAppId) {
+        const normalizedPath = path.startsWith('/') ? path : `/${path}`
+        return `${apiBase}/m/${miniAppId}${normalizedPath}`
+      }
+      // fall back to LIFF URL
+      const liffBase = `${apiBase}/liff/${this._liffId ?? ''}`
+      const normalizedPath = path.startsWith('/') ? path : `/${path}`
+      return `${liffBase}${normalizedPath}`
     },
   }
 

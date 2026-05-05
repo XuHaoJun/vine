@@ -208,6 +208,9 @@
     "packages/liff": {
       "name": "@vine/liff",
       "version": "0.0.1",
+      "devDependencies": {
+        "vitest": "^4.1.5",
+      },
     },
     "packages/liff-fixtures": {
       "name": "@vine/liff-fixtures",
