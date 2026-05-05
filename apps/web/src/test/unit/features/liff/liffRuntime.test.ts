@@ -5,6 +5,7 @@ import {
   getEndpointOrigin,
   isAllowedLiffMessageOrigin,
   canSendMessages,
+  buildNativeAckJavaScript,
   buildLiffRuntimeContext,
   type LiffRuntimeContext,
 } from '~/features/liff/liffRuntimeHelpers'
@@ -81,6 +82,13 @@ describe('LIFF runtime host helpers', () => {
     if (!result.ok) {
       expect(result.error).toContain('chat_message.write')
     }
+  })
+
+  it('builds native ack JS with an object literal for data', () => {
+    const ack = { type: 'liff:sendMessages:done', requestId: 'req-1' }
+    const js = buildNativeAckJavaScript(ack)
+    expect(js).toContain("data: {\"")
+    expect(js).not.toContain('data: "{')
   })
 })
 

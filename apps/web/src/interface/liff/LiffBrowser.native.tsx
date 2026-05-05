@@ -6,6 +6,7 @@ import {
   createLiffBootstrap,
   isAllowedLiffMessageOrigin,
   canSendMessages,
+  buildNativeAckJavaScript,
   LIFF_LINE_VERSION,
   type LiffRuntimeContext,
 } from '~/features/liff/liffRuntimeHelpers'
@@ -74,9 +75,7 @@ export const LiffBrowser = memo(
     const webViewRef = useRef<WebView>(null)
 
     const sendAckToWebview = (ack: Record<string, unknown>) => {
-      webViewRef.current?.injectJavaScript(
-        `window.dispatchEvent(new MessageEvent('message', { data: ${JSON.stringify(JSON.stringify(ack))} })); true;`,
-      )
+      webViewRef.current?.injectJavaScript(buildNativeAckJavaScript(ack))
     }
 
     const handleMessage = (event: WebViewMessageEvent) => {

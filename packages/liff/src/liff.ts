@@ -457,7 +457,7 @@ class LiffImpl {
       const apiBase = this.getApiBaseUrl()
       const liffBase = `${apiBase}/liff/${this._liffId ?? ''}`
       try {
-        const target = new URL(url)
+        const target = new URL(url, window.location.href)
         return `${liffBase}${target.pathname}${target.search}${target.hash}`
       } catch {
         return liffBase

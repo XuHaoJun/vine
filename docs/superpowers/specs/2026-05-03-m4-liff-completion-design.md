@@ -13,7 +13,7 @@ Vine already has a LIFF foundation:
 - `loginChannel` and `oaLiffApp` database tables.
 - Login Channel and LIFF App ConnectRPC CRUD.
 - Developer console screens for listing, creating, and deleting LIFF apps.
-- Public LIFF metadata endpoint: `GET /liff/v1/apps/:liffId`.
+- Public LIFF metadata endpoint: `GET /api/liff/v1/apps/:liffId`.
 - `@vine/liff` SDK with `init`, `ready`, `getContext`, `getProfile`,
   `getFriendship`, `sendMessages`, `shareTargetPicker`, `closeWindow`,
   `isApiAvailable`, and `permanentLink.createUrlBy`.
@@ -64,7 +64,7 @@ cloud APIs, require LINE Developers Console channel IDs, or depend on
 
 M4 must support real third-party LIFF endpoints, not only same-origin test
 fixtures. A LIFF app hosted at `https://app.example.com` still needs to call
-Vine-owned APIs such as `/liff/v1/apps/:liffId` and `/liff/v1/me`.
+Vine-owned APIs such as `/api/liff/v1/apps/:liffId` and `/api/liff/v1/me`.
 
 The LIFF host injects a small bootstrap object before the app initializes:
 
@@ -90,7 +90,7 @@ acting on `liff:*` messages.
 
 ### 1. Profile Endpoint
 
-Add `GET /liff/v1/me`.
+Add `GET /api/liff/v1/me`.
 
 The endpoint authenticates the current Vine user using the same Vine auth/session
 mechanism used by the app. It returns the LIFF profile shape used by the SDK:
@@ -120,7 +120,7 @@ Support permanent-link-style LIFF URLs:
 ```
 
 When the route opens the LIFF app, it resolves the endpoint URL from
-`/liff/v1/apps/:liffId`, then appends the extra LIFF path, query, and fragment to
+`/api/liff/v1/apps/:liffId`, then appends the extra LIFF path, query, and fragment to
 the endpoint URL:
 
 ```text
@@ -295,7 +295,7 @@ Keep console work narrow:
   - rejects template and imagemap.
   - rejects sticker for `shareTargetPicker`.
   - rejects non-URI Flex actions in LIFF mode.
-- `/liff/v1/me` route:
+- `/api/liff/v1/me` route:
   - returns current user's profile.
   - rejects unauthenticated requests.
 - SDK bootstrap:

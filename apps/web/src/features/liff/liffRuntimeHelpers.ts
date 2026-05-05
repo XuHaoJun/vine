@@ -111,6 +111,10 @@ export async function createLiffAccessToken(input: {
   }
 }
 
+export function buildNativeAckJavaScript(ack: Record<string, unknown>): string {
+  return `window.dispatchEvent(new MessageEvent('message', { data: ${JSON.stringify(ack)} })); true;`
+}
+
 export async function buildLiffRuntimeContext(input: {
   apiBaseUrl: string
   liffId: string

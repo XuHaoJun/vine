@@ -1,3 +1,4 @@
+import { createHmac } from 'node:crypto'
 import { describe, expect, it } from 'vitest'
 import { createLiffRuntimeTokenService } from './liff-runtime-token'
 
@@ -107,6 +108,17 @@ describe('createLiffRuntimeTokenService', () => {
     const tampered = parts.join('.')
 
     const resolved = svc.resolveAccessToken(tampered, 'app-1')
+    expect(resolved).toBeNull()
+  })
+
+  it('rejects tokens with valid HMAC but invalid JSON body', () => {
+    const svc = createLiffRuntimeTokenService({ secret })
+
+    const body = Buffer.from('invalid-json').toString('base64url')
+    const sig = createHmac('sha256', secret).update(body).digest('base64url')
+    const token = `${body}.${sig}`
+
+    const resolved = svc.resolveAccessToken(token, 'app-1')
     expect(resolved).toBeNull()
   })
 })

@@ -5,6 +5,7 @@ import { Avatar } from '~/interface/avatars/Avatar'
 import { CaretLeftIcon } from '~/interface/icons/phosphor/CaretLeftIcon'
 import { useShareTargets } from '~/features/liff/useShareTargets'
 import { validateAndConvertLiffMessages } from '~/features/liff/liffMessage'
+import { sendToTarget } from '~/features/liff/sendToTarget'
 import { zero } from '~/zero/client'
 
 type ShareTargetItem = {
@@ -168,34 +169,7 @@ export const ShareTargetPicker = memo(
       try {
         const now = Date.now()
         for (const target of targets) {
-          let chatId = target.chatId
-
-          if (target.kind === 'friend' && target.userId) {
-            const newChatId = crypto.randomUUID()
-            await zero.mutate.chat.findOrCreateDirectChat({
-              friendUserId: target.userId,
-              chatId: newChatId,
-              member1Id: crypto.randomUUID(),
-              member2Id: crypto.randomUUID(),
-            })
-            chatId = newChatId
-          }
-
-          if (!chatId) continue
-
-          for (let i = 0; i < validated.messages.length; i++) {
-            const converted = validated.messages[i]!
-            zero.mutate.message.sendLiff({
-              id: crypto.randomUUID(),
-              chatId,
-              senderId: undefined,
-              senderType: 'user',
-              type: converted.type,
-              text: converted.text ?? undefined,
-              metadata: converted.metadata ?? undefined,
-              createdAt: now + i,
-            })
-          }
+          await sendToTarget(zero, target, validated.messages, now)
         }
         onDone({ status: 'sent' })
       } catch {

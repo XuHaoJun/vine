@@ -341,4 +341,36 @@ describe('@vine/liff runtime bootstrap', () => {
 
     restore()
   })
+
+  it('permanentLink.createUrlBy resolves relative URLs', async () => {
+    const { restore } = setupWindow()
+    ;(globalThis as any).window.VineLIFF = {
+      apiBaseUrl: 'https://vine.example.com',
+      liffId: 'liff-perm',
+    }
+
+    vi.spyOn(globalThis, 'fetch' as any).mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          liffId: 'liff-perm',
+          viewType: 'full',
+          endpointUrl: 'https://app.example.com',
+          scopes: [],
+          moduleMode: false,
+          botPrompt: 'none',
+        }),
+        { status: 200 },
+      ),
+    )
+
+    await liff.init({ liffId: 'liff-perm' })
+
+    const result1 = liff.permanentLink.createUrlBy('/foo?x=1#bar')
+    expect(result1).toBe('https://vine.example.com/liff/liff-perm/foo?x=1#bar')
+
+    const result2 = liff.permanentLink.createUrlBy('foo/bar')
+    expect(result2).toBe('https://vine.example.com/liff/liff-perm/foo/bar')
+
+    restore()
+  })
 })

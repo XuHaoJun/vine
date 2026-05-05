@@ -35,7 +35,11 @@ function verify<T>(token: string, secret: string): T | null {
   const expectedBuf = Buffer.from(expected)
   if (sigBuf.length !== expectedBuf.length || !timingSafeEqual(sigBuf, expectedBuf))
     return null
-  return JSON.parse(Buffer.from(body!, 'base64url').toString()) as T
+  try {
+    return JSON.parse(Buffer.from(body!, 'base64url').toString()) as T
+  } catch {
+    return null
+  }
 }
 
 export function createLiffRuntimeTokenService(input: {
