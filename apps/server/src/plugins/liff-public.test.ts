@@ -44,6 +44,7 @@ function createTestDeps(
     deleteLoginChannel: vi.fn(),
     createLiffApp: vi.fn(),
     updateLiffApp: vi.fn(),
+    getLiffAppByDbId: vi.fn(),
     listLiffApps: vi.fn(),
     deleteLiffApp: vi.fn(),
   }
