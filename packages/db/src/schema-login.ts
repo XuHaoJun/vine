@@ -1,4 +1,12 @@
-import { boolean, index, pgTable, primaryKey, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import {
+  boolean,
+  index,
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core'
 import { oaProvider, officialAccount } from './schema-oa'
 
 export const loginChannel = pgTable(
@@ -83,5 +91,22 @@ export const miniAppOaLink = pgTable(
   (table) => [
     primaryKey({ columns: [table.miniAppId, table.oaId] }),
     index('miniAppOaLink_oaId_idx').on(table.oaId),
+  ],
+)
+
+export const miniAppRecent = pgTable(
+  'miniAppRecent',
+  {
+    userId: text('userId').notNull(),
+    miniAppId: uuid('miniAppId')
+      .notNull()
+      .references(() => miniApp.id, { onDelete: 'cascade' }),
+    lastOpenedAt: timestamp('lastOpenedAt', { mode: 'string' })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.miniAppId] }),
+    index('miniAppRecent_userId_lastOpened_idx').on(table.userId, table.lastOpenedAt),
   ],
 )

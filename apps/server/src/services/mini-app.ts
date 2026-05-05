@@ -1,7 +1,8 @@
-import { and, desc, eq } from 'drizzle-orm'
+import { and, desc, eq, sql } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { schema } from '@vine/db'
-import { miniApp, miniAppOaLink, oaLiffApp } from '@vine/db/schema-login'
+import { miniApp, miniAppOaLink, miniAppRecent, oaLiffApp } from '@vine/db/schema-login'
+import { oaFriendship } from '@vine/db/schema-oa'
 
 type MiniAppServiceDeps = {
   db: NodePgDatabase<typeof schema>
@@ -154,6 +155,50 @@ export function createMiniAppService(deps: MiniAppServiceDeps) {
     return row?.miniApp ?? null
   }
 
+  async function recordRecent(input: { userId: string; miniAppId: string }) {
+    await db
+      .insert(miniAppRecent)
+      .values({
+        userId: input.userId,
+        miniAppId: input.miniAppId,
+        lastOpenedAt: new Date().toISOString(),
+      })
+      .onConflictDoUpdate({
+        target: [miniAppRecent.userId, miniAppRecent.miniAppId],
+        set: { lastOpenedAt: new Date().toISOString() },
+      })
+  }
+
+  async function listRecent(userId: string, limit = 12) {
+    const rows = await db
+      .select({ miniApp })
+      .from(miniAppRecent)
+      .innerJoin(miniApp, eq(miniApp.id, miniAppRecent.miniAppId))
+      .where(and(eq(miniAppRecent.userId, userId), eq(miniApp.isPublished, true)))
+      .orderBy(desc(miniAppRecent.lastOpenedAt))
+      .limit(limit)
+    return rows.map((r) => r.miniApp)
+  }
+
+  async function listForUserOas(userId: string, excludeMiniAppIds: string[] = []) {
+    const rows = await db
+      .select({ miniApp })
+      .from(miniAppOaLink)
+      .innerJoin(miniApp, eq(miniApp.id, miniAppOaLink.miniAppId))
+      .innerJoin(oaFriendship, eq(oaFriendship.oaId, miniAppOaLink.oaId))
+      .where(
+        and(
+          eq(oaFriendship.userId, userId),
+          eq(oaFriendship.status, 'friend'),
+          eq(miniApp.isPublished, true),
+          excludeMiniAppIds.length
+            ? sql`${miniApp.id} NOT IN ${excludeMiniAppIds}`
+            : sql`TRUE`,
+        ),
+      )
+    return rows.map((r) => r.miniApp)
+  }
+
   return {
     createMiniApp,
     getMiniApp,
@@ -168,6 +213,9 @@ export function createMiniAppService(deps: MiniAppServiceDeps) {
     unlinkOa,
     listLinkedOaIds,
     listMiniAppsLinkedToOa,
+    recordRecent,
+    listRecent,
+    listForUserOas,
   }
 }
 

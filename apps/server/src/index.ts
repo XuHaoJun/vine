@@ -158,7 +158,7 @@ await oaWebhookPlugin(app, { oa, db, auth, webhookDelivery })
 await oaWebhookEndpointPlugin(app, { oa, db })
 await liffFixturesPublicPlugin(app)
 await liffPublicPlugin(app, { liff, auth, db, liffRuntimeToken })
-await app.register((instance) => miniAppPublicPlugin(instance, { miniApp, liff }))
+await app.register((instance) => miniAppPublicPlugin(instance, { miniApp, liff, auth }))
 
 app.get('/healthz', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))
 
