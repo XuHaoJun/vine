@@ -410,6 +410,7 @@ export const ChatRoomPage = memo(() => {
                           messageId={msg.id}
                           otherMemberOaId={otherMemberOaId ?? null}
                           sendMessage={sendMessage}
+                          miniAppId={msg.miniAppId ?? null}
                         />
                       </XStack>
                     </YStack>
