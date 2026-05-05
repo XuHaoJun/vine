@@ -9,7 +9,9 @@ import { useTanQuery, useTanMutation, useTanQueryClient } from '~/query'
 import { liffClient, loginChannelClient } from '~/features/liff/client'
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
+import { ArrowUpRightIcon } from '~/interface/icons/phosphor/ArrowUpRightIcon'
 import { CaretLeftIcon } from '~/interface/icons/phosphor/CaretLeftIcon'
+import { CopyIcon } from '~/interface/icons/phosphor/CopyIcon'
 import { showToast } from '~/interface/toast/Toast'
 import { dialogConfirm } from '~/interface/dialogs/actions'
 import { ViewType } from '@vine/proto/liff'
@@ -85,6 +87,15 @@ export const LiffAppsPage = memo(() => {
       showToast('Failed to delete LIFF app', { type: 'error' })
     },
   })
+
+  const origin = typeof window !== 'undefined' ? window.location.origin : ''
+
+  function handleCopy(text: string) {
+    navigator.clipboard.writeText(text).then(
+      () => showToast('Copied', { type: 'info' }),
+      () => showToast('Copy failed', { type: 'error' }),
+    )
+  }
 
   const handleDelete = async (liffId: string) => {
     const confirmed = await dialogConfirm({
@@ -251,50 +262,86 @@ export const LiffAppsPage = memo(() => {
             <SizableText size="$2" fontWeight="600" color="$color10" flex={2}>
               Endpoint URL
             </SizableText>
+            <SizableText size="$2" fontWeight="600" color="$color10" flex={2}>
+              LIFF URL
+            </SizableText>
             <SizableText
               size="$2"
               fontWeight="600"
               color="$color10"
-              width={60}
+              width={120}
             ></SizableText>
           </XStack>
-          {apps.map((app) => (
-            <XStack
-              key={app.liffId}
-              px="$3"
-              py="$3"
-              borderWidth={1}
-              borderColor="$borderColor"
-              rounded="$2"
-              gap="$4"
-              items="center"
-            >
-              <SizableText
-                size="$2"
-                color="$color12"
-                fontFamily="$mono"
-                flex={1}
-                numberOfLines={1}
+          {apps.map((app) => {
+            const liffUrl = `${origin}/liff/${app.liffId}`
+            return (
+              <XStack
+                key={app.liffId}
+                px="$3"
+                py="$3"
+                borderWidth={1}
+                borderColor="$borderColor"
+                rounded="$2"
+                gap="$4"
+                items="center"
               >
-                {app.liffId}
-              </SizableText>
-              <SizableText size="$2" color="$color10" width={80}>
-                {app.viewType}
-              </SizableText>
-              <SizableText size="$2" color="$color12" flex={2} numberOfLines={1}>
-                {app.endpointUrl}
-              </SizableText>
-              <Button
-                size="$1"
-                variant="outlined"
-                width={60}
-                onPress={() => handleDelete(app.liffId)}
-                disabled={deleteApp.isPending}
-              >
-                Delete
-              </Button>
-            </XStack>
-          ))}
+                <SizableText
+                  size="$2"
+                  color="$color12"
+                  fontFamily="$mono"
+                  flex={1}
+                  numberOfLines={1}
+                >
+                  {app.liffId}
+                </SizableText>
+                <SizableText size="$2" color="$color10" width={80}>
+                  {app.viewType}
+                </SizableText>
+                <SizableText size="$2" color="$color12" flex={2} numberOfLines={1}>
+                  {app.endpointUrl}
+                </SizableText>
+                <XStack flex={2} items="center" gap="$1">
+                  <SizableText
+                    size="$2"
+                    color="$color12"
+                    fontFamily="$mono"
+                    flex={1}
+                    numberOfLines={1}
+                  >
+                    {liffUrl}
+                  </SizableText>
+                  <Button
+                    size="$1"
+                    variant="transparent"
+                    circular
+                    onPress={() => handleCopy(liffUrl)}
+                    icon={<CopyIcon size={14} />}
+                    aria-label="Copy LIFF URL"
+                  />
+                </XStack>
+                <XStack width={120} gap="$1" justify="flex-end">
+                  <Button
+                    size="$1"
+                    variant="outlined"
+                    onPress={() =>
+                      window.open(`/liff/${app.liffId}`, '_blank', 'noopener,noreferrer')
+                    }
+                    iconAfter={<ArrowUpRightIcon size={12} />}
+                  >
+                    Open
+                  </Button>
+                  <Button
+                    size="$1"
+                    variant="outlined"
+                    onPress={() => handleDelete(app.liffId)}
+                    disabled={deleteApp.isPending}
+                  >
+                    Delete
+                  </Button>
+                </XStack>
+              </XStack>
+            )
+          })}
         </YStack>
       )}
     </YStack>

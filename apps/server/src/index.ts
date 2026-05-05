@@ -22,6 +22,7 @@ import { createOAService } from './services/oa'
 import { createOAMessagingService } from './services/oa-messaging'
 import { createOAWebhookDeliveryService } from './services/oa-webhook-delivery'
 import { createLiffService } from './services/liff'
+import { createLiffRuntimeTokenService } from './services/liff-runtime-token'
 import { createStickerMarketServices } from './services/sticker-market'
 import { liffFixturesPublicPlugin } from './plugins/liff-fixtures-public'
 import { liffPublicPlugin } from './plugins/liff-public'
@@ -63,6 +64,12 @@ const oaMessaging = createOAMessagingService({
 })
 const webhookDelivery = createOAWebhookDeliveryService({ db, oa, logger })
 const liff = createLiffService({ db })
+const liffRuntimeToken = createLiffRuntimeTokenService({
+  secret:
+    process.env['LIFF_RUNTIME_TOKEN_SECRET'] ??
+    process.env['BETTER_AUTH_SECRET'] ??
+    'vine-dev-liff-runtime-token-secret',
+})
 const auth = createAuthServer({ database, db })
 const drive = createFsDriveService({
   basePath: driveBasePath,
@@ -146,7 +153,7 @@ await oaRichMenuPlugin(app, { oa, db, drive })
 await oaWebhookPlugin(app, { oa, db, auth, webhookDelivery })
 await oaWebhookEndpointPlugin(app, { oa, db })
 await liffFixturesPublicPlugin(app)
-await liffPublicPlugin(app, { liff, auth, db })
+await liffPublicPlugin(app, { liff, auth, db, liffRuntimeToken })
 
 app.get('/healthz', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))
 

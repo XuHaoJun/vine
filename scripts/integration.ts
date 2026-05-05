@@ -10,12 +10,13 @@ import { Socket } from 'node:net'
 import { access, mkdir, rename, rm, writeFile } from 'node:fs/promises'
 import { constants as fsConstants } from 'node:fs'
 import path from 'node:path'
+import { loadEnv as vxrnLoadEnv } from 'vxrn/loadEnv'
 import { getTestEnv } from './helpers/get-test-env'
 import {
   BACKEND_PORT,
-  FRONTEND_PORT,
   STATIC_PORT,
   getProxyTargetPort,
+  getIntegrationTestProxyPort,
 } from './integration-proxy.ts'
 
 // --- config ---
@@ -174,6 +175,10 @@ async function cleanup() {
 
 async function main() {
   console.info('integration test runner\n')
+
+  // load .env.development so INTEGRATION_TEST_PROXY_PORT is available
+  await vxrnLoadEnv('development')
+  const FRONTEND_PORT = getIntegrationTestProxyPort()
 
   // ensure port clear
   if (await checkPort(FRONTEND_PORT)) {

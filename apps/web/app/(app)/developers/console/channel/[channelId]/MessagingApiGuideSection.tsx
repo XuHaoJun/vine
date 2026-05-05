@@ -1,4 +1,8 @@
 import { SizableText, YStack } from 'tamagui'
+import { createRoute } from 'one'
+
+const route =
+  createRoute<'/(app)/developers/console/channel/[channelId]/MessagingApiGuideSection'>()
 
 const basePath = '/api/oa/v2'
 

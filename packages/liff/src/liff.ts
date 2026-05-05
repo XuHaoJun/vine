@@ -1,5 +1,15 @@
 export type LiffOS = 'ios' | 'android' | 'web'
 
+export type VineLiffBootstrap = {
+  apiBaseUrl?: string
+  liffId?: string
+  endpointOrigin?: string
+  accessToken?: string
+  chatId?: string
+  contextType?: 'utou' | 'group' | 'external'
+  lineVersion?: string
+}
+
 export type LiffAvailability = {
   shareTargetPicker: { permission: boolean }
   multipleLiffTransition: { permission: boolean }
@@ -105,6 +115,7 @@ class LiffImpl {
   private _idToken: string | null = null
   private _accessTokenHash: string = ''
   private _appConfig: LiffAppConfig | null = null
+  private _bootstrap: VineLiffBootstrap = {}
   private _readyResolve: (() => void) | null = null
 
   readonly ready: Promise<void>
@@ -115,10 +126,56 @@ class LiffImpl {
     })
   }
 
+  getBootstrap(): VineLiffBootstrap {
+    if (typeof window === 'undefined') return {}
+    const w = window as any
+    if (w['VineLIFF']) return w['VineLIFF'] as VineLiffBootstrap
+    return this._bootstrap
+  }
+
+  getApiBaseUrl(): string {
+    const bootstrap = this.getBootstrap()
+    return (
+      bootstrap.apiBaseUrl ??
+      (typeof window !== 'undefined' ? window.location.origin : '')
+    )
+  }
+
+  private _requestBootstrap(liffId: string): Promise<VineLiffBootstrap> {
+    return new Promise((resolve) => {
+      const requestId = `req_${Date.now()}_${Math.random().toString(36).slice(2)}`
+      const timeout = setTimeout(() => {
+        window.removeEventListener('message', handler)
+        resolve({})
+      }, 3000)
+      const handler = (event: MessageEvent) => {
+        const data = event.data as Record<string, unknown> | undefined
+        if (data?.type === 'liff:bootstrap:done' && data.requestId === requestId) {
+          clearTimeout(timeout)
+          window.removeEventListener('message', handler)
+          resolve((data.bootstrap as VineLiffBootstrap) ?? {})
+        }
+      }
+      window.addEventListener('message', handler)
+      window.parent.postMessage({ type: 'liff:bootstrap', requestId, liffId }, '*')
+    })
+  }
+
   async init(config: LiffConfig): Promise<void> {
     this._liffId = config.liffId
 
-    const apiBase = typeof window !== 'undefined' ? window.location.origin : ''
+    if (typeof window !== 'undefined') {
+      const w = window as any
+      if (!w['VineLIFF']) {
+        this._bootstrap = await this._requestBootstrap(config.liffId)
+      }
+      const bootstrap = this.getBootstrap()
+      if (bootstrap.accessToken) {
+        this._accessToken = bootstrap.accessToken
+      }
+    }
+
+    const apiBase = this.getApiBaseUrl()
     const res = await fetch(`${apiBase}/liff/v1/apps/${config.liffId}`)
     if (!res.ok) {
       throw new Error(`LIFF init failed: liffId "${config.liffId}" not found`)
@@ -128,19 +185,30 @@ class LiffImpl {
     this._appConfig = appConfig
 
     if (typeof window !== 'undefined') {
-      const hash = new URLSearchParams(window.location.hash.slice(1))
-      const token = hash.get('access_token')
-      const idToken = hash.get('id_token')
-      if (token) {
-        this._accessToken = token
-        window.history.replaceState(
-          null,
-          '',
-          window.location.pathname + window.location.search,
-        )
-      }
-      if (idToken) {
-        this._idToken = idToken
+      const hash = window.location.hash.slice(1)
+      if (hash) {
+        const params = new URLSearchParams(hash)
+        const token = params.get('access_token')
+        const idToken = params.get('id_token')
+        const hasToken = token || idToken
+        if (token) {
+          this._accessToken = token
+        }
+        if (idToken) {
+          this._idToken = idToken
+        }
+        if (hasToken) {
+          const cleaned = new URLSearchParams(hash)
+          cleaned.delete('access_token')
+          cleaned.delete('id_token')
+          const cleanedStr = cleaned.toString()
+          const newHash = cleanedStr ? `#${cleanedStr}` : ''
+          window.history.replaceState(
+            null,
+            '',
+            window.location.pathname + window.location.search + newHash,
+          )
+        }
       }
       if (!this._accessToken) {
         const stored = sessionStorage.getItem(`vine_liff_token_${config.liffId}`)
@@ -190,7 +258,10 @@ class LiffImpl {
   }
 
   isInClient(): boolean {
-    return typeof window !== 'undefined' && !!(window as any).VineLIFF
+    return (
+      typeof window !== 'undefined' &&
+      (!!(window as any).VineLIFF || Object.keys(this._bootstrap).length > 0)
+    )
   }
 
   isLoggedIn(): boolean {
@@ -241,17 +312,19 @@ class LiffImpl {
 
   async getProfile(): Promise<LiffProfile> {
     if (!this._accessToken) throw new Error('Not logged in')
-    const apiBase = typeof window !== 'undefined' ? window.location.origin : ''
-    const res = await fetch(`${apiBase}/liff/v1/me`, {
-      headers: { Authorization: `Bearer ${this._accessToken}` },
-    })
+    const apiBase = this.getApiBaseUrl()
+    const liffId = this._liffId ?? ''
+    const res = await fetch(
+      `${apiBase}/liff/v1/me?liffId=${encodeURIComponent(liffId)}`,
+      { headers: { Authorization: `Bearer ${this._accessToken}` } },
+    )
     if (!res.ok) throw new Error('Failed to get profile')
     return res.json() as Promise<LiffProfile>
   }
 
   async getFriendship(): Promise<{ friendFlag: boolean }> {
     if (!this._accessToken) throw new Error('Not logged in')
-    const apiBase = typeof window !== 'undefined' ? window.location.origin : ''
+    const apiBase = this.getApiBaseUrl()
     const liffId = this._liffId ?? ''
     const res = await fetch(
       `${apiBase}/liff/v1/friendship?liffId=${encodeURIComponent(liffId)}`,
@@ -267,7 +340,31 @@ class LiffImpl {
     if (!this.isInClient())
       throw new Error('sendMessages is only available in LIFF browser')
     if (typeof window === 'undefined') return
-    window.parent?.postMessage({ type: 'liff:sendMessages', messages }, '*')
+    const requestId = `req_${Date.now()}_${Math.random().toString(36).slice(2)}`
+    return new Promise((resolve, reject) => {
+      const handler = (event: MessageEvent) => {
+        const data = event.data as Record<string, unknown> | undefined
+        if (data?.type === 'liff:sendMessages:done' && data.requestId === requestId) {
+          window.removeEventListener('message', handler)
+          resolve()
+        } else if (
+          data?.type === 'liff:sendMessages:error' &&
+          data.requestId === requestId
+        ) {
+          window.removeEventListener('message', handler)
+          const err = data.error
+          const msg =
+            typeof err === 'string'
+              ? err
+              : err && typeof err === 'object' && 'message' in err
+                ? String((err as Record<string, unknown>).message)
+                : 'sendMessages failed'
+          reject(new Error(msg))
+        }
+      }
+      window.addEventListener('message', handler)
+      window.parent.postMessage({ type: 'liff:sendMessages', requestId, messages }, '*')
+    })
   }
 
   openWindow(params: { url: string; external?: boolean }): void {
@@ -289,10 +386,10 @@ class LiffImpl {
   }
 
   getContext(): LiffContext {
-    const inClient = this.isInClient()
+    const bootstrap = this.getBootstrap()
     const cfg = this._appConfig
     return {
-      type: inClient ? 'utou' : 'external',
+      type: bootstrap.contextType ?? 'external',
       userId: this.getDecodedIDToken()?.sub,
       liffId: this._liffId ?? '',
       viewType: (cfg?.viewType as LiffContext['viewType']) ?? 'full',
@@ -301,10 +398,10 @@ class LiffImpl {
       scope: cfg?.scopes ?? [],
       availability: {
         shareTargetPicker: { permission: true },
-        multipleLiffTransition: { permission: inClient },
+        multipleLiffTransition: { permission: this.isInClient() },
         subwindowOpen: { permission: true },
         scanCode: { permission: false },
-        scanCodeV2: { permission: inClient },
+        scanCodeV2: { permission: this.isInClient() },
         createShortcutOnHomeScreen: { permission: false },
       },
       menuColorSetting: DEFAULT_MENU_COLOR_SETTING,
@@ -357,9 +454,10 @@ class LiffImpl {
   permanentLink = {
     createUrlBy: (url: string): string => {
       if (typeof window === 'undefined') return url
-      const liffBase = `${window.location.origin}/liff/${this._liffId ?? ''}`
+      const apiBase = this.getApiBaseUrl()
+      const liffBase = `${apiBase}/liff/${this._liffId ?? ''}`
       try {
-        const target = new URL(url)
+        const target = new URL(url, window.location.href)
         return `${liffBase}${target.pathname}${target.search}${target.hash}`
       } catch {
         return liffBase

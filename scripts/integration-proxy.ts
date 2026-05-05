@@ -14,6 +14,10 @@ export function getIntegrationTestProxyPort(
 
 export const FRONTEND_PORT = getIntegrationTestProxyPort()
 
+export function getFrontendPort() {
+  return getIntegrationTestProxyPort()
+}
+
 const CONNECT_RPC_PATH = /^\/[A-Za-z0-9_.-]+\.[A-Za-z0-9_.-]+\/[A-Z][A-Za-z0-9]*$/
 
 export function isBackendProxyPath(pathname: string) {

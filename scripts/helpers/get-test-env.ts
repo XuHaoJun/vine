@@ -1,16 +1,17 @@
 import { loadEnv as vxrnLoadEnv } from 'vxrn/loadEnv'
 
 import { getDockerHost } from './get-docker-host'
-import { FRONTEND_PORT } from '../integration-proxy'
+import { getIntegrationTestProxyPort } from '../integration-proxy'
 
 export async function getTestEnv() {
   // load development environment
   await vxrnLoadEnv('development')
 
+  const frontendPort = getIntegrationTestProxyPort()
   const dockerHost = getDockerHost()
   const dockerDbBase = `postgresql://user:password@127.0.0.1:5533`
-  const frontendOrigin = `http://localhost:${FRONTEND_PORT}`
-  const dockerFrontendOrigin = `http://${dockerHost}:${FRONTEND_PORT}`
+  const frontendOrigin = `http://localhost:${frontendPort}`
+  const dockerFrontendOrigin = `http://${dockerHost}:${frontendPort}`
 
   return {
     CI: 'true',

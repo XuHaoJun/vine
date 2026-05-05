@@ -4,7 +4,8 @@ import { SizableText, XStack, YStack, ScrollView, Circle, Spinner } from 'tamagu
 import { Avatar } from '~/interface/avatars/Avatar'
 import { CaretLeftIcon } from '~/interface/icons/phosphor/CaretLeftIcon'
 import { useShareTargets } from '~/features/liff/useShareTargets'
-import { useAuth } from '~/features/auth/client/authClient'
+import { validateAndConvertLiffMessages } from '~/features/liff/liffMessage'
+import { sendToTarget } from '~/features/liff/sendToTarget'
 import { zero } from '~/zero/client'
 
 type ShareTargetItem = {
@@ -18,7 +19,7 @@ type ShareTargetItem = {
 }
 
 type ShareTargetPickerProps = {
-  messages: { type: string; text?: string }[]
+  messages: unknown[]
   isMultiple: boolean
   onDone: (result: { status: 'sent' } | false) => void
 }
@@ -91,8 +92,6 @@ function TargetItem({
 
 export const ShareTargetPicker = memo(
   ({ messages, isMultiple, onDone }: ShareTargetPickerProps) => {
-    const { user } = useAuth()
-    const userId = user?.id ?? ''
     const { chats, friends, groups, isLoading } = useShareTargets()
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
     const [chatsExpanded, setChatsExpanded] = useState(true)
@@ -156,57 +155,21 @@ export const ShareTargetPicker = memo(
     const handleShare = async () => {
       if (selectedIds.size === 0) return
 
+      const validated = validateAndConvertLiffMessages({
+        method: 'shareTargetPicker',
+        messages,
+      })
+      if (!validated.ok) {
+        onDone(false)
+        return
+      }
+
       const targets = allTargets.filter((t) => selectedIds.has(t.id))
-      const textMessages = messages.filter((m) => m.type === 'text')
 
       try {
+        const now = Date.now()
         for (const target of targets) {
-          if (target.kind === 'friend' && target.userId) {
-            const newChatId = crypto.randomUUID()
-            await zero.mutate.chat.findOrCreateDirectChat({
-              friendUserId: target.userId,
-              chatId: newChatId,
-              member1Id: crypto.randomUUID(),
-              member2Id: crypto.randomUUID(),
-            })
-            for (const msg of textMessages) {
-              zero.mutate.message.send({
-                id: crypto.randomUUID(),
-                chatId: newChatId,
-                senderId: userId,
-                senderType: 'user',
-                type: 'text',
-                text: msg.text ?? '',
-                createdAt: Date.now(),
-              })
-            }
-          }
-          if (target.kind === 'chat' && target.chatId) {
-            for (const msg of textMessages) {
-              zero.mutate.message.send({
-                id: crypto.randomUUID(),
-                chatId: target.chatId,
-                senderId: userId,
-                senderType: 'user',
-                type: 'text',
-                text: msg.text ?? '',
-                createdAt: Date.now(),
-              })
-            }
-          }
-          if (target.kind === 'group' && target.chatId) {
-            for (const msg of textMessages) {
-              zero.mutate.message.send({
-                id: crypto.randomUUID(),
-                chatId: target.chatId,
-                senderId: userId,
-                senderType: 'user',
-                type: 'text',
-                text: msg.text ?? '',
-                createdAt: Date.now(),
-              })
-            }
-          }
+          await sendToTarget(zero, target, validated.messages, now)
         }
         onDone({ status: 'sent' })
       } catch {
