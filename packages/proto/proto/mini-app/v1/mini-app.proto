@@ -77,6 +77,60 @@ message ListMyGalleryResponse {
 message ListLinkedToOaRequest { string oa_id = 1; }
 message ListLinkedToOaResponse { repeated MiniApp mini_apps = 1; }
 
+message ParamSpec {
+  string name = 1;
+  bool required = 2;
+  string kind = 3; // "text" | "uri"
+  optional uint32 hard = 4;
+}
+message ServiceTemplate {
+  string id = 1;
+  string mini_app_id = 2;
+  string name = 3;
+  string kind = 4;
+  string language_tag = 5;
+  string flex_json = 6;
+  repeated ParamSpec params_schema = 7;
+  string use_case = 8;
+  string created_at = 9;
+  string updated_at = 10;
+}
+
+message ListServiceTemplatesRequest { string mini_app_id = 1; }
+message ListServiceTemplatesResponse { repeated ServiceTemplate templates = 1; }
+
+message CreateServiceTemplateRequest {
+  string mini_app_id = 1;
+  string kind = 2;
+  string language_tag = 3;
+  string name = 4;
+  string flex_json = 5;
+  repeated ParamSpec params_schema = 6;
+  string use_case = 7;
+}
+message CreateServiceTemplateResponse { ServiceTemplate template = 1; }
+
+message UpdateServiceTemplateRequest {
+  string id = 1;
+  optional string flex_json = 2;
+  repeated ParamSpec params_schema = 3;
+  optional string use_case = 4;
+  optional string language_tag = 5;
+}
+message UpdateServiceTemplateResponse { ServiceTemplate template = 1; }
+
+message DeleteServiceTemplateRequest { string id = 1; }
+message DeleteServiceTemplateResponse {}
+
+message SendTestServiceMessageRequest {
+  string template_id = 1;
+  map<string, string> params = 2;
+}
+message SendTestServiceMessageResponse {
+  string message_id = 1;
+  string chat_id = 2;
+}
+
 service MiniAppService {
   rpc ListMiniApps(ListMiniAppsRequest) returns (ListMiniAppsResponse);
   rpc GetMiniApp(GetMiniAppRequest) returns (GetMiniAppResponse);
@@ -90,4 +144,9 @@ service MiniAppService {
   rpc ListPublished(ListPublishedRequest) returns (ListPublishedResponse);
   rpc ListMyGallery(ListMyGalleryRequest) returns (ListMyGalleryResponse);
   rpc ListLinkedToOa(ListLinkedToOaRequest) returns (ListLinkedToOaResponse);
+  rpc ListServiceTemplates(ListServiceTemplatesRequest) returns (ListServiceTemplatesResponse);
+  rpc CreateServiceTemplate(CreateServiceTemplateRequest) returns (CreateServiceTemplateResponse);
+  rpc UpdateServiceTemplate(UpdateServiceTemplateRequest) returns (UpdateServiceTemplateResponse);
+  rpc DeleteServiceTemplate(DeleteServiceTemplateRequest) returns (DeleteServiceTemplateResponse);
+  rpc SendTestServiceMessage(SendTestServiceMessageRequest) returns (SendTestServiceMessageResponse);
 }

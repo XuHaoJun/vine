@@ -51,6 +51,7 @@ describe('GET /api/liff/v1/mini-app/:miniAppId', () => {
           },
         }),
         liff: fakeLiffService(),
+        auth: {} as any,
       }),
     )
     const res = await app.inject({ method: 'GET', url: '/api/liff/v1/mini-app/ma-1' })
@@ -68,6 +69,7 @@ describe('GET /api/liff/v1/mini-app/:miniAppId', () => {
       miniAppPublicPlugin(instance, {
         miniApp: fakeMiniAppService({}),
         liff: fakeLiffService(),
+        auth: {} as any,
       }),
     )
     const res = await app.inject({ method: 'GET', url: '/api/liff/v1/mini-app/missing' })

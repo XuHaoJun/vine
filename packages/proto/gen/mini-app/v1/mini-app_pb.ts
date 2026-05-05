@@ -12,7 +12,7 @@ import type { Message } from '@bufbuild/protobuf'
 export const file_mini_app_v1_mini_app: GenFile =
   /*@__PURE__*/
   fileDesc(
-    'ChptaW5pLWFwcC92MS9taW5pLWFwcC5wcm90bxIKbWluaWFwcC52MSLAAgoHTWluaUFwcBIKCgJpZBgBIAEoCRITCgtwcm92aWRlcl9pZBgCIAEoCRITCgtsaWZmX2FwcF9pZBgDIAEoCRIMCgRuYW1lGAQgASgJEhUKCGljb25fdXJsGAUgASgJSACIAQESGAoLZGVzY3JpcHRpb24YBiABKAlIAYgBARIVCghjYXRlZ29yeRgHIAEoCUgCiAEBEhQKDGlzX3B1Ymxpc2hlZBgIIAEoCBIZCgxwdWJsaXNoZWRfYXQYCSABKAlIA4gBARISCgpjcmVhdGVkX2F0GAogASgJEhIKCnVwZGF0ZWRfYXQYCyABKAkSFQoNbGlua2VkX29hX2lkcxgMIAMoCUILCglfaWNvbl91cmxCDgoMX2Rlc2NyaXB0aW9uQgsKCV9jYXRlZ29yeUIPCg1fcHVibGlzaGVkX2F0IioKE0xpc3RNaW5pQXBwc1JlcXVlc3QSEwoLcHJvdmlkZXJfaWQYASABKAkiPgoUTGlzdE1pbmlBcHBzUmVzcG9uc2USJgoJbWluaV9hcHBzGAEgAygLMhMubWluaWFwcC52MS5NaW5pQXBwIh8KEUdldE1pbmlBcHBSZXF1ZXN0EgoKAmlkGAEgASgJIjsKEkdldE1pbmlBcHBSZXNwb25zZRIlCghtaW5pX2FwcBgBIAEoCzITLm1pbmlhcHAudjEuTWluaUFwcCLAAQoUQ3JlYXRlTWluaUFwcFJlcXVlc3QSEwoLcHJvdmlkZXJfaWQYASABKAkSEwoLbGlmZl9hcHBfaWQYAiABKAkSDAoEbmFtZRgDIAEoCRIVCghpY29uX3VybBgEIAEoCUgAiAEBEhgKC2Rlc2NyaXB0aW9uGAUgASgJSAGIAQESFQoIY2F0ZWdvcnkYBiABKAlIAogBAUILCglfaWNvbl91cmxCDgoMX2Rlc2NyaXB0aW9uQgsKCV9jYXRlZ29yeSI+ChVDcmVhdGVNaW5pQXBwUmVzcG9uc2USJQoIbWluaV9hcHAYASABKAsyEy5taW5pYXBwLnYxLk1pbmlBcHAisAEKFFVwZGF0ZU1pbmlBcHBSZXF1ZXN0EgoKAmlkGAEgASgJEhEKBG5hbWUYAiABKAlIAIgBARIVCghpY29uX3VybBgDIAEoCUgBiAEBEhgKC2Rlc2NyaXB0aW9uGAQgASgJSAKIAQESFQoIY2F0ZWdvcnkYBSABKAlIA4gBAUIHCgVfbmFtZUILCglfaWNvbl91cmxCDgoMX2Rlc2NyaXB0aW9uQgsKCV9jYXRlZ29yeSI+ChVVcGRhdGVNaW5pQXBwUmVzcG9uc2USJQoIbWluaV9hcHAYASABKAsyEy5taW5pYXBwLnYxLk1pbmlBcHAiIwoVUHVibGlzaE1pbmlBcHBSZXF1ZXN0EgoKAmlkGAEgASgJIj8KFlB1Ymxpc2hNaW5pQXBwUmVzcG9uc2USJQoIbWluaV9hcHAYASABKAsyEy5taW5pYXBwLnYxLk1pbmlBcHAiJQoXVW5wdWJsaXNoTWluaUFwcFJlcXVlc3QSCgoCaWQYASABKAkiQQoYVW5wdWJsaXNoTWluaUFwcFJlc3BvbnNlEiUKCG1pbmlfYXBwGAEgASgLMhMubWluaWFwcC52MS5NaW5pQXBwIiIKFERlbGV0ZU1pbmlBcHBSZXF1ZXN0EgoKAmlkGAEgASgJIhcKFURlbGV0ZU1pbmlBcHBSZXNwb25zZSIzCg1MaW5rT2FSZXF1ZXN0EhMKC21pbmlfYXBwX2lkGAEgASgJEg0KBW9hX2lkGAIgASgJIhAKDkxpbmtPYVJlc3BvbnNlIjUKD1VubGlua09hUmVxdWVzdBITCgttaW5pX2FwcF9pZBgBIAEoCRINCgVvYV9pZBgCIAEoCSISChBVbmxpbmtPYVJlc3BvbnNlIqQBChRMaXN0UHVibGlzaGVkUmVxdWVzdBIVCghjYXRlZ29yeRgBIAEoCUgAiAEBEhkKDHNlYXJjaF9xdWVyeRgCIAEoCUgBiAEBEhIKBWxpbWl0GAMgASgNSAKIAQESEwoGb2Zmc2V0GAQgASgNSAOIAQFCCwoJX2NhdGVnb3J5Qg8KDV9zZWFyY2hfcXVlcnlCCAoGX2xpbWl0QgkKB19vZmZzZXQiTgoVTGlzdFB1Ymxpc2hlZFJlc3BvbnNlEiYKCW1pbmlfYXBwcxgBIAMoCzITLm1pbmlhcHAudjEuTWluaUFwcBINCgV0b3RhbBgCIAEoDSIWChRMaXN0TXlHYWxsZXJ5UmVxdWVzdCJkChVMaXN0TXlHYWxsZXJ5UmVzcG9uc2USJAoHcmVjZW50cxgBIAMoCzITLm1pbmlhcHAudjEuTWluaUFwcBIlCghmcm9tX29hcxgCIAMoCzITLm1pbmlhcHAudjEuTWluaUFwcCImChVMaXN0TGlua2VkVG9PYVJlcXVlc3QSDQoFb2FfaWQYASABKAkiQAoWTGlzdExpbmtlZFRvT2FSZXNwb25zZRImCgltaW5pX2FwcHMYASADKAsyEy5taW5pYXBwLnYxLk1pbmlBcHAy9wcKDk1pbmlBcHBTZXJ2aWNlElEKDExpc3RNaW5pQXBwcxIfLm1pbmlhcHAudjEuTGlzdE1pbmlBcHBzUmVxdWVzdBogLm1pbmlhcHAudjEuTGlzdE1pbmlBcHBzUmVzcG9uc2USSwoKR2V0TWluaUFwcBIdLm1pbmlhcHAudjEuR2V0TWluaUFwcFJlcXVlc3QaHi5taW5pYXBwLnYxLkdldE1pbmlBcHBSZXNwb25zZRJUCg1DcmVhdGVNaW5pQXBwEiAubWluaWFwcC52MS5DcmVhdGVNaW5pQXBwUmVxdWVzdBohLm1pbmlhcHAudjEuQ3JlYXRlTWluaUFwcFJlc3BvbnNlElQKDVVwZGF0ZU1pbmlBcHASIC5taW5pYXBwLnYxLlVwZGF0ZU1pbmlBcHBSZXF1ZXN0GiEubWluaWFwcC52MS5VcGRhdGVNaW5pQXBwUmVzcG9uc2USVwoOUHVibGlzaE1pbmlBcHASIS5taW5pYXBwLnYxLlB1Ymxpc2hNaW5pQXBwUmVxdWVzdBoiLm1pbmlhcHAudjEuUHVibGlzaE1pbmlBcHBSZXNwb25zZRJdChBVbnB1Ymxpc2hNaW5pQXBwEiMubWluaWFwcC52MS5VbnB1Ymxpc2hNaW5pQXBwUmVxdWVzdBokLm1pbmlhcHAudjEuVW5wdWJsaXNoTWluaUFwcFJlc3BvbnNlElQKDURlbGV0ZU1pbmlBcHASIC5taW5pYXBwLnYxLkRlbGV0ZU1pbmlBcHBSZXF1ZXN0GiEubWluaWFwcC52MS5EZWxldGVNaW5pQXBwUmVzcG9uc2USPwoGTGlua09hEhkubWluaWFwcC52MS5MaW5rT2FSZXF1ZXN0GhoubWluaWFwcC52MS5MaW5rT2FSZXNwb25zZRJFCghVbmxpbmtPYRIbLm1pbmlhcHAudjEuVW5saW5rT2FSZXF1ZXN0GhwubWluaWFwcC52MS5VbmxpbmtPYVJlc3BvbnNlElQKDUxpc3RQdWJsaXNoZWQSIC5taW5pYXBwLnYxLkxpc3RQdWJsaXNoZWRSZXF1ZXN0GiEubWluaWFwcC52MS5MaXN0UHVibGlzaGVkUmVzcG9uc2USVAoNTGlzdE15R2FsbGVyeRIgLm1pbmlhcHAudjEuTGlzdE15R2FsbGVyeVJlcXVlc3QaIS5taW5pYXBwLnYxLkxpc3RNeUdhbGxlcnlSZXNwb25zZRJXCg5MaXN0TGlua2VkVG9PYRIhLm1pbmlhcHAudjEuTGlzdExpbmtlZFRvT2FSZXF1ZXN0GiIubWluaWFwcC52MS5MaXN0TGlua2VkVG9PYVJlc3BvbnNlYgZwcm90bzM',
+    'ChptaW5pLWFwcC92MS9taW5pLWFwcC5wcm90bxIKbWluaWFwcC52MSLAAgoHTWluaUFwcBIKCgJpZBgBIAEoCRITCgtwcm92aWRlcl9pZBgCIAEoCRITCgtsaWZmX2FwcF9pZBgDIAEoCRIMCgRuYW1lGAQgASgJEhUKCGljb25fdXJsGAUgASgJSACIAQESGAoLZGVzY3JpcHRpb24YBiABKAlIAYgBARIVCghjYXRlZ29yeRgHIAEoCUgCiAEBEhQKDGlzX3B1Ymxpc2hlZBgIIAEoCBIZCgxwdWJsaXNoZWRfYXQYCSABKAlIA4gBARISCgpjcmVhdGVkX2F0GAogASgJEhIKCnVwZGF0ZWRfYXQYCyABKAkSFQoNbGlua2VkX29hX2lkcxgMIAMoCUILCglfaWNvbl91cmxCDgoMX2Rlc2NyaXB0aW9uQgsKCV9jYXRlZ29yeUIPCg1fcHVibGlzaGVkX2F0IioKE0xpc3RNaW5pQXBwc1JlcXVlc3QSEwoLcHJvdmlkZXJfaWQYASABKAkiPgoUTGlzdE1pbmlBcHBzUmVzcG9uc2USJgoJbWluaV9hcHBzGAEgAygLMhMubWluaWFwcC52MS5NaW5pQXBwIh8KEUdldE1pbmlBcHBSZXF1ZXN0EgoKAmlkGAEgASgJIjsKEkdldE1pbmlBcHBSZXNwb25zZRIlCghtaW5pX2FwcBgBIAEoCzITLm1pbmlhcHAudjEuTWluaUFwcCLAAQoUQ3JlYXRlTWluaUFwcFJlcXVlc3QSEwoLcHJvdmlkZXJfaWQYASABKAkSEwoLbGlmZl9hcHBfaWQYAiABKAkSDAoEbmFtZRgDIAEoCRIVCghpY29uX3VybBgEIAEoCUgAiAEBEhgKC2Rlc2NyaXB0aW9uGAUgASgJSAGIAQESFQoIY2F0ZWdvcnkYBiABKAlIAogBAUILCglfaWNvbl91cmxCDgoMX2Rlc2NyaXB0aW9uQgsKCV9jYXRlZ29yeSI+ChVDcmVhdGVNaW5pQXBwUmVzcG9uc2USJQoIbWluaV9hcHAYASABKAsyEy5taW5pYXBwLnYxLk1pbmlBcHAisAEKFFVwZGF0ZU1pbmlBcHBSZXF1ZXN0EgoKAmlkGAEgASgJEhEKBG5hbWUYAiABKAlIAIgBARIVCghpY29uX3VybBgDIAEoCUgBiAEBEhgKC2Rlc2NyaXB0aW9uGAQgASgJSAKIAQESFQoIY2F0ZWdvcnkYBSABKAlIA4gBAUIHCgVfbmFtZUILCglfaWNvbl91cmxCDgoMX2Rlc2NyaXB0aW9uQgsKCV9jYXRlZ29yeSI+ChVVcGRhdGVNaW5pQXBwUmVzcG9uc2USJQoIbWluaV9hcHAYASABKAsyEy5taW5pYXBwLnYxLk1pbmlBcHAiIwoVUHVibGlzaE1pbmlBcHBSZXF1ZXN0EgoKAmlkGAEgASgJIj8KFlB1Ymxpc2hNaW5pQXBwUmVzcG9uc2USJQoIbWluaV9hcHAYASABKAsyEy5taW5pYXBwLnYxLk1pbmlBcHAiJQoXVW5wdWJsaXNoTWluaUFwcFJlcXVlc3QSCgoCaWQYASABKAkiQQoYVW5wdWJsaXNoTWluaUFwcFJlc3BvbnNlEiUKCG1pbmlfYXBwGAEgASgLMhMubWluaWFwcC52MS5NaW5pQXBwIiIKFERlbGV0ZU1pbmlBcHBSZXF1ZXN0EgoKAmlkGAEgASgJIhcKFURlbGV0ZU1pbmlBcHBSZXNwb25zZSIzCg1MaW5rT2FSZXF1ZXN0EhMKC21pbmlfYXBwX2lkGAEgASgJEg0KBW9hX2lkGAIgASgJIhAKDkxpbmtPYVJlc3BvbnNlIjUKD1VubGlua09hUmVxdWVzdBITCgttaW5pX2FwcF9pZBgBIAEoCRINCgVvYV9pZBgCIAEoCSISChBVbmxpbmtPYVJlc3BvbnNlIqQBChRMaXN0UHVibGlzaGVkUmVxdWVzdBIVCghjYXRlZ29yeRgBIAEoCUgAiAEBEhkKDHNlYXJjaF9xdWVyeRgCIAEoCUgBiAEBEhIKBWxpbWl0GAMgASgNSAKIAQESEwoGb2Zmc2V0GAQgASgNSAOIAQFCCwoJX2NhdGVnb3J5Qg8KDV9zZWFyY2hfcXVlcnlCCAoGX2xpbWl0QgkKB19vZmZzZXQiTgoVTGlzdFB1Ymxpc2hlZFJlc3BvbnNlEiYKCW1pbmlfYXBwcxgBIAMoCzITLm1pbmlhcHAudjEuTWluaUFwcBINCgV0b3RhbBgCIAEoDSIWChRMaXN0TXlHYWxsZXJ5UmVxdWVzdCJkChVMaXN0TXlHYWxsZXJ5UmVzcG9uc2USJAoHcmVjZW50cxgBIAMoCzITLm1pbmlhcHAudjEuTWluaUFwcBIlCghmcm9tX29hcxgCIAMoCzITLm1pbmlhcHAudjEuTWluaUFwcCImChVMaXN0TGlua2VkVG9PYVJlcXVlc3QSDQoFb2FfaWQYASABKAkiQAoWTGlzdExpbmtlZFRvT2FSZXNwb25zZRImCgltaW5pX2FwcHMYASADKAsyEy5taW5pYXBwLnYxLk1pbmlBcHAiVQoJUGFyYW1TcGVjEgwKBG5hbWUYASABKAkSEAoIcmVxdWlyZWQYAiABKAgSDAoEa2luZBgDIAEoCRIRCgRoYXJkGAQgASgNSACIAQFCBwoFX2hhcmQi3wEKD1NlcnZpY2VUZW1wbGF0ZRIKCgJpZBgBIAEoCRITCgttaW5pX2FwcF9pZBgCIAEoCRIMCgRuYW1lGAMgASgJEgwKBGtpbmQYBCABKAkSFAoMbGFuZ3VhZ2VfdGFnGAUgASgJEhEKCWZsZXhfanNvbhgGIAEoCRIsCg1wYXJhbXNfc2NoZW1hGAcgAygLMhUubWluaWFwcC52MS5QYXJhbVNwZWMSEAoIdXNlX2Nhc2UYCCABKAkSEgoKY3JlYXRlZF9hdBgJIAEoCRISCgp1cGRhdGVkX2F0GAogASgJIjIKG0xpc3RTZXJ2aWNlVGVtcGxhdGVzUmVxdWVzdBITCgttaW5pX2FwcF9pZBgBIAEoCSJOChxMaXN0U2VydmljZVRlbXBsYXRlc1Jlc3BvbnNlEi4KCXRlbXBsYXRlcxgBIAMoCzIbLm1pbmlhcHAudjEuU2VydmljZVRlbXBsYXRlIrgBChxDcmVhdGVTZXJ2aWNlVGVtcGxhdGVSZXF1ZXN0EhMKC21pbmlfYXBwX2lkGAEgASgJEgwKBGtpbmQYAiABKAkSFAoMbGFuZ3VhZ2VfdGFnGAMgASgJEgwKBG5hbWUYBCABKAkSEQoJZmxleF9qc29uGAUgASgJEiwKDXBhcmFtc19zY2hlbWEYBiADKAsyFS5taW5pYXBwLnYxLlBhcmFtU3BlYxIQCgh1c2VfY2FzZRgHIAEoCSJOCh1DcmVhdGVTZXJ2aWNlVGVtcGxhdGVSZXNwb25zZRItCgh0ZW1wbGF0ZRgBIAEoCzIbLm1pbmlhcHAudjEuU2VydmljZVRlbXBsYXRlIs4BChxVcGRhdGVTZXJ2aWNlVGVtcGxhdGVSZXF1ZXN0EgoKAmlkGAEgASgJEhYKCWZsZXhfanNvbhgCIAEoCUgAiAEBEiwKDXBhcmFtc19zY2hlbWEYAyADKAsyFS5taW5pYXBwLnYxLlBhcmFtU3BlYxIVCgh1c2VfY2FzZRgEIAEoCUgBiAEBEhkKDGxhbmd1YWdlX3RhZxgFIAEoCUgCiAEBQgwKCl9mbGV4X2pzb25CCwoJX3VzZV9jYXNlQg8KDV9sYW5ndWFnZV90YWciTgodVXBkYXRlU2VydmljZVRlbXBsYXRlUmVzcG9uc2USLQoIdGVtcGxhdGUYASABKAsyGy5taW5pYXBwLnYxLlNlcnZpY2VUZW1wbGF0ZSIqChxEZWxldGVTZXJ2aWNlVGVtcGxhdGVSZXF1ZXN0EgoKAmlkGAEgASgJIh8KHURlbGV0ZVNlcnZpY2VUZW1wbGF0ZVJlc3BvbnNlIqoBCh1TZW5kVGVzdFNlcnZpY2VNZXNzYWdlUmVxdWVzdBITCgt0ZW1wbGF0ZV9pZBgBIAEoCRJFCgZwYXJhbXMYAiADKAsyNS5taW5pYXBwLnYxLlNlbmRUZXN0U2VydmljZU1lc3NhZ2VSZXF1ZXN0LlBhcmFtc0VudHJ5Gi0KC1BhcmFtc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiRQoeU2VuZFRlc3RTZXJ2aWNlTWVzc2FnZVJlc3BvbnNlEhIKCm1lc3NhZ2VfaWQYASABKAkSDwoHY2hhdF9pZBgCIAEoCTKdDAoOTWluaUFwcFNlcnZpY2USUQoMTGlzdE1pbmlBcHBzEh8ubWluaWFwcC52MS5MaXN0TWluaUFwcHNSZXF1ZXN0GiAubWluaWFwcC52MS5MaXN0TWluaUFwcHNSZXNwb25zZRJLCgpHZXRNaW5pQXBwEh0ubWluaWFwcC52MS5HZXRNaW5pQXBwUmVxdWVzdBoeLm1pbmlhcHAudjEuR2V0TWluaUFwcFJlc3BvbnNlElQKDUNyZWF0ZU1pbmlBcHASIC5taW5pYXBwLnYxLkNyZWF0ZU1pbmlBcHBSZXF1ZXN0GiEubWluaWFwcC52MS5DcmVhdGVNaW5pQXBwUmVzcG9uc2USVAoNVXBkYXRlTWluaUFwcBIgLm1pbmlhcHAudjEuVXBkYXRlTWluaUFwcFJlcXVlc3QaIS5taW5pYXBwLnYxLlVwZGF0ZU1pbmlBcHBSZXNwb25zZRJXCg5QdWJsaXNoTWluaUFwcBIhLm1pbmlhcHAudjEuUHVibGlzaE1pbmlBcHBSZXF1ZXN0GiIubWluaWFwcC52MS5QdWJsaXNoTWluaUFwcFJlc3BvbnNlEl0KEFVucHVibGlzaE1pbmlBcHASIy5taW5pYXBwLnYxLlVucHVibGlzaE1pbmlBcHBSZXF1ZXN0GiQubWluaWFwcC52MS5VbnB1Ymxpc2hNaW5pQXBwUmVzcG9uc2USVAoNRGVsZXRlTWluaUFwcBIgLm1pbmlhcHAudjEuRGVsZXRlTWluaUFwcFJlcXVlc3QaIS5taW5pYXBwLnYxLkRlbGV0ZU1pbmlBcHBSZXNwb25zZRI/CgZMaW5rT2ESGS5taW5pYXBwLnYxLkxpbmtPYVJlcXVlc3QaGi5taW5pYXBwLnYxLkxpbmtPYVJlc3BvbnNlEkUKCFVubGlua09hEhsubWluaWFwcC52MS5VbmxpbmtPYVJlcXVlc3QaHC5taW5pYXBwLnYxLlVubGlua09hUmVzcG9uc2USVAoNTGlzdFB1Ymxpc2hlZBIgLm1pbmlhcHAudjEuTGlzdFB1Ymxpc2hlZFJlcXVlc3QaIS5taW5pYXBwLnYxLkxpc3RQdWJsaXNoZWRSZXNwb25zZRJUCg1MaXN0TXlHYWxsZXJ5EiAubWluaWFwcC52MS5MaXN0TXlHYWxsZXJ5UmVxdWVzdBohLm1pbmlhcHAudjEuTGlzdE15R2FsbGVyeVJlc3BvbnNlElcKDkxpc3RMaW5rZWRUb09hEiEubWluaWFwcC52MS5MaXN0TGlua2VkVG9PYVJlcXVlc3QaIi5taW5pYXBwLnYxLkxpc3RMaW5rZWRUb09hUmVzcG9uc2USaQoUTGlzdFNlcnZpY2VUZW1wbGF0ZXMSJy5taW5pYXBwLnYxLkxpc3RTZXJ2aWNlVGVtcGxhdGVzUmVxdWVzdBooLm1pbmlhcHAudjEuTGlzdFNlcnZpY2VUZW1wbGF0ZXNSZXNwb25zZRJsChVDcmVhdGVTZXJ2aWNlVGVtcGxhdGUSKC5taW5pYXBwLnYxLkNyZWF0ZVNlcnZpY2VUZW1wbGF0ZVJlcXVlc3QaKS5taW5pYXBwLnYxLkNyZWF0ZVNlcnZpY2VUZW1wbGF0ZVJlc3BvbnNlEmwKFVVwZGF0ZVNlcnZpY2VUZW1wbGF0ZRIoLm1pbmlhcHAudjEuVXBkYXRlU2VydmljZVRlbXBsYXRlUmVxdWVzdBopLm1pbmlhcHAudjEuVXBkYXRlU2VydmljZVRlbXBsYXRlUmVzcG9uc2USbAoVRGVsZXRlU2VydmljZVRlbXBsYXRlEigubWluaWFwcC52MS5EZWxldGVTZXJ2aWNlVGVtcGxhdGVSZXF1ZXN0GikubWluaWFwcC52MS5EZWxldGVTZXJ2aWNlVGVtcGxhdGVSZXNwb25zZRJvChZTZW5kVGVzdFNlcnZpY2VNZXNzYWdlEikubWluaWFwcC52MS5TZW5kVGVzdFNlcnZpY2VNZXNzYWdlUmVxdWVzdBoqLm1pbmlhcHAudjEuU2VuZFRlc3RTZXJ2aWNlTWVzc2FnZVJlc3BvbnNlYgZwcm90bzM',
   )
 
 /**
@@ -581,6 +581,349 @@ export const ListLinkedToOaResponseSchema: GenMessage<ListLinkedToOaResponse> =
   messageDesc(file_mini_app_v1_mini_app, 24)
 
 /**
+ * @generated from message miniapp.v1.ParamSpec
+ */
+export type ParamSpec = Message<'miniapp.v1.ParamSpec'> & {
+  /**
+   * @generated from field: string name = 1;
+   */
+  name: string
+
+  /**
+   * @generated from field: bool required = 2;
+   */
+  required: boolean
+
+  /**
+   * "text" | "uri"
+   *
+   * @generated from field: string kind = 3;
+   */
+  kind: string
+
+  /**
+   * @generated from field: optional uint32 hard = 4;
+   */
+  hard?: number | undefined
+}
+
+/**
+ * Describes the message miniapp.v1.ParamSpec.
+ * Use `create(ParamSpecSchema)` to create a new message.
+ */
+export const ParamSpecSchema: GenMessage<ParamSpec> =
+  /*@__PURE__*/
+  messageDesc(file_mini_app_v1_mini_app, 25)
+
+/**
+ * @generated from message miniapp.v1.ServiceTemplate
+ */
+export type ServiceTemplate = Message<'miniapp.v1.ServiceTemplate'> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string
+
+  /**
+   * @generated from field: string mini_app_id = 2;
+   */
+  miniAppId: string
+
+  /**
+   * @generated from field: string name = 3;
+   */
+  name: string
+
+  /**
+   * @generated from field: string kind = 4;
+   */
+  kind: string
+
+  /**
+   * @generated from field: string language_tag = 5;
+   */
+  languageTag: string
+
+  /**
+   * @generated from field: string flex_json = 6;
+   */
+  flexJson: string
+
+  /**
+   * @generated from field: repeated miniapp.v1.ParamSpec params_schema = 7;
+   */
+  paramsSchema: ParamSpec[]
+
+  /**
+   * @generated from field: string use_case = 8;
+   */
+  useCase: string
+
+  /**
+   * @generated from field: string created_at = 9;
+   */
+  createdAt: string
+
+  /**
+   * @generated from field: string updated_at = 10;
+   */
+  updatedAt: string
+}
+
+/**
+ * Describes the message miniapp.v1.ServiceTemplate.
+ * Use `create(ServiceTemplateSchema)` to create a new message.
+ */
+export const ServiceTemplateSchema: GenMessage<ServiceTemplate> =
+  /*@__PURE__*/
+  messageDesc(file_mini_app_v1_mini_app, 26)
+
+/**
+ * @generated from message miniapp.v1.ListServiceTemplatesRequest
+ */
+export type ListServiceTemplatesRequest =
+  Message<'miniapp.v1.ListServiceTemplatesRequest'> & {
+    /**
+     * @generated from field: string mini_app_id = 1;
+     */
+    miniAppId: string
+  }
+
+/**
+ * Describes the message miniapp.v1.ListServiceTemplatesRequest.
+ * Use `create(ListServiceTemplatesRequestSchema)` to create a new message.
+ */
+export const ListServiceTemplatesRequestSchema: GenMessage<ListServiceTemplatesRequest> =
+  /*@__PURE__*/
+  messageDesc(file_mini_app_v1_mini_app, 27)
+
+/**
+ * @generated from message miniapp.v1.ListServiceTemplatesResponse
+ */
+export type ListServiceTemplatesResponse =
+  Message<'miniapp.v1.ListServiceTemplatesResponse'> & {
+    /**
+     * @generated from field: repeated miniapp.v1.ServiceTemplate templates = 1;
+     */
+    templates: ServiceTemplate[]
+  }
+
+/**
+ * Describes the message miniapp.v1.ListServiceTemplatesResponse.
+ * Use `create(ListServiceTemplatesResponseSchema)` to create a new message.
+ */
+export const ListServiceTemplatesResponseSchema: GenMessage<ListServiceTemplatesResponse> =
+  /*@__PURE__*/
+  messageDesc(file_mini_app_v1_mini_app, 28)
+
+/**
+ * @generated from message miniapp.v1.CreateServiceTemplateRequest
+ */
+export type CreateServiceTemplateRequest =
+  Message<'miniapp.v1.CreateServiceTemplateRequest'> & {
+    /**
+     * @generated from field: string mini_app_id = 1;
+     */
+    miniAppId: string
+
+    /**
+     * @generated from field: string kind = 2;
+     */
+    kind: string
+
+    /**
+     * @generated from field: string language_tag = 3;
+     */
+    languageTag: string
+
+    /**
+     * @generated from field: string name = 4;
+     */
+    name: string
+
+    /**
+     * @generated from field: string flex_json = 5;
+     */
+    flexJson: string
+
+    /**
+     * @generated from field: repeated miniapp.v1.ParamSpec params_schema = 6;
+     */
+    paramsSchema: ParamSpec[]
+
+    /**
+     * @generated from field: string use_case = 7;
+     */
+    useCase: string
+  }
+
+/**
+ * Describes the message miniapp.v1.CreateServiceTemplateRequest.
+ * Use `create(CreateServiceTemplateRequestSchema)` to create a new message.
+ */
+export const CreateServiceTemplateRequestSchema: GenMessage<CreateServiceTemplateRequest> =
+  /*@__PURE__*/
+  messageDesc(file_mini_app_v1_mini_app, 29)
+
+/**
+ * @generated from message miniapp.v1.CreateServiceTemplateResponse
+ */
+export type CreateServiceTemplateResponse =
+  Message<'miniapp.v1.CreateServiceTemplateResponse'> & {
+    /**
+     * @generated from field: miniapp.v1.ServiceTemplate template = 1;
+     */
+    template?: ServiceTemplate | undefined
+  }
+
+/**
+ * Describes the message miniapp.v1.CreateServiceTemplateResponse.
+ * Use `create(CreateServiceTemplateResponseSchema)` to create a new message.
+ */
+export const CreateServiceTemplateResponseSchema: GenMessage<CreateServiceTemplateResponse> =
+  /*@__PURE__*/
+  messageDesc(file_mini_app_v1_mini_app, 30)
+
+/**
+ * @generated from message miniapp.v1.UpdateServiceTemplateRequest
+ */
+export type UpdateServiceTemplateRequest =
+  Message<'miniapp.v1.UpdateServiceTemplateRequest'> & {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string
+
+    /**
+     * @generated from field: optional string flex_json = 2;
+     */
+    flexJson?: string | undefined
+
+    /**
+     * @generated from field: repeated miniapp.v1.ParamSpec params_schema = 3;
+     */
+    paramsSchema: ParamSpec[]
+
+    /**
+     * @generated from field: optional string use_case = 4;
+     */
+    useCase?: string | undefined
+
+    /**
+     * @generated from field: optional string language_tag = 5;
+     */
+    languageTag?: string | undefined
+  }
+
+/**
+ * Describes the message miniapp.v1.UpdateServiceTemplateRequest.
+ * Use `create(UpdateServiceTemplateRequestSchema)` to create a new message.
+ */
+export const UpdateServiceTemplateRequestSchema: GenMessage<UpdateServiceTemplateRequest> =
+  /*@__PURE__*/
+  messageDesc(file_mini_app_v1_mini_app, 31)
+
+/**
+ * @generated from message miniapp.v1.UpdateServiceTemplateResponse
+ */
+export type UpdateServiceTemplateResponse =
+  Message<'miniapp.v1.UpdateServiceTemplateResponse'> & {
+    /**
+     * @generated from field: miniapp.v1.ServiceTemplate template = 1;
+     */
+    template?: ServiceTemplate | undefined
+  }
+
+/**
+ * Describes the message miniapp.v1.UpdateServiceTemplateResponse.
+ * Use `create(UpdateServiceTemplateResponseSchema)` to create a new message.
+ */
+export const UpdateServiceTemplateResponseSchema: GenMessage<UpdateServiceTemplateResponse> =
+  /*@__PURE__*/
+  messageDesc(file_mini_app_v1_mini_app, 32)
+
+/**
+ * @generated from message miniapp.v1.DeleteServiceTemplateRequest
+ */
+export type DeleteServiceTemplateRequest =
+  Message<'miniapp.v1.DeleteServiceTemplateRequest'> & {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string
+  }
+
+/**
+ * Describes the message miniapp.v1.DeleteServiceTemplateRequest.
+ * Use `create(DeleteServiceTemplateRequestSchema)` to create a new message.
+ */
+export const DeleteServiceTemplateRequestSchema: GenMessage<DeleteServiceTemplateRequest> =
+  /*@__PURE__*/
+  messageDesc(file_mini_app_v1_mini_app, 33)
+
+/**
+ * @generated from message miniapp.v1.DeleteServiceTemplateResponse
+ */
+export type DeleteServiceTemplateResponse =
+  Message<'miniapp.v1.DeleteServiceTemplateResponse'> & {}
+
+/**
+ * Describes the message miniapp.v1.DeleteServiceTemplateResponse.
+ * Use `create(DeleteServiceTemplateResponseSchema)` to create a new message.
+ */
+export const DeleteServiceTemplateResponseSchema: GenMessage<DeleteServiceTemplateResponse> =
+  /*@__PURE__*/
+  messageDesc(file_mini_app_v1_mini_app, 34)
+
+/**
+ * @generated from message miniapp.v1.SendTestServiceMessageRequest
+ */
+export type SendTestServiceMessageRequest =
+  Message<'miniapp.v1.SendTestServiceMessageRequest'> & {
+    /**
+     * @generated from field: string template_id = 1;
+     */
+    templateId: string
+
+    /**
+     * @generated from field: map<string, string> params = 2;
+     */
+    params: { [key: string]: string }
+  }
+
+/**
+ * Describes the message miniapp.v1.SendTestServiceMessageRequest.
+ * Use `create(SendTestServiceMessageRequestSchema)` to create a new message.
+ */
+export const SendTestServiceMessageRequestSchema: GenMessage<SendTestServiceMessageRequest> =
+  /*@__PURE__*/
+  messageDesc(file_mini_app_v1_mini_app, 35)
+
+/**
+ * @generated from message miniapp.v1.SendTestServiceMessageResponse
+ */
+export type SendTestServiceMessageResponse =
+  Message<'miniapp.v1.SendTestServiceMessageResponse'> & {
+    /**
+     * @generated from field: string message_id = 1;
+     */
+    messageId: string
+
+    /**
+     * @generated from field: string chat_id = 2;
+     */
+    chatId: string
+  }
+
+/**
+ * Describes the message miniapp.v1.SendTestServiceMessageResponse.
+ * Use `create(SendTestServiceMessageResponseSchema)` to create a new message.
+ */
+export const SendTestServiceMessageResponseSchema: GenMessage<SendTestServiceMessageResponse> =
+  /*@__PURE__*/
+  messageDesc(file_mini_app_v1_mini_app, 36)
+
+/**
  * @generated from service miniapp.v1.MiniAppService
  */
 export const MiniAppService: GenService<{
@@ -679,5 +1022,45 @@ export const MiniAppService: GenService<{
     methodKind: 'unary'
     input: typeof ListLinkedToOaRequestSchema
     output: typeof ListLinkedToOaResponseSchema
+  }
+  /**
+   * @generated from rpc miniapp.v1.MiniAppService.ListServiceTemplates
+   */
+  listServiceTemplates: {
+    methodKind: 'unary'
+    input: typeof ListServiceTemplatesRequestSchema
+    output: typeof ListServiceTemplatesResponseSchema
+  }
+  /**
+   * @generated from rpc miniapp.v1.MiniAppService.CreateServiceTemplate
+   */
+  createServiceTemplate: {
+    methodKind: 'unary'
+    input: typeof CreateServiceTemplateRequestSchema
+    output: typeof CreateServiceTemplateResponseSchema
+  }
+  /**
+   * @generated from rpc miniapp.v1.MiniAppService.UpdateServiceTemplate
+   */
+  updateServiceTemplate: {
+    methodKind: 'unary'
+    input: typeof UpdateServiceTemplateRequestSchema
+    output: typeof UpdateServiceTemplateResponseSchema
+  }
+  /**
+   * @generated from rpc miniapp.v1.MiniAppService.DeleteServiceTemplate
+   */
+  deleteServiceTemplate: {
+    methodKind: 'unary'
+    input: typeof DeleteServiceTemplateRequestSchema
+    output: typeof DeleteServiceTemplateResponseSchema
+  }
+  /**
+   * @generated from rpc miniapp.v1.MiniAppService.SendTestServiceMessage
+   */
+  sendTestServiceMessage: {
+    methodKind: 'unary'
+    input: typeof SendTestServiceMessageRequestSchema
+    output: typeof SendTestServiceMessageResponseSchema
   }
 }> = /*@__PURE__*/ serviceDesc(file_mini_app_v1_mini_app, 0)

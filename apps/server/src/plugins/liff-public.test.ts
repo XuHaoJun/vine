@@ -103,6 +103,13 @@ function createTestDeps(
       scopes: ['profile', 'chat_message.write'],
       exp: Date.now() + 15 * 60 * 1000,
     }),
+    resolveAccessTokenAny: vi.fn().mockReturnValue({
+      kind: 'access',
+      liffId,
+      userId,
+      scopes: ['profile', 'chat_message.write'],
+      exp: Date.now() + 15 * 60 * 1000,
+    }),
     createLaunchToken: vi.fn().mockReturnValue('launch-token-123'),
     resolveLaunchToken: vi.fn().mockReturnValue({
       kind: 'launch',

@@ -121,4 +121,16 @@ describe('createLiffRuntimeTokenService', () => {
     const resolved = svc.resolveAccessToken(token, 'app-1')
     expect(resolved).toBeNull()
   })
+
+  it('resolveAccessTokenAny decodes a valid token without requiring liffId', () => {
+    const svc = createLiffRuntimeTokenService({ secret: 'x' })
+    const token = svc.createAccessToken({
+      liffId: 'l-1',
+      userId: 'u-1',
+      scopes: [],
+    })
+    const ctx = svc.resolveAccessTokenAny(token)
+    expect(ctx?.liffId).toBe('l-1')
+    expect(ctx?.userId).toBe('u-1')
+  })
 })

@@ -72,6 +72,14 @@ export function createLiffRuntimeTokenService(input: {
     return ctx
   }
 
+  function resolveAccessTokenAny(token: string): LiffAccessTokenContext | null {
+    const ctx = verify<LiffAccessTokenContext>(token, secret)
+    if (!ctx) return null
+    if (ctx.kind !== 'access') return null
+    if (ctx.exp < now()) return null
+    return ctx
+  }
+
   function createLaunchToken(ctx: LaunchPayload): string {
     const payload: LiffLaunchContext = {
       kind: 'launch',
@@ -90,5 +98,5 @@ export function createLiffRuntimeTokenService(input: {
     return ctx
   }
 
-  return { createAccessToken, resolveAccessToken, createLaunchToken, resolveLaunchToken }
+  return { createAccessToken, resolveAccessToken, resolveAccessTokenAny, createLaunchToken, resolveLaunchToken }
 }

@@ -3,10 +3,15 @@ import { Code, ConnectError, ConnectRouter } from '@connectrpc/connect'
 import type { AuthServer } from '@take-out/better-auth-utils/server'
 import { MiniAppService } from '@vine/proto/mini-app'
 import type { createMiniAppService } from '../services/mini-app'
+import type { createMiniAppTemplateService } from '../services/mini-app-service-message-templates'
+import type { createMiniAppServiceMessageService } from '../services/mini-app-service-message'
+import { validateParams, renderTemplate } from '../services/mini-app-service-message'
 import { requireAuthData, withAuthService } from './auth-context'
 
 type MiniAppHandlerDeps = {
   miniApp: ReturnType<typeof createMiniAppService>
+  template: ReturnType<typeof createMiniAppTemplateService>
+  serviceMessage: ReturnType<typeof createMiniAppServiceMessageService>
   auth: AuthServer
 }
 
@@ -28,6 +33,21 @@ async function toProtoMiniApp(
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     linkedOaIds,
+  }
+}
+
+function toProtoTemplate(row: any) {
+  return {
+    id: row.id,
+    miniAppId: row.miniAppId,
+    name: row.name,
+    kind: row.kind,
+    languageTag: row.languageTag,
+    flexJson: JSON.stringify(row.flexJson),
+    paramsSchema: row.paramsSchema,
+    useCase: row.useCase,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
   }
 }
 
@@ -174,6 +194,96 @@ export function miniAppImpl(deps: MiniAppHandlerDeps): ServiceImpl<typeof MiniAp
       return {
         miniApps: await Promise.all(published.map((r) => toProtoMiniApp(deps, r))),
       }
+    },
+
+    async listServiceTemplates(req, ctx) {
+      requireAuthData(ctx)
+      if (!req.miniAppId) throw new ConnectError('miniAppId required', Code.InvalidArgument)
+      const rows = await deps.template.listTemplates(req.miniAppId)
+      return { templates: rows.map(toProtoTemplate) }
+    },
+
+    async createServiceTemplate(req, ctx) {
+      requireAuthData(ctx)
+      if (!req.miniAppId) throw new ConnectError('miniAppId required', Code.InvalidArgument)
+      if (!req.name) throw new ConnectError('name required', Code.InvalidArgument)
+      if (!req.kind) throw new ConnectError('kind required', Code.InvalidArgument)
+      let flex: unknown
+      try { flex = JSON.parse(req.flexJson) } catch { throw new ConnectError('Invalid flexJson', Code.InvalidArgument) }
+      try {
+        const row = await deps.template.createTemplate({
+          miniAppId: req.miniAppId,
+          kind: req.kind,
+          name: req.name,
+          languageTag: req.languageTag || 'en',
+          flexJson: flex,
+          paramsSchema: req.paramsSchema as any,
+          useCase: req.useCase || '',
+        })
+        return { template: toProtoTemplate(row) }
+      } catch (e) {
+        throw new ConnectError(
+          e instanceof Error ? e.message : 'create failed',
+          Code.InvalidArgument,
+        )
+      }
+    },
+
+    async updateServiceTemplate(req, ctx) {
+      requireAuthData(ctx)
+      if (!req.id) throw new ConnectError('id required', Code.InvalidArgument)
+      let flex: unknown | undefined
+      if (req.flexJson) {
+        try { flex = JSON.parse(req.flexJson) } catch { throw new ConnectError('Invalid flexJson', Code.InvalidArgument) }
+      }
+      const row = await deps.template.updateTemplate(req.id, {
+        flexJson: flex,
+        paramsSchema: req.paramsSchema?.length ? (req.paramsSchema as any) : undefined,
+        useCase: req.useCase,
+        languageTag: req.languageTag,
+      })
+      if (!row) throw new ConnectError('Template not found', Code.NotFound)
+      return { template: toProtoTemplate(row) }
+    },
+
+    async deleteServiceTemplate(req, ctx) {
+      requireAuthData(ctx)
+      if (!req.id) throw new ConnectError('id required', Code.InvalidArgument)
+      await deps.template.deleteTemplate(req.id)
+      return {}
+    },
+
+    async sendTestServiceMessage(req, ctx) {
+      const auth = requireAuthData(ctx)
+      if (!req.templateId) throw new ConnectError('templateId required', Code.InvalidArgument)
+      const tpl = await deps.template.getTemplate(req.templateId)
+      if (!tpl) throw new ConnectError('Template not found', Code.NotFound)
+      const params = Object.fromEntries(Object.entries(req.params ?? {}))
+      try {
+        validateParams(tpl.paramsSchema as any, params)
+      } catch (e) {
+        throw new ConnectError(
+          e instanceof Error ? e.message : 'param validation failed',
+          Code.InvalidArgument,
+        )
+      }
+      const rendered = renderTemplate(tpl.flexJson, params) as any
+      // Mark the test message visually
+      if (rendered?.body?.contents) {
+        rendered.body.contents.unshift({
+          type: 'text',
+          text: '[TEST]',
+          weight: 'bold',
+          color: '#FF6B6B',
+        })
+      }
+      const out = await deps.serviceMessage.sendServiceMessage({
+        miniAppId: tpl.miniAppId,
+        userId: auth.id,
+        flexJson: rendered,
+        isTest: true,
+      })
+      return { messageId: out.messageId, chatId: out.chatId }
     },
   }
 }
