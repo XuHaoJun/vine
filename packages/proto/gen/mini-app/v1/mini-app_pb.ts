@@ -12,7 +12,7 @@ import type { Message } from '@bufbuild/protobuf'
 export const file_mini_app_v1_mini_app: GenFile =
   /*@__PURE__*/
   fileDesc(
-    'ChptaW5pLWFwcC92MS9taW5pLWFwcC5wcm90bxIKbWluaWFwcC52MSLAAgoHTWluaUFwcBIKCgJpZBgBIAEoCRITCgtwcm92aWRlcl9pZBgCIAEoCRITCgtsaWZmX2FwcF9pZBgDIAEoCRIMCgRuYW1lGAQgASgJEhUKCGljb25fdXJsGAUgASgJSACIAQESGAoLZGVzY3JpcHRpb24YBiABKAlIAYgBARIVCghjYXRlZ29yeRgHIAEoCUgCiAEBEhQKDGlzX3B1Ymxpc2hlZBgIIAEoCBIZCgxwdWJsaXNoZWRfYXQYCSABKAlIA4gBARISCgpjcmVhdGVkX2F0GAogASgJEhIKCnVwZGF0ZWRfYXQYCyABKAkSFQoNbGlua2VkX29hX2lkcxgMIAMoCUILCglfaWNvbl91cmxCDgoMX2Rlc2NyaXB0aW9uQgsKCV9jYXRlZ29yeUIPCg1fcHVibGlzaGVkX2F0IioKE0xpc3RNaW5pQXBwc1JlcXVlc3QSEwoLcHJvdmlkZXJfaWQYASABKAkiPgoUTGlzdE1pbmlBcHBzUmVzcG9uc2USJgoJbWluaV9hcHBzGAEgAygLMhMubWluaWFwcC52MS5NaW5pQXBwIh8KEUdldE1pbmlBcHBSZXF1ZXN0EgoKAmlkGAEgASgJIjsKEkdldE1pbmlBcHBSZXNwb25zZRIlCghtaW5pX2FwcBgBIAEoCzITLm1pbmlhcHAudjEuTWluaUFwcCLAAQoUQ3JlYXRlTWluaUFwcFJlcXVlc3QSEwoLcHJvdmlkZXJfaWQYASABKAkSEwoLbGlmZl9hcHBfaWQYAiABKAkSDAoEbmFtZRgDIAEoCRIVCghpY29uX3VybBgEIAEoCUgAiAEBEhgKC2Rlc2NyaXB0aW9uGAUgASgJSAGIAQESFQoIY2F0ZWdvcnkYBiABKAlIAogBAUILCglfaWNvbl91cmxCDgoMX2Rlc2NyaXB0aW9uQgsKCV9jYXRlZ29yeSI+ChVDcmVhdGVNaW5pQXBwUmVzcG9uc2USJQoIbWluaV9hcHAYASABKAsyEy5taW5pYXBwLnYxLk1pbmlBcHAisAEKFFVwZGF0ZU1pbmlBcHBSZXF1ZXN0EgoKAmlkGAEgASgJEhEKBG5hbWUYAiABKAlIAIgBARIVCghpY29uX3VybBgDIAEoCUgBiAEBEhgKC2Rlc2NyaXB0aW9uGAQgASgJSAKIAQESFQoIY2F0ZWdvcnkYBSABKAlIA4gBAUIHCgVfbmFtZUILCglfaWNvbl91cmxCDgoMX2Rlc2NyaXB0aW9uQgsKCV9jYXRlZ29yeSI+ChVVcGRhdGVNaW5pQXBwUmVzcG9uc2USJQoIbWluaV9hcHAYASABKAsyEy5taW5pYXBwLnYxLk1pbmlBcHAiIwoVUHVibGlzaE1pbmlBcHBSZXF1ZXN0EgoKAmlkGAEgASgJIj8KFlB1Ymxpc2hNaW5pQXBwUmVzcG9uc2USJQoIbWluaV9hcHAYASABKAsyEy5taW5pYXBwLnYxLk1pbmlBcHAiJQoXVW5wdWJsaXNoTWluaUFwcFJlcXVlc3QSCgoCaWQYASABKAkiQQoYVW5wdWJsaXNoTWluaUFwcFJlc3BvbnNlEiUKCG1pbmlfYXBwGAEgASgLMhMubWluaWFwcC52MS5NaW5pQXBwIiIKFERlbGV0ZU1pbmlBcHBSZXF1ZXN0EgoKAmlkGAEgASgJIhcKFURlbGV0ZU1pbmlBcHBSZXNwb25zZSIzCg1MaW5rT2FSZXF1ZXN0EhMKC21pbmlfYXBwX2lkGAEgASgJEg0KBW9hX2lkGAIgASgJIhAKDkxpbmtPYVJlc3BvbnNlIjUKD1VubGlua09hUmVxdWVzdBITCgttaW5pX2FwcF9pZBgBIAEoCRINCgVvYV9pZBgCIAEoCSISChBVbmxpbmtPYVJlc3BvbnNlMvIFCg5NaW5pQXBwU2VydmljZRJRCgxMaXN0TWluaUFwcHMSHy5taW5pYXBwLnYxLkxpc3RNaW5pQXBwc1JlcXVlc3QaIC5taW5pYXBwLnYxLkxpc3RNaW5pQXBwc1Jlc3BvbnNlEksKCkdldE1pbmlBcHASHS5taW5pYXBwLnYxLkdldE1pbmlBcHBSZXF1ZXN0Gh4ubWluaWFwcC52MS5HZXRNaW5pQXBwUmVzcG9uc2USVAoNQ3JlYXRlTWluaUFwcBIgLm1pbmlhcHAudjEuQ3JlYXRlTWluaUFwcFJlcXVlc3QaIS5taW5pYXBwLnYxLkNyZWF0ZU1pbmlBcHBSZXNwb25zZRJUCg1VcGRhdGVNaW5pQXBwEiAubWluaWFwcC52MS5VcGRhdGVNaW5pQXBwUmVxdWVzdBohLm1pbmlhcHAudjEuVXBkYXRlTWluaUFwcFJlc3BvbnNlElcKDlB1Ymxpc2hNaW5pQXBwEiEubWluaWFwcC52MS5QdWJsaXNoTWluaUFwcFJlcXVlc3QaIi5taW5pYXBwLnYxLlB1Ymxpc2hNaW5pQXBwUmVzcG9uc2USXQoQVW5wdWJsaXNoTWluaUFwcBIjLm1pbmlhcHAudjEuVW5wdWJsaXNoTWluaUFwcFJlcXVlc3QaJC5taW5pYXBwLnYxLlVucHVibGlzaE1pbmlBcHBSZXNwb25zZRJUCg1EZWxldGVNaW5pQXBwEiAubWluaWFwcC52MS5EZWxldGVNaW5pQXBwUmVxdWVzdBohLm1pbmlhcHAudjEuRGVsZXRlTWluaUFwcFJlc3BvbnNlEj8KBkxpbmtPYRIZLm1pbmlhcHAudjEuTGlua09hUmVxdWVzdBoaLm1pbmlhcHAudjEuTGlua09hUmVzcG9uc2USRQoIVW5saW5rT2ESGy5taW5pYXBwLnYxLlVubGlua09hUmVxdWVzdBocLm1pbmlhcHAudjEuVW5saW5rT2FSZXNwb25zZWIGcHJvdG8z',
+    'ChptaW5pLWFwcC92MS9taW5pLWFwcC5wcm90bxIKbWluaWFwcC52MSLAAgoHTWluaUFwcBIKCgJpZBgBIAEoCRITCgtwcm92aWRlcl9pZBgCIAEoCRITCgtsaWZmX2FwcF9pZBgDIAEoCRIMCgRuYW1lGAQgASgJEhUKCGljb25fdXJsGAUgASgJSACIAQESGAoLZGVzY3JpcHRpb24YBiABKAlIAYgBARIVCghjYXRlZ29yeRgHIAEoCUgCiAEBEhQKDGlzX3B1Ymxpc2hlZBgIIAEoCBIZCgxwdWJsaXNoZWRfYXQYCSABKAlIA4gBARISCgpjcmVhdGVkX2F0GAogASgJEhIKCnVwZGF0ZWRfYXQYCyABKAkSFQoNbGlua2VkX29hX2lkcxgMIAMoCUILCglfaWNvbl91cmxCDgoMX2Rlc2NyaXB0aW9uQgsKCV9jYXRlZ29yeUIPCg1fcHVibGlzaGVkX2F0IioKE0xpc3RNaW5pQXBwc1JlcXVlc3QSEwoLcHJvdmlkZXJfaWQYASABKAkiPgoUTGlzdE1pbmlBcHBzUmVzcG9uc2USJgoJbWluaV9hcHBzGAEgAygLMhMubWluaWFwcC52MS5NaW5pQXBwIh8KEUdldE1pbmlBcHBSZXF1ZXN0EgoKAmlkGAEgASgJIjsKEkdldE1pbmlBcHBSZXNwb25zZRIlCghtaW5pX2FwcBgBIAEoCzITLm1pbmlhcHAudjEuTWluaUFwcCLAAQoUQ3JlYXRlTWluaUFwcFJlcXVlc3QSEwoLcHJvdmlkZXJfaWQYASABKAkSEwoLbGlmZl9hcHBfaWQYAiABKAkSDAoEbmFtZRgDIAEoCRIVCghpY29uX3VybBgEIAEoCUgAiAEBEhgKC2Rlc2NyaXB0aW9uGAUgASgJSAGIAQESFQoIY2F0ZWdvcnkYBiABKAlIAogBAUILCglfaWNvbl91cmxCDgoMX2Rlc2NyaXB0aW9uQgsKCV9jYXRlZ29yeSI+ChVDcmVhdGVNaW5pQXBwUmVzcG9uc2USJQoIbWluaV9hcHAYASABKAsyEy5taW5pYXBwLnYxLk1pbmlBcHAisAEKFFVwZGF0ZU1pbmlBcHBSZXF1ZXN0EgoKAmlkGAEgASgJEhEKBG5hbWUYAiABKAlIAIgBARIVCghpY29uX3VybBgDIAEoCUgBiAEBEhgKC2Rlc2NyaXB0aW9uGAQgASgJSAKIAQESFQoIY2F0ZWdvcnkYBSABKAlIA4gBAUIHCgVfbmFtZUILCglfaWNvbl91cmxCDgoMX2Rlc2NyaXB0aW9uQgsKCV9jYXRlZ29yeSI+ChVVcGRhdGVNaW5pQXBwUmVzcG9uc2USJQoIbWluaV9hcHAYASABKAsyEy5taW5pYXBwLnYxLk1pbmlBcHAiIwoVUHVibGlzaE1pbmlBcHBSZXF1ZXN0EgoKAmlkGAEgASgJIj8KFlB1Ymxpc2hNaW5pQXBwUmVzcG9uc2USJQoIbWluaV9hcHAYASABKAsyEy5taW5pYXBwLnYxLk1pbmlBcHAiJQoXVW5wdWJsaXNoTWluaUFwcFJlcXVlc3QSCgoCaWQYASABKAkiQQoYVW5wdWJsaXNoTWluaUFwcFJlc3BvbnNlEiUKCG1pbmlfYXBwGAEgASgLMhMubWluaWFwcC52MS5NaW5pQXBwIiIKFERlbGV0ZU1pbmlBcHBSZXF1ZXN0EgoKAmlkGAEgASgJIhcKFURlbGV0ZU1pbmlBcHBSZXNwb25zZSIzCg1MaW5rT2FSZXF1ZXN0EhMKC21pbmlfYXBwX2lkGAEgASgJEg0KBW9hX2lkGAIgASgJIhAKDkxpbmtPYVJlc3BvbnNlIjUKD1VubGlua09hUmVxdWVzdBITCgttaW5pX2FwcF9pZBgBIAEoCRINCgVvYV9pZBgCIAEoCSISChBVbmxpbmtPYVJlc3BvbnNlIqQBChRMaXN0UHVibGlzaGVkUmVxdWVzdBIVCghjYXRlZ29yeRgBIAEoCUgAiAEBEhkKDHNlYXJjaF9xdWVyeRgCIAEoCUgBiAEBEhIKBWxpbWl0GAMgASgNSAKIAQESEwoGb2Zmc2V0GAQgASgNSAOIAQFCCwoJX2NhdGVnb3J5Qg8KDV9zZWFyY2hfcXVlcnlCCAoGX2xpbWl0QgkKB19vZmZzZXQiTgoVTGlzdFB1Ymxpc2hlZFJlc3BvbnNlEiYKCW1pbmlfYXBwcxgBIAMoCzITLm1pbmlhcHAudjEuTWluaUFwcBINCgV0b3RhbBgCIAEoDSIWChRMaXN0TXlHYWxsZXJ5UmVxdWVzdCJkChVMaXN0TXlHYWxsZXJ5UmVzcG9uc2USJAoHcmVjZW50cxgBIAMoCzITLm1pbmlhcHAudjEuTWluaUFwcBIlCghmcm9tX29hcxgCIAMoCzITLm1pbmlhcHAudjEuTWluaUFwcCImChVMaXN0TGlua2VkVG9PYVJlcXVlc3QSDQoFb2FfaWQYASABKAkiQAoWTGlzdExpbmtlZFRvT2FSZXNwb25zZRImCgltaW5pX2FwcHMYASADKAsyEy5taW5pYXBwLnYxLk1pbmlBcHAy9wcKDk1pbmlBcHBTZXJ2aWNlElEKDExpc3RNaW5pQXBwcxIfLm1pbmlhcHAudjEuTGlzdE1pbmlBcHBzUmVxdWVzdBogLm1pbmlhcHAudjEuTGlzdE1pbmlBcHBzUmVzcG9uc2USSwoKR2V0TWluaUFwcBIdLm1pbmlhcHAudjEuR2V0TWluaUFwcFJlcXVlc3QaHi5taW5pYXBwLnYxLkdldE1pbmlBcHBSZXNwb25zZRJUCg1DcmVhdGVNaW5pQXBwEiAubWluaWFwcC52MS5DcmVhdGVNaW5pQXBwUmVxdWVzdBohLm1pbmlhcHAudjEuQ3JlYXRlTWluaUFwcFJlc3BvbnNlElQKDVVwZGF0ZU1pbmlBcHASIC5taW5pYXBwLnYxLlVwZGF0ZU1pbmlBcHBSZXF1ZXN0GiEubWluaWFwcC52MS5VcGRhdGVNaW5pQXBwUmVzcG9uc2USVwoOUHVibGlzaE1pbmlBcHASIS5taW5pYXBwLnYxLlB1Ymxpc2hNaW5pQXBwUmVxdWVzdBoiLm1pbmlhcHAudjEuUHVibGlzaE1pbmlBcHBSZXNwb25zZRJdChBVbnB1Ymxpc2hNaW5pQXBwEiMubWluaWFwcC52MS5VbnB1Ymxpc2hNaW5pQXBwUmVxdWVzdBokLm1pbmlhcHAudjEuVW5wdWJsaXNoTWluaUFwcFJlc3BvbnNlElQKDURlbGV0ZU1pbmlBcHASIC5taW5pYXBwLnYxLkRlbGV0ZU1pbmlBcHBSZXF1ZXN0GiEubWluaWFwcC52MS5EZWxldGVNaW5pQXBwUmVzcG9uc2USPwoGTGlua09hEhkubWluaWFwcC52MS5MaW5rT2FSZXF1ZXN0GhoubWluaWFwcC52MS5MaW5rT2FSZXNwb25zZRJFCghVbmxpbmtPYRIbLm1pbmlhcHAudjEuVW5saW5rT2FSZXF1ZXN0GhwubWluaWFwcC52MS5VbmxpbmtPYVJlc3BvbnNlElQKDUxpc3RQdWJsaXNoZWQSIC5taW5pYXBwLnYxLkxpc3RQdWJsaXNoZWRSZXF1ZXN0GiEubWluaWFwcC52MS5MaXN0UHVibGlzaGVkUmVzcG9uc2USVAoNTGlzdE15R2FsbGVyeRIgLm1pbmlhcHAudjEuTGlzdE15R2FsbGVyeVJlcXVlc3QaIS5taW5pYXBwLnYxLkxpc3RNeUdhbGxlcnlSZXNwb25zZRJXCg5MaXN0TGlua2VkVG9PYRIhLm1pbmlhcHAudjEuTGlzdExpbmtlZFRvT2FSZXF1ZXN0GiIubWluaWFwcC52MS5MaXN0TGlua2VkVG9PYVJlc3BvbnNlYgZwcm90bzM',
   )
 
 /**
@@ -453,6 +453,134 @@ export const UnlinkOaResponseSchema: GenMessage<UnlinkOaResponse> =
   messageDesc(file_mini_app_v1_mini_app, 18)
 
 /**
+ * @generated from message miniapp.v1.ListPublishedRequest
+ */
+export type ListPublishedRequest = Message<'miniapp.v1.ListPublishedRequest'> & {
+  /**
+   * @generated from field: optional string category = 1;
+   */
+  category?: string | undefined
+
+  /**
+   * @generated from field: optional string search_query = 2;
+   */
+  searchQuery?: string | undefined
+
+  /**
+   * @generated from field: optional uint32 limit = 3;
+   */
+  limit?: number | undefined
+
+  /**
+   * @generated from field: optional uint32 offset = 4;
+   */
+  offset?: number | undefined
+}
+
+/**
+ * Describes the message miniapp.v1.ListPublishedRequest.
+ * Use `create(ListPublishedRequestSchema)` to create a new message.
+ */
+export const ListPublishedRequestSchema: GenMessage<ListPublishedRequest> =
+  /*@__PURE__*/
+  messageDesc(file_mini_app_v1_mini_app, 19)
+
+/**
+ * @generated from message miniapp.v1.ListPublishedResponse
+ */
+export type ListPublishedResponse = Message<'miniapp.v1.ListPublishedResponse'> & {
+  /**
+   * @generated from field: repeated miniapp.v1.MiniApp mini_apps = 1;
+   */
+  miniApps: MiniApp[]
+
+  /**
+   * @generated from field: uint32 total = 2;
+   */
+  total: number
+}
+
+/**
+ * Describes the message miniapp.v1.ListPublishedResponse.
+ * Use `create(ListPublishedResponseSchema)` to create a new message.
+ */
+export const ListPublishedResponseSchema: GenMessage<ListPublishedResponse> =
+  /*@__PURE__*/
+  messageDesc(file_mini_app_v1_mini_app, 20)
+
+/**
+ * @generated from message miniapp.v1.ListMyGalleryRequest
+ */
+export type ListMyGalleryRequest = Message<'miniapp.v1.ListMyGalleryRequest'> & {}
+
+/**
+ * Describes the message miniapp.v1.ListMyGalleryRequest.
+ * Use `create(ListMyGalleryRequestSchema)` to create a new message.
+ */
+export const ListMyGalleryRequestSchema: GenMessage<ListMyGalleryRequest> =
+  /*@__PURE__*/
+  messageDesc(file_mini_app_v1_mini_app, 21)
+
+/**
+ * @generated from message miniapp.v1.ListMyGalleryResponse
+ */
+export type ListMyGalleryResponse = Message<'miniapp.v1.ListMyGalleryResponse'> & {
+  /**
+   * @generated from field: repeated miniapp.v1.MiniApp recents = 1;
+   */
+  recents: MiniApp[]
+
+  /**
+   * @generated from field: repeated miniapp.v1.MiniApp from_oas = 2;
+   */
+  fromOas: MiniApp[]
+}
+
+/**
+ * Describes the message miniapp.v1.ListMyGalleryResponse.
+ * Use `create(ListMyGalleryResponseSchema)` to create a new message.
+ */
+export const ListMyGalleryResponseSchema: GenMessage<ListMyGalleryResponse> =
+  /*@__PURE__*/
+  messageDesc(file_mini_app_v1_mini_app, 22)
+
+/**
+ * @generated from message miniapp.v1.ListLinkedToOaRequest
+ */
+export type ListLinkedToOaRequest = Message<'miniapp.v1.ListLinkedToOaRequest'> & {
+  /**
+   * @generated from field: string oa_id = 1;
+   */
+  oaId: string
+}
+
+/**
+ * Describes the message miniapp.v1.ListLinkedToOaRequest.
+ * Use `create(ListLinkedToOaRequestSchema)` to create a new message.
+ */
+export const ListLinkedToOaRequestSchema: GenMessage<ListLinkedToOaRequest> =
+  /*@__PURE__*/
+  messageDesc(file_mini_app_v1_mini_app, 23)
+
+/**
+ * @generated from message miniapp.v1.ListLinkedToOaResponse
+ */
+export type ListLinkedToOaResponse = Message<'miniapp.v1.ListLinkedToOaResponse'> & {
+  /**
+   * @generated from field: repeated miniapp.v1.MiniApp mini_apps = 1;
+   */
+  miniApps: MiniApp[]
+}
+
+/**
+ * Describes the message miniapp.v1.ListLinkedToOaResponse.
+ * Use `create(ListLinkedToOaResponseSchema)` to create a new message.
+ */
+export const ListLinkedToOaResponseSchema: GenMessage<ListLinkedToOaResponse> =
+  /*@__PURE__*/
+  messageDesc(file_mini_app_v1_mini_app, 24)
+
+/**
  * @generated from service miniapp.v1.MiniAppService
  */
 export const MiniAppService: GenService<{
@@ -527,5 +655,29 @@ export const MiniAppService: GenService<{
     methodKind: 'unary'
     input: typeof UnlinkOaRequestSchema
     output: typeof UnlinkOaResponseSchema
+  }
+  /**
+   * @generated from rpc miniapp.v1.MiniAppService.ListPublished
+   */
+  listPublished: {
+    methodKind: 'unary'
+    input: typeof ListPublishedRequestSchema
+    output: typeof ListPublishedResponseSchema
+  }
+  /**
+   * @generated from rpc miniapp.v1.MiniAppService.ListMyGallery
+   */
+  listMyGallery: {
+    methodKind: 'unary'
+    input: typeof ListMyGalleryRequestSchema
+    output: typeof ListMyGalleryResponseSchema
+  }
+  /**
+   * @generated from rpc miniapp.v1.MiniAppService.ListLinkedToOa
+   */
+  listLinkedToOa: {
+    methodKind: 'unary'
+    input: typeof ListLinkedToOaRequestSchema
+    output: typeof ListLinkedToOaResponseSchema
   }
 }> = /*@__PURE__*/ serviceDesc(file_mini_app_v1_mini_app, 0)

@@ -1,4 +1,4 @@
-import { and, desc, eq, sql } from 'drizzle-orm'
+import { and, desc, eq, ilike, or, sql } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { schema } from '@vine/db'
 import { miniApp, miniAppOaLink, miniAppRecent, oaLiffApp } from '@vine/db/schema-login'
@@ -199,6 +199,36 @@ export function createMiniAppService(deps: MiniAppServiceDeps) {
     return rows.map((r) => r.miniApp)
   }
 
+  async function listPublished(input: {
+    category?: string
+    searchQuery?: string
+    limit: number
+    offset: number
+  }) {
+    const where = and(
+      eq(miniApp.isPublished, true),
+      input.category ? eq(miniApp.category, input.category) : sql`TRUE`,
+      input.searchQuery
+        ? or(
+            ilike(miniApp.name, `%${input.searchQuery}%`),
+            ilike(miniApp.description, `%${input.searchQuery}%`),
+          )
+        : sql`TRUE`,
+    )
+    const items = await db
+      .select()
+      .from(miniApp)
+      .where(where)
+      .orderBy(desc(miniApp.publishedAt))
+      .limit(input.limit)
+      .offset(input.offset)
+    const [{ count }] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(miniApp)
+      .where(where)
+    return { items, total: count }
+  }
+
   return {
     createMiniApp,
     getMiniApp,
@@ -216,6 +246,7 @@ export function createMiniAppService(deps: MiniAppServiceDeps) {
     recordRecent,
     listRecent,
     listForUserOas,
+    listPublished,
   }
 }
 

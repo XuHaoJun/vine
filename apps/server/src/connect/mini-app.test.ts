@@ -28,6 +28,10 @@ function fakeService() {
     listLinkedOaIds: vi.fn().mockResolvedValue([]),
     listMiniAppsLinkedToOa: vi.fn(),
     getMiniAppByLoginChannelId: vi.fn(),
+    recordRecent: vi.fn(),
+    listRecent: vi.fn().mockResolvedValue([]),
+    listForUserOas: vi.fn().mockResolvedValue([]),
+    listPublished: vi.fn().mockResolvedValue({ items: [], total: 0 }),
   }
 }
 

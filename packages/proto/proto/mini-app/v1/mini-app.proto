@@ -57,6 +57,26 @@ message LinkOaResponse {}
 message UnlinkOaRequest { string mini_app_id = 1; string oa_id = 2; }
 message UnlinkOaResponse {}
 
+message ListPublishedRequest {
+  optional string category = 1;
+  optional string search_query = 2;
+  optional uint32 limit = 3;
+  optional uint32 offset = 4;
+}
+message ListPublishedResponse {
+  repeated MiniApp mini_apps = 1;
+  uint32 total = 2;
+}
+
+message ListMyGalleryRequest {}
+message ListMyGalleryResponse {
+  repeated MiniApp recents = 1;
+  repeated MiniApp from_oas = 2;
+}
+
+message ListLinkedToOaRequest { string oa_id = 1; }
+message ListLinkedToOaResponse { repeated MiniApp mini_apps = 1; }
+
 service MiniAppService {
   rpc ListMiniApps(ListMiniAppsRequest) returns (ListMiniAppsResponse);
   rpc GetMiniApp(GetMiniAppRequest) returns (GetMiniAppResponse);
@@ -67,4 +87,7 @@ service MiniAppService {
   rpc DeleteMiniApp(DeleteMiniAppRequest) returns (DeleteMiniAppResponse);
   rpc LinkOa(LinkOaRequest) returns (LinkOaResponse);
   rpc UnlinkOa(UnlinkOaRequest) returns (UnlinkOaResponse);
+  rpc ListPublished(ListPublishedRequest) returns (ListPublishedResponse);
+  rpc ListMyGallery(ListMyGalleryRequest) returns (ListMyGalleryResponse);
+  rpc ListLinkedToOa(ListLinkedToOaRequest) returns (ListLinkedToOaResponse);
 }

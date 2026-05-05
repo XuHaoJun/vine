@@ -140,6 +140,41 @@ export function miniAppImpl(deps: MiniAppHandlerDeps): ServiceImpl<typeof MiniAp
       await deps.miniApp.unlinkOa({ miniAppId: req.miniAppId, oaId: req.oaId })
       return {}
     },
+
+    async listPublished(req, ctx) {
+      requireAuthData(ctx)
+      const limit = Math.min(Math.max(req.limit ?? 50, 1), 100)
+      const offset = req.offset ?? 0
+      const rows = await deps.miniApp.listPublished({
+        category: req.category || undefined,
+        searchQuery: req.searchQuery || undefined,
+        limit,
+        offset,
+      })
+      const protoRows = await Promise.all(rows.items.map((r) => toProtoMiniApp(deps, r)))
+      return { miniApps: protoRows, total: rows.total }
+    },
+
+    async listMyGallery(_req, ctx) {
+      const auth = requireAuthData(ctx)
+      const recents = await deps.miniApp.listRecent(auth.id, 12)
+      const recentIds = recents.map((m) => m.id)
+      const fromOas = await deps.miniApp.listForUserOas(auth.id, recentIds)
+      return {
+        recents: await Promise.all(recents.map((r) => toProtoMiniApp(deps, r))),
+        fromOas: await Promise.all(fromOas.map((r) => toProtoMiniApp(deps, r))),
+      }
+    },
+
+    async listLinkedToOa(req, ctx) {
+      requireAuthData(ctx)
+      if (!req.oaId) throw new ConnectError('oaId required', Code.InvalidArgument)
+      const rows = await deps.miniApp.listMiniAppsLinkedToOa(req.oaId)
+      const published = rows.filter((r) => r.isPublished)
+      return {
+        miniApps: await Promise.all(published.map((r) => toProtoMiniApp(deps, r))),
+      }
+    },
   }
 }
 
