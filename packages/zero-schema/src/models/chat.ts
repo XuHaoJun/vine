@@ -138,8 +138,6 @@ export const mutate = mutations(schema, chatReadPermission, {
         joinedAt: now,
       })
     }
-
-    return { chatId: foundChatId ?? args.chatId }
   },
   createGroupChat: async (
     { authData, tx },

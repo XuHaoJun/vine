@@ -45,15 +45,19 @@ export function useShareTargets() {
     if (!friends) return []
     return friends.map((f) => {
       const other = f.requesterId === userId ? f.addressee : f.requester
+      const directChat = chats?.find((c) => {
+        if (c.type !== 'direct') return false
+        return c.members?.some((m) => m.userId === other?.id)
+      })
       return {
         kind: 'friend' as const,
         userId: other?.id ?? '',
         name: other?.name ?? other?.username ?? 'Unknown',
         image: other?.image ?? null,
-        chatId: undefined,
+        chatId: directChat?.id,
       }
     })
-  }, [friends, userId])
+  }, [friends, chats, userId])
 
   const shareChats = useMemo<ShareChat[]>(() => {
     if (!chats) return []

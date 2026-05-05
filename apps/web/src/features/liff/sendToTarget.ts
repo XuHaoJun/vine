@@ -10,14 +10,14 @@ export type ShareTargetItem = {
 
 export type ConvertedMessage = {
   type: string
-  text?: string
-  metadata?: string
+  text?: string | null
+  metadata?: string | null
 }
 
 export async function sendToTarget(
   zero: {
     mutate: {
-      chat: { findOrCreateDirectChat: (args: any) => Promise<{ chatId: string }> }
+      chat: { findOrCreateDirectChat: (args: any) => any }
       message: { sendLiff: (args: any) => void }
     }
   },
@@ -27,14 +27,15 @@ export async function sendToTarget(
 ) {
   let chatId = target.chatId
 
-  if (target.kind === 'friend' && target.userId) {
-    const result = await zero.mutate.chat.findOrCreateDirectChat({
+  if (target.kind === 'friend' && target.userId && !chatId) {
+    const newChatId = crypto.randomUUID()
+    await zero.mutate.chat.findOrCreateDirectChat({
       friendUserId: target.userId,
-      chatId: crypto.randomUUID(),
+      chatId: newChatId,
       member1Id: crypto.randomUUID(),
       member2Id: crypto.randomUUID(),
     })
-    chatId = result.chatId
+    chatId = newChatId
   }
 
   if (!chatId) return

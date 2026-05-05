@@ -1,4 +1,4 @@
-import { memo, useRef, useEffect } from 'react'
+import { memo, useRef, useEffect, useMemo } from 'react'
 import { YStack } from 'tamagui'
 import {
   createLiffIframeSrc,
@@ -55,17 +55,20 @@ export const LiffBrowser = memo(
     onMessageRef.current = onMessage
     onShareTargetPickerRef.current = onShareTargetPicker
 
-    const context: LiffRuntimeContext = {
-      apiBaseUrl,
-      liffId,
-      endpointUrl,
-      endpointOrigin,
-      accessToken,
-      chatId,
-      contextType,
-      scopes,
-      lineVersion: LIFF_LINE_VERSION,
-    }
+    const context = useMemo<LiffRuntimeContext>(
+      () => ({
+        apiBaseUrl,
+        liffId,
+        endpointUrl,
+        endpointOrigin,
+        accessToken,
+        chatId,
+        contextType,
+        scopes,
+        lineVersion: LIFF_LINE_VERSION,
+      }),
+      [apiBaseUrl, liffId, endpointUrl, endpointOrigin, accessToken, chatId, contextType, scopes],
+    )
 
     const src = createLiffIframeSrc(context)
 
@@ -137,7 +140,7 @@ export const LiffBrowser = memo(
             const converted = validated.messages[i]!
             zero.mutate.message.sendLiff({
               id: crypto.randomUUID(),
-              chatId: chatId!,
+              chatId: context.chatId!,
               senderId: undefined,
               senderType: 'user',
               type: converted.type,
@@ -155,16 +158,7 @@ export const LiffBrowser = memo(
       }
       window.addEventListener('message', handler)
       return () => window.removeEventListener('message', handler)
-    }, [
-      endpointOrigin,
-      apiBaseUrl,
-      liffId,
-      chatId,
-      contextType,
-      scopes,
-      accessToken,
-      endpointUrl,
-    ])
+    }, [context, endpointOrigin])
 
     return (
       <YStack flex={1} style={{ height }}>

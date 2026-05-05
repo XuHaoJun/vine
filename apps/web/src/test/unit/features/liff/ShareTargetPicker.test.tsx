@@ -117,8 +117,8 @@ describe('sendToTarget', () => {
     vi.clearAllMocks()
   })
 
-  it('uses returned chatId for existing friend chats instead of random UUID', async () => {
-    findOrCreateDirectChat.mockResolvedValue({ chatId: 'existing-chat-id' })
+  it('sends directly to existing chatId for friends with a direct chat', async () => {
+    findOrCreateDirectChat.mockResolvedValue(undefined)
 
     const { sendToTarget } = await import('~/features/liff/sendToTarget')
 
@@ -128,32 +128,22 @@ describe('sendToTarget', () => {
       name: 'Alice',
       image: null,
       userId: 'u1',
+      chatId: 'existing-chat-id',
     }
 
     const messages = [{ type: 'text', text: 'Hello' }]
     await sendToTarget(zero, target, messages, Date.now())
 
-    expect(findOrCreateDirectChat).toHaveBeenCalledWith(
-      expect.objectContaining({
-        friendUserId: 'u1',
-      }),
-    )
-
+    expect(findOrCreateDirectChat).not.toHaveBeenCalled()
     expect(sendLiff).toHaveBeenCalledWith(
       expect.objectContaining({
         chatId: 'existing-chat-id',
       }),
     )
-
-    const callArg = sendLiff.mock.calls[0][0]
-    expect(callArg.chatId).toBe('existing-chat-id')
-    expect(callArg.chatId).not.toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
-    )
   })
 
   it('creates new chat when friend has no existing direct chat', async () => {
-    findOrCreateDirectChat.mockResolvedValue({ chatId: 'new-chat-id' })
+    findOrCreateDirectChat.mockResolvedValue(undefined)
 
     const { sendToTarget } = await import('~/features/liff/sendToTarget')
 
@@ -168,10 +158,15 @@ describe('sendToTarget', () => {
     const messages = [{ type: 'text', text: 'Hi' }]
     await sendToTarget(zero, target, messages, Date.now())
 
-    expect(sendLiff).toHaveBeenCalledWith(
+    expect(findOrCreateDirectChat).toHaveBeenCalledWith(
       expect.objectContaining({
-        chatId: 'new-chat-id',
+        friendUserId: 'u2',
       }),
+    )
+
+    const callArg = sendLiff.mock.calls[0]![0]
+    expect(callArg.chatId).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
     )
   })
 
