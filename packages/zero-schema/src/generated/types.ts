@@ -22,6 +22,12 @@ export type FriendshipUpdate = TableUpdateRow<typeof schema.friendship>
 export type Message = TableInsertRow<typeof schema.message>
 export type MessageUpdate = TableUpdateRow<typeof schema.message>
 
+export type OaProvider = TableInsertRow<typeof schema.oaProvider>
+export type OaProviderUpdate = TableUpdateRow<typeof schema.oaProvider>
+
+export type OfficialAccount = TableInsertRow<typeof schema.officialAccount>
+export type OfficialAccountUpdate = TableUpdateRow<typeof schema.officialAccount>
+
 export type StickerAsset = TableInsertRow<typeof schema.stickerAsset>
 export type StickerAssetUpdate = TableUpdateRow<typeof schema.stickerAsset>
 
