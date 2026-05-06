@@ -191,7 +191,9 @@ export function createMiniAppService(deps: MiniAppServiceDeps) {
           eq(oaFriendship.userId, userId),
           eq(oaFriendship.status, 'friend'),
           eq(miniApp.isPublished, true),
-          excludeMiniAppIds.length ? notInArray(miniApp.id, excludeMiniAppIds) : sql`TRUE`,
+          excludeMiniAppIds.length
+            ? notInArray(miniApp.id, excludeMiniAppIds)
+            : sql`TRUE`,
         ),
       )
     return rows.map((r) => r.miniApp)

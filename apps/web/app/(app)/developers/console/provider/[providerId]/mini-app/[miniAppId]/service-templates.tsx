@@ -128,10 +128,7 @@ export default function ServiceTemplatesPage() {
           </Text>
           <Input value={useCase} onChangeText={setUseCase} />
 
-          <Button
-            disabled={!name || create.isPending}
-            onPress={() => create.mutate()}
-          >
+          <Button disabled={!name || create.isPending} onPress={() => create.mutate()}>
             {create.isPending ? 'Adding...' : 'Add'}
           </Button>
         </YStack>

@@ -401,7 +401,13 @@ export function OADetailContent({
                         cursor="pointer"
                         onPress={() => router.push(`/m/${m.id}` as any)}
                       >
-                        <YStack width={56} height={56} rounded="$3" overflow="hidden" bg="$color3">
+                        <YStack
+                          width={56}
+                          height={56}
+                          rounded="$3"
+                          overflow="hidden"
+                          bg="$color3"
+                        >
                           {m.iconUrl ? (
                             <img src={m.iconUrl} width={56} height={56} alt="" />
                           ) : (

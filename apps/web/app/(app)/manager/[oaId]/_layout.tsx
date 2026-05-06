@@ -138,7 +138,13 @@ export default function ManagerLayout() {
                   onPress={() => router.push(`/m/${m.id}` as any)}
                 >
                   <XStack items="center" gap="$2">
-                    <YStack width={20} height={20} rounded="$1" overflow="hidden" bg="$color3">
+                    <YStack
+                      width={20}
+                      height={20}
+                      rounded="$1"
+                      overflow="hidden"
+                      bg="$color3"
+                    >
                       {m.iconUrl && <img src={m.iconUrl} width={20} height={20} alt="" />}
                     </YStack>
                     <SizableText size="$2" fontWeight="500" color="$color11">

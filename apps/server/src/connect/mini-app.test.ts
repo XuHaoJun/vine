@@ -50,9 +50,7 @@ function fakeService() {
 function fakeOaService(ownerId = 'u-1') {
   return {
     getProvider: vi.fn().mockResolvedValue({ id: 'prov-1', ownerId }),
-    getOfficialAccount: vi
-      .fn()
-      .mockResolvedValue({ id: 'oa-1', providerId: 'prov-1' }),
+    getOfficialAccount: vi.fn().mockResolvedValue({ id: 'oa-1', providerId: 'prov-1' }),
   }
 }
 
