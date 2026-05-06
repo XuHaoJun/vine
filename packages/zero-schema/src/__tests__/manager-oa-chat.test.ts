@@ -44,6 +44,36 @@ function makeTx(overrides: Record<string, any> = {}) {
 }
 
 describe('message.sendAsOA', () => {
+  it('rejects direct message inserts', async () => {
+    const { tx } = makeTx()
+
+    await expect(
+      (messageMutate as any).insert(
+        { authData: { id: 'manager-1' }, can: vi.fn(), tx },
+        {
+          id: 'msg-1',
+          chatId: 'chat-1',
+          senderType: 'oa',
+          oaId: 'oa-1',
+          type: 'text',
+          text: 'hello',
+          createdAt: 123,
+        },
+      ),
+    ).rejects.toThrow('Use a message action')
+  })
+
+  it('rejects direct message updates', async () => {
+    const { tx } = makeTx()
+
+    await expect(
+      (messageMutate as any).update(
+        { authData: { id: 'manager-1' }, can: vi.fn(), tx },
+        { id: 'msg-1', senderType: 'oa', oaId: 'oa-1' },
+      ),
+    ).rejects.toThrow('Use a message action')
+  })
+
   it('rejects OA messages sent through message.send', async () => {
     const { tx } = makeTx()
 

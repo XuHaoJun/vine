@@ -72,7 +72,16 @@ export const messageReadPermission = serverWhere('message', (eb, auth) => {
 
 const SYSTEM_PACKAGE_RE = /^\d+$/
 
+const rejectDirectMessageMutation = async () => {
+  throw new Error('Use a message action')
+}
+
 export const mutate = mutations(schema, messageReadPermission, {
+  insert: rejectDirectMessageMutation,
+  update: rejectDirectMessageMutation,
+  upsert: rejectDirectMessageMutation,
+  delete: rejectDirectMessageMutation,
+
   send: async ({ authData, tx }, message: Message) => {
     if (!authData) throw new Error('Unauthorized')
 
