@@ -76,4 +76,35 @@ describe('GET /api/liff/v1/mini-app/:miniAppId', () => {
     expect(res.statusCode).toBe(404)
     await app.close()
   })
+
+  it('does not expose draft mini app metadata', async () => {
+    const app = Fastify()
+    await app.register((instance) =>
+      miniAppPublicPlugin(instance, {
+        miniApp: fakeMiniAppService({
+          'ma-draft': {
+            id: 'ma-draft',
+            providerId: 'p',
+            liffAppId: 'liff-app-1',
+            name: 'Draft App',
+            iconUrl: null,
+            description: 'hidden',
+            category: null,
+            isPublished: false,
+            publishedAt: null,
+            createdAt: '2026-05-05T00:00:00Z',
+            updatedAt: '2026-05-05T00:00:00Z',
+          },
+        }),
+        liff: fakeLiffService(),
+        auth: {} as any,
+      }),
+    )
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/liff/v1/mini-app/ma-draft',
+    })
+    expect(res.statusCode).toBe(404)
+    await app.close()
+  })
 })

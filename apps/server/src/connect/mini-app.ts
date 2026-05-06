@@ -2,28 +2,90 @@ import type { ServiceImpl } from '@connectrpc/connect'
 import { Code, ConnectError, ConnectRouter } from '@connectrpc/connect'
 import type { AuthServer } from '@take-out/better-auth-utils/server'
 import { MiniAppService } from '@vine/proto/mini-app'
+import type { createOAService } from '../services/oa'
 import type { createMiniAppService } from '../services/mini-app'
+import type { createLiffService } from '../services/liff'
 import type { createMiniAppTemplateService } from '../services/mini-app-service-message-templates'
 import type { createMiniAppServiceMessageService } from '../services/mini-app-service-message'
 import { validateParams, renderTemplate } from '../services/mini-app-service-message'
-import { requireAuthData, withAuthService } from './auth-context'
+import { requireAuthData, withAuth } from './auth-context'
 
 type MiniAppHandlerDeps = {
   miniApp: ReturnType<typeof createMiniAppService>
   template: ReturnType<typeof createMiniAppTemplateService>
   serviceMessage: ReturnType<typeof createMiniAppServiceMessageService>
+  oa: Pick<ReturnType<typeof createOAService>, 'getProvider' | 'getOfficialAccount'>
+  liff: Pick<ReturnType<typeof createLiffService>, 'getLiffAppByDbId' | 'getLoginChannel'>
   auth: AuthServer
+}
+
+async function assertProviderOwnedByUser(
+  deps: MiniAppHandlerDeps,
+  providerId: string,
+  userId: string,
+) {
+  const provider = await deps.oa.getProvider(providerId)
+  if (!provider) throw new ConnectError('Provider not found', Code.NotFound)
+  if (provider.ownerId !== userId) {
+    throw new ConnectError('Forbidden', Code.PermissionDenied)
+  }
+  return provider
+}
+
+async function assertMiniAppOwnedByUser(
+  deps: MiniAppHandlerDeps,
+  miniAppId: string,
+  userId: string,
+) {
+  const row = await deps.miniApp.getMiniApp(miniAppId)
+  if (!row) throw new ConnectError('Mini App not found', Code.NotFound)
+  await assertProviderOwnedByUser(deps, row.providerId, userId)
+  return row
+}
+
+async function assertLiffAppBelongsToProvider(
+  deps: MiniAppHandlerDeps,
+  liffAppId: string,
+  providerId: string,
+) {
+  const app = await deps.liff.getLiffAppByDbId(liffAppId)
+  if (!app) throw new ConnectError('LIFF app not found', Code.NotFound)
+  const channel = await deps.liff.getLoginChannel(app.loginChannelId)
+  if (!channel) throw new ConnectError('Login channel not found', Code.NotFound)
+  if (channel.providerId !== providerId) {
+    throw new ConnectError('Forbidden', Code.PermissionDenied)
+  }
+  return app
+}
+
+async function assertOaCanLinkToMiniApp(
+  deps: MiniAppHandlerDeps,
+  miniAppProviderId: string,
+  oaId: string,
+  userId: string,
+) {
+  const account = await deps.oa.getOfficialAccount(oaId)
+  if (!account) throw new ConnectError('Official account not found', Code.NotFound)
+  await assertProviderOwnedByUser(deps, account.providerId, userId)
+  if (account.providerId !== miniAppProviderId) {
+    throw new ConnectError('Forbidden', Code.PermissionDenied)
+  }
+  return account
 }
 
 async function toProtoMiniApp(
   deps: MiniAppHandlerDeps,
   row: NonNullable<Awaited<ReturnType<typeof deps.miniApp.getMiniApp>>>,
 ) {
-  const linkedOaIds = await deps.miniApp.listLinkedOaIds(row.id)
+  const [linkedOaIds, liffApp] = await Promise.all([
+    deps.miniApp.listLinkedOaIds(row.id),
+    deps.liff.getLiffAppByDbId(row.liffAppId),
+  ])
   return {
     id: row.id,
     providerId: row.providerId,
     liffAppId: row.liffAppId,
+    liffId: liffApp?.liffId ?? undefined,
     name: row.name,
     iconUrl: row.iconUrl ?? undefined,
     description: row.description ?? undefined,
@@ -56,30 +118,32 @@ export function miniAppImpl(
 ): ServiceImpl<typeof MiniAppService> {
   return {
     async listMiniApps(req, ctx) {
-      requireAuthData(ctx)
+      const auth = requireAuthData(ctx)
       if (!req.providerId)
         throw new ConnectError('providerId required', Code.InvalidArgument)
+      await assertProviderOwnedByUser(deps, req.providerId, auth.id)
       const rows = await deps.miniApp.listMiniApps(req.providerId)
       const miniApps = await Promise.all(rows.map((r) => toProtoMiniApp(deps, r)))
       return { miniApps }
     },
 
     async getMiniApp(req, ctx) {
-      requireAuthData(ctx)
+      const auth = requireAuthData(ctx)
       if (!req.id) throw new ConnectError('id required', Code.InvalidArgument)
-      const row = await deps.miniApp.getMiniApp(req.id)
-      if (!row) throw new ConnectError('Mini App not found', Code.NotFound)
+      const row = await assertMiniAppOwnedByUser(deps, req.id, auth.id)
       return { miniApp: await toProtoMiniApp(deps, row) }
     },
 
     async createMiniApp(req, ctx) {
-      requireAuthData(ctx)
+      const auth = requireAuthData(ctx)
       if (!req.providerId)
         throw new ConnectError('providerId required', Code.InvalidArgument)
       if (!req.liffAppId)
         throw new ConnectError('liffAppId required', Code.InvalidArgument)
       if (!req.name) throw new ConnectError('name required', Code.InvalidArgument)
       try {
+        await assertProviderOwnedByUser(deps, req.providerId, auth.id)
+        await assertLiffAppBelongsToProvider(deps, req.liffAppId, req.providerId)
         const existing = await deps.miniApp.getMiniAppByLiffAppId(req.liffAppId)
         if (existing) {
           throw new ConnectError(
@@ -104,8 +168,9 @@ export function miniAppImpl(
     },
 
     async updateMiniApp(req, ctx) {
-      requireAuthData(ctx)
+      const auth = requireAuthData(ctx)
       if (!req.id) throw new ConnectError('id required', Code.InvalidArgument)
+      await assertMiniAppOwnedByUser(deps, req.id, auth.id)
       const row = await deps.miniApp.updateMiniApp(req.id, {
         name: req.name,
         iconUrl: req.iconUrl,
@@ -117,9 +182,10 @@ export function miniAppImpl(
     },
 
     async publishMiniApp(req, ctx) {
-      requireAuthData(ctx)
+      const auth = requireAuthData(ctx)
       if (!req.id) throw new ConnectError('id required', Code.InvalidArgument)
       try {
+        await assertMiniAppOwnedByUser(deps, req.id, auth.id)
         const row = await deps.miniApp.publishMiniApp(req.id)
         if (!row) throw new ConnectError('Mini App not found', Code.NotFound)
         return { miniApp: await toProtoMiniApp(deps, row) }
@@ -131,40 +197,45 @@ export function miniAppImpl(
     },
 
     async unpublishMiniApp(req, ctx) {
-      requireAuthData(ctx)
+      const auth = requireAuthData(ctx)
       if (!req.id) throw new ConnectError('id required', Code.InvalidArgument)
+      await assertMiniAppOwnedByUser(deps, req.id, auth.id)
       const row = await deps.miniApp.unpublishMiniApp(req.id)
       if (!row) throw new ConnectError('Mini App not found', Code.NotFound)
       return { miniApp: await toProtoMiniApp(deps, row) }
     },
 
     async deleteMiniApp(req, ctx) {
-      requireAuthData(ctx)
+      const auth = requireAuthData(ctx)
       if (!req.id) throw new ConnectError('id required', Code.InvalidArgument)
+      await assertMiniAppOwnedByUser(deps, req.id, auth.id)
       await deps.miniApp.deleteMiniApp(req.id)
       return {}
     },
 
     async linkOa(req, ctx) {
-      requireAuthData(ctx)
+      const auth = requireAuthData(ctx)
       if (!req.miniAppId)
         throw new ConnectError('miniAppId required', Code.InvalidArgument)
       if (!req.oaId) throw new ConnectError('oaId required', Code.InvalidArgument)
+      const row = await assertMiniAppOwnedByUser(deps, req.miniAppId, auth.id)
+      await assertOaCanLinkToMiniApp(deps, row.providerId, req.oaId, auth.id)
       await deps.miniApp.linkOa({ miniAppId: req.miniAppId, oaId: req.oaId })
       return {}
     },
 
     async unlinkOa(req, ctx) {
-      requireAuthData(ctx)
+      const auth = requireAuthData(ctx)
       if (!req.miniAppId)
         throw new ConnectError('miniAppId required', Code.InvalidArgument)
       if (!req.oaId) throw new ConnectError('oaId required', Code.InvalidArgument)
+      const row = await assertMiniAppOwnedByUser(deps, req.miniAppId, auth.id)
+      await assertOaCanLinkToMiniApp(deps, row.providerId, req.oaId, auth.id)
       await deps.miniApp.unlinkOa({ miniAppId: req.miniAppId, oaId: req.oaId })
       return {}
     },
 
     async listPublished(req, ctx) {
-      requireAuthData(ctx)
       const limit = Math.min(Math.max(req.limit ?? 50, 1), 100)
       const offset = req.offset ?? 0
       const rows = await deps.miniApp.listPublished({
@@ -199,19 +270,21 @@ export function miniAppImpl(
     },
 
     async listServiceTemplates(req, ctx) {
-      requireAuthData(ctx)
+      const auth = requireAuthData(ctx)
       if (!req.miniAppId)
         throw new ConnectError('miniAppId required', Code.InvalidArgument)
+      await assertMiniAppOwnedByUser(deps, req.miniAppId, auth.id)
       const rows = await deps.template.listTemplates(req.miniAppId)
       return { templates: rows.map(toProtoTemplate) }
     },
 
     async createServiceTemplate(req, ctx) {
-      requireAuthData(ctx)
+      const auth = requireAuthData(ctx)
       if (!req.miniAppId)
         throw new ConnectError('miniAppId required', Code.InvalidArgument)
       if (!req.name) throw new ConnectError('name required', Code.InvalidArgument)
       if (!req.kind) throw new ConnectError('kind required', Code.InvalidArgument)
+      await assertMiniAppOwnedByUser(deps, req.miniAppId, auth.id)
       let flex: unknown
       try {
         flex = JSON.parse(req.flexJson)
@@ -238,8 +311,11 @@ export function miniAppImpl(
     },
 
     async updateServiceTemplate(req, ctx) {
-      requireAuthData(ctx)
+      const auth = requireAuthData(ctx)
       if (!req.id) throw new ConnectError('id required', Code.InvalidArgument)
+      const existing = await deps.template.getTemplate(req.id)
+      if (!existing) throw new ConnectError('Template not found', Code.NotFound)
+      await assertMiniAppOwnedByUser(deps, existing.miniAppId, auth.id)
       let flex: unknown | undefined
       if (req.flexJson) {
         try {
@@ -259,8 +335,11 @@ export function miniAppImpl(
     },
 
     async deleteServiceTemplate(req, ctx) {
-      requireAuthData(ctx)
+      const auth = requireAuthData(ctx)
       if (!req.id) throw new ConnectError('id required', Code.InvalidArgument)
+      const existing = await deps.template.getTemplate(req.id)
+      if (!existing) throw new ConnectError('Template not found', Code.NotFound)
+      await assertMiniAppOwnedByUser(deps, existing.miniAppId, auth.id)
       await deps.template.deleteTemplate(req.id)
       return {}
     },
@@ -271,6 +350,7 @@ export function miniAppImpl(
         throw new ConnectError('templateId required', Code.InvalidArgument)
       const tpl = await deps.template.getTemplate(req.templateId)
       if (!tpl) throw new ConnectError('Template not found', Code.NotFound)
+      await assertMiniAppOwnedByUser(deps, tpl.miniAppId, auth.id)
       const params = Object.fromEntries(Object.entries(req.params ?? {}))
       try {
         validateParams(tpl.paramsSchema as any, params)
@@ -303,9 +383,25 @@ export function miniAppImpl(
 
 export function miniAppHandler(deps: MiniAppHandlerDeps) {
   return (router: ConnectRouter) => {
-    router.service(
-      MiniAppService,
-      withAuthService(MiniAppService, deps.auth, miniAppImpl(deps)),
-    )
+    const impl = miniAppImpl(deps)
+    router.service(MiniAppService, {
+      listMiniApps: withAuth(deps.auth, impl.listMiniApps),
+      getMiniApp: withAuth(deps.auth, impl.getMiniApp),
+      createMiniApp: withAuth(deps.auth, impl.createMiniApp),
+      updateMiniApp: withAuth(deps.auth, impl.updateMiniApp),
+      publishMiniApp: withAuth(deps.auth, impl.publishMiniApp),
+      unpublishMiniApp: withAuth(deps.auth, impl.unpublishMiniApp),
+      deleteMiniApp: withAuth(deps.auth, impl.deleteMiniApp),
+      linkOa: withAuth(deps.auth, impl.linkOa),
+      unlinkOa: withAuth(deps.auth, impl.unlinkOa),
+      listPublished: impl.listPublished,
+      listMyGallery: withAuth(deps.auth, impl.listMyGallery),
+      listLinkedToOa: withAuth(deps.auth, impl.listLinkedToOa),
+      listServiceTemplates: withAuth(deps.auth, impl.listServiceTemplates),
+      createServiceTemplate: withAuth(deps.auth, impl.createServiceTemplate),
+      updateServiceTemplate: withAuth(deps.auth, impl.updateServiceTemplate),
+      deleteServiceTemplate: withAuth(deps.auth, impl.deleteServiceTemplate),
+      sendTestServiceMessage: withAuth(deps.auth, impl.sendTestServiceMessage),
+    })
   }
 }

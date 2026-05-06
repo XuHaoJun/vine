@@ -51,6 +51,8 @@ export function connectRoutes(deps: ConnectDeps) {
       miniApp: deps.miniApp,
       template: deps.miniAppTemplate,
       serviceMessage: deps.miniAppSvcMsg,
+      oa: deps.oa,
+      liff: deps.liff,
       auth: deps.auth,
     })(router)
     router.service(

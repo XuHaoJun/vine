@@ -47,9 +47,9 @@ export const MiniAppSettingsPage = memo(() => {
 
   // Fetch the underlying LIFF app
   const { data: liffData } = useTanQuery({
-    queryKey: ['liff', 'app', miniApp?.liffAppId],
-    queryFn: () => liffClient.getLiffApp({ liffId: miniApp!.liffAppId }),
-    enabled: !!miniApp?.liffAppId,
+    queryKey: ['liff', 'app', miniApp?.liffId],
+    queryFn: () => liffClient.getLiffApp({ liffId: miniApp!.liffId }),
+    enabled: !!miniApp?.liffId,
   })
 
   const liffApp = liffData?.app

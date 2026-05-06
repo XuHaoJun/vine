@@ -5,6 +5,7 @@ import { SizableText, Spinner, XStack, YStack } from 'tamagui'
 import { useTanMutation, useTanQuery } from '~/query'
 import { miniAppClient } from '~/features/mini-app/client'
 import { loginChannelClient, liffClient } from '~/features/liff/client'
+import { getAvailableLiffAppsForMiniApps } from '~/features/mini-app/liffAppIds'
 import { Button } from '~/interface/buttons/Button'
 import { CaretLeftIcon } from '~/interface/icons/phosphor/CaretLeftIcon'
 import { Input } from '~/interface/forms/Input'
@@ -58,12 +59,9 @@ export const NewMiniAppPage = memo(() => {
     enabled: !!providerId,
   })
 
-  const usedLiffAppIds = new Set(
+  const availableLiffApps = getAvailableLiffAppsForMiniApps(
+    liffAppsData ?? [],
     (existingMiniAppsData?.miniApps ?? []).map((m) => m.liffAppId),
-  )
-
-  const availableLiffApps = (liffAppsData ?? []).filter(
-    (app) => !usedLiffAppIds.has(app.liffId),
   )
 
   const isLoading = channelsLoading || liffAppsLoading
@@ -175,7 +173,7 @@ export const NewMiniAppPage = memo(() => {
               onValueChange={setSelectedLiffAppId}
               options={availableLiffApps.map((app) => ({
                 label: app.liffId,
-                value: app.liffId,
+                value: app.id,
               }))}
               placeholder="Select a LIFF app"
             />

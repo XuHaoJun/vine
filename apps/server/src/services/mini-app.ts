@@ -1,4 +1,4 @@
-import { and, desc, eq, ilike, or, sql } from 'drizzle-orm'
+import { and, desc, eq, ilike, notInArray, or, sql } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { schema } from '@vine/db'
 import { miniApp, miniAppOaLink, miniAppRecent, oaLiffApp } from '@vine/db/schema-login'
@@ -191,9 +191,7 @@ export function createMiniAppService(deps: MiniAppServiceDeps) {
           eq(oaFriendship.userId, userId),
           eq(oaFriendship.status, 'friend'),
           eq(miniApp.isPublished, true),
-          excludeMiniAppIds.length
-            ? sql`${miniApp.id} NOT IN ${excludeMiniAppIds}`
-            : sql`TRUE`,
+          excludeMiniAppIds.length ? notInArray(miniApp.id, excludeMiniAppIds) : sql`TRUE`,
         ),
       )
     return rows.map((r) => r.miniApp)

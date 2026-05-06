@@ -20,6 +20,7 @@ export async function miniAppPublicPlugin(
       const { miniAppId } = request.params
       const m = await deps.miniApp.getMiniApp(miniAppId)
       if (!m) return reply.status(404).send({ error: 'Mini App not found' })
+      if (!m.isPublished) return reply.status(404).send({ error: 'Mini App not found' })
       const [linkedOaIds, liffAppRow] = await Promise.all([
         deps.miniApp.listLinkedOaIds(miniAppId),
         deps.liff.getLiffAppByDbId(m.liffAppId),

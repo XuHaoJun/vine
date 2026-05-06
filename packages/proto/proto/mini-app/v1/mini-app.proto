@@ -15,6 +15,7 @@ message MiniApp {
   string created_at = 10;
   string updated_at = 11;
   repeated string linked_oa_ids = 12;
+  optional string liff_id = 13;
 }
 
 message ListMiniAppsRequest { string provider_id = 1; }
