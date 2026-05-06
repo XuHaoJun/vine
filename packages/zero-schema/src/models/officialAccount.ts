@@ -13,7 +13,6 @@ export const schema = table('officialAccount')
     uniqueId: string(),
     description: string().optional(),
     imageUrl: string().optional(),
-    channelSecret: string(),
     status: string(),
     kind: string(),
     email: string().optional(),
@@ -32,4 +31,4 @@ export const officialAccountOwnerPermission = serverWhere(
   },
 )
 
-export const mutate = mutations(schema, officialAccountOwnerPermission)
+export const mutate = mutations({})
