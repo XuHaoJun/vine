@@ -47,8 +47,8 @@ export const RichMenu = memo(
           style={{
             width: '100%',
             height: '100%',
-            resizeMode: 'contain',
           }}
+          resizeMode="contain"
         />
         {areas.map((area, index) => (
           <Pressable
