@@ -102,6 +102,12 @@ export const mutationValidators = {
       lastReadMessageId: v.string(),
       lastReadAt: v.number(),
     }),
+    markOARead: v.object({
+      chatId: v.string(),
+      oaId: v.string(),
+      lastReadMessageId: v.string(),
+      lastReadAt: v.number(),
+    }),
     addMembers: v.object({
       chatId: v.string(),
       userIds: v.array(v.string()),
@@ -201,6 +207,13 @@ export const mutationValidators = {
       chatId: v.string(),
       senderType: v.string(),
       type: v.string(),
+      createdAt: v.number(),
+    }),
+    sendAsOA: v.object({
+      id: v.string(),
+      chatId: v.string(),
+      oaId: v.string(),
+      text: v.string(),
       createdAt: v.number(),
     }),
     sendSticker: v.object({

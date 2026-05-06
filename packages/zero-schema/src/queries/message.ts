@@ -11,3 +11,17 @@ export const messagesByChatId = (props: { chatId: string; limit?: number }) => {
     .orderBy('createdAt', 'asc')
     .limit(props.limit ?? 100)
 }
+
+export const oaMessagesByChatId = (props: {
+  oaId: string
+  chatId: string
+  limit?: number
+}) => {
+  return zql.message
+    .where(messageReadPermission)
+    .where('chatId', props.chatId)
+    .whereExists('members', (q) => q.where('oaId', props.oaId))
+    .related('sender')
+    .orderBy('createdAt', 'asc')
+    .limit(props.limit ?? 100)
+}

@@ -20,6 +20,30 @@ export const chatMembersByChatId = (props: { chatId: string }) => {
     .related('user')
 }
 
+export const oaChatsByOfficialAccountId = (props: { oaId: string }) => {
+  return zql.chat
+    .where(chatReadPermission)
+    .where('type', 'oa')
+    .whereExists('members', (q) => q.where('oaId', props.oaId))
+    .related('members', (q) => q.related('user').related('oa'))
+    .related('lastMessage')
+    .orderBy('lastMessageAt', 'desc')
+    .limit(50)
+}
+
+export const oaChatMembersByChatId = (props: { oaId: string; chatId: string }) => {
+  return zql.chatMember
+    .where('chatId', props.chatId)
+    .whereExists('chat', (q) =>
+      q
+        .where(chatReadPermission)
+        .where('id', props.chatId)
+        .whereExists('members', (mq) => mq.where('oaId', props.oaId)),
+    )
+    .related('user')
+    .related('oa')
+}
+
 export const chatById = (props: { chatId: string }) => {
   return zql.chat.where(chatReadPermission).where('id', props.chatId).limit(1)
 }

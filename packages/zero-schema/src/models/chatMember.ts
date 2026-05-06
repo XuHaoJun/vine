@@ -19,14 +19,37 @@ export const schema = table('chatMember')
   })
   .primaryKey('id')
 
-// A user can read chatMember records if:
-// - it's their own record (userId match), OR
-// - the record belongs to a chat they are also a member of (needed for read markers)
+async function assertOaOwner(
+  tx: { query?: Record<string, any> },
+  oaId: string,
+  userId: string,
+) {
+  const query = tx.query as Record<string, any> | undefined
+  if (!query?.officialAccount || !query?.oaProvider) {
+    throw new Error('Unauthorized')
+  }
+
+  const accounts = await query.officialAccount.where('id', oaId).run()
+  const account = accounts[0]
+  if (!account) throw new Error('Unauthorized')
+
+  const providers = await query.oaProvider.where('id', account.providerId).run()
+  const provider = providers[0]
+  if (!provider || provider.ownerId !== userId) {
+    throw new Error('Unauthorized')
+  }
+}
+
+// A user can read chatMember records for their chats or for OAs they manage
 const chatMemberPermission = serverWhere('chatMember', (eb, auth) => {
+  const userId = auth?.id || ''
   return eb.or(
-    eb.cmp('userId', auth?.id || ''),
+    eb.cmp('userId', userId),
     eb.exists('chat', (q) =>
-      q.whereExists('members', (mq) => mq.where('userId', auth?.id || '')),
+      q.whereExists('members', (mq) => mq.where('userId', userId)),
+    ),
+    eb.exists('oa', (oaQ) =>
+      oaQ.whereExists('provider', (providerQ) => providerQ.where('ownerId', userId)),
     ),
   )
 })
@@ -48,6 +71,36 @@ export const mutate = mutations(schema, chatMemberPermission, {
 
     await tx.mutate.chatMember.update({
       id: data.id,
+      lastReadMessageId: data.lastReadMessageId,
+      lastReadAt: data.lastReadAt,
+    })
+  },
+
+  markOARead: async (
+    { authData, tx },
+    data: {
+      chatId: string
+      oaId: string
+      lastReadMessageId: string
+      lastReadAt: number
+    },
+  ) => {
+    if (!authData) throw new Error('Unauthorized')
+
+    await assertOaOwner(tx as { query?: Record<string, any> }, data.oaId, authData.id)
+
+    const query = tx.query as Record<string, any> | undefined
+    if (!query?.chatMember) throw new Error('Unauthorized')
+
+    const members = await query.chatMember
+      .where('chatId', data.chatId)
+      .where('oaId', data.oaId)
+      .run()
+    const member = members[0]
+    if (!member) throw new Error('Unauthorized')
+
+    await tx.mutate.chatMember.update({
+      id: member.id,
       lastReadMessageId: data.lastReadMessageId,
       lastReadAt: data.lastReadAt,
     })
