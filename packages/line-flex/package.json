@@ -8,12 +8,12 @@
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
-    "react": "*",
+    "react": "19.2.5",
     "tamagui": "2.0.0-rc.41"
   },
   "devDependencies": {
     "@tamagui/config": "2.0.0-rc.41",
-    "@types/react": "^18.2.0",
+    "@types/react": "^19.2.14",
     "tamagui": "2.0.0-rc.41",
     "vitest": "^4.1.5"
   }
