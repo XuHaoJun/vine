@@ -54,7 +54,16 @@ const chatMemberPermission = serverWhere('chatMember', (eb, auth) => {
   )
 })
 
+const rejectDirectChatMemberMutation = async () => {
+  throw new Error('Use a chatMember action')
+}
+
 export const mutate = mutations(schema, chatMemberPermission, {
+  insert: rejectDirectChatMemberMutation,
+  update: rejectDirectChatMemberMutation,
+  upsert: rejectDirectChatMemberMutation,
+  delete: rejectDirectChatMemberMutation,
+
   markRead: async (
     { authData, can, tx },
     data: { id: string; lastReadMessageId: string; lastReadAt: number },

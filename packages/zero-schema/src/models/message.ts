@@ -80,8 +80,8 @@ export const mutate = mutations(schema, messageReadPermission, {
     if (message.senderType === 'user' && message.senderId !== authData.id) {
       throw new Error('Unauthorized')
     }
-    if (message.senderType === 'oa' && !message.oaId) {
-      throw new Error('OA message requires oaId')
+    if (message.senderType === 'oa') {
+      throw new Error('Use sendAsOA for OA messages')
     }
 
     // Insert the message
