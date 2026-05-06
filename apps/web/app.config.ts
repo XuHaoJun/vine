@@ -117,6 +117,13 @@ export default {
         },
       ],
       [
+        'expo-camera',
+        {
+          cameraPermission: '允許 Vine 使用相機掃描 QR Code 以新增官方帳號。',
+          barcodeScannerEnabled: true,
+        },
+      ],
+      [
         'react-native-permissions',
         {
           // Add setup_permissions to your Podfile (see iOS setup - steps 1, 2 and 3)

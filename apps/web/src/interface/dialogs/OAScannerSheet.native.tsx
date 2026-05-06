@@ -1,6 +1,7 @@
 import { useState } from 'react'
+import { Linking } from 'react-native'
 import { Sheet, Text, XStack, YStack } from 'tamagui'
-import { Scanner } from '@yudiel/react-qr-scanner'
+import { CameraView, useCameraPermissions } from 'expo-camera'
 
 import { oaClient } from '~/features/oa/client'
 import { parseOAScanResult } from '~/features/oa/parse-qr'
@@ -9,11 +10,6 @@ import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
 
 import type { OADetailData } from '~/interface/dialogs/OADetailSheet'
-
-type CameraError =
-  | { type: 'notAllowed' }
-  | { type: 'notFound' }
-  | { type: 'unknown'; message: string }
 
 type OAScannerSheetProps = {
   open: boolean
@@ -28,7 +24,8 @@ export function OAScannerSheet({
 }: OAScannerSheetProps) {
   const [manualInput, setManualInput] = useState('')
   const [resolving, setResolving] = useState(false)
-  const [cameraError, setCameraError] = useState<CameraError | null>(null)
+  const [scanned, setScanned] = useState(false)
+  const [permission, requestPermission] = useCameraPermissions()
 
   const resolveOA = async (uniqueId: string) => {
     if (!uniqueId) return
@@ -51,11 +48,10 @@ export function OAScannerSheet({
     }
   }
 
-  const handleScan = (detectedCodes: Array<{ rawValue: string }>) => {
-    const firstCode = detectedCodes[0]
-    if (!firstCode) return
-    const content = firstCode.rawValue
-    const uniqueId = parseOAScanResult(content)
+  const handleBarcodeScanned = (result: { data: string }) => {
+    if (scanned) return
+    setScanned(true)
+    const uniqueId = parseOAScanResult(result.data)
     resolveOA(uniqueId)
   }
 
@@ -64,41 +60,32 @@ export function OAScannerSheet({
     resolveOA(uniqueId)
   }
 
-  const handleScannerError = (error: unknown) => {
-    console.error('QR Scanner error:', error)
+  const handleOpenSettings = () => {
+    void Linking.openSettings()
+  }
 
-    if (error instanceof DOMException) {
-      if (error.name === 'NotAllowedError') {
-        setCameraError({ type: 'notAllowed' })
-        showToast('相機權限被拒絕', { type: 'error' })
-        return
-      }
-      if (error.name === 'NotFoundError') {
-        setCameraError({ type: 'notFound' })
-        showToast('找不到相機裝置', { type: 'error' })
-        return
-      }
+  const handleRequestPermission = async () => {
+    const result = await requestPermission()
+    if (!result.granted) {
+      showToast('相機權限被拒絕', { type: 'error' })
     }
-
-    const message = error instanceof Error ? error.message : '相機存取失敗'
-    setCameraError({ type: 'unknown', message })
-    showToast(message, { type: 'error' })
   }
 
-  const handleRetry = () => {
-    setCameraError(null)
+  // Reset scanned state when sheet opens
+  const handleOpenChange = (isOpen: boolean) => {
+    if (isOpen) {
+      setScanned(false)
+    }
+    onOpenChange(isOpen)
   }
 
-  const openSettings = () => {
-    // On web, guide user to browser settings. We cannot programmatically
-    // open browser permission settings, so show a helpful toast.
-    showToast('請在網址列左側點擊相機圖示，允許相機權限後重新整理頁面', {
-      type: 'info',
-    })
-  }
+  const showPermissionPrompt = permission && !permission.granted && permission.canAskAgain
+
+  const showPermissionDenied =
+    permission && !permission.granted && !permission.canAskAgain
 
   return (
-    <Sheet modal open={open} onOpenChange={onOpenChange} snapPoints={[80]}>
+    <Sheet modal open={open} onOpenChange={handleOpenChange} snapPoints={[80]}>
       <Sheet.Overlay
         opacity={0.5}
         enterStyle={{ opacity: 0 }}
@@ -111,27 +98,30 @@ export function OAScannerSheet({
           </Text>
 
           <YStack height={280} rounded="$4" overflow="hidden" bg="$color3">
-            {open && !cameraError && (
-              <Scanner
-                onScan={handleScan}
-                onError={handleScannerError}
-                styles={{ container: { width: '100%', height: '100%' } }}
+            {open && permission?.granted && (
+              <CameraView
+                style={{ flex: 1 }}
+                facing="back"
+                barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+                onBarcodeScanned={handleBarcodeScanned}
               />
             )}
 
-            {cameraError && (
+            {open && showPermissionPrompt && (
               <YStack flex={1} items="center" justify="center" gap="$3" p="$4">
                 <Text fontSize={15} color="$color11" text="center">
-                  {cameraError.type === 'notAllowed' && '需要相機權限才能掃描 QR Code'}
-                  {cameraError.type === 'notFound' && '找不到相機裝置'}
-                  {cameraError.type === 'unknown' && cameraError.message}
+                  需要相機權限才能掃描 QR Code
                 </Text>
-                <XStack gap="$2">
-                  {cameraError.type === 'notAllowed' && (
-                    <Button onPress={openSettings}>如何授權</Button>
-                  )}
-                  <Button onPress={handleRetry}>重試</Button>
-                </XStack>
+                <Button onPress={handleRequestPermission}>允許相機權限</Button>
+              </YStack>
+            )}
+
+            {open && showPermissionDenied && (
+              <YStack flex={1} items="center" justify="center" gap="$3" p="$4">
+                <Text fontSize={15} color="$color11" text="center">
+                  相機權限已被拒絕。請前往系統設定開啟相機權限。
+                </Text>
+                <Button onPress={handleOpenSettings}>開啟設定</Button>
               </YStack>
             )}
           </YStack>
