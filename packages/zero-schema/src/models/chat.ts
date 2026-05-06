@@ -22,10 +22,20 @@ export const schema = table('chat')
   })
   .primaryKey('id')
 
-// A user can read a chat only if they are a member
-// The 'members' relationship is defined in relationships.ts (Task 5)
+// A user can read a chat if they are a member or manage the OA in it
 export const chatReadPermission = serverWhere('chat', (eb, auth) => {
-  return eb.exists('members', (q) => q.where('userId', auth?.id || ''))
+  const userId = auth?.id || ''
+  return eb.or(
+    eb.exists('members', (q) => q.where('userId', userId)),
+    eb.and(
+      eb.cmp('type', 'oa'),
+      eb.exists('members', (q) =>
+        q.whereExists('oa', (oaQ) =>
+          oaQ.whereExists('provider', (providerQ) => providerQ.where('ownerId', userId)),
+        ),
+      ),
+    ),
+  )
 })
 
 export const mutate = mutations(schema, chatReadPermission, {

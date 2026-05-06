@@ -35,6 +35,19 @@ const chat = {
     }),
     ({ args }) => Queries.chat.groupMembersWithRoles(args),
   ),
+  oaChatMembersByChatId: defineQuery(
+    v.object({
+      oaId: v.string(),
+      chatId: v.string(),
+    }),
+    ({ args }) => Queries.chat.oaChatMembersByChatId(args),
+  ),
+  oaChatsByOfficialAccountId: defineQuery(
+    v.object({
+      oaId: v.string(),
+    }),
+    ({ args }) => Queries.chat.oaChatsByOfficialAccountId(args),
+  ),
   pendingInvitesByUserId: defineQuery(
     v.object({
       userId: v.string(),
@@ -105,6 +118,14 @@ const message = {
       limit: v.optional(v.number()),
     }),
     ({ args }) => Queries.message.messagesByChatId(args),
+  ),
+  oaMessagesByChatId: defineQuery(
+    v.object({
+      oaId: v.string(),
+      chatId: v.string(),
+      limit: v.optional(v.number()),
+    }),
+    ({ args }) => Queries.message.oaMessagesByChatId(args),
   ),
 }
 

@@ -1,0 +1,435 @@
+import { describe, expect, it, vi } from 'vitest'
+import { getRawWhere } from 'on-zero'
+import type { Where } from 'on-zero'
+
+import { mutate as chatMemberMutate } from '../models/chatMember'
+import { mutate as messageMutate } from '../models/message'
+import { managerOwnedOaChatPermission } from '../queries/chat'
+import { managerOwnedOaMessagePermission } from '../queries/message'
+import type { AuthData } from '../types'
+
+function chain(rows: unknown[]) {
+  return {
+    where: vi.fn().mockReturnThis(),
+    run: vi.fn().mockResolvedValue(rows),
+  }
+}
+
+function makeTx(overrides: Record<string, any> = {}) {
+  const inserted: unknown[] = []
+  const chatUpdates: unknown[] = []
+  const memberUpdates: unknown[] = []
+
+  return {
+    inserted,
+    chatUpdates,
+    memberUpdates,
+    tx: {
+      query: {
+        officialAccount: chain([{ id: 'oa-1', providerId: 'provider-1' }]),
+        oaProvider: chain([{ id: 'provider-1', ownerId: 'manager-1' }]),
+        chat: chain([{ id: 'chat-1', type: 'oa' }]),
+        chatMember: chain([{ id: 'oa-member-1', chatId: 'chat-1', oaId: 'oa-1' }]),
+        ...overrides.query,
+      },
+      mutate: {
+        message: {
+          insert: vi.fn(async (msg: unknown) => inserted.push(msg)),
+        },
+        chat: {
+          update: vi.fn(async (patch: unknown) => chatUpdates.push(patch)),
+        },
+        chatMember: {
+          update: vi.fn(async (patch: unknown) => memberUpdates.push(patch)),
+        },
+        ...overrides.mutate,
+      },
+    },
+  }
+}
+
+type RecordedRelation = {
+  calls: unknown[]
+  where: (field: string, value: unknown) => RecordedRelation
+  whereExists: (relation: string, cb: (q: RecordedRelation) => unknown) => RecordedRelation
+}
+
+function recordPermission(permission: Where) {
+  const makeRelation = (): RecordedRelation => {
+    const calls: unknown[] = []
+    return {
+      calls,
+      where(field: string, value: unknown) {
+        calls.push(['where', field, value])
+        return this
+      },
+      whereExists(relation: string, cb: (q: ReturnType<typeof makeRelation>) => unknown) {
+        const child = makeRelation()
+        cb(child)
+        calls.push(['whereExists', relation, child.calls])
+        return this
+      },
+    }
+  }
+
+  const eb = {
+    cmp(field: string, value: unknown) {
+      return ['cmp', field, value]
+    },
+    and(...args: unknown[]) {
+      return ['and', ...args]
+    },
+    exists(relation: string, cb: (q: ReturnType<typeof makeRelation>) => unknown) {
+      const child = makeRelation()
+      cb(child)
+      return ['exists', relation, child.calls]
+    },
+  }
+
+  const raw = getRawWhere(permission)
+  const auth: AuthData = { id: 'manager-1', role: undefined }
+  return JSON.stringify(raw?.(eb as any, auth))
+}
+
+describe('manager OA query permissions', () => {
+  it('requires OA provider ownership for manager chat queries', () => {
+    const chatPermission = recordPermission(managerOwnedOaChatPermission)
+
+    expect(chatPermission).toContain('"ownerId","manager-1"')
+    expect(chatPermission).not.toContain('"userId","manager-1"')
+  })
+
+  it('requires OA provider ownership for manager message queries', () => {
+    const permission = recordPermission(managerOwnedOaMessagePermission)
+
+    expect(permission).toContain('"ownerId","manager-1"')
+    expect(permission).not.toContain('"userId","manager-1"')
+  })
+})
+
+describe('message.sendAsOA', () => {
+  it('rejects direct message inserts', async () => {
+    const { tx } = makeTx()
+
+    await expect(
+      (messageMutate as any).insert(
+        { authData: { id: 'manager-1' }, can: vi.fn(), tx },
+        {
+          id: 'msg-1',
+          chatId: 'chat-1',
+          senderType: 'oa',
+          oaId: 'oa-1',
+          type: 'text',
+          text: 'hello',
+          createdAt: 123,
+        },
+      ),
+    ).rejects.toThrow('Use a message action')
+  })
+
+  it('rejects direct message updates', async () => {
+    const { tx } = makeTx()
+
+    await expect(
+      (messageMutate as any).update(
+        { authData: { id: 'manager-1' }, can: vi.fn(), tx },
+        { id: 'msg-1', senderType: 'oa', oaId: 'oa-1' },
+      ),
+    ).rejects.toThrow('Use a message action')
+  })
+
+  it('rejects OA messages sent through message.send', async () => {
+    const { tx } = makeTx()
+
+    await expect(
+      (messageMutate as any).send(
+        { authData: { id: 'manager-1' }, tx },
+        {
+          id: 'msg-1',
+          chatId: 'chat-1',
+          senderType: 'oa',
+          oaId: 'oa-1',
+          type: 'text',
+          text: 'hello',
+          createdAt: 123,
+        },
+      ),
+    ).rejects.toThrow('Use sendAsOA for OA messages')
+  })
+
+  it('rejects user messages with oaId sent through message.send', async () => {
+    const { tx } = makeTx()
+
+    await expect(
+      (messageMutate as any).send(
+        { authData: { id: 'user-1' }, tx },
+        {
+          id: 'msg-1',
+          chatId: 'chat-1',
+          senderId: 'user-1',
+          senderType: 'user',
+          oaId: 'oa-1',
+          type: 'text',
+          text: 'hello',
+          createdAt: 123,
+        },
+      ),
+    ).rejects.toThrow('User message cannot include oaId')
+  })
+
+  it('rejects OA stickers sent through message.sendSticker', async () => {
+    const { tx } = makeTx({
+      query: {
+        entitlement: chain([{ id: 'entitlement-1', userId: 'manager-1', packageId: '1' }]),
+      },
+    })
+
+    await expect(
+      (messageMutate as any).sendSticker(
+        { authData: { id: 'manager-1' }, tx },
+        {
+          id: 'sticker-1',
+          chatId: 'chat-1',
+          senderId: 'manager-1',
+          senderType: 'oa',
+          oaId: 'oa-1',
+          type: 'sticker',
+          metadata: JSON.stringify({ packageId: '1', stickerId: 100 }),
+          createdAt: 789,
+        },
+      ),
+    ).rejects.toThrow('Unauthorized')
+  })
+
+  it('rejects user stickers with oaId sent through message.sendSticker', async () => {
+    const { tx } = makeTx({
+      query: {
+        entitlement: chain([{ id: 'entitlement-1', userId: 'user-1', packageId: '1' }]),
+      },
+    })
+
+    await expect(
+      (messageMutate as any).sendSticker(
+        { authData: { id: 'user-1' }, tx },
+        {
+          id: 'sticker-1',
+          chatId: 'chat-1',
+          senderId: 'user-1',
+          senderType: 'user',
+          oaId: 'oa-1',
+          type: 'sticker',
+          metadata: JSON.stringify({ packageId: '1', stickerId: 100 }),
+          createdAt: 789,
+        },
+      ),
+    ).rejects.toThrow('User message cannot include oaId')
+  })
+
+  it('rejects user LIFF messages with oaId sent through message.sendLiff', async () => {
+    const { tx } = makeTx()
+
+    await expect(
+      (messageMutate as any).sendLiff(
+        { authData: { id: 'user-1' }, tx },
+        {
+          id: 'liff-1',
+          chatId: 'chat-1',
+          senderType: 'user',
+          oaId: 'oa-1',
+          type: 'text',
+          text: 'hello from liff',
+          createdAt: 789,
+        },
+      ),
+    ).rejects.toThrow('User message cannot include oaId')
+  })
+
+  it('rejects unauthenticated callers', async () => {
+    const { tx } = makeTx()
+
+    await expect(
+      (messageMutate as any).sendAsOA(
+        { authData: undefined, tx },
+        {
+          id: 'msg-1',
+          chatId: 'chat-1',
+          oaId: 'oa-1',
+          text: 'hello',
+          createdAt: 123,
+        },
+      ),
+    ).rejects.toThrow('Unauthorized')
+  })
+
+  it('rejects non-owners', async () => {
+    const { tx } = makeTx()
+
+    await expect(
+      (messageMutate as any).sendAsOA(
+        { authData: { id: 'user-1' }, tx },
+        {
+          id: 'msg-1',
+          chatId: 'chat-1',
+          oaId: 'oa-1',
+          text: 'hello',
+          createdAt: 123,
+        },
+      ),
+    ).rejects.toThrow('Unauthorized')
+  })
+
+  it('rejects blank text', async () => {
+    const { tx } = makeTx()
+
+    await expect(
+      (messageMutate as any).sendAsOA(
+        { authData: { id: 'manager-1' }, tx },
+        {
+          id: 'msg-1',
+          chatId: 'chat-1',
+          oaId: 'oa-1',
+          text: '   ',
+          createdAt: 123,
+        },
+      ),
+    ).rejects.toThrow('Message text is required')
+  })
+
+  it('rejects non-OA chats', async () => {
+    const { tx } = makeTx({
+      query: {
+        chat: chain([]),
+      },
+    })
+
+    await expect(
+      (messageMutate as any).sendAsOA(
+        { authData: { id: 'manager-1' }, tx },
+        {
+          id: 'msg-1',
+          chatId: 'chat-1',
+          oaId: 'oa-1',
+          text: 'hello',
+          createdAt: 123,
+        },
+      ),
+    ).rejects.toThrow('Unauthorized')
+  })
+
+  it('rejects when the OA is not a chat member', async () => {
+    const { tx } = makeTx({
+      query: {
+        chatMember: chain([]),
+      },
+    })
+
+    await expect(
+      (messageMutate as any).sendAsOA(
+        { authData: { id: 'manager-1' }, tx },
+        {
+          id: 'msg-1',
+          chatId: 'chat-1',
+          oaId: 'oa-1',
+          text: 'hello',
+          createdAt: 123,
+        },
+      ),
+    ).rejects.toThrow('Unauthorized')
+  })
+
+  it('inserts an OA text message with trimmed text and updates chat metadata', async () => {
+    const { tx, inserted, chatUpdates } = makeTx()
+
+    await (messageMutate as any).sendAsOA(
+      { authData: { id: 'manager-1' }, tx },
+      {
+        id: 'msg-1',
+        chatId: 'chat-1',
+        oaId: 'oa-1',
+        text: '  hello from oa  ',
+        createdAt: 123,
+      },
+    )
+
+    expect(inserted).toEqual([
+      {
+        id: 'msg-1',
+        chatId: 'chat-1',
+        senderType: 'oa',
+        oaId: 'oa-1',
+        type: 'text',
+        text: 'hello from oa',
+        createdAt: 123,
+      },
+    ])
+    expect(chatUpdates).toEqual([
+      {
+        id: 'chat-1',
+        lastMessageId: 'msg-1',
+        lastMessageAt: 123,
+      },
+    ])
+  })
+})
+
+describe('chatMember.markOARead', () => {
+  it('rejects non-owners', async () => {
+    const { tx } = makeTx({
+      query: {
+        oaProvider: chain([{ id: 'provider-1', ownerId: 'other-manager' }]),
+      },
+    })
+
+    await expect(
+      (chatMemberMutate as any).markOARead(
+        { authData: { id: 'manager-1' }, tx },
+        {
+          chatId: 'chat-1',
+          oaId: 'oa-1',
+          lastReadMessageId: 'msg-1',
+          lastReadAt: 456,
+        },
+      ),
+    ).rejects.toThrow('Unauthorized')
+  })
+
+  it('rejects direct chatMember updates', async () => {
+    const { tx } = makeTx()
+
+    await expect(
+      (chatMemberMutate as any).update(
+        { authData: { id: 'manager-1' }, can: vi.fn(), tx },
+        { id: 'oa-member-1', role: 'owner' },
+      ),
+    ).rejects.toThrow('Use a chatMember action')
+  })
+
+  it('updates only the OA member row', async () => {
+    const { tx, memberUpdates } = makeTx({
+      query: {
+        chatMember: chain([
+          { id: 'oa-member-1', chatId: 'chat-1', oaId: 'oa-1' },
+          { id: 'user-member-1', chatId: 'chat-1', userId: 'user-1' },
+        ]),
+      },
+    })
+
+    await (chatMemberMutate as any).markOARead(
+      { authData: { id: 'manager-1' }, tx },
+      {
+        chatId: 'chat-1',
+        oaId: 'oa-1',
+        lastReadMessageId: 'msg-1',
+        lastReadAt: 456,
+      },
+    )
+
+    expect(memberUpdates).toEqual([
+      {
+        id: 'oa-member-1',
+        lastReadMessageId: 'msg-1',
+        lastReadAt: 456,
+      },
+    ])
+  })
+})
