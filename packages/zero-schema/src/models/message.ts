@@ -139,6 +139,7 @@ export const mutate = mutations(schema, messageReadPermission, {
   },
   sendSticker: async ({ authData, tx }, message: Message) => {
     if (!authData) throw new Error('Unauthorized')
+    if (message.senderType !== 'user') throw new Error('Unauthorized')
     if (message.senderId !== authData.id) throw new Error('Unauthorized')
 
     const meta = JSON.parse(message.metadata ?? '{}') as {

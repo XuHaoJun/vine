@@ -93,6 +93,30 @@ describe('message.sendAsOA', () => {
     ).rejects.toThrow('Use sendAsOA for OA messages')
   })
 
+  it('rejects OA stickers sent through message.sendSticker', async () => {
+    const { tx } = makeTx({
+      query: {
+        entitlement: chain([{ id: 'entitlement-1', userId: 'manager-1', packageId: '1' }]),
+      },
+    })
+
+    await expect(
+      (messageMutate as any).sendSticker(
+        { authData: { id: 'manager-1' }, tx },
+        {
+          id: 'sticker-1',
+          chatId: 'chat-1',
+          senderId: 'manager-1',
+          senderType: 'oa',
+          oaId: 'oa-1',
+          type: 'sticker',
+          metadata: JSON.stringify({ packageId: '1', stickerId: 100 }),
+          createdAt: 789,
+        },
+      ),
+    ).rejects.toThrow('Unauthorized')
+  })
+
   it('rejects unauthenticated callers', async () => {
     const { tx } = makeTx()
 
