@@ -1,4 +1,4 @@
-import { memo, useRef, useEffect, useMemo } from 'react'
+import { memo, useRef, useEffect, useMemo, type MutableRefObject } from 'react'
 import { YStack } from 'tamagui'
 import {
   createLiffIframeSrc,
@@ -17,6 +17,14 @@ type ShareTargetPickerPayload = {
   options: { isMultiple: boolean }
 }
 
+type MiniAppMeta = {
+  id: string
+  name: string
+  iconUrl: string | null
+  description: string | null
+  category: string | null
+}
+
 type LiffBrowserProps = {
   endpointUrl: string
   liffId: string
@@ -30,6 +38,10 @@ type LiffBrowserProps = {
   onMessage?: ((data: unknown) => void) | undefined
   onShareTargetPicker?: ((payload: ShareTargetPickerPayload) => void) | undefined
   height?: number | string
+  miniApp?: MiniAppMeta | undefined
+  forwardPath?: string | undefined
+  onLoad?: (() => void) | undefined
+  onIframeRef?: ((ref: HTMLIFrameElement | null) => void) | undefined
 }
 
 export const LiffBrowser = memo(
@@ -46,14 +58,21 @@ export const LiffBrowser = memo(
     onMessage,
     onShareTargetPicker,
     height = '100%',
+    miniApp,
+    forwardPath,
+    onLoad,
+    onIframeRef,
   }: LiffBrowserProps) => {
     const iframeRef = useRef<HTMLIFrameElement>(null)
     const onCloseRef = useRef(onClose)
     const onMessageRef = useRef(onMessage)
     const onShareTargetPickerRef = useRef(onShareTargetPicker)
+    const onLoadRef = useRef(onLoad)
+    const onIframeRefCb = onIframeRef
     onCloseRef.current = onClose
     onMessageRef.current = onMessage
     onShareTargetPickerRef.current = onShareTargetPicker
+    onLoadRef.current = onLoad
 
     const context = useMemo<LiffRuntimeContext>(
       () => ({
@@ -79,7 +98,20 @@ export const LiffBrowser = memo(
       ],
     )
 
-    const src = createLiffIframeSrc(context)
+    const src = useMemo(() => {
+      const base = createLiffIframeSrc(context)
+      if (forwardPath) {
+        try {
+          const url = new URL(base)
+          // Append forwardPath as liff.state query param so LIFF runtime can restore navigation
+          url.searchParams.set('liff.state', forwardPath)
+          return url.toString()
+        } catch {
+          return base
+        }
+      }
+      return base
+    }, [context, forwardPath])
 
     useEffect(() => {
       const handler = (event: MessageEvent) => {
@@ -96,8 +128,11 @@ export const LiffBrowser = memo(
         if (type === 'liff:bootstrap') {
           const requestId = msg['requestId'] as string
           const bootstrap = createLiffBootstrap(context)
+          const enrichedBootstrap = miniApp
+            ? { ...bootstrap, miniAppId: miniApp.id, miniApp }
+            : bootstrap
           iframeRef.current?.contentWindow?.postMessage(
-            { type: 'liff:bootstrap:done', requestId, bootstrap },
+            { type: 'liff:bootstrap:done', requestId, bootstrap: enrichedBootstrap },
             endpointOrigin,
           )
           return
@@ -167,18 +202,22 @@ export const LiffBrowser = memo(
       }
       window.addEventListener('message', handler)
       return () => window.removeEventListener('message', handler)
-    }, [context, endpointOrigin])
+    }, [context, endpointOrigin, miniApp])
 
     return (
       <YStack flex={1} style={{ height }}>
         <iframe
-          ref={iframeRef}
+          ref={(el) => {
+            ;(iframeRef as MutableRefObject<HTMLIFrameElement | null>).current = el
+            onIframeRefCb?.(el)
+          }}
           id="liff-browser-iframe"
           src={src}
           style={{ width: '100%', height: '100%', border: 'none' }}
           allow="camera; microphone"
           sandbox="allow-scripts allow-same-origin"
           title={`LIFF App ${liffId}`}
+          onLoad={() => onLoadRef.current?.()}
         />
       </YStack>
     )

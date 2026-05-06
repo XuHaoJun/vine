@@ -44,6 +44,7 @@ function createTestDeps(
     deleteLoginChannel: vi.fn(),
     createLiffApp: vi.fn(),
     updateLiffApp: vi.fn(),
+    getLiffAppByDbId: vi.fn(),
     listLiffApps: vi.fn(),
     deleteLiffApp: vi.fn(),
   }
@@ -96,6 +97,13 @@ function createTestDeps(
   const liffRuntimeToken = {
     createAccessToken: vi.fn().mockReturnValue('access-token-123'),
     resolveAccessToken: vi.fn().mockReturnValue({
+      kind: 'access',
+      liffId,
+      userId,
+      scopes: ['profile', 'chat_message.write'],
+      exp: Date.now() + 15 * 60 * 1000,
+    }),
+    resolveAccessTokenAny: vi.fn().mockReturnValue({
       kind: 'access',
       liffId,
       userId,

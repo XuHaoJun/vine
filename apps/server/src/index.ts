@@ -4,9 +4,12 @@ import cors from '@fastify/cors'
 import formbody from '@fastify/formbody'
 import { fastifyConnectPlugin } from '@connectrpc/connect-fastify'
 import Fastify from 'fastify'
+import { eq } from 'drizzle-orm'
 import { getDatabase } from '@vine/db/database'
 import { createDb } from '@vine/db'
 import { ensureSeed } from '@vine/db/seed'
+import { oaAccessToken } from '@vine/db/schema-oa'
+import { loginChannel } from '@vine/db/schema-login'
 
 import { connectRoutes } from './connect/routes'
 import { createPayments, registerPaymentsWebhookRoutes } from './services/payments'
@@ -22,10 +25,15 @@ import { createOAService } from './services/oa'
 import { createOAMessagingService } from './services/oa-messaging'
 import { createOAWebhookDeliveryService } from './services/oa-webhook-delivery'
 import { createLiffService } from './services/liff'
+import { createMiniAppService } from './services/mini-app'
+import { createMiniAppTemplateService } from './services/mini-app-service-message-templates'
+import { createMiniAppServiceMessageService } from './services/mini-app-service-message'
 import { createLiffRuntimeTokenService } from './services/liff-runtime-token'
 import { createStickerMarketServices } from './services/sticker-market'
 import { liffFixturesPublicPlugin } from './plugins/liff-fixtures-public'
 import { liffPublicPlugin } from './plugins/liff-public'
+import { miniAppPublicPlugin } from './plugins/mini-app-public'
+import { miniAppNotifierPlugin } from './plugins/mini-app-notifier'
 import { createFsDriveService } from '@vine/drive'
 
 const app = Fastify({ logger: true })
@@ -64,6 +72,9 @@ const oaMessaging = createOAMessagingService({
 })
 const webhookDelivery = createOAWebhookDeliveryService({ db, oa, logger })
 const liff = createLiffService({ db })
+const miniApp = createMiniAppService({ db })
+const miniAppTemplate = createMiniAppTemplateService({ db })
+const miniAppSvcMsg = createMiniAppServiceMessageService({ db })
 const liffRuntimeToken = createLiffRuntimeTokenService({
   secret:
     process.env['LIFF_RUNTIME_TOKEN_SECRET'] ??
@@ -98,6 +109,9 @@ await app.register(fastifyConnectPlugin, {
     oa,
     webhookDelivery,
     liff,
+    miniApp,
+    miniAppTemplate,
+    miniAppSvcMsg,
     auth,
     drive,
     stickerMarketUser: {
@@ -154,6 +168,43 @@ await oaWebhookPlugin(app, { oa, db, auth, webhookDelivery })
 await oaWebhookEndpointPlugin(app, { oa, db })
 await liffFixturesPublicPlugin(app)
 await liffPublicPlugin(app, { liff, auth, db, liffRuntimeToken })
+await app.register((instance) => miniAppPublicPlugin(instance, { miniApp, liff, auth }))
+await app.register((instance) =>
+  miniAppNotifierPlugin(instance, {
+    miniApp,
+    template: miniAppTemplate,
+    serviceMessage: miniAppSvcMsg,
+    auth: {
+      validateLoginChannelAccessToken: async (token: string) => {
+        const [record] = await db
+          .select()
+          .from(oaAccessToken)
+          .where(eq(oaAccessToken.token, token))
+          .limit(1)
+        if (!record) return null
+        if (record.expiresAt && new Date(record.expiresAt) < new Date()) return null
+        const [channel] = await db
+          .select({ id: loginChannel.id })
+          .from(loginChannel)
+          .where(eq(loginChannel.oaId, record.oaId))
+          .limit(1)
+        if (!channel) return null
+        return { loginChannelId: channel.id }
+      },
+      resolveLiffAccessToken: async (token: string) => {
+        const ctx = liffRuntimeToken.resolveAccessTokenAny(token)
+        if (!ctx) return null
+        const app = await liff.getLiffApp(ctx.liffId)
+        if (!app) return null
+        return {
+          userId: ctx.userId,
+          liffAppId: app.id,
+          loginChannelId: app.loginChannelId,
+        }
+      },
+    },
+  }),
+)
 
 app.get('/healthz', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))
 

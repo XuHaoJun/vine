@@ -8,7 +8,8 @@
     "./greeter": "./gen/greeter/v1/greeter_pb.ts",
     "./liff": "./gen/liff/v1/liff_pb.ts",
     "./oa": "./gen/oa/v1/oa_pb.ts",
-    "./stickerMarket": "./gen/stickerMarket/v1/stickerMarket_pb.ts"
+    "./stickerMarket": "./gen/stickerMarket/v1/stickerMarket_pb.ts",
+    "./mini-app": "./gen/mini-app/v1/mini-app_pb.ts"
   },
   "scripts": {
     "build": "buf generate && oxfmt gen",

@@ -1,6 +1,8 @@
-import { useActiveParams } from 'one'
+import { useActiveParams, createRoute } from 'one'
 
 import { LiffPermanentRouteEntry } from '~/features/liff/LiffPermanentRouteEntry'
+
+const route = createRoute<'/(app)/liff/[liffId]/[permanentPath]'>()
 
 // Keep this explicit one-segment permanent-link route next to the catch-all
 // `[...liffPath]` route for now. One generates a `/liff/*` route for the

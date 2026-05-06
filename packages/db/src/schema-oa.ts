@@ -31,6 +31,7 @@ export const officialAccount = pgTable(
     imageUrl: text('imageUrl'),
     channelSecret: text('channelSecret').notNull(),
     status: text('status').notNull().default('active'),
+    kind: text('kind').notNull().default('user').$type<'user' | 'platform_system'>(),
     email: text('email'),
     country: text('country'),
     company: text('company'),

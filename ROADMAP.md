@@ -48,10 +48,11 @@ The next major theme should be:
 
 **OA Manager parity**
 
-Milestones 1 through 4 are now complete. OA Manager parity is the next
-highest-leverage step: it turns the existing Messaging API, webhook, and rich
-menu foundations into a recognizable LINE-like operator surface that OA managers
-can use to run their accounts without relying on console-only workflows.
+Milestones 1 through 5 are now complete. OA Manager parity is the next
+highest-leverage step: it turns the existing Messaging API, webhook, rich
+menu, and Mini App foundations into a recognizable LINE-like operator surface
+that OA managers can use to run their accounts without relying on console-only
+workflows.
 
 ## Milestones
 
@@ -217,6 +218,38 @@ Out of scope:
 - External LINE LIFF compatibility guarantees.
 - Public app review marketplace.
 - Payments inside mini apps.
+
+### Milestone 5: Mini App Platform
+
+Status: complete.
+
+Goal: turn Vine LIFF into a publishable Mini App platform with Service Messages
+and LINE-like app lifecycle management.
+
+Completed:
+
+- Mini App data model with draft and published states, versioning, and
+  provider-owned lifecycle.
+- Service Message templates with Flex Message bodies and parameterized
+  substitution (`{{param}}`).
+- `POST /api/oa/v2/mini-app/notifier/send` public endpoint with Login Channel
+  Bearer auth, LIFF access-token validation, template resolution, and Flex
+  validation.
+- Rate limiting enforced at 5 messages per 24 hours per (miniAppId, userId)
+  with `Retry-After` header on `429` responses.
+- Single per-user "Mini App 通知" chat for all Service Messages, replacing
+  LINE's region-specific notice chats.
+- Integration tests for auth rejection and endpoint wiring.
+- Public API documentation for Service Messages endpoint, request/response
+  shapes, and differences from official LINE.
+
+Differences from official LINE:
+
+- No service-notification-token chain; each send is one-shot.
+- Rate limit is 5 messages per 24 hours per (miniAppId, userId) instead of
+  LINE's stateful `remainingCount` / 1-year session model.
+- Any published Mini App may send Service Messages; there is no
+  verified-vs-unverified split.
 
 ## Later Bets
 

@@ -1,4 +1,12 @@
-import { boolean, index, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import {
+  boolean,
+  index,
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core'
 import { oaProvider, officialAccount } from './schema-oa'
 
 export const loginChannel = pgTable(
@@ -41,4 +49,83 @@ export const oaLiffApp = pgTable(
     index('oaLiffApp_loginChannelId_idx').on(table.loginChannelId),
     index('oaLiffApp_liffId_idx').on(table.liffId),
   ],
+)
+
+export const miniApp = pgTable(
+  'miniApp',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    providerId: uuid('providerId')
+      .notNull()
+      .references(() => oaProvider.id, { onDelete: 'cascade' }),
+    liffAppId: uuid('liffAppId')
+      .notNull()
+      .unique()
+      .references(() => oaLiffApp.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    iconUrl: text('iconUrl'),
+    description: text('description'),
+    category: text('category'),
+    isPublished: boolean('isPublished').notNull().default(false),
+    publishedAt: timestamp('publishedAt', { mode: 'string' }),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('miniApp_providerId_idx').on(table.providerId),
+    index('miniApp_liffAppId_idx').on(table.liffAppId),
+  ],
+)
+
+export const miniAppOaLink = pgTable(
+  'miniAppOaLink',
+  {
+    miniAppId: uuid('miniAppId')
+      .notNull()
+      .references(() => miniApp.id, { onDelete: 'cascade' }),
+    oaId: uuid('oaId')
+      .notNull()
+      .references(() => officialAccount.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.miniAppId, table.oaId] }),
+    index('miniAppOaLink_oaId_idx').on(table.oaId),
+  ],
+)
+
+export const miniAppRecent = pgTable(
+  'miniAppRecent',
+  {
+    userId: text('userId').notNull(),
+    miniAppId: uuid('miniAppId')
+      .notNull()
+      .references(() => miniApp.id, { onDelete: 'cascade' }),
+    lastOpenedAt: timestamp('lastOpenedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.miniAppId] }),
+    index('miniAppRecent_userId_lastOpened_idx').on(table.userId, table.lastOpenedAt),
+  ],
+)
+
+import { jsonb } from 'drizzle-orm/pg-core'
+
+export const miniAppServiceMessageTemplate = pgTable(
+  'miniAppServiceMessageTemplate',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    miniAppId: uuid('miniAppId')
+      .notNull()
+      .references(() => miniApp.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    kind: text('kind').notNull(),
+    languageTag: text('languageTag').notNull(),
+    flexJson: jsonb('flexJson').notNull(),
+    paramsSchema: jsonb('paramsSchema').notNull(),
+    useCase: text('useCase').notNull().default(''),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [index('miniAppSMT_miniAppId_idx').on(table.miniAppId)],
 )

@@ -1,0 +1,153 @@
+syntax = "proto3";
+
+package miniapp.v1;
+
+message MiniApp {
+  string id = 1;
+  string provider_id = 2;
+  string liff_app_id = 3;
+  string name = 4;
+  optional string icon_url = 5;
+  optional string description = 6;
+  optional string category = 7;
+  bool is_published = 8;
+  optional string published_at = 9;
+  string created_at = 10;
+  string updated_at = 11;
+  repeated string linked_oa_ids = 12;
+  optional string liff_id = 13;
+}
+
+message ListMiniAppsRequest { string provider_id = 1; }
+message ListMiniAppsResponse { repeated MiniApp mini_apps = 1; }
+
+message GetMiniAppRequest { string id = 1; }
+message GetMiniAppResponse { MiniApp mini_app = 1; }
+
+message CreateMiniAppRequest {
+  string provider_id = 1;
+  string liff_app_id = 2;
+  string name = 3;
+  optional string icon_url = 4;
+  optional string description = 5;
+  optional string category = 6;
+}
+message CreateMiniAppResponse { MiniApp mini_app = 1; }
+
+message UpdateMiniAppRequest {
+  string id = 1;
+  optional string name = 2;
+  optional string icon_url = 3;
+  optional string description = 4;
+  optional string category = 5;
+}
+message UpdateMiniAppResponse { MiniApp mini_app = 1; }
+
+message PublishMiniAppRequest { string id = 1; }
+message PublishMiniAppResponse { MiniApp mini_app = 1; }
+
+message UnpublishMiniAppRequest { string id = 1; }
+message UnpublishMiniAppResponse { MiniApp mini_app = 1; }
+
+message DeleteMiniAppRequest { string id = 1; }
+message DeleteMiniAppResponse {}
+
+message LinkOaRequest { string mini_app_id = 1; string oa_id = 2; }
+message LinkOaResponse {}
+
+message UnlinkOaRequest { string mini_app_id = 1; string oa_id = 2; }
+message UnlinkOaResponse {}
+
+message ListPublishedRequest {
+  optional string category = 1;
+  optional string search_query = 2;
+  optional uint32 limit = 3;
+  optional uint32 offset = 4;
+}
+message ListPublishedResponse {
+  repeated MiniApp mini_apps = 1;
+  uint32 total = 2;
+}
+
+message ListMyGalleryRequest {}
+message ListMyGalleryResponse {
+  repeated MiniApp recents = 1;
+  repeated MiniApp from_oas = 2;
+}
+
+message ListLinkedToOaRequest { string oa_id = 1; }
+message ListLinkedToOaResponse { repeated MiniApp mini_apps = 1; }
+
+message ParamSpec {
+  string name = 1;
+  bool required = 2;
+  string kind = 3; // "text" | "uri"
+  optional uint32 hard = 4;
+}
+message ServiceTemplate {
+  string id = 1;
+  string mini_app_id = 2;
+  string name = 3;
+  string kind = 4;
+  string language_tag = 5;
+  string flex_json = 6;
+  repeated ParamSpec params_schema = 7;
+  string use_case = 8;
+  string created_at = 9;
+  string updated_at = 10;
+}
+
+message ListServiceTemplatesRequest { string mini_app_id = 1; }
+message ListServiceTemplatesResponse { repeated ServiceTemplate templates = 1; }
+
+message CreateServiceTemplateRequest {
+  string mini_app_id = 1;
+  string kind = 2;
+  string language_tag = 3;
+  string name = 4;
+  string flex_json = 5;
+  repeated ParamSpec params_schema = 6;
+  string use_case = 7;
+}
+message CreateServiceTemplateResponse { ServiceTemplate template = 1; }
+
+message UpdateServiceTemplateRequest {
+  string id = 1;
+  optional string flex_json = 2;
+  repeated ParamSpec params_schema = 3;
+  optional string use_case = 4;
+  optional string language_tag = 5;
+}
+message UpdateServiceTemplateResponse { ServiceTemplate template = 1; }
+
+message DeleteServiceTemplateRequest { string id = 1; }
+message DeleteServiceTemplateResponse {}
+
+message SendTestServiceMessageRequest {
+  string template_id = 1;
+  map<string, string> params = 2;
+}
+message SendTestServiceMessageResponse {
+  string message_id = 1;
+  string chat_id = 2;
+}
+
+service MiniAppService {
+  rpc ListMiniApps(ListMiniAppsRequest) returns (ListMiniAppsResponse);
+  rpc GetMiniApp(GetMiniAppRequest) returns (GetMiniAppResponse);
+  rpc CreateMiniApp(CreateMiniAppRequest) returns (CreateMiniAppResponse);
+  rpc UpdateMiniApp(UpdateMiniAppRequest) returns (UpdateMiniAppResponse);
+  rpc PublishMiniApp(PublishMiniAppRequest) returns (PublishMiniAppResponse);
+  rpc UnpublishMiniApp(UnpublishMiniAppRequest) returns (UnpublishMiniAppResponse);
+  rpc DeleteMiniApp(DeleteMiniAppRequest) returns (DeleteMiniAppResponse);
+  rpc LinkOa(LinkOaRequest) returns (LinkOaResponse);
+  rpc UnlinkOa(UnlinkOaRequest) returns (UnlinkOaResponse);
+  rpc ListPublished(ListPublishedRequest) returns (ListPublishedResponse);
+  rpc ListMyGallery(ListMyGalleryRequest) returns (ListMyGalleryResponse);
+  rpc ListLinkedToOa(ListLinkedToOaRequest) returns (ListLinkedToOaResponse);
+  rpc ListServiceTemplates(ListServiceTemplatesRequest) returns (ListServiceTemplatesResponse);
+  rpc CreateServiceTemplate(CreateServiceTemplateRequest) returns (CreateServiceTemplateResponse);
+  rpc UpdateServiceTemplate(UpdateServiceTemplateRequest) returns (UpdateServiceTemplateResponse);
+  rpc DeleteServiceTemplate(DeleteServiceTemplateRequest) returns (DeleteServiceTemplateResponse);
+  rpc SendTestServiceMessage(SendTestServiceMessageRequest) returns (SendTestServiceMessageResponse);
+}

@@ -8,6 +8,7 @@ import { ChatCircleIcon } from '~/interface/icons/phosphor/ChatCircleIcon'
 import { showToast } from '~/interface/toast/Toast'
 import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
 import { oaClient } from '~/features/oa/client'
+import { miniAppClient } from '~/features/mini-app/client'
 import { useAuth } from '~/features/auth/client/authClient'
 import { useChats } from '~/features/chat/useChats'
 import { zero } from '~/zero/client'
@@ -75,6 +76,12 @@ export function OADetailContent({
   })
 
   const isFriend = isFriendData?.isFriend ?? false
+
+  const linkedApps = useTanQuery({
+    queryKey: ['miniApp', 'linkedToOa', id],
+    queryFn: () => miniAppClient.listLinkedToOa({ oaId: id }),
+    enabled: !!id,
+  })
 
   const handleStartChat = () => {
     if (!userId || !id) return
@@ -373,6 +380,43 @@ export function OADetailContent({
                 </XStack>
               </YStack>
             </YStack>
+
+            {linkedApps.data?.miniApps.length ? (
+              <YStack gap="$2" mb="$4">
+                <Text
+                  fontSize={12}
+                  fontWeight="600"
+                  color="$color10"
+                  textTransform="uppercase"
+                >
+                  Mini Apps
+                </Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <XStack gap="$2">
+                    {linkedApps.data.miniApps.map((m) => (
+                      <YStack
+                        key={m.id}
+                        width={80}
+                        items="center"
+                        cursor="pointer"
+                        onPress={() => router.push(`/m/${m.id}` as any)}
+                      >
+                        <YStack width={56} height={56} rounded="$3" overflow="hidden" bg="$color3">
+                          {m.iconUrl ? (
+                            <img src={m.iconUrl} width={56} height={56} alt="" />
+                          ) : (
+                            <Text fontSize={24}>📱</Text>
+                          )}
+                        </YStack>
+                        <Text fontSize={12} numberOfLines={1} color="$color11">
+                          {m.name}
+                        </Text>
+                      </YStack>
+                    ))}
+                  </XStack>
+                </ScrollView>
+              </YStack>
+            ) : null}
 
             <YStack items="center" py="$4">
               <Text fontSize={14} color="$color10">

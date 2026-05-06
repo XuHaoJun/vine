@@ -1,8 +1,11 @@
 import { memo, useMemo } from 'react'
-import { SizableText, YStack } from 'tamagui'
+import { SizableText, XStack, YStack, Text } from 'tamagui'
 import { LfBubble, LfCarousel } from '@vine/line-flex'
 import type { LFexBubble, LFexCarousel } from '@vine/line-flex'
 import type { ImagemapAction, ImagemapVideo } from '@vine/imagemap-schema'
+import { router } from 'one'
+import { useTanQuery } from '~/query'
+import { miniAppClient } from '~/features/mini-app/client'
 import { AudioBubble } from './AudioBubble'
 import { ImageBubble } from './ImageBubble'
 import { ImagemapBubble } from './ImagemapBubble'
@@ -28,6 +31,7 @@ type MessageBubbleFactoryProps = {
   messageId?: string
   otherMemberOaId: string | null
   sendMessage: (text: string) => void
+  miniAppId?: string | null
 }
 
 export const MessageBubbleFactory = memo(
@@ -40,6 +44,7 @@ export const MessageBubbleFactory = memo(
     messageId,
     otherMemberOaId,
     sendMessage,
+    miniAppId,
   }: MessageBubbleFactoryProps) => {
     if (type === 'text') {
       return <TextBubble text={text ?? ''} isMine={isMine} />
@@ -118,9 +123,47 @@ export const MessageBubbleFactory = memo(
       )
     }
 
-    return <UnsupportedBubble type={type} />
+    return (
+      <>
+        {miniAppId && <ServiceMessageFooter miniAppId={miniAppId} />}
+        <UnsupportedBubble type={type} />
+      </>
+    )
   },
 )
+
+function ServiceMessageFooter({ miniAppId }: { miniAppId: string }) {
+  const meta = useTanQuery({
+    queryKey: ['miniApp', 'publicMeta', miniAppId],
+    queryFn: async () => {
+      const r = await fetch(`/api/liff/v1/mini-app/${miniAppId}`)
+      if (!r.ok) return null
+      return (await r.json()) as { id: string; name: string; iconUrl: string | null }
+    },
+  })
+  if (!meta.data) return null
+  return (
+    <XStack
+      items="center"
+      gap="$2"
+      p="$2"
+      bg="$color2"
+      rounded="$2"
+      mt="$1"
+      cursor="pointer"
+      onPress={() => router.push(`/m/${miniAppId}` as any)}
+    >
+      {meta.data.iconUrl && (
+        <YStack width={20} height={20} rounded="$1" overflow="hidden">
+          <img src={meta.data.iconUrl} width={20} height={20} alt="" />
+        </YStack>
+      )}
+      <Text fontSize={12} color="$color11" numberOfLines={1}>
+        {meta.data.name}
+      </Text>
+    </XStack>
+  )
+}
 
 type FlexBubbleContentProps = {
   metadata: string

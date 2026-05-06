@@ -3,9 +3,13 @@ import { ConnectRouter } from '@connectrpc/connect'
 import { greeterHandler } from './greeter'
 import { oaHandler } from './oa'
 import { liffHandler } from './liff'
+import { miniAppHandler } from './mini-app'
 import type { createOAService } from '../services/oa'
 import type { createOAWebhookDeliveryService } from '../services/oa-webhook-delivery'
 import type { createLiffService } from '../services/liff'
+import type { createMiniAppService } from '../services/mini-app'
+import type { createMiniAppTemplateService } from '../services/mini-app-service-message-templates'
+import type { createMiniAppServiceMessageService } from '../services/mini-app-service-message'
 import type { DriveService } from '@vine/drive'
 import {
   StickerMarketUserService,
@@ -27,6 +31,9 @@ type ConnectDeps = {
   oa: ReturnType<typeof createOAService>
   webhookDelivery: ReturnType<typeof createOAWebhookDeliveryService>
   liff: ReturnType<typeof createLiffService>
+  miniApp: ReturnType<typeof createMiniAppService>
+  miniAppTemplate: ReturnType<typeof createMiniAppTemplateService>
+  miniAppSvcMsg: ReturnType<typeof createMiniAppServiceMessageService>
   auth: AuthServer
   drive: DriveService
   stickerMarketUser: StickerMarketUserHandlerDeps
@@ -40,6 +47,14 @@ export function connectRoutes(deps: ConnectDeps) {
     greeterHandler(router)
     oaHandler(deps)(router)
     liffHandler(deps)(router)
+    miniAppHandler({
+      miniApp: deps.miniApp,
+      template: deps.miniAppTemplate,
+      serviceMessage: deps.miniAppSvcMsg,
+      oa: deps.oa,
+      liff: deps.liff,
+      auth: deps.auth,
+    })(router)
     router.service(
       StickerMarketUserService,
       withAuthService(

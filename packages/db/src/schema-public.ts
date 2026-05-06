@@ -12,6 +12,7 @@ import {
 } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
 import { officialAccount } from './schema-oa'
+import { miniApp } from './schema-login'
 
 export const userPublic = pgTable(
   'userPublic',
@@ -136,10 +137,12 @@ export const message = pgTable(
     replyToMessageId: text('replyToMessageId'),
     createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
     oaId: uuid('oaId').references(() => officialAccount.id),
+    miniAppId: uuid('miniAppId').references(() => miniApp.id, { onDelete: 'set null' }),
   },
   (table) => [
     index('message_chatId_createdAt_idx').on(table.chatId, table.createdAt),
     index('message_oaId_idx').on(table.oaId),
+    index('message_miniAppId_idx').on(table.miniAppId),
     check(
       'message_sender_user_check',
       sql`(${table.senderType} = 'user' AND ${table.senderId} IS NOT NULL) OR (${table.senderType} = 'oa' AND ${table.oaId} IS NOT NULL)`,

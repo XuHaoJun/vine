@@ -17,6 +17,7 @@ export const schema = table('message')
     replyToMessageId: string().optional(),
     createdAt: number(),
     oaId: string().optional(),
+    miniAppId: string().optional(),
   })
   .primaryKey('id')
 

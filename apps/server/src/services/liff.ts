@@ -156,6 +156,11 @@ export function createLiffService(deps: LiffDeps) {
     return app ?? null
   }
 
+  async function getLiffAppByDbId(id: string) {
+    const [app] = await db.select().from(oaLiffApp).where(eq(oaLiffApp.id, id)).limit(1)
+    return app ?? null
+  }
+
   async function listLiffApps(loginChannelId: string) {
     return db.select().from(oaLiffApp).where(eq(oaLiffApp.loginChannelId, loginChannelId))
   }
@@ -173,6 +178,7 @@ export function createLiffService(deps: LiffDeps) {
     createLiffApp,
     updateLiffApp,
     getLiffApp,
+    getLiffAppByDbId,
     listLiffApps,
     deleteLiffApp,
     getLinkedOA,
