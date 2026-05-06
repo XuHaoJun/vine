@@ -27,9 +27,12 @@ export const chatReadPermission = serverWhere('chat', (eb, auth) => {
   const userId = auth?.id || ''
   return eb.or(
     eb.exists('members', (q) => q.where('userId', userId)),
-    eb.exists('members', (q) =>
-      q.whereExists('oa', (oaQ) =>
-        oaQ.whereExists('provider', (providerQ) => providerQ.where('ownerId', userId)),
+    eb.and(
+      eb.cmp('type', 'oa'),
+      eb.exists('members', (q) =>
+        q.whereExists('oa', (oaQ) =>
+          oaQ.whereExists('provider', (providerQ) => providerQ.where('ownerId', userId)),
+        ),
       ),
     ),
   )

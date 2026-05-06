@@ -57,15 +57,22 @@ async function assertOaChat(
   if (members.length === 0) throw new Error('Unauthorized')
 }
 
+function assertUserMessagePayload(message: Message) {
+  if (message.senderType !== 'user') throw new Error('Unauthorized')
+  if (message.oaId) throw new Error('User message cannot include oaId')
+}
+
 // A user can read messages if they are a member of the chat or manage the OA in it
 export const messageReadPermission = serverWhere('message', (eb, auth) => {
   const userId = auth?.id || ''
   return eb.or(
     eb.exists('members', (q) => q.where('userId', userId)),
     eb.exists('members', (q) =>
-      q.whereExists('oa', (oaQ) =>
-        oaQ.whereExists('provider', (providerQ) => providerQ.where('ownerId', userId)),
-      ),
+      q
+        .whereExists('chat', (chatQ) => chatQ.where('type', 'oa'))
+        .whereExists('oa', (oaQ) =>
+          oaQ.whereExists('provider', (providerQ) => providerQ.where('ownerId', userId)),
+        ),
     ),
   )
 })
@@ -85,12 +92,14 @@ export const mutate = mutations(schema, messageReadPermission, {
   send: async ({ authData, tx }, message: Message) => {
     if (!authData) throw new Error('Unauthorized')
 
+    if (message.senderType === 'oa') {
+      throw new Error('Use sendAsOA for OA messages')
+    }
+    assertUserMessagePayload(message)
+
     // Validate sender based on senderType
     if (message.senderType === 'user' && message.senderId !== authData.id) {
       throw new Error('Unauthorized')
-    }
-    if (message.senderType === 'oa') {
-      throw new Error('Use sendAsOA for OA messages')
     }
 
     // Insert the message
@@ -139,7 +148,7 @@ export const mutate = mutations(schema, messageReadPermission, {
   },
   sendSticker: async ({ authData, tx }, message: Message) => {
     if (!authData) throw new Error('Unauthorized')
-    if (message.senderType !== 'user') throw new Error('Unauthorized')
+    assertUserMessagePayload(message)
     if (message.senderId !== authData.id) throw new Error('Unauthorized')
 
     const meta = JSON.parse(message.metadata ?? '{}') as {
@@ -168,7 +177,7 @@ export const mutate = mutations(schema, messageReadPermission, {
   },
   sendLiff: async ({ authData, tx }, message: Message) => {
     if (!authData) throw new Error('Unauthorized')
-    if (message.senderType !== 'user') throw new Error('Unauthorized')
+    assertUserMessagePayload(message)
     const liffMessage = { ...message, senderId: authData.id }
 
     const query = tx.query as Record<string, any> | undefined

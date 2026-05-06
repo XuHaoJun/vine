@@ -93,6 +93,26 @@ describe('message.sendAsOA', () => {
     ).rejects.toThrow('Use sendAsOA for OA messages')
   })
 
+  it('rejects user messages with oaId sent through message.send', async () => {
+    const { tx } = makeTx()
+
+    await expect(
+      (messageMutate as any).send(
+        { authData: { id: 'user-1' }, tx },
+        {
+          id: 'msg-1',
+          chatId: 'chat-1',
+          senderId: 'user-1',
+          senderType: 'user',
+          oaId: 'oa-1',
+          type: 'text',
+          text: 'hello',
+          createdAt: 123,
+        },
+      ),
+    ).rejects.toThrow('User message cannot include oaId')
+  })
+
   it('rejects OA stickers sent through message.sendSticker', async () => {
     const { tx } = makeTx({
       query: {
@@ -115,6 +135,49 @@ describe('message.sendAsOA', () => {
         },
       ),
     ).rejects.toThrow('Unauthorized')
+  })
+
+  it('rejects user stickers with oaId sent through message.sendSticker', async () => {
+    const { tx } = makeTx({
+      query: {
+        entitlement: chain([{ id: 'entitlement-1', userId: 'user-1', packageId: '1' }]),
+      },
+    })
+
+    await expect(
+      (messageMutate as any).sendSticker(
+        { authData: { id: 'user-1' }, tx },
+        {
+          id: 'sticker-1',
+          chatId: 'chat-1',
+          senderId: 'user-1',
+          senderType: 'user',
+          oaId: 'oa-1',
+          type: 'sticker',
+          metadata: JSON.stringify({ packageId: '1', stickerId: 100 }),
+          createdAt: 789,
+        },
+      ),
+    ).rejects.toThrow('User message cannot include oaId')
+  })
+
+  it('rejects user LIFF messages with oaId sent through message.sendLiff', async () => {
+    const { tx } = makeTx()
+
+    await expect(
+      (messageMutate as any).sendLiff(
+        { authData: { id: 'user-1' }, tx },
+        {
+          id: 'liff-1',
+          chatId: 'chat-1',
+          senderType: 'user',
+          oaId: 'oa-1',
+          type: 'text',
+          text: 'hello from liff',
+          createdAt: 789,
+        },
+      ),
+    ).rejects.toThrow('User message cannot include oaId')
   })
 
   it('rejects unauthenticated callers', async () => {
