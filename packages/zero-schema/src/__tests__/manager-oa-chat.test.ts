@@ -1,7 +1,12 @@
 import { describe, expect, it, vi } from 'vitest'
+import { getRawWhere } from 'on-zero'
+import type { Where } from 'on-zero'
 
 import { mutate as chatMemberMutate } from '../models/chatMember'
 import { mutate as messageMutate } from '../models/message'
+import { managerOwnedOaChatPermission } from '../queries/chat'
+import { managerOwnedOaMessagePermission } from '../queries/message'
+import type { AuthData } from '../types'
 
 function chain(rows: unknown[]) {
   return {
@@ -42,6 +47,65 @@ function makeTx(overrides: Record<string, any> = {}) {
     },
   }
 }
+
+type RecordedRelation = {
+  calls: unknown[]
+  where: (field: string, value: unknown) => RecordedRelation
+  whereExists: (relation: string, cb: (q: RecordedRelation) => unknown) => RecordedRelation
+}
+
+function recordPermission(permission: Where) {
+  const makeRelation = (): RecordedRelation => {
+    const calls: unknown[] = []
+    return {
+      calls,
+      where(field: string, value: unknown) {
+        calls.push(['where', field, value])
+        return this
+      },
+      whereExists(relation: string, cb: (q: ReturnType<typeof makeRelation>) => unknown) {
+        const child = makeRelation()
+        cb(child)
+        calls.push(['whereExists', relation, child.calls])
+        return this
+      },
+    }
+  }
+
+  const eb = {
+    cmp(field: string, value: unknown) {
+      return ['cmp', field, value]
+    },
+    and(...args: unknown[]) {
+      return ['and', ...args]
+    },
+    exists(relation: string, cb: (q: ReturnType<typeof makeRelation>) => unknown) {
+      const child = makeRelation()
+      cb(child)
+      return ['exists', relation, child.calls]
+    },
+  }
+
+  const raw = getRawWhere(permission)
+  const auth: AuthData = { id: 'manager-1', role: undefined }
+  return JSON.stringify(raw?.(eb as any, auth))
+}
+
+describe('manager OA query permissions', () => {
+  it('requires OA provider ownership for manager chat queries', () => {
+    const chatPermission = recordPermission(managerOwnedOaChatPermission)
+
+    expect(chatPermission).toContain('"ownerId","manager-1"')
+    expect(chatPermission).not.toContain('"userId","manager-1"')
+  })
+
+  it('requires OA provider ownership for manager message queries', () => {
+    const permission = recordPermission(managerOwnedOaMessagePermission)
+
+    expect(permission).toContain('"ownerId","manager-1"')
+    expect(permission).not.toContain('"userId","manager-1"')
+  })
+})
 
 describe('message.sendAsOA', () => {
   it('rejects direct message inserts', async () => {

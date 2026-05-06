@@ -1,6 +1,18 @@
-import { zql } from 'on-zero'
+import { serverWhere, zql } from 'on-zero'
 
 import { chatReadPermission } from '../models/chat'
+
+export const managerOwnedOaChatPermission = serverWhere('chat', (eb, auth) => {
+  const userId = auth?.id || ''
+  return eb.and(
+    eb.cmp('type', 'oa'),
+    eb.exists('members', (q) =>
+      q.whereExists('oa', (oaQ) =>
+        oaQ.whereExists('provider', (providerQ) => providerQ.where('ownerId', userId)),
+      ),
+    ),
+  )
+})
 
 // All chats where the current user is a member, ordered by latest message
 export const chatsByUserId = (props: { userId: string }) => {
@@ -22,7 +34,7 @@ export const chatMembersByChatId = (props: { chatId: string }) => {
 
 export const oaChatsByOfficialAccountId = (props: { oaId: string }) => {
   return zql.chat
-    .where(chatReadPermission)
+    .where(managerOwnedOaChatPermission)
     .where('type', 'oa')
     .whereExists('members', (q) => q.where('oaId', props.oaId))
     .related('members', (q) => q.related('user').related('oa'))
@@ -36,7 +48,7 @@ export const oaChatMembersByChatId = (props: { oaId: string; chatId: string }) =
     .where('chatId', props.chatId)
     .whereExists('chat', (q) =>
       q
-        .where(chatReadPermission)
+        .where(managerOwnedOaChatPermission)
         .where('id', props.chatId)
         .whereExists('members', (mq) => mq.where('oaId', props.oaId)),
     )
