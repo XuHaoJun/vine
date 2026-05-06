@@ -240,6 +240,16 @@ OneJS auto-generates `app/routes.d.ts` with all known routes. This gives you typ
 
 ## Known issues & workarounds (routing)
 These come from One’s integration with React Navigation (`node_modules/one/src/views/Navigator.tsx`, `hooks.tsx`, `RouteInfoContext.tsx`). Behavior may change in future One versions.
+
+### Auto-injected `createRoute` causes agent edit conflicts
+One dev server may **automatically rewrite** route files to inject `createRoute` (and its import) when `typedRoutesGeneration` is set to `'runtime'` or similar modes. This happens in `node_modules/one/src/typed-routes/injectRouteHelpers.ts`.
+
+**Impact:** If the dev server is running while an agent edits the same route file, the file on disk can change underneath the editor, causing conflicts or overwriting the agent’s changes.
+
+**Workaround:**
+- Prefer `'type'` mode for typed routes (generates `routes.d.ts` only, does not mutate source files), or
+- Stop the dev server before performing bulk route edits, or
+- Add `const route = createRoute<'/your/path'>()` manually so the injector skips the file (it checks for existing `const route =` before writing).
 ### 1. `usePathname()` in layouts vs the real URL
 Inside a `_layout.tsx`, `usePathname()` ultimately uses **root navigation state** (`useStoreRouteInfo()`), which can be **incomplete or out of sync** with the address bar during nested navigators’ first paint, refresh, or certain stacks. Leaf pages get more accurate info via `RouteInfoContext`.
 **Workaround (shell / guards):** For anything that must match the **browser URL** on web (tab bar visibility, auth redirects keyed to path), read `window.location.pathname` on web (e.g. a small `useResolvedPathname()` helper: web → `window.location.pathname`, native → `usePathname()`). Do not rely on layout `usePathname()` alone for those decisions.
