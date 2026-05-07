@@ -9,11 +9,9 @@ import type { GenFile, GenMessage, GenService } from '@bufbuild/protobuf/codegen
 /**
  * Describes the file mini-app/v1/mini-app.proto.
  */
-export const file_mini_app_v1_mini_app: GenFile =
-  /*@__PURE__*/
-  fileDesc(
-    'ChptaW5pLWFwcC92MS9taW5pLWFwcC5wcm90bxIKbWluaWFwcC52MSLiAgoHTWluaUFwcBIKCgJpZBgBIAEoCRITCgtwcm92aWRlcl9pZBgCIAEoCRITCgtsaWZmX2FwcF9pZBgDIAEoCRIMCgRuYW1lGAQgASgJEhUKCGljb25fdXJsGAUgASgJSACIAQESGAoLZGVzY3JpcHRpb24YBiABKAlIAYgBARIVCghjYXRlZ29yeRgHIAEoCUgCiAEBEhQKDGlzX3B1Ymxpc2hlZBgIIAEoCBIZCgxwdWJsaXNoZWRfYXQYCSABKAlIA4gBARISCgpjcmVhdGVkX2F0GAogASgJEhIKCnVwZGF0ZWRfYXQYCyABKAkSFQoNbGlua2VkX29hX2lkcxgMIAMoCRIUCgdsaWZmX2lkGA0gASgJSASIAQFCCwoJX2ljb25fdXJsQg4KDF9kZXNjcmlwdGlvbkILCglfY2F0ZWdvcnlCDwoNX3B1Ymxpc2hlZF9hdEIKCghfbGlmZl9pZCIqChNMaXN0TWluaUFwcHNSZXF1ZXN0EhMKC3Byb3ZpZGVyX2lkGAEgASgJIj4KFExpc3RNaW5pQXBwc1Jlc3BvbnNlEiYKCW1pbmlfYXBwcxgBIAMoCzITLm1pbmlhcHAudjEuTWluaUFwcCIfChFHZXRNaW5pQXBwUmVxdWVzdBIKCgJpZBgBIAEoCSI7ChJHZXRNaW5pQXBwUmVzcG9uc2USJQoIbWluaV9hcHAYASABKAsyEy5taW5pYXBwLnYxLk1pbmlBcHAiwAEKFENyZWF0ZU1pbmlBcHBSZXF1ZXN0EhMKC3Byb3ZpZGVyX2lkGAEgASgJEhMKC2xpZmZfYXBwX2lkGAIgASgJEgwKBG5hbWUYAyABKAkSFQoIaWNvbl91cmwYBCABKAlIAIgBARIYCgtkZXNjcmlwdGlvbhgFIAEoCUgBiAEBEhUKCGNhdGVnb3J5GAYgASgJSAKIAQFCCwoJX2ljb25fdXJsQg4KDF9kZXNjcmlwdGlvbkILCglfY2F0ZWdvcnkiPgoVQ3JlYXRlTWluaUFwcFJlc3BvbnNlEiUKCG1pbmlfYXBwGAEgASgLMhMubWluaWFwcC52MS5NaW5pQXBwIrABChRVcGRhdGVNaW5pQXBwUmVxdWVzdBIKCgJpZBgBIAEoCRIRCgRuYW1lGAIgASgJSACIAQESFQoIaWNvbl91cmwYAyABKAlIAYgBARIYCgtkZXNjcmlwdGlvbhgEIAEoCUgCiAEBEhUKCGNhdGVnb3J5GAUgASgJSAOIAQFCBwoFX25hbWVCCwoJX2ljb25fdXJsQg4KDF9kZXNjcmlwdGlvbkILCglfY2F0ZWdvcnkiPgoVVXBkYXRlTWluaUFwcFJlc3BvbnNlEiUKCG1pbmlfYXBwGAEgASgLMhMubWluaWFwcC52MS5NaW5pQXBwIiMKFVB1Ymxpc2hNaW5pQXBwUmVxdWVzdBIKCgJpZBgBIAEoCSI/ChZQdWJsaXNoTWluaUFwcFJlc3BvbnNlEiUKCG1pbmlfYXBwGAEgASgLMhMubWluaWFwcC52MS5NaW5pQXBwIiUKF1VucHVibGlzaE1pbmlBcHBSZXF1ZXN0EgoKAmlkGAEgASgJIkEKGFVucHVibGlzaE1pbmlBcHBSZXNwb25zZRIlCghtaW5pX2FwcBgBIAEoCzITLm1pbmlhcHAudjEuTWluaUFwcCIiChREZWxldGVNaW5pQXBwUmVxdWVzdBIKCgJpZBgBIAEoCSIXChVEZWxldGVNaW5pQXBwUmVzcG9uc2UiMwoNTGlua09hUmVxdWVzdBITCgttaW5pX2FwcF9pZBgBIAEoCRINCgVvYV9pZBgCIAEoCSIQCg5MaW5rT2FSZXNwb25zZSI1Cg9VbmxpbmtPYVJlcXVlc3QSEwoLbWluaV9hcHBfaWQYASABKAkSDQoFb2FfaWQYAiABKAkiEgoQVW5saW5rT2FSZXNwb25zZSKkAQoUTGlzdFB1Ymxpc2hlZFJlcXVlc3QSFQoIY2F0ZWdvcnkYASABKAlIAIgBARIZCgxzZWFyY2hfcXVlcnkYAiABKAlIAYgBARISCgVsaW1pdBgDIAEoDUgCiAEBEhMKBm9mZnNldBgEIAEoDUgDiAEBQgsKCV9jYXRlZ29yeUIPCg1fc2VhcmNoX3F1ZXJ5QggKBl9saW1pdEIJCgdfb2Zmc2V0Ik4KFUxpc3RQdWJsaXNoZWRSZXNwb25zZRImCgltaW5pX2FwcHMYASADKAsyEy5taW5pYXBwLnYxLk1pbmlBcHASDQoFdG90YWwYAiABKA0iFgoUTGlzdE15R2FsbGVyeVJlcXVlc3QiZAoVTGlzdE15R2FsbGVyeVJlc3BvbnNlEiQKB3JlY2VudHMYASADKAsyEy5taW5pYXBwLnYxLk1pbmlBcHASJQoIZnJvbV9vYXMYAiADKAsyEy5taW5pYXBwLnYxLk1pbmlBcHAiJgoVTGlzdExpbmtlZFRvT2FSZXF1ZXN0Eg0KBW9hX2lkGAEgASgJIkAKFkxpc3RMaW5rZWRUb09hUmVzcG9uc2USJgoJbWluaV9hcHBzGAEgAygLMhMubWluaWFwcC52MS5NaW5pQXBwIlUKCVBhcmFtU3BlYxIMCgRuYW1lGAEgASgJEhAKCHJlcXVpcmVkGAIgASgIEgwKBGtpbmQYAyABKAkSEQoEaGFyZBgEIAEoDUgAiAEBQgcKBV9oYXJkIt8BCg9TZXJ2aWNlVGVtcGxhdGUSCgoCaWQYASABKAkSEwoLbWluaV9hcHBfaWQYAiABKAkSDAoEbmFtZRgDIAEoCRIMCgRraW5kGAQgASgJEhQKDGxhbmd1YWdlX3RhZxgFIAEoCRIRCglmbGV4X2pzb24YBiABKAkSLAoNcGFyYW1zX3NjaGVtYRgHIAMoCzIVLm1pbmlhcHAudjEuUGFyYW1TcGVjEhAKCHVzZV9jYXNlGAggASgJEhIKCmNyZWF0ZWRfYXQYCSABKAkSEgoKdXBkYXRlZF9hdBgKIAEoCSIyChtMaXN0U2VydmljZVRlbXBsYXRlc1JlcXVlc3QSEwoLbWluaV9hcHBfaWQYASABKAkiTgocTGlzdFNlcnZpY2VUZW1wbGF0ZXNSZXNwb25zZRIuCgl0ZW1wbGF0ZXMYASADKAsyGy5taW5pYXBwLnYxLlNlcnZpY2VUZW1wbGF0ZSK4AQocQ3JlYXRlU2VydmljZVRlbXBsYXRlUmVxdWVzdBITCgttaW5pX2FwcF9pZBgBIAEoCRIMCgRraW5kGAIgASgJEhQKDGxhbmd1YWdlX3RhZxgDIAEoCRIMCgRuYW1lGAQgASgJEhEKCWZsZXhfanNvbhgFIAEoCRIsCg1wYXJhbXNfc2NoZW1hGAYgAygLMhUubWluaWFwcC52MS5QYXJhbVNwZWMSEAoIdXNlX2Nhc2UYByABKAkiTgodQ3JlYXRlU2VydmljZVRlbXBsYXRlUmVzcG9uc2USLQoIdGVtcGxhdGUYASABKAsyGy5taW5pYXBwLnYxLlNlcnZpY2VUZW1wbGF0ZSLOAQocVXBkYXRlU2VydmljZVRlbXBsYXRlUmVxdWVzdBIKCgJpZBgBIAEoCRIWCglmbGV4X2pzb24YAiABKAlIAIgBARIsCg1wYXJhbXNfc2NoZW1hGAMgAygLMhUubWluaWFwcC52MS5QYXJhbVNwZWMSFQoIdXNlX2Nhc2UYBCABKAlIAYgBARIZCgxsYW5ndWFnZV90YWcYBSABKAlIAogBAUIMCgpfZmxleF9qc29uQgsKCV91c2VfY2FzZUIPCg1fbGFuZ3VhZ2VfdGFnIk4KHVVwZGF0ZVNlcnZpY2VUZW1wbGF0ZVJlc3BvbnNlEi0KCHRlbXBsYXRlGAEgASgLMhsubWluaWFwcC52MS5TZXJ2aWNlVGVtcGxhdGUiKgocRGVsZXRlU2VydmljZVRlbXBsYXRlUmVxdWVzdBIKCgJpZBgBIAEoCSIfCh1EZWxldGVTZXJ2aWNlVGVtcGxhdGVSZXNwb25zZSKqAQodU2VuZFRlc3RTZXJ2aWNlTWVzc2FnZVJlcXVlc3QSEwoLdGVtcGxhdGVfaWQYASABKAkSRQoGcGFyYW1zGAIgAygLMjUubWluaWFwcC52MS5TZW5kVGVzdFNlcnZpY2VNZXNzYWdlUmVxdWVzdC5QYXJhbXNFbnRyeRotCgtQYXJhbXNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIkUKHlNlbmRUZXN0U2VydmljZU1lc3NhZ2VSZXNwb25zZRISCgptZXNzYWdlX2lkGAEgASgJEg8KB2NoYXRfaWQYAiABKAkynQwKDk1pbmlBcHBTZXJ2aWNlElEKDExpc3RNaW5pQXBwcxIfLm1pbmlhcHAudjEuTGlzdE1pbmlBcHBzUmVxdWVzdBogLm1pbmlhcHAudjEuTGlzdE1pbmlBcHBzUmVzcG9uc2USSwoKR2V0TWluaUFwcBIdLm1pbmlhcHAudjEuR2V0TWluaUFwcFJlcXVlc3QaHi5taW5pYXBwLnYxLkdldE1pbmlBcHBSZXNwb25zZRJUCg1DcmVhdGVNaW5pQXBwEiAubWluaWFwcC52MS5DcmVhdGVNaW5pQXBwUmVxdWVzdBohLm1pbmlhcHAudjEuQ3JlYXRlTWluaUFwcFJlc3BvbnNlElQKDVVwZGF0ZU1pbmlBcHASIC5taW5pYXBwLnYxLlVwZGF0ZU1pbmlBcHBSZXF1ZXN0GiEubWluaWFwcC52MS5VcGRhdGVNaW5pQXBwUmVzcG9uc2USVwoOUHVibGlzaE1pbmlBcHASIS5taW5pYXBwLnYxLlB1Ymxpc2hNaW5pQXBwUmVxdWVzdBoiLm1pbmlhcHAudjEuUHVibGlzaE1pbmlBcHBSZXNwb25zZRJdChBVbnB1Ymxpc2hNaW5pQXBwEiMubWluaWFwcC52MS5VbnB1Ymxpc2hNaW5pQXBwUmVxdWVzdBokLm1pbmlhcHAudjEuVW5wdWJsaXNoTWluaUFwcFJlc3BvbnNlElQKDURlbGV0ZU1pbmlBcHASIC5taW5pYXBwLnYxLkRlbGV0ZU1pbmlBcHBSZXF1ZXN0GiEubWluaWFwcC52MS5EZWxldGVNaW5pQXBwUmVzcG9uc2USPwoGTGlua09hEhkubWluaWFwcC52MS5MaW5rT2FSZXF1ZXN0GhoubWluaWFwcC52MS5MaW5rT2FSZXNwb25zZRJFCghVbmxpbmtPYRIbLm1pbmlhcHAudjEuVW5saW5rT2FSZXF1ZXN0GhwubWluaWFwcC52MS5VbmxpbmtPYVJlc3BvbnNlElQKDUxpc3RQdWJsaXNoZWQSIC5taW5pYXBwLnYxLkxpc3RQdWJsaXNoZWRSZXF1ZXN0GiEubWluaWFwcC52MS5MaXN0UHVibGlzaGVkUmVzcG9uc2USVAoNTGlzdE15R2FsbGVyeRIgLm1pbmlhcHAudjEuTGlzdE15R2FsbGVyeVJlcXVlc3QaIS5taW5pYXBwLnYxLkxpc3RNeUdhbGxlcnlSZXNwb25zZRJXCg5MaXN0TGlua2VkVG9PYRIhLm1pbmlhcHAudjEuTGlzdExpbmtlZFRvT2FSZXF1ZXN0GiIubWluaWFwcC52MS5MaXN0TGlua2VkVG9PYVJlc3BvbnNlEmkKFExpc3RTZXJ2aWNlVGVtcGxhdGVzEicubWluaWFwcC52MS5MaXN0U2VydmljZVRlbXBsYXRlc1JlcXVlc3QaKC5taW5pYXBwLnYxLkxpc3RTZXJ2aWNlVGVtcGxhdGVzUmVzcG9uc2USbAoVQ3JlYXRlU2VydmljZVRlbXBsYXRlEigubWluaWFwcC52MS5DcmVhdGVTZXJ2aWNlVGVtcGxhdGVSZXF1ZXN0GikubWluaWFwcC52MS5DcmVhdGVTZXJ2aWNlVGVtcGxhdGVSZXNwb25zZRJsChVVcGRhdGVTZXJ2aWNlVGVtcGxhdGUSKC5taW5pYXBwLnYxLlVwZGF0ZVNlcnZpY2VUZW1wbGF0ZVJlcXVlc3QaKS5taW5pYXBwLnYxLlVwZGF0ZVNlcnZpY2VUZW1wbGF0ZVJlc3BvbnNlEmwKFURlbGV0ZVNlcnZpY2VUZW1wbGF0ZRIoLm1pbmlhcHAudjEuRGVsZXRlU2VydmljZVRlbXBsYXRlUmVxdWVzdBopLm1pbmlhcHAudjEuRGVsZXRlU2VydmljZVRlbXBsYXRlUmVzcG9uc2USbwoWU2VuZFRlc3RTZXJ2aWNlTWVzc2FnZRIpLm1pbmlhcHAudjEuU2VuZFRlc3RTZXJ2aWNlTWVzc2FnZVJlcXVlc3QaKi5taW5pYXBwLnYxLlNlbmRUZXN0U2VydmljZU1lc3NhZ2VSZXNwb25zZWIGcHJvdG8z',
-  )
+export const file_mini_app_v1_mini_app: GenFile /*@__PURE__*/ = fileDesc(
+  'ChptaW5pLWFwcC92MS9taW5pLWFwcC5wcm90bxIKbWluaWFwcC52MSLiAgoHTWluaUFwcBIKCgJpZBgBIAEoCRITCgtwcm92aWRlcl9pZBgCIAEoCRITCgtsaWZmX2FwcF9pZBgDIAEoCRIMCgRuYW1lGAQgASgJEhUKCGljb25fdXJsGAUgASgJSACIAQESGAoLZGVzY3JpcHRpb24YBiABKAlIAYgBARIVCghjYXRlZ29yeRgHIAEoCUgCiAEBEhQKDGlzX3B1Ymxpc2hlZBgIIAEoCBIZCgxwdWJsaXNoZWRfYXQYCSABKAlIA4gBARISCgpjcmVhdGVkX2F0GAogASgJEhIKCnVwZGF0ZWRfYXQYCyABKAkSFQoNbGlua2VkX29hX2lkcxgMIAMoCRIUCgdsaWZmX2lkGA0gASgJSASIAQFCCwoJX2ljb25fdXJsQg4KDF9kZXNjcmlwdGlvbkILCglfY2F0ZWdvcnlCDwoNX3B1Ymxpc2hlZF9hdEIKCghfbGlmZl9pZCIqChNMaXN0TWluaUFwcHNSZXF1ZXN0EhMKC3Byb3ZpZGVyX2lkGAEgASgJIj4KFExpc3RNaW5pQXBwc1Jlc3BvbnNlEiYKCW1pbmlfYXBwcxgBIAMoCzITLm1pbmlhcHAudjEuTWluaUFwcCIfChFHZXRNaW5pQXBwUmVxdWVzdBIKCgJpZBgBIAEoCSI7ChJHZXRNaW5pQXBwUmVzcG9uc2USJQoIbWluaV9hcHAYASABKAsyEy5taW5pYXBwLnYxLk1pbmlBcHAiwAEKFENyZWF0ZU1pbmlBcHBSZXF1ZXN0EhMKC3Byb3ZpZGVyX2lkGAEgASgJEhMKC2xpZmZfYXBwX2lkGAIgASgJEgwKBG5hbWUYAyABKAkSFQoIaWNvbl91cmwYBCABKAlIAIgBARIYCgtkZXNjcmlwdGlvbhgFIAEoCUgBiAEBEhUKCGNhdGVnb3J5GAYgASgJSAKIAQFCCwoJX2ljb25fdXJsQg4KDF9kZXNjcmlwdGlvbkILCglfY2F0ZWdvcnkiPgoVQ3JlYXRlTWluaUFwcFJlc3BvbnNlEiUKCG1pbmlfYXBwGAEgASgLMhMubWluaWFwcC52MS5NaW5pQXBwIrABChRVcGRhdGVNaW5pQXBwUmVxdWVzdBIKCgJpZBgBIAEoCRIRCgRuYW1lGAIgASgJSACIAQESFQoIaWNvbl91cmwYAyABKAlIAYgBARIYCgtkZXNjcmlwdGlvbhgEIAEoCUgCiAEBEhUKCGNhdGVnb3J5GAUgASgJSAOIAQFCBwoFX25hbWVCCwoJX2ljb25fdXJsQg4KDF9kZXNjcmlwdGlvbkILCglfY2F0ZWdvcnkiPgoVVXBkYXRlTWluaUFwcFJlc3BvbnNlEiUKCG1pbmlfYXBwGAEgASgLMhMubWluaWFwcC52MS5NaW5pQXBwIiMKFVB1Ymxpc2hNaW5pQXBwUmVxdWVzdBIKCgJpZBgBIAEoCSI/ChZQdWJsaXNoTWluaUFwcFJlc3BvbnNlEiUKCG1pbmlfYXBwGAEgASgLMhMubWluaWFwcC52MS5NaW5pQXBwIiUKF1VucHVibGlzaE1pbmlBcHBSZXF1ZXN0EgoKAmlkGAEgASgJIkEKGFVucHVibGlzaE1pbmlBcHBSZXNwb25zZRIlCghtaW5pX2FwcBgBIAEoCzITLm1pbmlhcHAudjEuTWluaUFwcCIiChREZWxldGVNaW5pQXBwUmVxdWVzdBIKCgJpZBgBIAEoCSIXChVEZWxldGVNaW5pQXBwUmVzcG9uc2UiMwoNTGlua09hUmVxdWVzdBITCgttaW5pX2FwcF9pZBgBIAEoCRINCgVvYV9pZBgCIAEoCSIQCg5MaW5rT2FSZXNwb25zZSI1Cg9VbmxpbmtPYVJlcXVlc3QSEwoLbWluaV9hcHBfaWQYASABKAkSDQoFb2FfaWQYAiABKAkiEgoQVW5saW5rT2FSZXNwb25zZSKkAQoUTGlzdFB1Ymxpc2hlZFJlcXVlc3QSFQoIY2F0ZWdvcnkYASABKAlIAIgBARIZCgxzZWFyY2hfcXVlcnkYAiABKAlIAYgBARISCgVsaW1pdBgDIAEoDUgCiAEBEhMKBm9mZnNldBgEIAEoDUgDiAEBQgsKCV9jYXRlZ29yeUIPCg1fc2VhcmNoX3F1ZXJ5QggKBl9saW1pdEIJCgdfb2Zmc2V0Ik4KFUxpc3RQdWJsaXNoZWRSZXNwb25zZRImCgltaW5pX2FwcHMYASADKAsyEy5taW5pYXBwLnYxLk1pbmlBcHASDQoFdG90YWwYAiABKA0iFgoUTGlzdE15R2FsbGVyeVJlcXVlc3QiZAoVTGlzdE15R2FsbGVyeVJlc3BvbnNlEiQKB3JlY2VudHMYASADKAsyEy5taW5pYXBwLnYxLk1pbmlBcHASJQoIZnJvbV9vYXMYAiADKAsyEy5taW5pYXBwLnYxLk1pbmlBcHAiJgoVTGlzdExpbmtlZFRvT2FSZXF1ZXN0Eg0KBW9hX2lkGAEgASgJIkAKFkxpc3RMaW5rZWRUb09hUmVzcG9uc2USJgoJbWluaV9hcHBzGAEgAygLMhMubWluaWFwcC52MS5NaW5pQXBwIlUKCVBhcmFtU3BlYxIMCgRuYW1lGAEgASgJEhAKCHJlcXVpcmVkGAIgASgIEgwKBGtpbmQYAyABKAkSEQoEaGFyZBgEIAEoDUgAiAEBQgcKBV9oYXJkIt8BCg9TZXJ2aWNlVGVtcGxhdGUSCgoCaWQYASABKAkSEwoLbWluaV9hcHBfaWQYAiABKAkSDAoEbmFtZRgDIAEoCRIMCgRraW5kGAQgASgJEhQKDGxhbmd1YWdlX3RhZxgFIAEoCRIRCglmbGV4X2pzb24YBiABKAkSLAoNcGFyYW1zX3NjaGVtYRgHIAMoCzIVLm1pbmlhcHAudjEuUGFyYW1TcGVjEhAKCHVzZV9jYXNlGAggASgJEhIKCmNyZWF0ZWRfYXQYCSABKAkSEgoKdXBkYXRlZF9hdBgKIAEoCSIyChtMaXN0U2VydmljZVRlbXBsYXRlc1JlcXVlc3QSEwoLbWluaV9hcHBfaWQYASABKAkiTgocTGlzdFNlcnZpY2VUZW1wbGF0ZXNSZXNwb25zZRIuCgl0ZW1wbGF0ZXMYASADKAsyGy5taW5pYXBwLnYxLlNlcnZpY2VUZW1wbGF0ZSK4AQocQ3JlYXRlU2VydmljZVRlbXBsYXRlUmVxdWVzdBITCgttaW5pX2FwcF9pZBgBIAEoCRIMCgRraW5kGAIgASgJEhQKDGxhbmd1YWdlX3RhZxgDIAEoCRIMCgRuYW1lGAQgASgJEhEKCWZsZXhfanNvbhgFIAEoCRIsCg1wYXJhbXNfc2NoZW1hGAYgAygLMhUubWluaWFwcC52MS5QYXJhbVNwZWMSEAoIdXNlX2Nhc2UYByABKAkiTgodQ3JlYXRlU2VydmljZVRlbXBsYXRlUmVzcG9uc2USLQoIdGVtcGxhdGUYASABKAsyGy5taW5pYXBwLnYxLlNlcnZpY2VUZW1wbGF0ZSLOAQocVXBkYXRlU2VydmljZVRlbXBsYXRlUmVxdWVzdBIKCgJpZBgBIAEoCRIWCglmbGV4X2pzb24YAiABKAlIAIgBARIsCg1wYXJhbXNfc2NoZW1hGAMgAygLMhUubWluaWFwcC52MS5QYXJhbVNwZWMSFQoIdXNlX2Nhc2UYBCABKAlIAYgBARIZCgxsYW5ndWFnZV90YWcYBSABKAlIAogBAUIMCgpfZmxleF9qc29uQgsKCV91c2VfY2FzZUIPCg1fbGFuZ3VhZ2VfdGFnIk4KHVVwZGF0ZVNlcnZpY2VUZW1wbGF0ZVJlc3BvbnNlEi0KCHRlbXBsYXRlGAEgASgLMhsubWluaWFwcC52MS5TZXJ2aWNlVGVtcGxhdGUiKgocRGVsZXRlU2VydmljZVRlbXBsYXRlUmVxdWVzdBIKCgJpZBgBIAEoCSIfCh1EZWxldGVTZXJ2aWNlVGVtcGxhdGVSZXNwb25zZSKqAQodU2VuZFRlc3RTZXJ2aWNlTWVzc2FnZVJlcXVlc3QSEwoLdGVtcGxhdGVfaWQYASABKAkSRQoGcGFyYW1zGAIgAygLMjUubWluaWFwcC52MS5TZW5kVGVzdFNlcnZpY2VNZXNzYWdlUmVxdWVzdC5QYXJhbXNFbnRyeRotCgtQYXJhbXNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIkUKHlNlbmRUZXN0U2VydmljZU1lc3NhZ2VSZXNwb25zZRISCgptZXNzYWdlX2lkGAEgASgJEg8KB2NoYXRfaWQYAiABKAkynQwKDk1pbmlBcHBTZXJ2aWNlElEKDExpc3RNaW5pQXBwcxIfLm1pbmlhcHAudjEuTGlzdE1pbmlBcHBzUmVxdWVzdBogLm1pbmlhcHAudjEuTGlzdE1pbmlBcHBzUmVzcG9uc2USSwoKR2V0TWluaUFwcBIdLm1pbmlhcHAudjEuR2V0TWluaUFwcFJlcXVlc3QaHi5taW5pYXBwLnYxLkdldE1pbmlBcHBSZXNwb25zZRJUCg1DcmVhdGVNaW5pQXBwEiAubWluaWFwcC52MS5DcmVhdGVNaW5pQXBwUmVxdWVzdBohLm1pbmlhcHAudjEuQ3JlYXRlTWluaUFwcFJlc3BvbnNlElQKDVVwZGF0ZU1pbmlBcHASIC5taW5pYXBwLnYxLlVwZGF0ZU1pbmlBcHBSZXF1ZXN0GiEubWluaWFwcC52MS5VcGRhdGVNaW5pQXBwUmVzcG9uc2USVwoOUHVibGlzaE1pbmlBcHASIS5taW5pYXBwLnYxLlB1Ymxpc2hNaW5pQXBwUmVxdWVzdBoiLm1pbmlhcHAudjEuUHVibGlzaE1pbmlBcHBSZXNwb25zZRJdChBVbnB1Ymxpc2hNaW5pQXBwEiMubWluaWFwcC52MS5VbnB1Ymxpc2hNaW5pQXBwUmVxdWVzdBokLm1pbmlhcHAudjEuVW5wdWJsaXNoTWluaUFwcFJlc3BvbnNlElQKDURlbGV0ZU1pbmlBcHASIC5taW5pYXBwLnYxLkRlbGV0ZU1pbmlBcHBSZXF1ZXN0GiEubWluaWFwcC52MS5EZWxldGVNaW5pQXBwUmVzcG9uc2USPwoGTGlua09hEhkubWluaWFwcC52MS5MaW5rT2FSZXF1ZXN0GhoubWluaWFwcC52MS5MaW5rT2FSZXNwb25zZRJFCghVbmxpbmtPYRIbLm1pbmlhcHAudjEuVW5saW5rT2FSZXF1ZXN0GhwubWluaWFwcC52MS5VbmxpbmtPYVJlc3BvbnNlElQKDUxpc3RQdWJsaXNoZWQSIC5taW5pYXBwLnYxLkxpc3RQdWJsaXNoZWRSZXF1ZXN0GiEubWluaWFwcC52MS5MaXN0UHVibGlzaGVkUmVzcG9uc2USVAoNTGlzdE15R2FsbGVyeRIgLm1pbmlhcHAudjEuTGlzdE15R2FsbGVyeVJlcXVlc3QaIS5taW5pYXBwLnYxLkxpc3RNeUdhbGxlcnlSZXNwb25zZRJXCg5MaXN0TGlua2VkVG9PYRIhLm1pbmlhcHAudjEuTGlzdExpbmtlZFRvT2FSZXF1ZXN0GiIubWluaWFwcC52MS5MaXN0TGlua2VkVG9PYVJlc3BvbnNlEmkKFExpc3RTZXJ2aWNlVGVtcGxhdGVzEicubWluaWFwcC52MS5MaXN0U2VydmljZVRlbXBsYXRlc1JlcXVlc3QaKC5taW5pYXBwLnYxLkxpc3RTZXJ2aWNlVGVtcGxhdGVzUmVzcG9uc2USbAoVQ3JlYXRlU2VydmljZVRlbXBsYXRlEigubWluaWFwcC52MS5DcmVhdGVTZXJ2aWNlVGVtcGxhdGVSZXF1ZXN0GikubWluaWFwcC52MS5DcmVhdGVTZXJ2aWNlVGVtcGxhdGVSZXNwb25zZRJsChVVcGRhdGVTZXJ2aWNlVGVtcGxhdGUSKC5taW5pYXBwLnYxLlVwZGF0ZVNlcnZpY2VUZW1wbGF0ZVJlcXVlc3QaKS5taW5pYXBwLnYxLlVwZGF0ZVNlcnZpY2VUZW1wbGF0ZVJlc3BvbnNlEmwKFURlbGV0ZVNlcnZpY2VUZW1wbGF0ZRIoLm1pbmlhcHAudjEuRGVsZXRlU2VydmljZVRlbXBsYXRlUmVxdWVzdBopLm1pbmlhcHAudjEuRGVsZXRlU2VydmljZVRlbXBsYXRlUmVzcG9uc2USbwoWU2VuZFRlc3RTZXJ2aWNlTWVzc2FnZRIpLm1pbmlhcHAudjEuU2VuZFRlc3RTZXJ2aWNlTWVzc2FnZVJlcXVlc3QaKi5taW5pYXBwLnYxLlNlbmRUZXN0U2VydmljZU1lc3NhZ2VSZXNwb25zZWIGcHJvdG8z',
+)
 
 /**
  * @generated from message miniapp.v1.MiniApp
@@ -89,9 +87,10 @@ export type MiniApp = Message<'miniapp.v1.MiniApp'> & {
  * Describes the message miniapp.v1.MiniApp.
  * Use `create(MiniAppSchema)` to create a new message.
  */
-export const MiniAppSchema: GenMessage<MiniApp> =
-  /*@__PURE__*/
-  messageDesc(file_mini_app_v1_mini_app, 0)
+export const MiniAppSchema: GenMessage<MiniApp> /*@__PURE__*/ = messageDesc(
+  file_mini_app_v1_mini_app,
+  0,
+)
 
 /**
  * @generated from message miniapp.v1.ListMiniAppsRequest
@@ -107,8 +106,7 @@ export type ListMiniAppsRequest = Message<'miniapp.v1.ListMiniAppsRequest'> & {
  * Describes the message miniapp.v1.ListMiniAppsRequest.
  * Use `create(ListMiniAppsRequestSchema)` to create a new message.
  */
-export const ListMiniAppsRequestSchema: GenMessage<ListMiniAppsRequest> =
-  /*@__PURE__*/
+export const ListMiniAppsRequestSchema: GenMessage<ListMiniAppsRequest> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 1)
 
 /**
@@ -125,8 +123,7 @@ export type ListMiniAppsResponse = Message<'miniapp.v1.ListMiniAppsResponse'> & 
  * Describes the message miniapp.v1.ListMiniAppsResponse.
  * Use `create(ListMiniAppsResponseSchema)` to create a new message.
  */
-export const ListMiniAppsResponseSchema: GenMessage<ListMiniAppsResponse> =
-  /*@__PURE__*/
+export const ListMiniAppsResponseSchema: GenMessage<ListMiniAppsResponse> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 2)
 
 /**
@@ -143,8 +140,7 @@ export type GetMiniAppRequest = Message<'miniapp.v1.GetMiniAppRequest'> & {
  * Describes the message miniapp.v1.GetMiniAppRequest.
  * Use `create(GetMiniAppRequestSchema)` to create a new message.
  */
-export const GetMiniAppRequestSchema: GenMessage<GetMiniAppRequest> =
-  /*@__PURE__*/
+export const GetMiniAppRequestSchema: GenMessage<GetMiniAppRequest> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 3)
 
 /**
@@ -161,8 +157,7 @@ export type GetMiniAppResponse = Message<'miniapp.v1.GetMiniAppResponse'> & {
  * Describes the message miniapp.v1.GetMiniAppResponse.
  * Use `create(GetMiniAppResponseSchema)` to create a new message.
  */
-export const GetMiniAppResponseSchema: GenMessage<GetMiniAppResponse> =
-  /*@__PURE__*/
+export const GetMiniAppResponseSchema: GenMessage<GetMiniAppResponse> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 4)
 
 /**
@@ -204,8 +199,7 @@ export type CreateMiniAppRequest = Message<'miniapp.v1.CreateMiniAppRequest'> & 
  * Describes the message miniapp.v1.CreateMiniAppRequest.
  * Use `create(CreateMiniAppRequestSchema)` to create a new message.
  */
-export const CreateMiniAppRequestSchema: GenMessage<CreateMiniAppRequest> =
-  /*@__PURE__*/
+export const CreateMiniAppRequestSchema: GenMessage<CreateMiniAppRequest> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 5)
 
 /**
@@ -222,8 +216,7 @@ export type CreateMiniAppResponse = Message<'miniapp.v1.CreateMiniAppResponse'> 
  * Describes the message miniapp.v1.CreateMiniAppResponse.
  * Use `create(CreateMiniAppResponseSchema)` to create a new message.
  */
-export const CreateMiniAppResponseSchema: GenMessage<CreateMiniAppResponse> =
-  /*@__PURE__*/
+export const CreateMiniAppResponseSchema: GenMessage<CreateMiniAppResponse> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 6)
 
 /**
@@ -260,8 +253,7 @@ export type UpdateMiniAppRequest = Message<'miniapp.v1.UpdateMiniAppRequest'> & 
  * Describes the message miniapp.v1.UpdateMiniAppRequest.
  * Use `create(UpdateMiniAppRequestSchema)` to create a new message.
  */
-export const UpdateMiniAppRequestSchema: GenMessage<UpdateMiniAppRequest> =
-  /*@__PURE__*/
+export const UpdateMiniAppRequestSchema: GenMessage<UpdateMiniAppRequest> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 7)
 
 /**
@@ -278,8 +270,7 @@ export type UpdateMiniAppResponse = Message<'miniapp.v1.UpdateMiniAppResponse'> 
  * Describes the message miniapp.v1.UpdateMiniAppResponse.
  * Use `create(UpdateMiniAppResponseSchema)` to create a new message.
  */
-export const UpdateMiniAppResponseSchema: GenMessage<UpdateMiniAppResponse> =
-  /*@__PURE__*/
+export const UpdateMiniAppResponseSchema: GenMessage<UpdateMiniAppResponse> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 8)
 
 /**
@@ -296,8 +287,7 @@ export type PublishMiniAppRequest = Message<'miniapp.v1.PublishMiniAppRequest'> 
  * Describes the message miniapp.v1.PublishMiniAppRequest.
  * Use `create(PublishMiniAppRequestSchema)` to create a new message.
  */
-export const PublishMiniAppRequestSchema: GenMessage<PublishMiniAppRequest> =
-  /*@__PURE__*/
+export const PublishMiniAppRequestSchema: GenMessage<PublishMiniAppRequest> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 9)
 
 /**
@@ -314,8 +304,7 @@ export type PublishMiniAppResponse = Message<'miniapp.v1.PublishMiniAppResponse'
  * Describes the message miniapp.v1.PublishMiniAppResponse.
  * Use `create(PublishMiniAppResponseSchema)` to create a new message.
  */
-export const PublishMiniAppResponseSchema: GenMessage<PublishMiniAppResponse> =
-  /*@__PURE__*/
+export const PublishMiniAppResponseSchema: GenMessage<PublishMiniAppResponse> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 10)
 
 /**
@@ -332,8 +321,7 @@ export type UnpublishMiniAppRequest = Message<'miniapp.v1.UnpublishMiniAppReques
  * Describes the message miniapp.v1.UnpublishMiniAppRequest.
  * Use `create(UnpublishMiniAppRequestSchema)` to create a new message.
  */
-export const UnpublishMiniAppRequestSchema: GenMessage<UnpublishMiniAppRequest> =
-  /*@__PURE__*/
+export const UnpublishMiniAppRequestSchema: GenMessage<UnpublishMiniAppRequest> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 11)
 
 /**
@@ -350,8 +338,7 @@ export type UnpublishMiniAppResponse = Message<'miniapp.v1.UnpublishMiniAppRespo
  * Describes the message miniapp.v1.UnpublishMiniAppResponse.
  * Use `create(UnpublishMiniAppResponseSchema)` to create a new message.
  */
-export const UnpublishMiniAppResponseSchema: GenMessage<UnpublishMiniAppResponse> =
-  /*@__PURE__*/
+export const UnpublishMiniAppResponseSchema: GenMessage<UnpublishMiniAppResponse> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 12)
 
 /**
@@ -368,8 +355,7 @@ export type DeleteMiniAppRequest = Message<'miniapp.v1.DeleteMiniAppRequest'> & 
  * Describes the message miniapp.v1.DeleteMiniAppRequest.
  * Use `create(DeleteMiniAppRequestSchema)` to create a new message.
  */
-export const DeleteMiniAppRequestSchema: GenMessage<DeleteMiniAppRequest> =
-  /*@__PURE__*/
+export const DeleteMiniAppRequestSchema: GenMessage<DeleteMiniAppRequest> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 13)
 
 /**
@@ -381,8 +367,7 @@ export type DeleteMiniAppResponse = Message<'miniapp.v1.DeleteMiniAppResponse'> 
  * Describes the message miniapp.v1.DeleteMiniAppResponse.
  * Use `create(DeleteMiniAppResponseSchema)` to create a new message.
  */
-export const DeleteMiniAppResponseSchema: GenMessage<DeleteMiniAppResponse> =
-  /*@__PURE__*/
+export const DeleteMiniAppResponseSchema: GenMessage<DeleteMiniAppResponse> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 14)
 
 /**
@@ -404,9 +389,10 @@ export type LinkOaRequest = Message<'miniapp.v1.LinkOaRequest'> & {
  * Describes the message miniapp.v1.LinkOaRequest.
  * Use `create(LinkOaRequestSchema)` to create a new message.
  */
-export const LinkOaRequestSchema: GenMessage<LinkOaRequest> =
-  /*@__PURE__*/
-  messageDesc(file_mini_app_v1_mini_app, 15)
+export const LinkOaRequestSchema: GenMessage<LinkOaRequest> /*@__PURE__*/ = messageDesc(
+  file_mini_app_v1_mini_app,
+  15,
+)
 
 /**
  * @generated from message miniapp.v1.LinkOaResponse
@@ -417,9 +403,10 @@ export type LinkOaResponse = Message<'miniapp.v1.LinkOaResponse'> & {}
  * Describes the message miniapp.v1.LinkOaResponse.
  * Use `create(LinkOaResponseSchema)` to create a new message.
  */
-export const LinkOaResponseSchema: GenMessage<LinkOaResponse> =
-  /*@__PURE__*/
-  messageDesc(file_mini_app_v1_mini_app, 16)
+export const LinkOaResponseSchema: GenMessage<LinkOaResponse> /*@__PURE__*/ = messageDesc(
+  file_mini_app_v1_mini_app,
+  16,
+)
 
 /**
  * @generated from message miniapp.v1.UnlinkOaRequest
@@ -440,8 +427,7 @@ export type UnlinkOaRequest = Message<'miniapp.v1.UnlinkOaRequest'> & {
  * Describes the message miniapp.v1.UnlinkOaRequest.
  * Use `create(UnlinkOaRequestSchema)` to create a new message.
  */
-export const UnlinkOaRequestSchema: GenMessage<UnlinkOaRequest> =
-  /*@__PURE__*/
+export const UnlinkOaRequestSchema: GenMessage<UnlinkOaRequest> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 17)
 
 /**
@@ -453,8 +439,7 @@ export type UnlinkOaResponse = Message<'miniapp.v1.UnlinkOaResponse'> & {}
  * Describes the message miniapp.v1.UnlinkOaResponse.
  * Use `create(UnlinkOaResponseSchema)` to create a new message.
  */
-export const UnlinkOaResponseSchema: GenMessage<UnlinkOaResponse> =
-  /*@__PURE__*/
+export const UnlinkOaResponseSchema: GenMessage<UnlinkOaResponse> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 18)
 
 /**
@@ -486,8 +471,7 @@ export type ListPublishedRequest = Message<'miniapp.v1.ListPublishedRequest'> & 
  * Describes the message miniapp.v1.ListPublishedRequest.
  * Use `create(ListPublishedRequestSchema)` to create a new message.
  */
-export const ListPublishedRequestSchema: GenMessage<ListPublishedRequest> =
-  /*@__PURE__*/
+export const ListPublishedRequestSchema: GenMessage<ListPublishedRequest> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 19)
 
 /**
@@ -509,8 +493,7 @@ export type ListPublishedResponse = Message<'miniapp.v1.ListPublishedResponse'> 
  * Describes the message miniapp.v1.ListPublishedResponse.
  * Use `create(ListPublishedResponseSchema)` to create a new message.
  */
-export const ListPublishedResponseSchema: GenMessage<ListPublishedResponse> =
-  /*@__PURE__*/
+export const ListPublishedResponseSchema: GenMessage<ListPublishedResponse> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 20)
 
 /**
@@ -522,8 +505,7 @@ export type ListMyGalleryRequest = Message<'miniapp.v1.ListMyGalleryRequest'> & 
  * Describes the message miniapp.v1.ListMyGalleryRequest.
  * Use `create(ListMyGalleryRequestSchema)` to create a new message.
  */
-export const ListMyGalleryRequestSchema: GenMessage<ListMyGalleryRequest> =
-  /*@__PURE__*/
+export const ListMyGalleryRequestSchema: GenMessage<ListMyGalleryRequest> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 21)
 
 /**
@@ -545,8 +527,7 @@ export type ListMyGalleryResponse = Message<'miniapp.v1.ListMyGalleryResponse'> 
  * Describes the message miniapp.v1.ListMyGalleryResponse.
  * Use `create(ListMyGalleryResponseSchema)` to create a new message.
  */
-export const ListMyGalleryResponseSchema: GenMessage<ListMyGalleryResponse> =
-  /*@__PURE__*/
+export const ListMyGalleryResponseSchema: GenMessage<ListMyGalleryResponse> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 22)
 
 /**
@@ -563,8 +544,7 @@ export type ListLinkedToOaRequest = Message<'miniapp.v1.ListLinkedToOaRequest'> 
  * Describes the message miniapp.v1.ListLinkedToOaRequest.
  * Use `create(ListLinkedToOaRequestSchema)` to create a new message.
  */
-export const ListLinkedToOaRequestSchema: GenMessage<ListLinkedToOaRequest> =
-  /*@__PURE__*/
+export const ListLinkedToOaRequestSchema: GenMessage<ListLinkedToOaRequest> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 23)
 
 /**
@@ -581,8 +561,7 @@ export type ListLinkedToOaResponse = Message<'miniapp.v1.ListLinkedToOaResponse'
  * Describes the message miniapp.v1.ListLinkedToOaResponse.
  * Use `create(ListLinkedToOaResponseSchema)` to create a new message.
  */
-export const ListLinkedToOaResponseSchema: GenMessage<ListLinkedToOaResponse> =
-  /*@__PURE__*/
+export const ListLinkedToOaResponseSchema: GenMessage<ListLinkedToOaResponse> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 24)
 
 /**
@@ -616,9 +595,10 @@ export type ParamSpec = Message<'miniapp.v1.ParamSpec'> & {
  * Describes the message miniapp.v1.ParamSpec.
  * Use `create(ParamSpecSchema)` to create a new message.
  */
-export const ParamSpecSchema: GenMessage<ParamSpec> =
-  /*@__PURE__*/
-  messageDesc(file_mini_app_v1_mini_app, 25)
+export const ParamSpecSchema: GenMessage<ParamSpec> /*@__PURE__*/ = messageDesc(
+  file_mini_app_v1_mini_app,
+  25,
+)
 
 /**
  * @generated from message miniapp.v1.ServiceTemplate
@@ -679,8 +659,7 @@ export type ServiceTemplate = Message<'miniapp.v1.ServiceTemplate'> & {
  * Describes the message miniapp.v1.ServiceTemplate.
  * Use `create(ServiceTemplateSchema)` to create a new message.
  */
-export const ServiceTemplateSchema: GenMessage<ServiceTemplate> =
-  /*@__PURE__*/
+export const ServiceTemplateSchema: GenMessage<ServiceTemplate> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 26)
 
 /**
@@ -698,8 +677,7 @@ export type ListServiceTemplatesRequest =
  * Describes the message miniapp.v1.ListServiceTemplatesRequest.
  * Use `create(ListServiceTemplatesRequestSchema)` to create a new message.
  */
-export const ListServiceTemplatesRequestSchema: GenMessage<ListServiceTemplatesRequest> =
-  /*@__PURE__*/
+export const ListServiceTemplatesRequestSchema: GenMessage<ListServiceTemplatesRequest> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 27)
 
 /**
@@ -717,8 +695,7 @@ export type ListServiceTemplatesResponse =
  * Describes the message miniapp.v1.ListServiceTemplatesResponse.
  * Use `create(ListServiceTemplatesResponseSchema)` to create a new message.
  */
-export const ListServiceTemplatesResponseSchema: GenMessage<ListServiceTemplatesResponse> =
-  /*@__PURE__*/
+export const ListServiceTemplatesResponseSchema: GenMessage<ListServiceTemplatesResponse> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 28)
 
 /**
@@ -766,8 +743,7 @@ export type CreateServiceTemplateRequest =
  * Describes the message miniapp.v1.CreateServiceTemplateRequest.
  * Use `create(CreateServiceTemplateRequestSchema)` to create a new message.
  */
-export const CreateServiceTemplateRequestSchema: GenMessage<CreateServiceTemplateRequest> =
-  /*@__PURE__*/
+export const CreateServiceTemplateRequestSchema: GenMessage<CreateServiceTemplateRequest> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 29)
 
 /**
@@ -785,8 +761,7 @@ export type CreateServiceTemplateResponse =
  * Describes the message miniapp.v1.CreateServiceTemplateResponse.
  * Use `create(CreateServiceTemplateResponseSchema)` to create a new message.
  */
-export const CreateServiceTemplateResponseSchema: GenMessage<CreateServiceTemplateResponse> =
-  /*@__PURE__*/
+export const CreateServiceTemplateResponseSchema: GenMessage<CreateServiceTemplateResponse> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 30)
 
 /**
@@ -824,8 +799,7 @@ export type UpdateServiceTemplateRequest =
  * Describes the message miniapp.v1.UpdateServiceTemplateRequest.
  * Use `create(UpdateServiceTemplateRequestSchema)` to create a new message.
  */
-export const UpdateServiceTemplateRequestSchema: GenMessage<UpdateServiceTemplateRequest> =
-  /*@__PURE__*/
+export const UpdateServiceTemplateRequestSchema: GenMessage<UpdateServiceTemplateRequest> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 31)
 
 /**
@@ -843,8 +817,7 @@ export type UpdateServiceTemplateResponse =
  * Describes the message miniapp.v1.UpdateServiceTemplateResponse.
  * Use `create(UpdateServiceTemplateResponseSchema)` to create a new message.
  */
-export const UpdateServiceTemplateResponseSchema: GenMessage<UpdateServiceTemplateResponse> =
-  /*@__PURE__*/
+export const UpdateServiceTemplateResponseSchema: GenMessage<UpdateServiceTemplateResponse> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 32)
 
 /**
@@ -862,8 +835,7 @@ export type DeleteServiceTemplateRequest =
  * Describes the message miniapp.v1.DeleteServiceTemplateRequest.
  * Use `create(DeleteServiceTemplateRequestSchema)` to create a new message.
  */
-export const DeleteServiceTemplateRequestSchema: GenMessage<DeleteServiceTemplateRequest> =
-  /*@__PURE__*/
+export const DeleteServiceTemplateRequestSchema: GenMessage<DeleteServiceTemplateRequest> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 33)
 
 /**
@@ -876,8 +848,7 @@ export type DeleteServiceTemplateResponse =
  * Describes the message miniapp.v1.DeleteServiceTemplateResponse.
  * Use `create(DeleteServiceTemplateResponseSchema)` to create a new message.
  */
-export const DeleteServiceTemplateResponseSchema: GenMessage<DeleteServiceTemplateResponse> =
-  /*@__PURE__*/
+export const DeleteServiceTemplateResponseSchema: GenMessage<DeleteServiceTemplateResponse> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 34)
 
 /**
@@ -900,8 +871,7 @@ export type SendTestServiceMessageRequest =
  * Describes the message miniapp.v1.SendTestServiceMessageRequest.
  * Use `create(SendTestServiceMessageRequestSchema)` to create a new message.
  */
-export const SendTestServiceMessageRequestSchema: GenMessage<SendTestServiceMessageRequest> =
-  /*@__PURE__*/
+export const SendTestServiceMessageRequestSchema: GenMessage<SendTestServiceMessageRequest> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 35)
 
 /**
@@ -924,8 +894,7 @@ export type SendTestServiceMessageResponse =
  * Describes the message miniapp.v1.SendTestServiceMessageResponse.
  * Use `create(SendTestServiceMessageResponseSchema)` to create a new message.
  */
-export const SendTestServiceMessageResponseSchema: GenMessage<SendTestServiceMessageResponse> =
-  /*@__PURE__*/
+export const SendTestServiceMessageResponseSchema: GenMessage<SendTestServiceMessageResponse> /*@__PURE__*/ =
   messageDesc(file_mini_app_v1_mini_app, 36)
 
 /**
@@ -1068,4 +1037,4 @@ export const MiniAppService: GenService<{
     input: typeof SendTestServiceMessageRequestSchema
     output: typeof SendTestServiceMessageResponseSchema
   }
-}> = /*@__PURE__*/ serviceDesc(file_mini_app_v1_mini_app, 0)
+}> /*@__PURE__*/ = serviceDesc(file_mini_app_v1_mini_app, 0)

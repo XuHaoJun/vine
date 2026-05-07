@@ -16,7 +16,7 @@ const { values } = parseArgs({
 })
 
 if (values.fix) {
-  await $`oxfmt && oxlint --fix --fix-suggestions`
+  await $`oxfmt && oxlint --import-plugin --type-aware --fix --fix-suggestions`
 } else {
-  await $`oxlint`
+  await $`oxlint --import-plugin --type-aware`
 }

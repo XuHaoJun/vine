@@ -9,11 +9,9 @@ import type { GenFile, GenMessage, GenService } from '@bufbuild/protobuf/codegen
 /**
  * Describes the file greeter/v1/greeter.proto.
  */
-export const file_greeter_v1_greeter: GenFile =
-  /*@__PURE__*/
-  fileDesc(
-    'ChhncmVldGVyL3YxL2dyZWV0ZXIucHJvdG8SCmdyZWV0ZXIudjEiHwoPU2F5SGVsbG9SZXF1ZXN0EgwKBG5hbWUYASABKAkiIwoQU2F5SGVsbG9SZXNwb25zZRIPCgdtZXNzYWdlGAEgASgJMlcKDkdyZWV0ZXJTZXJ2aWNlEkUKCFNheUhlbGxvEhsuZ3JlZXRlci52MS5TYXlIZWxsb1JlcXVlc3QaHC5ncmVldGVyLnYxLlNheUhlbGxvUmVzcG9uc2ViBnByb3RvMw',
-  )
+export const file_greeter_v1_greeter: GenFile /*@__PURE__*/ = fileDesc(
+  'ChhncmVldGVyL3YxL2dyZWV0ZXIucHJvdG8SCmdyZWV0ZXIudjEiHwoPU2F5SGVsbG9SZXF1ZXN0EgwKBG5hbWUYASABKAkiIwoQU2F5SGVsbG9SZXNwb25zZRIPCgdtZXNzYWdlGAEgASgJMlcKDkdyZWV0ZXJTZXJ2aWNlEkUKCFNheUhlbGxvEhsuZ3JlZXRlci52MS5TYXlIZWxsb1JlcXVlc3QaHC5ncmVldGVyLnYxLlNheUhlbGxvUmVzcG9uc2ViBnByb3RvMw',
+)
 
 /**
  * @generated from message greeter.v1.SayHelloRequest
@@ -29,8 +27,7 @@ export type SayHelloRequest = Message<'greeter.v1.SayHelloRequest'> & {
  * Describes the message greeter.v1.SayHelloRequest.
  * Use `create(SayHelloRequestSchema)` to create a new message.
  */
-export const SayHelloRequestSchema: GenMessage<SayHelloRequest> =
-  /*@__PURE__*/
+export const SayHelloRequestSchema: GenMessage<SayHelloRequest> /*@__PURE__*/ =
   messageDesc(file_greeter_v1_greeter, 0)
 
 /**
@@ -47,8 +44,7 @@ export type SayHelloResponse = Message<'greeter.v1.SayHelloResponse'> & {
  * Describes the message greeter.v1.SayHelloResponse.
  * Use `create(SayHelloResponseSchema)` to create a new message.
  */
-export const SayHelloResponseSchema: GenMessage<SayHelloResponse> =
-  /*@__PURE__*/
+export const SayHelloResponseSchema: GenMessage<SayHelloResponse> /*@__PURE__*/ =
   messageDesc(file_greeter_v1_greeter, 1)
 
 /**
@@ -63,4 +59,4 @@ export const GreeterService: GenService<{
     input: typeof SayHelloRequestSchema
     output: typeof SayHelloResponseSchema
   }
-}> = /*@__PURE__*/ serviceDesc(file_greeter_v1_greeter, 0)
+}> /*@__PURE__*/ = serviceDesc(file_greeter_v1_greeter, 0)

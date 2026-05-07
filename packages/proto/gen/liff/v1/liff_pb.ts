@@ -21,11 +21,9 @@ import type {
 /**
  * Describes the file liff/v1/liff.proto.
  */
-export const file_liff_v1_liff: GenFile =
-  /*@__PURE__*/
-  fileDesc(
-    'ChJsaWZmL3YxL2xpZmYucHJvdG8SB2xpZmYudjEiowEKDExvZ2luQ2hhbm5lbBIKCgJpZBgBIAEoCRITCgtwcm92aWRlcl9pZBgCIAEoCRIMCgRuYW1lGAMgASgJEhIKCmNoYW5uZWxfaWQYBCABKAkSGAoLZGVzY3JpcHRpb24YBSABKAlIAIgBARISCgpjcmVhdGVkX2F0GAYgASgJEhIKCnVwZGF0ZWRfYXQYByABKAlCDgoMX2Rlc2NyaXB0aW9uIkAKEkxvZ2luQ2hhbm5lbFNlY3JldBIWCg5jaGFubmVsX3NlY3JldBgBIAEoCRISCgpjaGFubmVsX2lkGAIgASgJImgKGUNyZWF0ZUxvZ2luQ2hhbm5lbFJlcXVlc3QSEwoLcHJvdmlkZXJfaWQYASABKAkSDAoEbmFtZRgCIAEoCRIYCgtkZXNjcmlwdGlvbhgDIAEoCUgAiAEBQg4KDF9kZXNjcmlwdGlvbiJEChpDcmVhdGVMb2dpbkNoYW5uZWxSZXNwb25zZRImCgdjaGFubmVsGAEgASgLMhUubGlmZi52MS5Mb2dpbkNoYW5uZWwiJAoWR2V0TG9naW5DaGFubmVsUmVxdWVzdBIKCgJpZBgBIAEoCSJBChdHZXRMb2dpbkNoYW5uZWxSZXNwb25zZRImCgdjaGFubmVsGAEgASgLMhUubGlmZi52MS5Mb2dpbkNoYW5uZWwiKgocR2V0TG9naW5DaGFubmVsU2VjcmV0UmVxdWVzdBIKCgJpZBgBIAEoCSJMCh1HZXRMb2dpbkNoYW5uZWxTZWNyZXRSZXNwb25zZRIrCgZzZWNyZXQYASABKAsyGy5saWZmLnYxLkxvZ2luQ2hhbm5lbFNlY3JldCIvChhMaXN0TG9naW5DaGFubmVsc1JlcXVlc3QSEwoLcHJvdmlkZXJfaWQYASABKAkiRAoZTGlzdExvZ2luQ2hhbm5lbHNSZXNwb25zZRInCghjaGFubmVscxgBIAMoCzIVLmxpZmYudjEuTG9naW5DaGFubmVsIicKGURlbGV0ZUxvZ2luQ2hhbm5lbFJlcXVlc3QSCgoCaWQYASABKAkiHAoaRGVsZXRlTG9naW5DaGFubmVsUmVzcG9uc2UirAIKB0xpZmZBcHASCgoCaWQYASABKAkSGAoQbG9naW5fY2hhbm5lbF9pZBgCIAEoCRIPCgdsaWZmX2lkGAMgASgJEiQKCXZpZXdfdHlwZRgEIAEoDjIRLmxpZmYudjEuVmlld1R5cGUSFAoMZW5kcG9pbnRfdXJsGAUgASgJEhMKC21vZHVsZV9tb2RlGAYgASgIEhgKC2Rlc2NyaXB0aW9uGAcgASgJSACIAQESDgoGc2NvcGVzGAggAygJEiYKCmJvdF9wcm9tcHQYCSABKA4yEi5saWZmLnYxLkJvdFByb21wdBIPCgdxcl9jb2RlGAogASgIEhIKCmNyZWF0ZWRfYXQYCyABKAkSEgoKdXBkYXRlZF9hdBgMIAEoCUIOCgxfZGVzY3JpcHRpb24irgIKFENyZWF0ZUxpZmZBcHBSZXF1ZXN0EhgKEGxvZ2luX2NoYW5uZWxfaWQYASABKAkSJAoJdmlld190eXBlGAIgASgOMhEubGlmZi52MS5WaWV3VHlwZRIUCgxlbmRwb2ludF91cmwYAyABKAkSGAoLbW9kdWxlX21vZGUYBCABKAhIAIgBARIYCgtkZXNjcmlwdGlvbhgFIAEoCUgBiAEBEg4KBnNjb3BlcxgGIAMoCRIrCgpib3RfcHJvbXB0GAcgASgOMhIubGlmZi52MS5Cb3RQcm9tcHRIAogBARIUCgdxcl9jb2RlGAggASgISAOIAQFCDgoMX21vZHVsZV9tb2RlQg4KDF9kZXNjcmlwdGlvbkINCgtfYm90X3Byb21wdEIKCghfcXJfY29kZSI2ChVDcmVhdGVMaWZmQXBwUmVzcG9uc2USHQoDYXBwGAEgASgLMhAubGlmZi52MS5MaWZmQXBwIs4CChRVcGRhdGVMaWZmQXBwUmVxdWVzdBIPCgdsaWZmX2lkGAEgASgJEikKCXZpZXdfdHlwZRgCIAEoDjIRLmxpZmYudjEuVmlld1R5cGVIAIgBARIZCgxlbmRwb2ludF91cmwYAyABKAlIAYgBARIYCgttb2R1bGVfbW9kZRgEIAEoCEgCiAEBEhgKC2Rlc2NyaXB0aW9uGAUgASgJSAOIAQESDgoGc2NvcGVzGAYgAygJEisKCmJvdF9wcm9tcHQYByABKA4yEi5saWZmLnYxLkJvdFByb21wdEgEiAEBEhQKB3FyX2NvZGUYCCABKAhIBYgBAUIMCgpfdmlld190eXBlQg8KDV9lbmRwb2ludF91cmxCDgoMX21vZHVsZV9tb2RlQg4KDF9kZXNjcmlwdGlvbkINCgtfYm90X3Byb21wdEIKCghfcXJfY29kZSI2ChVVcGRhdGVMaWZmQXBwUmVzcG9uc2USHQoDYXBwGAEgASgLMhAubGlmZi52MS5MaWZmQXBwIiQKEUdldExpZmZBcHBSZXF1ZXN0Eg8KB2xpZmZfaWQYASABKAkiMwoSR2V0TGlmZkFwcFJlc3BvbnNlEh0KA2FwcBgBIAEoCzIQLmxpZmYudjEuTGlmZkFwcCIvChNMaXN0TGlmZkFwcHNSZXF1ZXN0EhgKEGxvZ2luX2NoYW5uZWxfaWQYASABKAkiNgoUTGlzdExpZmZBcHBzUmVzcG9uc2USHgoEYXBwcxgBIAMoCzIQLmxpZmYudjEuTGlmZkFwcCInChREZWxldGVMaWZmQXBwUmVxdWVzdBIPCgdsaWZmX2lkGAEgASgJIhcKFURlbGV0ZUxpZmZBcHBSZXNwb25zZSpkCghWaWV3VHlwZRIZChVWSUVXX1RZUEVfVU5TUEVDSUZJRUQQABIVChFWSUVXX1RZUEVfQ09NUEFDVBABEhIKDlZJRVdfVFlQRV9UQUxMEAISEgoOVklFV19UWVBFX0ZVTEwQAypuCglCb3RQcm9tcHQSGgoWQk9UX1BST01QVF9VTlNQRUNJRklFRBAAEhMKD0JPVF9QUk9NUFRfTk9ORRABEhUKEUJPVF9QUk9NUFRfTk9STUFMEAISGQoVQk9UX1BST01QVF9BR0dSRVNTSVZFEAMy7QMKE0xvZ2luQ2hhbm5lbFNlcnZpY2USXQoSQ3JlYXRlTG9naW5DaGFubmVsEiIubGlmZi52MS5DcmVhdGVMb2dpbkNoYW5uZWxSZXF1ZXN0GiMubGlmZi52MS5DcmVhdGVMb2dpbkNoYW5uZWxSZXNwb25zZRJUCg9HZXRMb2dpbkNoYW5uZWwSHy5saWZmLnYxLkdldExvZ2luQ2hhbm5lbFJlcXVlc3QaIC5saWZmLnYxLkdldExvZ2luQ2hhbm5lbFJlc3BvbnNlEmYKFUdldExvZ2luQ2hhbm5lbFNlY3JldBIlLmxpZmYudjEuR2V0TG9naW5DaGFubmVsU2VjcmV0UmVxdWVzdBomLmxpZmYudjEuR2V0TG9naW5DaGFubmVsU2VjcmV0UmVzcG9uc2USWgoRTGlzdExvZ2luQ2hhbm5lbHMSIS5saWZmLnYxLkxpc3RMb2dpbkNoYW5uZWxzUmVxdWVzdBoiLmxpZmYudjEuTGlzdExvZ2luQ2hhbm5lbHNSZXNwb25zZRJdChJEZWxldGVMb2dpbkNoYW5uZWwSIi5saWZmLnYxLkRlbGV0ZUxvZ2luQ2hhbm5lbFJlcXVlc3QaIy5saWZmLnYxLkRlbGV0ZUxvZ2luQ2hhbm5lbFJlc3BvbnNlMpEDCgtMSUZGU2VydmljZRJOCg1DcmVhdGVMaWZmQXBwEh0ubGlmZi52MS5DcmVhdGVMaWZmQXBwUmVxdWVzdBoeLmxpZmYudjEuQ3JlYXRlTGlmZkFwcFJlc3BvbnNlEk4KDVVwZGF0ZUxpZmZBcHASHS5saWZmLnYxLlVwZGF0ZUxpZmZBcHBSZXF1ZXN0Gh4ubGlmZi52MS5VcGRhdGVMaWZmQXBwUmVzcG9uc2USRQoKR2V0TGlmZkFwcBIaLmxpZmYudjEuR2V0TGlmZkFwcFJlcXVlc3QaGy5saWZmLnYxLkdldExpZmZBcHBSZXNwb25zZRJLCgxMaXN0TGlmZkFwcHMSHC5saWZmLnYxLkxpc3RMaWZmQXBwc1JlcXVlc3QaHS5saWZmLnYxLkxpc3RMaWZmQXBwc1Jlc3BvbnNlEk4KDURlbGV0ZUxpZmZBcHASHS5saWZmLnYxLkRlbGV0ZUxpZmZBcHBSZXF1ZXN0Gh4ubGlmZi52MS5EZWxldGVMaWZmQXBwUmVzcG9uc2ViBnByb3RvMw',
-  )
+export const file_liff_v1_liff: GenFile /*@__PURE__*/ = fileDesc(
+  'ChJsaWZmL3YxL2xpZmYucHJvdG8SB2xpZmYudjEiowEKDExvZ2luQ2hhbm5lbBIKCgJpZBgBIAEoCRITCgtwcm92aWRlcl9pZBgCIAEoCRIMCgRuYW1lGAMgASgJEhIKCmNoYW5uZWxfaWQYBCABKAkSGAoLZGVzY3JpcHRpb24YBSABKAlIAIgBARISCgpjcmVhdGVkX2F0GAYgASgJEhIKCnVwZGF0ZWRfYXQYByABKAlCDgoMX2Rlc2NyaXB0aW9uIkAKEkxvZ2luQ2hhbm5lbFNlY3JldBIWCg5jaGFubmVsX3NlY3JldBgBIAEoCRISCgpjaGFubmVsX2lkGAIgASgJImgKGUNyZWF0ZUxvZ2luQ2hhbm5lbFJlcXVlc3QSEwoLcHJvdmlkZXJfaWQYASABKAkSDAoEbmFtZRgCIAEoCRIYCgtkZXNjcmlwdGlvbhgDIAEoCUgAiAEBQg4KDF9kZXNjcmlwdGlvbiJEChpDcmVhdGVMb2dpbkNoYW5uZWxSZXNwb25zZRImCgdjaGFubmVsGAEgASgLMhUubGlmZi52MS5Mb2dpbkNoYW5uZWwiJAoWR2V0TG9naW5DaGFubmVsUmVxdWVzdBIKCgJpZBgBIAEoCSJBChdHZXRMb2dpbkNoYW5uZWxSZXNwb25zZRImCgdjaGFubmVsGAEgASgLMhUubGlmZi52MS5Mb2dpbkNoYW5uZWwiKgocR2V0TG9naW5DaGFubmVsU2VjcmV0UmVxdWVzdBIKCgJpZBgBIAEoCSJMCh1HZXRMb2dpbkNoYW5uZWxTZWNyZXRSZXNwb25zZRIrCgZzZWNyZXQYASABKAsyGy5saWZmLnYxLkxvZ2luQ2hhbm5lbFNlY3JldCIvChhMaXN0TG9naW5DaGFubmVsc1JlcXVlc3QSEwoLcHJvdmlkZXJfaWQYASABKAkiRAoZTGlzdExvZ2luQ2hhbm5lbHNSZXNwb25zZRInCghjaGFubmVscxgBIAMoCzIVLmxpZmYudjEuTG9naW5DaGFubmVsIicKGURlbGV0ZUxvZ2luQ2hhbm5lbFJlcXVlc3QSCgoCaWQYASABKAkiHAoaRGVsZXRlTG9naW5DaGFubmVsUmVzcG9uc2UirAIKB0xpZmZBcHASCgoCaWQYASABKAkSGAoQbG9naW5fY2hhbm5lbF9pZBgCIAEoCRIPCgdsaWZmX2lkGAMgASgJEiQKCXZpZXdfdHlwZRgEIAEoDjIRLmxpZmYudjEuVmlld1R5cGUSFAoMZW5kcG9pbnRfdXJsGAUgASgJEhMKC21vZHVsZV9tb2RlGAYgASgIEhgKC2Rlc2NyaXB0aW9uGAcgASgJSACIAQESDgoGc2NvcGVzGAggAygJEiYKCmJvdF9wcm9tcHQYCSABKA4yEi5saWZmLnYxLkJvdFByb21wdBIPCgdxcl9jb2RlGAogASgIEhIKCmNyZWF0ZWRfYXQYCyABKAkSEgoKdXBkYXRlZF9hdBgMIAEoCUIOCgxfZGVzY3JpcHRpb24irgIKFENyZWF0ZUxpZmZBcHBSZXF1ZXN0EhgKEGxvZ2luX2NoYW5uZWxfaWQYASABKAkSJAoJdmlld190eXBlGAIgASgOMhEubGlmZi52MS5WaWV3VHlwZRIUCgxlbmRwb2ludF91cmwYAyABKAkSGAoLbW9kdWxlX21vZGUYBCABKAhIAIgBARIYCgtkZXNjcmlwdGlvbhgFIAEoCUgBiAEBEg4KBnNjb3BlcxgGIAMoCRIrCgpib3RfcHJvbXB0GAcgASgOMhIubGlmZi52MS5Cb3RQcm9tcHRIAogBARIUCgdxcl9jb2RlGAggASgISAOIAQFCDgoMX21vZHVsZV9tb2RlQg4KDF9kZXNjcmlwdGlvbkINCgtfYm90X3Byb21wdEIKCghfcXJfY29kZSI2ChVDcmVhdGVMaWZmQXBwUmVzcG9uc2USHQoDYXBwGAEgASgLMhAubGlmZi52MS5MaWZmQXBwIs4CChRVcGRhdGVMaWZmQXBwUmVxdWVzdBIPCgdsaWZmX2lkGAEgASgJEikKCXZpZXdfdHlwZRgCIAEoDjIRLmxpZmYudjEuVmlld1R5cGVIAIgBARIZCgxlbmRwb2ludF91cmwYAyABKAlIAYgBARIYCgttb2R1bGVfbW9kZRgEIAEoCEgCiAEBEhgKC2Rlc2NyaXB0aW9uGAUgASgJSAOIAQESDgoGc2NvcGVzGAYgAygJEisKCmJvdF9wcm9tcHQYByABKA4yEi5saWZmLnYxLkJvdFByb21wdEgEiAEBEhQKB3FyX2NvZGUYCCABKAhIBYgBAUIMCgpfdmlld190eXBlQg8KDV9lbmRwb2ludF91cmxCDgoMX21vZHVsZV9tb2RlQg4KDF9kZXNjcmlwdGlvbkINCgtfYm90X3Byb21wdEIKCghfcXJfY29kZSI2ChVVcGRhdGVMaWZmQXBwUmVzcG9uc2USHQoDYXBwGAEgASgLMhAubGlmZi52MS5MaWZmQXBwIiQKEUdldExpZmZBcHBSZXF1ZXN0Eg8KB2xpZmZfaWQYASABKAkiMwoSR2V0TGlmZkFwcFJlc3BvbnNlEh0KA2FwcBgBIAEoCzIQLmxpZmYudjEuTGlmZkFwcCIvChNMaXN0TGlmZkFwcHNSZXF1ZXN0EhgKEGxvZ2luX2NoYW5uZWxfaWQYASABKAkiNgoUTGlzdExpZmZBcHBzUmVzcG9uc2USHgoEYXBwcxgBIAMoCzIQLmxpZmYudjEuTGlmZkFwcCInChREZWxldGVMaWZmQXBwUmVxdWVzdBIPCgdsaWZmX2lkGAEgASgJIhcKFURlbGV0ZUxpZmZBcHBSZXNwb25zZSpkCghWaWV3VHlwZRIZChVWSUVXX1RZUEVfVU5TUEVDSUZJRUQQABIVChFWSUVXX1RZUEVfQ09NUEFDVBABEhIKDlZJRVdfVFlQRV9UQUxMEAISEgoOVklFV19UWVBFX0ZVTEwQAypuCglCb3RQcm9tcHQSGgoWQk9UX1BST01QVF9VTlNQRUNJRklFRBAAEhMKD0JPVF9QUk9NUFRfTk9ORRABEhUKEUJPVF9QUk9NUFRfTk9STUFMEAISGQoVQk9UX1BST01QVF9BR0dSRVNTSVZFEAMy7QMKE0xvZ2luQ2hhbm5lbFNlcnZpY2USXQoSQ3JlYXRlTG9naW5DaGFubmVsEiIubGlmZi52MS5DcmVhdGVMb2dpbkNoYW5uZWxSZXF1ZXN0GiMubGlmZi52MS5DcmVhdGVMb2dpbkNoYW5uZWxSZXNwb25zZRJUCg9HZXRMb2dpbkNoYW5uZWwSHy5saWZmLnYxLkdldExvZ2luQ2hhbm5lbFJlcXVlc3QaIC5saWZmLnYxLkdldExvZ2luQ2hhbm5lbFJlc3BvbnNlEmYKFUdldExvZ2luQ2hhbm5lbFNlY3JldBIlLmxpZmYudjEuR2V0TG9naW5DaGFubmVsU2VjcmV0UmVxdWVzdBomLmxpZmYudjEuR2V0TG9naW5DaGFubmVsU2VjcmV0UmVzcG9uc2USWgoRTGlzdExvZ2luQ2hhbm5lbHMSIS5saWZmLnYxLkxpc3RMb2dpbkNoYW5uZWxzUmVxdWVzdBoiLmxpZmYudjEuTGlzdExvZ2luQ2hhbm5lbHNSZXNwb25zZRJdChJEZWxldGVMb2dpbkNoYW5uZWwSIi5saWZmLnYxLkRlbGV0ZUxvZ2luQ2hhbm5lbFJlcXVlc3QaIy5saWZmLnYxLkRlbGV0ZUxvZ2luQ2hhbm5lbFJlc3BvbnNlMpEDCgtMSUZGU2VydmljZRJOCg1DcmVhdGVMaWZmQXBwEh0ubGlmZi52MS5DcmVhdGVMaWZmQXBwUmVxdWVzdBoeLmxpZmYudjEuQ3JlYXRlTGlmZkFwcFJlc3BvbnNlEk4KDVVwZGF0ZUxpZmZBcHASHS5saWZmLnYxLlVwZGF0ZUxpZmZBcHBSZXF1ZXN0Gh4ubGlmZi52MS5VcGRhdGVMaWZmQXBwUmVzcG9uc2USRQoKR2V0TGlmZkFwcBIaLmxpZmYudjEuR2V0TGlmZkFwcFJlcXVlc3QaGy5saWZmLnYxLkdldExpZmZBcHBSZXNwb25zZRJLCgxMaXN0TGlmZkFwcHMSHC5saWZmLnYxLkxpc3RMaWZmQXBwc1JlcXVlc3QaHS5saWZmLnYxLkxpc3RMaWZmQXBwc1Jlc3BvbnNlEk4KDURlbGV0ZUxpZmZBcHASHS5saWZmLnYxLkRlbGV0ZUxpZmZBcHBSZXF1ZXN0Gh4ubGlmZi52MS5EZWxldGVMaWZmQXBwUmVzcG9uc2ViBnByb3RvMw',
+)
 
 /**
  * @generated from message liff.v1.LoginChannel
@@ -71,9 +69,10 @@ export type LoginChannel = Message<'liff.v1.LoginChannel'> & {
  * Describes the message liff.v1.LoginChannel.
  * Use `create(LoginChannelSchema)` to create a new message.
  */
-export const LoginChannelSchema: GenMessage<LoginChannel> =
-  /*@__PURE__*/
-  messageDesc(file_liff_v1_liff, 0)
+export const LoginChannelSchema: GenMessage<LoginChannel> /*@__PURE__*/ = messageDesc(
+  file_liff_v1_liff,
+  0,
+)
 
 /**
  * @generated from message liff.v1.LoginChannelSecret
@@ -94,8 +93,7 @@ export type LoginChannelSecret = Message<'liff.v1.LoginChannelSecret'> & {
  * Describes the message liff.v1.LoginChannelSecret.
  * Use `create(LoginChannelSecretSchema)` to create a new message.
  */
-export const LoginChannelSecretSchema: GenMessage<LoginChannelSecret> =
-  /*@__PURE__*/
+export const LoginChannelSecretSchema: GenMessage<LoginChannelSecret> /*@__PURE__*/ =
   messageDesc(file_liff_v1_liff, 1)
 
 /**
@@ -122,8 +120,7 @@ export type CreateLoginChannelRequest = Message<'liff.v1.CreateLoginChannelReque
  * Describes the message liff.v1.CreateLoginChannelRequest.
  * Use `create(CreateLoginChannelRequestSchema)` to create a new message.
  */
-export const CreateLoginChannelRequestSchema: GenMessage<CreateLoginChannelRequest> =
-  /*@__PURE__*/
+export const CreateLoginChannelRequestSchema: GenMessage<CreateLoginChannelRequest> /*@__PURE__*/ =
   messageDesc(file_liff_v1_liff, 2)
 
 /**
@@ -140,8 +137,7 @@ export type CreateLoginChannelResponse = Message<'liff.v1.CreateLoginChannelResp
  * Describes the message liff.v1.CreateLoginChannelResponse.
  * Use `create(CreateLoginChannelResponseSchema)` to create a new message.
  */
-export const CreateLoginChannelResponseSchema: GenMessage<CreateLoginChannelResponse> =
-  /*@__PURE__*/
+export const CreateLoginChannelResponseSchema: GenMessage<CreateLoginChannelResponse> /*@__PURE__*/ =
   messageDesc(file_liff_v1_liff, 3)
 
 /**
@@ -158,8 +154,7 @@ export type GetLoginChannelRequest = Message<'liff.v1.GetLoginChannelRequest'> &
  * Describes the message liff.v1.GetLoginChannelRequest.
  * Use `create(GetLoginChannelRequestSchema)` to create a new message.
  */
-export const GetLoginChannelRequestSchema: GenMessage<GetLoginChannelRequest> =
-  /*@__PURE__*/
+export const GetLoginChannelRequestSchema: GenMessage<GetLoginChannelRequest> /*@__PURE__*/ =
   messageDesc(file_liff_v1_liff, 4)
 
 /**
@@ -176,8 +171,7 @@ export type GetLoginChannelResponse = Message<'liff.v1.GetLoginChannelResponse'>
  * Describes the message liff.v1.GetLoginChannelResponse.
  * Use `create(GetLoginChannelResponseSchema)` to create a new message.
  */
-export const GetLoginChannelResponseSchema: GenMessage<GetLoginChannelResponse> =
-  /*@__PURE__*/
+export const GetLoginChannelResponseSchema: GenMessage<GetLoginChannelResponse> /*@__PURE__*/ =
   messageDesc(file_liff_v1_liff, 5)
 
 /**
@@ -195,8 +189,7 @@ export type GetLoginChannelSecretRequest =
  * Describes the message liff.v1.GetLoginChannelSecretRequest.
  * Use `create(GetLoginChannelSecretRequestSchema)` to create a new message.
  */
-export const GetLoginChannelSecretRequestSchema: GenMessage<GetLoginChannelSecretRequest> =
-  /*@__PURE__*/
+export const GetLoginChannelSecretRequestSchema: GenMessage<GetLoginChannelSecretRequest> /*@__PURE__*/ =
   messageDesc(file_liff_v1_liff, 6)
 
 /**
@@ -214,8 +207,7 @@ export type GetLoginChannelSecretResponse =
  * Describes the message liff.v1.GetLoginChannelSecretResponse.
  * Use `create(GetLoginChannelSecretResponseSchema)` to create a new message.
  */
-export const GetLoginChannelSecretResponseSchema: GenMessage<GetLoginChannelSecretResponse> =
-  /*@__PURE__*/
+export const GetLoginChannelSecretResponseSchema: GenMessage<GetLoginChannelSecretResponse> /*@__PURE__*/ =
   messageDesc(file_liff_v1_liff, 7)
 
 /**
@@ -232,8 +224,7 @@ export type ListLoginChannelsRequest = Message<'liff.v1.ListLoginChannelsRequest
  * Describes the message liff.v1.ListLoginChannelsRequest.
  * Use `create(ListLoginChannelsRequestSchema)` to create a new message.
  */
-export const ListLoginChannelsRequestSchema: GenMessage<ListLoginChannelsRequest> =
-  /*@__PURE__*/
+export const ListLoginChannelsRequestSchema: GenMessage<ListLoginChannelsRequest> /*@__PURE__*/ =
   messageDesc(file_liff_v1_liff, 8)
 
 /**
@@ -250,8 +241,7 @@ export type ListLoginChannelsResponse = Message<'liff.v1.ListLoginChannelsRespon
  * Describes the message liff.v1.ListLoginChannelsResponse.
  * Use `create(ListLoginChannelsResponseSchema)` to create a new message.
  */
-export const ListLoginChannelsResponseSchema: GenMessage<ListLoginChannelsResponse> =
-  /*@__PURE__*/
+export const ListLoginChannelsResponseSchema: GenMessage<ListLoginChannelsResponse> /*@__PURE__*/ =
   messageDesc(file_liff_v1_liff, 9)
 
 /**
@@ -268,8 +258,7 @@ export type DeleteLoginChannelRequest = Message<'liff.v1.DeleteLoginChannelReque
  * Describes the message liff.v1.DeleteLoginChannelRequest.
  * Use `create(DeleteLoginChannelRequestSchema)` to create a new message.
  */
-export const DeleteLoginChannelRequestSchema: GenMessage<DeleteLoginChannelRequest> =
-  /*@__PURE__*/
+export const DeleteLoginChannelRequestSchema: GenMessage<DeleteLoginChannelRequest> /*@__PURE__*/ =
   messageDesc(file_liff_v1_liff, 10)
 
 /**
@@ -282,8 +271,7 @@ export type DeleteLoginChannelResponse =
  * Describes the message liff.v1.DeleteLoginChannelResponse.
  * Use `create(DeleteLoginChannelResponseSchema)` to create a new message.
  */
-export const DeleteLoginChannelResponseSchema: GenMessage<DeleteLoginChannelResponse> =
-  /*@__PURE__*/
+export const DeleteLoginChannelResponseSchema: GenMessage<DeleteLoginChannelResponse> /*@__PURE__*/ =
   messageDesc(file_liff_v1_liff, 11)
 
 /**
@@ -355,9 +343,10 @@ export type LiffApp = Message<'liff.v1.LiffApp'> & {
  * Describes the message liff.v1.LiffApp.
  * Use `create(LiffAppSchema)` to create a new message.
  */
-export const LiffAppSchema: GenMessage<LiffApp> =
-  /*@__PURE__*/
-  messageDesc(file_liff_v1_liff, 12)
+export const LiffAppSchema: GenMessage<LiffApp> /*@__PURE__*/ = messageDesc(
+  file_liff_v1_liff,
+  12,
+)
 
 /**
  * @generated from message liff.v1.CreateLiffAppRequest
@@ -408,8 +397,7 @@ export type CreateLiffAppRequest = Message<'liff.v1.CreateLiffAppRequest'> & {
  * Describes the message liff.v1.CreateLiffAppRequest.
  * Use `create(CreateLiffAppRequestSchema)` to create a new message.
  */
-export const CreateLiffAppRequestSchema: GenMessage<CreateLiffAppRequest> =
-  /*@__PURE__*/
+export const CreateLiffAppRequestSchema: GenMessage<CreateLiffAppRequest> /*@__PURE__*/ =
   messageDesc(file_liff_v1_liff, 13)
 
 /**
@@ -426,8 +414,7 @@ export type CreateLiffAppResponse = Message<'liff.v1.CreateLiffAppResponse'> & {
  * Describes the message liff.v1.CreateLiffAppResponse.
  * Use `create(CreateLiffAppResponseSchema)` to create a new message.
  */
-export const CreateLiffAppResponseSchema: GenMessage<CreateLiffAppResponse> =
-  /*@__PURE__*/
+export const CreateLiffAppResponseSchema: GenMessage<CreateLiffAppResponse> /*@__PURE__*/ =
   messageDesc(file_liff_v1_liff, 14)
 
 /**
@@ -479,8 +466,7 @@ export type UpdateLiffAppRequest = Message<'liff.v1.UpdateLiffAppRequest'> & {
  * Describes the message liff.v1.UpdateLiffAppRequest.
  * Use `create(UpdateLiffAppRequestSchema)` to create a new message.
  */
-export const UpdateLiffAppRequestSchema: GenMessage<UpdateLiffAppRequest> =
-  /*@__PURE__*/
+export const UpdateLiffAppRequestSchema: GenMessage<UpdateLiffAppRequest> /*@__PURE__*/ =
   messageDesc(file_liff_v1_liff, 15)
 
 /**
@@ -497,8 +483,7 @@ export type UpdateLiffAppResponse = Message<'liff.v1.UpdateLiffAppResponse'> & {
  * Describes the message liff.v1.UpdateLiffAppResponse.
  * Use `create(UpdateLiffAppResponseSchema)` to create a new message.
  */
-export const UpdateLiffAppResponseSchema: GenMessage<UpdateLiffAppResponse> =
-  /*@__PURE__*/
+export const UpdateLiffAppResponseSchema: GenMessage<UpdateLiffAppResponse> /*@__PURE__*/ =
   messageDesc(file_liff_v1_liff, 16)
 
 /**
@@ -515,8 +500,7 @@ export type GetLiffAppRequest = Message<'liff.v1.GetLiffAppRequest'> & {
  * Describes the message liff.v1.GetLiffAppRequest.
  * Use `create(GetLiffAppRequestSchema)` to create a new message.
  */
-export const GetLiffAppRequestSchema: GenMessage<GetLiffAppRequest> =
-  /*@__PURE__*/
+export const GetLiffAppRequestSchema: GenMessage<GetLiffAppRequest> /*@__PURE__*/ =
   messageDesc(file_liff_v1_liff, 17)
 
 /**
@@ -533,8 +517,7 @@ export type GetLiffAppResponse = Message<'liff.v1.GetLiffAppResponse'> & {
  * Describes the message liff.v1.GetLiffAppResponse.
  * Use `create(GetLiffAppResponseSchema)` to create a new message.
  */
-export const GetLiffAppResponseSchema: GenMessage<GetLiffAppResponse> =
-  /*@__PURE__*/
+export const GetLiffAppResponseSchema: GenMessage<GetLiffAppResponse> /*@__PURE__*/ =
   messageDesc(file_liff_v1_liff, 18)
 
 /**
@@ -551,8 +534,7 @@ export type ListLiffAppsRequest = Message<'liff.v1.ListLiffAppsRequest'> & {
  * Describes the message liff.v1.ListLiffAppsRequest.
  * Use `create(ListLiffAppsRequestSchema)` to create a new message.
  */
-export const ListLiffAppsRequestSchema: GenMessage<ListLiffAppsRequest> =
-  /*@__PURE__*/
+export const ListLiffAppsRequestSchema: GenMessage<ListLiffAppsRequest> /*@__PURE__*/ =
   messageDesc(file_liff_v1_liff, 19)
 
 /**
@@ -569,8 +551,7 @@ export type ListLiffAppsResponse = Message<'liff.v1.ListLiffAppsResponse'> & {
  * Describes the message liff.v1.ListLiffAppsResponse.
  * Use `create(ListLiffAppsResponseSchema)` to create a new message.
  */
-export const ListLiffAppsResponseSchema: GenMessage<ListLiffAppsResponse> =
-  /*@__PURE__*/
+export const ListLiffAppsResponseSchema: GenMessage<ListLiffAppsResponse> /*@__PURE__*/ =
   messageDesc(file_liff_v1_liff, 20)
 
 /**
@@ -587,8 +568,7 @@ export type DeleteLiffAppRequest = Message<'liff.v1.DeleteLiffAppRequest'> & {
  * Describes the message liff.v1.DeleteLiffAppRequest.
  * Use `create(DeleteLiffAppRequestSchema)` to create a new message.
  */
-export const DeleteLiffAppRequestSchema: GenMessage<DeleteLiffAppRequest> =
-  /*@__PURE__*/
+export const DeleteLiffAppRequestSchema: GenMessage<DeleteLiffAppRequest> /*@__PURE__*/ =
   messageDesc(file_liff_v1_liff, 21)
 
 /**
@@ -600,8 +580,7 @@ export type DeleteLiffAppResponse = Message<'liff.v1.DeleteLiffAppResponse'> & {
  * Describes the message liff.v1.DeleteLiffAppResponse.
  * Use `create(DeleteLiffAppResponseSchema)` to create a new message.
  */
-export const DeleteLiffAppResponseSchema: GenMessage<DeleteLiffAppResponse> =
-  /*@__PURE__*/
+export const DeleteLiffAppResponseSchema: GenMessage<DeleteLiffAppResponse> /*@__PURE__*/ =
   messageDesc(file_liff_v1_liff, 22)
 
 /**
@@ -632,9 +611,10 @@ export enum ViewType {
 /**
  * Describes the enum liff.v1.ViewType.
  */
-export const ViewTypeSchema: GenEnum<ViewType> =
-  /*@__PURE__*/
-  enumDesc(file_liff_v1_liff, 0)
+export const ViewTypeSchema: GenEnum<ViewType> /*@__PURE__*/ = enumDesc(
+  file_liff_v1_liff,
+  0,
+)
 
 /**
  * @generated from enum liff.v1.BotPrompt
@@ -664,9 +644,10 @@ export enum BotPrompt {
 /**
  * Describes the enum liff.v1.BotPrompt.
  */
-export const BotPromptSchema: GenEnum<BotPrompt> =
-  /*@__PURE__*/
-  enumDesc(file_liff_v1_liff, 1)
+export const BotPromptSchema: GenEnum<BotPrompt> /*@__PURE__*/ = enumDesc(
+  file_liff_v1_liff,
+  1,
+)
 
 /**
  * @generated from service liff.v1.LoginChannelService
@@ -712,7 +693,7 @@ export const LoginChannelService: GenService<{
     input: typeof DeleteLoginChannelRequestSchema
     output: typeof DeleteLoginChannelResponseSchema
   }
-}> = /*@__PURE__*/ serviceDesc(file_liff_v1_liff, 0)
+}> /*@__PURE__*/ = serviceDesc(file_liff_v1_liff, 0)
 
 /**
  * @generated from service liff.v1.LIFFService
@@ -758,4 +739,4 @@ export const LIFFService: GenService<{
     input: typeof DeleteLiffAppRequestSchema
     output: typeof DeleteLiffAppResponseSchema
   }
-}> = /*@__PURE__*/ serviceDesc(file_liff_v1_liff, 1)
+}> /*@__PURE__*/ = serviceDesc(file_liff_v1_liff, 1)
