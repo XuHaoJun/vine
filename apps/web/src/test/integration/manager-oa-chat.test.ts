@@ -12,7 +12,8 @@ test.describe('Manager OA chat', () => {
 
     await expect(page.getByText('Test Bot')).toBeVisible({ timeout: 10000 })
 
-    await page.getByRole('button', { name: 'Manage' }).first().click()
+    const testBotRow = page.getByText('@testbot').locator('xpath=../..')
+    await testBotRow.getByRole('button', { name: 'Manage' }).click()
     await page.waitForURL(/\/manager\/.+\/richmenu$/, { timeout: 15000 })
     await page.getByText('Chats', { exact: true }).click()
     await page.waitForURL(/\/manager\/.+\/chat$/, { timeout: 15000 })
