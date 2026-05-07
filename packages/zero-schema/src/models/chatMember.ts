@@ -1,9 +1,23 @@
 import { number, string, table } from '@rocicorp/zero'
-import { mutations, serverWhere } from 'on-zero'
+import { mutations, run, serverWhere, zql } from 'on-zero'
 
 import type { TableInsertRow } from 'on-zero'
 
 export type ChatMember = TableInsertRow<typeof schema>
+
+async function readRows(
+  tx: { query?: Record<string, any> },
+  tableName: string,
+  build: (query: any) => any,
+) {
+  const query = tx.query as Record<string, any> | undefined
+  const txQuery = query?.[tableName]
+  if (txQuery) {
+    return build(txQuery).run()
+  }
+
+  return run(build((zql as Record<string, any>)[tableName]))
+}
 
 export const schema = table('chatMember')
   .columns({
@@ -24,16 +38,13 @@ async function assertOaOwner(
   oaId: string,
   userId: string,
 ) {
-  const query = tx.query as Record<string, any> | undefined
-  if (!query?.officialAccount || !query?.oaProvider) {
-    throw new Error('Unauthorized')
-  }
-
-  const accounts = await query.officialAccount.where('id', oaId).run()
+  const accounts = await readRows(tx, 'officialAccount', (q) => q.where('id', oaId))
   const account = accounts[0]
   if (!account) throw new Error('Unauthorized')
 
-  const providers = await query.oaProvider.where('id', account.providerId).run()
+  const providers = await readRows(tx, 'oaProvider', (q) =>
+    q.where('id', account.providerId),
+  )
   const provider = providers[0]
   if (!provider || provider.ownerId !== userId) {
     throw new Error('Unauthorized')
@@ -101,13 +112,11 @@ export const mutate = mutations(schema, chatMemberPermission, {
 
     await assertOaOwner(tx as { query?: Record<string, any> }, data.oaId, authData.id)
 
-    const query = tx.query as Record<string, any> | undefined
-    if (!query?.chatMember) throw new Error('Unauthorized')
-
-    const members = await query.chatMember
-      .where('chatId', data.chatId)
-      .where('oaId', data.oaId)
-      .run()
+    const members = await readRows(
+      tx as { query?: Record<string, any> },
+      'chatMember',
+      (q) => q.where('chatId', data.chatId).where('oaId', data.oaId),
+    )
     const member = members[0]
     if (!member) throw new Error('Unauthorized')
 

@@ -30,5 +30,6 @@ export async function getTestEnv() {
     ZERO_UPSTREAM_DB: `${dockerDbBase}/postgres`,
     ZERO_CVR_DB: `${dockerDbBase}/zero_cvr`,
     ZERO_CHANGE_DB: `${dockerDbBase}/zero_cdb`,
+    ZERO_APP_PUBLICATIONS: 'zero_takeout',
   }
 }

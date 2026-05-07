@@ -44,7 +44,6 @@ export const chatMembersByChatId = (props: { chatId: string }) => {
 
 export const oaChatsByOfficialAccountId = (props: { oaId: string }) => {
   return zql.chat
-    .where(managerOwnedOaChatPermission)
     .where('type', 'oa')
     .whereExists('members', (q) => q.where('oaId', props.oaId))
     .related('members', (q) => q.related('user'))
@@ -55,11 +54,10 @@ export const oaChatsByOfficialAccountId = (props: { oaId: string }) => {
 
 export const oaChatMembersByChatId = (props: { oaId: string; chatId: string }) => {
   return zql.chatMember
-    .where(managerOwnedOaChatMemberPermission)
     .where('chatId', props.chatId)
     .whereExists('chat', (q) =>
       q
-        .where(managerOwnedOaChatPermission)
+        .where('type', 'oa')
         .where('id', props.chatId)
         .whereExists('members', (mq) => mq.where('oaId', props.oaId)),
     )

@@ -48,6 +48,7 @@ declare module 'one' {
         | `/(app)/home/talks/`
         | `/(app)/home/talks/requests`
         | `/(app)/manager`
+        | `/(app)/manager/[oaId]/chat`
         | `/(app)/manager/[oaId]/richmenu`
         | `/(app)/manager/[oaId]/richmenu/create`
         | `/(app)/manager/[oaId]/richmenu/users`
@@ -98,6 +99,7 @@ declare module 'one' {
         | `/home/talks/`
         | `/home/talks/requests`
         | `/manager`
+        | `/manager/[oaId]/chat`
         | `/manager/[oaId]/richmenu`
         | `/manager/[oaId]/richmenu/create`
         | `/manager/[oaId]/richmenu/users`
@@ -137,6 +139,7 @@ declare module 'one' {
         | `/(app)/liff/${OneRouter.SingleRoutePart<T>}/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/liff/${string}`
         | `/(app)/manager/${OneRouter.SingleRoutePart<T>}`
+        | `/(app)/manager/${OneRouter.SingleRoutePart<T>}/chat/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/manager/${OneRouter.SingleRoutePart<T>}/richmenu/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/oa/${OneRouter.SingleRoutePart<T>}`
         | `/(app)/store/${OneRouter.SingleRoutePart<T>}`
@@ -175,6 +178,7 @@ declare module 'one' {
         | `/m/${OneRouter.SingleRoutePart<T>}`
         | `/m/${OneRouter.SingleRoutePart<T>}/${string}`
         | `/manager/${OneRouter.SingleRoutePart<T>}`
+        | `/manager/${OneRouter.SingleRoutePart<T>}/chat/${OneRouter.SingleRoutePart<T>}`
         | `/manager/${OneRouter.SingleRoutePart<T>}/richmenu/${OneRouter.SingleRoutePart<T>}`
         | `/oa/${OneRouter.SingleRoutePart<T>}`
         | `/store/${OneRouter.SingleRoutePart<T>}`
@@ -208,6 +212,7 @@ declare module 'one' {
         | `/(app)/liff/[liffId]`
         | `/(app)/liff/[liffId]/[permanentPath]`
         | `/(app)/manager/[oaId]`
+        | `/(app)/manager/[oaId]/chat/[chatId]`
         | `/(app)/manager/[oaId]/richmenu/[richMenuId]`
         | `/(app)/oa/[oaId]`
         | `/(app)/store/[packageId]`
@@ -246,6 +251,7 @@ declare module 'one' {
         | `/m/[miniAppId]`
         | `/m/[miniAppId]/[...rest]`
         | `/manager/[oaId]`
+        | `/manager/[oaId]/chat/[chatId]`
         | `/manager/[oaId]/richmenu/[richMenuId]`
         | `/oa/[oaId]`
         | `/store/[packageId]`
@@ -280,6 +286,7 @@ declare module 'one' {
         '/(app)/liff/[liffId]': RouteInfo<{ liffId: string }>
         '/(app)/liff/[liffId]/[permanentPath]': RouteInfo<{ liffId: string; permanentPath: string }>
         '/(app)/manager/[oaId]': RouteInfo<{ oaId: string }>
+        '/(app)/manager/[oaId]/chat/[chatId]': RouteInfo<{ oaId: string; chatId: string }>
         '/(app)/manager/[oaId]/richmenu/[richMenuId]': RouteInfo<{ oaId: string; richMenuId: string }>
         '/(app)/oa/[oaId]': RouteInfo<{ oaId: string }>
         '/(app)/store/[packageId]': RouteInfo<{ packageId: string }>
@@ -318,6 +325,7 @@ declare module 'one' {
         '/m/[miniAppId]': RouteInfo<{ miniAppId: string }>
         '/m/[miniAppId]/[...rest]': RouteInfo<{ miniAppId: string; rest: string[] }>
         '/manager/[oaId]': RouteInfo<{ oaId: string }>
+        '/manager/[oaId]/chat/[chatId]': RouteInfo<{ oaId: string; chatId: string }>
         '/manager/[oaId]/richmenu/[richMenuId]': RouteInfo<{ oaId: string; richMenuId: string }>
         '/oa/[oaId]': RouteInfo<{ oaId: string }>
         '/store/[packageId]': RouteInfo<{ packageId: string }>

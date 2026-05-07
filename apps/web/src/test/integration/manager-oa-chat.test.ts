@@ -18,26 +18,34 @@ test.describe('Manager OA chat', () => {
     await page.getByText('Chats', { exact: true }).click()
     await page.waitForURL(/\/manager\/.+\/chat$/, { timeout: 15000 })
 
-    await expect(page.getByText('test1', { exact: false })).toBeVisible({
+    await page.waitForTimeout(2000)
+
+    await expect(page.getByPlaceholder('Search chats')).toBeVisible({
+      timeout: 10000,
+    })
+
+    await expect(page.getByText('Test One', { exact: false })).toBeVisible({
       timeout: 20000,
     })
-    await expect(page.getByText('Hello manager, I need help')).toBeVisible({
+    await expect(
+      page.getByText('Hello manager, I need help', { exact: false }),
+    ).toBeVisible({
       timeout: 20000,
     })
     await expect(page.locator('[data-testid="unread-dot"]')).toBeVisible({
       timeout: 10000,
     })
 
-    await page.getByText('test1', { exact: false }).first().click()
+    await page.getByText('Test One', { exact: false }).first().click()
     await page.waitForURL(/\/manager\/.+\/chat\/.+/, { timeout: 15000 })
 
     await expect(page.getByText('Hello manager, I need help')).toBeVisible()
-    await expect(page.getByText('test1', { exact: false }).first()).toBeVisible()
+    await expect(page.getByText('Test One', { exact: false }).first()).toBeVisible()
 
     await page.getByPlaceholder('Aa').fill('Thanks for reaching out')
     await page.getByRole('button', { name: 'Send' }).click()
 
-    await expect(page.getByText('Thanks for reaching out')).toBeVisible({
+    await expect(page.getByText('Thanks for reaching out').last()).toBeVisible({
       timeout: 10000,
     })
   })
