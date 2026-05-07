@@ -10,8 +10,10 @@ test.describe('Manager OA chat', () => {
     await page.goto(`${BASE_URL}/manager`, { waitUntil: 'domcontentloaded' })
     await page.waitForURL(/\/manager$/, { timeout: 10000 })
 
-    await page.getByText('Test Bot').first().click()
-    await page.waitForURL(/\/manager\/.+/, { timeout: 15000 })
+    await expect(page.getByText('Test Bot')).toBeVisible({ timeout: 10000 })
+
+    await page.getByRole('button', { name: 'Manage' }).first().click()
+    await page.waitForURL(/\/manager\/.+\/richmenu$/, { timeout: 15000 })
     await page.getByText('Chats', { exact: true }).click()
     await page.waitForURL(/\/manager\/.+\/chat$/, { timeout: 15000 })
 
