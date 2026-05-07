@@ -8,7 +8,7 @@ import { stickerMarketAdminClient } from './client'
 
 export function AdminFeaturedShelvesPage() {
   const queryClient = useTanQueryClient()
-  const [editingShelf, setEditingShelf] = useState<any | null>(null)
+  const [editingShelf, setEditingShelf] = useState<any>(null)
   const [newSlug, setNewSlug] = useState('')
   const [newTitle, setNewTitle] = useState('')
   const [newPackageIds, setNewPackageIds] = useState('')

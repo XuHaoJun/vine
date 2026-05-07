@@ -68,6 +68,7 @@ export const AreaOverlay = memo(
     }
 
     const tapGesture = Gesture.Tap().onEnd(() => {
+      // eslint-disable-next-line @typescript-eslint/no-deprecated -- reanimated migration TBD
       runOnJS(onSelect)(area.id)
     })
 
@@ -88,6 +89,7 @@ export const AreaOverlay = memo(
         )
       })
       .onEnd(() => {
+        // eslint-disable-next-line @typescript-eslint/no-deprecated -- reanimated migration TBD
         runOnJS(commitUpdate)(tx.value, ty.value, tw.value, th.value)
       })
 
@@ -107,6 +109,7 @@ export const AreaOverlay = memo(
         )
       })
       .onEnd(() => {
+        // eslint-disable-next-line @typescript-eslint/no-deprecated -- reanimated migration TBD
         runOnJS(commitUpdate)(tx.value, ty.value, tw.value, th.value)
       })
 

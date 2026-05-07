@@ -72,9 +72,9 @@ export const LocationBubble = memo(({ messageId, metadata, chatId, isMine }: Pro
           </YStack>
         ) : (
           <Image
-            source={{ uri: mapUrl }}
+            src={mapUrl}
             style={{ width: 280, height: 140 }}
-            resizeMode="cover"
+            objectFit="cover"
             onError={() => setImageError(true)}
           />
         )}

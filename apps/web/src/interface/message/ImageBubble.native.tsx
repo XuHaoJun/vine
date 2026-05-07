@@ -14,11 +14,7 @@ export const ImageBubble = memo(({ url }: Props) => {
     <>
       <Pressable onPress={() => setOpen(true)}>
         <YStack maxW={280} style={{ borderRadius: 18, overflow: 'hidden' }}>
-          <Image
-            source={{ uri: url }}
-            style={{ width: 280, height: 200 }}
-            resizeMode="cover"
-          />
+          <Image src={url} style={{ width: 280, height: 200 }} objectFit="cover" />
         </YStack>
       </Pressable>
 
@@ -38,11 +34,7 @@ export const ImageBubble = memo(({ url }: Props) => {
             justifyContent: 'center',
           }}
         >
-          <Image
-            source={{ uri: url }}
-            style={{ width: '95%', height: '95%' }}
-            resizeMode="contain"
-          />
+          <Image src={url} style={{ width: '95%', height: '95%' }} objectFit="contain" />
         </Pressable>
       </Modal>
     </>

@@ -20,7 +20,7 @@ export function createDriveService(disk: Disk): DriveService {
     },
 
     async exists(key) {
-      return await disk.exists(key)
+      return disk.exists(key)
     },
 
     async delete(key) {
@@ -28,7 +28,7 @@ export function createDriveService(disk: Disk): DriveService {
     },
 
     async getUrl(key) {
-      return await disk.getUrl(key)
+      return disk.getUrl(key)
     },
   }
 }

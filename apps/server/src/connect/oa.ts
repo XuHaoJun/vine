@@ -902,7 +902,7 @@ export function oaHandler(deps: OAHandlerDeps) {
               })
             },
           })
-          .catch((err) => {
+          .catch((err: unknown) => {
             logger.error(
               { err, oaId: req.officialAccountId, chatId: req.chatId },
               '[oa] richmenuswitch webhook delivery failed',

@@ -36,7 +36,7 @@ export const database = new Proxy({} as Pool, {
 // cleanup function that can be called during shutdown
 export async function closeDatabase() {
   try {
-    await database.end()
+    await getDatabase().end()
   } catch (error) {
     console.error(`[postgres] error closing database:`, error)
   }

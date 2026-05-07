@@ -1,4 +1,4 @@
-import { memo, useRef, useEffect, useMemo, type MutableRefObject } from 'react'
+import { memo, useRef, useEffect, useMemo, type RefObject } from 'react'
 import { YStack } from 'tamagui'
 import { validateAndConvertLiffMessages } from '~/features/liff/liffMessage'
 import {
@@ -208,7 +208,7 @@ export const LiffBrowser = memo(
       <YStack flex={1} style={{ height }}>
         <iframe
           ref={(el) => {
-            ;(iframeRef as MutableRefObject<HTMLIFrameElement | null>).current = el
+            ;(iframeRef as RefObject<HTMLIFrameElement | null>).current = el
             onIframeRefCb?.(el)
           }}
           id="liff-browser-iframe"

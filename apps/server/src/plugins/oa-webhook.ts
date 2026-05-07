@@ -37,6 +37,9 @@ function sendDispatchResult(reply: FastifyReply, result: WebhookDispatchResult) 
         .send({ message: 'Webhook delivery failed', status: result.statusCode ?? 0 })
     case 'ok':
       return reply.send({ success: true })
+    case 'delivery-not-failed':
+    case 'delivery-not-found':
+    case 'redelivery-disabled':
     default:
       return reply.code(500).send({ message: 'Unexpected dispatch result' })
   }

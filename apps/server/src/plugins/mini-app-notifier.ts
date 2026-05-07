@@ -93,7 +93,7 @@ export async function miniAppNotifierPlugin(
           userId: liffCtx.userId,
           flexJson: rendered,
         })
-        return reply.send({ status: 'sent', messageId: result.messageId })
+        return await reply.send({ status: 'sent', messageId: result.messageId })
       } catch (e) {
         if (e instanceof RateLimitError) {
           return reply

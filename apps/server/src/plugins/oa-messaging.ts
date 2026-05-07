@@ -282,7 +282,7 @@ export async function oaMessagingPlugin(
         const body = request.body as { replyToken: string; messages: MessageItem[] }
 
         if (request.headers['x-line-retry-key']) {
-          return reply.code(400).send({
+          return await reply.code(400).send({
             message: 'X-Line-Retry-Key is not supported on reply messages',
             code: 'INVALID_RETRY_KEY',
           })
@@ -312,7 +312,7 @@ export async function oaMessagingPlugin(
           replyToken: body.replyToken,
           messages: validMessages,
         })
-        return sendMessagingResult(reply, result)
+        return await sendMessagingResult(reply, result)
       } catch (err) {
         if (err instanceof Error && err.message === 'Missing Bearer token') {
           return reply
@@ -366,7 +366,7 @@ export async function oaMessagingPlugin(
           to: body.to,
           messages: validMessages,
         })
-        return sendMessagingResult(reply, result)
+        return await sendMessagingResult(reply, result)
       } catch (err) {
         if (err instanceof Error && err.message === 'Missing Bearer token') {
           return reply
@@ -430,7 +430,7 @@ export async function oaMessagingPlugin(
           to: body.to,
           messages: validMessages,
         })
-        return sendMessagingResult(reply, result)
+        return await sendMessagingResult(reply, result)
       } catch (err) {
         if (err instanceof Error && err.message === 'Missing Bearer token') {
           return reply
@@ -483,7 +483,7 @@ export async function oaMessagingPlugin(
           retryKey: request.headers['x-line-retry-key'] as string | undefined,
           messages: validMessages,
         })
-        return sendMessagingResult(reply, result)
+        return await sendMessagingResult(reply, result)
       } catch (err) {
         if (err instanceof Error && err.message === 'Missing Bearer token') {
           return reply
@@ -520,7 +520,7 @@ export async function oaMessagingPlugin(
           .limit(1)
 
         if (!user) {
-          return reply.code(404).send({ message: 'User not found' })
+          return await reply.code(404).send({ message: 'User not found' })
         }
 
         return await reply.send({
@@ -557,13 +557,13 @@ export async function oaMessagingPlugin(
         const oaId = await extractOaFromToken(request, db)
         const body = request.body as { chatId: string; loadingSeconds: number }
 
-        const loadingSeconds = Number(body.loadingSeconds)
+        const loadingSeconds = body.loadingSeconds
         if (
           !Number.isInteger(loadingSeconds) ||
           loadingSeconds < 5 ||
           loadingSeconds > 60
         ) {
-          return reply
+          return await reply
             .code(400)
             .send({ message: 'loadingSeconds must be an integer between 5 and 60' })
         }
@@ -575,7 +575,9 @@ export async function oaMessagingPlugin(
           .limit(1)
 
         if (!membership) {
-          return reply.code(404).send({ message: 'Chat not found or OA is not a member' })
+          return await reply
+            .code(404)
+            .send({ message: 'Chat not found or OA is not a member' })
         }
 
         const [chatRow] = await db
@@ -585,7 +587,7 @@ export async function oaMessagingPlugin(
           .limit(1)
 
         if (!chatRow || chatRow.type !== 'oa') {
-          return reply.code(400).send({
+          return await reply.code(400).send({
             message: 'Loading animation is only supported for one-on-one OA chats',
           })
         }
@@ -600,7 +602,7 @@ export async function oaMessagingPlugin(
             set: { expiresAt },
           })
 
-        return reply.send({})
+        return await reply.send({})
       } catch (err) {
         if (err instanceof Error && err.message === 'Missing Bearer token') {
           return reply
@@ -696,30 +698,32 @@ export async function oaMessagingPlugin(
           .limit(1)
 
         if (!msg || msg.oaId !== oaId) {
-          return reply.code(404).send({ message: 'Message not found' })
+          return await reply.code(404).send({ message: 'Message not found' })
         }
 
         const msgType = msg.type
         if (!['image', 'video', 'audio'].includes(msgType)) {
-          return reply
+          return await reply
             .code(400)
             .send({ message: 'Message type does not support content upload' })
         }
 
         const ext = getExtensionForContentType(contentType ?? '', msgType)
         if (!ext) {
-          return reply.code(415).send({ message: 'Unsupported media type' })
+          return await reply.code(415).send({ message: 'Unsupported media type' })
         }
 
         const body = request.body as Buffer
         if (body.length > 20 * 1024 * 1024) {
-          return reply.code(400).send({ message: 'Content size exceeds 20MB limit' })
+          return await reply
+            .code(400)
+            .send({ message: 'Content size exceeds 20MB limit' })
         }
 
         const key = `message/${oaId}/${messageId}.${ext}`
         await drive.put(key, Buffer.from(body), contentType ?? 'application/octet-stream')
 
-        return reply.send({})
+        return await reply.send({})
       } catch (err) {
         if (err instanceof Error && err.message === 'Missing Bearer token') {
           return reply
@@ -757,12 +761,12 @@ export async function oaMessagingPlugin(
           .limit(1)
 
         if (!msg || msg.oaId !== oaId) {
-          return reply.code(404).send({ message: 'Message not found' })
+          return await reply.code(404).send({ message: 'Message not found' })
         }
 
         const msgType = msg.type
         if (!['image', 'video', 'audio'].includes(msgType)) {
-          return reply
+          return await reply
             .code(400)
             .send({ message: 'Message type does not support content retrieval' })
         }
@@ -772,11 +776,11 @@ export async function oaMessagingPlugin(
 
         const fileExists = await drive.exists(key)
         if (!fileExists) {
-          return reply.code(404).send({ message: 'Content not found' })
+          return await reply.code(404).send({ message: 'Content not found' })
         }
 
         const file = await drive.get(key)
-        return reply
+        return await reply
           .header('Content-Type', file.mimeType ?? 'application/octet-stream')
           .header('Content-Length', file.size)
           .send(file.content)

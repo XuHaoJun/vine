@@ -27,12 +27,7 @@ const PillButton = memo(
         style={{ borderRadius: 999 }}
       >
         {item.imageUrl ? (
-          <Image
-            source={{ uri: item.imageUrl }}
-            width={20}
-            height={20}
-            style={{ borderRadius: 4 }}
-          />
+          <Image src={item.imageUrl} width={20} height={20} style={{ borderRadius: 4 }} />
         ) : null}
         <SizableText fontSize={14} color="$gray12" numberOfLines={1}>
           {label}
@@ -79,7 +74,8 @@ function labelFor(action: QuickReplyAction): string {
       return action.uri
     case 'postback':
       return action.displayText ?? '...'
-    default:
+    case 'clipboard':
+    case 'datetimepicker':
       return action.type
   }
 }

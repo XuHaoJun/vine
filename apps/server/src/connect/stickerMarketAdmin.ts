@@ -426,7 +426,7 @@ function trustReportStatusFromProto(status: TrustReportStatus): string | undefin
       return 'resolved'
     case TrustReportStatus.DISMISSED:
       return 'dismissed'
-    default:
+    case TrustReportStatus.UNSPECIFIED:
       return undefined
   }
 }

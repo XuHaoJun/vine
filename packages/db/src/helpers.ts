@@ -1,4 +1,4 @@
 import { createServerHelpers } from '@take-out/postgres'
-import { database } from './database'
+import { getDatabase } from './database'
 
-export const { sql, getDBClient } = createServerHelpers(database)
+export const { sql, getDBClient } = createServerHelpers(getDatabase())

@@ -253,7 +253,7 @@ export class LiffImpl {
     if (typeof navigator === 'undefined') return 'web'
     const ua = navigator.userAgent
     if (/iPad|iPhone|iPod/.test(ua)) return 'ios'
-    if (/Android/.test(ua)) return 'android'
+    if (ua.includes('Android')) return 'android'
     return 'web'
   }
 

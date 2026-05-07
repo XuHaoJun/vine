@@ -215,7 +215,7 @@ const oaMessagingRecoveryInterval = setInterval(() => {
   oaMessagingRecoveryRunning = true
   void oaMessaging
     .processPendingDeliveries({ batchSize: 100, staleAfterMs: 60_000 })
-    .catch((err) => logger.error({ err }, '[oa-messaging] recovery failed'))
+    .catch((err: unknown) => logger.error({ err }, '[oa-messaging] recovery failed'))
     .finally(() => {
       oaMessagingRecoveryRunning = false
     })
@@ -228,7 +228,9 @@ app.addHook('onClose', async () => {
 const cleanupWebhookDeliveries = () =>
   webhookDelivery
     .cleanupExpiredDeliveries({ olderThanDays: 30 })
-    .catch((err) => logger.error({ err }, '[oa-webhook] retention cleanup failed'))
+    .catch((err: unknown) =>
+      logger.error({ err }, '[oa-webhook] retention cleanup failed'),
+    )
 
 void cleanupWebhookDeliveries()
 const webhookRetentionInterval = setInterval(
@@ -242,7 +244,7 @@ app.addHook('onClose', async () => {
 const cleanupLoadings = () =>
   oaMessaging
     .cleanupExpiredChatLoadings()
-    .catch((err) => logger.error({ err }, '[loading] cleanup failed'))
+    .catch((err: unknown) => logger.error({ err }, '[loading] cleanup failed'))
 
 void cleanupLoadings()
 const loadingCleanupInterval = setInterval(() => void cleanupLoadings(), 60_000)

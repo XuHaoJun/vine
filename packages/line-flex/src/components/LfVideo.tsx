@@ -24,7 +24,7 @@ export function LfVideo({
       // @ts-ignore - TamaguiImage type incompatibility with JSX
       <Image
         flex={1}
-        source={{ uri: img.url }}
+        src={img.url}
         objectFit="cover"
         aspectRatio={aspectRatio.replace(':', ' / ')}
         onPress={clickHandler}
@@ -37,7 +37,7 @@ export function LfVideo({
     // @ts-ignore - TamaguiImage type incompatibility with JSX
     <Image
       flex={1}
-      source={{ uri: previewUrl }}
+      src={previewUrl}
       objectFit="cover"
       aspectRatio={aspectRatio.replace(':', ' / ')}
       onPress={clickHandler}

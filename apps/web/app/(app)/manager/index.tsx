@@ -1,3 +1,4 @@
+import { OAStatus } from '@vine/proto/oa'
 import { useRouter } from 'one'
 import { memo, useState } from 'react'
 import { SizableText, Spinner, XStack, YStack } from 'tamagui'
@@ -229,9 +230,9 @@ export const ManagerIndexPage = memo(() => {
                           py="$1"
                           rounded="$2"
                           bg={
-                            account.status === 1
+                            account.status === OAStatus.OA_STATUS_ACTIVE
                               ? '$green3'
-                              : account.status === 2
+                              : account.status === OAStatus.OA_STATUS_DISABLED
                                 ? '$red3'
                                 : '$color3'
                           }
@@ -241,16 +242,16 @@ export const ManagerIndexPage = memo(() => {
                             size="$1"
                             fontWeight="700"
                             color={
-                              account.status === 1
+                              account.status === OAStatus.OA_STATUS_ACTIVE
                                 ? '$green10'
-                                : account.status === 2
+                                : account.status === OAStatus.OA_STATUS_DISABLED
                                   ? '$red10'
                                   : '$color10'
                             }
                           >
-                            {account.status === 1
+                            {account.status === OAStatus.OA_STATUS_ACTIVE
                               ? 'Active'
-                              : account.status === 2
+                              : account.status === OAStatus.OA_STATUS_DISABLED
                                 ? 'Disabled'
                                 : 'Unknown'}
                           </SizableText>

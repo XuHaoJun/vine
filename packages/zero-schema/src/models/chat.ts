@@ -1,4 +1,5 @@
 import { number, string, table } from '@rocicorp/zero'
+/* eslint-disable @typescript-eslint/no-deprecated -- tx.query is the current Zero mutations API */
 import { mutations, serverWhere } from 'on-zero'
 import type { TableInsertRow } from 'on-zero'
 

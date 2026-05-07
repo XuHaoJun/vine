@@ -15,7 +15,7 @@ export type LFexTextProps = LFexText & {
 }
 
 export function LfText({
-  text = '',
+  text,
   contents,
   flex,
   margin,

@@ -149,7 +149,7 @@ export async function oaWebhookEndpointPlugin(
           signal: AbortSignal.timeout(10000),
         })
 
-        return reply.send({
+        return await reply.send({
           success: response.ok,
           timestamp,
           statusCode: response.status,

@@ -21,7 +21,7 @@ describe('mini-app service message renderer', () => {
   it('rejects missing required params', () => {
     expect(() =>
       validateParams([{ name: 'title', required: true, kind: 'text' }], {}),
-    ).toThrowError(TemplateValidationError)
+    ).toThrow(TemplateValidationError)
   })
 
   it('hard-cap fails when text exceeds limit', () => {
@@ -29,7 +29,7 @@ describe('mini-app service message renderer', () => {
       validateParams([{ name: 'x', required: true, kind: 'text', hard: 5 }], {
         x: '123456',
       }),
-    ).toThrowError(/hard limit/)
+    ).toThrow(/hard limit/)
   })
 
   it('rejects non-https uri params', () => {
@@ -37,6 +37,6 @@ describe('mini-app service message renderer', () => {
       validateParams([{ name: 'u', required: true, kind: 'uri' }], {
         u: 'javascript:alert(1)',
       }),
-    ).toThrowError(/uri/i)
+    ).toThrow(/uri/i)
   })
 })

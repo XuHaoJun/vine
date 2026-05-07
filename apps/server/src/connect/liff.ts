@@ -35,7 +35,7 @@ function viewTypeToDb(vt: ViewType): string {
       return 'tall'
     case ViewType.FULL:
       return 'full'
-    default:
+    case ViewType.UNSPECIFIED:
       return 'full'
   }
 }
@@ -59,7 +59,8 @@ function botPromptToDb(bp: BotPrompt): string {
       return 'normal'
     case BotPrompt.AGGRESSIVE:
       return 'aggressive'
-    default:
+    case BotPrompt.UNSPECIFIED:
+    case BotPrompt.NONE:
       return 'none'
   }
 }

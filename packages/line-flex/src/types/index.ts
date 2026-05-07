@@ -96,8 +96,8 @@ export interface LFexBox {
   layout: LFexLayout
   contents: LFexComponent[]
   flex?: number
-  spacing?: LFexSpacing | string
-  margin?: LFexMargin | string
+  spacing?: string
+  margin?: string
   paddingAll?: string
   paddingTop?: string
   paddingBottom?: string
@@ -110,7 +110,7 @@ export interface LFexBox {
   offsetEnd?: string
   backgroundColor?: string
   borderColor?: string
-  borderWidth?: LFexBorderWidth | string
+  borderWidth?: string
   cornerRadius?: string
   width?: string
   maxWidth?: string
@@ -126,7 +126,7 @@ export interface LFexButton {
   type: 'button'
   action: LFexAction
   flex?: number
-  margin?: LFexMargin | string
+  margin?: string
   position?: LFexPosition
   offsetTop?: string
   offsetBottom?: string
@@ -147,9 +147,9 @@ export interface LFexFiller {
 export interface LFexIcon {
   type: 'icon'
   url: string
-  size?: LFexSize | string
+  size?: string
   aspectRatio?: LFexAspectRatio
-  margin?: LFexMargin | string
+  margin?: string
   position?: LFexPosition
   offsetTop?: string
   offsetBottom?: string
@@ -161,7 +161,7 @@ export interface LFexImage {
   type: 'image'
   url: string
   flex?: number
-  margin?: LFexMargin | string
+  margin?: string
   position?: LFexPosition
   offsetTop?: string
   offsetBottom?: string
@@ -169,7 +169,7 @@ export interface LFexImage {
   offsetEnd?: string
   align?: LFexAlign
   gravity?: LFexGravity
-  size?: LFexSize | string
+  size?: string
   aspectRatio?: LFexAspectRatio
   aspectMode?: LFexAspectMode
   backgroundColor?: string
@@ -178,13 +178,13 @@ export interface LFexImage {
 
 export interface LFexSeparator {
   type: 'separator'
-  margin?: LFexMargin | string
+  margin?: string
   color?: string
 }
 
 export interface LFexSpacer {
   type: 'spacer'
-  size?: LFexSize | string
+  size?: string
 }
 
 export interface LFexText {
@@ -192,13 +192,13 @@ export interface LFexText {
   text: string
   contents?: LFexSpan[]
   flex?: number
-  margin?: LFexMargin | string
+  margin?: string
   position?: LFexPosition
   offsetTop?: string
   offsetBottom?: string
   offsetStart?: string
   offsetEnd?: string
-  size?: LFexSize | string
+  size?: string
   align?: LFexAlign
   gravity?: LFexGravity
   wrap?: boolean
@@ -214,7 +214,7 @@ export interface LFexText {
 export interface LFexSpan {
   type: 'span'
   text: string
-  size?: LFexSize | string
+  size?: string
   color?: string
   weight?: LFexWeight
   style?: LFexStyle

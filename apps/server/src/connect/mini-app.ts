@@ -316,7 +316,7 @@ export function miniAppImpl(
       const existing = await deps.template.getTemplate(req.id)
       if (!existing) throw new ConnectError('Template not found', Code.NotFound)
       await assertMiniAppOwnedByUser(deps, existing.miniAppId, auth.id)
-      let flex: unknown | undefined
+      let flex: unknown
       if (req.flexJson) {
         try {
           flex = JSON.parse(req.flexJson)

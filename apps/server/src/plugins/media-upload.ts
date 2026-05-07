@@ -131,7 +131,7 @@ export async function mediaUploadPlugin(
       try {
         await deps.drive.put(key, buffer, baseMime)
         const url = await deps.drive.getUrl(key)
-        return reply.send({ url })
+        return await reply.send({ url })
       } catch (err) {
         logger.error({ err }, '[media-upload] drive write failed')
         return reply.code(500).send({ message: 'Upload failed' })

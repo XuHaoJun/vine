@@ -220,7 +220,7 @@ export function createOAWebhookDeliveryService(deps: OAWebhookDeliveryDeps) {
 
   async function deliverRealEvent(input: {
     oaId: string
-    buildPayload: () => unknown | Promise<unknown>
+    buildPayload: () => unknown
   }): Promise<WebhookDispatchResult> {
     const account = await deps.oa.getOfficialAccount(input.oaId)
     if (!account) return { kind: 'oa-not-found' }

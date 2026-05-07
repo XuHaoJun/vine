@@ -146,8 +146,8 @@ function renderChild(
 }
 
 export function LfBox({
-  layout = 'vertical',
-  contents = [],
+  layout,
+  contents,
   flex,
   spacing,
   margin,

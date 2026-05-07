@@ -131,6 +131,7 @@ function createAuthServer(deps: AuthDeps) {
         },
       }),
       admin(),
+      // eslint-disable-next-line @typescript-eslint/no-deprecated -- better-auth API, migration TBD
       oidcProvider({
         loginPage: '/auth/login',
         consentPage: '/auth/consent',
@@ -347,7 +348,7 @@ export async function authPlugin(fastify: FastifyInstance, deps: AuthPluginDeps)
         )
 
         if (result.rows.length === 0) {
-          return reply.code(400).send({
+          return await reply.code(400).send({
             error: 'invalid_request',
             error_description: 'invalid access token',
           })
@@ -363,7 +364,7 @@ export async function authPlugin(fastify: FastifyInstance, deps: AuthPluginDeps)
         const now = new Date()
 
         if (expiresAt <= now) {
-          return reply.code(400).send({
+          return await reply.code(400).send({
             error: 'invalid_request',
             error_description: 'access token expired',
           })
@@ -371,7 +372,7 @@ export async function authPlugin(fastify: FastifyInstance, deps: AuthPluginDeps)
 
         const expiresIn = Math.floor((expiresAt.getTime() - now.getTime()) / 1000)
 
-        return reply.send({
+        return await reply.send({
           scope: row.scopes,
           client_id: row.clientId,
           expires_in: expiresIn,
@@ -414,21 +415,21 @@ export async function authPlugin(fastify: FastifyInstance, deps: AuthPluginDeps)
         const { payload } = await jwtVerify(idToken, jwks)
 
         if (payload.aud !== clientId) {
-          return reply.code(400).send({
+          return await reply.code(400).send({
             error: 'invalid_request',
             error_description: 'Invalid IdToken Audience.',
           })
         }
 
         if (nonce && payload.nonce !== nonce) {
-          return reply.code(400).send({
+          return await reply.code(400).send({
             error: 'invalid_request',
             error_description: 'Invalid IdToken Nonce.',
           })
         }
 
         if (userId && payload.sub !== userId) {
-          return reply.code(400).send({
+          return await reply.code(400).send({
             error: 'invalid_request',
             error_description: 'Invalid IdToken Subject Identifier.',
           })
@@ -449,7 +450,7 @@ export async function authPlugin(fastify: FastifyInstance, deps: AuthPluginDeps)
         if (payload.picture) response.picture = payload.picture
         if (payload.email) response.email = payload.email
 
-        return reply.send(response)
+        return await reply.send(response)
       } catch (err) {
         logger.error({ err }, '[oauth] verify id token error')
 

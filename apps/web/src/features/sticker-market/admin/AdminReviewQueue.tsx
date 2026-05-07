@@ -20,7 +20,7 @@ function getStatusLabel(status: StickerPackageStatus) {
       return '已下架'
     case StickerPackageStatus.REMOVED:
       return '已移除'
-    default:
+    case StickerPackageStatus.UNSPECIFIED:
       return '未知'
   }
 }

@@ -14,7 +14,7 @@ function statusLabel(status: TrustReportStatus) {
       return '已處理'
     case TrustReportStatus.DISMISSED:
       return '不處理'
-    default:
+    case TrustReportStatus.UNSPECIFIED:
       return '未知'
   }
 }

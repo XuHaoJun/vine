@@ -50,7 +50,7 @@ export function validateParams(
         if (typeof v !== 'string') {
           throw new TemplateValidationError(`Param ${spec.name} must be a uri string`)
         }
-        if (!/^https:\/\//.test(v)) {
+        if (!v.startsWith('https://')) {
           throw new TemplateValidationError(`Param ${spec.name} must be an https URI`)
         }
       }
