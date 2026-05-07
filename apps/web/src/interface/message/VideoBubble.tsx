@@ -1,7 +1,7 @@
 import { memo, useState } from 'react'
 import { Pressable } from 'react-native'
-import { YStack } from 'tamagui'
 import Svg, { Circle, Path } from 'react-native-svg'
+import { YStack } from 'tamagui'
 
 type Props = {
   url: string

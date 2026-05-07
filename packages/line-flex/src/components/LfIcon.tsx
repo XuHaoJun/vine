@@ -1,6 +1,6 @@
 import { Image } from 'tamagui'
-import type { LFexIcon, LFexLayout } from '../types'
 import { mergeLineMarginWithParentSpacing } from '../utils/spacing'
+import type { LFexIcon, LFexLayout } from '../types'
 
 export type LFexIconProps = LFexIcon & {
   layout?: LFexLayout

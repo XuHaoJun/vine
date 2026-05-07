@@ -1,7 +1,7 @@
 import { Code, ConnectError } from '@connectrpc/connect'
-import type { HandlerContext } from '@connectrpc/connect'
 import { StickerPackageStatus } from '@vine/proto/stickerMarket'
 import { requireAuthData } from './auth-context'
+import type { HandlerContext } from '@connectrpc/connect'
 
 export type StickerMarketCreatorHandlerDeps = {
   creatorRepo: any

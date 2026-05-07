@@ -6,7 +6,6 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated'
 import { SizableText, YStack } from 'tamagui'
-
 import type { Area, AreaBounds } from './types'
 
 type Props = {

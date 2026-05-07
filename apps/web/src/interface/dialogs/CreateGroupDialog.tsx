@@ -1,10 +1,9 @@
 import { useState } from 'react'
-import { Sheet, SizableText, YStack, XStack } from 'tamagui'
 import { TouchableOpacity } from 'react-native'
-
-import { FriendPicker } from '~/interface/friend-picker/FriendPicker'
+import { Sheet, SizableText, YStack, XStack } from 'tamagui'
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
+import { FriendPicker } from '~/interface/friend-picker/FriendPicker'
 import { showToast } from '~/interface/toast/Toast'
 import { zero } from '~/zero/client'
 

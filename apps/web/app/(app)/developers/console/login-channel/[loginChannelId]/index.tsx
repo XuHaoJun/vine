@@ -2,10 +2,10 @@
 import { useActiveParams, useRouter, createRoute } from 'one'
 import { memo, useState } from 'react'
 import { SizableText, Spinner, XStack, YStack } from 'tamagui'
-import { useTanQuery } from '~/query'
 import { loginChannelClient } from '~/features/liff/client'
 import { Button } from '~/interface/buttons/Button'
 import { CaretLeftIcon } from '~/interface/icons/phosphor/CaretLeftIcon'
+import { useTanQuery } from '~/query'
 
 const route = createRoute<'/(app)/developers/console/login-channel/[loginChannelId]'>()
 

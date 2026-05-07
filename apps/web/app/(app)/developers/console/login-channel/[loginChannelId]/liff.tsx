@@ -1,20 +1,20 @@
+import { valibotResolver } from '@hookform/resolvers/valibot'
+import { ViewType } from '@vine/proto/liff'
 // apps/web/app/(app)/developers/console/login-channel/[loginChannelId]/liff.tsx
 import { useActiveParams, useRouter, createRoute } from 'one'
 import { memo, useState } from 'react'
-import { SizableText, Spinner, XStack, YStack } from 'tamagui'
 import { Controller, useForm } from 'react-hook-form'
-import { valibotResolver } from '@hookform/resolvers/valibot'
+import { SizableText, Spinner, XStack, YStack } from 'tamagui'
 import * as v from 'valibot'
-import { useTanQuery, useTanMutation, useTanQueryClient } from '~/query'
 import { liffClient, loginChannelClient } from '~/features/liff/client'
 import { Button } from '~/interface/buttons/Button'
+import { dialogConfirm } from '~/interface/dialogs/actions'
 import { Input } from '~/interface/forms/Input'
 import { ArrowUpRightIcon } from '~/interface/icons/phosphor/ArrowUpRightIcon'
 import { CaretLeftIcon } from '~/interface/icons/phosphor/CaretLeftIcon'
 import { CopyIcon } from '~/interface/icons/phosphor/CopyIcon'
 import { showToast } from '~/interface/toast/Toast'
-import { dialogConfirm } from '~/interface/dialogs/actions'
-import { ViewType } from '@vine/proto/liff'
+import { useTanQuery, useTanMutation, useTanQueryClient } from '~/query'
 
 const route =
   createRoute<'/(app)/developers/console/login-channel/[loginChannelId]/liff'>()

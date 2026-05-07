@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from 'vitest'
 import Fastify from 'fastify'
+import { describe, expect, it, vi } from 'vitest'
 import { miniAppPublicPlugin } from './mini-app-public'
 
 function fakeMiniAppService(rows: Record<string, any>) {

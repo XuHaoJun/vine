@@ -6,7 +6,6 @@
  */
 
 import { parseArgs } from 'node:util'
-
 import { $ } from 'bun'
 
 const { values } = parseArgs({

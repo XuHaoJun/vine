@@ -1,11 +1,11 @@
 import { Code, ConnectError } from '@connectrpc/connect'
-import type { HandlerContext } from '@connectrpc/connect'
-import { and, eq } from 'drizzle-orm'
-import { stickerPackage, entitlement } from '@vine/db/schema-public'
 import { stickerOrder } from '@vine/db/schema-private'
-import type { PaymentsService } from '@vine/pay'
+import { stickerPackage, entitlement } from '@vine/db/schema-public'
 import { OrderStatus, TrustReportStatus } from '@vine/proto/stickerMarket'
+import { and, eq } from 'drizzle-orm'
 import { requireAuthData } from './auth-context'
+import type { HandlerContext } from '@connectrpc/connect'
+import type { PaymentsService } from '@vine/pay'
 
 export type StickerMarketUserHandlerDeps = {
   db: any

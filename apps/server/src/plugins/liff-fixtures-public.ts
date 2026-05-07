@@ -1,8 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-
-import type { FastifyInstance } from 'fastify'
 import { getLiffFixturesDistDir } from '@vine/liff-fixtures/paths'
+import type { FastifyInstance } from 'fastify'
 
 /**
  * Serves built LIFF integration-test fixtures from `@vine/liff-fixtures` (see `packages/liff-fixtures`).

@@ -1,14 +1,9 @@
-import { useMemo } from 'react'
-import { Controller, useForm } from 'react-hook-form'
 import { valibotResolver } from '@hookform/resolvers/valibot'
-import { SizableText, XStack, YStack } from 'tamagui'
-
 import { creatorProfileByUserId } from '@vine/zero-schema/queries/creatorProfile'
 import { stickerPackagesByCreatorId } from '@vine/zero-schema/queries/stickerPackage'
-import { Button } from '~/interface/buttons/Button'
-import { Input } from '~/interface/forms/Input'
-import { TextArea } from '~/interface/forms/TextArea'
-import { showToast } from '~/interface/toast/Toast'
+import { useMemo } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { SizableText, XStack, YStack } from 'tamagui'
 import { useAuth } from '~/features/auth/client/authClient'
 import {
   creatorSalesReportQueryKey,
@@ -17,9 +12,12 @@ import {
   stickerMarketCreatorClient,
 } from '~/features/sticker-market/creator/client'
 import { creatorProfileSchema } from '~/features/sticker-market/creator/schema'
-import { useZeroQuery } from '~/zero/client'
+import { Button } from '~/interface/buttons/Button'
+import { Input } from '~/interface/forms/Input'
+import { TextArea } from '~/interface/forms/TextArea'
+import { showToast } from '~/interface/toast/Toast'
 import { useTanMutation, useTanQuery } from '~/query'
-
+import { useZeroQuery } from '~/zero/client'
 import type { CreatorProfileFormData } from '~/features/sticker-market/creator/schema'
 
 export function CreatorDashboard() {

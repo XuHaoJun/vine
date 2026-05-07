@@ -1,12 +1,12 @@
 import { getAuthDataFromRequest } from '@take-out/better-auth-utils/server'
-import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import { and, eq } from 'drizzle-orm'
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import type { schema } from '@vine/db'
 import { chatMember, message } from '@vine/db/schema-public'
-import { toWebRequest } from '../utils'
+import { and, eq } from 'drizzle-orm'
 import { logger } from '../lib/logger'
+import { toWebRequest } from '../utils'
 import type { createAuthServer } from './auth'
+import type { schema } from '@vine/db'
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 
 type LocationMapPluginDeps = {
   db: NodePgDatabase<typeof schema>

@@ -1,7 +1,7 @@
-// packages/db/src/seed/sticker-fixtures/generate.mjs
-import { deflateSync } from 'zlib'
 import { writeFileSync, mkdirSync } from 'fs'
 import path from 'path'
+// packages/db/src/seed/sticker-fixtures/generate.mjs
+import { deflateSync } from 'zlib'
 
 function crc32(buf) {
   const table = []

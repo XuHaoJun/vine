@@ -1,6 +1,6 @@
 import { YStack, XStack } from 'tamagui'
-import type { LFexSeparator } from '../types'
 import { mergeLineMarginWithParentSpacing } from '../utils/spacing'
+import type { LFexSeparator } from '../types'
 
 export type LFexSeparatorProps = LFexSeparator & {
   layout?: 'horizontal' | 'vertical' | 'baseline'

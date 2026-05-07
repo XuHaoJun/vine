@@ -1,6 +1,5 @@
 import { Redirect, Slot, Stack, usePathname } from 'one'
 import { Configuration } from 'tamagui'
-
 import { useAuth } from '~/features/auth/client/authClient'
 import { DialogProvider } from '~/interface/dialogs/Dialog'
 import { PlatformSpecificRootProvider } from '~/interface/platform/PlatformSpecificRootProvider'

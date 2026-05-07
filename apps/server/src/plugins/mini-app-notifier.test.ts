@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from 'vitest'
 import Fastify from 'fastify'
+import { describe, expect, it, vi } from 'vitest'
 import { miniAppNotifierPlugin } from './mini-app-notifier'
 
 function deps(overrides: Partial<any> = {}) {

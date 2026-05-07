@@ -1,8 +1,8 @@
 import { Code, ConnectError, createContextValues } from '@connectrpc/connect'
 import { OrderStatus } from '@vine/proto/stickerMarket'
 import { describe, it, expect, vi } from 'vitest'
-import { createStickerMarketUserHandler } from './stickerMarketUser'
 import { connectAuthDataKey } from './auth-context'
+import { createStickerMarketUserHandler } from './stickerMarketUser'
 
 function makeMockPay() {
   return {

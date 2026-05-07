@@ -1,6 +1,3 @@
-import { describe, expect, it } from 'vitest'
-import { creatorProfile } from '@vine/db/schema-public'
-import { withRollbackDb } from '../../test/integration-db'
 import {
   creatorPayoutAccount,
   creatorPayoutAuditEvent,
@@ -8,6 +5,9 @@ import {
   creatorPayoutLedger,
   creatorPayoutRequest,
 } from '@vine/db/schema-private'
+import { creatorProfile } from '@vine/db/schema-public'
+import { describe, expect, it } from 'vitest'
+import { withRollbackDb } from '../../test/integration-db'
 import { createPayoutRepository } from './payout.repository'
 
 describe('createPayoutRepository', () => {

@@ -1,5 +1,4 @@
 import { join, resolve } from 'node:path'
-
 import { tamaguiPlugin } from '@tamagui/vite-plugin'
 import { defineConfig } from 'vitest/config'
 

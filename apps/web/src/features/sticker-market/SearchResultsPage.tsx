@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react'
 import { router } from 'one'
+import { useState, useEffect } from 'react'
 import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
-
-import { Input } from '~/interface/forms/Input'
 import { Button } from '~/interface/buttons/Button'
+import { Input } from '~/interface/forms/Input'
 import { useTanQuery } from '~/query'
 import { stickerMarketDiscoveryClient } from './client'
 

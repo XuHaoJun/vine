@@ -1,6 +1,7 @@
 import { memo, useRef } from 'react'
-import { YStack } from 'tamagui'
 import { WebView, type WebViewMessageEvent } from 'react-native-webview'
+import { YStack } from 'tamagui'
+import { validateAndConvertLiffMessages } from '~/features/liff/liffMessage'
 import {
   createLiffIframeSrc,
   createLiffBootstrap,
@@ -10,7 +11,6 @@ import {
   LIFF_LINE_VERSION,
   type LiffRuntimeContext,
 } from '~/features/liff/liffRuntimeHelpers'
-import { validateAndConvertLiffMessages } from '~/features/liff/liffMessage'
 import { zero } from '~/zero/client'
 
 type ShareTargetPickerPayload = {

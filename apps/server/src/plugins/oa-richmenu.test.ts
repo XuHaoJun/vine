@@ -1,7 +1,7 @@
-import { describe, expect, it, afterAll, vi } from 'vitest'
 import Fastify from 'fastify'
-import { oaApiPath } from './oa-routes'
+import { describe, expect, it, afterAll, vi } from 'vitest'
 import { oaRichMenuPlugin } from './oa-richmenu'
+import { oaApiPath } from './oa-routes'
 
 const validToken = 'valid-test-token'
 const oaId = '550e8400-e29b-41d4-a716-446655440000'

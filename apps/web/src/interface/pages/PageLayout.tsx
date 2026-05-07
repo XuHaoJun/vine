@@ -1,7 +1,5 @@
 import { isWeb } from 'tamagui'
-
 import { GradientBackground } from '../backgrounds/GradientBackground'
-
 import type { ReactNode } from 'react'
 
 export type PageLayoutProps = {

@@ -44,12 +44,12 @@ bun run backend     # starts postgres, migrate, zero, server, and web in docker 
 
 The dockerized stack exposes:
 
-| Service   | URL / Port                                            |
-| --------- | ----------------------------------------------------- |
-| Web (One) | <http://localhost:3000>                               |
-| Server    | <http://localhost:3001>                               |
-| Zero      | <http://localhost:4948>                               |
-| Postgres  | `postgresql://user:password@localhost:5533/postgres`  |
+| Service   | URL / Port                                           |
+| --------- | ---------------------------------------------------- |
+| Web (One) | <http://localhost:3000>                              |
+| Server    | <http://localhost:3001>                              |
+| Zero      | <http://localhost:4948>                              |
+| Postgres  | `postgresql://user:password@localhost:5533/postgres` |
 
 > Local development is driven by `docker compose`. You normally do **not** need to run `bun run dev` separately — the `web` and `server` services already run their own dev processes inside the compose stack.
 
@@ -81,24 +81,24 @@ vine/
 
 ### Apps
 
-| App            | Description                                                                |
-| -------------- | -------------------------------------------------------------------------- |
-| `@vine/web`    | One (vxrn) cross-platform app — web + iOS + Android, built with Tamagui    |
+| App            | Description                                                                    |
+| -------------- | ------------------------------------------------------------------------------ |
+| `@vine/web`    | One (vxrn) cross-platform app — web + iOS + Android, built with Tamagui        |
 | `@vine/server` | Fastify HTTP server with ConnectRPC, Better Auth, and Zero push/pull endpoints |
 
 ### Packages
 
-| Package                  | Description                                                       |
-| ------------------------ | ----------------------------------------------------------------- |
-| `@vine/db`               | Drizzle ORM schema, migrations, and seed utilities                |
-| `@vine/zero-schema`      | Zero sync models, queries, mutations, and permissions             |
-| `@vine/proto`            | Protobuf definitions + buf-generated TypeScript clients/services  |
-| `@vine/drive`            | File storage abstraction (local / S3 / Cloudflare R2)             |
-| `@vine/liff`             | LIFF-style mini-app SDK consumed by `apps/web`                    |
-| `@vine/liff-fixtures`    | Static LIFF fixtures served by `apps/server` for integration tests |
-| `@vine/line-flex`        | LINE-style Flex Message renderer                                  |
-| `@vine/flex-schema`      | Type-safe Flex Message schema                                     |
-| `@vine/richmenu-schema`  | Type-safe Rich Menu schema                                        |
+| Package                 | Description                                                        |
+| ----------------------- | ------------------------------------------------------------------ |
+| `@vine/db`              | Drizzle ORM schema, migrations, and seed utilities                 |
+| `@vine/zero-schema`     | Zero sync models, queries, mutations, and permissions              |
+| `@vine/proto`           | Protobuf definitions + buf-generated TypeScript clients/services   |
+| `@vine/drive`           | File storage abstraction (local / S3 / Cloudflare R2)              |
+| `@vine/liff`            | LIFF-style mini-app SDK consumed by `apps/web`                     |
+| `@vine/liff-fixtures`   | Static LIFF fixtures served by `apps/server` for integration tests |
+| `@vine/line-flex`       | LINE-style Flex Message renderer                                   |
+| `@vine/flex-schema`     | Type-safe Flex Message schema                                      |
+| `@vine/richmenu-schema` | Type-safe Rich Menu schema                                         |
 
 ## Common Commands
 
@@ -244,11 +244,11 @@ Raw `fetch()` is **not** the default and should be avoided for normal server dat
 
 GitHub Actions runs three main jobs:
 
-| Job             | Purpose                                | Skip condition                               |
-| --------------- | -------------------------------------- | -------------------------------------------- |
-| `check`         | `bun run check:all`                    | commit / PR title contains `docs:`           |
-| `test-server`   | `bun run --cwd apps/server test`       | commit / PR title contains `docs:`           |
-| `integration`   | `bun scripts/integration.ts`           | commit / PR title contains `docs:`           |
+| Job           | Purpose                          | Skip condition                     |
+| ------------- | -------------------------------- | ---------------------------------- |
+| `check`       | `bun run check:all`              | commit / PR title contains `docs:` |
+| `test-server` | `bun run --cwd apps/server test` | commit / PR title contains `docs:` |
+| `integration` | `bun scripts/integration.ts`     | commit / PR title contains `docs:` |
 
 The install action sets up Node, Bun, `libreadline-dev`, then runs install + postinstall + build. The `integration` job needs the required secrets and env to be present.
 

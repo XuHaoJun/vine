@@ -1,10 +1,10 @@
-import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import type { schema } from '@vine/db'
 import { oaAccessToken } from '@vine/db/schema-oa'
 import { eq } from 'drizzle-orm'
-import type { createOAService } from '../services/oa'
 import { oaApiPath } from './oa-routes'
+import type { createOAService } from '../services/oa'
+import type { schema } from '@vine/db'
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 
 class MissingBearerTokenError extends Error {}
 class InvalidAccessTokenError extends Error {}

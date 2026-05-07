@@ -1,10 +1,7 @@
 import Svg, { Path } from 'react-native-svg'
 import { useTheme } from 'tamagui'
-
 import { getIconSize } from '~/interface/icons/helpers'
-
 import { useIconProps } from './useIconProps'
-
 import type { IconProps } from '~/interface/icons/types'
 
 export const AppleIcon = (props: IconProps) => {

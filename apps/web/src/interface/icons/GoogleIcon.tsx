@@ -1,7 +1,5 @@
 import Svg, { Path } from 'react-native-svg'
-
 import { useIconProps } from './useIconProps'
-
 import type { IconProps } from '~/interface/icons/types'
 
 export const GoogleIcon = (props: IconProps) => {

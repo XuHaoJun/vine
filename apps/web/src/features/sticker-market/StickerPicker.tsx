@@ -1,14 +1,13 @@
-import { useState, useMemo, useEffect } from 'react'
-import { router } from 'one'
-import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
-
-import { useAuth } from '~/features/auth/client/authClient'
-import { allStickerPackages } from '@vine/zero-schema/queries/stickerPackage'
 import { entitlementsByUserId } from '@vine/zero-schema/queries/entitlement'
-import { useZeroQuery } from '~/zero/client'
-import { Input } from '~/interface/forms/Input'
+import { allStickerPackages } from '@vine/zero-schema/queries/stickerPackage'
+import { router } from 'one'
+import { useState, useMemo, useEffect } from 'react'
+import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
+import { useAuth } from '~/features/auth/client/authClient'
 import { Button } from '~/interface/buttons/Button'
+import { Input } from '~/interface/forms/Input'
 import { useTanQuery } from '~/query'
+import { useZeroQuery } from '~/zero/client'
 import { stickerMarketDiscoveryClient } from './client'
 
 type Props = {

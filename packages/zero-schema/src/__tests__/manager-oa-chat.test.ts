@@ -1,9 +1,7 @@
-import { describe, expect, it, vi } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { getRawWhere } from 'on-zero'
-import type { Where } from 'on-zero'
-
+import { describe, expect, it, vi } from 'vitest'
 import { mutate as chatMemberMutate } from '../models/chatMember'
 import { mutate as messageMutate } from '../models/message'
 import {
@@ -12,6 +10,7 @@ import {
 } from '../queries/chat'
 import { managerOwnedOaMessagePermission } from '../queries/message'
 import type { AuthData } from '../types'
+import type { Where } from 'on-zero'
 
 function chain(rows: unknown[]) {
   return {

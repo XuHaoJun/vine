@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
-import { describe, expect, it } from 'vitest'
 import { officialAccount, oaProvider, oaRichMenu } from '@vine/db/schema-oa'
+import { describe, expect, it } from 'vitest'
 import { withRollbackDb } from '../test/integration-db'
 import { createOAService } from './oa'
 

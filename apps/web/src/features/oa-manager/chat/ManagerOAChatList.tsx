@@ -1,10 +1,8 @@
 import { useRouter } from 'one'
 import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
-
 import { Avatar } from '~/interface/avatars/Avatar'
 import { Pressable } from '~/interface/buttons/Pressable'
 import { Input } from '~/interface/forms/Input'
-
 import type { ManagerOAChatListItem } from './useManagerOAChats'
 
 type Props = {

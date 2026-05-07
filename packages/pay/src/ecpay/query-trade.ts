@@ -1,7 +1,7 @@
-import type { ChargeStatusResult, EcpayCredentials, GetChargeInput } from '../types'
 import { computeCheckMacValue } from '../utils/ecpay-mac'
-import { encodeEcpayForm, parseEcpayForm } from './form'
 import { getQueryTradeInfoUrl } from './endpoints'
+import { encodeEcpayForm, parseEcpayForm } from './form'
+import type { ChargeStatusResult, EcpayCredentials, GetChargeInput } from '../types'
 
 export async function queryEcpayTrade(
   deps: { ecpay: EcpayCredentials; fetch: typeof fetch; now: () => Date },

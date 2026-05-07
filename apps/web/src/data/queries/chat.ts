@@ -1,5 +1,4 @@
 import { zql } from 'on-zero'
-
 import { chatReadPermission } from '../models/chat'
 
 // All chats where the current user is a member, ordered by latest message

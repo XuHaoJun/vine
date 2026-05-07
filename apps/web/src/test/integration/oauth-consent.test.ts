@@ -4,9 +4,8 @@
  */
 
 import { test, expect } from '@playwright/test'
-
-import type { APIRequestContext, Page } from '@playwright/test'
 import { BASE_URL, OAUTH_CALLBACK_URL } from './helpers'
+import type { APIRequestContext, Page } from '@playwright/test'
 
 function createAuthUrl({ scope, state }: { scope: string; state: string }) {
   return (

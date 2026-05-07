@@ -1,13 +1,12 @@
 import { router } from 'one'
 import { memo, useState } from 'react'
 import { SizableText, XStack, YStack } from 'tamagui'
-
 import { Button } from '~/interface/buttons/Button'
+import { CreateGroupDialog } from '~/interface/dialogs/CreateGroupDialog'
+import { SearchInput } from '~/interface/forms/SearchInput'
 import { ClockIcon } from '~/interface/icons/phosphor/ClockIcon'
 import { FunnelIcon } from '~/interface/icons/phosphor/FunnelIcon'
 import { GearIcon } from '~/interface/icons/phosphor/GearIcon'
-import { SearchInput } from '~/interface/forms/SearchInput'
-import { CreateGroupDialog } from '~/interface/dialogs/CreateGroupDialog'
 
 type TalksHeaderProps = {
   activeTab: 'chats' | 'friends'

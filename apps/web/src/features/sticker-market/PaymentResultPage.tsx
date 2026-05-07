@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
-import { router } from 'one'
-import { SizableText, YStack } from 'tamagui'
-
-import { Button } from '~/interface/buttons/Button'
 import { OrderStatus } from '@vine/proto/stickerMarket'
+import { router } from 'one'
+import { useEffect, useRef, useState } from 'react'
+import { SizableText, YStack } from 'tamagui'
+import { Button } from '~/interface/buttons/Button'
 import { stickerMarketUserClient } from './client'
 
 type Status = 'polling' | 'paid' | 'failed' | 'timeout'

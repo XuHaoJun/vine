@@ -1,7 +1,7 @@
-import type { LFexBubble, LFexAction } from '../types'
 import { LfBox } from './LfBox'
 import { LfImage } from './LfImage'
 import { LfVideo } from './LfVideo'
+import type { LFexBubble, LFexAction } from '../types'
 
 export type LFexHeroProps = {
   hero?: LFexBubble['hero']

@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   AudioModule,
   RecordingPresets,
   setAudioModeAsync,
   useAudioRecorder as useExpoAudioRecorder,
 } from 'expo-audio'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 const PRESET = RecordingPresets.HIGH_QUALITY
 

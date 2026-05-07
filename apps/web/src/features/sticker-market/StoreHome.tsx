@@ -1,9 +1,8 @@
-import { useState } from 'react'
 import { router } from 'one'
+import { useState } from 'react'
 import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
-
-import { useTanQuery } from '~/query'
 import { Input } from '~/interface/forms/Input'
+import { useTanQuery } from '~/query'
 import { stickerMarketDiscoveryClient } from './client'
 
 const TYPE_CHIPS = [

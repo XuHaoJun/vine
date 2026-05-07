@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { handlePaymentEvent } from './event-handler'
-import type { StickerOrderRepository, StickerOrderRow } from './order.repository'
 import type { EntitlementRepository } from './entitlement.repository'
+import type { StickerOrderRepository, StickerOrderRow } from './order.repository'
 import type { Logger } from 'pino'
 
 const silentLog = {

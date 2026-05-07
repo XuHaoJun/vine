@@ -1,6 +1,5 @@
 import { memo } from 'react'
 import { ListItem, SizableText, XStack, YStack } from 'tamagui'
-
 import { Avatar } from '~/interface/avatars/Avatar'
 
 type Props = {

@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { H3, Separator, Sheet, XStack, YStack } from 'tamagui'
-
 import { Button } from '~/interface/buttons/Button'
 import { ArrowUpRightIcon } from '~/interface/icons/phosphor/ArrowUpRightIcon'
+import { ChatCircleIcon } from '~/interface/icons/phosphor/ChatCircleIcon'
 import { CopyIcon } from '~/interface/icons/phosphor/CopyIcon'
 import { ListIcon } from '~/interface/icons/phosphor/ListIcon'
-import { ChatCircleIcon } from '~/interface/icons/phosphor/ChatCircleIcon'
 import { showToast } from '~/interface/toast/Toast'
 
 type Props = {

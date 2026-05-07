@@ -1,6 +1,5 @@
-import { useMemo } from 'react'
-
 import { oaChatsByOfficialAccountId } from '@vine/zero-schema/queries/chat'
+import { useMemo } from 'react'
 import { useZeroQuery } from '~/zero/client'
 
 export type ManagerOAChatListItem = {

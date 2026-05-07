@@ -1,7 +1,6 @@
-import { useState } from 'react'
 import { router } from 'one'
+import { useState } from 'react'
 import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
-
 import { Button } from '~/interface/buttons/Button'
 import { TextArea } from '~/interface/forms/TextArea'
 import { showToast } from '~/interface/toast/Toast'

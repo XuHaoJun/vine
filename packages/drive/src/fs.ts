@@ -1,7 +1,7 @@
 import { Disk } from 'flydrive'
 import { FSDriver } from 'flydrive/drivers/fs'
-import type { DriveService } from './types'
 import { createDriveService } from './disk'
+import type { DriveService } from './types'
 
 type FsDeps = {
   basePath: string

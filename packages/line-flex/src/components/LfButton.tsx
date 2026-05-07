@@ -1,8 +1,8 @@
 import { Button, Text } from 'tamagui'
-import type { LFexButton, LFexAction, LFexLayout } from '../types'
-import { expandFlexForChild, normalizeFlexValue } from '../utils/flex'
 import { handleAction } from '../utils/action'
+import { expandFlexForChild, normalizeFlexValue } from '../utils/flex'
 import { mergeLineMarginWithParentSpacing } from '../utils/spacing'
+import type { LFexButton, LFexAction, LFexLayout } from '../types'
 
 export type LFexButtonProps = LFexButton & {
   className?: string

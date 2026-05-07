@@ -1,6 +1,6 @@
 import { ScrollView, XStack } from 'tamagui'
-import type { LFexCarousel, LFexAction } from '../types'
 import { LfBubble } from './LfBubble'
+import type { LFexCarousel, LFexAction } from '../types'
 
 export type LFexCarouselProps = LFexCarousel & {
   className?: string

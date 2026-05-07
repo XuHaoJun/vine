@@ -1,12 +1,11 @@
+import { createRoute } from 'one'
 import { YStack } from 'tamagui'
-
 import { AccessTokenSection } from './AccessTokenSection'
 import { MessagingApiGuideSection } from './MessagingApiGuideSection'
 import { MessagingApiQuotaSection } from './MessagingApiQuotaSection'
 import { TestWebhookSection } from './TestWebhookSection'
 import { WebhookErrorsSection } from './WebhookErrorsSection'
 import { WebhookSettingsSection } from './WebhookSettingsSection'
-import { createRoute } from 'one'
 
 const route =
   createRoute<'/(app)/developers/console/channel/[channelId]/MessagingApiTab'>()

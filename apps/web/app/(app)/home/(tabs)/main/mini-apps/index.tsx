@@ -1,6 +1,5 @@
 import { router } from 'one'
 import { ScrollView, Text, XStack, YStack } from 'tamagui'
-
 import { miniAppClient } from '~/features/mini-app/client'
 import { useTanQuery } from '~/query'
 

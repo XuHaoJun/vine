@@ -1,9 +1,7 @@
 import { router } from 'one'
 import { Circle, H5, isWeb, Spacer, XStack, YStack } from 'tamagui'
-
 import { HeaderBackButton } from '../buttons/HeaderBackButton'
 import { H1, H4 } from '../text/Headings'
-
 import type { IconComponent } from '../icons/types'
 import type { ReactNode } from 'react'
 

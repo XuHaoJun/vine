@@ -1,13 +1,12 @@
 import { useRouter } from 'one'
 import { memo, useState } from 'react'
 import { ListItem, SizableText, Spinner, XStack, YStack } from 'tamagui'
-
-import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
 import { oaClient } from '~/features/oa/client'
 import { Button } from '~/interface/buttons/Button'
+import { CreateProviderDialog } from '~/interface/dialogs/CreateProviderDialog'
 import { Input } from '~/interface/forms/Input'
 import { showToast } from '~/interface/toast/Toast'
-import { CreateProviderDialog } from '~/interface/dialogs/CreateProviderDialog'
+import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
 
 export const ProviderListPage = memo(() => {
   const router = useRouter()

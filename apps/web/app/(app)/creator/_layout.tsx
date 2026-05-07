@@ -1,6 +1,6 @@
 import { Redirect } from 'one'
-import { CreatorShell } from '~/features/sticker-market/creator/CreatorShell'
 import { useAuth } from '~/features/auth/client/authClient'
+import { CreatorShell } from '~/features/sticker-market/creator/CreatorShell'
 
 export default function CreatorLayout() {
   const { state } = useAuth()

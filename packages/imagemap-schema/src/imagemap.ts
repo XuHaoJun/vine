@@ -1,5 +1,5 @@
-import * as v from 'valibot'
 import { FlexHttpsUrlSchema } from '@vine/line-schema-primitives'
+import * as v from 'valibot'
 import { ImagemapActionSchema, type ImagemapAction } from './action'
 import { ImagemapVideoSchema, type ImagemapVideo } from './video'
 

@@ -1,5 +1,5 @@
-import type { Disk } from 'flydrive'
 import type { DriveFile, DriveService } from './types'
+import type { Disk } from 'flydrive'
 
 export function createDriveService(disk: Disk): DriveService {
   return {

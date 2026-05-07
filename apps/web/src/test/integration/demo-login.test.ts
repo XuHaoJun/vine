@@ -4,7 +4,6 @@
  */
 
 import { expect, test } from '@playwright/test'
-
 import { loginAsDemo } from './helpers'
 
 test.beforeEach(async ({ context }) => {

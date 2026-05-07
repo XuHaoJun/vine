@@ -1,7 +1,6 @@
 import { Link, Slot, usePathname, useRouter } from 'one'
 import { Linking } from 'react-native'
 import { SizableText, XStack, YStack } from 'tamagui'
-
 import { Pressable } from '~/interface/buttons/Pressable'
 import { ArrowUpRightIcon } from '~/interface/icons/phosphor/ArrowUpRightIcon'
 import { HouseIcon } from '~/interface/icons/phosphor/HouseIcon'

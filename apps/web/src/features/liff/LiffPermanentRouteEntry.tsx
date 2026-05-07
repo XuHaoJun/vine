@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { isWeb } from 'tamagui'
-
 import { LiffRouteShell } from '~/features/liff/liffRuntime'
 
 type LiffPermanentRouteEntryProps = {

@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
-import { creatorProfile, stickerPackage } from '@vine/db/schema-public'
 import { stickerOrder } from '@vine/db/schema-private'
+import { creatorProfile, stickerPackage } from '@vine/db/schema-public'
+import { describe, expect, it } from 'vitest'
 import { withRollbackDb } from '../../test/integration-db'
 import { createSalesReportRepository } from './sales-report.repository'
 

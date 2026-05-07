@@ -2,10 +2,8 @@ import { router, usePathname } from 'one'
 import { memo } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SizableText, XStack, YStack } from 'tamagui'
-
 import { ChatCircleIcon } from '~/interface/icons/phosphor/ChatCircleIcon'
 import { HouseIcon } from '~/interface/icons/phosphor/HouseIcon'
-
 import type { IconProps } from '~/interface/icons/types'
 
 type TabRoute = {

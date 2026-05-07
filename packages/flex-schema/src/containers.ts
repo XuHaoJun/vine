@@ -1,12 +1,12 @@
 import * as v from 'valibot'
 import { FlexActionSchema } from './action'
+import { FlexBoxSchema, FlexImageSchema, FlexVideoSchema } from './components'
 import {
   FlexBackgroundSchema,
   FlexBubbleSizeSchema,
   FlexColorSchema,
   FlexDirectionSchema,
 } from './primitives'
-import { FlexBoxSchema, FlexImageSchema, FlexVideoSchema } from './components'
 
 // ============ Block Styles ============
 

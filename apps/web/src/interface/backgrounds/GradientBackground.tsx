@@ -2,7 +2,6 @@ import { LinearGradient } from '@tamagui/linear-gradient'
 import { ImageBackground } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTheme, View } from 'tamagui'
-
 import { useIsDark } from '~/features/theme/useIsDark'
 
 interface GradientBackgroundProps {

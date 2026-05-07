@@ -1,9 +1,8 @@
 import { useActiveParams, useRouter, createRoute } from 'one'
 import { memo } from 'react'
 import { SizableText, YStack } from 'tamagui'
-import { useTanQueryClient } from '~/query'
-
 import { RichMenuEditor } from '~/features/oa-manager/richmenu/RichMenuEditor'
+import { useTanQueryClient } from '~/query'
 
 const route = createRoute<'/(app)/manager/[oaId]/richmenu/create'>()
 

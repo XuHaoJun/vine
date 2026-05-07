@@ -1,8 +1,7 @@
-import { useMemo } from 'react'
-
-import { useZeroQuery } from '~/zero/client'
 import { chatsByUserId, chatMembersByChatId } from '@vine/zero-schema/queries/chat'
+import { useMemo } from 'react'
 import { useAuth } from '~/features/auth/client/authClient'
+import { useZeroQuery } from '~/zero/client'
 
 export function useGroups() {
   const { user } = useAuth()

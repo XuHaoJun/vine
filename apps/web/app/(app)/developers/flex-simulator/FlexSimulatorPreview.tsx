@@ -1,5 +1,5 @@
-import { Text, YStack } from 'tamagui'
 import { LfBubble, LfCarousel } from '@vine/line-flex'
+import { Text, YStack } from 'tamagui'
 import type { LFexCarousel, LFexBubble } from '@vine/line-flex'
 
 // LINE chat background color

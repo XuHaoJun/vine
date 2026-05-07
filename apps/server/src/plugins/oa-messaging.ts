@@ -1,7 +1,4 @@
-import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import { and, eq } from 'drizzle-orm'
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import type { schema } from '@vine/db'
+import { oaAccessToken } from '@vine/db/schema-oa'
 import {
   chatMember,
   chat,
@@ -9,14 +6,17 @@ import {
   message,
   userPublic,
 } from '@vine/db/schema-public'
-import { oaAccessToken } from '@vine/db/schema-oa'
 import { FlexMessageSchema, QuickReplySchema } from '@vine/flex-schema'
 import { ImagemapMessageSchema } from '@vine/imagemap-schema'
+import { and, eq } from 'drizzle-orm'
 import * as v from 'valibot'
-import type { DriveService } from '@vine/drive'
+import { oaApiPath } from './oa-routes'
 import type { createOAService } from '../services/oa'
 import type { createOAMessagingService } from '../services/oa-messaging'
-import { oaApiPath } from './oa-routes'
+import type { schema } from '@vine/db'
+import type { DriveService } from '@vine/drive'
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 
 const CONTENT_TYPE_MAP: Record<string, { ext: string; mimeTypes: string[] }> = {
   image: { ext: 'jpg', mimeTypes: ['image/jpeg', 'image/png'] },

@@ -1,8 +1,8 @@
-import { eq } from 'drizzle-orm'
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import type { schema } from '@vine/db'
-import { loginChannel, oaLiffApp } from '@vine/db/schema-login'
 import { randomBytes, randomUUID } from 'crypto'
+import { loginChannel, oaLiffApp } from '@vine/db/schema-login'
+import { eq } from 'drizzle-orm'
+import type { schema } from '@vine/db'
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 type LiffDeps = {
   db: NodePgDatabase<typeof schema>

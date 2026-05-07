@@ -1,7 +1,6 @@
-import { useMemo } from 'react'
-
 import { chatsByUserId } from '@vine/zero-schema/queries/chat'
 import { friendsByUserId } from '@vine/zero-schema/queries/friendship'
+import { useMemo } from 'react'
 import { useAuth } from '~/features/auth/client/authClient'
 import { useZeroQuery } from '~/zero/client'
 

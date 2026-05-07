@@ -1,10 +1,9 @@
 import { useActiveParams, createRoute } from 'one'
 import { memo } from 'react'
 import { YStack, Text, Spinner } from 'tamagui'
-
 import { oaClient } from '~/features/oa/client'
-import { useTanQuery } from '~/query'
 import { OADetailContent } from '~/interface/oa/OADetailContent'
+import { useTanQuery } from '~/query'
 
 const route = createRoute<'/(app)/oa/[oaId]'>()
 

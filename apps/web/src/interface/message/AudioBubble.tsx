@@ -1,7 +1,7 @@
 import { memo, useEffect, useRef, useState } from 'react'
 import { Pressable } from 'react-native'
-import { SizableText, XStack } from 'tamagui'
 import Svg, { Path } from 'react-native-svg'
+import { SizableText, XStack } from 'tamagui'
 
 type Props = {
   url: string

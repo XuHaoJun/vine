@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { XStack, YStack, isClient } from 'tamagui'
-
 import type { ReactNode } from 'react'
 
 export const ScrollHeader = ({ children }: { children: ReactNode }) => {

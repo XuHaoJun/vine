@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest'
 import { entitlement } from '@vine/db/schema-public'
+import { describe, it, expect, vi } from 'vitest'
 import { createEntitlementRepository } from './entitlement.repository'
 
 function createMockTx(existingRows: any[] = []) {

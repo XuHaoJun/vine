@@ -1,6 +1,5 @@
 import '~/features/storage/setupStorage'
 import '~/helpers/crypto/polyfill'
-
 import { setupDev } from 'tamagui'
 import { logger } from '~/lib/logger'
 

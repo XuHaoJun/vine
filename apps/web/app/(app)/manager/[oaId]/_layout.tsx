@@ -1,12 +1,11 @@
 import { Slot, usePathname, useRouter, Link, useActiveParams } from 'one'
 import { useEffect } from 'react'
 import { SizableText, Spinner, XStack, YStack } from 'tamagui'
-
-import { showError } from '~/interface/dialogs/actions'
-import { Pressable } from '~/interface/buttons/Pressable'
-import { useTanQuery } from '~/query'
-import { oaClient } from '~/features/oa/client'
 import { miniAppClient } from '~/features/mini-app/client'
+import { oaClient } from '~/features/oa/client'
+import { Pressable } from '~/interface/buttons/Pressable'
+import { showError } from '~/interface/dialogs/actions'
+import { useTanQuery } from '~/query'
 
 function normalizePath(path: string) {
   return path.replace(/\/$/, '') || '/'

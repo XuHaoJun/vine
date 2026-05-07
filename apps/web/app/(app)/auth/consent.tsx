@@ -1,14 +1,13 @@
 import { router } from 'one'
 import { useRef } from 'react'
 import { isWeb, SizableText, Spinner, XStack, YStack } from 'tamagui'
-
+import { SERVER_URL } from '~/constants/urls'
 import { useAuth } from '~/features/auth/client/authClient'
-import { useTanMutation, useTanQuery } from '~/query'
 import { Button } from '~/interface/buttons/Button'
 import { LineIcon } from '~/interface/icons/LineIcon'
 import { H2 } from '~/interface/text/Headings'
 import { showToast } from '~/interface/toast/helpers'
-import { SERVER_URL } from '~/constants/urls'
+import { useTanMutation, useTanQuery } from '~/query'
 
 const LINE_GREEN = '#06C755'
 const CONSENT_SEARCH_KEY = 'auth.consent.search'

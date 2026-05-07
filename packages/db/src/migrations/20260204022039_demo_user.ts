@@ -1,6 +1,5 @@
 import { scryptAsync } from '@noble/hashes/scrypt.js'
 import { bytesToHex, randomBytes } from '@noble/hashes/utils.js'
-
 import type { PoolClient } from 'pg'
 
 const DEMO_ID = 'demo-user-id'

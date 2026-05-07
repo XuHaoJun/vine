@@ -1,6 +1,6 @@
 import { Image } from 'tamagui'
-import type { LFexVideo, LFexAction, LFexImage } from '../types'
 import { handleAction } from '../utils/action'
+import type { LFexVideo, LFexAction, LFexImage } from '../types'
 
 export type LFexVideoProps = LFexVideo & {
   className?: string

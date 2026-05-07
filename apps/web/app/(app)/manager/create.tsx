@@ -1,17 +1,16 @@
+import { valibotResolver } from '@hookform/resolvers/valibot'
 import { useRouter } from 'one'
 import { memo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { valibotResolver } from '@hookform/resolvers/valibot'
-import * as v from 'valibot'
 import { SizableText, Spinner, XStack, YStack } from 'tamagui'
-
+import * as v from 'valibot'
 import { oaClient } from '~/features/oa/client'
 import { Button } from '~/interface/buttons/Button'
 import { Pressable } from '~/interface/buttons/Pressable'
+import { showError } from '~/interface/dialogs/actions'
 import { Input } from '~/interface/forms/Input'
 import { Select } from '~/interface/forms/Select'
 import { showToast } from '~/interface/toast/Toast'
-import { showError } from '~/interface/dialogs/actions'
 import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
 
 const schema = v.object({

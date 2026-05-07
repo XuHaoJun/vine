@@ -1,13 +1,12 @@
 import { router } from 'one'
 import { memo, useState } from 'react'
 import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
-
+import { useAuth } from '~/features/auth/client/authClient'
 import {
   usePendingRequests,
   useFriendshipActions,
   useUserSearch,
 } from '~/features/chat/useFriendship'
-import { useAuth } from '~/features/auth/client/authClient'
 import { Avatar } from '~/interface/avatars/Avatar'
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'

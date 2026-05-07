@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import * as v from 'valibot'
+import { describe, expect, it } from 'vitest'
 import { ImagemapActionSchema } from './action'
 
 const area = { x: 0, y: 0, width: 100, height: 100 }

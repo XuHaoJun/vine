@@ -1,11 +1,11 @@
 import { Code, ConnectError } from '@connectrpc/connect'
-import type { HandlerContext } from '@connectrpc/connect'
 import {
   RefundStatus,
   StickerPackageStatus,
   TrustReportStatus,
 } from '@vine/proto/stickerMarket'
 import { requireAuthData } from './auth-context'
+import type { HandlerContext } from '@connectrpc/connect'
 
 const DEFAULT_RECONCILE_SINCE_MS = 24 * 60 * 60 * 1000
 const DEFAULT_RECONCILE_LIMIT = 100

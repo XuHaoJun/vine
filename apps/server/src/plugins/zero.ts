@@ -1,12 +1,11 @@
 import { getAuthDataFromRequest } from '@take-out/better-auth-utils/server'
 import { assertString } from '@take-out/helpers'
-import type { FastifyInstance } from 'fastify'
-import { createZeroServer } from 'on-zero/server'
-
 import { models, queries, schema, createServerActions } from '@vine/zero-schema'
-import { toWebRequest } from '../utils'
+import { createZeroServer } from 'on-zero/server'
 import { logger } from '../lib/logger'
+import { toWebRequest } from '../utils'
 import { createAuthServer } from './auth'
+import type { FastifyInstance } from 'fastify'
 
 const ZERO_UPSTREAM_DB = process.env['ZERO_UPSTREAM_DB']
 

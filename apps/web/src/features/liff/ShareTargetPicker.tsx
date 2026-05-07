@@ -1,11 +1,10 @@
 import { memo, useMemo, useState } from 'react'
 import { SizableText, XStack, YStack, ScrollView, Circle, Spinner } from 'tamagui'
-
-import { Avatar } from '~/interface/avatars/Avatar'
-import { CaretLeftIcon } from '~/interface/icons/phosphor/CaretLeftIcon'
-import { useShareTargets } from '~/features/liff/useShareTargets'
 import { validateAndConvertLiffMessages } from '~/features/liff/liffMessage'
 import { sendToTarget } from '~/features/liff/sendToTarget'
+import { useShareTargets } from '~/features/liff/useShareTargets'
+import { Avatar } from '~/interface/avatars/Avatar'
+import { CaretLeftIcon } from '~/interface/icons/phosphor/CaretLeftIcon'
 import { zero } from '~/zero/client'
 
 type ShareTargetItem = {

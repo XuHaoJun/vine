@@ -10,10 +10,9 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
-
-import type { InferSelectModel } from 'drizzle-orm'
 import { officialAccount } from './schema-oa'
 import { stickerPackage } from './schema-public'
+import type { InferSelectModel } from 'drizzle-orm'
 
 export const user = pgTable('user', (t) => ({
   id: t.varchar('id').primaryKey(),

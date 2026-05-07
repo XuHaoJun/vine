@@ -29,13 +29,13 @@ services:
       -c tcp_keepalives_interval=10
       -c tcp_keepalives_count=3
     # for verbose logging when debugging (uncomment as needed):
-      # -c log_error_verbosity=default
-      # -c log_min_messages=info
-      # -c log_statement=all
-      # -c log_connections=on
-      # -c log_disconnections=on
-      # -c log_duration=on
-      # -c log_line_prefix='%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
+    # -c log_error_verbosity=default
+    # -c log_min_messages=info
+    # -c log_statement=all
+    # -c log_connections=on
+    # -c log_disconnections=on
+    # -c log_duration=on
+    # -c log_line_prefix='%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
     volumes:
       - pgdb_data:/var/lib/postgresql/data
       - ./packages/db/src/:/docker-entrypoint-initdb.d
@@ -62,7 +62,7 @@ services:
     entrypoint: sh -c 'bunx --bun vite build --config vite.config.ts && bun run migrate-dist.js'
 
   zero:
-    image: "rocicorp/zero:${ZERO_VERSION:-error-run-bun-tko-run-env-update}"
+    image: 'rocicorp/zero:${ZERO_VERSION:-error-run-bun-tko-run-env-update}'
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -72,7 +72,7 @@ services:
       - zero_data:/app
     working_dir: /app
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - 'host.docker.internal:host-gateway'
     environment:
       ZERO_LOG_LEVEL: ${ZERO_LOG_LEVEL:-warn}
       ZERO_UPSTREAM_DB: postgresql://user:password@pgdb:5432/postgres
@@ -88,7 +88,7 @@ services:
       ZERO_NUM_SYNC_WORKERS: ${ZERO_NUM_SYNC_WORKERS:-4}
       ZERO_UPSTREAM_MAX_CONNS: ${ZERO_UPSTREAM_MAX_CONNS:-10}
     ports:
-      - "${VITE_PORT_ZERO:-4948}:4848"
+      - '${VITE_PORT_ZERO:-4948}:4848'
 
   server:
     image: oven/bun:1
@@ -103,13 +103,13 @@ services:
       - path: .env.docker-compose
         required: true
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - 'host.docker.internal:host-gateway'
     environment:
       GIT_SHA: ${GIT_SHA:-}
-      PORT: "3001"
+      PORT: '3001'
     command: bun --watch --env-file=../../.env.docker-compose src/index.ts
     ports:
-      - "3001:3001"
+      - '3001:3001'
 
   web:
     image: oven/bun:1
@@ -124,15 +124,15 @@ services:
       - path: .env.docker-compose
         required: true
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - 'host.docker.internal:host-gateway'
     environment:
       GIT_SHA: ${GIT_SHA:-}
-      ONE_PORT: "3000"
+      ONE_PORT: '3000'
       # Web talks to server via host.docker.internal in Docker
-      ONE_SERVER_URL: "http://host.docker.internal:3001"
+      ONE_SERVER_URL: 'http://host.docker.internal:3001'
     command: bun run dev
     ports:
-      - "3000:3000"
+      - '3000:3000'
 
 volumes:
   pgdb_data:

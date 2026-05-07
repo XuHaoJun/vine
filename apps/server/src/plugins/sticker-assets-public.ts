@@ -1,6 +1,6 @@
+import { resolve } from 'node:path'
 import fastifyStatic from '@fastify/static'
 import type { FastifyInstance } from 'fastify'
-import { resolve } from 'node:path'
 
 export async function stickerAssetsPublicPlugin(
   app: FastifyInstance,

@@ -1,9 +1,9 @@
-import type { ServiceImpl } from '@connectrpc/connect'
 import { Code, ConnectError, ConnectRouter } from '@connectrpc/connect'
-import type { AuthServer } from '@take-out/better-auth-utils/server'
 import { BotPrompt, LIFFService, LoginChannelService, ViewType } from '@vine/proto/liff'
-import type { createLiffService } from '../services/liff'
 import { requireAuthData, withAuthService } from './auth-context'
+import type { createLiffService } from '../services/liff'
+import type { ServiceImpl } from '@connectrpc/connect'
+import type { AuthServer } from '@take-out/better-auth-utils/server'
 
 type LiffHandlerDeps = {
   liff: ReturnType<typeof createLiffService>

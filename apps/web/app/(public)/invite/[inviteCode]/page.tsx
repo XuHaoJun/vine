@@ -1,14 +1,13 @@
+import { chatsByUserId } from '@vine/zero-schema/queries/chat'
 import { createRoute, useActiveParams, router } from 'one'
 import { memo, useState } from 'react'
 import { SizableText, YStack } from 'tamagui'
-
 import { useAuth } from '~/features/auth/client/authClient'
 import { Avatar } from '~/interface/avatars/Avatar'
 import { Button } from '~/interface/buttons/Button'
 import { showToast } from '~/interface/toast/Toast'
 import { zero } from '~/zero/client'
 import { useZeroQuery } from '~/zero/client'
-import { chatsByUserId } from '@vine/zero-schema/queries/chat'
 
 const route = createRoute<'/(public)/invite/[inviteCode]'>()
 

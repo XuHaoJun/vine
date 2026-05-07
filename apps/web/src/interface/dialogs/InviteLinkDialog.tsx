@@ -1,10 +1,9 @@
+import { chatById } from '@vine/zero-schema/queries/chat'
 import { useState, useEffect, useCallback } from 'react'
 import { Sheet, SizableText, YStack, XStack } from 'tamagui'
-
 import { Button } from '~/interface/buttons/Button'
 import { showToast } from '~/interface/toast/Toast'
 import { zero, getQuery } from '~/zero/client'
-import { chatById } from '@vine/zero-schema/queries/chat'
 import type { Chat } from '@vine/zero-schema/models/chat'
 
 type InviteLinkDialogProps = {

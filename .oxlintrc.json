@@ -1,10 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": [
-    "react",
-    "import",
-    "typescript"
-  ],
+  "plugins": ["react", "import", "typescript"],
   "rules": {
     "import/no-cycle": "error",
     "no-restricted-imports": [
@@ -101,23 +97,18 @@
       }
     },
     {
-      "files": [
-        "**/*.native.tsx",
-        "**/*.native.ts"
-      ],
+      "files": ["**/*.native.tsx", "**/*.native.ts"],
       "rules": {
         "no-restricted-imports": "off"
       }
     },
-      {
-        "files": [
-          "packages/line-flex/**"
-        ],
-        "rules": {
-          "no-restricted-imports": "off"
-        }
-      },
-    ],
+    {
+      "files": ["packages/line-flex/**"],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ],
   "ignorePatterns": [
     "learn-projects/**",
     "**/.claude/**",

@@ -1,15 +1,14 @@
 import { useActiveParams, useRouter, createRoute } from 'one'
 import { memo, useState } from 'react'
 import { SizableText, Spinner, XStack, YStack } from 'tamagui'
-import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
-
-import { oaClient } from '~/features/oa/client'
-import { showError } from '~/interface/dialogs/actions'
-import { showToast } from '~/interface/toast/Toast'
-import { Input } from '~/interface/forms/Input'
-import { Button } from '~/interface/buttons/Button'
 import { RichMenuEditor } from '~/features/oa-manager/richmenu/RichMenuEditor'
 import { boundsFromProto } from '~/features/oa-manager/richmenu/types'
+import { oaClient } from '~/features/oa/client'
+import { Button } from '~/interface/buttons/Button'
+import { showError } from '~/interface/dialogs/actions'
+import { Input } from '~/interface/forms/Input'
+import { showToast } from '~/interface/toast/Toast'
+import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
 import type { Area, EditorState, MenuSize } from '~/features/oa-manager/richmenu/types'
 
 const route = createRoute<'/(app)/manager/[oaId]/richmenu/[richMenuId]'>()

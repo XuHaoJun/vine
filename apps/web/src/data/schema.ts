@@ -1,5 +1,4 @@
 import { createSchema } from '@rocicorp/zero'
-
 import * as tables from './generated/tables'
 import { allRelationships } from './relationships'
 

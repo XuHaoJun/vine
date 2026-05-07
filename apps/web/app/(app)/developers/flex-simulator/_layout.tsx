@@ -1,8 +1,6 @@
 import { Link, Slot } from 'one'
 import { SizableText, XStack, YStack } from 'tamagui'
-
 import { Button } from '~/interface/buttons/Button'
-
 import {
   FlexSimulatorHeaderProvider,
   useFlexSimulatorHeader,

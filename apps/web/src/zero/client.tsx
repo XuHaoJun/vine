@@ -1,4 +1,8 @@
+import { dropAllDatabases } from '@rocicorp/zero'
 import { useZero } from '@rocicorp/zero/react'
+import * as groupedQueries from '@vine/zero-schema/generated/groupedQueries'
+import { models } from '@vine/zero-schema/generated/models'
+import { schema } from '@vine/zero-schema/schema'
 import { createZeroClient, run } from 'on-zero'
 import {
   Component,
@@ -11,21 +15,17 @@ import {
   type ReactNode,
 } from 'react'
 import { debounce, SizableText, YStack } from 'tamagui'
-import { Button } from '~/interface/buttons/Button'
-import { dropAllDatabases } from '@rocicorp/zero'
 import { ZERO_SERVER_URL } from '~/constants/urls'
-import * as groupedQueries from '@vine/zero-schema/generated/groupedQueries'
-import { models } from '@vine/zero-schema/generated/models'
-import { schema } from '@vine/zero-schema/schema'
 import { useAuth } from '~/features/auth/client/authClient'
+import { Button } from '~/interface/buttons/Button'
 import { showToast } from '~/interface/toast/Toast'
+import { logger } from '~/lib/logger'
 import { unstable_batchedUpdates } from './batchUpdates'
 import {
   resetShownClientDataError,
   showClientDataErrorOnce,
 } from './helpers/showClientDataError'
 import { createKVStore } from './storage'
-import { logger } from '~/lib/logger'
 
 export const {
   usePermission,

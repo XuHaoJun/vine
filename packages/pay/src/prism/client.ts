@@ -1,6 +1,6 @@
 import { PaymentClient, EventClient } from '@xuhaojun/hyperswitch-prism'
-import type { EcpayCredentials } from '../types'
 import { buildEcpayConnectorConfig } from './ecpay-config'
+import type { EcpayCredentials } from '../types'
 
 export type PrismClients = {
   paymentClient: PaymentClient

@@ -1,9 +1,9 @@
 import { randomUUID } from 'crypto'
-import { describe, expect, it } from 'vitest'
-import { eq } from 'drizzle-orm'
-import { chat, chatMember, message } from '@vine/db/schema-public'
-import { oaMessageDelivery, oaMessageRequest, oaRetryKey } from '@vine/db/schema-private'
 import { officialAccount, oaFriendship, oaProvider, oaQuota } from '@vine/db/schema-oa'
+import { oaMessageDelivery, oaMessageRequest, oaRetryKey } from '@vine/db/schema-private'
+import { chat, chatMember, message } from '@vine/db/schema-public'
+import { eq } from 'drizzle-orm'
+import { describe, expect, it } from 'vitest'
 import { getIntegrationDb, withRollbackDb } from '../test/integration-db'
 import { createOAMessagingService, createRequestHash } from './oa-messaging'
 

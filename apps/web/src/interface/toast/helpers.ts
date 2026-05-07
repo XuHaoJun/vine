@@ -1,5 +1,4 @@
 import { toastEmitter } from './emitter'
-
 import type { ToastOptions } from './types'
 
 export const showToast = (title: string, toast: ToastOptions = {}) => {

@@ -1,3 +1,4 @@
+import { oaWebhookAttempt, oaWebhookDelivery } from '@vine/db/schema-private'
 import { describe, expect, it, vi } from 'vitest'
 import {
   classifyWebhookError,
@@ -7,7 +8,6 @@ import {
   extractFirstWebhookEvent,
   shouldCreateDeveloperVisibleDelivery,
 } from './oa-webhook-delivery'
-import { oaWebhookAttempt, oaWebhookDelivery } from '@vine/db/schema-private'
 
 describe('webhook delivery helpers', () => {
   it('caps response body excerpts at 4096 characters', () => {

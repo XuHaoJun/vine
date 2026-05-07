@@ -1,14 +1,13 @@
-import { Link } from 'one'
-import { SizableText, XStack, YStack } from 'tamagui'
-
 import { creatorProfileByUserId } from '@vine/zero-schema/queries/creatorProfile'
 import { stickerPackageForCreator } from '@vine/zero-schema/queries/stickerPackage'
-import { Button } from '~/interface/buttons/Button'
-import { showToast } from '~/interface/toast/Toast'
+import { Link } from 'one'
+import { SizableText, XStack, YStack } from 'tamagui'
 import { useAuth } from '~/features/auth/client/authClient'
 import { stickerMarketCreatorClient } from '~/features/sticker-market/creator/client'
-import { useZeroQuery } from '~/zero/client'
+import { Button } from '~/interface/buttons/Button'
+import { showToast } from '~/interface/toast/Toast'
 import { useTanMutation } from '~/query'
+import { useZeroQuery } from '~/zero/client'
 
 export function ReviewResult({ packageId }: { packageId: string }) {
   const { user } = useAuth()

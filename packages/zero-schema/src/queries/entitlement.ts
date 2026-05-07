@@ -1,5 +1,4 @@
 import { zql } from 'on-zero'
-
 import { permissions } from '../models/entitlement'
 
 // All entitlements for the current user

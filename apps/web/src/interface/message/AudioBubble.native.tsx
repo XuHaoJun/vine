@@ -1,8 +1,8 @@
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio'
 import { memo, useEffect, useState } from 'react'
 import { Pressable } from 'react-native'
-import { SizableText, XStack } from 'tamagui'
-import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio'
 import Svg, { Path } from 'react-native-svg'
+import { SizableText, XStack } from 'tamagui'
 
 type Props = {
   url: string

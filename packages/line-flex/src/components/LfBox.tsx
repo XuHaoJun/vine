@@ -1,15 +1,8 @@
-import { XStack, YStack } from 'tamagui'
 import React from 'react'
 import { Platform } from 'react-native'
-import type { LFexBox, LFexComponent, LFexAction, LFexLayout } from '../types'
-import type { LFexTextProps } from './LfText'
-import type { LFexImageProps } from './LfImage'
-import type { LFexButtonProps } from './LfButton'
-import type { LFexIconProps } from './LfIcon'
-import type { LFexSeparatorProps } from './LfSeparator'
-import type { LFexSpacerProps } from './LfSpacer'
-import type { LFexFillerProps } from './LfFiller'
-import type { LFexVideoProps } from './LfVideo'
+import { XStack, YStack } from 'tamagui'
+import { handleAction } from '../utils/action'
+import { lineBorderWidthToCssValue } from '../utils/border'
 import {
   expandFlexForChild,
   getChildDefaultFlex,
@@ -20,16 +13,23 @@ import {
   paddingToTamagui,
   tamaguiSpaceTokenToPx,
 } from '../utils/spacing'
-import { handleAction } from '../utils/action'
-import { lineBorderWidthToCssValue } from '../utils/border'
-import { LfText } from './LfText'
-import { LfImage } from './LfImage'
 import { LfButton } from './LfButton'
+import { LfFiller } from './LfFiller'
 import { LfIcon } from './LfIcon'
+import { LfImage } from './LfImage'
 import { LfSeparator } from './LfSeparator'
 import { LfSpacer } from './LfSpacer'
-import { LfFiller } from './LfFiller'
+import { LfText } from './LfText'
 import { LfVideo } from './LfVideo'
+import type { LFexBox, LFexComponent, LFexAction, LFexLayout } from '../types'
+import type { LFexButtonProps } from './LfButton'
+import type { LFexFillerProps } from './LfFiller'
+import type { LFexIconProps } from './LfIcon'
+import type { LFexImageProps } from './LfImage'
+import type { LFexSeparatorProps } from './LfSeparator'
+import type { LFexSpacerProps } from './LfSpacer'
+import type { LFexTextProps } from './LfText'
+import type { LFexVideoProps } from './LfVideo'
 
 export type LFexBoxProps = LFexBox & {
   className?: string

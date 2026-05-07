@@ -1,11 +1,10 @@
 import { randomUUID } from 'node:crypto'
 import { getAuthDataFromRequest } from '@take-out/better-auth-utils/server'
-import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import type { DriveService } from '@vine/drive'
-
-import { toWebRequest } from '../utils'
 import { logger } from '../lib/logger'
+import { toWebRequest } from '../utils'
 import type { createAuthServer } from './auth'
+import type { DriveService } from '@vine/drive'
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 
 type MediaUploadPluginDeps = {
   auth: ReturnType<typeof createAuthServer>

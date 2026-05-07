@@ -1,10 +1,9 @@
 import { useMemo, useState } from 'react'
 import { XStack } from 'tamagui'
-
-import { useManagerOAChats } from './useManagerOAChats'
 import { ManagerOAChatList } from './ManagerOAChatList'
 import { ManagerOAChatRoom } from './ManagerOAChatRoom'
 import { ManagerOAProfilePanel } from './ManagerOAProfilePanel'
+import { useManagerOAChats } from './useManagerOAChats'
 
 type Props = {
   oaId: string

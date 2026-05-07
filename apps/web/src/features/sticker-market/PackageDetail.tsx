@@ -1,13 +1,12 @@
-import { useState } from 'react'
 import { router } from 'one'
+import { useState } from 'react'
 import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
-
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
 import { showToast } from '~/interface/toast/Toast'
 import { useTanQuery, useTanMutation, useTanQueryClient } from '~/query'
-import { stickerMarketDiscoveryClient, stickerMarketUserClient } from './client'
 import { CheckoutSheet } from './CheckoutSheet'
+import { stickerMarketDiscoveryClient, stickerMarketUserClient } from './client'
 import { ReportStickerPackageDialog } from './ReportStickerPackageDialog'
 
 type PackageDetailProps = {

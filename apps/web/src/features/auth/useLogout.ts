@@ -1,7 +1,7 @@
 import { authClient, clearAuthClientToken } from '~/features/auth/client/authClient'
 import { dialogConfirm, showError } from '~/interface/dialogs/actions'
-import { queryClient } from '~/query'
 import { logger } from '~/lib/logger'
+import { queryClient } from '~/query'
 
 export const useLogout = () => {
   const logout = async (options?: { skipConfirm?: boolean }) => {

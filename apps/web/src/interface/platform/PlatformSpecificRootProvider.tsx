@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react'
 import { QueryClientProvider, queryClient } from '~/query'
+import type { ReactNode } from 'react'
 
 export function PlatformSpecificRootProvider(props: { children: ReactNode }) {
   return (

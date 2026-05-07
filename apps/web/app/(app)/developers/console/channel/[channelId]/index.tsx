@@ -1,12 +1,10 @@
 import { useActiveParams, useRouter, createRoute } from 'one'
 import { useState } from 'react'
 import { SizableText, Spinner, XStack, YStack } from 'tamagui'
-
-import { useTanMutation, useTanQuery } from '~/query'
 import { oaClient } from '~/features/oa/client'
 import { Button } from '~/interface/buttons/Button'
 import { showToast } from '~/interface/toast/Toast'
-
+import { useTanMutation, useTanQuery } from '~/query'
 import { ChannelHeader } from './ChannelHeader'
 import { MessagingApiTab } from './MessagingApiTab'
 

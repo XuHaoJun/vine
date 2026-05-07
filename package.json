@@ -25,7 +25,7 @@
     "backend": "GIT_SHA=$(git rev-parse HEAD) docker compose up --remove-orphans"
   },
   "devDependencies": {
-    "oxfmt": "^0.16.0",
+    "oxfmt": "^0.48.0",
     "oxlint": "^1.31.0",
     "turbo": "^2.9.9"
   },

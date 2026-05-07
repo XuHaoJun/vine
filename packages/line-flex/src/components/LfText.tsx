@@ -1,10 +1,10 @@
-import { Paragraph } from 'tamagui'
 import React from 'react'
-import type { LFexText, LFexSpan, LFexAction } from '../types'
-import { expandFlexForChild, normalizeFlexValue } from '../utils/flex'
+import { Paragraph } from 'tamagui'
 import { handleAction } from '../utils/action'
+import { expandFlexForChild, normalizeFlexValue } from '../utils/flex'
 import { mergeLineMarginWithParentSpacing } from '../utils/spacing'
 import { LfSpan } from './LfSpan'
+import type { LFexText, LFexSpan, LFexAction } from '../types'
 
 export type LFexTextProps = LFexText & {
   className?: string

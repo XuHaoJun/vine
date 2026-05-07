@@ -1,6 +1,6 @@
-import type { LFexMessage, LFexAction } from '../types'
 import { LfBubble } from './LfBubble'
 import { LfCarousel } from './LfCarousel'
+import type { LFexMessage, LFexAction } from '../types'
 
 export type LFexMessageProps = LFexMessage & {
   className?: string

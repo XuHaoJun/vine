@@ -1,10 +1,8 @@
 import { Link, usePathname } from 'one'
 import { useMedia, XStack } from 'tamagui'
-
 import { Pressable } from '~/interface/buttons/Pressable'
 import { ChatCircleIcon } from '~/interface/icons/phosphor/ChatCircleIcon'
 import { GearIcon } from '~/interface/icons/phosphor/GearIcon'
-
 import type { Href } from 'one'
 
 type TabRoute = {

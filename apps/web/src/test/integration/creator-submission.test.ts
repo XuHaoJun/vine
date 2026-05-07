@@ -1,6 +1,5 @@
 import { expect, test } from '@playwright/test'
 import { BASE_URL, loginAsDemo } from './helpers'
-
 import type { Page } from '@playwright/test'
 
 async function ensureCreatorProfile(page: Page) {

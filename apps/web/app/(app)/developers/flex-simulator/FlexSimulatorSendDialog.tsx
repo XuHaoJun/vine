@@ -1,11 +1,10 @@
 import { Dialog, XStack, YStack, SizableText } from 'tamagui'
-
-import { Button } from '~/interface/buttons/Button'
-import { showError } from '~/interface/dialogs/actions'
-import { showToast } from '~/interface/toast/Toast'
 import { useAuth } from '~/features/auth/client/authClient'
 import { oaClient } from '~/features/oa/client'
 import { FLEX_SIMULATOR_OA_UNIQUE_ID } from '~/features/oa/constants'
+import { Button } from '~/interface/buttons/Button'
+import { showError } from '~/interface/dialogs/actions'
+import { showToast } from '~/interface/toast/Toast'
 import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
 import type { OADetailData } from '~/interface/dialogs/OADetailSheet'
 

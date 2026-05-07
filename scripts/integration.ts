@@ -6,9 +6,9 @@
  * runs docker, waits for migrations, builds, starts server, runs playwright tests
  */
 
-import { Socket } from 'node:net'
-import { access, mkdir, rename, rm, writeFile } from 'node:fs/promises'
 import { constants as fsConstants } from 'node:fs'
+import { access, mkdir, rename, rm, writeFile } from 'node:fs/promises'
+import { Socket } from 'node:net'
 import path from 'node:path'
 import { loadEnv as vxrnLoadEnv } from 'vxrn/loadEnv'
 import { getTestEnv } from './helpers/get-test-env'

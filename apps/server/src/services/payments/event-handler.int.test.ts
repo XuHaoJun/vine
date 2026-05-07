@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import { entitlement, stickerPackage } from '@vine/db/schema-public'
+import { describe, expect, it } from 'vitest'
 import { withRollbackDb } from '../../test/integration-db'
 import { createEntitlementRepository } from './entitlement.repository'
 import { handlePaymentEvent } from './event-handler'

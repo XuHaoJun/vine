@@ -1,13 +1,12 @@
 import { useRouter } from 'one'
 import { memo, useState } from 'react'
 import { SizableText, Spinner, XStack, YStack } from 'tamagui'
-
 import { oaClient } from '~/features/oa/client'
 import { Button } from '~/interface/buttons/Button'
 import { Pressable } from '~/interface/buttons/Pressable'
+import { dialogConfirm, showError } from '~/interface/dialogs/actions'
 import { Input } from '~/interface/forms/Input'
 import { showToast } from '~/interface/toast/Toast'
-import { dialogConfirm, showError } from '~/interface/dialogs/actions'
 import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
 
 export const ManagerIndexPage = memo(() => {

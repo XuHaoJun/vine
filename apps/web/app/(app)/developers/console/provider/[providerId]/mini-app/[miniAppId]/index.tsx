@@ -1,18 +1,17 @@
 import { useActiveParams, useRouter, createRoute } from 'one'
 import { memo, useState, useEffect } from 'react'
 import { SizableText, Spinner, XStack, YStack } from 'tamagui'
-import { Switch } from '~/interface/forms/Switch'
-
-import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
-import { miniAppClient } from '~/features/mini-app/client'
 import { liffClient } from '~/features/liff/client'
+import { miniAppClient } from '~/features/mini-app/client'
 import { Button } from '~/interface/buttons/Button'
+import { dialogConfirm, showError } from '~/interface/dialogs/actions'
+import { Input } from '~/interface/forms/Input'
+import { Switch } from '~/interface/forms/Switch'
+import { ArrowUpRightIcon } from '~/interface/icons/phosphor/ArrowUpRightIcon'
 import { CaretLeftIcon } from '~/interface/icons/phosphor/CaretLeftIcon'
 import { CopyIcon } from '~/interface/icons/phosphor/CopyIcon'
-import { ArrowUpRightIcon } from '~/interface/icons/phosphor/ArrowUpRightIcon'
-import { Input } from '~/interface/forms/Input'
 import { showToast } from '~/interface/toast/Toast'
-import { dialogConfirm, showError } from '~/interface/dialogs/actions'
+import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
 
 const route =
   createRoute<'/(app)/developers/console/provider/[providerId]/mini-app/[miniAppId]'>()

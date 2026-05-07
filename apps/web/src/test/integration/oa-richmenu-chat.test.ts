@@ -8,7 +8,6 @@
  */
 
 import { expect, test } from '@playwright/test'
-
 import { BASE_URL, loginAsTest1 } from './helpers'
 
 test('OA chat shows RichMenuBar for OA with rich menu', async ({ page }) => {

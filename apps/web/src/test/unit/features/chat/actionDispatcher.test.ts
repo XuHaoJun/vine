@@ -13,10 +13,10 @@ vi.mock('~/features/oa/openDateTimePicker', () => ({
 vi.mock('~/interface/toast/Toast', () => ({ showToast: vi.fn() }))
 
 import { Linking } from 'react-native'
+import { dispatchAction } from '~/features/chat/useActionDispatcher'
 import { dispatchPostback } from '~/features/oa/dispatchPostback'
 import { openDateTimePicker } from '~/features/oa/openDateTimePicker'
 import { showToast } from '~/interface/toast/Toast'
-import { dispatchAction } from '~/features/chat/useActionDispatcher'
 
 const sendMessage = vi.fn()
 const baseCtx = { chatId: 'c1', otherMemberOaId: 'oa1', sendMessage }

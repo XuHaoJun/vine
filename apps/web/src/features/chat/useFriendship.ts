@@ -1,10 +1,9 @@
-import { useMemo } from 'react'
-
 import {
   friendsByUserId,
   pendingRequestsByUserId,
   usersByUsername,
 } from '@vine/zero-schema/queries/friendship'
+import { useMemo } from 'react'
 import { useAuth } from '~/features/auth/client/authClient'
 import { showError } from '~/interface/dialogs/actions'
 import { zero, useZeroQuery } from '~/zero/client'

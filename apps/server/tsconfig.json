@@ -16,8 +16,5 @@
       "@vine/liff-fixtures/paths": ["../../packages/liff-fixtures/src/paths"]
     }
   },
-  "include": [
-    "./src",
-    "../../packages/zero-schema/src/augment.ts"
-  ]
+  "include": ["./src", "../../packages/zero-schema/src/augment.ts"]
 }

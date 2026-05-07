@@ -1,10 +1,9 @@
-import { useState } from 'react'
 import { router } from 'one'
+import { useState } from 'react'
 import { ScrollView, Text, XStack, YStack } from 'tamagui'
+import { miniAppClient } from '~/features/mini-app/client'
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
-
-import { miniAppClient } from '~/features/mini-app/client'
 import { useTanQuery } from '~/query'
 
 export default function PublicDirectoryPage() {

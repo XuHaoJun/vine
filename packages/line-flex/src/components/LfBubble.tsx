@@ -1,9 +1,9 @@
 import { YStack } from 'tamagui'
-import type { LFexBubble, LFexAction, LFexBox } from '../types'
-import { LfHero } from './LfHero'
-import { LfHeader } from './LfHeader'
 import { LfBody } from './LfBody'
 import { LfFooter } from './LfFooter'
+import { LfHeader } from './LfHeader'
+import { LfHero } from './LfHero'
+import type { LFexBubble, LFexAction, LFexBox } from '../types'
 
 export type LFexBubbleProps = LFexBubble & {
   className?: string

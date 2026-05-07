@@ -1,5 +1,4 @@
 import { expect, test } from '@playwright/test'
-
 import { BASE_URL, loginAsDemo } from './helpers'
 
 test.describe('Chat System', () => {

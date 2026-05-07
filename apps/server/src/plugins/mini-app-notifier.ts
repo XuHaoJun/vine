@@ -1,4 +1,3 @@
-import type { FastifyInstance } from 'fastify'
 import {
   TemplateValidationError,
   RateLimitError,
@@ -6,8 +5,9 @@ import {
   renderTemplate,
 } from '../services/mini-app-service-message'
 import type { createMiniAppService } from '../services/mini-app'
-import type { createMiniAppTemplateService } from '../services/mini-app-service-message-templates'
 import type { createMiniAppServiceMessageService } from '../services/mini-app-service-message'
+import type { createMiniAppTemplateService } from '../services/mini-app-service-message-templates'
+import type { FastifyInstance } from 'fastify'
 
 type Deps = {
   miniApp: ReturnType<typeof createMiniAppService>

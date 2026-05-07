@@ -1,10 +1,8 @@
-import { useState, useEffect, useRef } from 'react'
 import { router } from 'one'
+import { useState, useEffect, useRef } from 'react'
 import { SizableText, XStack, YStack } from 'tamagui'
-
-import { useAuth } from '~/features/auth/client/authClient'
-import { LiffBrowser } from '~/interface/liff/LiffBrowser'
 import { API_URL } from '~/constants/urls'
+import { useAuth } from '~/features/auth/client/authClient'
 import {
   buildLiffRuntimeContext,
   getEndpointOrigin,
@@ -14,6 +12,7 @@ import { resolveLiffPermanentUrl } from '~/features/liff/resolveLiffPermanentUrl
 import { ShareTargetPicker } from '~/features/liff/ShareTargetPicker'
 import { Pressable } from '~/interface/buttons/Pressable'
 import { CaretLeftIcon } from '~/interface/icons/phosphor/CaretLeftIcon'
+import { LiffBrowser } from '~/interface/liff/LiffBrowser'
 import { MiniAppActionMenu } from './MiniAppActionMenu'
 
 type MiniAppMeta = {

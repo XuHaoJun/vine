@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { useTanQuery } from '~/query'
 import { oaClient } from '~/features/oa/client'
+import { useTanQuery } from '~/query'
 
 type RichMenuArea = {
   bounds: { x: number; y: number; width: number; height: number }

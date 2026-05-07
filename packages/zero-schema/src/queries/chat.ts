@@ -1,5 +1,4 @@
 import { serverWhere, zql } from 'on-zero'
-
 import { chatReadPermission } from '../models/chat'
 
 export const managerOwnedOaChatPermission = serverWhere('chat', (eb, auth) => {

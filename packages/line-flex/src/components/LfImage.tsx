@@ -1,8 +1,8 @@
 import { Image } from 'tamagui'
-import type { LFexImage, LFexAction, LFexLayout } from '../types'
-import { expandFlexForChild, normalizeFlexValue } from '../utils/flex'
 import { handleAction } from '../utils/action'
+import { expandFlexForChild, normalizeFlexValue } from '../utils/flex'
 import { mergeLineMarginWithParentSpacing } from '../utils/spacing'
+import type { LFexImage, LFexAction, LFexLayout } from '../types'
 
 export type LFexImageProps = LFexImage & {
   className?: string

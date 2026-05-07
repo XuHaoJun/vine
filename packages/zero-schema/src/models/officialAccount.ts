@@ -1,6 +1,5 @@
 import { number, string, table } from '@rocicorp/zero'
 import { mutations, serverWhere } from 'on-zero'
-
 import type { TableInsertRow } from 'on-zero'
 
 export type OfficialAccount = TableInsertRow<typeof schema>

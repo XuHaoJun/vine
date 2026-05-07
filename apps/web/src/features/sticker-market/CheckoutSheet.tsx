@@ -1,7 +1,6 @@
-import { useState } from 'react'
 import { router } from 'one'
+import { useState } from 'react'
 import { Sheet, SizableText, XStack, YStack } from 'tamagui'
-
 import { Button } from '~/interface/buttons/Button'
 import { showToast } from '~/interface/toast/Toast'
 import { stickerMarketUserClient } from './client'

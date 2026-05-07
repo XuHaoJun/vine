@@ -1,10 +1,9 @@
+import { valibotResolver } from '@hookform/resolvers/valibot'
 import { router } from 'one'
 import { useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { valibotResolver } from '@hookform/resolvers/valibot'
 import { isWeb, SizableText, Spinner, XStack, YStack } from 'tamagui'
 import * as v from 'valibot'
-
 import { useAuth } from '~/features/auth/client/authClient'
 import { passwordLogin } from '~/features/auth/client/passwordLogin'
 import { signInAsDemo } from '~/features/auth/client/signInAsDemo'

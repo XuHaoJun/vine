@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Sheet } from 'tamagui'
-
 import { OADetailContent, type OADetailContentData } from '~/interface/oa/OADetailContent'
 
 export type OADetailData = OADetailContentData

@@ -1,7 +1,6 @@
 import { memo, useState } from 'react'
 import { Modal, Pressable } from 'react-native'
 import { YStack } from 'tamagui'
-
 import { Image } from '~/interface/image/Image'
 
 type Props = {

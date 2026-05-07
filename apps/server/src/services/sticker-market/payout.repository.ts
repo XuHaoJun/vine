@@ -1,6 +1,4 @@
 import { randomUUID } from 'node:crypto'
-import { and, eq, inArray, isNotNull } from 'drizzle-orm'
-import { creatorProfile } from '@vine/db/schema-public'
 import {
   creatorPayoutAccount,
   creatorPayoutAuditEvent,
@@ -8,6 +6,8 @@ import {
   creatorPayoutLedger,
   creatorPayoutRequest,
 } from '@vine/db/schema-private'
+import { creatorProfile } from '@vine/db/schema-public'
+import { and, eq, inArray, isNotNull } from 'drizzle-orm'
 
 export function createPayoutRepository() {
   return {

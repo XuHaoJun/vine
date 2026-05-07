@@ -1,5 +1,4 @@
 import { useActiveParams, createRoute } from 'one'
-
 import { LiffRouteShell } from '~/features/liff/liffRuntime'
 
 const route = createRoute<'/(app)/liff/[liffId]'>()

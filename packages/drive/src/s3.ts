@@ -1,7 +1,7 @@
 import { Disk } from 'flydrive'
 import { S3Driver } from 'flydrive/drivers/s3'
-import type { DriveService } from './types'
 import { createDriveService } from './disk'
+import type { DriveService } from './types'
 
 type S3Deps = {
   bucket: string

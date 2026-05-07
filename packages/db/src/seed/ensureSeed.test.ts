@@ -1,9 +1,7 @@
 import { describe, expect, it, mock } from 'bun:test'
-
 import { mkdtempSync, mkdirSync, rmSync } from 'fs'
 import os from 'os'
 import path from 'path'
-
 import { resolveStickerFixturesDir, resolveTestRichMenuImageSource } from './ensureSeed'
 
 describe('resolveTestRichMenuImageSource', () => {

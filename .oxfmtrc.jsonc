@@ -17,12 +17,11 @@
       ["parent", "sibling", "index"],
       ["type"],
       ["style"],
-      ["unknown"]
+      ["unknown"],
     ],
-    "newlinesBetween": false
+    "newlinesBetween": false,
   },
   "ignorePatterns": [
-    "learn-projects/**",
     "**/generated-new.ts",
     "**/generated-v2.ts",
     "**/.tamagui/**",
@@ -44,6 +43,11 @@
     "**/android/**",
     "**/dist/**",
     "**/tamagui.css",
-    "**/.ultra.cache.json"
-  ]
+    "**/.ultra.cache.json",
+    "learn-projects/**",
+    ".skills/**",
+    ".claude/**",
+    ".cursor/**",
+    "docs/**",
+  ],
 }

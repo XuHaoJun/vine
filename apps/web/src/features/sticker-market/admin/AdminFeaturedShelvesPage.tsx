@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
-
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
 import { showToast } from '~/interface/toast/Toast'

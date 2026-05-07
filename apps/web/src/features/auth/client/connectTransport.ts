@@ -1,7 +1,5 @@
 import { createConnectTransport } from '@connectrpc/connect-web'
-
 import { SERVER_URL } from '~/constants/urls'
-
 import { authState } from './authClient'
 
 /**

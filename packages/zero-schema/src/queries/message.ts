@@ -1,5 +1,4 @@
 import { serverWhere, zql } from 'on-zero'
-
 import { messageReadPermission } from '../models/message'
 
 export const managerOwnedOaMessagePermission = serverWhere('message', (eb, auth) => {

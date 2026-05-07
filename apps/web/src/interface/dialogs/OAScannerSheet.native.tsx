@@ -1,14 +1,12 @@
+import { CameraView, useCameraPermissions } from 'expo-camera'
 import { useState } from 'react'
 import { Linking } from 'react-native'
 import { Sheet, Text, XStack, YStack } from 'tamagui'
-import { CameraView, useCameraPermissions } from 'expo-camera'
-
 import { oaClient } from '~/features/oa/client'
 import { parseOAScanResult } from '~/features/oa/parse-qr'
-import { showToast } from '~/interface/toast/Toast'
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
-
+import { showToast } from '~/interface/toast/Toast'
 import type { OADetailData } from '~/interface/dialogs/OADetailSheet'
 
 type OAScannerSheetProps = {

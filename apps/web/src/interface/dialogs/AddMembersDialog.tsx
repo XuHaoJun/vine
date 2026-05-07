@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { Sheet, SizableText, YStack, XStack } from 'tamagui'
-
-import { FriendPicker } from '~/interface/friend-picker/FriendPicker'
 import { Button } from '~/interface/buttons/Button'
+import { FriendPicker } from '~/interface/friend-picker/FriendPicker'
 import { showToast } from '~/interface/toast/Toast'
 import { zero } from '~/zero/client'
 

@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
-
 import { Avatar } from '~/interface/avatars/Avatar'
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
 import { MessageBubbleFactory } from '~/interface/message/MessageBubbleFactory'
 import { showToast } from '~/interface/toast/Toast'
-
 import { useManagerOAMessages } from './useManagerOAMessages'
 
 type Props = {

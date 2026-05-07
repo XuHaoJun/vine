@@ -1,5 +1,5 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
 import liff from '@vine/liff'
+import { describe, expect, it, vi, beforeEach } from 'vitest'
 
 function setupWindow() {
   const original = globalThis.window

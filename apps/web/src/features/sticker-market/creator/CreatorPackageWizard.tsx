@@ -1,18 +1,16 @@
+import { valibotResolver } from '@hookform/resolvers/valibot'
 import { router } from 'one'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { valibotResolver } from '@hookform/resolvers/valibot'
 import { Checkbox, Label, SizableText, XStack, YStack } from 'tamagui'
-
+import { stickerMarketCreatorClient } from '~/features/sticker-market/creator/client'
+import { stickerPackageDraftSchema } from '~/features/sticker-market/creator/schema'
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
 import { Select } from '~/interface/forms/Select'
 import { TextArea } from '~/interface/forms/TextArea'
 import { showToast } from '~/interface/toast/Toast'
-import { stickerMarketCreatorClient } from '~/features/sticker-market/creator/client'
-import { stickerPackageDraftSchema } from '~/features/sticker-market/creator/schema'
 import { useTanMutation } from '~/query'
-
 import type { StickerPackageDraftFormData } from '~/features/sticker-market/creator/schema'
 
 function tagsTextToJson(tagsText: string) {

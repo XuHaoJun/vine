@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import Fastify from 'fastify'
 import FormData from 'form-data'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mediaUploadPlugin, stripMimeParams } from './media-upload'
 
 vi.mock('@take-out/better-auth-utils/server', () => ({

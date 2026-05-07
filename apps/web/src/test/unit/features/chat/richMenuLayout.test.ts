@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-
 import {
   getRichMenuDisplaySize,
   RICH_MENU_RESERVED_HEIGHT,

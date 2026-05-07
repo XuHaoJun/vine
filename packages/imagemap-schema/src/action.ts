@@ -1,5 +1,5 @@
-import * as v from 'valibot'
 import { FlexUrlSchema } from '@vine/line-schema-primitives'
+import * as v from 'valibot'
 import { ImagemapAreaSchema } from './area'
 
 export const ImagemapUriActionSchema = v.object({

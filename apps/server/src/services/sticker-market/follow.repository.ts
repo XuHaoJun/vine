@@ -1,5 +1,5 @@
-import { and, eq } from 'drizzle-orm'
 import { creatorFollow } from '@vine/db/schema-public'
+import { and, eq } from 'drizzle-orm'
 
 export type FollowRow = {
   id: string

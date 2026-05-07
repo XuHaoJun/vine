@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest'
-import { creatorProfile, stickerAsset, stickerPackage } from '@vine/db/schema-public'
 import { stickerReviewEvent } from '@vine/db/schema-private'
+import { creatorProfile, stickerAsset, stickerPackage } from '@vine/db/schema-public'
 import { eq } from 'drizzle-orm'
+import { describe, expect, it } from 'vitest'
 import { withRollbackDb } from '../../test/integration-db'
 
 describe('creator submission database behavior', () => {

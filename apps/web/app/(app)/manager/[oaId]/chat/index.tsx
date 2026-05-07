@@ -1,5 +1,4 @@
 import { useActiveParams } from 'one'
-
 import { ManagerOAChatWorkspace } from '~/features/oa-manager/chat/ManagerOAChatWorkspace'
 
 export default function ManagerOAChatIndexPage() {

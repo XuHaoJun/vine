@@ -1,6 +1,5 @@
 import { number, string, table } from '@rocicorp/zero'
 import { mutations, run, serverWhere, zql } from 'on-zero'
-
 import type { TableInsertRow } from 'on-zero'
 
 export type ChatMember = TableInsertRow<typeof schema>

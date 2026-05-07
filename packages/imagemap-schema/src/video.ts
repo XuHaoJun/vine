@@ -1,5 +1,5 @@
-import * as v from 'valibot'
 import { FlexHttpsUrlSchema, FlexUrlSchema } from '@vine/line-schema-primitives'
+import * as v from 'valibot'
 import { ImagemapAreaSchema } from './area'
 
 const ExternalLinkSchema = v.object({

@@ -1,6 +1,6 @@
-import { afterAll } from 'vitest'
-import { drizzle } from 'drizzle-orm/node-postgres'
 import { createPool, schema } from '@vine/db'
+import { drizzle } from 'drizzle-orm/node-postgres'
+import { afterAll } from 'vitest'
 
 const DEFAULT_TEST_DATABASE_URL = 'postgresql://user:password@localhost:5533/postgres'
 const ROLLBACK = Symbol('ROLLBACK')

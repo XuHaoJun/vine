@@ -1,5 +1,4 @@
 import { zql } from 'on-zero'
-
 import { friendshipPermission } from '../models/friendship'
 
 // Accepted friends for the current user

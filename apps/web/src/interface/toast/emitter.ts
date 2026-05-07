@@ -1,5 +1,4 @@
 import { createEmitter } from '@take-out/helpers'
-
 import type { ToastOptions } from './types'
 
 export const toastEmitter = createEmitter<

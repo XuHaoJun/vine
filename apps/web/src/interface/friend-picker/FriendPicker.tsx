@@ -1,8 +1,7 @@
 import { memo, useState } from 'react'
 import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
-
-import { useFriends } from '~/features/chat/useFriendship'
 import { useAuth } from '~/features/auth/client/authClient'
+import { useFriends } from '~/features/chat/useFriendship'
 import { Avatar } from '~/interface/avatars/Avatar'
 import { SearchInput } from '~/interface/forms/SearchInput'
 

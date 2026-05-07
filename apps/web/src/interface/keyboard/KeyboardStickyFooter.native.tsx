@@ -1,6 +1,5 @@
 import { KeyboardStickyView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-
 import type { KeyboardStickyFooterProps } from './KeyboardStickyFooter'
 
 export const KeyboardStickyFooter = ({

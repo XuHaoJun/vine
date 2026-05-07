@@ -2,12 +2,6 @@
 // @generated from file oa/v1/oa.proto (package oa.v1, syntax proto3)
 /* eslint-disable */
 
-import type {
-  GenEnum,
-  GenFile,
-  GenMessage,
-  GenService,
-} from '@bufbuild/protobuf/codegenv2'
 import {
   enumDesc,
   fileDesc,
@@ -15,6 +9,12 @@ import {
   serviceDesc,
 } from '@bufbuild/protobuf/codegenv2'
 import type { Message } from '@bufbuild/protobuf'
+import type {
+  GenEnum,
+  GenFile,
+  GenMessage,
+  GenService,
+} from '@bufbuild/protobuf/codegenv2'
 
 /**
  * Describes the file oa/v1/oa.proto.

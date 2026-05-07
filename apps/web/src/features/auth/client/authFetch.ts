@@ -1,8 +1,7 @@
 import { createFetch } from '@better-fetch/fetch'
-
 import { SERVER_URL } from '~/constants/urls'
-import { authState } from './authClient'
 import { logger } from '~/lib/logger'
+import { authState } from './authClient'
 
 export const authFetch = createFetch({
   baseURL: SERVER_URL,

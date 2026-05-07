@@ -1,13 +1,13 @@
-import { valibotResolver } from '@hookform/resolvers/valibot'
 import { createClient } from '@connectrpc/connect'
+import { valibotResolver } from '@hookform/resolvers/valibot'
 import { GreeterService } from '@vine/proto/greeter'
 import { Controller, useForm } from 'react-hook-form'
-import * as v from 'valibot'
 import { SizableText, YStack, XStack } from 'tamagui'
+import * as v from 'valibot'
+import { connectTransport } from '~/features/auth/client/connectTransport'
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
 import { useTanMutation } from '~/query'
-import { connectTransport } from '~/features/auth/client/connectTransport'
 
 const schema = v.object({
   name: v.pipe(v.string(), v.minLength(1, 'Name is required')),

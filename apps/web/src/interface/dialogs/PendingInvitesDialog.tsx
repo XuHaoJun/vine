@@ -1,12 +1,11 @@
+import { pendingInvitesByUserId } from '@vine/zero-schema/queries/chat'
 import { memo } from 'react'
 import { ScrollView, Sheet, SizableText, YStack, XStack } from 'tamagui'
-
 import { useAuth } from '~/features/auth/client/authClient'
 import { Avatar } from '~/interface/avatars/Avatar'
 import { Button } from '~/interface/buttons/Button'
 import { showToast } from '~/interface/toast/Toast'
 import { zero, useZeroQuery } from '~/zero/client'
-import { pendingInvitesByUserId } from '@vine/zero-schema/queries/chat'
 
 type PendingInvitesDialogProps = {
   open: boolean

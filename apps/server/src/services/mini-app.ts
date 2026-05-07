@@ -1,8 +1,8 @@
-import { and, desc, eq, ilike, notInArray, or, sql } from 'drizzle-orm'
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import type { schema } from '@vine/db'
 import { miniApp, miniAppOaLink, miniAppRecent, oaLiffApp } from '@vine/db/schema-login'
 import { oaFriendship } from '@vine/db/schema-oa'
+import { and, desc, eq, ilike, notInArray, or, sql } from 'drizzle-orm'
+import type { schema } from '@vine/db'
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 type MiniAppServiceDeps = {
   db: NodePgDatabase<typeof schema>

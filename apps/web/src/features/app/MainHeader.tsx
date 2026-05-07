@@ -1,7 +1,6 @@
 import { Link, router } from 'one'
 import { memo, useState } from 'react'
 import { H3, Separator, Sheet, Spacer, View, XStack, YStack } from 'tamagui'
-
 import { useAuth } from '~/features/auth/client/authClient'
 import { useLogout } from '~/features/auth/useLogout'
 import { Logo } from '~/interface/app/Logo'
@@ -12,7 +11,6 @@ import { DoorIcon } from '~/interface/icons/phosphor/DoorIcon'
 import { GearIcon } from '~/interface/icons/phosphor/GearIcon'
 import { ListIcon } from '~/interface/icons/phosphor/ListIcon'
 import { PageContainer } from '~/interface/layout/PageContainer'
-
 import { NavigationTabs } from './NavigationTabs'
 
 export const MainHeader = () => {

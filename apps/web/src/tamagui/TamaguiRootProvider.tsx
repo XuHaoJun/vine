@@ -1,9 +1,7 @@
 import './tamagui.generated.css'
-
 import { MetaTheme, SchemeProvider, useUserScheme } from '@vxrn/color-scheme'
 import { type ReactNode } from 'react'
 import { isWeb, TamaguiProvider, useTheme } from 'tamagui'
-
 import { config } from './tamagui.config'
 
 export const TamaguiRootProvider = ({ children }: { children: ReactNode }) => {

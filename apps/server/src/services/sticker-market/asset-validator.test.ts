@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
-import { zip, zlibSync } from 'fflate'
 import { readFileSync } from 'node:fs'
+import { zip, zlibSync } from 'fflate'
+import { describe, expect, it } from 'vitest'
 import { validateStickerZip } from './asset-validator'
 
 async function makeTestZip(files: Record<string, Uint8Array>): Promise<Uint8Array> {

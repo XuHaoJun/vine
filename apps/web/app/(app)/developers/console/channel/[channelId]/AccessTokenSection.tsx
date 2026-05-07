@@ -1,12 +1,11 @@
+import { AccessTokenType } from '@vine/proto/oa'
+import { createRoute } from 'one'
 import { useState } from 'react'
 import { SizableText, XStack, YStack } from 'tamagui'
-import { AccessTokenType } from '@vine/proto/oa'
-
 import { oaClient } from '~/features/oa/client'
 import { Button } from '~/interface/buttons/Button'
 import { showToast } from '~/interface/toast/Toast'
 import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
-import { createRoute } from 'one'
 
 const route =
   createRoute<'/(app)/developers/console/channel/[channelId]/AccessTokenSection'>()

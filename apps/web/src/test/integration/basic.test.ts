@@ -1,5 +1,4 @@
 import { test, expect, type Page } from '@playwright/test'
-
 import { BASE_URL, INTEGRATION_TEST_PROXY_PORT } from './helpers'
 
 test.describe('Basic Integration Tests', () => {

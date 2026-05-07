@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { LFexAction } from '../types'
 import { handleAction } from './action'
+import type { LFexAction } from '../types'
 
 describe('action utilities', () => {
   it('calls onAction with the action when provided', () => {

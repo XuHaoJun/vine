@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'bun:test'
-
 import {
   DEFAULT_FRONTEND_PORT,
   FRONTEND_PORT,

@@ -1,13 +1,12 @@
-import type { ServiceImpl } from '@connectrpc/connect'
 import { Code, ConnectError, ConnectRouter } from '@connectrpc/connect'
-import type { AuthServer } from '@take-out/better-auth-utils/server'
 import { AccessTokenType, OAService, OAStatus, WebhookStatus } from '@vine/proto/oa'
+import { logger } from '../lib/logger'
+import { requireAuthData, withAuthService } from './auth-context'
 import type { createOAService } from '../services/oa'
 import type { createOAWebhookDeliveryService } from '../services/oa-webhook-delivery'
+import type { ServiceImpl } from '@connectrpc/connect'
+import type { AuthServer } from '@take-out/better-auth-utils/server'
 import type { DriveService } from '@vine/drive'
-
-import { requireAuthData, withAuthService } from './auth-context'
-import { logger } from '../lib/logger'
 
 type OAHandlerDeps = {
   oa: ReturnType<typeof createOAService>

@@ -1,9 +1,9 @@
-import type { FastifyInstance } from 'fastify'
-import type { PaymentsService } from '@vine/pay'
-import type { StickerOrderRepository } from './order.repository'
-import type { EntitlementRepository } from './entitlement.repository'
-import type { PaymentAlertSink } from './alert-sink'
 import { handlePaymentEvent } from './event-handler'
+import type { PaymentAlertSink } from './alert-sink'
+import type { EntitlementRepository } from './entitlement.repository'
+import type { StickerOrderRepository } from './order.repository'
+import type { PaymentsService } from '@vine/pay'
+import type { FastifyInstance } from 'fastify'
 
 export type WebhookDeps = {
   pay: PaymentsService

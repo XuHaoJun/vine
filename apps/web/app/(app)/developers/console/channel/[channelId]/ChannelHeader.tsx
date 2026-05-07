@@ -1,9 +1,8 @@
 import { useRouter, createRoute } from 'one'
 import { SizableText, XStack, YStack } from 'tamagui'
-import type { OfficialAccount } from '@vine/proto/oa'
-
 import { Button } from '~/interface/buttons/Button'
 import { CaretLeftIcon } from '~/interface/icons/phosphor/CaretLeftIcon'
+import type { OfficialAccount } from '@vine/proto/oa'
 
 const route = createRoute<'/(app)/developers/console/channel/[channelId]/ChannelHeader'>()
 

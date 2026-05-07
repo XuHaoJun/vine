@@ -1,9 +1,7 @@
-import { eq } from 'drizzle-orm'
-
 import { getDb } from '@vine/db'
 import { user as userTable } from '@vine/db/schema-private'
 import { todo, userPublic, userState } from '@vine/db/schema-public'
-
+import { eq } from 'drizzle-orm'
 import type { AuthData } from '../../types'
 
 export const userActions = {

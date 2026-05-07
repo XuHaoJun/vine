@@ -25,9 +25,7 @@ import {
   YStack,
   type ThemeName,
 } from 'tamagui'
-
 import { toastEmitter } from './emitter'
-
 import type { ToastData, ToastType } from './types'
 
 const BANNER_HEIGHT = 78

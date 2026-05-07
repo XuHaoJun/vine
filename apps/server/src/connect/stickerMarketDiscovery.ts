@@ -1,9 +1,9 @@
-import type { HandlerContext } from '@connectrpc/connect'
 import { Code, ConnectError } from '@connectrpc/connect'
 import { StickerMarketDiscoveryService } from '@vine/proto/stickerMarket'
-import type { DriveService } from '@vine/drive'
-import type { AuthServer } from '@take-out/better-auth-utils/server'
 import { tryGetAuthData } from './auth-context'
+import type { HandlerContext } from '@connectrpc/connect'
+import type { AuthServer } from '@take-out/better-auth-utils/server'
+import type { DriveService } from '@vine/drive'
 
 export type StickerMarketDiscoveryHandlerDeps = {
   db: any

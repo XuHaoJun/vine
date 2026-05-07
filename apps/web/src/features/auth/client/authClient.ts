@@ -5,7 +5,6 @@ import { useMemo } from 'react'
 import { SERVER_URL } from '~/constants/urls'
 import { showToast } from '~/interface/toast/Toast'
 import { plugins } from './plugins'
-
 import type { User } from 'better-auth'
 import type { AuthData } from 'on-zero'
 

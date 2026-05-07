@@ -1,7 +1,6 @@
 import { router } from 'one'
 import { memo } from 'react'
 import { ListItem, ScrollView, SizableText, XStack, YStack } from 'tamagui'
-
 import { useLogout } from '~/features/auth/useLogout'
 import { Button } from '~/interface/buttons/Button'
 import { CaretLeftIcon } from '~/interface/icons/phosphor/CaretLeftIcon'

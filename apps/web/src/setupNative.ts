@@ -8,7 +8,6 @@ import '@tamagui/native/setup-zeego'
 // setup global side effects
 import '~/features/storage/setupStorage'
 import '~/helpers/crypto/polyfill'
-
 import { setupDev } from 'tamagui'
 import { logger } from '~/lib/logger'
 

@@ -6,7 +6,6 @@ import {
   type LinkProps as OneLinkProps,
 } from 'one'
 import { isWeb, SizableText, useDebounce, View, type SizableTextProps } from 'tamagui'
-
 import { ArrowUpRightIcon } from '~/interface/icons/phosphor/ArrowUpRightIcon'
 
 type ResetStackConfig = {

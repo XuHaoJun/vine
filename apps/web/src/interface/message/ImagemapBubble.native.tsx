@@ -1,13 +1,13 @@
+import { useVideoPlayer, VideoView } from 'expo-video'
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
-import type { LayoutChangeEvent } from 'react-native'
 import { Image, PixelRatio, Pressable } from 'react-native'
 import { SizableText, YStack } from 'tamagui'
-import { useVideoPlayer, VideoView } from 'expo-video'
-import type { ImagemapAction, ImagemapVideo } from '@vine/imagemap-schema'
 import {
   useActionDispatcher,
   type DispatchableAction,
 } from '~/features/chat/useActionDispatcher'
+import type { ImagemapAction, ImagemapVideo } from '@vine/imagemap-schema'
+import type { LayoutChangeEvent } from 'react-native'
 
 const WIDTHS = [240, 300, 460, 700, 1040] as const
 

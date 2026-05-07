@@ -1,8 +1,7 @@
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { Controller, useForm } from 'react-hook-form'
-import * as v from 'valibot'
 import { AlertDialog, XStack, YStack } from 'tamagui'
-
+import * as v from 'valibot'
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
 

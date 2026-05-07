@@ -1,3 +1,4 @@
+import * as v from 'valibot'
 import { describe, expect, it } from 'vitest'
 import {
   validateFlexMessage,
@@ -5,7 +6,6 @@ import {
   FlexMessageSchema,
   FlexComponentSchema,
 } from '../src'
-import * as v from 'valibot'
 
 describe('validateFlexMessage', () => {
   it('accepts a valid flex message', () => {

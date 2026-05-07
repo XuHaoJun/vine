@@ -1,17 +1,16 @@
-import { useState } from 'react'
-import { router } from 'one'
-import { Controller, useForm } from 'react-hook-form'
 import { valibotResolver } from '@hookform/resolvers/valibot'
+import { StickerPackageStatus } from '@vine/proto/stickerMarket'
+import { router } from 'one'
+import { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
 import * as v from 'valibot'
-
-import { StickerPackageStatus } from '@vine/proto/stickerMarket'
+import { stickerMarketAdminClient } from '~/features/sticker-market/admin/client'
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
 import { TextArea } from '~/interface/forms/TextArea'
 import { showToast } from '~/interface/toast/Toast'
 import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
-import { stickerMarketAdminClient } from '~/features/sticker-market/admin/client'
 
 const rejectSchema = v.object({
   reasonCategory: v.pipe(v.string(), v.minLength(1, 'Category is required')),

@@ -1,5 +1,4 @@
 import { SizableText, YStack } from 'tamagui'
-
 import { Avatar } from '~/interface/avatars/Avatar'
 
 type Props = {

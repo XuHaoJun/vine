@@ -1,17 +1,15 @@
 import { memo, useCallback, useRef, useState } from 'react'
-import type { ChangeEvent } from 'react'
 import { Pressable } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Svg, { Path } from 'react-native-svg'
 import { XStack, YStack, SizableText, isWeb } from 'tamagui'
-
+import { StickerPicker } from '~/features/sticker-market/StickerPicker'
 import { Input } from '~/interface/forms/Input'
 import { showToast } from '~/interface/toast/Toast'
-import { StickerPicker } from '~/features/sticker-market/StickerPicker'
-
 import { useAudioRecorder } from '../useAudioRecorder'
 import { useImagePicker } from '../useImagePicker'
 import { useMediaUpload } from '../useMediaUpload'
+import type { ChangeEvent } from 'react'
 
 type Props = {
   onSend: (text: string) => void

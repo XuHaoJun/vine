@@ -1,10 +1,10 @@
 import { memo, useEffect, useState } from 'react'
 import { SizableText, Spinner, YStack } from 'tamagui'
-import { useAuth } from '~/features/auth/client/authClient'
-import { LiffBrowser } from '~/interface/liff/LiffBrowser'
-import { ShareTargetPicker } from '~/features/liff/ShareTargetPicker'
-import { resolveLiffPermanentUrl } from '~/features/liff/resolveLiffPermanentUrl'
 import { API_URL } from '~/constants/urls'
+import { useAuth } from '~/features/auth/client/authClient'
+import { resolveLiffPermanentUrl } from '~/features/liff/resolveLiffPermanentUrl'
+import { ShareTargetPicker } from '~/features/liff/ShareTargetPicker'
+import { LiffBrowser } from '~/interface/liff/LiffBrowser'
 import {
   getEndpointOrigin,
   buildLiffRuntimeContext,

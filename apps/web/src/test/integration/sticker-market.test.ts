@@ -1,5 +1,4 @@
 import { expect, test } from '@playwright/test'
-
 import { BASE_URL, loginAsTest1, loginAsTest2 } from './helpers'
 
 test.describe('Sticker Market', () => {

@@ -6,7 +6,6 @@
 
 import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-
 import { $ } from 'bun'
 
 // patch @take-out/scripts package.json to add missing "." export (vite strict exports)

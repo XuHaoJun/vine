@@ -1,7 +1,7 @@
 import { Code, createContextValues } from '@connectrpc/connect'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { oaHandler } from './oa'
 import { connectAuthDataKey } from './auth-context'
+import { oaHandler } from './oa'
 
 vi.mock('@take-out/better-auth-utils/server', () => ({
   getAuthDataFromRequest: vi.fn(),

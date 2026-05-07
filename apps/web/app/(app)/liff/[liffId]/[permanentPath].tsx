@@ -1,5 +1,4 @@
 import { useActiveParams, createRoute } from 'one'
-
 import { LiffPermanentRouteEntry } from '~/features/liff/LiffPermanentRouteEntry'
 
 const route = createRoute<'/(app)/liff/[liffId]/[permanentPath]'>()

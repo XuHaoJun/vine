@@ -1,10 +1,9 @@
+import { createRequire } from 'node:module'
+import path from 'node:path'
+import strip from '@rollup/plugin-strip'
 import { tamaguiPlugin } from '@tamagui/vite-plugin'
 import { one } from 'one/vite'
 import { visualizer } from 'rollup-plugin-visualizer'
-import strip from '@rollup/plugin-strip'
-import { createRequire } from 'node:module'
-import path from 'node:path'
-
 import type { UserConfig } from 'vite'
 
 const _require = createRequire(import.meta.url)

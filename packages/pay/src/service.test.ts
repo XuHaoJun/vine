@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
+import { ConfigError } from './errors'
 import { createPaymentsService } from './service'
 import { signFormBody } from './test-utils/ecpay-mac'
-import { ConfigError } from './errors'
 
 const STAGE_CREDS = {
   merchantId: '3002607',

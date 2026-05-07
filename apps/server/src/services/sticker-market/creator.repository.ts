@@ -1,5 +1,5 @@
-import { eq } from 'drizzle-orm'
 import { creatorProfile } from '@vine/db/schema-public'
+import { eq } from 'drizzle-orm'
 
 export type CreatorProfileRow = typeof creatorProfile.$inferSelect
 

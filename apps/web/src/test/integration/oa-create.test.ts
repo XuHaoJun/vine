@@ -4,7 +4,6 @@
  */
 
 import { expect, test } from '@playwright/test'
-
 import { BASE_URL, loginAsDemo } from './helpers'
 
 test('create OA account flow', async ({ page }) => {

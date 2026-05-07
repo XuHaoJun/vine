@@ -1,5 +1,4 @@
 import { zql } from 'on-zero'
-
 import { chatOaLoadingReadPermission } from '../models/chatOaLoading'
 
 export const chatOaLoadingByChat = (props: { chatId: string; oaId: string }) => {

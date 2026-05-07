@@ -14,7 +14,6 @@
  */
 
 import { expect, test, type Frame, type Page } from '@playwright/test'
-
 import { BASE_URL, loginAsDemo } from './helpers'
 
 function createLiffAppConfig(liffId: string, endpointUrl: string) {

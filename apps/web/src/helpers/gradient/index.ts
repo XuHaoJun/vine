@@ -1,5 +1,4 @@
 import { Easing, type EasingFunction } from 'react-native'
-
 import { createInterpolation } from './create-interpolation'
 
 interface ColorStops {

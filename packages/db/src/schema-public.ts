@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm'
 import {
   bigint,
   boolean,
@@ -10,9 +11,8 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
-import { sql } from 'drizzle-orm'
-import { officialAccount } from './schema-oa'
 import { miniApp } from './schema-login'
+import { officialAccount } from './schema-oa'
 
 export const userPublic = pgTable(
   'userPublic',

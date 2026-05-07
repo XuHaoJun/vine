@@ -1,7 +1,6 @@
 import { loadEnv as vxrnLoadEnv } from 'vxrn/loadEnv'
-
-import { getDockerHost } from './get-docker-host'
 import { getIntegrationTestProxyPort } from '../integration-proxy'
+import { getDockerHost } from './get-docker-host'
 
 export async function getTestEnv() {
   // load development environment

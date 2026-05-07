@@ -1,9 +1,8 @@
+import { StickerPackageStatus } from '@vine/proto/stickerMarket'
 import { router } from 'one'
 import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
-
-import { StickerPackageStatus } from '@vine/proto/stickerMarket'
-import { useTanQuery } from '~/query'
 import { stickerMarketAdminClient } from '~/features/sticker-market/admin/client'
+import { useTanQuery } from '~/query'
 
 function getStatusLabel(status: StickerPackageStatus) {
   switch (status) {

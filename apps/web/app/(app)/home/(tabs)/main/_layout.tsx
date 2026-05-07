@@ -1,5 +1,5 @@
-import { isWeb } from 'tamagui'
 import { Slot, Stack } from 'one'
+import { isWeb } from 'tamagui'
 
 export default function MainLayout() {
   if (isWeb) {

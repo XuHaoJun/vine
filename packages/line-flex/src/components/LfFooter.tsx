@@ -1,6 +1,6 @@
 import { YStack } from 'tamagui'
-import type { LFexBubble, LFexAction } from '../types'
 import { LfBox } from './LfBox'
+import type { LFexBubble, LFexAction } from '../types'
 
 export type LFexFooterProps = {
   footer?: LFexBubble['footer']

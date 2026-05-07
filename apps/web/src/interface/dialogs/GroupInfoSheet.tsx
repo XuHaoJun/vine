@@ -1,19 +1,18 @@
+import {
+  groupMembersWithRoles,
+  pendingMembersByChatId,
+} from '@vine/zero-schema/queries/chat'
 import { useState } from 'react'
-import { Sheet, SizableText, YStack, XStack, ScrollView, Dialog } from 'tamagui'
 import { TouchableOpacity } from 'react-native'
-
+import { Sheet, SizableText, YStack, XStack, ScrollView, Dialog } from 'tamagui'
 import { useAuth } from '~/features/auth/client/authClient'
 import { Avatar } from '~/interface/avatars/Avatar'
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
 import { showToast } from '~/interface/toast/Toast'
 import { zero, useZeroQuery } from '~/zero/client'
-import {
-  groupMembersWithRoles,
-  pendingMembersByChatId,
-} from '@vine/zero-schema/queries/chat'
-import { InviteLinkDialog } from './InviteLinkDialog'
 import { AddMembersDialog } from './AddMembersDialog'
+import { InviteLinkDialog } from './InviteLinkDialog'
 
 type GroupInfoSheetProps = {
   chatId: string

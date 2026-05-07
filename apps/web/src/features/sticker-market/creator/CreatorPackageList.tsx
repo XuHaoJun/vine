@@ -1,9 +1,8 @@
+import { creatorProfileByUserId } from '@vine/zero-schema/queries/creatorProfile'
+import { stickerPackagesByCreatorId } from '@vine/zero-schema/queries/stickerPackage'
 import { Link } from 'one'
 import { useMemo, useState } from 'react'
 import { SizableText, XStack, YStack } from 'tamagui'
-
-import { creatorProfileByUserId } from '@vine/zero-schema/queries/creatorProfile'
-import { stickerPackagesByCreatorId } from '@vine/zero-schema/queries/stickerPackage'
 import { useAuth } from '~/features/auth/client/authClient'
 import { useZeroQuery } from '~/zero/client'
 

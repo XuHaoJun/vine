@@ -1,5 +1,4 @@
 import { YStack } from 'tamagui'
-
 import type { ReactNode } from 'react'
 
 // web version - just a bit of padding

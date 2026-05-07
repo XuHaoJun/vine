@@ -1,7 +1,5 @@
 import { useTheme } from 'tamagui'
-
 import { getIconSize } from './helpers'
-
 import type { IconProps } from './types'
 import type { ColorTokens } from 'tamagui'
 

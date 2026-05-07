@@ -1,7 +1,7 @@
-import { and, eq } from 'drizzle-orm'
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import type { schema } from '@vine/db'
 import { miniAppServiceMessageTemplate } from '@vine/db/schema-login'
+import { and, eq } from 'drizzle-orm'
+import type { schema } from '@vine/db'
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 export const BUILTIN_TEMPLATE_KINDS = [
   'reservation_confirmation',

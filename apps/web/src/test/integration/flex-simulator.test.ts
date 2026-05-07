@@ -4,7 +4,6 @@
  */
 
 import { expect, test, type Page } from '@playwright/test'
-
 import { BASE_URL, loginAsDemo } from './helpers'
 
 /** Flex bubble render root — scoped so JSON in the editor textarea never matches these locators. */

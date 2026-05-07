@@ -1,17 +1,17 @@
+import { LfBubble, LfCarousel } from '@vine/line-flex'
+import { router } from 'one'
 import { memo, useMemo } from 'react'
 import { SizableText, XStack, YStack, Text } from 'tamagui'
-import { LfBubble, LfCarousel } from '@vine/line-flex'
-import type { LFexBubble, LFexCarousel } from '@vine/line-flex'
-import type { ImagemapAction, ImagemapVideo } from '@vine/imagemap-schema'
-import { router } from 'one'
-import { useTanQuery } from '~/query'
 import { miniAppClient } from '~/features/mini-app/client'
+import { useTanQuery } from '~/query'
 import { AudioBubble } from './AudioBubble'
 import { ImageBubble } from './ImageBubble'
 import { ImagemapBubble } from './ImagemapBubble'
 import { LocationBubble } from './LocationBubble'
 import { TextBubble } from './TextBubble'
 import { VideoBubble } from './VideoBubble'
+import type { ImagemapAction, ImagemapVideo } from '@vine/imagemap-schema'
+import type { LFexBubble, LFexCarousel } from '@vine/line-flex'
 
 function parseMetadata(metadata?: string): Record<string, unknown> {
   if (!metadata) return {}

@@ -1,5 +1,4 @@
 import { useLoader, createRoute } from 'one'
-
 import { MiniAppShell } from '~/features/mini-app/MiniAppShell'
 
 const route = createRoute<'/(public)/m/[miniAppId]'>()

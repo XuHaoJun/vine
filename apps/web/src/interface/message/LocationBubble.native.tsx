@@ -1,7 +1,6 @@
 import { memo, useState } from 'react'
 import { Linking, Pressable } from 'react-native'
 import { SizableText, XStack, YStack } from 'tamagui'
-
 import { Image } from '~/interface/image/Image'
 
 type Props = {

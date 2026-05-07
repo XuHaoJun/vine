@@ -2,12 +2,11 @@ import { useActiveParams, useRouter, createRoute } from 'one'
 import { memo } from 'react'
 import { Image } from 'react-native'
 import { SizableText, Spinner, XStack, YStack } from 'tamagui'
-
+import { oaClient } from '~/features/oa/client'
+import { Button } from '~/interface/buttons/Button'
 import { dialogConfirm, showError } from '~/interface/dialogs/actions'
 import { showToast } from '~/interface/toast/Toast'
-import { Button } from '~/interface/buttons/Button'
 import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
-import { oaClient } from '~/features/oa/client'
 
 const route = createRoute<'/(app)/manager/[oaId]/richmenu'>()
 

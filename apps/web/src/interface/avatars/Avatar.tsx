@@ -1,8 +1,6 @@
 import { memo } from 'react'
 import { Circle, styled, YStack, type CircleProps } from 'tamagui'
-
 import { Image } from '~/interface/image/Image'
-
 import { UserIcon } from '../icons/phosphor/UserIcon'
 
 export type SimpleSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'

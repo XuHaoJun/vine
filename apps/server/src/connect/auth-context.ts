@@ -1,8 +1,8 @@
-import type { DescMethod, DescService } from '@bufbuild/protobuf'
-import type { HandlerContext, ServiceImpl } from '@connectrpc/connect'
 import { Code, ConnectError } from '@connectrpc/connect'
 import { createContextKey } from '@connectrpc/connect'
 import { getAuthDataFromRequest } from '@take-out/better-auth-utils/server'
+import type { DescMethod, DescService } from '@bufbuild/protobuf'
+import type { HandlerContext, ServiceImpl } from '@connectrpc/connect'
 import type { AuthData, AuthServer } from '@take-out/better-auth-utils/server'
 
 /**
