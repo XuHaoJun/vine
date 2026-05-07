@@ -14,6 +14,16 @@ export const managerOwnedOaChatPermission = serverWhere('chat', (eb, auth) => {
   )
 })
 
+export const managerOwnedOaChatMemberPermission = serverWhere(
+  'chatMember',
+  (eb, auth) => {
+    const userId = auth?.id || ''
+    return eb.exists('oa', (oaQ) =>
+      oaQ.whereExists('provider', (providerQ) => providerQ.where('ownerId', userId)),
+    )
+  },
+)
+
 // All chats where the current user is a member, ordered by latest message
 export const chatsByUserId = (props: { userId: string }) => {
   return zql.chat
@@ -45,6 +55,7 @@ export const oaChatsByOfficialAccountId = (props: { oaId: string }) => {
 
 export const oaChatMembersByChatId = (props: { oaId: string; chatId: string }) => {
   return zql.chatMember
+    .where(managerOwnedOaChatMemberPermission)
     .where('chatId', props.chatId)
     .whereExists('chat', (q) =>
       q

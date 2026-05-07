@@ -4,7 +4,10 @@ import type { Where } from 'on-zero'
 
 import { mutate as chatMemberMutate } from '../models/chatMember'
 import { mutate as messageMutate } from '../models/message'
-import { managerOwnedOaChatPermission } from '../queries/chat'
+import {
+  managerOwnedOaChatMemberPermission,
+  managerOwnedOaChatPermission,
+} from '../queries/chat'
 import { managerOwnedOaMessagePermission } from '../queries/message'
 import type { AuthData } from '../types'
 
@@ -97,6 +100,13 @@ describe('manager OA query permissions', () => {
 
     expect(chatPermission).toContain('"ownerId","manager-1"')
     expect(chatPermission).not.toContain('"userId","manager-1"')
+  })
+
+  it('requires OA provider ownership for manager chat member queries', () => {
+    const permission = recordPermission(managerOwnedOaChatMemberPermission)
+
+    expect(permission).toContain('"ownerId","manager-1"')
+    expect(permission).not.toContain('"userId","manager-1"')
   })
 
   it('requires OA provider ownership for manager message queries', () => {
