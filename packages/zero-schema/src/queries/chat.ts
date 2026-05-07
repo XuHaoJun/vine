@@ -47,7 +47,7 @@ export const oaChatsByOfficialAccountId = (props: { oaId: string }) => {
     .where(managerOwnedOaChatPermission)
     .where('type', 'oa')
     .whereExists('members', (q) => q.where('oaId', props.oaId))
-    .related('members', (q) => q.related('user').related('oa'))
+    .related('members', (q) => q.related('user'))
     .related('lastMessage')
     .orderBy('lastMessageAt', 'desc')
     .limit(50)
