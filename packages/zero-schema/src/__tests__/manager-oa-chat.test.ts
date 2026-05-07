@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { getRawWhere } from 'on-zero'
 import type { Where } from 'on-zero'
 
@@ -117,6 +119,20 @@ describe('manager OA query permissions', () => {
 
     expect(permission).toContain('"ownerId","manager-1"')
     expect(permission).not.toContain('"userId","manager-1"')
+  })
+
+  it('applies manager ownership permissions in manager chat query builders', () => {
+    const querySource = readFileSync(
+      fileURLToPath(new URL('../queries/chat.ts', import.meta.url)),
+      'utf8',
+    )
+
+    expect(querySource).toMatch(
+      /oaChatsByOfficialAccountId[\s\S]*?\.where\(managerOwnedOaChatPermission\)/,
+    )
+    expect(querySource).toMatch(
+      /oaChatMembersByChatId[\s\S]*?\.where\(managerOwnedOaChatMemberPermission\)/,
+    )
   })
 })
 

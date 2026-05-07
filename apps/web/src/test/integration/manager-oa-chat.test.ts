@@ -3,6 +3,10 @@ import { expect, test } from '@playwright/test'
 import { BASE_URL, loginAsDemo, loginAsTest2 } from './helpers'
 
 test.describe('Manager OA chat', () => {
+  test.describe.configure({ mode: 'serial' })
+
+  let managerChatPath: string | undefined
+
   test('owner can view unread OA chat and send a reply', async ({ page }) => {
     test.setTimeout(60000)
 
@@ -17,6 +21,7 @@ test.describe('Manager OA chat', () => {
     await page.waitForURL(/\/manager\/.+\/richmenu$/, { timeout: 15000 })
     await page.getByText('Chats', { exact: true }).click()
     await page.waitForURL(/\/manager\/.+\/chat$/, { timeout: 15000 })
+    managerChatPath = new URL(page.url()).pathname
 
     await page.waitForTimeout(2000)
 
@@ -63,5 +68,13 @@ test.describe('Manager OA chat', () => {
       timeout: 10000,
     })
     await expect(page.getByText('Test Bot')).toHaveCount(0)
+
+    expect(managerChatPath).toBeDefined()
+    await page.goto(`${BASE_URL}${managerChatPath}`, {
+      waitUntil: 'domcontentloaded',
+    })
+
+    await expect(page.getByText('Hello manager, I need help')).toHaveCount(0)
+    await expect(page.getByText('Test One', { exact: false })).toHaveCount(0)
   })
 })

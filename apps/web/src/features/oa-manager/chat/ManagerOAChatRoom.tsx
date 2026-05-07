@@ -5,6 +5,7 @@ import { Avatar } from '~/interface/avatars/Avatar'
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
 import { MessageBubbleFactory } from '~/interface/message/MessageBubbleFactory'
+import { showToast } from '~/interface/toast/Toast'
 
 import { useManagerOAMessages } from './useManagerOAMessages'
 
@@ -16,6 +17,7 @@ type Props = {
 export function ManagerOAChatRoom({ oaId, chatId }: Props) {
   const scrollRef = useRef<ScrollView>(null)
   const [draft, setDraft] = useState('')
+  const [isSending, setIsSending] = useState(false)
   const { messages, isLoading, userMember, sendMessage, markRead } = useManagerOAMessages(
     oaId,
     chatId,
@@ -48,11 +50,19 @@ export function ManagerOAChatRoom({ oaId, chatId }: Props) {
     )
   }
 
-  const submit = () => {
+  const submit = async () => {
     const text = draft.trim()
-    if (!text) return
-    sendMessage(text)
-    setDraft('')
+    if (!text || isSending) return
+
+    setIsSending(true)
+    try {
+      await sendMessage(text)
+      setDraft('')
+    } catch {
+      showToast('Message failed to send', { type: 'error' })
+    } finally {
+      setIsSending(false)
+    }
   }
 
   return (
@@ -112,7 +122,7 @@ export function ManagerOAChatRoom({ oaId, chatId }: Props) {
           placeholder="Aa"
           onSubmitEditing={submit}
         />
-        <Button onPress={submit} disabled={!draft.trim()}>
+        <Button onPress={submit} disabled={!draft.trim() || isSending}>
           Send
         </Button>
       </XStack>

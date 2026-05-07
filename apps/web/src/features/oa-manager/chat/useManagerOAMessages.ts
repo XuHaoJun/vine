@@ -32,10 +32,10 @@ export function useManagerOAMessages(
   )
 
   const sendMessage = useCallback(
-    (text: string) => {
+    async (text: string) => {
       const trimmed = text.trim()
       if (!oaId || !chatId || !trimmed) return
-      zero.mutate.message.sendAsOA({
+      await zero.mutate.message.sendAsOA({
         id: crypto.randomUUID(),
         chatId,
         oaId,
