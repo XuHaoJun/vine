@@ -77,7 +77,13 @@ export function ManagerOAChatList({
                   </XStack>
                   <XStack items="center" gap="$2">
                     {chat.hasUnread && (
-                      <YStack width={8} height={8} rounded="$10" bg="$green9" />
+                      <YStack
+                        data-testid="unread-dot"
+                        width={8}
+                        height={8}
+                        rounded="$10"
+                        bg="$green9"
+                      />
                     )}
                     <SizableText size="$2" color="$color10" numberOfLines={1}>
                       {chat.lastMessageText ?? ''}

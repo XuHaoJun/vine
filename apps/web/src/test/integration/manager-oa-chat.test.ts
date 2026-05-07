@@ -25,6 +25,9 @@ test.describe('Manager OA chat', () => {
     ).toBeVisible({
       timeout: 20000,
     })
+    await expect(page.locator('[data-testid="unread-dot"]')).toBeVisible({
+      timeout: 10000,
+    })
 
     await page.getByText('test1', { exact: false }).first().click()
     await page.waitForURL(/\/manager\/.+\/chat\/.+/, { timeout: 15000 })
@@ -55,7 +58,7 @@ test.describe('Manager OA chat', () => {
     await page.goto(`${BASE_URL}/manager`, {
       waitUntil: 'domcontentloaded',
     })
-    await page.waitForLoadState('domcontentloaded')
+    await page.waitForURL(/\/manager$/, { timeout: 10000 })
 
     await expect(page.getByText('Test Bot')).toHaveCount(0)
   })
