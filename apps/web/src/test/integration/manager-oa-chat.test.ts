@@ -60,6 +60,9 @@ test.describe('Manager OA chat', () => {
     })
     await page.waitForURL(/\/manager$/, { timeout: 10000 })
 
+    await expect(
+      page.getByText('LINE Official Account Manager'),
+    ).toBeVisible({ timeout: 10000 })
     await expect(page.getByText('Test Bot')).toHaveCount(0)
   })
 })
