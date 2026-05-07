@@ -16,8 +16,10 @@ type Props = {
 export function ManagerOAChatRoom({ oaId, chatId }: Props) {
   const scrollRef = useRef<ScrollView>(null)
   const [draft, setDraft] = useState('')
-  const { messages, isLoading, userMember, sendMessage, markRead } =
-    useManagerOAMessages(oaId, chatId)
+  const { messages, isLoading, userMember, sendMessage, markRead } = useManagerOAMessages(
+    oaId,
+    chatId,
+  )
 
   const user = userMember?.user
   const userName = user?.name ?? 'Unknown user'

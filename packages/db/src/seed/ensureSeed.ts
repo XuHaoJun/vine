@@ -565,7 +565,10 @@ export async function ensureSeed(pool: Pool, db: any, drive?: SeedDrive) {
             .select()
             .from(chatMember)
             .where(
-              and(eq(chatMember.chatId, membership.chatId), eq(chatMember.oaId, testOaId)),
+              and(
+                eq(chatMember.chatId, membership.chatId),
+                eq(chatMember.oaId, testOaId),
+              ),
             )
             .limit(1)
 

@@ -54,7 +54,10 @@ function makeTx(overrides: Record<string, any> = {}) {
 type RecordedRelation = {
   calls: unknown[]
   where: (field: string, value: unknown) => RecordedRelation
-  whereExists: (relation: string, cb: (q: RecordedRelation) => unknown) => RecordedRelation
+  whereExists: (
+    relation: string,
+    cb: (q: RecordedRelation) => unknown,
+  ) => RecordedRelation
 }
 
 function recordPermission(permission: Where) {
@@ -190,7 +193,9 @@ describe('message.sendAsOA', () => {
   it('rejects OA stickers sent through message.sendSticker', async () => {
     const { tx } = makeTx({
       query: {
-        entitlement: chain([{ id: 'entitlement-1', userId: 'manager-1', packageId: '1' }]),
+        entitlement: chain([
+          { id: 'entitlement-1', userId: 'manager-1', packageId: '1' },
+        ]),
       },
     })
 

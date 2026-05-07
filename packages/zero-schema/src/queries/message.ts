@@ -5,9 +5,11 @@ import { messageReadPermission } from '../models/message'
 export const managerOwnedOaMessagePermission = serverWhere('message', (eb, auth) => {
   const userId = auth?.id || ''
   return eb.exists('members', (q) =>
-    q.whereExists('chat', (chatQ) => chatQ.where('type', 'oa')).whereExists('oa', (oaQ) =>
-      oaQ.whereExists('provider', (providerQ) => providerQ.where('ownerId', userId)),
-    ),
+    q
+      .whereExists('chat', (chatQ) => chatQ.where('type', 'oa'))
+      .whereExists('oa', (oaQ) =>
+        oaQ.whereExists('provider', (providerQ) => providerQ.where('ownerId', userId)),
+      ),
   )
 })
 

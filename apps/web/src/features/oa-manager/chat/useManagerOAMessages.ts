@@ -4,7 +4,10 @@ import { oaChatMembersByChatId } from '@vine/zero-schema/queries/chat'
 import { oaMessagesByChatId } from '@vine/zero-schema/queries/message'
 import { zero, useZeroQuery } from '~/zero/client'
 
-export function useManagerOAMessages(oaId: string | undefined, chatId: string | undefined) {
+export function useManagerOAMessages(
+  oaId: string | undefined,
+  chatId: string | undefined,
+) {
   const enabled = Boolean(oaId && chatId)
 
   const [messages, { type: messagesType }] = useZeroQuery(
