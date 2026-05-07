@@ -1,9 +1,23 @@
 import { number, string, table } from '@rocicorp/zero'
-import { mutations, serverWhere } from 'on-zero'
+import { mutations, run, serverWhere, zql } from 'on-zero'
 
 import type { TableInsertRow } from 'on-zero'
 
 export type Message = TableInsertRow<typeof schema>
+
+async function readRows(
+  tx: { query?: Record<string, any> },
+  tableName: string,
+  build: (query: any) => any,
+) {
+  const query = tx.query as Record<string, any> | undefined
+  const txQuery = query?.[tableName]
+  if (txQuery) {
+    return build(txQuery).run()
+  }
+
+  return run(build((zql as Record<string, any>)[tableName]))
+}
 
 export const schema = table('message')
   .columns({
@@ -21,24 +35,83 @@ export const schema = table('message')
   })
   .primaryKey('id')
 
-// A user can read messages only if they are a member of that chat
-// The 'members' relationship on message (via chatId → chatMember.chatId) is defined in Task 5
+async function assertOaOwner(
+  tx: { query?: Record<string, any> },
+  oaId: string,
+  userId: string,
+) {
+  const accounts = await readRows(tx, 'officialAccount', (q) => q.where('id', oaId))
+  const account = accounts[0]
+  if (!account) throw new Error('Unauthorized')
+
+  const providers = await readRows(tx, 'oaProvider', (q) =>
+    q.where('id', account.providerId),
+  )
+  const provider = providers[0]
+  if (!provider || provider.ownerId !== userId) {
+    throw new Error('Unauthorized')
+  }
+}
+
+async function assertOaChat(
+  tx: { query?: Record<string, any> },
+  chatId: string,
+  oaId: string,
+) {
+  const chats = await readRows(tx, 'chat', (q) =>
+    q.where('id', chatId).where('type', 'oa'),
+  )
+  if (chats.length === 0) throw new Error('Unauthorized')
+
+  const members = await readRows(tx, 'chatMember', (q) =>
+    q.where('chatId', chatId).where('oaId', oaId),
+  )
+  if (members.length === 0) throw new Error('Unauthorized')
+}
+
+function assertUserMessagePayload(message: Message) {
+  if (message.senderType !== 'user') throw new Error('Unauthorized')
+  if (message.oaId) throw new Error('User message cannot include oaId')
+}
+
+// A user can read messages if they are a member of the chat or manage the OA in it
 export const messageReadPermission = serverWhere('message', (eb, auth) => {
-  return eb.exists('members', (q) => q.where('userId', auth?.id || ''))
+  const userId = auth?.id || ''
+  return eb.or(
+    eb.exists('members', (q) => q.where('userId', userId)),
+    eb.exists('members', (q) =>
+      q
+        .whereExists('chat', (chatQ) => chatQ.where('type', 'oa'))
+        .whereExists('oa', (oaQ) =>
+          oaQ.whereExists('provider', (providerQ) => providerQ.where('ownerId', userId)),
+        ),
+    ),
+  )
 })
 
 const SYSTEM_PACKAGE_RE = /^\d+$/
 
+const rejectDirectMessageMutation = async () => {
+  throw new Error('Use a message action')
+}
+
 export const mutate = mutations(schema, messageReadPermission, {
+  insert: rejectDirectMessageMutation,
+  update: rejectDirectMessageMutation,
+  upsert: rejectDirectMessageMutation,
+  delete: rejectDirectMessageMutation,
+
   send: async ({ authData, tx }, message: Message) => {
     if (!authData) throw new Error('Unauthorized')
+
+    if (message.senderType === 'oa') {
+      throw new Error('Use sendAsOA for OA messages')
+    }
+    assertUserMessagePayload(message)
 
     // Validate sender based on senderType
     if (message.senderType === 'user' && message.senderId !== authData.id) {
       throw new Error('Unauthorized')
-    }
-    if (message.senderType === 'oa' && !message.oaId) {
-      throw new Error('OA message requires oaId')
     }
 
     // Insert the message
@@ -51,8 +124,43 @@ export const mutate = mutations(schema, messageReadPermission, {
       lastMessageAt: message.createdAt,
     })
   },
+  sendAsOA: async (
+    { authData, tx },
+    args: {
+      id: string
+      chatId: string
+      oaId: string
+      text: string
+      createdAt: number
+    },
+  ) => {
+    if (!authData) throw new Error('Unauthorized')
+
+    const text = args.text.trim()
+    if (!text) throw new Error('Message text is required')
+
+    await assertOaOwner(tx as { query?: Record<string, any> }, args.oaId, authData.id)
+    await assertOaChat(tx as { query?: Record<string, any> }, args.chatId, args.oaId)
+
+    await tx.mutate.message.insert({
+      id: args.id,
+      chatId: args.chatId,
+      senderType: 'oa',
+      oaId: args.oaId,
+      type: 'text',
+      text,
+      createdAt: args.createdAt,
+    })
+
+    await tx.mutate.chat.update({
+      id: args.chatId,
+      lastMessageId: args.id,
+      lastMessageAt: args.createdAt,
+    })
+  },
   sendSticker: async ({ authData, tx }, message: Message) => {
     if (!authData) throw new Error('Unauthorized')
+    assertUserMessagePayload(message)
     if (message.senderId !== authData.id) throw new Error('Unauthorized')
 
     const meta = JSON.parse(message.metadata ?? '{}') as {
@@ -81,7 +189,7 @@ export const mutate = mutations(schema, messageReadPermission, {
   },
   sendLiff: async ({ authData, tx }, message: Message) => {
     if (!authData) throw new Error('Unauthorized')
-    if (message.senderType !== 'user') throw new Error('Unauthorized')
+    assertUserMessagePayload(message)
     const liffMessage = { ...message, senderId: authData.id }
 
     const query = tx.query as Record<string, any> | undefined

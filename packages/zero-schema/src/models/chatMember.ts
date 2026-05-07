@@ -1,9 +1,23 @@
 import { number, string, table } from '@rocicorp/zero'
-import { mutations, serverWhere } from 'on-zero'
+import { mutations, run, serverWhere, zql } from 'on-zero'
 
 import type { TableInsertRow } from 'on-zero'
 
 export type ChatMember = TableInsertRow<typeof schema>
+
+async function readRows(
+  tx: { query?: Record<string, any> },
+  tableName: string,
+  build: (query: any) => any,
+) {
+  const query = tx.query as Record<string, any> | undefined
+  const txQuery = query?.[tableName]
+  if (txQuery) {
+    return build(txQuery).run()
+  }
+
+  return run(build((zql as Record<string, any>)[tableName]))
+}
 
 export const schema = table('chatMember')
   .columns({
@@ -19,19 +33,51 @@ export const schema = table('chatMember')
   })
   .primaryKey('id')
 
-// A user can read chatMember records if:
-// - it's their own record (userId match), OR
-// - the record belongs to a chat they are also a member of (needed for read markers)
+async function assertOaOwner(
+  tx: { query?: Record<string, any> },
+  oaId: string,
+  userId: string,
+) {
+  const accounts = await readRows(tx, 'officialAccount', (q) => q.where('id', oaId))
+  const account = accounts[0]
+  if (!account) throw new Error('Unauthorized')
+
+  const providers = await readRows(tx, 'oaProvider', (q) =>
+    q.where('id', account.providerId),
+  )
+  const provider = providers[0]
+  if (!provider || provider.ownerId !== userId) {
+    throw new Error('Unauthorized')
+  }
+}
+
+// A user can read chatMember records for their chats or for OAs they manage
 const chatMemberPermission = serverWhere('chatMember', (eb, auth) => {
+  const userId = auth?.id || ''
   return eb.or(
-    eb.cmp('userId', auth?.id || ''),
+    eb.cmp('userId', userId),
     eb.exists('chat', (q) =>
-      q.whereExists('members', (mq) => mq.where('userId', auth?.id || '')),
+      q.whereExists('members', (mq) => mq.where('userId', userId)),
+    ),
+    eb.and(
+      eb.exists('chat', (q) => q.where('type', 'oa')),
+      eb.exists('oa', (oaQ) =>
+        oaQ.whereExists('provider', (providerQ) => providerQ.where('ownerId', userId)),
+      ),
     ),
   )
 })
 
+const rejectDirectChatMemberMutation = async () => {
+  throw new Error('Use a chatMember action')
+}
+
 export const mutate = mutations(schema, chatMemberPermission, {
+  insert: rejectDirectChatMemberMutation,
+  update: rejectDirectChatMemberMutation,
+  upsert: rejectDirectChatMemberMutation,
+  delete: rejectDirectChatMemberMutation,
+
   markRead: async (
     { authData, can, tx },
     data: { id: string; lastReadMessageId: string; lastReadAt: number },
@@ -48,6 +94,34 @@ export const mutate = mutations(schema, chatMemberPermission, {
 
     await tx.mutate.chatMember.update({
       id: data.id,
+      lastReadMessageId: data.lastReadMessageId,
+      lastReadAt: data.lastReadAt,
+    })
+  },
+
+  markOARead: async (
+    { authData, tx },
+    data: {
+      chatId: string
+      oaId: string
+      lastReadMessageId: string
+      lastReadAt: number
+    },
+  ) => {
+    if (!authData) throw new Error('Unauthorized')
+
+    await assertOaOwner(tx as { query?: Record<string, any> }, data.oaId, authData.id)
+
+    const members = await readRows(
+      tx as { query?: Record<string, any> },
+      'chatMember',
+      (q) => q.where('chatId', data.chatId).where('oaId', data.oaId),
+    )
+    const member = members[0]
+    if (!member) throw new Error('Unauthorized')
+
+    await tx.mutate.chatMember.update({
+      id: member.id,
       lastReadMessageId: data.lastReadMessageId,
       lastReadAt: data.lastReadAt,
     })

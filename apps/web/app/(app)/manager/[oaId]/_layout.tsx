@@ -51,6 +51,7 @@ export default function ManagerLayout() {
   }
 
   const oa = accountData?.account
+  const isChatActive = path.includes('/chat')
   const isRichMenuActive = path.includes('/richmenu')
 
   return (
@@ -97,6 +98,24 @@ export default function ManagerLayout() {
             >
               Chat screen
             </SizableText>
+            <Link href={`/manager/${oaId}/chat` as any}>
+              <Pressable
+                role="link"
+                py="$2"
+                px="$3"
+                rounded="$3"
+                bg={isChatActive ? '$color3' : 'transparent'}
+                hoverStyle={{ bg: isChatActive ? '$color3' : '$color2' }}
+              >
+                <SizableText
+                  size="$2"
+                  fontWeight={isChatActive ? '700' : '500'}
+                  color={isChatActive ? '$color12' : '$color11'}
+                >
+                  Chats
+                </SizableText>
+              </Pressable>
+            </Link>
             <Link href={`/manager/${oaId}/richmenu` as any}>
               <Pressable
                 role="link"
@@ -162,9 +181,13 @@ export default function ManagerLayout() {
 
         {/* Main content */}
         <YStack flex={1} style={{ minHeight: 0 }} $platform-web={{ overflowY: 'auto' }}>
-          <YStack p="$6" maxW={1120} width="100%" mx="auto">
+          {isChatActive ? (
             <Slot />
-          </YStack>
+          ) : (
+            <YStack p="$6" maxW={1120} width="100%" mx="auto">
+              <Slot />
+            </YStack>
+          )}
         </YStack>
       </XStack>
     </YStack>
