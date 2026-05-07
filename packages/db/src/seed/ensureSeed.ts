@@ -14,6 +14,7 @@ import {
   userState,
   chat,
   chatMember,
+  message,
   stickerPackage,
   entitlement,
 } from '../schema-public'
@@ -31,6 +32,9 @@ const TEST_OA_UNIQUE_ID = 'testbot'
 const TEST_OA_NAME = 'Test Bot'
 const TEST_RICH_MENU_IMAGE_URL =
   'https://img2.pixhost.to/images/7292/716433745_gemini_generated_image_puffhnpuffhnpuff-edited.jpg'
+
+const TEST_OA_CHAT_USER_MESSAGE_TEXT = 'Hello manager, I need help'
+const TEST_OA_CHAT_MANAGER_REPLY_TEXT = 'Thanks for reaching out'
 
 const TEST_OA_RICH_MENU = {
   richMenuId: 'richmenu-testbot-default',
@@ -525,11 +529,68 @@ export async function ensureSeed(pool: Pool, db: any, drive?: SeedDrive) {
           },
         ])
 
+        const userMessageId = randomUUID()
+
+        await db.insert(message).values({
+          id: userMessageId,
+          chatId: oaChatId,
+          senderId: test1Id,
+          senderType: 'user',
+          type: 'text',
+          text: TEST_OA_CHAT_USER_MESSAGE_TEXT,
+          createdAt: now,
+        })
+
+        await db
+          .update(chat)
+          .set({
+            lastMessageId: userMessageId,
+            lastMessageAt: now,
+          })
+          .where(eq(chat.id, oaChatId))
+
         console.info(
           `[seed] Created OA friendship: test1 <-> ${TEST_OA_NAME} (chat: ${oaChatId})`,
         )
       } else {
         console.info(`[seed] OA friendship test1 <-> ${TEST_OA_NAME} already exists`)
+
+        const existingOaChatMember = await db
+          .select()
+          .from(chatMember)
+          .where(
+            and(eq(chatMember.userId, test1Id), eq(chatMember.oaId, testOaId)),
+          )
+          .limit(1)
+
+        if (existingOaChatMember.length > 0) {
+          const [existingChat] = await db
+            .select()
+            .from(chat)
+            .where(eq(chat.id, existingOaChatMember[0].chatId))
+            .limit(1)
+
+          if (existingChat && !existingChat.lastMessageId) {
+            const userMessageId = randomUUID()
+            await db.insert(message).values({
+              id: userMessageId,
+              chatId: existingChat.id,
+              senderId: test1Id,
+              senderType: 'user',
+              type: 'text',
+              text: TEST_OA_CHAT_USER_MESSAGE_TEXT,
+              createdAt: now,
+            })
+            await db
+              .update(chat)
+              .set({ lastMessageId: userMessageId, lastMessageAt: now })
+              .where(eq(chat.id, existingChat.id))
+
+            console.info(
+              `[seed] Repaired missing OA chat message for test1 <-> ${TEST_OA_NAME}`,
+            )
+          }
+        }
       }
     }
   }
