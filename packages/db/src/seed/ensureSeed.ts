@@ -347,7 +347,7 @@ export async function ensureSeed(pool: Pool, db: any, drive?: SeedDrive) {
     await db.insert(oaProvider).values({
       id: providerId,
       name: 'Vine Developers',
-      ownerId: 'system',
+      ownerId: 'demo-user-id',
       createdAt: now,
       updatedAt: now,
     })
@@ -383,7 +383,7 @@ export async function ensureSeed(pool: Pool, db: any, drive?: SeedDrive) {
     await db.insert(oaProvider).values({
       id: testOaProviderId,
       name: 'Vine Test',
-      ownerId: 'system',
+      ownerId: 'demo-user-id',
       createdAt: now,
       updatedAt: now,
     })
