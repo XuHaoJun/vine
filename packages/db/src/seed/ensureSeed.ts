@@ -555,40 +555,48 @@ export async function ensureSeed(pool: Pool, db: any, drive?: SeedDrive) {
       } else {
         console.info(`[seed] OA friendship test1 <-> ${TEST_OA_NAME} already exists`)
 
-        const existingOaChatMember = await db
+        const test1Memberships = await db
           .select()
           .from(chatMember)
-          .where(
-            and(eq(chatMember.userId, test1Id), eq(chatMember.oaId, testOaId)),
-          )
-          .limit(1)
+          .where(eq(chatMember.userId, test1Id))
 
-        if (existingOaChatMember.length > 0) {
-          const [existingChat] = await db
+        for (const membership of test1Memberships) {
+          const oaMembers = await db
             .select()
-            .from(chat)
-            .where(eq(chat.id, existingOaChatMember[0].chatId))
+            .from(chatMember)
+            .where(
+              and(eq(chatMember.chatId, membership.chatId), eq(chatMember.oaId, testOaId)),
+            )
             .limit(1)
 
-          if (existingChat && !existingChat.lastMessageId) {
-            const userMessageId = randomUUID()
-            await db.insert(message).values({
-              id: userMessageId,
-              chatId: existingChat.id,
-              senderId: test1Id,
-              senderType: 'user',
-              type: 'text',
-              text: TEST_OA_CHAT_USER_MESSAGE_TEXT,
-              createdAt: now,
-            })
-            await db
-              .update(chat)
-              .set({ lastMessageId: userMessageId, lastMessageAt: now })
-              .where(eq(chat.id, existingChat.id))
+          if (oaMembers.length > 0) {
+            const [existingChat] = await db
+              .select()
+              .from(chat)
+              .where(eq(chat.id, membership.chatId))
+              .limit(1)
 
-            console.info(
-              `[seed] Repaired missing OA chat message for test1 <-> ${TEST_OA_NAME}`,
-            )
+            if (existingChat && !existingChat.lastMessageId) {
+              const userMessageId = randomUUID()
+              await db.insert(message).values({
+                id: userMessageId,
+                chatId: existingChat.id,
+                senderId: test1Id,
+                senderType: 'user',
+                type: 'text',
+                text: TEST_OA_CHAT_USER_MESSAGE_TEXT,
+                createdAt: now,
+              })
+              await db
+                .update(chat)
+                .set({ lastMessageId: userMessageId, lastMessageAt: now })
+                .where(eq(chat.id, existingChat.id))
+
+              console.info(
+                `[seed] Repaired missing OA chat message for test1 <-> ${TEST_OA_NAME}`,
+              )
+            }
+            break
           }
         }
       }
