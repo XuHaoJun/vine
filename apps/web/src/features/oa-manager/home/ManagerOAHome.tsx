@@ -1,5 +1,5 @@
-import { useRouter } from 'one'
 import { WebhookStatus } from '@vine/proto/oa'
+import { useRouter } from 'one'
 import { useEffect } from 'react'
 import { Image } from 'react-native'
 import { Spinner, SizableText, XStack, YStack } from 'tamagui'
@@ -96,11 +96,7 @@ export function ManagerOAHome({ oaId }: ManagerOAHomeProps) {
         <OperationCard
           title="Chats"
           description="Open the OA inbox and reply to users."
-          value={
-            data.chat?.chatCount
-              ? `${data.chat.chatCount} chats`
-              : 'Inbox ready'
-          }
+          value={data.chat?.chatCount ? `${data.chat.chatCount} chats` : 'Inbox ready'}
           actionLabel="Open chats"
           onPress={() => router.navigate(`/manager/${oaId}/chat` as any)}
         />

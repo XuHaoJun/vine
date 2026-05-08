@@ -103,7 +103,12 @@ export default function ManagerHomeLayout() {
           gap="$2"
           $platform-web={{ overflowY: 'auto' }}
         >
-          <SizableText size="$1" fontWeight="700" color="$color9" textTransform="uppercase">
+          <SizableText
+            size="$1"
+            fontWeight="700"
+            color="$color9"
+            textTransform="uppercase"
+          >
             Chat screen
           </SizableText>
           <Link href={richMenuPath as any}>

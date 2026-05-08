@@ -179,14 +179,16 @@ export function createOAService(deps: OADeps) {
       .where(and(eq(chat.type, 'oa'), eq(chatMember.oaId, oaId)))
 
     const chatCount = chatCountRow?.value ?? 0
-    const profileComplete = Boolean(account.name && account.uniqueId && account.description)
+    const profileComplete = Boolean(
+      account.name && account.uniqueId && account.description,
+    )
     const profileImageAdded = Boolean(account.imageUrl)
     const webhookConfigured = Boolean(webhook?.url)
     const defaultRichMenuCreated = Boolean(defaultRichMenu)
 
     return {
       account,
-      friendCount: (friendCountRow?.value ?? 0),
+      friendCount: friendCountRow?.value ?? 0,
       chat: {
         status: chatCount > 0 ? 'available' : 'off',
         chatCount,

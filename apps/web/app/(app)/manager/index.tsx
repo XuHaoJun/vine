@@ -262,9 +262,7 @@ export const ManagerIndexPage = memo(() => {
                       <XStack width={160} gap="$2" justify="flex-end">
                         <Button
                           size="$2"
-                          onPress={() =>
-                            router.push(`/manager/${account.id}` as never)
-                          }
+                          onPress={() => router.push(`/manager/${account.id}` as never)}
                         >
                           Manage
                         </Button>
