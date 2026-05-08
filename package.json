@@ -28,7 +28,7 @@
     "oxfmt": "^0.48.0",
     "oxlint": "^1.31.0",
     "oxlint-tsgolint": "^0.22.1",
-    "turbo": "^2.9.9"
+    "turbo": "^2.9.10"
   },
   "overrides": {
     "@expo/fingerprint": "0.15.3",
