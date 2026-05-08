@@ -86,7 +86,7 @@ describe('oa manager summary', () => {
       expect(summary).not.toBeNull()
       expect(summary!.account.name).toBe('Test Bot')
       expect(summary!.friendCount).toBe(2)
-      expect(summary!.chat.recentChatCount).toBe(1)
+      expect(summary!.chat.chatCount).toBe(1)
       expect(summary!.chat.status).toBe('available')
       expect(summary!.webhook.configured).toBe(true)
       expect(summary!.webhook.status).toBe('verified')
@@ -99,6 +99,45 @@ describe('oa manager summary', () => {
       expect(summary!.setup.profileImageAdded).toBe(true)
       expect(summary!.setup.webhookConfigured).toBe(true)
       expect(summary!.setup.defaultRichMenuCreated).toBe(true)
+      expect(summary!.setup.chatInboxAvailable).toBe(true)
+    })
+  })
+
+  it('returns empty/setup state for a bare account with no related data', async () => {
+    await withRollbackDb(async (db) => {
+      const suffix = randomUUID()
+      const [provider] = await db
+        .insert(oaProvider)
+        .values({ name: 'Provider', ownerId: 'owner-2' })
+        .returning()
+      const [account] = await db
+        .insert(officialAccount)
+        .values({
+          providerId: provider.id,
+          name: 'Bare Bot',
+          uniqueId: `bare-${suffix}`,
+          channelSecret: 'secret',
+        })
+        .returning()
+
+      const oa = createOAService({ db, database: {} as any })
+      const summary = await oa.getManagerSummary(account.id)
+
+      expect(summary).not.toBeNull()
+      expect(summary!.friendCount).toBe(0)
+      expect(summary!.chat.chatCount).toBe(0)
+      expect(summary!.chat.status).toBe('off')
+      expect(summary!.webhook.configured).toBe(false)
+      expect(summary!.webhook.status).toBeUndefined()
+      expect(summary!.richMenu.totalCount).toBe(0)
+      expect(summary!.richMenu.defaultRichMenuId).toBeUndefined()
+      expect(summary!.quota.monthlyLimit).toBeUndefined()
+      expect(summary!.quota.remaining).toBeUndefined()
+      expect(summary!.setup.profileComplete).toBe(false)
+      expect(summary!.setup.profileImageAdded).toBe(false)
+      expect(summary!.setup.webhookConfigured).toBe(false)
+      expect(summary!.setup.defaultRichMenuCreated).toBe(false)
+      expect(summary!.setup.chatInboxAvailable).toBe(false)
     })
   })
 })

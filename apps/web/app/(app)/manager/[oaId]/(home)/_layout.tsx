@@ -1,6 +1,7 @@
-import { Link, Slot, useActiveParams } from 'one'
+import { Link, Slot, useActiveParams, usePathname } from 'one'
 import { SizableText, XStack, YStack } from 'tamagui'
 import { oaClient } from '~/features/oa/client'
+import { Button } from '~/interface/buttons/Button'
 import { Pressable } from '~/interface/buttons/Pressable'
 import { useTanQuery } from '~/query'
 
@@ -8,15 +9,10 @@ function normalizePath(path: string) {
   return path.replace(/\/$/, '') || '/'
 }
 
-function useBrowserPathname() {
-  if (typeof window !== 'undefined') return normalizePath(window.location.pathname)
-  return '/'
-}
-
 export default function ManagerHomeLayout() {
   const params = useActiveParams<{ oaId: string }>()
   const oaId = params.oaId!
-  const path = useBrowserPathname()
+  const path = normalizePath(usePathname())
   const homePath = `/manager/${oaId}`
   const chatPath = `/manager/${oaId}/chat`
   const richMenuPath = `/manager/${oaId}/richmenu`
@@ -66,9 +62,9 @@ export default function ManagerHomeLayout() {
             </>
           ) : null}
         </XStack>
-        <SizableText size="$2" color="$color10">
+        <Button size="$2" variant="outlined" disabled>
           Settings
-        </SizableText>
+        </Button>
       </XStack>
 
       <XStack

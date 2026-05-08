@@ -212,8 +212,9 @@ export const ManagerIndexPage = memo(() => {
                       items="center"
                       borderBottomWidth={i < filtered.length - 1 ? 1 : 0}
                       borderColor="$borderColor"
-                          cursor="pointer"
-                          onPress={() => router.push(`/manager/${account.id}` as never)}
+                      cursor="pointer"
+                      hoverStyle={{ bg: '$backgroundHover' }}
+                      onPress={() => router.push(`/manager/${account.id}` as never)}
                     >
                       <YStack flex={2}>
                         <SizableText size="$3" fontWeight="600" color="$color12">

@@ -100,7 +100,7 @@ function toProtoOfficialAccount(
   }
 }
 
-function dbWebhookStatusToProto(status: string): WebhookStatus {
+function dbWebhookStatusToProto(status: string | undefined): WebhookStatus {
   switch (status) {
     case 'pending':
       return WebhookStatus.PENDING
@@ -595,7 +595,7 @@ export function oaHandler(deps: OAHandlerDeps) {
           friendCount: summary.friendCount,
           chat: {
             status: summary.chat.status,
-            recentChatCount: summary.chat.recentChatCount,
+            chatCount: summary.chat.chatCount,
           },
           richMenu: {
             totalCount: summary.richMenu.totalCount,

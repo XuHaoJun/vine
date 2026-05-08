@@ -1,24 +1,17 @@
 import { useRouter } from 'one'
 import { WebhookStatus } from '@vine/proto/oa'
 import { useEffect } from 'react'
+import { Image } from 'react-native'
 import { Spinner, SizableText, XStack, YStack } from 'tamagui'
 import { oaClient } from '~/features/oa/client'
 import { Button } from '~/interface/buttons/Button'
 import { showError } from '~/interface/dialogs/actions'
 import { useTanQuery } from '~/query'
+import { formatQuota } from './formatQuota'
 import { OperationCard, SetupChecklist } from './ManagerSummaryCards'
 
 type ManagerOAHomeProps = {
   oaId: string
-}
-
-function formatQuota(summary: {
-  quota?: { monthlyLimit?: number; totalUsage: number; remaining?: number }
-}) {
-  const quota = summary.quota
-  if (!quota) return 'No quota data'
-  if (!quota.monthlyLimit) return `${quota.totalUsage} used`
-  return `${quota.totalUsage}/${quota.monthlyLimit} used`
 }
 
 export function ManagerOAHome({ oaId }: ManagerOAHomeProps) {
@@ -36,23 +29,10 @@ export function ManagerOAHome({ oaId }: ManagerOAHomeProps) {
     }
   }, [isError, router])
 
-  if (isLoading) {
+  if (isLoading || isError || !data?.account) {
     return (
       <YStack items="center" py="$10">
         <Spinner size="large" />
-      </YStack>
-    )
-  }
-
-  if (isError || !data?.account) {
-    return (
-      <YStack gap="$2">
-        <SizableText size="$5" fontWeight="700" color="$color12">
-          Account unavailable
-        </SizableText>
-        <SizableText size="$2" color="$color10">
-          This account could not be loaded or you do not have access.
-        </SizableText>
       </YStack>
     )
   }
@@ -82,7 +62,11 @@ export function ManagerOAHome({ oaId }: ManagerOAHomeProps) {
           justify="center"
         >
           {account.imageUrl ? (
-            <img src={account.imageUrl} width={72} height={72} alt="" />
+            <Image
+              source={{ uri: account.imageUrl }}
+              style={{ width: 72, height: 72 }}
+              resizeMode="cover"
+            />
           ) : (
             <SizableText size="$7" color="$color9">
               {account.name.slice(0, 1).toUpperCase()}
@@ -113,8 +97,8 @@ export function ManagerOAHome({ oaId }: ManagerOAHomeProps) {
           title="Chats"
           description="Open the OA inbox and reply to users."
           value={
-            data.chat?.recentChatCount
-              ? `${data.chat.recentChatCount} recent chats`
+            data.chat?.chatCount
+              ? `${data.chat.chatCount} chats`
               : 'Inbox ready'
           }
           actionLabel="Open chats"

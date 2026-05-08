@@ -172,12 +172,13 @@ export function createOAService(deps: OADeps) {
       ? richMenus.find((menu) => menu.richMenuId === defaultRichMenu.richMenuId)?.name
       : undefined
 
-    const [recentChatCountRow] = await db
+    const [chatCountRow] = await db
       .select({ value: count() })
       .from(chat)
       .innerJoin(chatMember, eq(chatMember.chatId, chat.id))
       .where(and(eq(chat.type, 'oa'), eq(chatMember.oaId, oaId)))
 
+    const chatCount = chatCountRow?.value ?? 0
     const profileComplete = Boolean(account.name && account.uniqueId && account.description)
     const profileImageAdded = Boolean(account.imageUrl)
     const webhookConfigured = Boolean(webhook?.url)
@@ -187,8 +188,8 @@ export function createOAService(deps: OADeps) {
       account,
       friendCount: (friendCountRow?.value ?? 0),
       chat: {
-        status: (recentChatCountRow?.value ?? 0) > 0 ? 'available' : 'off',
-        recentChatCount: (recentChatCountRow?.value ?? 0),
+        status: chatCount > 0 ? 'available' : 'off',
+        chatCount,
       },
       richMenu: {
         totalCount: richMenus.length,
@@ -198,7 +199,7 @@ export function createOAService(deps: OADeps) {
       webhook: {
         configured: webhookConfigured,
         useWebhook: webhook?.useWebhook ?? false,
-        status: webhook?.status ?? 'pending',
+        status: webhook?.status,
         lastVerifiedAt: webhook?.lastVerifiedAt ?? undefined,
         lastVerifyReason: webhook?.lastVerifyReason ?? undefined,
       },
@@ -216,7 +217,7 @@ export function createOAService(deps: OADeps) {
         profileImageAdded,
         webhookConfigured,
         defaultRichMenuCreated,
-        chatInboxAvailable: true,
+        chatInboxAvailable: chatCount > 0,
       },
     }
   }

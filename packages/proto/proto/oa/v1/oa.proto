@@ -383,7 +383,7 @@ message GetOfficialAccountManagerSummaryRequest {
 
 message ManagerSummaryChat {
   string status = 1;
-  int32 recent_chat_count = 2;
+  int32 chat_count = 2;
 }
 
 message ManagerSummaryRichMenu {
