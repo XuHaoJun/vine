@@ -8,7 +8,7 @@ import { dialogConfirm, showError } from '~/interface/dialogs/actions'
 import { showToast } from '~/interface/toast/Toast'
 import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
 
-const route = createRoute<'/(app)/manager/[oaId]/richmenu'>()
+const route = createRoute<'/(app)/manager/[oaId]/(home)/richmenu'>()
 
 // Shows the image thumbnail if hasImage is true, otherwise a "No image" box
 const RichMenuThumbnail = memo(
@@ -132,7 +132,7 @@ export const RichMenuListPage = memo(() => {
             Rich menus
           </SizableText>
           <SizableText size="$2" color="$color10">
-            Create custom menus shown in the chat screen
+            Create visually appealing custom menus for your chat screen.
           </SizableText>
         </YStack>
         <XStack gap="$2">
@@ -145,7 +145,7 @@ export const RichMenuListPage = memo(() => {
           <Button
             onPress={() => router.navigate(`/manager/${oaId}/richmenu/create` as any)}
           >
-            + Create
+            Create new
           </Button>
         </XStack>
       </XStack>
@@ -169,7 +169,7 @@ export const RichMenuListPage = memo(() => {
         </YStack>
       )}
 
-      {/* Default menu */}
+      {/* Current menu */}
       {defaultMenu && (
         <YStack gap="$2">
           <SizableText
@@ -178,7 +178,7 @@ export const RichMenuListPage = memo(() => {
             color="$color9"
             textTransform="uppercase"
           >
-            Default menu
+            Current menu
           </SizableText>
           <MenuCard
             menu={defaultMenu}
@@ -194,7 +194,35 @@ export const RichMenuListPage = memo(() => {
         </YStack>
       )}
 
-      {/* Other menus */}
+      {menus.length > 0 && !defaultMenu && (
+        <YStack gap="$2">
+          <SizableText
+            size="$1"
+            fontWeight="700"
+            color="$color9"
+            textTransform="uppercase"
+          >
+            Current menu
+          </SizableText>
+          <YStack
+            py="$6"
+            px="$4"
+            borderWidth={1}
+            borderColor="$borderColor"
+            rounded="$3"
+            gap="$2"
+          >
+            <SizableText size="$3" fontWeight="700" color="$color12">
+              No default rich menu
+            </SizableText>
+            <SizableText size="$2" color="$color10">
+              Set a menu as default to show it to users in the chat screen.
+            </SizableText>
+          </YStack>
+        </YStack>
+      )}
+
+      {/* Rich menu list */}
       {otherMenus.length > 0 && (
         <YStack gap="$2">
           <SizableText
@@ -203,7 +231,7 @@ export const RichMenuListPage = memo(() => {
             color="$color9"
             textTransform="uppercase"
           >
-            Other menus
+            Rich menu list
           </SizableText>
           {otherMenus.map((menu) => (
             <MenuCard

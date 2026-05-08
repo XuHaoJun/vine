@@ -15,7 +15,7 @@ import {
   oaRichMenuClick,
 } from '@vine/db/schema-oa'
 import { chat, chatMember, message, userPublic } from '@vine/db/schema-public'
-import { and, eq, ilike, inArray, lt, or, sql } from 'drizzle-orm'
+import { and, count, eq, ilike, inArray, lt, or, sql } from 'drizzle-orm'
 import type { schema } from '@vine/db'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { Pool } from 'pg'
@@ -152,6 +152,73 @@ export function createOAService(deps: OADeps) {
       .where(eq(officialAccount.uniqueId, uniqueId))
       .limit(1)
     return account ?? null
+  }
+
+  async function getManagerSummary(oaId: string) {
+    const account = await getOfficialAccount(oaId)
+    if (!account) return null
+
+    const [friendCountRow] = await db
+      .select({ value: count() })
+      .from(oaFriendship)
+      .where(and(eq(oaFriendship.oaId, oaId), eq(oaFriendship.status, 'friend')))
+
+    const webhook = await getWebhook(oaId)
+    const richMenus = await getRichMenuList(oaId)
+    const defaultRichMenu = await getDefaultRichMenu(oaId)
+    const quota = await getQuota(oaId)
+
+    const defaultRichMenuTitle = defaultRichMenu
+      ? richMenus.find((menu) => menu.richMenuId === defaultRichMenu.richMenuId)?.name
+      : undefined
+
+    const [recentChatCountRow] = await db
+      .select({ value: count() })
+      .from(chat)
+      .innerJoin(chatMember, eq(chatMember.chatId, chat.id))
+      .where(and(eq(chat.type, 'oa'), eq(chatMember.oaId, oaId)))
+
+    const profileComplete = Boolean(account.name && account.uniqueId && account.description)
+    const profileImageAdded = Boolean(account.imageUrl)
+    const webhookConfigured = Boolean(webhook?.url)
+    const defaultRichMenuCreated = Boolean(defaultRichMenu)
+
+    return {
+      account,
+      friendCount: (friendCountRow?.value ?? 0),
+      chat: {
+        status: (recentChatCountRow?.value ?? 0) > 0 ? 'available' : 'off',
+        recentChatCount: (recentChatCountRow?.value ?? 0),
+      },
+      richMenu: {
+        totalCount: richMenus.length,
+        defaultRichMenuId: defaultRichMenu?.richMenuId,
+        defaultRichMenuTitle,
+      },
+      webhook: {
+        configured: webhookConfigured,
+        useWebhook: webhook?.useWebhook ?? false,
+        status: webhook?.status ?? 'pending',
+        lastVerifiedAt: webhook?.lastVerifiedAt ?? undefined,
+        lastVerifyReason: webhook?.lastVerifyReason ?? undefined,
+      },
+      quota: {
+        type: quota.type,
+        monthlyLimit: quota.value,
+        totalUsage: quota.totalUsage,
+        remaining:
+          quota.value === undefined
+            ? undefined
+            : Math.max(quota.value - quota.totalUsage, 0),
+      },
+      setup: {
+        profileComplete,
+        profileImageAdded,
+        webhookConfigured,
+        defaultRichMenuCreated,
+        chatInboxAvailable: true,
+      },
+    }
   }
 
   async function updateOfficialAccount(
@@ -1194,6 +1261,7 @@ export function createOAService(deps: OADeps) {
     listMyOfficialAccounts,
     createOfficialAccount,
     getOfficialAccount,
+    getManagerSummary,
     updateOfficialAccount,
     deleteOfficialAccount,
     setWebhook,

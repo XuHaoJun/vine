@@ -17,7 +17,7 @@ test.describe('Manager OA chat', () => {
 
     const testBotRow = page.getByText('@testbot').locator('xpath=../..')
     await testBotRow.getByRole('button', { name: 'Manage' }).click()
-    await page.waitForURL(/\/manager\/.+\/richmenu$/, { timeout: 15000 })
+    await page.waitForURL(/\/manager\/[^/]+$/, { timeout: 15000 })
     await page.getByText('Chats', { exact: true }).click()
     await page.waitForURL(/\/manager\/.+\/chat$/, { timeout: 15000 })
     managerChatPath = new URL(page.url()).pathname
