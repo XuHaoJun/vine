@@ -64,7 +64,7 @@ jobs:
           ONE_SERVER_URL: ${{ secrets.ONE_SERVER_URL }}
           VITE_ZERO_HOSTNAME: ${{ secrets.VITE_ZERO_HOSTNAME }}
           VITE_WEB_HOSTNAME: ${{ secrets.VITE_WEB_HOSTNAME }}
-          ZERO_VERSION: ${{ secrets.ZERO_VERSION || '0.26.2' }}
+          ZERO_VERSION: ${{ secrets.ZERO_VERSION || '1.4.0' }}
           ZERO_NUM_SYNC_WORKERS: ${{ secrets.ZERO_NUM_SYNC_WORKERS }}
           ZERO_CVR_MAX_CONNS: ${{ secrets.ZERO_CVR_MAX_CONNS }}
           ZERO_UPSTREAM_MAX_CONNS: ${{ secrets.ZERO_UPSTREAM_MAX_CONNS }}
