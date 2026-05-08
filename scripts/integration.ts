@@ -1,9 +1,15 @@
 #!/usr/bin/env bun
 
 /**
- * @description Simple integration test runner
+ * @description Integration test runner — handles Docker, migrations, build, and test execution.
  *
- * runs docker, waits for migrations, builds, starts server, runs playwright tests
+ * Usage:
+ *   bun scripts/integration.ts                    # full suite (DB + Playwright)
+ *   bun scripts/integration.ts integration/foo.test.ts     # specific Playwright file
+ *   bun scripts/integration.ts --db-only                   # server DB integration only
+ *   bun scripts/integration.ts --db-only payments.int.test.ts  # specific DB test
+ *   bun scripts/integration.ts --web-only                  # skip DB tests, only web
+ *   bun scripts/integration.ts --web-only integration/foo.test.ts
  */
 
 import { constants as fsConstants } from 'node:fs'
@@ -18,6 +24,26 @@ import {
   getProxyTargetPort,
   getIntegrationTestProxyPort,
 } from './integration-proxy.ts'
+
+// --- argument parsing ---
+type RunMode = 'all' | 'db' | 'web'
+
+function parseArgs(raw: string[]): { mode: RunMode; testArgs: string[] } {
+  const flags: string[] = []
+  const testArgs: string[] = []
+  for (const arg of raw) {
+    if (arg === '--db-only' || arg === '--web-only') {
+      flags.push(arg)
+    } else {
+      testArgs.push(arg)
+    }
+  }
+  const dbOnly = flags.includes('--db-only')
+  const webOnly = flags.includes('--web-only')
+  const mode: RunMode =
+    dbOnly && webOnly ? 'all' : dbOnly ? 'db' : webOnly ? 'web' : 'all'
+  return { mode, testArgs }
+}
 
 // --- config ---
 const DOCKER_TIMEOUT = 120_000 // 2 min
@@ -174,114 +200,104 @@ async function cleanup() {
 // --- main ---
 
 async function main() {
-  console.info('integration test runner\n')
+  const { mode, testArgs } = parseArgs(process.argv.slice(2))
+  const needsWeb = mode !== 'db'
+  console.info(`integration test runner (mode: ${mode})\n`)
 
-  // load .env.development so INTEGRATION_TEST_PROXY_PORT is available
+  // load env
   await vxrnLoadEnv('development')
-  const FRONTEND_PORT = getIntegrationTestProxyPort()
 
-  // ensure port clear
-  if (await checkPort(FRONTEND_PORT)) {
-    console.error(`port ${FRONTEND_PORT} in use`)
-    process.exit(1)
+  if (needsWeb) {
+    const FRONTEND_PORT = getIntegrationTestProxyPort()
+    if (await checkPort(FRONTEND_PORT)) {
+      console.error(`port ${FRONTEND_PORT} in use`)
+      process.exit(1)
+    }
   }
 
   try {
-    // clean start
+    // Phase 1: Docker setup (always)
     await $('docker compose down -v --remove-orphans', {
       silent: true,
       timeout: 60_000,
     }).catch(() => {})
 
-    // build migrations
     console.info('\nbuilding migrations...')
     await $('bun run tko migrate build', { timeout: BUILD_TIMEOUT })
 
-    // start docker
     console.info('\nstarting docker...')
     await spawn('docker compose up --remove-orphans pgdb migrate zero')
     await waitForMigrations()
 
-    // Run backend DB integration tests before app startup. These tests use the
-    // migrated Docker PostgreSQL database and rollback every test transaction.
-    console.info('\nrunning server db integration tests...')
-    await $(
-      'ZERO_UPSTREAM_DB=postgresql://user:password@localhost:5533/postgres bun run --cwd apps/server test:integration:db',
-      { timeout: TEST_TIMEOUT },
-    )
+    // Phase 2: Server DB integration tests
+    if (mode !== 'web') {
+      console.info('\nrunning server db integration tests...')
+      const dbExtraArgs =
+        mode === 'db' && testArgs.length > 0 ? ` ${testArgs.join(' ')}` : ''
+      await $(
+        `ZERO_UPSTREAM_DB=postgresql://user:password@localhost:5533/postgres bun run --cwd apps/server test:integration:db${dbExtraArgs}`,
+        { timeout: TEST_TIMEOUT },
+      )
+    }
 
-    // install playwright
-    console.info('\ninstalling playwright...')
-    await $('bunx playwright install chromium', { timeout: BUILD_TIMEOUT })
+    // Phase 3: Web build + Playwright
+    if (needsWeb) {
+      console.info('\ninstalling playwright...')
+      await $('bunx playwright install chromium', { timeout: BUILD_TIMEOUT })
 
-    // build (bake VITE_DEMO_MODE into client bundle at build time)
-    console.info('\nbuilding...')
-    await ensureWritableVxrnCompilerCache()
-    await $('VITE_DEMO_MODE=1 bun run build', { timeout: BUILD_TIMEOUT })
+      console.info('\nbuilding...')
+      await ensureWritableVxrnCompilerCache()
+      await $('VITE_DEMO_MODE=1 bun run build', { timeout: BUILD_TIMEOUT })
 
-    // start backend
-    console.info('\nstarting backend...')
-    const commonEnv = await getTestEnv()
-    await spawnWithEnv('bun --cwd apps/server start', commonEnv)
-    await waitForPort(BACKEND_PORT, 30_000)
+      console.info('\nstarting backend...')
+      const commonEnv = await getTestEnv()
+      await spawnWithEnv('bun --cwd apps/server start', commonEnv)
+      await waitForPort(BACKEND_PORT, 30_000)
 
-    // start static file server on internal port
-    console.info('\nstarting frontend...')
-    await spawnWithEnv(`bun --cwd apps/web one serve --port ${STATIC_PORT}`, commonEnv)
-    await waitForPort(STATIC_PORT, 60_000)
+      console.info('\nstarting frontend...')
+      await spawnWithEnv(`bun --cwd apps/web one serve --port ${STATIC_PORT}`, commonEnv)
+      await waitForPort(STATIC_PORT, 60_000)
 
-    // start proxy on FRONTEND_PORT: routes /api/* to backend, everything else to static server
-    // this keeps the browser on a single origin so auth cookies work without cross-origin CORS
-    console.info(`\nstarting proxy on port ${FRONTEND_PORT}...`)
-    proxyServer = Bun.serve({
-      port: FRONTEND_PORT,
-      async fetch(req) {
-        const url = new URL(req.url)
-        const targetPort = getProxyTargetPort(url.pathname)
-        const target = `http://localhost:${targetPort}${url.pathname}${url.search}`
+      const FRONTEND_PORT = getIntegrationTestProxyPort()
+      console.info(`\nstarting proxy on port ${FRONTEND_PORT}...`)
+      proxyServer = Bun.serve({
+        port: FRONTEND_PORT,
+        async fetch(req) {
+          const url = new URL(req.url)
+          const targetPort = getProxyTargetPort(url.pathname)
+          const target = `http://localhost:${targetPort}${url.pathname}${url.search}`
 
-        // Disable compression so we can buffer and forward the body without re-encoding issues
-        const reqHeaders = new Headers(req.headers)
-        reqHeaders.set('accept-encoding', 'identity')
+          const reqHeaders = new Headers(req.headers)
+          reqHeaders.set('accept-encoding', 'identity')
 
-        const upstream = await fetch(target, {
-          method: req.method,
-          headers: reqHeaders,
-          body: req.method !== 'GET' && req.method !== 'HEAD' ? req.body : undefined,
-          redirect: 'manual',
-        })
-
-        // Pass through redirects directly to the browser
-        if (upstream.status >= 300 && upstream.status < 400) {
-          const resHeaders = new Headers(upstream.headers)
-          return new Response(null, {
-            status: upstream.status,
-            headers: resHeaders,
+          const upstream = await fetch(target, {
+            method: req.method,
+            headers: reqHeaders,
+            body: req.method !== 'GET' && req.method !== 'HEAD' ? req.body : undefined,
+            redirect: 'manual',
           })
-        }
 
-        // Buffer the full body to avoid chunked transfer encoding issues with Bun.serve
-        const body = await upstream.arrayBuffer()
-        const resHeaders = new Headers(upstream.headers)
-        resHeaders.delete('transfer-encoding')
-        resHeaders.set('content-length', String(body.byteLength))
+          if (upstream.status >= 300 && upstream.status < 400) {
+            const resHeaders = new Headers(upstream.headers)
+            return new Response(null, { status: upstream.status, headers: resHeaders })
+          }
 
-        return new Response(body, {
-          status: upstream.status,
-          headers: resHeaders,
-        })
-      },
-    })
-    console.info(`  ➜  Proxy:  http://localhost:${FRONTEND_PORT}/`)
+          const body = await upstream.arrayBuffer()
+          const resHeaders = new Headers(upstream.headers)
+          resHeaders.delete('transfer-encoding')
+          resHeaders.set('content-length', String(body.byteLength))
 
-    // run tests (optional args forwarded to playwright, e.g. integration/foo.test.ts)
-    const playwrightExtra = process.argv.slice(2)
-    const playwrightCmd =
-      playwrightExtra.length > 0
-        ? `bunx playwright test ${playwrightExtra.join(' ')}`
-        : `bunx playwright test`
-    console.info('\nrunning tests...')
-    await $(`cd apps/web/src/test && ${playwrightCmd}`, { timeout: TEST_TIMEOUT })
+          return new Response(body, { status: upstream.status, headers: resHeaders })
+        },
+      })
+      console.info(`  ➜  Proxy:  http://localhost:${FRONTEND_PORT}/`)
+
+      console.info('\nrunning tests...')
+      const playwrightExtra = testArgs.length > 0 ? ` ${testArgs.join(' ')}` : ''
+      await $(`cd apps/web/src/test && bunx playwright test${playwrightExtra}`, {
+        timeout: TEST_TIMEOUT,
+      })
+    }
 
     console.info('\n✓ integration tests passed')
   } finally {

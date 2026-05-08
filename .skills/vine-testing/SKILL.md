@@ -12,11 +12,15 @@ Vine prefers focused tests that protect behavior without flooding the repo with 
 | Area | Runner | Command |
 | --- | --- | --- |
 | `apps/web` unit | Vitest | `bun run --cwd apps/web test:unit` |
-| full integration | Docker Compose + Vitest + Playwright | `bun scripts/integration.ts` |
-| `apps/web` integration debug | Playwright | `bun run --cwd apps/web test:integration:manual` |
 | `apps/server` unit | Vitest | `bun run --cwd apps/server test:unit` |
-| `apps/server` DB integration debug | Vitest + PostgreSQL | `bun run --cwd apps/server test:integration:db` |
-| packages | Vitest | `bun run --cwd packages/<name> test` |
+| packages unit | Vitest | `bun run --cwd packages/<name> test` |
+| full integration | Docker Compose + Vitest + Playwright | `bun scripts/integration.ts` |
+| specific Playwright file | Docker Compose + Playwright | `bun scripts/integration.ts integration/foo.test.ts` |
+| server DB integration only | Docker Compose + Vitest | `bun scripts/integration.ts --db-only` |
+| specific DB integration file | Docker Compose + Vitest | `bun scripts/integration.ts --db-only payments.int.test.ts` |
+| web/Playwright only (skip DB tests) | Docker Compose + Playwright | `bun scripts/integration.ts --web-only` |
+| `apps/web` integration debug (human only) | Playwright (requires healthy stack) | `bun run --cwd apps/web test:integration:manual` |
+| `apps/server` DB integration debug (human only) | Vitest + PostgreSQL (requires healthy stack) | `bun run --cwd apps/server test:integration:db` |
 
 ## Where Tests Live
 
@@ -99,11 +103,36 @@ If the risk is route transitions, browser state, or a multi-step form flow, add 
 
 ## Integration Prerequisites
 
-For automated integration checks, run the canonical runner:
+For automated integration checks or running a specific test, use the canonical runner:
 
 ```bash
+# full suite (backend DB + frontend Playwright)
 bun scripts/integration.ts
+
+# single Playwright file (handles docker, migrations, build, teardown)
+bun scripts/integration.ts integration/login.test.ts
+
+# with playwright flags
+bun scripts/integration.ts integration/foo.test.ts --headed
+
+# backend DB integration only (skips build, playwright, server/web startup)
+bun scripts/integration.ts --db-only
+
+# backend DB integration with specific file
+bun scripts/integration.ts --db-only payments.int.test.ts
+
+# skip backend DB integration, only frontend
+bun scripts/integration.ts --web-only
+bun scripts/integration.ts --web-only integration/chat.test.ts
 ```
+
+| Flag | Phase 1 (docker) | Phase 2 (DB tests) | Phase 3 (build/web/Playwright) |
+|------|:----------------:|:------------------:|:------------------------------:|
+| (none) | ✓ | ✓ | ✓ |
+| `--db-only` | ✓ | ✓ | — |
+| `--web-only` | ✓ | — | ✓ |
+
+`scripts/integration.ts` manages the full stack lifecycle automatically. Prefer it over the manual debug commands below for any automated/agent use.
 
 Before running manual Playwright or DB integration debug commands, make sure the local stack is healthy:
 
@@ -195,7 +224,7 @@ describe('repository DB integration', () => {
 - using pglite/in-memory DB for server integration tests that need PostgreSQL semantics
 - adding backend DB integration tests without `withRollbackDb()`
 - running server DB integration before migrations have completed
-- using app-level manual integration commands for automated/agent verification instead of `bun scripts/integration.ts`
+- using `test:integration:manual` or `test:integration:db` for automated/agent verification instead of `bun scripts/integration.ts` (or `--db-only` / `--web-only`). The manual commands assume a pre-existing healthy Docker Compose stack and won't tear it down.
 - pointing host-run integration tests at `pgdb:5432` instead of `localhost:5533`
 - testing trivial UI wrappers instead of behavior-rich code
 - forgetting integration prerequisites and blaming the app for a stale local stack
