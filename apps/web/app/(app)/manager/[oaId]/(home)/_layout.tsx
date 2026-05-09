@@ -77,14 +77,14 @@ export default function ManagerHomeLayout() {
         borderColor="$borderColor"
       >
         <Link href={homePath as any}>
-          <Pressable role="link" py="$3">
+          <Pressable py="$3">
             <SizableText size="$2" fontWeight={homeActive ? '700' : '500'}>
               Home
             </SizableText>
           </Pressable>
         </Link>
         <Link href={chatPath as any}>
-          <Pressable role="link" py="$3">
+          <Pressable py="$3">
             <SizableText size="$2" fontWeight="500">
               Chats
             </SizableText>
@@ -113,7 +113,6 @@ export default function ManagerHomeLayout() {
           </SizableText>
           <Link href={richMenuPath as any}>
             <Pressable
-              role="link"
               py="$2"
               px="$3"
               rounded="$3"

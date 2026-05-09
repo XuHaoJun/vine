@@ -40,7 +40,7 @@ test.describe('Manager OA chat', () => {
       timeout: 10000,
     })
 
-    await page.getByText('Test One', { exact: false }).first().click()
+    await page.getByRole('button', { name: /Open chat with Test One/ }).click()
     await page.waitForURL(/\/manager\/.+\/chat\/.+/, { timeout: 15000 })
 
     await expect(page.getByText('Hello manager, I need help')).toBeVisible()
