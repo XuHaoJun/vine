@@ -1,7 +1,7 @@
 import { Link, Slot, useActiveParams, usePathname } from 'one'
 import { SizableText, XStack, YStack } from 'tamagui'
-import { oaClient } from '~/features/oa/client'
 import { ManagerOAAccountSwitcher } from '~/features/oa-manager/shared/ManagerOAAccountSwitcher'
+import { oaClient } from '~/features/oa/client'
 import { Button } from '~/interface/buttons/Button'
 import { Pressable } from '~/interface/buttons/Pressable'
 import { useTanQuery } from '~/query'

@@ -102,7 +102,10 @@ describe('oa business profile draft lifecycle', () => {
         profileImageUrl: 'https://example.test/new.png',
       }))!
 
-      const published = (await oa.publishBusinessProfile(account.id, saved.draft.serverRevision))!
+      const published = (await oa.publishBusinessProfile(
+        account.id,
+        saved.draft.serverRevision,
+      ))!
 
       expect(published.published.displayName).toBe('Published Name')
       expect(published.isDirty).toBe(false)
@@ -155,9 +158,9 @@ describe('oa business profile draft lifecycle', () => {
         displayName: 'New Name',
         uniqueId: `new_${account.uniqueId}`,
       })
-      await expect(
-        oa.publishBusinessProfile(account.id, 0),
-      ).rejects.toThrow('draft revision conflict')
+      await expect(oa.publishBusinessProfile(account.id, 0)).rejects.toThrow(
+        'draft revision conflict',
+      )
     })
   })
 
@@ -173,9 +176,9 @@ describe('oa business profile draft lifecycle', () => {
         uniqueId: account2.uniqueId,
       })
 
-      await expect(
-        oa.publishBusinessProfile(account1.id),
-      ).rejects.toThrow('uniqueId already exists')
+      await expect(oa.publishBusinessProfile(account1.id)).rejects.toThrow(
+        'uniqueId already exists',
+      )
     })
   })
 
@@ -248,9 +251,9 @@ describe('oa business profile draft lifecycle', () => {
         .set({ displayName: '' } as any)
         .where(eq(oaBusinessProfileDraft.oaId, account.id))
 
-      await expect(
-        oa.publishBusinessProfile(account.id),
-      ).rejects.toThrow('displayName must not be empty')
+      await expect(oa.publishBusinessProfile(account.id)).rejects.toThrow(
+        'displayName must not be empty',
+      )
     })
   })
 
@@ -276,9 +279,9 @@ describe('oa business profile draft lifecycle', () => {
       })
 
       // Publish should fail because uniqueId conflicts with account2
-      await expect(
-        oa.publishBusinessProfile(account.id),
-      ).rejects.toThrow('uniqueId already exists')
+      await expect(oa.publishBusinessProfile(account.id)).rejects.toThrow(
+        'uniqueId already exists',
+      )
 
       // Published profile must remain unchanged (atomic rollback)
       const [published] = await db

@@ -23,9 +23,7 @@ export function AccountPageHeader({ account, onBack }: Props) {
       <SizableText size="$4" fontWeight="700" color="$color12">
         Vine Official Account Manager
       </SizableText>
-      {account ? (
-        <ManagerOAAccountSwitcher account={account} />
-      ) : null}
+      {account ? <ManagerOAAccountSwitcher account={account} /> : null}
       <XStack flex={1} />
       <Button size="$2" variant="outlined" onPress={onBack}>
         Home

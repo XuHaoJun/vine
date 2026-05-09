@@ -2,11 +2,11 @@ import { useRouter } from 'one'
 import { useState } from 'react'
 import { Spinner, SizableText, XStack, YStack } from 'tamagui'
 import { Button } from '~/interface/buttons/Button'
-import { getBusinessProfileSaveStatus } from './saveStatus'
 import { AccountPageHeader } from './AccountPageHeader'
 import { BusinessProfileForm } from './BusinessProfileForm'
 import { BusinessProfilePreview } from './BusinessProfilePreview'
 import { ProfileBlockEditors } from './ProfileBlockEditors'
+import { getBusinessProfileSaveStatus } from './saveStatus'
 import { useBusinessProfileEditor } from './useBusinessProfileEditor'
 import type { EditorSection } from './clientTypes'
 
@@ -38,7 +38,13 @@ export function BusinessProfileEditor({ oaId }: Props) {
         account={data.account}
         onBack={() => router.navigate(`/manager/${oaId}` as any)}
       />
-      <XStack height="$6" px="$5" items="center" borderBottomWidth={1} borderColor="$borderColor">
+      <XStack
+        height="$6"
+        px="$5"
+        items="center"
+        borderBottomWidth={1}
+        borderColor="$borderColor"
+      >
         <SizableText size="$4" fontWeight="700">
           Business profile settings
         </SizableText>

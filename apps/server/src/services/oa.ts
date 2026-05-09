@@ -198,7 +198,9 @@ export function createOAService(deps: OADeps) {
     }
   }
 
-  function validateBusinessProfilePatch(patch: BusinessProfilePatch): Partial<typeof oaBusinessProfile.$inferInsert> {
+  function validateBusinessProfilePatch(
+    patch: BusinessProfilePatch,
+  ): Partial<typeof oaBusinessProfile.$inferInsert> {
     const clean: any = {}
 
     if (patch.displayName !== undefined) {
@@ -209,7 +211,8 @@ export function createOAService(deps: OADeps) {
     if (patch.uniqueId !== undefined) {
       const trimmed = patch.uniqueId.trim()
       if (trimmed.length === 0) throw new Error('uniqueId must not be empty')
-      if (!/^[a-z0-9_]+$/.test(trimmed)) throw new Error('uniqueId must be lower-case alphanumeric with underscores')
+      if (!/^[a-z0-9_]+$/.test(trimmed))
+        throw new Error('uniqueId must be lower-case alphanumeric with underscores')
       clean.uniqueId = trimmed
     }
     if (patch.statusMessage !== undefined) {
@@ -273,7 +276,8 @@ export function createOAService(deps: OADeps) {
         if (!VALID_BLOCK_IDS.has(id)) throw new Error(`Invalid block ID: ${id}`)
       }
       const deduped = [...new Set(patch.blockOrder)]
-      if (deduped.length !== patch.blockOrder.length) throw new Error('Duplicate block IDs')
+      if (deduped.length !== patch.blockOrder.length)
+        throw new Error('Duplicate block IDs')
       clean.blockOrder = patch.blockOrder
     }
     return clean
@@ -355,7 +359,9 @@ export function createOAService(deps: OADeps) {
       'basicInfoBlock',
       'blockOrder',
     ]
-    return keys.every((key) => JSON.stringify(published[key]) === JSON.stringify(draft[key]))
+    return keys.every(
+      (key) => JSON.stringify(published[key]) === JSON.stringify(draft[key]),
+    )
   }
 
   async function ensureBusinessProfileRows(oaId: string, store = db) {

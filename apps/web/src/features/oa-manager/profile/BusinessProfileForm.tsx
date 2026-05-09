@@ -1,9 +1,9 @@
-import { Label, SizableText, XStack, YStack } from 'tamagui'
+import { BusinessProfileImageKind } from '@vine/proto/oa'
 import { Image } from 'react-native'
+import { Label, SizableText, XStack, YStack } from 'tamagui'
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
 import { Switch } from '~/interface/forms/Switch'
-import { BusinessProfileImageKind } from '@vine/proto/oa'
 import type { BusinessProfile, BusinessProfilePatch } from '@vine/proto/oa'
 
 type Props = {
@@ -17,7 +17,12 @@ type Props = {
   onRemoveImage: (kind: BusinessProfileImageKind) => void
 }
 
-export function BusinessProfileForm({ draft, onSave, onUploadImage, onRemoveImage }: Props) {
+export function BusinessProfileForm({
+  draft,
+  onSave,
+  onUploadImage,
+  onRemoveImage,
+}: Props) {
   if (!draft) return null
 
   return (
@@ -61,21 +66,33 @@ export function BusinessProfileForm({ draft, onSave, onUploadImage, onRemoveImag
         <Label>Account name</Label>
         <Input
           defaultValue={draft.displayName}
-          onBlur={(event) => onSave({ displayName: (event.currentTarget as HTMLInputElement).value } as unknown as BusinessProfilePatch)}
+          onBlur={(event) =>
+            onSave({
+              displayName: (event.currentTarget as HTMLInputElement).value,
+            } as unknown as BusinessProfilePatch)
+          }
         />
       </YStack>
       <YStack gap="$3">
         <Label>Unique ID</Label>
         <Input
           defaultValue={draft.uniqueId}
-          onBlur={(event) => onSave({ uniqueId: (event.currentTarget as HTMLInputElement).value } as unknown as BusinessProfilePatch)}
+          onBlur={(event) =>
+            onSave({
+              uniqueId: (event.currentTarget as HTMLInputElement).value,
+            } as unknown as BusinessProfilePatch)
+          }
         />
       </YStack>
       <YStack gap="$3">
         <Label>Status message</Label>
         <Input
           defaultValue={draft.statusMessage}
-          onBlur={(event) => onSave({ statusMessage: (event.currentTarget as HTMLInputElement).value } as unknown as BusinessProfilePatch)}
+          onBlur={(event) =>
+            onSave({
+              statusMessage: (event.currentTarget as HTMLInputElement).value,
+            } as unknown as BusinessProfilePatch)
+          }
         />
       </YStack>
       <XStack items="center" justify="space-between">
@@ -87,14 +104,20 @@ export function BusinessProfileForm({ draft, onSave, onUploadImage, onRemoveImag
         </YStack>
         <Switch
           checked={draft.showFollowerCount}
-          onCheckedChange={(value) => onSave({ showFollowerCount: value } as unknown as BusinessProfilePatch)}
+          onCheckedChange={(value) =>
+            onSave({ showFollowerCount: value } as unknown as BusinessProfilePatch)
+          }
         />
       </XStack>
       <YStack gap="$3">
         <SizableText size="$5" fontWeight="700">
           Design
         </SizableText>
-        <Button onPress={() => onSave({ footerButtonColor: '#06c755' } as unknown as BusinessProfilePatch)}>
+        <Button
+          onPress={() =>
+            onSave({ footerButtonColor: '#06c755' } as unknown as BusinessProfilePatch)
+          }
+        >
           Use Vine green footer button
         </Button>
       </YStack>
@@ -103,7 +126,9 @@ export function BusinessProfileForm({ draft, onSave, onUploadImage, onRemoveImag
         <Input
           defaultValue={draft.phoneNumber}
           onBlur={(event) =>
-            onSave({ phoneNumber: (event.currentTarget as HTMLInputElement).value } as unknown as BusinessProfilePatch)
+            onSave({
+              phoneNumber: (event.currentTarget as HTMLInputElement).value,
+            } as unknown as BusinessProfilePatch)
           }
         />
       </YStack>

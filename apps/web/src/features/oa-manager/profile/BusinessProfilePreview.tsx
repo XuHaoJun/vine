@@ -1,7 +1,7 @@
 import { SizableText, XStack, YStack } from 'tamagui'
 import { Button } from '~/interface/buttons/Button'
-import type { BusinessProfile } from '@vine/proto/oa'
 import type { EditorSection } from './clientTypes'
+import type { BusinessProfile } from '@vine/proto/oa'
 
 type Props = {
   draft: BusinessProfile | undefined
@@ -19,7 +19,13 @@ const blocks: Array<{ key: EditorSection; label: string }> = [
 
 export function BusinessProfilePreview({ draft, selected, onSelect }: Props) {
   return (
-    <YStack width={420} shrink={0} bg="$color2" borderRightWidth={1} borderColor="$borderColor">
+    <YStack
+      width={420}
+      shrink={0}
+      bg="$color2"
+      borderRightWidth={1}
+      borderColor="$borderColor"
+    >
       <XStack p="$3" justify="flex-end">
         <Button size="$2" variant="outlined">
           Preview
@@ -41,7 +47,9 @@ export function BusinessProfilePreview({ draft, selected, onSelect }: Props) {
           >
             <XStack items="center" justify="space-between">
               <SizableText size="$3" fontWeight="700">
-                {block.key === 'businessProfile' ? draft?.displayName || 'Account' : block.label}
+                {block.key === 'businessProfile'
+                  ? draft?.displayName || 'Account'
+                  : block.label}
               </SizableText>
               {selected === block.key ? (
                 <SizableText size="$1" color="$blue10">

@@ -62,7 +62,15 @@ function makeDeps(ownerId = 'user-1') {
     updatedAt: '2025-01-01T00:00:00Z',
   }
   const mockEditorState = {
-    account: { id: 'oa-1', providerId: 'provider-1', name: 'Test OA', uniqueId: 'test_oa', status: 'active', createdAt: '2025-01-01T00:00:00Z', updatedAt: '2025-01-01T00:00:00Z' },
+    account: {
+      id: 'oa-1',
+      providerId: 'provider-1',
+      name: 'Test OA',
+      uniqueId: 'test_oa',
+      status: 'active',
+      createdAt: '2025-01-01T00:00:00Z',
+      updatedAt: '2025-01-01T00:00:00Z',
+    },
     published: mockProfile,
     draft: mockProfile,
     isDirty: false,

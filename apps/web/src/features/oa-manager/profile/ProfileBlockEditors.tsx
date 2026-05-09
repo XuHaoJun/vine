@@ -2,8 +2,8 @@ import { Label, SizableText, XStack, YStack } from 'tamagui'
 import { Input } from '~/interface/forms/Input'
 import { Switch } from '~/interface/forms/Switch'
 import { makeProfileJson, parseProfileJson } from './clientTypes'
-import type { BusinessProfile, BusinessProfilePatch } from '@vine/proto/oa'
 import type { EditorSection } from './clientTypes'
+import type { BusinessProfile, BusinessProfilePatch } from '@vine/proto/oa'
 
 type Props = {
   section: Exclude<EditorSection, 'businessProfile'>
@@ -19,8 +19,7 @@ export function ProfileBlockEditors({ section, draft, onSave }: Props) {
     socialMedia: 'Social media',
     basicInfo: 'Basic info',
   }
-  const fieldName =
-    section === 'basicInfo' ? 'basicInfoBlock' : section
+  const fieldName = section === 'basicInfo' ? 'basicInfoBlock' : section
   const value = parseProfileJson<Record<string, any>>(
     (draft as Record<string, unknown>)[fieldName] as { json?: string } | undefined,
     {},
@@ -36,7 +35,9 @@ export function ProfileBlockEditors({ section, draft, onSave }: Props) {
         <Switch
           checked={Boolean(value.enabled)}
           onCheckedChange={(enabled) =>
-            onSave({ [fieldName]: makeProfileJson({ ...value, enabled }) } as unknown as BusinessProfilePatch)
+            onSave({
+              [fieldName]: makeProfileJson({ ...value, enabled }),
+            } as unknown as BusinessProfilePatch)
           }
         />
       </XStack>

@@ -1,6 +1,9 @@
 import type { BusinessProfile } from '@vine/proto/oa'
 
-export function parseProfileJson<T>(field: { json?: string } | undefined, fallback: T): T {
+export function parseProfileJson<T>(
+  field: { json?: string } | undefined,
+  fallback: T,
+): T {
   if (!field?.json) return fallback
   try {
     return JSON.parse(field.json) as T

@@ -1,5 +1,11 @@
 import { Code, ConnectError, ConnectRouter } from '@connectrpc/connect'
-import { AccessTokenType, BusinessProfileImageKind, OAService, OAStatus, WebhookStatus } from '@vine/proto/oa'
+import {
+  AccessTokenType,
+  BusinessProfileImageKind,
+  OAService,
+  OAStatus,
+  WebhookStatus,
+} from '@vine/proto/oa'
 import { logger } from '../lib/logger'
 import { requireAuthData, withAuthService } from './auth-context'
 import type { createOAService } from '../services/oa'
@@ -1253,7 +1259,8 @@ export function oaHandler(deps: OAHandlerDeps) {
         const key = `oa-profile/${req.officialAccountId}/${kind}.${ext}`
         await deps.drive.put(key, Buffer.from(req.image), baseMime)
         const imageUrl = await deps.drive.getUrl(key)
-        const patch = kind === 'cover' ? { coverImageUrl: imageUrl } : { profileImageUrl: imageUrl }
+        const patch =
+          kind === 'cover' ? { coverImageUrl: imageUrl } : { profileImageUrl: imageUrl }
         const state = await deps.oa.autosaveBusinessProfileDraft(
           req.officialAccountId,
           patch,

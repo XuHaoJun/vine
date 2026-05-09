@@ -1,8 +1,8 @@
+import { BusinessProfileImageKind } from '@vine/proto/oa'
 import { useCallback, useMemo, useState } from 'react'
 import { oaClient } from '~/features/oa/client'
 import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
 import { makeProfileJson } from './clientTypes'
-import { BusinessProfileImageKind } from '@vine/proto/oa'
 import type { BusinessProfilePatch } from '@vine/proto/oa'
 
 export function useBusinessProfileEditor(oaId: string) {
@@ -68,7 +68,10 @@ export function useBusinessProfileEditor(oaId: string) {
   })
 
   const saveTextField = useCallback(
-    (key: 'displayName' | 'uniqueId' | 'statusMessage' | 'phoneNumber', value: string) => {
+    (
+      key: 'displayName' | 'uniqueId' | 'statusMessage' | 'phoneNumber',
+      value: string,
+    ) => {
       autosave.mutate({ [key]: value } as unknown as BusinessProfilePatch)
     },
     [autosave],
@@ -89,7 +92,9 @@ export function useBusinessProfileEditor(oaId: string) {
         | 'basicInfoBlock',
       value: unknown,
     ) => {
-      autosave.mutate({ [key]: makeProfileJson(value) } as unknown as BusinessProfilePatch)
+      autosave.mutate({
+        [key]: makeProfileJson(value),
+      } as unknown as BusinessProfilePatch)
     },
     [autosave],
   )
