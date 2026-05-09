@@ -88,13 +88,17 @@ function makeDeps(ownerId = 'user-1') {
     resetBusinessProfileDraft: vi.fn().mockResolvedValue(mockEditorState),
     publishBusinessProfile: vi.fn().mockResolvedValue(mockEditorState),
   }
+  const drive = {
+    put: vi.fn(),
+    getUrl: vi.fn().mockResolvedValue('https://uploads.example/image.jpg'),
+  }
   oaHandler({
     auth: {} as any,
-    drive: {} as any,
+    drive: drive as any,
     webhookDelivery: {} as any,
     oa: oa as any,
   })(router as any)
-  return { capturedImpl, oa }
+  return { capturedImpl, oa, drive }
 }
 
 beforeEach(() => {
@@ -207,5 +211,93 @@ describe('OA connect business profile', () => {
       ),
     ).rejects.toMatchObject({ code: Code.PermissionDenied })
     expect(oa.publishBusinessProfile).not.toHaveBeenCalled()
+  })
+
+  it('uploadBusinessProfileImage stores image and updates draft', async () => {
+    const { capturedImpl, oa, drive } = makeDeps('user-1')
+    mockedGetAuthDataFromRequest.mockResolvedValue({ id: 'user-1' } as any)
+
+    const result = await capturedImpl.uploadBusinessProfileImage(
+      {
+        officialAccountId: 'oa-1',
+        kind: 1,
+        image: new Uint8Array([0xff, 0xd8]),
+        contentType: 'image/jpeg',
+      },
+      makeAuthCtx('user-1'),
+    )
+
+    expect(drive.put).toHaveBeenCalledWith(
+      'oa-profile/oa-1/profile.jpg',
+      expect.any(Buffer),
+      'image/jpeg',
+    )
+    expect(drive.getUrl).toHaveBeenCalled()
+    expect(oa.autosaveBusinessProfileDraft).toHaveBeenCalledWith('oa-1', {
+      profileImageUrl: 'https://uploads.example/image.jpg',
+    })
+    expect(result.imageUrl).toBe('https://uploads.example/image.jpg')
+  })
+
+  it('uploadBusinessProfileImage rejects unsupported type', async () => {
+    const { capturedImpl } = makeDeps('user-1')
+    mockedGetAuthDataFromRequest.mockResolvedValue({ id: 'user-1' } as any)
+
+    await expect(
+      capturedImpl.uploadBusinessProfileImage(
+        {
+          officialAccountId: 'oa-1',
+          kind: 1,
+          image: new Uint8Array([0x00]),
+          contentType: 'image/gif',
+        },
+        makeAuthCtx('user-1'),
+      ),
+    ).rejects.toMatchObject({ code: Code.InvalidArgument })
+  })
+
+  it('uploadBusinessProfileImage rejects oversized image', async () => {
+    const { capturedImpl } = makeDeps('user-1')
+    mockedGetAuthDataFromRequest.mockResolvedValue({ id: 'user-1' } as any)
+
+    const oversized = new Uint8Array(4 * 1024 * 1024)
+    await expect(
+      capturedImpl.uploadBusinessProfileImage(
+        {
+          officialAccountId: 'oa-1',
+          kind: 1,
+          image: oversized,
+          contentType: 'image/png',
+        },
+        makeAuthCtx('user-1'),
+      ),
+    ).rejects.toMatchObject({ code: Code.InvalidArgument })
+  })
+
+  it('removeBusinessProfileImage clears draft image field', async () => {
+    const { capturedImpl, oa } = makeDeps('user-1')
+    mockedGetAuthDataFromRequest.mockResolvedValue({ id: 'user-1' } as any)
+
+    await capturedImpl.removeBusinessProfileImage(
+      { officialAccountId: 'oa-1', kind: 1 },
+      makeAuthCtx('user-1'),
+    )
+
+    expect(oa.autosaveBusinessProfileDraft).toHaveBeenCalledWith('oa-1', {
+      profileImageUrl: null,
+    })
+  })
+
+  it('removeBusinessProfileImage rejects non-owner', async () => {
+    const { capturedImpl, oa } = makeDeps('other-user')
+    mockedGetAuthDataFromRequest.mockResolvedValue({ id: 'user-1' } as any)
+
+    await expect(
+      capturedImpl.removeBusinessProfileImage(
+        { officialAccountId: 'oa-1', kind: 1 },
+        makeAuthCtx('user-1'),
+      ),
+    ).rejects.toMatchObject({ code: Code.PermissionDenied })
+    expect(oa.autosaveBusinessProfileDraft).not.toHaveBeenCalled()
   })
 })

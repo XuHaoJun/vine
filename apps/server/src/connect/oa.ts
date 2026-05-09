@@ -279,7 +279,11 @@ function jsonField(value: unknown) {
 
 function parseJsonField(field: { json?: string } | undefined) {
   if (!field?.json) return undefined
-  return JSON.parse(field.json)
+  try {
+    return JSON.parse(field.json)
+  } catch {
+    return undefined
+  }
 }
 
 function toProtoBusinessProfile(db: any) {
@@ -324,7 +328,7 @@ function toEditorStateResponse(state: any) {
 }
 
 function patchFromProto(patch: any) {
-  return {
+  const raw: Record<string, unknown> = {
     displayName: patch.displayName,
     uniqueId: patch.uniqueId,
     statusMessage: patch.statusMessage,
@@ -346,6 +350,11 @@ function patchFromProto(patch: any) {
     basicInfoBlock: parseJsonField(patch.basicInfoBlock),
     blockOrder: patch.blockOrder ? patch.blockOrder.values : undefined,
   }
+  const clean: Record<string, unknown> = {}
+  for (const [k, v] of Object.entries(raw)) {
+    if (v !== undefined) clean[k] = v
+  }
+  return clean
 }
 
 export function oaHandler(deps: OAHandlerDeps) {

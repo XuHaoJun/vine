@@ -368,44 +368,50 @@ export function createOAService(deps: OADeps) {
     const account = await getOfficialAccount(oaId, store)
     if (!account) return null
 
-    const [existingPublished] = await store
+    let [published] = await store
       .select()
       .from(oaBusinessProfile)
       .where(eq(oaBusinessProfile.oaId, oaId))
       .limit(1)
 
-    const published =
-      existingPublished ??
-      (
-        await store
-          .insert(oaBusinessProfile)
-          .values({
-            ...profileFromAccount(account),
-            publishedAt: new Date().toISOString(),
-          })
-          .returning()
-      )[0]!
+    if (!published) {
+      await store
+        .insert(oaBusinessProfile)
+        .values({
+          ...profileFromAccount(account),
+          publishedAt: new Date().toISOString(),
+        })
+        .onConflictDoNothing({ target: oaBusinessProfile.oaId })
+      ;[published] = await store
+        .select()
+        .from(oaBusinessProfile)
+        .where(eq(oaBusinessProfile.oaId, oaId))
+        .limit(1)
+    }
 
-    const [existingDraft] = await store
+    let [draft] = await store
       .select()
       .from(oaBusinessProfileDraft)
       .where(eq(oaBusinessProfileDraft.oaId, oaId))
       .limit(1)
 
-    const draft =
-      existingDraft ??
-      (
-        await store
-          .insert(oaBusinessProfileDraft)
-          .values({
-            ...draftValuesFromPublished(published),
-            serverRevision: 1,
-            lastSavedAt: new Date().toISOString(),
-          })
-          .returning()
-      )[0]!
+    if (!draft) {
+      await store
+        .insert(oaBusinessProfileDraft)
+        .values({
+          ...draftValuesFromPublished(published!),
+          serverRevision: 1,
+          lastSavedAt: new Date().toISOString(),
+        })
+        .onConflictDoNothing({ target: oaBusinessProfileDraft.oaId })
+      ;[draft] = await store
+        .select()
+        .from(oaBusinessProfileDraft)
+        .where(eq(oaBusinessProfileDraft.oaId, oaId))
+        .limit(1)
+    }
 
-    return { account, published, draft }
+    return { account, published: published!, draft: draft! }
   }
 
   async function getBusinessProfileEditorState(oaId: string) {
@@ -456,33 +462,15 @@ export function createOAService(deps: OADeps) {
     if (!rows) return null
 
     const now = new Date().toISOString()
+    const resetValues = draftValuesFromPublished(rows.published)
     const [draft] = await db
       .update(oaBusinessProfileDraft)
       .set({
-        displayName: rows.published.displayName,
-        uniqueId: rows.published.uniqueId,
-        statusMessage: rows.published.statusMessage,
-        profileImageUrl: rows.published.profileImageUrl,
-        coverImageUrl: rows.published.coverImageUrl,
-        showFollowerCount: rows.published.showFollowerCount,
-        footerButtonColor: rows.published.footerButtonColor,
-        splashLabels: rows.published.splashLabels,
-        buttons: rows.published.buttons,
-        address: rows.published.address,
-        phoneNumber: rows.published.phoneNumber,
-        paymentMethods: rows.published.paymentMethods,
-        businessHours: rows.published.businessHours,
-        websites: rows.published.websites,
-        visibilitySettings: rows.published.visibilitySettings,
-        announcements: rows.published.announcements,
-        mixedMediaFeed: rows.published.mixedMediaFeed,
-        socialMedia: rows.published.socialMedia,
-        basicInfoBlock: rows.published.basicInfoBlock,
-        blockOrder: rows.published.blockOrder,
+        ...resetValues,
         serverRevision: rows.draft.serverRevision + 1,
         lastSavedAt: now,
         updatedAt: now,
-      } as any)
+      })
       .where(eq(oaBusinessProfileDraft.oaId, oaId))
       .returning()
 

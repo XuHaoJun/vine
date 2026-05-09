@@ -429,8 +429,6 @@ export function OADetailContent({
                 @{oaId}
               </Text>
             </YStack>
-
-            <YStack items="flex-end" pb="$4" />
           </YStack>
         </ScrollView>
       </YStack>

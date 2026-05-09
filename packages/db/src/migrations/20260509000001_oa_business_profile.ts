@@ -27,7 +27,7 @@ CREATE TABLE "oaBusinessProfile" (
   "createdAt" timestamptz DEFAULT now() NOT NULL,
   "updatedAt" timestamptz DEFAULT now() NOT NULL
 );
-CREATE INDEX "oaBusinessProfile_uniqueId_idx" ON "oaBusinessProfile"("uniqueId");
+CREATE UNIQUE INDEX "oaBusinessProfile_uniqueId_idx" ON "oaBusinessProfile"("uniqueId");
 
 CREATE TABLE "oaBusinessProfileDraft" (
   "oaId" uuid PRIMARY KEY REFERENCES "officialAccount"("id") ON DELETE CASCADE,

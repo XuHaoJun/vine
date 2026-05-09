@@ -247,7 +247,7 @@ export const oaBusinessProfile = pgTable(
     createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
     updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
   },
-  (table) => [index('oaBusinessProfile_uniqueId_idx').on(table.uniqueId)],
+  (table) => [uniqueIndex('oaBusinessProfile_uniqueId_idx').on(table.uniqueId)],
 )
 
 export const oaBusinessProfileDraft = pgTable('oaBusinessProfileDraft', {

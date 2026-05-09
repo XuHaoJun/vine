@@ -1,5 +1,5 @@
 import { BusinessProfileImageKind } from '@vine/proto/oa'
-import { Image } from 'react-native'
+import { Image, Platform } from 'react-native'
 import { Label, SizableText, XStack, YStack } from 'tamagui'
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
@@ -9,6 +9,7 @@ import type { BusinessProfile, BusinessProfilePatch } from '@vine/proto/oa'
 type Props = {
   draft: BusinessProfile | undefined
   onSave: (patch: BusinessProfilePatch) => void
+  onImmediateSave: (patch: BusinessProfilePatch) => void
   onUploadImage: (input: {
     kind: BusinessProfileImageKind
     image: Uint8Array
@@ -17,9 +18,31 @@ type Props = {
   onRemoveImage: (kind: BusinessProfileImageKind) => void
 }
 
+function handleFileSelect(
+  kind: BusinessProfileImageKind,
+  onUpload: Props['onUploadImage'],
+) {
+  if (Platform.OS !== 'web') return
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = 'image/jpeg,image/png'
+  input.onchange = async () => {
+    const file = input.files?.[0]
+    if (!file) return
+    const buffer = await file.arrayBuffer()
+    onUpload({
+      kind,
+      image: new Uint8Array(buffer),
+      contentType: file.type,
+    })
+  }
+  input.click()
+}
+
 export function BusinessProfileForm({
   draft,
   onSave,
+  onImmediateSave,
   onUploadImage,
   onRemoveImage,
 }: Props) {
@@ -39,12 +62,26 @@ export function BusinessProfileForm({
               style={{ width: 72, height: 72, borderRadius: 36 }}
             />
           ) : null}
-          <Button
-            variant="outlined"
-            onPress={() => onRemoveImage(BusinessProfileImageKind.PROFILE)}
-          >
-            Remove profile photo
-          </Button>
+          <XStack gap="$2">
+            <Button
+              size="$2"
+              variant="outlined"
+              onPress={() =>
+                handleFileSelect(BusinessProfileImageKind.PROFILE, onUploadImage)
+              }
+            >
+              Upload
+            </Button>
+            {draft.profileImageUrl ? (
+              <Button
+                size="$2"
+                variant="outlined"
+                onPress={() => onRemoveImage(BusinessProfileImageKind.PROFILE)}
+              >
+                Remove
+              </Button>
+            ) : null}
+          </XStack>
         </YStack>
         <YStack gap="$2">
           <SizableText fontWeight="700">Cover photo</SizableText>
@@ -54,44 +91,52 @@ export function BusinessProfileForm({
               style={{ width: 220, height: 96 }}
             />
           ) : null}
-          <Button
-            variant="outlined"
-            onPress={() => onRemoveImage(BusinessProfileImageKind.COVER)}
-          >
-            Remove cover photo
-          </Button>
+          <XStack gap="$2">
+            <Button
+              size="$2"
+              variant="outlined"
+              onPress={() =>
+                handleFileSelect(BusinessProfileImageKind.COVER, onUploadImage)
+              }
+            >
+              Upload
+            </Button>
+            {draft.coverImageUrl ? (
+              <Button
+                size="$2"
+                variant="outlined"
+                onPress={() => onRemoveImage(BusinessProfileImageKind.COVER)}
+              >
+                Remove
+              </Button>
+            ) : null}
+          </XStack>
         </YStack>
       </XStack>
       <YStack gap="$3">
         <Label>Account name</Label>
         <Input
-          defaultValue={draft.displayName}
-          onBlur={(event) =>
-            onSave({
-              displayName: (event.currentTarget as HTMLInputElement).value,
-            } as unknown as BusinessProfilePatch)
+          value={draft.displayName}
+          onChangeText={(text: string) =>
+            onSave({ displayName: text } as unknown as BusinessProfilePatch)
           }
         />
       </YStack>
       <YStack gap="$3">
         <Label>Unique ID</Label>
         <Input
-          defaultValue={draft.uniqueId}
-          onBlur={(event) =>
-            onSave({
-              uniqueId: (event.currentTarget as HTMLInputElement).value,
-            } as unknown as BusinessProfilePatch)
+          value={draft.uniqueId}
+          onChangeText={(text: string) =>
+            onSave({ uniqueId: text } as unknown as BusinessProfilePatch)
           }
         />
       </YStack>
       <YStack gap="$3">
         <Label>Status message</Label>
         <Input
-          defaultValue={draft.statusMessage}
-          onBlur={(event) =>
-            onSave({
-              statusMessage: (event.currentTarget as HTMLInputElement).value,
-            } as unknown as BusinessProfilePatch)
+          value={draft.statusMessage}
+          onChangeText={(text: string) =>
+            onSave({ statusMessage: text } as unknown as BusinessProfilePatch)
           }
         />
       </YStack>
@@ -105,7 +150,9 @@ export function BusinessProfileForm({
         <Switch
           checked={draft.showFollowerCount}
           onCheckedChange={(value) =>
-            onSave({ showFollowerCount: value } as unknown as BusinessProfilePatch)
+            onImmediateSave({
+              showFollowerCount: value,
+            } as unknown as BusinessProfilePatch)
           }
         />
       </XStack>
@@ -115,7 +162,9 @@ export function BusinessProfileForm({
         </SizableText>
         <Button
           onPress={() =>
-            onSave({ footerButtonColor: '#06c755' } as unknown as BusinessProfilePatch)
+            onImmediateSave({
+              footerButtonColor: '#06c755',
+            } as unknown as BusinessProfilePatch)
           }
         >
           Use Vine green footer button
@@ -124,22 +173,20 @@ export function BusinessProfileForm({
       <YStack gap="$3">
         <Label>Phone number</Label>
         <Input
-          defaultValue={draft.phoneNumber}
-          onBlur={(event) =>
-            onSave({
-              phoneNumber: (event.currentTarget as HTMLInputElement).value,
-            } as unknown as BusinessProfilePatch)
+          value={draft.phoneNumber}
+          onChangeText={(text: string) =>
+            onSave({ phoneNumber: text } as unknown as BusinessProfilePatch)
           }
         />
       </YStack>
       <YStack gap="$3">
         <Label>Footer button splash labels</Label>
         <Input
-          defaultValue={draft.splashLabels.join(', ')}
-          onBlur={(event) =>
+          value={draft.splashLabels.join(', ')}
+          onChangeText={(text: string) =>
             onSave({
               splashLabels: {
-                values: (event.currentTarget as HTMLInputElement).value
+                values: text
                   .split(',')
                   .map((label) => label.trim())
                   .filter(Boolean)

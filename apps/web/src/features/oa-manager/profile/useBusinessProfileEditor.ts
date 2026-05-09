@@ -1,14 +1,15 @@
 import { BusinessProfileImageKind } from '@vine/proto/oa'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { oaClient } from '~/features/oa/client'
 import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
-import { makeProfileJson } from './clientTypes'
 import type { BusinessProfilePatch } from '@vine/proto/oa'
 
 export function useBusinessProfileEditor(oaId: string) {
   const queryClient = useTanQueryClient()
   const queryKey = useMemo(() => ['oa', 'business-profile-editor', oaId], [oaId])
   const [saveError, setSaveError] = useState(false)
+  const revisionRef = useRef<number | undefined>(undefined)
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const editor = useTanQuery({
     queryKey,
@@ -16,15 +17,23 @@ export function useBusinessProfileEditor(oaId: string) {
     enabled: !!oaId,
   })
 
+  if (
+    editor.data?.draft?.serverRevision !== undefined &&
+    revisionRef.current === undefined
+  ) {
+    revisionRef.current = editor.data.draft.serverRevision
+  }
+
   const autosave = useTanMutation({
     mutationFn: (patch: BusinessProfilePatch) =>
       oaClient.autosaveBusinessProfileDraft({
         officialAccountId: oaId,
         patch,
-        clientRevision: editor.data?.draft?.serverRevision,
+        clientRevision: revisionRef.current,
       }),
     onMutate: () => setSaveError(false),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      revisionRef.current = data.serverRevision
       queryClient.invalidateQueries({ queryKey })
     },
     onError: () => setSaveError(true),
@@ -32,16 +41,22 @@ export function useBusinessProfileEditor(oaId: string) {
 
   const reset = useTanMutation({
     mutationFn: () => oaClient.resetBusinessProfileDraft({ officialAccountId: oaId }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: (data) => {
+      revisionRef.current = data.state?.draft?.serverRevision
+      queryClient.invalidateQueries({ queryKey })
+    },
   })
 
   const publish = useTanMutation({
     mutationFn: () =>
       oaClient.publishBusinessProfile({
         officialAccountId: oaId,
-        expectedRevision: editor.data?.draft?.serverRevision,
+        expectedRevision: revisionRef.current,
       }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: (data) => {
+      revisionRef.current = data.state?.draft?.serverRevision
+      queryClient.invalidateQueries({ queryKey })
+    },
   })
 
   const uploadImage = useTanMutation({
@@ -67,34 +82,12 @@ export function useBusinessProfileEditor(oaId: string) {
     onError: () => setSaveError(true),
   })
 
-  const saveTextField = useCallback(
-    (
-      key: 'displayName' | 'uniqueId' | 'statusMessage' | 'phoneNumber',
-      value: string,
-    ) => {
-      autosave.mutate({ [key]: value } as unknown as BusinessProfilePatch)
-    },
-    [autosave],
-  )
-
-  const saveJsonField = useCallback(
-    (
-      key:
-        | 'buttons'
-        | 'address'
-        | 'paymentMethods'
-        | 'businessHours'
-        | 'websites'
-        | 'visibilitySettings'
-        | 'announcements'
-        | 'mixedMediaFeed'
-        | 'socialMedia'
-        | 'basicInfoBlock',
-      value: unknown,
-    ) => {
-      autosave.mutate({
-        [key]: makeProfileJson(value),
-      } as unknown as BusinessProfilePatch)
+  const debouncedAutosave = useCallback(
+    (patch: BusinessProfilePatch) => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current)
+      debounceTimerRef.current = setTimeout(() => {
+        autosave.mutate(patch)
+      }, 500)
     },
     [autosave],
   )
@@ -102,11 +95,10 @@ export function useBusinessProfileEditor(oaId: string) {
   return {
     editor,
     autosave,
+    debouncedAutosave,
     reset,
     publish,
     saveError,
-    saveTextField,
-    saveJsonField,
     uploadImage,
     removeImage,
   }
