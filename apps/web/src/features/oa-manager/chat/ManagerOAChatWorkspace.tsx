@@ -79,6 +79,7 @@ export function ManagerOAChatWorkspace({ oaId, chatId }: Props) {
         <ManagerOAProfilePanel
           name={profileContact?.userName ?? selected?.userName ?? 'Unknown user'}
           image={profileContact?.userImage ?? selected?.userImage ?? null}
+          contact={profileContact}
         />
       ) : null}
     </XStack>
