@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto'
 import { existsSync, readFileSync } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { deflateSync } from 'zlib'
 import { scryptAsync } from '@noble/hashes/scrypt.js'
 import { bytesToHex, randomBytes } from '@noble/hashes/utils.js'
 import { and, eq } from 'drizzle-orm'
@@ -68,7 +69,9 @@ type RichMenuImageSource = {
 export async function resolveTestRichMenuImageSource(
   fetchImpl: typeof fetch = fetch,
 ): Promise<RichMenuImageSource> {
-  const response = await fetchImpl(TEST_RICH_MENU_IMAGE_URL)
+  const response = await fetchImpl(TEST_RICH_MENU_IMAGE_URL, {
+    signal: AbortSignal.timeout(10_000),
+  })
   if (!response.ok) {
     throw new Error(
       `Failed to fetch rich menu image: ${response.status} ${response.statusText}`,
@@ -88,6 +91,64 @@ export async function resolveTestRichMenuImageSource(
     mimeType,
     extension,
   }
+}
+
+function createPlaceholderRichMenuImage(
+  width: number,
+  height: number,
+): RichMenuImageSource {
+  const rowBytes = 1 + width * 3 // filter byte + RGB per pixel
+  const raw = Buffer.alloc(rowBytes * height, 0)
+  for (let y = 0; y < height; y++) {
+    raw[y * rowBytes] = 0 // no filter
+    for (let x = 0; x < width; x++) {
+      const offset = y * rowBytes + 1 + x * 3
+      raw[offset] = 0xcc
+      raw[offset + 1] = 0xcc
+      raw[offset + 2] = 0xcc
+    }
+  }
+
+  const compressed = deflateSync(raw)
+  const png = buildPng(width, height, compressed)
+  return { buffer: png, mimeType: 'image/png', extension: 'png' }
+}
+
+function buildPng(width: number, height: number, compressedData: Buffer): Buffer {
+  const signature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])
+
+  const ihdr = Buffer.alloc(13)
+  ihdr.writeUInt32BE(width, 0)
+  ihdr.writeUInt32BE(height, 4)
+  ihdr[8] = 8 // bit depth
+  ihdr[9] = 2 // color type: RGB
+  const ihdrChunk = pngChunk('IHDR', ihdr)
+  const idatChunk = pngChunk('IDAT', compressedData)
+  const iendChunk = pngChunk('IEND', Buffer.alloc(0))
+
+  return Buffer.concat([signature, ihdrChunk, idatChunk, iendChunk])
+}
+
+function pngChunk(type: string, data: Buffer): Buffer {
+  const length = Buffer.alloc(4)
+  length.writeUInt32BE(data.length, 0)
+  const typeBytes = Buffer.from(type, 'ascii')
+  const payload = Buffer.concat([typeBytes, data])
+  const crc = crc32(payload)
+  const crcBuf = Buffer.alloc(4)
+  crcBuf.writeUInt32BE(crc >>> 0, 0)
+  return Buffer.concat([length, payload, crcBuf])
+}
+
+function crc32(buf: Buffer): number {
+  let c = 0xffffffff
+  for (let i = 0; i < buf.length; i++) {
+    c ^= buf[i]
+    for (let j = 0; j < 8; j++) {
+      c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1
+    }
+  }
+  return c ^ 0xffffffff
 }
 
 const TEST_USERS = [
@@ -454,25 +515,33 @@ export async function ensureSeed(pool: Pool, db: any, drive?: SeedDrive) {
       })
 
     if (drive) {
+      let image: RichMenuImageSource
       try {
-        const image = await resolveTestRichMenuImageSource()
-        const richMenuKey = `richmenu/${testOaId}/${TEST_OA_RICH_MENU.richMenuId}.${image.extension}`
-        await drive.put(richMenuKey, image.buffer, image.mimeType)
-        await db
-          .update(oaRichMenu)
-          .set({ hasImage: true, updatedAt: now })
-          .where(
-            and(
-              eq(oaRichMenu.oaId, testOaId),
-              eq(oaRichMenu.richMenuId, TEST_OA_RICH_MENU.richMenuId),
-            ),
-          )
+        image = await resolveTestRichMenuImageSource()
         console.info(
-          `[seed] Ensured ${TEST_OA_NAME} rich menu image is available from ${TEST_RICH_MENU_IMAGE_URL}`,
+          `[seed] Fetched ${TEST_OA_NAME} rich menu image from ${TEST_RICH_MENU_IMAGE_URL}`,
         )
       } catch (error) {
-        console.warn(`[seed] Failed to fetch ${TEST_OA_NAME} rich menu image`, error)
+        console.warn(
+          `[seed] Failed to fetch ${TEST_OA_NAME} rich menu image, using placeholder`,
+          error,
+        )
+        image = createPlaceholderRichMenuImage(
+          TEST_OA_RICH_MENU.sizeWidth,
+          TEST_OA_RICH_MENU.sizeHeight,
+        )
       }
+      const richMenuKey = `richmenu/${testOaId}/${TEST_OA_RICH_MENU.richMenuId}.${image.extension}`
+      await drive.put(richMenuKey, image.buffer, image.mimeType)
+      await db
+        .update(oaRichMenu)
+        .set({ hasImage: true, updatedAt: now })
+        .where(
+          and(
+            eq(oaRichMenu.oaId, testOaId),
+            eq(oaRichMenu.richMenuId, TEST_OA_RICH_MENU.richMenuId),
+          ),
+        )
     }
   }
 
