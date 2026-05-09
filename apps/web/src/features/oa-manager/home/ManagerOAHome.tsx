@@ -81,7 +81,10 @@ export function ManagerOAHome({ oaId }: ManagerOAHomeProps) {
             {data.friendCount} friends - @{account.uniqueId}
           </SizableText>
         </YStack>
-        <Button variant="outlined" disabled>
+        <Button
+          variant="outlined"
+          onPress={() => router.navigate(`/manager/${oaId}/account-page/profile` as any)}
+        >
           Edit profile
         </Button>
       </XStack>
