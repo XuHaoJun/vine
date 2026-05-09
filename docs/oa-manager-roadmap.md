@@ -43,8 +43,9 @@ It should combine three jobs:
 1. Account operations: profile, settings, role, and lifecycle management.
    (Messaging API operations — webhook, token, quota — are handled in the
    developer console.)
-2. Customer operations: one-on-one chats, contacts, tags, notes, standard
-   replies, response hours, scheduled messages, and user status.
+2. Customer operations: one-on-one chats, contact management, CRM tags, notes,
+   saved filters, triage status, retention/export policy, and tag-based audience
+   handoff.
 3. Growth operations: broadcasts, audiences, rich menus, coupons, add-friend
    assets, insights, and campaign measurement.
 
@@ -70,7 +71,7 @@ navigation to the features Vine already has."
 | --- | --- | --- | --- | --- |
 | 0 | OA Detail Home | Fix entry flow and add `/manager/:oaId` overview. | Existing account list | Done |
 | 1 | Profile and Basic Settings | Make account identity editable and remove mock profile gaps. | Phase 0 | Done |
-| 2 | Chat CRM | Evolve chat MVP into an operator-grade support workspace. | Existing chat MVP | Next |
+| 2 | Chat CRM | Evolve chat MVP into contact CRM, tagging, notes, and triage filters. | Existing chat MVP | Next |
 | 3 | Broadcast and Audiences | Add outbound campaign workflows and targeting. | Friendship data | Planned |
 | 4 | Interactive Content | Complete rich menus and add reusable content/coupon surfaces. | Existing rich menu MVP | Planned |
 | 5 | Insights and Growth | Provide friend, message, click, webhook, and growth analytics. | Phases 3, 4 | Planned |
@@ -143,23 +144,47 @@ Acceptance criteria:
 
 Goal: evolve the current OA chat MVP into daily support tooling.
 
+Reference source of truth:
+
+- `docs/line-oa-manger-chat-CRM.md` drives this phase's functional scope.
+- `docs/line-ui-reference/manager/oa-chat.md` remains useful for layout context,
+  but scheduled messages, standard replies, response hours, and rich message
+  authoring are not Phase 2 commitments unless a later spec explicitly pulls
+  them forward.
+
 Scope:
 
 - Keep the current four-column chat workspace.
-- Add contact list mode.
-- Add user profile panel fields: friendship status, last interaction, tags,
-  notes, and provider-scoped user ID.
-- Add manager-owned read state and search/filter improvements.
-- Add standard replies.
-- Add response hours and off-hours auto-response.
-- Add scheduled messages from the chat composer.
-- Add media/sticker/template/Flex send support only after those message types
-  render reliably in Vine chats.
+- Split Phase 2 into four implementation slices:
+  - 2A Contact CRM foundation: contact list mode, profile panel data,
+    friendship status, last interaction, provider-scoped user ID, and current
+    chat status.
+  - 2B Tags and notes: OA-scoped tag CRUD, assigning/removing tags from users,
+    and manager-only notes on OA contacts.
+  - 2C Filters and triage: default filters for unread, pending, done, and
+    assigned/owned conversations, plus saved custom filters based on chat
+    status and tags.
+  - 2D Retention and export policy: define what Vine retains, what operators can
+    export, and what remains unavailable.
+- Preserve tag data in a form that Phase 3 can use for tag-based audiences, but
+  do not ship broadcast sending in Phase 2.
+
+Non-goals:
+
+- No scheduled sending in Phase 2.
+- No standard replies in Phase 2.
+- No response hours or off-hours auto-response in Phase 2.
+- No media/sticker/template/Flex send expansion in Phase 2 unless that message
+  type already renders reliably and a separate spec pulls it forward.
 
 Acceptance criteria:
 
 - Operators can triage user conversations without switching tools.
-- Standard replies and response hours reduce repetitive manual replies.
+- Operators can create CRM tags, assign them to contacts, and use them in saved
+  filters.
+- Operators can record internal notes on OA contacts.
+- The roadmap and Phase 2 spec agree on what belongs to Phase 2 and what is
+  deferred.
 - User-side chat behavior remains unchanged.
 
 ### Phase 3: Broadcast and Audiences
@@ -309,7 +334,8 @@ Do this first:
 
 1. Phase 0 `/manager/:oaId` detail home. *(done)*
 2. Phase 1 profile/basic settings. *(done)*
-3. Phase 2 chat CRM additions that reuse existing chat MVP.
+3. Phase 2 chat CRM additions that reuse existing chat MVP, split into contact
+   CRM, tags/notes, filters/triage, and retention/export policy.
 4. Phase 4 rich menu completion, because routes already exist.
 5. Phase 3 broadcast/audience once friendship data is available.
 6. Phase 5 insights once events are consistently tracked.
@@ -359,7 +385,8 @@ Minimal verification completed by Phase 0:
   child navigation.
 - Existing manager chat and rich menu tests still pass.
 
-Recommended next spec: `manager-oa-chat-crm`.
+Recommended next spec:
+`docs/superpowers/specs/2026-05-09-manager-oa-chat-crm-design.md`.
 
 ## 8. Open Decisions
 
