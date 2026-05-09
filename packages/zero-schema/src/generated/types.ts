@@ -1,5 +1,5 @@
-import type { TableInsertRow, TableUpdateRow } from 'on-zero'
 import type * as schema from './tables'
+import type { TableInsertRow, TableUpdateRow } from 'on-zero'
 
 export type Chat = TableInsertRow<typeof schema.chat>
 export type ChatUpdate = TableUpdateRow<typeof schema.chat>

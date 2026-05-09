@@ -19,8 +19,9 @@ type Props = {
 export function ManagerOAChatWorkspace({ oaId, chatId }: Props) {
   const [mode, setMode] = useState<ManagerOAChatMode>('chats')
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedContact, setSelectedContact] =
-    useState<ManagerOAContactListItem | null>(null)
+  const [selectedContact, setSelectedContact] = useState<ManagerOAContactListItem | null>(
+    null,
+  )
   const { chats, isLoading } = useManagerOAChats(oaId, searchQuery)
   const { contacts, isLoading: contactsLoading } = useManagerOAContacts(
     oaId,

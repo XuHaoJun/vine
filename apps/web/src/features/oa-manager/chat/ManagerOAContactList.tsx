@@ -101,7 +101,8 @@ export function ManagerOAContactList({
                     ) : null}
                   </XStack>
                   <SizableText size="$2" color="$color10" numberOfLines={1}>
-                    {formatStatus(contact)} · {formatContactTime(contact.lastInteractionAt)}
+                    {formatStatus(contact)} ·{' '}
+                    {formatContactTime(contact.lastInteractionAt)}
                   </SizableText>
                   <SizableText size="$1" color="$color10" numberOfLines={1}>
                     ID {contact.contactId}

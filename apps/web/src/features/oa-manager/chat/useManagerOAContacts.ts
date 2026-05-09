@@ -48,7 +48,11 @@ export function useManagerOAContacts(
           lastInteractionAt: chat?.lastMessageAt ?? null,
           chatId: chat?.id ?? null,
           hasUnread,
-          chatStatus: (hasUnread ? 'unread' : chat ? 'active' : 'no_chat') as ManagerOAContactListItem['chatStatus'],
+          chatStatus: (hasUnread
+            ? 'unread'
+            : chat
+              ? 'active'
+              : 'no_chat') as ManagerOAContactListItem['chatStatus'],
         }
       })
       .filter((item) => {

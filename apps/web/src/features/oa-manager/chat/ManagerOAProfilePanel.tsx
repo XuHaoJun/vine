@@ -65,10 +65,7 @@ export function ManagerOAProfilePanel({ name, image, contact }: Props) {
           label="Friendship"
           value={contact?.friendshipStatus === 'friend' ? 'Friend' : 'Unknown'}
         />
-        <ProfileField
-          label="Last interaction"
-          value={formatLastInteraction(contact)}
-        />
+        <ProfileField label="Last interaction" value={formatLastInteraction(contact)} />
         <ProfileField label="Chat status" value={formatChatStatus(contact)} />
       </YStack>
     </YStack>

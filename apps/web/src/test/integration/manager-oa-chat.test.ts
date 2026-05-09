@@ -35,9 +35,11 @@ test.describe('Manager OA chat', () => {
       timeout: 10000,
     })
     await expect(page.getByText('Contact list')).toBeVisible()
-    await expect(page.getByRole('button', { name: /Open contact Test One/ })).toBeVisible({
-      timeout: 20000,
-    })
+    await expect(page.getByRole('button', { name: /Open contact Test One/ })).toBeVisible(
+      {
+        timeout: 20000,
+      },
+    )
 
     // Open contact to see profile fields
     await page.getByRole('button', { name: /Open contact Test One/ }).click()
