@@ -423,12 +423,6 @@ export function OADetailContent({
                 </ScrollView>
               </YStack>
             ) : null}
-
-            <YStack items="center" py="$4">
-              <Text fontSize={14} color="$color10">
-                @{oaId}
-              </Text>
-            </YStack>
           </YStack>
         </ScrollView>
       </YStack>
