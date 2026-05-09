@@ -61,3 +61,5 @@ dev.log
 uploads/
 # Added by code-review-graph
 .code-review-graph/
+
+.superpowers
