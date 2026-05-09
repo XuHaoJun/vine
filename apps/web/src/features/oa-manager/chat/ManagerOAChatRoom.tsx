@@ -10,9 +10,10 @@ import { useManagerOAMessages } from './useManagerOAMessages'
 type Props = {
   oaId: string
   chatId?: string
+  emptyStateLabel?: string
 }
 
-export function ManagerOAChatRoom({ oaId, chatId }: Props) {
+export function ManagerOAChatRoom({ oaId, chatId, emptyStateLabel }: Props) {
   const scrollRef = useRef<ScrollView>(null)
   const [draft, setDraft] = useState('')
   const [isSending, setIsSending] = useState(false)
@@ -42,7 +43,7 @@ export function ManagerOAChatRoom({ oaId, chatId }: Props) {
     return (
       <YStack flex={1} items="center" justify="center">
         <SizableText size="$3" color="$color10">
-          Select a chat
+          {emptyStateLabel ?? 'Select a chat'}
         </SizableText>
       </YStack>
     )
