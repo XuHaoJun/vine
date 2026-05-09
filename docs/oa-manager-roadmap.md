@@ -1,6 +1,6 @@
 # Vine OA Manager Roadmap
 
-> Snapshot date: 2026-05-08
+> Snapshot date: 2026-05-09
 >
 > Vine is not the official LINE platform. This roadmap uses LINE Official
 > Account Manager and LINE Developers documentation as product references only.
@@ -65,16 +65,16 @@ navigation to the features Vine already has."
 
 ## 4. Roadmap Summary
 
-| Phase | Name | Goal | Depends on |
-| --- | --- | --- | --- |
-| 0 | OA Detail Home | Fix entry flow and add `/manager/:oaId` overview. | Existing account list |
-| 1 | Profile and Basic Settings | Make account identity editable and remove mock profile gaps. | Phase 0 |
-| 2 | Messaging API Operations | Manage webhook, token, quota, delivery health, and API docs. | Existing OA API |
-| 3 | Chat CRM | Evolve chat MVP into an operator-grade support workspace. | Existing chat MVP |
-| 4 | Broadcast and Audiences | Add outbound campaign workflows and targeting. | Phase 2, friendship data |
-| 5 | Interactive Content | Complete rich menus and add reusable content/coupon surfaces. | Existing rich menu MVP |
-| 6 | Insights and Growth | Provide friend, message, click, webhook, and growth analytics. | Phases 2, 4, 5 |
-| 7 | Collaboration and Governance | Add roles, audit logs, plan/quota policy, and account lifecycle controls. | Phases 0-6 |
+| Phase | Name | Goal | Depends on | Status |
+| --- | --- | --- | --- | --- |
+| 0 | OA Detail Home | Fix entry flow and add `/manager/:oaId` overview. | Existing account list | Done |
+| 1 | Profile and Basic Settings | Make account identity editable and remove mock profile gaps. | Phase 0 | Next |
+| 2 | Messaging API Operations | Manage webhook, token, quota, delivery health, and API docs. | Existing OA API | Planned |
+| 3 | Chat CRM | Evolve chat MVP into an operator-grade support workspace. | Existing chat MVP | Planned |
+| 4 | Broadcast and Audiences | Add outbound campaign workflows and targeting. | Phase 2, friendship data | Planned |
+| 5 | Interactive Content | Complete rich menus and add reusable content/coupon surfaces. | Existing rich menu MVP | Planned |
+| 6 | Insights and Growth | Provide friend, message, click, webhook, and growth analytics. | Phases 2, 4, 5 | Planned |
+| 7 | Collaboration and Governance | Add roles, audit logs, plan/quota policy, and account lifecycle controls. | Phases 0-6 | Planned |
 
 ## 5. Phase Details
 
@@ -359,9 +359,9 @@ Reasoning:
 - Roles are important, but owner-only is acceptable until there is enough
   manager surface area to justify multi-operator complexity.
 
-## 7. First Implementation Slice
+## 7. Completed Implementation Slice
 
-Recommended next spec: `manager-oa-detail-home-mvp`.
+Completed spec: `manager-oa-detail-home-mvp`.
 
 Files likely involved:
 
@@ -385,13 +385,15 @@ Minimal UI:
   - rich menu card linking to `/manager/:oaId/richmenu`;
   - webhook/quota cards only if current data exists.
 
-Minimal verification:
+Minimal verification completed by Phase 0:
 
 - Unit or integration test that `/manager` `Manage` navigates to
   `/manager/:oaId`.
 - Integration coverage that `/manager/:oaId` loads account data and shows
   child navigation.
 - Existing manager chat and rich menu tests still pass.
+
+Recommended next spec: `manager-oa-profile-basic-settings`.
 
 ## 8. Open Decisions
 
