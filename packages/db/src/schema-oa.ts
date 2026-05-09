@@ -216,3 +216,69 @@ export const oaReplyToken = pgTable(
     index('oaReplyToken_expiresAt_idx').on(table.expiresAt),
   ],
 )
+
+export const oaBusinessProfile = pgTable(
+  'oaBusinessProfile',
+  {
+    oaId: uuid('oaId')
+      .primaryKey()
+      .references(() => officialAccount.id, { onDelete: 'cascade' }),
+    displayName: text('displayName').notNull(),
+    uniqueId: text('uniqueId').notNull(),
+    statusMessage: text('statusMessage').notNull().default(''),
+    profileImageUrl: text('profileImageUrl'),
+    coverImageUrl: text('coverImageUrl'),
+    showFollowerCount: boolean('showFollowerCount').notNull().default(false),
+    footerButtonColor: text('footerButtonColor').notNull().default('#06c755'),
+    splashLabels: text('splashLabels').array().notNull().default([]),
+    buttons: jsonb('buttons').notNull().default([]),
+    address: jsonb('address').notNull().default({}),
+    phoneNumber: text('phoneNumber'),
+    paymentMethods: jsonb('paymentMethods').notNull().default([]),
+    businessHours: jsonb('businessHours').notNull().default({}),
+    websites: jsonb('websites').notNull().default([]),
+    visibilitySettings: jsonb('visibilitySettings').notNull().default({}),
+    announcements: jsonb('announcements').notNull().default({}),
+    mixedMediaFeed: jsonb('mixedMediaFeed').notNull().default({}),
+    socialMedia: jsonb('socialMedia').notNull().default({}),
+    basicInfoBlock: jsonb('basicInfoBlock').notNull().default({}),
+    blockOrder: text('blockOrder').array().notNull().default([]),
+    publishedAt: timestamp('publishedAt', { mode: 'string' }),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [index('oaBusinessProfile_uniqueId_idx').on(table.uniqueId)],
+)
+
+export const oaBusinessProfileDraft = pgTable(
+  'oaBusinessProfileDraft',
+  {
+    oaId: uuid('oaId')
+      .primaryKey()
+      .references(() => officialAccount.id, { onDelete: 'cascade' }),
+    displayName: text('displayName').notNull(),
+    uniqueId: text('uniqueId').notNull(),
+    statusMessage: text('statusMessage').notNull().default(''),
+    profileImageUrl: text('profileImageUrl'),
+    coverImageUrl: text('coverImageUrl'),
+    showFollowerCount: boolean('showFollowerCount').notNull().default(false),
+    footerButtonColor: text('footerButtonColor').notNull().default('#06c755'),
+    splashLabels: text('splashLabels').array().notNull().default([]),
+    buttons: jsonb('buttons').notNull().default([]),
+    address: jsonb('address').notNull().default({}),
+    phoneNumber: text('phoneNumber'),
+    paymentMethods: jsonb('paymentMethods').notNull().default([]),
+    businessHours: jsonb('businessHours').notNull().default({}),
+    websites: jsonb('websites').notNull().default([]),
+    visibilitySettings: jsonb('visibilitySettings').notNull().default({}),
+    announcements: jsonb('announcements').notNull().default({}),
+    mixedMediaFeed: jsonb('mixedMediaFeed').notNull().default({}),
+    socialMedia: jsonb('socialMedia').notNull().default({}),
+    basicInfoBlock: jsonb('basicInfoBlock').notNull().default({}),
+    blockOrder: text('blockOrder').array().notNull().default([]),
+    serverRevision: integer('serverRevision').notNull().default(1),
+    lastSavedAt: timestamp('lastSavedAt', { mode: 'string' }),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+)
