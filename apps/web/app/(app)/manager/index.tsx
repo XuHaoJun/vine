@@ -212,7 +212,9 @@ export const ManagerIndexPage = memo(() => {
                       items="center"
                       borderBottomWidth={i < filtered.length - 1 ? 1 : 0}
                       borderColor="$borderColor"
+                      cursor="pointer"
                       hoverStyle={{ bg: '$backgroundHover' }}
+                      onPress={() => router.push(`/manager/${account.id}` as never)}
                     >
                       <YStack flex={2}>
                         <SizableText size="$3" fontWeight="600" color="$color12">
@@ -260,9 +262,7 @@ export const ManagerIndexPage = memo(() => {
                       <XStack width={160} gap="$2" justify="flex-end">
                         <Button
                           size="$2"
-                          onPress={() =>
-                            router.push(`/manager/${account.id}/richmenu` as never)
-                          }
+                          onPress={() => router.push(`/manager/${account.id}` as never)}
                         >
                           Manage
                         </Button>
@@ -270,7 +270,10 @@ export const ManagerIndexPage = memo(() => {
                           size="$2"
                           variant="outlined"
                           theme="red"
-                          onPress={() => handleDelete(account.id, account.name)}
+                          onPress={(event) => {
+                            event.stopPropagation()
+                            handleDelete(account.id, account.name)
+                          }}
                         >
                           Delete
                         </Button>

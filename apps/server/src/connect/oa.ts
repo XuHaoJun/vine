@@ -100,7 +100,7 @@ function toProtoOfficialAccount(
   }
 }
 
-function dbWebhookStatusToProto(status: string): WebhookStatus {
+function dbWebhookStatusToProto(status: string | undefined): WebhookStatus {
   switch (status) {
     case 'pending':
       return WebhookStatus.PENDING
@@ -583,6 +583,45 @@ export function oaHandler(deps: OAHandlerDeps) {
           type: quota.type,
           monthlyLimit: quota.value,
           totalUsage: quota.totalUsage,
+        }
+      },
+      async getOfficialAccountManagerSummary(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const summary = await deps.oa.getManagerSummary(req.officialAccountId)
+        if (!summary) throw new ConnectError('Account not found', Code.NotFound)
+        return {
+          account: toProtoOfficialAccount(summary.account),
+          friendCount: summary.friendCount,
+          chat: {
+            status: summary.chat.status,
+            chatCount: summary.chat.chatCount,
+          },
+          richMenu: {
+            totalCount: summary.richMenu.totalCount,
+            defaultRichMenuId: summary.richMenu.defaultRichMenuId,
+            defaultRichMenuTitle: summary.richMenu.defaultRichMenuTitle,
+          },
+          webhook: {
+            configured: summary.webhook.configured,
+            useWebhook: summary.webhook.useWebhook,
+            status: dbWebhookStatusToProto(summary.webhook.status),
+            lastVerifiedAt: summary.webhook.lastVerifiedAt,
+            lastVerifyReason: summary.webhook.lastVerifyReason,
+          },
+          quota: {
+            type: summary.quota.type,
+            monthlyLimit: summary.quota.monthlyLimit,
+            totalUsage: summary.quota.totalUsage,
+            remaining: summary.quota.remaining,
+          },
+          setup: {
+            profileComplete: summary.setup.profileComplete,
+            profileImageAdded: summary.setup.profileImageAdded,
+            webhookConfigured: summary.setup.webhookConfigured,
+            defaultRichMenuCreated: summary.setup.defaultRichMenuCreated,
+            chatInboxAvailable: summary.setup.chatInboxAvailable,
+          },
         }
       },
       async searchOfficialAccounts(req, ctx) {

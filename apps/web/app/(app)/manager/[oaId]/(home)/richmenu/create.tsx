@@ -4,7 +4,7 @@ import { SizableText, YStack } from 'tamagui'
 import { RichMenuEditor } from '~/features/oa-manager/richmenu/RichMenuEditor'
 import { useTanQueryClient } from '~/query'
 
-const route = createRoute<'/(app)/manager/[oaId]/richmenu/create'>()
+const route = createRoute<'/(app)/manager/[oaId]/(home)/richmenu/create'>()
 
 export const CreateRichMenuPage = memo(() => {
   const params = useActiveParams<{ oaId: string }>()

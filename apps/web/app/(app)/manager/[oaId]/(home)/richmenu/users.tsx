@@ -8,7 +8,7 @@ import { Select } from '~/interface/forms/Select'
 import { showToast } from '~/interface/toast/Toast'
 import { useTanQuery, useTanMutation, useTanQueryClient } from '~/query'
 
-const route = createRoute<'/(app)/manager/[oaId]/richmenu/users'>()
+const route = createRoute<'/(app)/manager/[oaId]/(home)/richmenu/users'>()
 
 export const RichMenuUsersPage = memo(() => {
   const params = useActiveParams<{ oaId: string }>()

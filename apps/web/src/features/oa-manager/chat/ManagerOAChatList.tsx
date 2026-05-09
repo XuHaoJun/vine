@@ -57,9 +57,12 @@ export function ManagerOAChatList({
           chats.map((chat) => (
             <Pressable
               key={chat.id}
+              role="button"
+              aria-label={`Open chat with ${chat.userName}`}
               onPress={() => router.push(`/manager/${oaId}/chat/${chat.id}` as any)}
               px="$3"
               py="$3"
+              cursor="pointer"
               bg={selectedChatId === chat.id ? '$color3' : 'transparent'}
               hoverStyle={{ bg: selectedChatId === chat.id ? '$color3' : '$color2' }}
             >

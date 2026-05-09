@@ -11,7 +11,7 @@ import { showToast } from '~/interface/toast/Toast'
 import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
 import type { Area, EditorState, MenuSize } from '~/features/oa-manager/richmenu/types'
 
-const route = createRoute<'/(app)/manager/[oaId]/richmenu/[richMenuId]'>()
+const route = createRoute<'/(app)/manager/[oaId]/(home)/richmenu/[richMenuId]'>()
 
 export const EditRichMenuPage = memo(() => {
   const params = useActiveParams<{ oaId: string; richMenuId: string }>()

@@ -246,7 +246,7 @@ export const ChannelSettingsPage = () => {
             <XStack gap="$3" justify="flex-end">
               <Button
                 variant="outlined"
-                onPress={() => router.navigate(`/manager/${oa.id}/richmenu` as any)}
+                onPress={() => router.navigate(`/manager/${oa.id}` as any)}
               >
                 Manage →
               </Button>

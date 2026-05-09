@@ -375,6 +375,56 @@ message GetMessagingApiQuotaSummaryResponse {
   int32 total_usage = 3;
 }
 
+// ── OA Manager Home ──
+
+message GetOfficialAccountManagerSummaryRequest {
+  string official_account_id = 1;
+}
+
+message ManagerSummaryChat {
+  string status = 1;
+  int32 chat_count = 2;
+}
+
+message ManagerSummaryRichMenu {
+  int32 total_count = 1;
+  optional string default_rich_menu_id = 2;
+  optional string default_rich_menu_title = 3;
+}
+
+message ManagerSummaryWebhook {
+  bool configured = 1;
+  bool use_webhook = 2;
+  WebhookStatus status = 3;
+  optional string last_verified_at = 4;
+  optional string last_verify_reason = 5;
+}
+
+message ManagerSummaryQuota {
+  string type = 1;
+  optional int32 monthly_limit = 2;
+  int32 total_usage = 3;
+  optional int32 remaining = 4;
+}
+
+message ManagerSummarySetup {
+  bool profile_complete = 1;
+  bool profile_image_added = 2;
+  bool webhook_configured = 3;
+  bool default_rich_menu_created = 4;
+  bool chat_inbox_available = 5;
+}
+
+message GetOfficialAccountManagerSummaryResponse {
+  OfficialAccount account = 1;
+  int32 friend_count = 2;
+  ManagerSummaryChat chat = 3;
+  ManagerSummaryRichMenu rich_menu = 4;
+  ManagerSummaryWebhook webhook = 5;
+  ManagerSummaryQuota quota = 6;
+  ManagerSummarySetup setup = 7;
+}
+
 // ── Search ──
 
 message SearchOfficialAccountsRequest {
@@ -726,6 +776,7 @@ service OAService {
   rpc RevokeAccessToken(RevokeAccessTokenRequest) returns (RevokeAccessTokenResponse);
   rpc RevokeAllAccessTokens(RevokeAllAccessTokensRequest) returns (RevokeAllAccessTokensResponse);
   rpc GetMessagingApiQuotaSummary(GetMessagingApiQuotaSummaryRequest) returns (GetMessagingApiQuotaSummaryResponse);
+  rpc GetOfficialAccountManagerSummary(GetOfficialAccountManagerSummaryRequest) returns (GetOfficialAccountManagerSummaryResponse);
   rpc SearchOfficialAccounts(SearchOfficialAccountsRequest) returns (SearchOfficialAccountsResponse);
   rpc RecommendOfficialAccounts(RecommendOfficialAccountsRequest) returns (RecommendOfficialAccountsResponse);
   rpc AddOAFriend(AddOAFriendRequest) returns (AddOAFriendResponse);
