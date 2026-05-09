@@ -16,7 +16,7 @@ type Props = {
 }
 
 function formatContactTime(ts: number | null): string {
-  if (!ts) return 'No chat yet'
+  if (ts == null) return 'No chat yet'
   return new Date(ts).toLocaleDateString([], { month: 'short', day: 'numeric' })
 }
 

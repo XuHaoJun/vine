@@ -41,7 +41,7 @@ export function useManagerOAContacts(
         return {
           id: contact.id,
           userId: contact.userId,
-          contactId: contact.id,
+          contactId: contact.userId,
           userName: name,
           userImage: user?.image ?? null,
           friendshipStatus: contact.status,

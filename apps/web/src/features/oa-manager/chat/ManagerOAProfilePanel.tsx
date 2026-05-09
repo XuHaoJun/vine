@@ -13,7 +13,7 @@ function formatLastInteraction(
 ): string {
   if (!contact) return 'Unknown'
   const ts = contact.lastInteractionAt
-  if (!ts) return 'No chat yet'
+  if (ts == null) return 'No chat yet'
   return new Date(ts).toLocaleString([], {
     month: 'short',
     day: 'numeric',

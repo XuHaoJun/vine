@@ -37,6 +37,10 @@ export function ManagerOAChatWorkspace({ oaId, chatId }: Props) {
     [contacts, selected?.userId],
   )
   const profileContact = selectedContactFromChat ?? selectedContact
+  const effectiveChatId =
+    mode === 'contacts' && profileContact && profileContact.chatId === null
+      ? undefined
+      : chatId
 
   return (
     <XStack flex={1} minH={0} bg="$background" $platform-web={{ overflow: 'hidden' }}>
@@ -69,7 +73,7 @@ export function ManagerOAChatWorkspace({ oaId, chatId }: Props) {
       )}
       <ManagerOAChatRoom
         oaId={oaId}
-        chatId={chatId}
+        chatId={effectiveChatId}
         emptyStateLabel={
           mode === 'contacts' && profileContact?.chatId === null
             ? 'This contact has no chat yet'
