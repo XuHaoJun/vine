@@ -488,6 +488,29 @@ export function createOAService(deps: OADeps) {
     }
   }
 
+  async function getPublishedBusinessProfile(oaId: string) {
+    const [profile] = await db
+      .select()
+      .from(oaBusinessProfile)
+      .where(eq(oaBusinessProfile.oaId, oaId))
+      .limit(1)
+    return profile ?? null
+  }
+
+  async function getPublishedBusinessProfiles(oaIds: string[]) {
+    if (oaIds.length === 0)
+      return new Map<string, typeof oaBusinessProfile.$inferSelect>()
+    const profiles = await db
+      .select()
+      .from(oaBusinessProfile)
+      .where(inArray(oaBusinessProfile.oaId, oaIds))
+    const map = new Map<string, typeof oaBusinessProfile.$inferSelect>()
+    for (const p of profiles) {
+      map.set(p.oaId, p)
+    }
+    return map
+  }
+
   async function publishBusinessProfile(oaId: string, expectedRevision?: number) {
     const now = new Date().toISOString()
 
@@ -1691,6 +1714,8 @@ export function createOAService(deps: OADeps) {
     autosaveBusinessProfileDraft,
     resetBusinessProfileDraft,
     publishBusinessProfile,
+    getPublishedBusinessProfile,
+    getPublishedBusinessProfiles,
     updateOfficialAccount,
     deleteOfficialAccount,
     setWebhook,

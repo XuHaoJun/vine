@@ -702,27 +702,55 @@ export function oaHandler(deps: OAHandlerDeps) {
       async searchOfficialAccounts(req, ctx) {
         const auth = requireAuthData(ctx)
         const accounts = await deps.oa.searchOAsForOwner(auth.id, req.query)
+        const profileMap = await deps.oa.getPublishedBusinessProfiles(
+          accounts.map((a) => a.id),
+        )
         return {
-          accounts: accounts.map((a) => ({
-            id: a.id,
-            name: a.name,
-            uniqueId: a.uniqueId,
-            description: a.description ?? '',
-            imageUrl: a.imageUrl ?? '',
-          })),
+          accounts: accounts.map((a) => {
+            const profile = profileMap.get(a.id)
+            return {
+              id: a.id,
+              name: profile?.displayName ?? a.name,
+              uniqueId: profile?.uniqueId ?? a.uniqueId,
+              description: profile?.statusMessage ?? a.description ?? '',
+              imageUrl: profile?.profileImageUrl ?? a.imageUrl ?? '',
+              coverImageUrl: profile?.coverImageUrl ?? '',
+              statusMessage: profile?.statusMessage ?? a.description ?? '',
+              showFollowerCount: profile?.showFollowerCount ?? false,
+              splashLabels: profile?.splashLabels ?? [],
+              footerButtonColor: profile?.footerButtonColor ?? '#06c755',
+              buttons: jsonField(profile?.buttons ?? []),
+              socialMedia: jsonField(profile?.socialMedia ?? {}),
+              basicInfoBlock: jsonField(profile?.basicInfoBlock ?? {}),
+            }
+          }),
         }
       },
       async recommendOfficialAccounts(req) {
         const limit = req.limit > 0 ? req.limit : 15
         const accounts = await deps.oa.recommendOfficialAccounts(limit)
+        const profileMap = await deps.oa.getPublishedBusinessProfiles(
+          accounts.map((a) => a.id),
+        )
         return {
-          accounts: accounts.map((a) => ({
-            id: a.id,
-            name: a.name,
-            uniqueId: a.uniqueId,
-            description: a.description ?? '',
-            imageUrl: a.imageUrl ?? '',
-          })),
+          accounts: accounts.map((a) => {
+            const profile = profileMap.get(a.id)
+            return {
+              id: a.id,
+              name: profile?.displayName ?? a.name,
+              uniqueId: profile?.uniqueId ?? a.uniqueId,
+              description: profile?.statusMessage ?? a.description ?? '',
+              imageUrl: profile?.profileImageUrl ?? a.imageUrl ?? '',
+              coverImageUrl: profile?.coverImageUrl ?? '',
+              statusMessage: profile?.statusMessage ?? a.description ?? '',
+              showFollowerCount: profile?.showFollowerCount ?? false,
+              splashLabels: profile?.splashLabels ?? [],
+              footerButtonColor: profile?.footerButtonColor ?? '#06c755',
+              buttons: jsonField(profile?.buttons ?? []),
+              socialMedia: jsonField(profile?.socialMedia ?? {}),
+              basicInfoBlock: jsonField(profile?.basicInfoBlock ?? {}),
+            }
+          }),
         }
       },
       async addOAFriend(req, ctx) {
@@ -778,13 +806,22 @@ export function oaHandler(deps: OAHandlerDeps) {
         if (!account) {
           throw new ConnectError('Official account not found', Code.NotFound)
         }
+        const profile = await deps.oa.getPublishedBusinessProfile(account.id)
         return {
           account: {
             id: account.id,
-            name: account.name,
-            uniqueId: account.uniqueId,
-            description: account.description ?? '',
-            imageUrl: account.imageUrl ?? '',
+            name: profile?.displayName ?? account.name,
+            uniqueId: profile?.uniqueId ?? account.uniqueId,
+            description: profile?.statusMessage ?? account.description ?? '',
+            imageUrl: profile?.profileImageUrl ?? account.imageUrl ?? '',
+            coverImageUrl: profile?.coverImageUrl ?? '',
+            statusMessage: profile?.statusMessage ?? account.description ?? '',
+            showFollowerCount: profile?.showFollowerCount ?? false,
+            splashLabels: profile?.splashLabels ?? [],
+            footerButtonColor: profile?.footerButtonColor ?? '#06c755',
+            buttons: jsonField(profile?.buttons ?? []),
+            socialMedia: jsonField(profile?.socialMedia ?? {}),
+            basicInfoBlock: jsonField(profile?.basicInfoBlock ?? {}),
           },
         }
       },

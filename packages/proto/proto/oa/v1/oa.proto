@@ -490,6 +490,14 @@ message OfficialAccountSummary {
   string unique_id = 3;
   string description = 4;
   string image_url = 5;
+  string cover_image_url = 6;
+  string status_message = 7;
+  bool show_follower_count = 8;
+  repeated string splash_labels = 9;
+  string footer_button_color = 10;
+  BusinessProfileJson buttons = 11;
+  BusinessProfileJson social_media = 12;
+  BusinessProfileJson basic_info_block = 13;
 }
 
 // ── Resolve by uniqueId ──

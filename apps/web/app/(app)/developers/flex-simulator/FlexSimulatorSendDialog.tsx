@@ -168,6 +168,8 @@ export function FlexSimulatorSendDialog({
                       name: flexSimOA.name,
                       oaId: flexSimOA.uniqueId,
                       imageUrl: flexSimOA.imageUrl || undefined,
+                      coverImageUrl: flexSimOA.coverImageUrl || undefined,
+                      description: flexSimOA.statusMessage || undefined,
                     })
                   }
                 >

@@ -46,6 +46,8 @@ export const OADetailPage = memo(() => {
         name={oa.name}
         oaId={oa.uniqueId}
         imageUrl={oa.imageUrl || undefined}
+        coverImageUrl={oa.coverImageUrl || undefined}
+        description={oa.statusMessage || undefined}
         showCloseButton={false}
       />
     </YStack>
