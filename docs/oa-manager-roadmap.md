@@ -40,8 +40,9 @@ Relevant product references:
 The OA manager should become the operator console for a Vine Official Account.
 It should combine three jobs:
 
-1. Account operations: profile, settings, webhook, token, quota, role, and
-   lifecycle management.
+1. Account operations: profile, settings, role, and lifecycle management.
+   (Messaging API operations — webhook, token, quota — are handled in the
+   developer console.)
 2. Customer operations: one-on-one chats, contacts, tags, notes, standard
    replies, response hours, scheduled messages, and user status.
 3. Growth operations: broadcasts, audiences, rich menus, coupons, add-friend
@@ -57,7 +58,7 @@ navigation to the features Vine already has."
 | --- | --- | --- |
 | Developer | Authenticated Vine user | Use `useAuth()` and server auth, not LINE login sessions. |
 | Provider | `oaProvider` | Keep provider as the organization boundary and future role boundary. |
-| Messaging API Channel | Embedded in `officialAccount` | Channel secret, webhook, quota, and access tokens live under the OA. |
+| Messaging API Channel | Embedded in `officialAccount` | Channel secret, webhook, quota, and access tokens are managed in the developer console. |
 | Official Account | `officialAccount` | User-facing bot/account identity. |
 | Channel roles | Future OA/provider roles | Start with owner-only, then add Admin/Member/Tester-like permissions. |
 | LINE OA Manager | Vine `/manager` | Product reference only; no calls to `manager.line.biz`. |
@@ -68,13 +69,12 @@ navigation to the features Vine already has."
 | Phase | Name | Goal | Depends on | Status |
 | --- | --- | --- | --- | --- |
 | 0 | OA Detail Home | Fix entry flow and add `/manager/:oaId` overview. | Existing account list | Done |
-| 1 | Profile and Basic Settings | Make account identity editable and remove mock profile gaps. | Phase 0 | Next |
-| 2 | Messaging API Operations | Manage webhook, token, quota, delivery health, and API docs. | Existing OA API | Planned |
-| 3 | Chat CRM | Evolve chat MVP into an operator-grade support workspace. | Existing chat MVP | Planned |
-| 4 | Broadcast and Audiences | Add outbound campaign workflows and targeting. | Phase 2, friendship data | Planned |
-| 5 | Interactive Content | Complete rich menus and add reusable content/coupon surfaces. | Existing rich menu MVP | Planned |
-| 6 | Insights and Growth | Provide friend, message, click, webhook, and growth analytics. | Phases 2, 4, 5 | Planned |
-| 7 | Collaboration and Governance | Add roles, audit logs, plan/quota policy, and account lifecycle controls. | Phases 0-6 | Planned |
+| 1 | Profile and Basic Settings | Make account identity editable and remove mock profile gaps. | Phase 0 | Done |
+| 2 | Chat CRM | Evolve chat MVP into an operator-grade support workspace. | Existing chat MVP | Next |
+| 3 | Broadcast and Audiences | Add outbound campaign workflows and targeting. | Friendship data | Planned |
+| 4 | Interactive Content | Complete rich menus and add reusable content/coupon surfaces. | Existing rich menu MVP | Planned |
+| 5 | Insights and Growth | Provide friend, message, click, webhook, and growth analytics. | Phases 3, 4 | Planned |
+| 6 | Collaboration and Governance | Add roles, audit logs, plan/quota policy, and account lifecycle controls. | Phases 0-5 | Planned |
 
 ## 5. Phase Details
 
@@ -139,41 +139,7 @@ Acceptance criteria:
 - Account creation and edit validation stay consistent.
 - Disabled future fields do not imply official LINE certification.
 
-### Phase 2: Messaging API Operations
-
-Goal: make Vine's LINE-like API operable from the manager.
-
-Scope:
-
-- Add `Messaging API` settings under `/manager/:oaId/settings` or a dedicated
-  section.
-- Manage webhook URL, `useWebhook`, redelivery, verification, last verify
-  result, and error-statistics toggle.
-- Show webhook error categories modeled after LINE's reasons:
-  `could_not_connect`, `request_timeout`, `error_status_code`, and
-  `unclassified`, backed by Vine delivery records.
-- Manage channel secret and access tokens:
-  - issue short-lived token;
-  - issue JWT v2.1-style token if supported;
-  - rotate/revoke token;
-  - hide full secrets after creation.
-- Show quota and monthly usage from `oaQuota`.
-- Link to Vine API docs and examples, using `/api/oa/v2` endpoints.
-
-LINE reference concepts used:
-
-- Messaging API webhook flow.
-- Channel access tokens.
-- Webhook verification and error statistics.
-- Message quota and consumption.
-
-Acceptance criteria:
-
-- A bot developer can configure and verify a webhook without leaving Vine.
-- Webhook delivery failures are inspectable from the manager.
-- Token operations are auditable and never expose stored secret material.
-
-### Phase 3: Chat CRM
+### Phase 2: Chat CRM
 
 Goal: evolve the current OA chat MVP into daily support tooling.
 
@@ -196,7 +162,7 @@ Acceptance criteria:
 - Standard replies and response hours reduce repetitive manual replies.
 - User-side chat behavior remains unchanged.
 
-### Phase 4: Broadcast and Audiences
+### Phase 3: Broadcast and Audiences
 
 Goal: support outbound communication beyond one-on-one chat.
 
@@ -227,7 +193,7 @@ Acceptance criteria:
 - Message usage is counted per recipient.
 - Future targeting is backed by explicit audience records, not ad hoc filters.
 
-### Phase 5: Interactive Content
+### Phase 4: Interactive Content
 
 Goal: make OA conversations richer without forcing managers into API-only work.
 
@@ -266,7 +232,7 @@ Acceptance criteria:
 - Managers can author one reusable interactive asset and send or attach it in
   at least one channel.
 
-### Phase 6: Insights and Growth
+### Phase 5: Insights and Growth
 
 Goal: let managers understand whether the OA is growing and whether messages
 work.
@@ -300,7 +266,7 @@ Acceptance criteria:
 - Growth tools generate Vine URLs, not LINE URLs.
 - Small-audience analytics do not expose individual behavior.
 
-### Phase 7: Collaboration and Governance
+### Phase 6: Collaboration and Governance
 
 Goal: support real organizations and production operations.
 
@@ -341,21 +307,21 @@ Acceptance criteria:
 
 Do this first:
 
-1. Phase 0 `/manager/:oaId` detail home.
-2. Phase 1 profile/basic settings.
-3. Phase 2 webhook/token/quota operations.
-4. Phase 3 chat CRM additions that reuse existing chat MVP.
-5. Phase 5 rich menu completion, because routes already exist.
-6. Phase 4 broadcast/audience once quota and messaging operations are visible.
-7. Phase 6 insights once events are consistently tracked.
-8. Phase 7 roles/governance when more than one operator per OA matters.
+1. Phase 0 `/manager/:oaId` detail home. *(done)*
+2. Phase 1 profile/basic settings. *(done)*
+3. Phase 2 chat CRM additions that reuse existing chat MVP.
+4. Phase 4 rich menu completion, because routes already exist.
+5. Phase 3 broadcast/audience once friendship data is available.
+6. Phase 5 insights once events are consistently tracked.
+7. Phase 6 roles/governance when more than one operator per OA matters.
 
 Reasoning:
 
-- The immediate product gap is navigation and the missing detail page.
-- Profile/settings and API operations make the home page useful quickly.
-- Broadcast/audience/insights depend on tracking, quota, and deliverability
-  primitives; shipping them too early creates misleading manager UI.
+- Messaging API operations (webhook, token, quota) are already handled in the
+  developer console and do not need duplication in the OA manager.
+- Chat CRM is the next high-value addition for day-to-day operator work.
+- Broadcast/audience/insights depend on tracking and deliverability primitives;
+  shipping them too early creates misleading manager UI.
 - Roles are important, but owner-only is acceptable until there is enough
   manager surface area to justify multi-operator complexity.
 
@@ -393,7 +359,7 @@ Minimal verification completed by Phase 0:
   child navigation.
 - Existing manager chat and rich menu tests still pass.
 
-Recommended next spec: `manager-oa-profile-basic-settings`.
+Recommended next spec: `manager-oa-chat-crm`.
 
 ## 8. Open Decisions
 
