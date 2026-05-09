@@ -62,7 +62,12 @@ export function BusinessProfileEditor({ oaId }: Props) {
         />
         <YStack flex={1} p="$6" $platform-web={{ overflowY: 'auto' }}>
           {selected === 'businessProfile' ? (
-            <BusinessProfileForm draft={data.draft} onSave={(patch) => editor.autosave.mutate(patch)} />
+            <BusinessProfileForm
+              draft={data.draft}
+              onSave={(patch) => editor.autosave.mutate(patch)}
+              onUploadImage={(input) => editor.uploadImage.mutate(input)}
+              onRemoveImage={(kind) => editor.removeImage.mutate(kind)}
+            />
           ) : (
             <ProfileBlockEditors
               section={selected}

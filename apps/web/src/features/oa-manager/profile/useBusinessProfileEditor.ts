@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { oaClient } from '~/features/oa/client'
 import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
 import { makeProfileJson } from './clientTypes'
+import { BusinessProfileImageKind } from '@vine/proto/oa'
 import type { BusinessProfilePatch } from '@vine/proto/oa'
 
 export function useBusinessProfileEditor(oaId: string) {
@@ -43,6 +44,29 @@ export function useBusinessProfileEditor(oaId: string) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey }),
   })
 
+  const uploadImage = useTanMutation({
+    mutationFn: (input: {
+      kind: BusinessProfileImageKind
+      image: Uint8Array
+      contentType: string
+    }) =>
+      oaClient.uploadBusinessProfileImage({
+        officialAccountId: oaId,
+        kind: input.kind,
+        image: input.image,
+        contentType: input.contentType,
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onError: () => setSaveError(true),
+  })
+
+  const removeImage = useTanMutation({
+    mutationFn: (kind: BusinessProfileImageKind) =>
+      oaClient.removeBusinessProfileImage({ officialAccountId: oaId, kind }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onError: () => setSaveError(true),
+  })
+
   const saveTextField = useCallback(
     (key: 'displayName' | 'uniqueId' | 'statusMessage' | 'phoneNumber', value: string) => {
       autosave.mutate({ [key]: value } as unknown as BusinessProfilePatch)
@@ -78,5 +102,7 @@ export function useBusinessProfileEditor(oaId: string) {
     saveError,
     saveTextField,
     saveJsonField,
+    uploadImage,
+    removeImage,
   }
 }
