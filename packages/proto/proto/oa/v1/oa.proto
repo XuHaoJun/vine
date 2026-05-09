@@ -490,6 +490,14 @@ message OfficialAccountSummary {
   string unique_id = 3;
   string description = 4;
   string image_url = 5;
+  string cover_image_url = 6;
+  string status_message = 7;
+  bool show_follower_count = 8;
+  repeated string splash_labels = 9;
+  string footer_button_color = 10;
+  BusinessProfileJson buttons = 11;
+  BusinessProfileJson social_media = 12;
+  BusinessProfileJson basic_info_block = 13;
 }
 
 // ── Resolve by uniqueId ──
@@ -746,6 +754,138 @@ message GetRichMenuStatsResponse {
   repeated RichMenuAreaStat stats = 1;
 }
 
+// ── Business Profile ──
+
+enum BusinessProfileImageKind {
+  BUSINESS_PROFILE_IMAGE_KIND_UNSPECIFIED = 0;
+  BUSINESS_PROFILE_IMAGE_KIND_PROFILE = 1;
+  BUSINESS_PROFILE_IMAGE_KIND_COVER = 2;
+}
+
+message BusinessProfileJson {
+  string json = 1;
+}
+
+message BusinessProfileStringList {
+  repeated string values = 1;
+}
+
+message BusinessProfile {
+  string official_account_id = 1;
+  string display_name = 2;
+  string unique_id = 3;
+  string status_message = 4;
+  string profile_image_url = 5;
+  string cover_image_url = 6;
+  bool show_follower_count = 7;
+  string footer_button_color = 8;
+  repeated string splash_labels = 9;
+  BusinessProfileJson buttons = 10;
+  BusinessProfileJson address = 11;
+  string phone_number = 12;
+  BusinessProfileJson payment_methods = 13;
+  BusinessProfileJson business_hours = 14;
+  BusinessProfileJson websites = 15;
+  BusinessProfileJson visibility_settings = 16;
+  BusinessProfileJson announcements = 17;
+  BusinessProfileJson mixed_media_feed = 18;
+  BusinessProfileJson social_media = 19;
+  BusinessProfileJson basic_info_block = 20;
+  repeated string block_order = 21;
+  int32 server_revision = 22;
+  string last_saved_at = 23;
+  string published_at = 24;
+  string created_at = 25;
+  string updated_at = 26;
+}
+
+message BusinessProfilePatch {
+  optional string display_name = 1;
+  optional string unique_id = 2;
+  optional string status_message = 3;
+  optional string profile_image_url = 4;
+  optional string cover_image_url = 5;
+  optional bool show_follower_count = 6;
+  optional string footer_button_color = 7;
+  optional BusinessProfileStringList splash_labels = 8;
+  optional BusinessProfileJson buttons = 9;
+  optional BusinessProfileJson address = 10;
+  optional string phone_number = 11;
+  optional BusinessProfileJson payment_methods = 12;
+  optional BusinessProfileJson business_hours = 13;
+  optional BusinessProfileJson websites = 14;
+  optional BusinessProfileJson visibility_settings = 15;
+  optional BusinessProfileJson announcements = 16;
+  optional BusinessProfileJson mixed_media_feed = 17;
+  optional BusinessProfileJson social_media = 18;
+  optional BusinessProfileJson basic_info_block = 19;
+  optional BusinessProfileStringList block_order = 20;
+}
+
+message GetBusinessProfileEditorStateRequest {
+  string official_account_id = 1;
+}
+
+message GetBusinessProfileEditorStateResponse {
+  OfficialAccount account = 1;
+  BusinessProfile published = 2;
+  BusinessProfile draft = 3;
+  bool is_dirty = 4;
+}
+
+message AutosaveBusinessProfileDraftRequest {
+  string official_account_id = 1;
+  BusinessProfilePatch patch = 2;
+  optional int32 client_revision = 3;
+}
+
+message AutosaveBusinessProfileDraftResponse {
+  BusinessProfile draft = 1;
+  int32 server_revision = 2;
+  string saved_at = 3;
+  bool is_dirty = 4;
+}
+
+message ResetBusinessProfileDraftRequest {
+  string official_account_id = 1;
+}
+
+message ResetBusinessProfileDraftResponse {
+  GetBusinessProfileEditorStateResponse state = 1;
+}
+
+message PublishBusinessProfileRequest {
+  string official_account_id = 1;
+  optional int32 expected_revision = 2;
+}
+
+message PublishBusinessProfileResponse {
+  GetBusinessProfileEditorStateResponse state = 1;
+}
+
+message UploadBusinessProfileImageRequest {
+  string official_account_id = 1;
+  BusinessProfileImageKind kind = 2;
+  bytes image = 3;
+  string content_type = 4;
+}
+
+message UploadBusinessProfileImageResponse {
+  BusinessProfile draft = 1;
+  string image_url = 2;
+  bool is_dirty = 3;
+}
+
+message RemoveBusinessProfileImageRequest {
+  string official_account_id = 1;
+  BusinessProfileImageKind kind = 2;
+}
+
+message RemoveBusinessProfileImageResponse {
+  BusinessProfile draft = 1;
+  bool is_dirty = 2;
+}
+
 // ── Service ──
 
 service OAService {
@@ -803,4 +943,10 @@ service OAService {
   rpc UnlinkRichMenuFromUserManager(UnlinkRichMenuFromUserManagerRequest) returns (UnlinkRichMenuFromUserManagerResponse);
   rpc TrackRichMenuClick(TrackRichMenuClickRequest) returns (TrackRichMenuClickResponse);
   rpc GetRichMenuStats(GetRichMenuStatsRequest) returns (GetRichMenuStatsResponse);
+  rpc GetBusinessProfileEditorState(GetBusinessProfileEditorStateRequest) returns (GetBusinessProfileEditorStateResponse);
+  rpc AutosaveBusinessProfileDraft(AutosaveBusinessProfileDraftRequest) returns (AutosaveBusinessProfileDraftResponse);
+  rpc ResetBusinessProfileDraft(ResetBusinessProfileDraftRequest) returns (ResetBusinessProfileDraftResponse);
+  rpc PublishBusinessProfile(PublishBusinessProfileRequest) returns (PublishBusinessProfileResponse);
+  rpc UploadBusinessProfileImage(UploadBusinessProfileImageRequest) returns (UploadBusinessProfileImageResponse);
+  rpc RemoveBusinessProfileImage(RemoveBusinessProfileImageRequest) returns (RemoveBusinessProfileImageResponse);
 }

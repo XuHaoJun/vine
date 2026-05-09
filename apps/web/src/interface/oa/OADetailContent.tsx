@@ -12,19 +12,13 @@ import { showToast } from '~/interface/toast/Toast'
 import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
 import { zero } from '~/zero/client'
 
-const MOCK_COVER_URL =
-  'https://images.unsplash.com/photo-1557683316-973673baf926?w=800&q=80'
-const MOCK_FRIEND_COUNT = 12847
-const MOCK_POST_COUNT = 42
-const MOCK_LOCATION = '台灣'
-const MOCK_DESCRIPTION =
-  'Vine 是新一代的即時通訊平台，提供安全、快速、有趣的聊天體驗。加入我們，探索無限可能！'
-
 export type OADetailContentData = {
   id: string
   name: string
   oaId: string
   imageUrl?: string
+  coverImageUrl?: string
+  description?: string
 }
 
 type OADetailContentProps = OADetailContentData & {
@@ -37,6 +31,8 @@ export function OADetailContent({
   name,
   oaId,
   imageUrl,
+  coverImageUrl,
+  description,
   onClose,
   showCloseButton = true,
 }: OADetailContentProps) {
@@ -176,13 +172,17 @@ export function OADetailContent({
           )}
 
           <YStack height={180} bg="$color5" position="relative">
-            <Image
-              src={MOCK_COVER_URL}
-              alt="Cover"
-              width="100%"
-              height={180}
-              objectFit="cover"
-            />
+            {coverImageUrl ? (
+              <Image
+                src={coverImageUrl}
+                alt="Cover"
+                width="100%"
+                height={180}
+                objectFit="cover"
+              />
+            ) : (
+              <YStack width="100%" height={180} bg="$color5" />
+            )}
           </YStack>
 
           <YStack px="$4" mt={-40} position="relative" z={5}>
@@ -219,22 +219,23 @@ export function OADetailContent({
             </XStack>
 
             <Text fontSize={12} color="$color10" mt="$1" mb="$3">
-              好友人數{' '}
-              {MOCK_FRIEND_COUNT.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+              @{oaId}
             </Text>
 
-            <YStack
-              p="$3"
-              bg="$color2"
-              rounded="$4"
-              borderWidth={1}
-              borderColor="$borderColor"
-              mb="$4"
-            >
-              <Text fontSize={14} color="$color11" lineHeight={20}>
-                {MOCK_DESCRIPTION}
-              </Text>
-            </YStack>
+            {description ? (
+              <YStack
+                p="$3"
+                bg="$color2"
+                rounded="$4"
+                borderWidth={1}
+                borderColor="$borderColor"
+                mb="$4"
+              >
+                <Text fontSize={14} color="$color11" lineHeight={20}>
+                  {description}
+                </Text>
+              </YStack>
+            ) : null}
 
             <XStack gap="$3" mb="$5">
               <YStack
@@ -297,7 +298,7 @@ export function OADetailContent({
                   ))}
                 </XStack>
                 <Text fontSize={12} fontWeight="600" color="$color12">
-                  {MOCK_POST_COUNT} 貼文
+                  貼文
                 </Text>
               </YStack>
 
@@ -422,18 +423,6 @@ export function OADetailContent({
                 </ScrollView>
               </YStack>
             ) : null}
-
-            <YStack items="center" py="$4">
-              <Text fontSize={14} color="$color10">
-                @{oaId}
-              </Text>
-            </YStack>
-
-            <YStack items="flex-end" pb="$4">
-              <Text fontSize={12} color="$color10">
-                所在國家或地區：{MOCK_LOCATION}
-              </Text>
-            </YStack>
           </YStack>
         </ScrollView>
       </YStack>

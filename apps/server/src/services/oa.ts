@@ -1,18 +1,20 @@
 import { createHmac, randomBytes, randomUUID } from 'crypto'
 import { FLEX_SIMULATOR_OA_UNIQUE_ID } from '@vine/db/constants'
 import {
-  oaProvider,
-  officialAccount,
-  oaWebhook,
   oaAccessToken,
-  oaFriendship,
-  oaRichMenu,
-  oaRichMenuAlias,
-  oaRichMenuUserLink,
+  oaBusinessProfile,
+  oaBusinessProfileDraft,
   oaDefaultRichMenu,
+  oaFriendship,
+  oaProvider,
   oaQuota,
   oaReplyToken,
+  oaRichMenu,
+  oaRichMenuAlias,
   oaRichMenuClick,
+  oaRichMenuUserLink,
+  oaWebhook,
+  officialAccount,
 } from '@vine/db/schema-oa'
 import { chat, chatMember, message, userPublic } from '@vine/db/schema-public'
 import { and, count, eq, ilike, inArray, lt, or, sql } from 'drizzle-orm'
@@ -101,6 +103,201 @@ export function createOAService(deps: OADeps) {
     return randomBytes(32).toString('hex')
   }
 
+  type BusinessProfilePatch = Partial<{
+    displayName: string
+    uniqueId: string
+    statusMessage: string
+    profileImageUrl: string | null
+    coverImageUrl: string | null
+    showFollowerCount: boolean
+    footerButtonColor: string
+    splashLabels: string[]
+    buttons: unknown
+    address: unknown
+    phoneNumber: string | null
+    paymentMethods: unknown
+    businessHours: unknown
+    websites: unknown
+    visibilitySettings: unknown
+    announcements: unknown
+    mixedMediaFeed: unknown
+    socialMedia: unknown
+    basicInfoBlock: unknown
+    blockOrder: string[]
+  }>
+
+  const DEFAULT_FOOTER_BUTTON_COLOR = '#06c755'
+
+  const ALLOWED_FOOTER_COLORS = ['#06c755', '#9B95FF', '#FFBB00', '#FF6B6B', '#4DA6FF']
+
+  const DEFAULT_BLOCK_ORDER = [
+    'businessProfile',
+    'announcements',
+    'mixedMediaFeed',
+    'socialMedia',
+    'basicInfo',
+  ] as const
+
+  const VALID_BLOCK_IDS: Set<string> = new Set(DEFAULT_BLOCK_ORDER)
+
+  const MAX_SPLASH_LABELS = 3
+
+  function normalizeProfileImageUrl(value: string | null | undefined) {
+    return value || null
+  }
+
+  function profileFromAccount(account: typeof officialAccount.$inferSelect) {
+    return {
+      oaId: account.id,
+      displayName: account.name,
+      uniqueId: account.uniqueId,
+      statusMessage: account.description ?? '',
+      profileImageUrl: normalizeProfileImageUrl(account.imageUrl),
+      coverImageUrl: null,
+      showFollowerCount: false,
+      footerButtonColor: DEFAULT_FOOTER_BUTTON_COLOR,
+      splashLabels: [],
+      buttons: [{ type: 'chat', label: 'Chat', enabled: true }],
+      address: {},
+      phoneNumber: null,
+      paymentMethods: [],
+      businessHours: {},
+      websites: [],
+      visibilitySettings: {},
+      announcements: { enabled: false, title: '', body: '', linkUrl: '' },
+      mixedMediaFeed: { enabled: true },
+      socialMedia: { enabled: false, links: [] },
+      basicInfoBlock: { enabled: true },
+      blockOrder: [...DEFAULT_BLOCK_ORDER],
+    }
+  }
+
+  function draftValuesFromPublished(published: typeof oaBusinessProfile.$inferSelect) {
+    return {
+      oaId: published.oaId,
+      displayName: published.displayName,
+      uniqueId: published.uniqueId,
+      statusMessage: published.statusMessage,
+      profileImageUrl: published.profileImageUrl,
+      coverImageUrl: published.coverImageUrl,
+      showFollowerCount: published.showFollowerCount,
+      footerButtonColor: published.footerButtonColor,
+      splashLabels: published.splashLabels,
+      buttons: published.buttons,
+      address: published.address,
+      phoneNumber: published.phoneNumber,
+      paymentMethods: published.paymentMethods,
+      businessHours: published.businessHours,
+      websites: published.websites,
+      visibilitySettings: published.visibilitySettings,
+      announcements: published.announcements,
+      mixedMediaFeed: published.mixedMediaFeed,
+      socialMedia: published.socialMedia,
+      basicInfoBlock: published.basicInfoBlock,
+      blockOrder: published.blockOrder,
+    }
+  }
+
+  function validateBusinessProfilePatch(
+    patch: BusinessProfilePatch,
+  ): Partial<typeof oaBusinessProfile.$inferInsert> {
+    const clean: any = {}
+
+    if (patch.displayName !== undefined) {
+      const trimmed = patch.displayName.trim()
+      if (trimmed.length === 0) throw new Error('displayName must not be empty')
+      clean.displayName = trimmed
+    }
+    if (patch.uniqueId !== undefined) {
+      const trimmed = patch.uniqueId.trim()
+      if (trimmed.length === 0) throw new Error('uniqueId must not be empty')
+      if (!/^[a-z0-9_]+$/.test(trimmed))
+        throw new Error('uniqueId must be lower-case alphanumeric with underscores')
+      clean.uniqueId = trimmed
+    }
+    if (patch.statusMessage !== undefined) {
+      clean.statusMessage = patch.statusMessage.trim().slice(0, 200)
+    }
+    if (patch.profileImageUrl !== undefined) {
+      clean.profileImageUrl = patch.profileImageUrl || null
+    }
+    if (patch.coverImageUrl !== undefined) {
+      clean.coverImageUrl = patch.coverImageUrl || null
+    }
+    if (patch.showFollowerCount !== undefined) {
+      clean.showFollowerCount = patch.showFollowerCount
+    }
+    if (patch.footerButtonColor !== undefined) {
+      if (!ALLOWED_FOOTER_COLORS.includes(patch.footerButtonColor)) {
+        throw new Error('Invalid footer button color')
+      }
+      clean.footerButtonColor = patch.footerButtonColor
+    }
+    if (patch.splashLabels !== undefined) {
+      const labels = patch.splashLabels.filter((l) => l.trim().length > 0)
+      if (labels.length > MAX_SPLASH_LABELS) throw new Error('Too many splash labels')
+      clean.splashLabels = labels
+    }
+    if (patch.buttons !== undefined) {
+      clean.buttons = patch.buttons
+    }
+    if (patch.address !== undefined) {
+      clean.address = patch.address
+    }
+    if (patch.phoneNumber !== undefined) {
+      clean.phoneNumber = patch.phoneNumber || null
+    }
+    if (patch.paymentMethods !== undefined) {
+      clean.paymentMethods = patch.paymentMethods
+    }
+    if (patch.businessHours !== undefined) {
+      clean.businessHours = patch.businessHours
+    }
+    if (patch.websites !== undefined) {
+      clean.websites = patch.websites
+    }
+    if (patch.visibilitySettings !== undefined) {
+      clean.visibilitySettings = patch.visibilitySettings
+    }
+    if (patch.announcements !== undefined) {
+      clean.announcements = patch.announcements
+    }
+    if (patch.mixedMediaFeed !== undefined) {
+      clean.mixedMediaFeed = patch.mixedMediaFeed
+    }
+    if (patch.socialMedia !== undefined) {
+      clean.socialMedia = patch.socialMedia
+    }
+    if (patch.basicInfoBlock !== undefined) {
+      clean.basicInfoBlock = patch.basicInfoBlock
+    }
+    if (patch.blockOrder !== undefined) {
+      for (const id of patch.blockOrder) {
+        if (!VALID_BLOCK_IDS.has(id)) throw new Error(`Invalid block ID: ${id}`)
+      }
+      const deduped = [...new Set(patch.blockOrder)]
+      if (deduped.length !== patch.blockOrder.length)
+        throw new Error('Duplicate block IDs')
+      clean.blockOrder = patch.blockOrder
+    }
+    return clean
+  }
+
+  function validateBusinessProfileDraftForPublish(draft: any) {
+    if (!draft.displayName || draft.displayName.trim().length === 0) {
+      throw new Error('displayName must not be empty')
+    }
+    if (!draft.uniqueId || draft.uniqueId.trim().length === 0) {
+      throw new Error('uniqueId must not be empty')
+    }
+    if (!/^[a-z0-9_]+$/.test(draft.uniqueId)) {
+      throw new Error('uniqueId must be lower-case alphanumeric with underscores')
+    }
+    if (draft.splashLabels && draft.splashLabels.length > MAX_SPLASH_LABELS) {
+      throw new Error('Too many splash labels')
+    }
+  }
+
   async function createOfficialAccount(input: {
     providerId: string
     name: string
@@ -130,13 +327,255 @@ export function createOAService(deps: OADeps) {
     return account
   }
 
-  async function getOfficialAccount(id: string) {
-    const [account] = await db
+  async function getOfficialAccount(id: string, store = db) {
+    const [account] = await store
       .select()
       .from(officialAccount)
       .where(eq(officialAccount.id, id))
       .limit(1)
     return account ?? null
+  }
+
+  function profilesEqual(published: any, draft: any) {
+    const keys = [
+      'displayName',
+      'uniqueId',
+      'statusMessage',
+      'profileImageUrl',
+      'coverImageUrl',
+      'showFollowerCount',
+      'footerButtonColor',
+      'splashLabels',
+      'buttons',
+      'address',
+      'phoneNumber',
+      'paymentMethods',
+      'businessHours',
+      'websites',
+      'visibilitySettings',
+      'announcements',
+      'mixedMediaFeed',
+      'socialMedia',
+      'basicInfoBlock',
+      'blockOrder',
+    ]
+    return keys.every(
+      (key) => JSON.stringify(published[key]) === JSON.stringify(draft[key]),
+    )
+  }
+
+  async function ensureBusinessProfileRows(oaId: string, store = db) {
+    const account = await getOfficialAccount(oaId, store)
+    if (!account) return null
+
+    let [published] = await store
+      .select()
+      .from(oaBusinessProfile)
+      .where(eq(oaBusinessProfile.oaId, oaId))
+      .limit(1)
+
+    if (!published) {
+      await store
+        .insert(oaBusinessProfile)
+        .values({
+          ...profileFromAccount(account),
+          publishedAt: new Date().toISOString(),
+        })
+        .onConflictDoNothing({ target: oaBusinessProfile.oaId })
+      ;[published] = await store
+        .select()
+        .from(oaBusinessProfile)
+        .where(eq(oaBusinessProfile.oaId, oaId))
+        .limit(1)
+    }
+
+    let [draft] = await store
+      .select()
+      .from(oaBusinessProfileDraft)
+      .where(eq(oaBusinessProfileDraft.oaId, oaId))
+      .limit(1)
+
+    if (!draft) {
+      await store
+        .insert(oaBusinessProfileDraft)
+        .values({
+          ...draftValuesFromPublished(published!),
+          serverRevision: 1,
+          lastSavedAt: new Date().toISOString(),
+        })
+        .onConflictDoNothing({ target: oaBusinessProfileDraft.oaId })
+      ;[draft] = await store
+        .select()
+        .from(oaBusinessProfileDraft)
+        .where(eq(oaBusinessProfileDraft.oaId, oaId))
+        .limit(1)
+    }
+
+    return { account, published: published!, draft: draft! }
+  }
+
+  async function getBusinessProfileEditorState(oaId: string) {
+    const rows = await ensureBusinessProfileRows(oaId)
+    if (!rows) return null
+    return {
+      account: rows.account,
+      published: rows.published,
+      draft: rows.draft,
+      isDirty: !profilesEqual(rows.published, rows.draft),
+    }
+  }
+
+  async function autosaveBusinessProfileDraft(
+    oaId: string,
+    patch: BusinessProfilePatch,
+    clientRevision?: number,
+  ) {
+    const rows = await ensureBusinessProfileRows(oaId)
+    if (!rows) return null
+    if (clientRevision !== undefined && clientRevision !== rows.draft.serverRevision) {
+      throw new Error('draft revision conflict')
+    }
+
+    const now = new Date().toISOString()
+    const validatedPatch = validateBusinessProfilePatch(patch)
+    const [draft] = await db
+      .update(oaBusinessProfileDraft)
+      .set({
+        ...validatedPatch,
+        serverRevision: rows.draft.serverRevision + 1,
+        lastSavedAt: now,
+        updatedAt: now,
+      })
+      .where(eq(oaBusinessProfileDraft.oaId, oaId))
+      .returning()
+
+    return {
+      account: rows.account,
+      published: rows.published,
+      draft: draft!,
+      isDirty: !profilesEqual(rows.published, draft!),
+    }
+  }
+
+  async function resetBusinessProfileDraft(oaId: string) {
+    const rows = await ensureBusinessProfileRows(oaId)
+    if (!rows) return null
+
+    const now = new Date().toISOString()
+    const resetValues = draftValuesFromPublished(rows.published)
+    const [draft] = await db
+      .update(oaBusinessProfileDraft)
+      .set({
+        ...resetValues,
+        serverRevision: rows.draft.serverRevision + 1,
+        lastSavedAt: now,
+        updatedAt: now,
+      })
+      .where(eq(oaBusinessProfileDraft.oaId, oaId))
+      .returning()
+
+    return {
+      account: rows.account,
+      published: rows.published,
+      draft: draft!,
+      isDirty: false,
+    }
+  }
+
+  async function getPublishedBusinessProfile(oaId: string) {
+    const [profile] = await db
+      .select()
+      .from(oaBusinessProfile)
+      .where(eq(oaBusinessProfile.oaId, oaId))
+      .limit(1)
+    return profile ?? null
+  }
+
+  async function getPublishedBusinessProfiles(oaIds: string[]) {
+    if (oaIds.length === 0)
+      return new Map<string, typeof oaBusinessProfile.$inferSelect>()
+    const profiles = await db
+      .select()
+      .from(oaBusinessProfile)
+      .where(inArray(oaBusinessProfile.oaId, oaIds))
+    const map = new Map<string, typeof oaBusinessProfile.$inferSelect>()
+    for (const p of profiles) {
+      map.set(p.oaId, p)
+    }
+    return map
+  }
+
+  async function publishBusinessProfile(oaId: string, expectedRevision?: number) {
+    const now = new Date().toISOString()
+
+    return db.transaction(async (tx) => {
+      const rows = await ensureBusinessProfileRows(oaId, tx)
+      if (!rows) return null
+      const draft = rows.draft
+      if (expectedRevision !== undefined && expectedRevision !== draft.serverRevision) {
+        throw new Error('draft revision conflict')
+      }
+      validateBusinessProfileDraftForPublish(draft)
+
+      const [existing] = await tx
+        .select()
+        .from(officialAccount)
+        .where(eq(officialAccount.uniqueId, draft.uniqueId))
+        .limit(1)
+      if (existing && existing.id !== oaId) {
+        throw new Error('uniqueId already exists')
+      }
+
+      const publishedValues = {
+        displayName: draft.displayName,
+        uniqueId: draft.uniqueId,
+        statusMessage: draft.statusMessage,
+        profileImageUrl: draft.profileImageUrl,
+        coverImageUrl: draft.coverImageUrl,
+        showFollowerCount: draft.showFollowerCount,
+        footerButtonColor: draft.footerButtonColor,
+        splashLabels: draft.splashLabels,
+        buttons: draft.buttons,
+        address: draft.address,
+        phoneNumber: draft.phoneNumber,
+        paymentMethods: draft.paymentMethods,
+        businessHours: draft.businessHours,
+        websites: draft.websites,
+        visibilitySettings: draft.visibilitySettings,
+        announcements: draft.announcements,
+        mixedMediaFeed: draft.mixedMediaFeed,
+        socialMedia: draft.socialMedia,
+        basicInfoBlock: draft.basicInfoBlock,
+        blockOrder: draft.blockOrder,
+        publishedAt: now,
+        updatedAt: now,
+      }
+
+      const [published] = await tx
+        .update(oaBusinessProfile)
+        .set(publishedValues)
+        .where(eq(oaBusinessProfile.oaId, oaId))
+        .returning()
+
+      const [account] = await tx
+        .update(officialAccount)
+        .set({
+          name: draft.displayName,
+          uniqueId: draft.uniqueId,
+          description: draft.statusMessage,
+          imageUrl: draft.profileImageUrl,
+          updatedAt: now,
+        })
+        .where(eq(officialAccount.id, oaId))
+        .returning()
+
+      return {
+        account: account!,
+        published: published!,
+        draft,
+        isDirty: false,
+      }
+    })
   }
 
   async function findOfficialAccountByUniqueId(uniqueId: string) {
@@ -1265,6 +1704,12 @@ export function createOAService(deps: OADeps) {
     createOfficialAccount,
     getOfficialAccount,
     getManagerSummary,
+    getBusinessProfileEditorState,
+    autosaveBusinessProfileDraft,
+    resetBusinessProfileDraft,
+    publishBusinessProfile,
+    getPublishedBusinessProfile,
+    getPublishedBusinessProfiles,
     updateOfficialAccount,
     deleteOfficialAccount,
     setWebhook,

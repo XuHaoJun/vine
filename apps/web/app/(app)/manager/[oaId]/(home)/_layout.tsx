@@ -1,5 +1,6 @@
 import { Link, Slot, useActiveParams, usePathname } from 'one'
 import { SizableText, XStack, YStack } from 'tamagui'
+import { ManagerOAAccountSwitcher } from '~/features/oa-manager/shared/ManagerOAAccountSwitcher'
 import { oaClient } from '~/features/oa/client'
 import { Button } from '~/interface/buttons/Button'
 import { Pressable } from '~/interface/buttons/Pressable'
@@ -47,12 +48,7 @@ export default function ManagerHomeLayout() {
           </SizableText>
           {account ? (
             <>
-              <SizableText size="$3" fontWeight="700" color="$color12">
-                {account.name}
-              </SizableText>
-              <SizableText size="$2" color="$color10">
-                @{account.uniqueId}
-              </SizableText>
+              <ManagerOAAccountSwitcher account={account} />
               <SizableText size="$2" color="$color10">
                 {summary.data?.friendCount ?? 0} friends
               </SizableText>

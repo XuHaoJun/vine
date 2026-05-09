@@ -1,5 +1,11 @@
 import { Code, ConnectError, ConnectRouter } from '@connectrpc/connect'
-import { AccessTokenType, OAService, OAStatus, WebhookStatus } from '@vine/proto/oa'
+import {
+  AccessTokenType,
+  BusinessProfileImageKind,
+  OAService,
+  OAStatus,
+  WebhookStatus,
+} from '@vine/proto/oa'
 import { logger } from '../lib/logger'
 import { requireAuthData, withAuthService } from './auth-context'
 import type { createOAService } from '../services/oa'
@@ -265,6 +271,90 @@ function protoTokenTypeToDb(type: AccessTokenType): 'short_lived' | 'jwt_v21' {
     default:
       return 'short_lived'
   }
+}
+
+function jsonField(value: unknown) {
+  return { json: JSON.stringify(value ?? {}) }
+}
+
+function parseJsonField(field: { json?: string } | undefined) {
+  if (!field?.json) return undefined
+  try {
+    return JSON.parse(field.json)
+  } catch {
+    return undefined
+  }
+}
+
+function toProtoBusinessProfile(db: any) {
+  if (!db) return undefined
+  return {
+    officialAccountId: db.oaId,
+    displayName: db.displayName,
+    uniqueId: db.uniqueId,
+    statusMessage: db.statusMessage ?? '',
+    profileImageUrl: db.profileImageUrl ?? '',
+    coverImageUrl: db.coverImageUrl ?? '',
+    showFollowerCount: db.showFollowerCount,
+    footerButtonColor: db.footerButtonColor,
+    splashLabels: db.splashLabels ?? [],
+    buttons: jsonField(db.buttons),
+    address: jsonField(db.address),
+    phoneNumber: db.phoneNumber ?? '',
+    paymentMethods: jsonField(db.paymentMethods),
+    businessHours: jsonField(db.businessHours),
+    websites: jsonField(db.websites),
+    visibilitySettings: jsonField(db.visibilitySettings),
+    announcements: jsonField(db.announcements),
+    mixedMediaFeed: jsonField(db.mixedMediaFeed),
+    socialMedia: jsonField(db.socialMedia),
+    basicInfoBlock: jsonField(db.basicInfoBlock),
+    blockOrder: db.blockOrder ?? [],
+    serverRevision: db.serverRevision ?? 0,
+    lastSavedAt: db.lastSavedAt ?? '',
+    publishedAt: db.publishedAt ?? '',
+    createdAt: db.createdAt,
+    updatedAt: db.updatedAt,
+  }
+}
+
+function toEditorStateResponse(state: any) {
+  return {
+    account: toProtoOfficialAccount(state.account),
+    published: toProtoBusinessProfile(state.published),
+    draft: toProtoBusinessProfile(state.draft),
+    isDirty: state.isDirty,
+  }
+}
+
+function patchFromProto(patch: any) {
+  const raw: Record<string, unknown> = {
+    displayName: patch.displayName,
+    uniqueId: patch.uniqueId,
+    statusMessage: patch.statusMessage,
+    profileImageUrl: patch.profileImageUrl,
+    coverImageUrl: patch.coverImageUrl,
+    showFollowerCount: patch.showFollowerCount,
+    footerButtonColor: patch.footerButtonColor,
+    splashLabels: patch.splashLabels ? patch.splashLabels.values : undefined,
+    buttons: parseJsonField(patch.buttons),
+    address: parseJsonField(patch.address),
+    phoneNumber: patch.phoneNumber,
+    paymentMethods: parseJsonField(patch.paymentMethods),
+    businessHours: parseJsonField(patch.businessHours),
+    websites: parseJsonField(patch.websites),
+    visibilitySettings: parseJsonField(patch.visibilitySettings),
+    announcements: parseJsonField(patch.announcements),
+    mixedMediaFeed: parseJsonField(patch.mixedMediaFeed),
+    socialMedia: parseJsonField(patch.socialMedia),
+    basicInfoBlock: parseJsonField(patch.basicInfoBlock),
+    blockOrder: patch.blockOrder ? patch.blockOrder.values : undefined,
+  }
+  const clean: Record<string, unknown> = {}
+  for (const [k, v] of Object.entries(raw)) {
+    if (v !== undefined) clean[k] = v
+  }
+  return clean
 }
 
 export function oaHandler(deps: OAHandlerDeps) {
@@ -627,27 +717,55 @@ export function oaHandler(deps: OAHandlerDeps) {
       async searchOfficialAccounts(req, ctx) {
         const auth = requireAuthData(ctx)
         const accounts = await deps.oa.searchOAsForOwner(auth.id, req.query)
+        const profileMap = await deps.oa.getPublishedBusinessProfiles(
+          accounts.map((a) => a.id),
+        )
         return {
-          accounts: accounts.map((a) => ({
-            id: a.id,
-            name: a.name,
-            uniqueId: a.uniqueId,
-            description: a.description ?? '',
-            imageUrl: a.imageUrl ?? '',
-          })),
+          accounts: accounts.map((a) => {
+            const profile = profileMap.get(a.id)
+            return {
+              id: a.id,
+              name: profile?.displayName ?? a.name,
+              uniqueId: profile?.uniqueId ?? a.uniqueId,
+              description: profile?.statusMessage ?? a.description ?? '',
+              imageUrl: profile?.profileImageUrl ?? a.imageUrl ?? '',
+              coverImageUrl: profile?.coverImageUrl ?? '',
+              statusMessage: profile?.statusMessage ?? a.description ?? '',
+              showFollowerCount: profile?.showFollowerCount ?? false,
+              splashLabels: profile?.splashLabels ?? [],
+              footerButtonColor: profile?.footerButtonColor ?? '#06c755',
+              buttons: jsonField(profile?.buttons ?? []),
+              socialMedia: jsonField(profile?.socialMedia ?? {}),
+              basicInfoBlock: jsonField(profile?.basicInfoBlock ?? {}),
+            }
+          }),
         }
       },
       async recommendOfficialAccounts(req) {
         const limit = req.limit > 0 ? req.limit : 15
         const accounts = await deps.oa.recommendOfficialAccounts(limit)
+        const profileMap = await deps.oa.getPublishedBusinessProfiles(
+          accounts.map((a) => a.id),
+        )
         return {
-          accounts: accounts.map((a) => ({
-            id: a.id,
-            name: a.name,
-            uniqueId: a.uniqueId,
-            description: a.description ?? '',
-            imageUrl: a.imageUrl ?? '',
-          })),
+          accounts: accounts.map((a) => {
+            const profile = profileMap.get(a.id)
+            return {
+              id: a.id,
+              name: profile?.displayName ?? a.name,
+              uniqueId: profile?.uniqueId ?? a.uniqueId,
+              description: profile?.statusMessage ?? a.description ?? '',
+              imageUrl: profile?.profileImageUrl ?? a.imageUrl ?? '',
+              coverImageUrl: profile?.coverImageUrl ?? '',
+              statusMessage: profile?.statusMessage ?? a.description ?? '',
+              showFollowerCount: profile?.showFollowerCount ?? false,
+              splashLabels: profile?.splashLabels ?? [],
+              footerButtonColor: profile?.footerButtonColor ?? '#06c755',
+              buttons: jsonField(profile?.buttons ?? []),
+              socialMedia: jsonField(profile?.socialMedia ?? {}),
+              basicInfoBlock: jsonField(profile?.basicInfoBlock ?? {}),
+            }
+          }),
         }
       },
       async addOAFriend(req, ctx) {
@@ -703,13 +821,22 @@ export function oaHandler(deps: OAHandlerDeps) {
         if (!account) {
           throw new ConnectError('Official account not found', Code.NotFound)
         }
+        const profile = await deps.oa.getPublishedBusinessProfile(account.id)
         return {
           account: {
             id: account.id,
-            name: account.name,
-            uniqueId: account.uniqueId,
-            description: account.description ?? '',
-            imageUrl: account.imageUrl ?? '',
+            name: profile?.displayName ?? account.name,
+            uniqueId: profile?.uniqueId ?? account.uniqueId,
+            description: profile?.statusMessage ?? account.description ?? '',
+            imageUrl: profile?.profileImageUrl ?? account.imageUrl ?? '',
+            coverImageUrl: profile?.coverImageUrl ?? '',
+            statusMessage: profile?.statusMessage ?? account.description ?? '',
+            showFollowerCount: profile?.showFollowerCount ?? false,
+            splashLabels: profile?.splashLabels ?? [],
+            footerButtonColor: profile?.footerButtonColor ?? '#06c755',
+            buttons: jsonField(profile?.buttons ?? []),
+            socialMedia: jsonField(profile?.socialMedia ?? {}),
+            basicInfoBlock: jsonField(profile?.basicInfoBlock ?? {}),
           },
         }
       },
@@ -1083,6 +1210,90 @@ export function oaHandler(deps: OAHandlerDeps) {
             clickCount: s.clickCount,
           })),
         }
+      },
+      async getBusinessProfileEditorState(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const state = await deps.oa.getBusinessProfileEditorState(req.officialAccountId)
+        if (!state) throw new ConnectError('Official account not found', Code.NotFound)
+        return toEditorStateResponse(state)
+      },
+      async autosaveBusinessProfileDraft(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const state = await deps.oa.autosaveBusinessProfileDraft(
+          req.officialAccountId,
+          patchFromProto(req.patch),
+          req.clientRevision,
+        )
+        if (!state) throw new ConnectError('Official account not found', Code.NotFound)
+        return {
+          draft: toProtoBusinessProfile(state.draft),
+          serverRevision: state.draft.serverRevision,
+          savedAt: state.draft.lastSavedAt ?? '',
+          isDirty: state.isDirty,
+        }
+      },
+      async resetBusinessProfileDraft(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const state = await deps.oa.resetBusinessProfileDraft(req.officialAccountId)
+        if (!state) throw new ConnectError('Official account not found', Code.NotFound)
+        return { state: toEditorStateResponse(state) }
+      },
+      async publishBusinessProfile(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const state = await deps.oa.publishBusinessProfile(
+          req.officialAccountId,
+          req.expectedRevision,
+        )
+        if (!state) throw new ConnectError('Official account not found', Code.NotFound)
+        return { state: toEditorStateResponse(state) }
+      },
+      async uploadBusinessProfileImage(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const baseMime = req.contentType.split(';')[0]?.trim() ?? req.contentType
+        if (!['image/jpeg', 'image/png'].includes(baseMime)) {
+          throw new ConnectError('Unsupported image type', Code.InvalidArgument)
+        }
+        const isCover = req.kind === BusinessProfileImageKind.COVER
+        const maxBytes = isCover ? 10 * 1024 * 1024 : 3 * 1024 * 1024
+        if (req.image.length > maxBytes) {
+          throw new ConnectError('Image is too large', Code.InvalidArgument)
+        }
+        const ext = baseMime === 'image/png' ? 'png' : 'jpg'
+        const kind = isCover ? 'cover' : 'profile'
+        const key = `oa-profile/${req.officialAccountId}/${kind}.${ext}`
+        await deps.drive.put(key, Buffer.from(req.image), baseMime)
+        const imageUrl = await deps.drive.getUrl(key)
+        const patch =
+          kind === 'cover' ? { coverImageUrl: imageUrl } : { profileImageUrl: imageUrl }
+        const state = await deps.oa.autosaveBusinessProfileDraft(
+          req.officialAccountId,
+          patch,
+        )
+        if (!state) throw new ConnectError('Official account not found', Code.NotFound)
+        return {
+          draft: toProtoBusinessProfile(state.draft),
+          imageUrl,
+          isDirty: state.isDirty,
+        }
+      },
+      async removeBusinessProfileImage(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const patch =
+          req.kind === BusinessProfileImageKind.COVER
+            ? { coverImageUrl: null }
+            : { profileImageUrl: null }
+        const state = await deps.oa.autosaveBusinessProfileDraft(
+          req.officialAccountId,
+          patch,
+        )
+        if (!state) throw new ConnectError('Official account not found', Code.NotFound)
+        return { draft: toProtoBusinessProfile(state.draft), isDirty: state.isDirty }
       },
     }
 
