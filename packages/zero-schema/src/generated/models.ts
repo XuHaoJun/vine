@@ -6,6 +6,7 @@ import * as creatorProfile from '../models/creatorProfile'
 import * as entitlement from '../models/entitlement'
 import * as friendship from '../models/friendship'
 import * as message from '../models/message'
+import * as oaFriendship from '../models/oaFriendship'
 import * as oaProvider from '../models/oaProvider'
 import * as officialAccount from '../models/officialAccount'
 import * as stickerAsset from '../models/stickerAsset'
@@ -22,6 +23,7 @@ export const models = {
   entitlement,
   friendship,
   message,
+  oaFriendship,
   oaProvider,
   officialAccount,
   stickerAsset,
