@@ -1,5 +1,5 @@
 import { Code, ConnectError, ConnectRouter } from '@connectrpc/connect'
-import { AccessTokenType, OAService, OAStatus, WebhookStatus } from '@vine/proto/oa'
+import { AccessTokenType, BusinessProfileImageKind, OAService, OAStatus, WebhookStatus } from '@vine/proto/oa'
 import { logger } from '../lib/logger'
 import { requireAuthData, withAuthService } from './auth-context'
 import type { createOAService } from '../services/oa'
@@ -264,6 +264,81 @@ function protoTokenTypeToDb(type: AccessTokenType): 'short_lived' | 'jwt_v21' {
     case AccessTokenType.UNSPECIFIED:
     default:
       return 'short_lived'
+  }
+}
+
+function jsonField(value: unknown) {
+  return { json: JSON.stringify(value ?? {}) }
+}
+
+function parseJsonField(field: { json?: string } | undefined) {
+  if (!field?.json) return undefined
+  return JSON.parse(field.json)
+}
+
+function toProtoBusinessProfile(db: any) {
+  if (!db) return undefined
+  return {
+    officialAccountId: db.oaId,
+    displayName: db.displayName,
+    uniqueId: db.uniqueId,
+    statusMessage: db.statusMessage ?? '',
+    profileImageUrl: db.profileImageUrl ?? '',
+    coverImageUrl: db.coverImageUrl ?? '',
+    showFollowerCount: db.showFollowerCount,
+    footerButtonColor: db.footerButtonColor,
+    splashLabels: db.splashLabels ?? [],
+    buttons: jsonField(db.buttons),
+    address: jsonField(db.address),
+    phoneNumber: db.phoneNumber ?? '',
+    paymentMethods: jsonField(db.paymentMethods),
+    businessHours: jsonField(db.businessHours),
+    websites: jsonField(db.websites),
+    visibilitySettings: jsonField(db.visibilitySettings),
+    announcements: jsonField(db.announcements),
+    mixedMediaFeed: jsonField(db.mixedMediaFeed),
+    socialMedia: jsonField(db.socialMedia),
+    basicInfoBlock: jsonField(db.basicInfoBlock),
+    blockOrder: db.blockOrder ?? [],
+    serverRevision: db.serverRevision ?? 0,
+    lastSavedAt: db.lastSavedAt ?? '',
+    publishedAt: db.publishedAt ?? '',
+    createdAt: db.createdAt,
+    updatedAt: db.updatedAt,
+  }
+}
+
+function toEditorStateResponse(state: any) {
+  return {
+    account: toProtoOfficialAccount(state.account),
+    published: toProtoBusinessProfile(state.published),
+    draft: toProtoBusinessProfile(state.draft),
+    isDirty: state.isDirty,
+  }
+}
+
+function patchFromProto(patch: any) {
+  return {
+    displayName: patch.displayName,
+    uniqueId: patch.uniqueId,
+    statusMessage: patch.statusMessage,
+    profileImageUrl: patch.profileImageUrl,
+    coverImageUrl: patch.coverImageUrl,
+    showFollowerCount: patch.showFollowerCount,
+    footerButtonColor: patch.footerButtonColor,
+    splashLabels: patch.splashLabels ? patch.splashLabels.values : undefined,
+    buttons: parseJsonField(patch.buttons),
+    address: parseJsonField(patch.address),
+    phoneNumber: patch.phoneNumber,
+    paymentMethods: parseJsonField(patch.paymentMethods),
+    businessHours: parseJsonField(patch.businessHours),
+    websites: parseJsonField(patch.websites),
+    visibilitySettings: parseJsonField(patch.visibilitySettings),
+    announcements: parseJsonField(patch.announcements),
+    mixedMediaFeed: parseJsonField(patch.mixedMediaFeed),
+    socialMedia: parseJsonField(patch.socialMedia),
+    basicInfoBlock: parseJsonField(patch.basicInfoBlock),
+    blockOrder: patch.blockOrder ? patch.blockOrder.values : undefined,
   }
 }
 
@@ -1083,6 +1158,89 @@ export function oaHandler(deps: OAHandlerDeps) {
             clickCount: s.clickCount,
           })),
         }
+      },
+      async getBusinessProfileEditorState(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const state = await deps.oa.getBusinessProfileEditorState(req.officialAccountId)
+        if (!state) throw new ConnectError('Official account not found', Code.NotFound)
+        return toEditorStateResponse(state)
+      },
+      async autosaveBusinessProfileDraft(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const state = await deps.oa.autosaveBusinessProfileDraft(
+          req.officialAccountId,
+          patchFromProto(req.patch),
+          req.clientRevision,
+        )
+        if (!state) throw new ConnectError('Official account not found', Code.NotFound)
+        return {
+          draft: toProtoBusinessProfile(state.draft),
+          serverRevision: state.draft.serverRevision,
+          savedAt: state.draft.lastSavedAt ?? '',
+          isDirty: state.isDirty,
+        }
+      },
+      async resetBusinessProfileDraft(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const state = await deps.oa.resetBusinessProfileDraft(req.officialAccountId)
+        if (!state) throw new ConnectError('Official account not found', Code.NotFound)
+        return { state: toEditorStateResponse(state) }
+      },
+      async publishBusinessProfile(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const state = await deps.oa.publishBusinessProfile(
+          req.officialAccountId,
+          req.expectedRevision,
+        )
+        if (!state) throw new ConnectError('Official account not found', Code.NotFound)
+        return { state: toEditorStateResponse(state) }
+      },
+      async uploadBusinessProfileImage(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const baseMime = req.contentType.split(';')[0]?.trim() ?? req.contentType
+        if (!['image/jpeg', 'image/png'].includes(baseMime)) {
+          throw new ConnectError('Unsupported image type', Code.InvalidArgument)
+        }
+        const isCover = req.kind === BusinessProfileImageKind.COVER
+        const maxBytes = isCover ? 10 * 1024 * 1024 : 3 * 1024 * 1024
+        if (req.image.length > maxBytes) {
+          throw new ConnectError('Image is too large', Code.InvalidArgument)
+        }
+        const ext = baseMime === 'image/png' ? 'png' : 'jpg'
+        const kind = isCover ? 'cover' : 'profile'
+        const key = `oa-profile/${req.officialAccountId}/${kind}.${ext}`
+        await deps.drive.put(key, Buffer.from(req.image), baseMime)
+        const imageUrl = await deps.drive.getUrl(key)
+        const patch = kind === 'cover' ? { coverImageUrl: imageUrl } : { profileImageUrl: imageUrl }
+        const state = await deps.oa.autosaveBusinessProfileDraft(
+          req.officialAccountId,
+          patch,
+        )
+        if (!state) throw new ConnectError('Official account not found', Code.NotFound)
+        return {
+          draft: toProtoBusinessProfile(state.draft),
+          imageUrl,
+          isDirty: state.isDirty,
+        }
+      },
+      async removeBusinessProfileImage(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const patch =
+          req.kind === BusinessProfileImageKind.COVER
+            ? { coverImageUrl: null }
+            : { profileImageUrl: null }
+        const state = await deps.oa.autosaveBusinessProfileDraft(
+          req.officialAccountId,
+          patch,
+        )
+        if (!state) throw new ConnectError('Official account not found', Code.NotFound)
+        return { draft: toProtoBusinessProfile(state.draft), isDirty: state.isDirty }
       },
     }
 
