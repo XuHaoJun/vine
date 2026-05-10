@@ -5,7 +5,7 @@ description: Zero data layer guide for the vine turborepo. Use whenever you touc
 
 # Zero data layer (vine)
 
-Vine syncs data with `@rocicorp/zero` 0.26 plus the `on-zero` 0.2 helpers. The canonical schema lives in `packages/zero-schema` (`@vine/zero-schema`); the web client wires it up in `apps/web/src/zero/client.tsx`; the Fastify server hosts pull/push at `apps/server/src/plugins/zero.ts`.
+Vine syncs data with `@rocicorp/zero` 1.4 plus the `on-zero` 0.4 helpers. The canonical schema lives in `packages/zero-schema` (`@vine/zero-schema`); the web client wires it up in `apps/web/src/zero/client.tsx`; the Fastify server hosts pull/push at `apps/server/src/plugins/zero.ts`.
 
 `apps/web/src/data/` is **dead legacy** — ignore it. Always work in `packages/zero-schema/src/`.
 
