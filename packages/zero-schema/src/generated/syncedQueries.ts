@@ -129,6 +129,16 @@ const message = {
   ),
 }
 
+const oaContactTag = {
+  oaContactTagsByOfficialAccountId: defineQuery(
+    v.object({
+      oaId: v.string(),
+      limit: v.optional(v.number()),
+    }),
+    ({ args }) => Queries.oaContactTag.oaContactTagsByOfficialAccountId(args),
+  ),
+}
+
 const oaFriendship = {
   oaContactsByOfficialAccountId: defineQuery(
     v.object({
@@ -211,6 +221,7 @@ export const queries = defineQueries({
   entitlement,
   friendship,
   message,
+  oaContactTag,
   oaFriendship,
   stickerAsset,
   stickerPackage,
