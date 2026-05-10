@@ -59,12 +59,22 @@ function recordPermission(permission: Where) {
 }
 
 function makeTx(rows: Record<string, any[]> = {}) {
+  const makeQuery = (data: any[], filters: [string, unknown][] = []): any => {
+    return {
+      where: vi.fn((field: string, value: unknown) =>
+        makeQuery(data, [...filters, [field, value]]),
+      ),
+      run: vi
+        .fn()
+        .mockResolvedValue(
+          data.filter((row) => filters.every(([field, value]) => row[field] === value)),
+        ),
+    }
+  }
+
   const query: Record<string, any> = {}
   for (const [table, data] of Object.entries(rows)) {
-    query[table] = {
-      where: vi.fn().mockReturnThis(),
-      run: vi.fn().mockResolvedValue(data),
-    }
+    query[table] = makeQuery(data)
   }
   return {
     query,
@@ -114,7 +124,13 @@ describe('saveNote', () => {
     await expect(
       (profileMutate as any).saveNote(
         { authData: null, tx },
-        { oaId: 'oa-1', userId: 'user-1', noteText: 'hello', updatedAt: '2026-01-01' },
+        {
+          id: 'profile-1',
+          oaId: 'oa-1',
+          userId: 'user-1',
+          noteText: 'hello',
+          updatedAt: '2026-01-01',
+        },
       ),
     ).rejects.toThrow('Unauthorized')
   })
@@ -127,7 +143,13 @@ describe('saveNote', () => {
     await expect(
       (profileMutate as any).saveNote(
         { authData, tx },
-        { oaId: 'oa-1', userId: 'user-1', noteText: 'hello', updatedAt: '2026-01-01' },
+        {
+          id: 'profile-1',
+          oaId: 'oa-1',
+          userId: 'user-1',
+          noteText: 'hello',
+          updatedAt: '2026-01-01',
+        },
       ),
     ).rejects.toThrow('Unauthorized')
   })
@@ -141,7 +163,13 @@ describe('saveNote', () => {
     await expect(
       (profileMutate as any).saveNote(
         { authData, tx },
-        { oaId: 'oa-1', userId: 'user-1', noteText: 'hello', updatedAt: '2026-01-01' },
+        {
+          id: 'profile-1',
+          oaId: 'oa-1',
+          userId: 'user-1',
+          noteText: 'hello',
+          updatedAt: '2026-01-01',
+        },
       ),
     ).rejects.toThrow('Contact not found')
   })
@@ -155,12 +183,19 @@ describe('saveNote', () => {
     })
     await (profileMutate as any).saveNote(
       { authData, tx },
-      { oaId: 'oa-1', userId: 'user-1', noteText: '  hello  ', updatedAt: '2026-01-01' },
+      {
+        id: 'profile-1',
+        oaId: 'oa-1',
+        userId: 'user-1',
+        noteText: '  hello  ',
+        updatedAt: '2026-01-01',
+      },
     )
     expect(tx.mutate.oaContactProfile.insert).toHaveBeenCalledWith(
       expect.objectContaining({
         oaId: 'oa-1',
         userId: 'user-1',
+        id: 'profile-1',
         noteText: 'hello',
       }),
     )
@@ -178,6 +213,7 @@ describe('saveNote', () => {
     await (profileMutate as any).saveNote(
       { authData, tx },
       {
+        id: 'profile-new',
         oaId: 'oa-1',
         userId: 'user-1',
         noteText: '  updated  ',
@@ -354,6 +390,8 @@ describe('assignment mutations', () => {
     const tx = makeTx({
       officialAccount: [{ id: 'oa-1', providerId: 'prov-1' }],
       oaProvider: [{ id: 'prov-1', ownerId: 'manager-1' }],
+      oaFriendship: [{ oaId: 'oa-1', userId: 'user-1', status: 'friend' }],
+      oaContactTag: [{ id: 'tag-1', oaId: 'oa-1', name: 'VIP' }],
       oaContactTagAssignment: [],
     })
     await (assignmentMutate as any).assign(
@@ -371,10 +409,58 @@ describe('assignment mutations', () => {
     )
   })
 
+  it('rejects assignment for a non-friend contact', async () => {
+    const tx = makeTx({
+      officialAccount: [{ id: 'oa-1', providerId: 'prov-1' }],
+      oaProvider: [{ id: 'prov-1', ownerId: 'manager-1' }],
+      oaFriendship: [],
+      oaContactTag: [{ id: 'tag-1', oaId: 'oa-1', name: 'VIP' }],
+      oaContactTagAssignment: [],
+    })
+    await expect(
+      (assignmentMutate as any).assign(
+        { authData, tx },
+        {
+          id: 'assign-1',
+          oaId: 'oa-1',
+          userId: 'user-1',
+          tagId: 'tag-1',
+          createdAt: '2026-01-01',
+        },
+      ),
+    ).rejects.toThrow('Contact not found')
+    expect(tx.mutate.oaContactTagAssignment.insert).not.toHaveBeenCalled()
+  })
+
+  it('rejects assignment with a tag from another OA', async () => {
+    const tx = makeTx({
+      officialAccount: [{ id: 'oa-1', providerId: 'prov-1' }],
+      oaProvider: [{ id: 'prov-1', ownerId: 'manager-1' }],
+      oaFriendship: [{ oaId: 'oa-1', userId: 'user-1', status: 'friend' }],
+      oaContactTag: [{ id: 'tag-1', oaId: 'oa-2', name: 'VIP' }],
+      oaContactTagAssignment: [],
+    })
+    await expect(
+      (assignmentMutate as any).assign(
+        { authData, tx },
+        {
+          id: 'assign-1',
+          oaId: 'oa-1',
+          userId: 'user-1',
+          tagId: 'tag-1',
+          createdAt: '2026-01-01',
+        },
+      ),
+    ).rejects.toThrow('Tag not found')
+    expect(tx.mutate.oaContactTagAssignment.insert).not.toHaveBeenCalled()
+  })
+
   it('does not duplicate existing assignment', async () => {
     const tx = makeTx({
       officialAccount: [{ id: 'oa-1', providerId: 'prov-1' }],
       oaProvider: [{ id: 'prov-1', ownerId: 'manager-1' }],
+      oaFriendship: [{ oaId: 'oa-1', userId: 'user-1', status: 'friend' }],
+      oaContactTag: [{ id: 'tag-1', oaId: 'oa-1', name: 'VIP' }],
       oaContactTagAssignment: [
         { id: 'existing', oaId: 'oa-1', userId: 'user-1', tagId: 'tag-1' },
       ],

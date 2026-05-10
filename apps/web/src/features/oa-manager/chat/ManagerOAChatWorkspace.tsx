@@ -3,6 +3,7 @@ import { XStack } from 'tamagui'
 import { ManagerOAChatList } from './ManagerOAChatList'
 import { ManagerOAChatModeNav, type ManagerOAChatMode } from './ManagerOAChatModeNav'
 import { ManagerOAChatRoom } from './ManagerOAChatRoom'
+import { resolveManagerOAProfileContact } from './managerOAChatSelection'
 import { ManagerOAContactList } from './ManagerOAContactList'
 import { ManagerOAProfilePanel } from './ManagerOAProfilePanel'
 import { useManagerOAChats } from './useManagerOAChats'
@@ -32,11 +33,15 @@ export function ManagerOAChatWorkspace({ oaId, chatId }: Props) {
     () => chats.find((chat) => chat.id === chatId) ?? null,
     [chatId, chats],
   )
-  const selectedContactFromChat = useMemo(
-    () => contacts.find((contact) => contact.userId === selected?.userId) ?? null,
-    [contacts, selected?.userId],
+  const profileContact = useMemo(
+    () =>
+      resolveManagerOAProfileContact({
+        contacts,
+        selectedChatUserId: selected?.userId,
+        selectedContact,
+      }),
+    [contacts, selected?.userId, selectedContact],
   )
-  const profileContact = selectedContactFromChat ?? selectedContact
   const effectiveChatId =
     mode === 'contacts' && profileContact && profileContact.chatId === null
       ? undefined

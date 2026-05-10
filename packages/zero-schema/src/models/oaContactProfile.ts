@@ -74,6 +74,7 @@ export const mutate = mutations(schema, managerOwnedOaContactProfilePermission, 
   saveNote: async (
     { authData, tx },
     args: {
+      id: string
       oaId: string
       userId: string
       noteText: string
@@ -105,7 +106,7 @@ export const mutate = mutations(schema, managerOwnedOaContactProfilePermission, 
       })
     } else {
       await tx.mutate.oaContactProfile.insert({
-        id: crypto.randomUUID(),
+        id: args.id,
         oaId: args.oaId,
         userId: args.userId,
         noteText: trimmed,

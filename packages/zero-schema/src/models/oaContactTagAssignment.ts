@@ -37,6 +37,28 @@ async function assertManagerOwnsOa(
   }
 }
 
+async function assertOaContactExists(
+  tx: { query?: Record<string, any> },
+  oaId: string,
+  userId: string,
+) {
+  const friendships = await readRows(tx, 'oaFriendship', (q) =>
+    q.where('oaId', oaId).where('userId', userId).where('status', 'friend'),
+  )
+  if (friendships.length === 0) throw new Error('Contact not found')
+}
+
+async function assertTagBelongsToOa(
+  tx: { query?: Record<string, any> },
+  oaId: string,
+  tagId: string,
+) {
+  const tags = await readRows(tx, 'oaContactTag', (q) =>
+    q.where('id', tagId).where('oaId', oaId),
+  )
+  if (tags.length === 0) throw new Error('Tag not found')
+}
+
 export const schema = table('oaContactTagAssignment')
   .columns({
     id: string(),
@@ -70,6 +92,16 @@ export const mutate = mutations(schema, managerOwnedOaContactTagAssignmentPermis
   ) => {
     if (!authData) throw new Error('Unauthorized')
     await assertManagerOwnsOa(tx as { query?: Record<string, any> }, authData, args.oaId)
+    await assertOaContactExists(
+      tx as { query?: Record<string, any> },
+      args.oaId,
+      args.userId,
+    )
+    await assertTagBelongsToOa(
+      tx as { query?: Record<string, any> },
+      args.oaId,
+      args.tagId,
+    )
 
     const existing = await readRows(
       tx as { query?: Record<string, any> },

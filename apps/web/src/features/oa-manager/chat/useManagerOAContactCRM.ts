@@ -29,6 +29,7 @@ export function useManagerOAContactCRM(
     async (noteText: string) => {
       if (!contact) return
       await zero.mutate.oaContactProfile.saveNote({
+        id: contact.profileId ?? crypto.randomUUID(),
         oaId,
         userId: contact.userId,
         noteText,

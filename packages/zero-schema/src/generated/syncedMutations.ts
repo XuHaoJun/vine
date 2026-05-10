@@ -266,6 +266,7 @@ export const mutationValidators = {
       id: v.string(),
     }),
     saveNote: v.object({
+      id: v.string(),
       oaId: v.string(),
       userId: v.string(),
       noteText: v.string(),
