@@ -70,6 +70,36 @@ test.describe('Manager OA chat', () => {
     await expect(page.getByText('Friendship')).toBeVisible()
     await expect(page.getByText('Last interaction')).toBeVisible()
     await expect(page.getByText('Chat status')).toBeVisible()
+
+    await page.getByPlaceholder('New tag').fill('Priority')
+    await page.getByRole('button', { name: 'Create' }).click()
+    await expect(page.getByText('Tag created')).toBeVisible({ timeout: 10000 })
+
+    await page.getByRole('button', { name: 'Add Priority' }).click()
+    await expect(page.getByText('Priority').first()).toBeVisible({ timeout: 10000 })
+
+    await page.getByPlaceholder('Add a private note').fill('Follow up about onboarding')
+    await page.getByRole('button', { name: 'Save note' }).click()
+    await expect(page.getByText('Note saved')).toBeVisible({ timeout: 10000 })
+
+    await page.getByRole('button', { name: 'Show Chats' }).click()
+    await expect(page.getByText('Priority').first()).toBeVisible({ timeout: 10000 })
+
+    await page.getByRole('button', { name: 'Show Contacts' }).click()
+    await expect(page.getByText('Follow up about onboarding')).toBeVisible({
+      timeout: 10000,
+    })
+
+    await page.getByRole('button', { name: 'Remove' }).first().click()
+    await expect(page.getByRole('button', { name: 'Add Priority' })).toBeVisible({
+      timeout: 10000,
+    })
+
+    await page.getByRole('button', { name: 'Delete' }).first().click()
+    await expect(page.getByText('Delete tag?')).toBeVisible()
+    await page.getByRole('button', { name: 'Confirm' }).click()
+    await expect(page.getByText('Tag deleted')).toBeVisible({ timeout: 10000 })
+    await expect(page.getByRole('button', { name: 'Add Priority' })).toHaveCount(0)
   })
 
   test('non-owner cannot see manager OA chat data', async ({ page }) => {
@@ -96,5 +126,10 @@ test.describe('Manager OA chat', () => {
 
     await expect(page.getByText('Hello manager, I need help')).toHaveCount(0)
     await expect(page.getByText('Test One', { exact: false })).toHaveCount(0)
+
+    await expect(page.getByText('Priority')).toHaveCount(0)
+    await expect(page.getByText('Follow up about onboarding')).toHaveCount(0)
+    await expect(page.getByPlaceholder('New tag')).toHaveCount(0)
+    await expect(page.getByPlaceholder('Add a private note')).toHaveCount(0)
   })
 })
