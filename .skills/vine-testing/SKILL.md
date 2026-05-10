@@ -22,6 +22,38 @@ Vine prefers focused tests that protect behavior without flooding the repo with 
 | `apps/web` integration debug (human only) | Playwright (requires healthy stack) | `bun run --cwd apps/web test:integration:manual` |
 | `apps/server` DB integration debug (human only) | Vitest + PostgreSQL (requires healthy stack) | `bun run --cwd apps/server test:integration:db` |
 
+## Agent Integration Verification Policy
+
+Do not skip `bun scripts/integration.ts` just because it depends on Docker Compose. For agent-driven verification, treat Docker as a prerequisite to check, not a reason to avoid the integration suite.
+
+When integration coverage is relevant, run this sequence:
+
+```bash
+docker compose version
+docker compose config --quiet
+docker compose ps
+ss -ltnp | rg ':(3000|3001|4948|5533|8081|9090)\b' || true
+bun scripts/integration.ts
+```
+
+For narrower changes, run the matching canonical runner variant instead:
+
+```bash
+bun scripts/integration.ts --db-only
+bun scripts/integration.ts --web-only
+bun scripts/integration.ts integration/foo.test.ts
+```
+
+Only skip an integration run when a concrete blocker is observed:
+
+- Docker or Compose is unavailable.
+- `docker compose config --quiet` fails, including missing required env files.
+- A required port is held by a non-Compose process that the agent cannot stop.
+- Required external secrets or credentials for the targeted integration path are absent.
+- The user explicitly asked not to run integration tests.
+
+If the preflight checks pass and the relevant ports are available or owned by the Vine Compose stack, run the integration command. If it fails, report the failing command, the phase that failed, and the relevant `docker compose ps` / logs instead of marking integration as skipped.
+
 ## Where Tests Live
 
 | Area | Preferred location |
@@ -225,6 +257,7 @@ describe('repository DB integration', () => {
 - adding backend DB integration tests without `withRollbackDb()`
 - running server DB integration before migrations have completed
 - using `test:integration:manual` or `test:integration:db` for automated/agent verification instead of `bun scripts/integration.ts` (or `--db-only` / `--web-only`). The manual commands assume a pre-existing healthy Docker Compose stack and won't tear it down.
+- skipping `bun scripts/integration.ts` because Docker Compose is involved instead of checking Compose, checking ports, and running the canonical command when preflight passes
 - pointing host-run integration tests at `pgdb:5432` instead of `localhost:5533`
 - testing trivial UI wrappers instead of behavior-rich code
 - forgetting integration prerequisites and blaming the app for a stale local stack
