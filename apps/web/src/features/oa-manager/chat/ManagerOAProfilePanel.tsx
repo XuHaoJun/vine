@@ -7,7 +7,10 @@ import { Input } from '~/interface/forms/Input'
 import { TextArea } from '~/interface/forms/TextArea'
 import { showToast } from '~/interface/toast/Toast'
 import { useManagerOAContactCRM } from './useManagerOAContactCRM'
-import type { ManagerOAContactListItem, ManagerOAContactTag } from './useManagerOAContacts'
+import type {
+  ManagerOAContactListItem,
+  ManagerOAContactTag,
+} from './useManagerOAContacts'
 
 type Props = {
   oaId: string
@@ -87,9 +90,9 @@ export function ManagerOAProfilePanel({ oaId, name, image, contact }: Props) {
   const [editingTagName, setEditingTagName] = useState('')
   const [isSavingNote, setIsSavingNote] = useState(false)
   const [isSavingTag, setIsSavingTag] = useState(false)
-  const [pendingRemovedAssignmentIds, setPendingRemovedAssignmentIds] = useState<string[]>(
-    [],
-  )
+  const [pendingRemovedAssignmentIds, setPendingRemovedAssignmentIds] = useState<
+    string[]
+  >([])
   const [pendingDeletedTagIds, setPendingDeletedTagIds] = useState<string[]>([])
   const visibleContact = contact
     ? {
@@ -256,7 +259,11 @@ export function ManagerOAProfilePanel({ oaId, name, image, contact }: Props) {
                 placeholder="New tag"
                 size="$3"
               />
-              <Button size="$3" onPress={createTag} disabled={!newTagName.trim() || isSavingTag}>
+              <Button
+                size="$3"
+                onPress={createTag}
+                disabled={!newTagName.trim() || isSavingTag}
+              >
                 Create
               </Button>
             </XStack>
@@ -271,7 +278,11 @@ export function ManagerOAProfilePanel({ oaId, name, image, contact }: Props) {
                       placeholder="Tag name"
                       size="$3"
                     />
-                    <Button size="$3" onPress={renameTag} disabled={!editingTagName.trim()}>
+                    <Button
+                      size="$3"
+                      onPress={renameTag}
+                      disabled={!editingTagName.trim()}
+                    >
                       Save
                     </Button>
                   </XStack>

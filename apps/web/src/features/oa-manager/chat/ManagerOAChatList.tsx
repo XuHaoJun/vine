@@ -77,46 +77,46 @@ export function ManagerOAChatList({
           chats.map((chat) => {
             const tags = contactsByUserId.get(chat.userId)?.tags ?? []
             return (
-            <Pressable
-              key={chat.id}
-              role="button"
-              aria-label={`Open chat with ${chat.userName}`}
-              onPress={() => router.push(`/manager/${oaId}/chat/${chat.id}` as any)}
-              px="$3"
-              py="$3"
-              cursor="pointer"
-              bg={selectedChatId === chat.id ? '$color3' : 'transparent'}
-              hoverStyle={{ bg: selectedChatId === chat.id ? '$color3' : '$color2' }}
-            >
-              <XStack gap="$3" items="center">
-                <Avatar size={40} image={chat.userImage} name={chat.userName} />
-                <YStack flex={1} minW={0} gap="$1">
-                  <XStack items="center" justify="space-between" gap="$2">
-                    <SizableText size="$3" fontWeight="600" numberOfLines={1}>
-                      {chat.userName}
-                    </SizableText>
-                    <SizableText size="$1" color="$color10">
-                      {formatChatTime(chat.lastMessageAt)}
-                    </SizableText>
-                  </XStack>
-                  <XStack items="center" gap="$2">
-                    {chat.hasUnread && (
-                      <YStack
-                        data-testid="unread-dot"
-                        width={8}
-                        height={8}
-                        rounded="$10"
-                        bg="$green9"
-                      />
-                    )}
-                    <SizableText size="$2" color="$color10" numberOfLines={1}>
-                      {chat.lastMessageText ?? ''}
-                    </SizableText>
-                  </XStack>
-                  <ContactTagChips tags={tags} />
-                </YStack>
-              </XStack>
-            </Pressable>
+              <Pressable
+                key={chat.id}
+                role="button"
+                aria-label={`Open chat with ${chat.userName}`}
+                onPress={() => router.push(`/manager/${oaId}/chat/${chat.id}` as any)}
+                px="$3"
+                py="$3"
+                cursor="pointer"
+                bg={selectedChatId === chat.id ? '$color3' : 'transparent'}
+                hoverStyle={{ bg: selectedChatId === chat.id ? '$color3' : '$color2' }}
+              >
+                <XStack gap="$3" items="center">
+                  <Avatar size={40} image={chat.userImage} name={chat.userName} />
+                  <YStack flex={1} minW={0} gap="$1">
+                    <XStack items="center" justify="space-between" gap="$2">
+                      <SizableText size="$3" fontWeight="600" numberOfLines={1}>
+                        {chat.userName}
+                      </SizableText>
+                      <SizableText size="$1" color="$color10">
+                        {formatChatTime(chat.lastMessageAt)}
+                      </SizableText>
+                    </XStack>
+                    <XStack items="center" gap="$2">
+                      {chat.hasUnread && (
+                        <YStack
+                          data-testid="unread-dot"
+                          width={8}
+                          height={8}
+                          rounded="$10"
+                          bg="$green9"
+                        />
+                      )}
+                      <SizableText size="$2" color="$color10" numberOfLines={1}>
+                        {chat.lastMessageText ?? ''}
+                      </SizableText>
+                    </XStack>
+                    <ContactTagChips tags={tags} />
+                  </YStack>
+                </XStack>
+              </Pressable>
             )
           })
         )}

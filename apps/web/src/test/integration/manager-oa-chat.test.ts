@@ -9,7 +9,8 @@ test.describe('Manager OA chat', () => {
 
   test('owner can view unread OA chat and send a reply', async ({ page }) => {
     test.setTimeout(60000)
-    crmTagName = test.info().retry === 0 ? 'Priority' : `Priority retry ${test.info().retry}`
+    crmTagName =
+      test.info().retry === 0 ? 'Priority' : `Priority retry ${test.info().retry}`
 
     await loginAsDemo(page)
     await page.goto(`${BASE_URL}/manager`, { waitUntil: 'domcontentloaded' })
