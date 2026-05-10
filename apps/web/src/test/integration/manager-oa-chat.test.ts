@@ -28,33 +28,9 @@ test.describe('Manager OA chat', () => {
       timeout: 10000,
     })
 
-    // Navigate to contacts mode
-    await page.getByRole('button', { name: 'Show Contacts' }).click()
-
-    await expect(page.getByPlaceholder('Search contacts')).toBeVisible({
-      timeout: 10000,
-    })
-    await expect(page.getByText('Contact list')).toBeVisible()
-    await expect(page.getByRole('button', { name: /Open contact Test One/ })).toBeVisible(
-      {
-        timeout: 20000,
-      },
-    )
-
-    // Open contact to see profile fields
-    await page.getByRole('button', { name: /Open contact Test One/ }).click()
-
-    await expect(page.getByText('Contact ID')).toBeVisible()
-    await expect(page.getByText('Friendship')).toBeVisible()
-    await expect(page.getByText('Last interaction')).toBeVisible()
-    await expect(page.getByText('Chat status')).toBeVisible()
-
-    // Switch back to chats mode for the rest of the test
-    await page.getByRole('button', { name: 'Show Chats' }).click()
-
-    await expect(page.getByText('Test One', { exact: false })).toBeVisible({
-      timeout: 20000,
-    })
+    await expect(
+      page.getByRole('button', { name: /Open chat with Test One/ }),
+    ).toBeVisible({ timeout: 20000 })
     await expect(
       page.getByText('Hello manager, I need help', { exact: false }),
     ).toBeVisible({
@@ -76,6 +52,24 @@ test.describe('Manager OA chat', () => {
     await expect(page.getByText('Thanks for reaching out').last()).toBeVisible({
       timeout: 10000,
     })
+
+    // Contact list mode
+    await page.getByRole('button', { name: 'Show Contacts' }).click()
+
+    await expect(page.getByPlaceholder('Search contacts')).toBeVisible({
+      timeout: 10000,
+    })
+    await expect(page.getByText('Contact list')).toBeVisible()
+    await expect(page.getByRole('button', { name: /Open contact Test One/ })).toBeVisible(
+      { timeout: 20000 },
+    )
+
+    await page.getByRole('button', { name: /Open contact Test One/ }).click()
+
+    await expect(page.getByText('Contact ID')).toBeVisible()
+    await expect(page.getByText('Friendship')).toBeVisible()
+    await expect(page.getByText('Last interaction')).toBeVisible()
+    await expect(page.getByText('Chat status')).toBeVisible()
   })
 
   test('non-owner cannot see manager OA chat data', async ({ page }) => {
