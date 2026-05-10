@@ -26,6 +26,22 @@ function formatStatus(contact: ManagerOAContactListItem): string {
   return contact.friendshipStatus === 'friend' ? 'Friend' : contact.friendshipStatus
 }
 
+function ContactTagChips({ tags }: { tags: ManagerOAContactListItem['tags'] }) {
+  if (tags.length === 0) return null
+
+  return (
+    <XStack gap="$1" flexWrap="wrap" mt="$1">
+      {tags.slice(0, 3).map((tag) => (
+        <YStack key={tag.id} px="$2" py="$1" rounded="$2" bg="$color3">
+          <SizableText size="$1" numberOfLines={1}>
+            {tag.name}
+          </SizableText>
+        </YStack>
+      ))}
+    </XStack>
+  )
+}
+
 export function ManagerOAContactList({
   oaId,
   selectedUserId,
@@ -107,6 +123,7 @@ export function ManagerOAContactList({
                   <SizableText size="$1" color="$color10" numberOfLines={1}>
                     ID {contact.contactId}
                   </SizableText>
+                  <ContactTagChips tags={contact.tags} />
                 </YStack>
               </XStack>
             </Pressable>

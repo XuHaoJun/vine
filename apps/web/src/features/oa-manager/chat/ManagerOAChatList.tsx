@@ -4,6 +4,7 @@ import { Avatar } from '~/interface/avatars/Avatar'
 import { Pressable } from '~/interface/buttons/Pressable'
 import { Input } from '~/interface/forms/Input'
 import type { ManagerOAChatListItem } from './useManagerOAChats'
+import type { ManagerOAContactListItem } from './useManagerOAContacts'
 
 type Props = {
   oaId: string
@@ -11,6 +12,7 @@ type Props = {
   searchQuery: string
   onSearchQueryChange: (value: string) => void
   chats: ManagerOAChatListItem[]
+  contacts: ManagerOAContactListItem[]
   isLoading: boolean
 }
 
@@ -20,15 +22,33 @@ function formatChatTime(ts: number | null): string {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
+function ContactTagChips({ tags }: { tags: ManagerOAContactListItem['tags'] }) {
+  if (tags.length === 0) return null
+
+  return (
+    <XStack gap="$1" flexWrap="wrap" mt="$1">
+      {tags.slice(0, 3).map((tag) => (
+        <YStack key={tag.id} px="$2" py="$1" rounded="$2" bg="$color3">
+          <SizableText size="$1" numberOfLines={1}>
+            {tag.name}
+          </SizableText>
+        </YStack>
+      ))}
+    </XStack>
+  )
+}
+
 export function ManagerOAChatList({
   oaId,
   selectedChatId,
   searchQuery,
   onSearchQueryChange,
   chats,
+  contacts,
   isLoading,
 }: Props) {
   const router = useRouter()
+  const contactsByUserId = new Map(contacts.map((contact) => [contact.userId, contact]))
 
   return (
     <YStack width={280} shrink={0} borderRightWidth={1} borderColor="$borderColor">
@@ -54,7 +74,9 @@ export function ManagerOAChatList({
             </SizableText>
           </YStack>
         ) : (
-          chats.map((chat) => (
+          chats.map((chat) => {
+            const tags = contactsByUserId.get(chat.userId)?.tags ?? []
+            return (
             <Pressable
               key={chat.id}
               role="button"
@@ -91,10 +113,12 @@ export function ManagerOAChatList({
                       {chat.lastMessageText ?? ''}
                     </SizableText>
                   </XStack>
+                  <ContactTagChips tags={tags} />
                 </YStack>
               </XStack>
             </Pressable>
-          ))
+            )
+          })
         )}
       </ScrollView>
     </YStack>

@@ -68,6 +68,7 @@ export function ManagerOAChatWorkspace({ oaId, chatId }: Props) {
           searchQuery={searchQuery}
           onSearchQueryChange={setSearchQuery}
           chats={chats}
+          contacts={contacts}
           isLoading={isLoading}
         />
       )}
