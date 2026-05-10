@@ -83,6 +83,7 @@ export function ManagerOAChatWorkspace({ oaId, chatId }: Props) {
       />
       {selected || profileContact ? (
         <ManagerOAProfilePanel
+          oaId={oaId}
           name={profileContact?.userName ?? selected?.userName ?? 'Unknown user'}
           image={profileContact?.userImage ?? selected?.userImage ?? null}
           contact={profileContact}
