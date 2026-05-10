@@ -1,0 +1,23 @@
+{
+  "skill_name": "zero-upgrade",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Migrate packages/zero-schema/src/models/message.ts from on-zero to native @rocicorp/zero 1.x. Convert the mutations() call to defineMutators(), remove serverWhere, move auth checks into the mutators, and add zod validation schemas. Keep all the existing business logic (send, sendAsOA, sendSticker, sendLiff). Don't actually write to the file - just show me the migrated code.",
+      "expected_output": "A complete migrated message.ts file using defineMutator/defineMutators with zod schemas, auth checks inside mutators, tx.run() for reads instead of tx.query",
+      "files": []
+    },
+    {
+      "id": 1,
+      "prompt": "Convert the chat queries in packages/zero-schema/src/queries/chat.ts from on-zero (zql, serverWhere) to native Zero 1.x (defineQueries, defineQuery, builder). The permission logic from serverWhere should become a helper function that filters queries. Show me the migrated code without writing to the file.",
+      "expected_output": "A complete migrated chat.ts queries file using defineQueries/defineQuery with zod schemas, permission helper functions replacing serverWhere, builder instead of zql",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Show me a migration plan for converting apps/web/src/zero/client.tsx from on-zero's createZeroClient to native @rocicorp/zero 1.x's ZeroProvider. List what imports change, what gets removed, and what the new code looks like. Include the React hook changes (useZeroQuery -> useQuery). Don't modify the file.",
+      "expected_output": "A clear migration plan showing: removed on-zero imports, new @rocicorp/zero/react imports, ZeroProvider replacing createZeroClient, useQuery replacing useZeroQuery, removal of generated imports",
+      "files": []
+    }
+  ]
+}
