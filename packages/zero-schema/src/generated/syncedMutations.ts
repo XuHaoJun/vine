@@ -243,6 +243,106 @@ export const mutationValidators = {
       createdAt: v.number(),
     }),
   },
+  oaContactProfile: {
+    insert: v.object({
+      id: v.string(),
+      oaId: v.string(),
+      userId: v.string(),
+      noteText: v.string(),
+      noteUpdatedAt: v.optional(v.nullable(v.number())),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    }),
+    update: v.object({
+      id: v.string(),
+      oaId: v.optional(v.nullable(v.string())),
+      userId: v.optional(v.nullable(v.string())),
+      noteText: v.optional(v.nullable(v.string())),
+      noteUpdatedAt: v.optional(v.nullable(v.number())),
+      createdAt: v.optional(v.nullable(v.number())),
+      updatedAt: v.optional(v.nullable(v.number())),
+    }),
+    delete: v.object({
+      id: v.string(),
+    }),
+    saveNote: v.object({
+      id: v.string(),
+      oaId: v.string(),
+      userId: v.string(),
+      noteText: v.string(),
+      updatedAt: v.number(),
+    }),
+  },
+  oaContactTag: {
+    insert: v.object({
+      id: v.string(),
+      oaId: v.string(),
+      name: v.string(),
+      color: v.optional(v.nullable(v.string())),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    }),
+    update: v.object({
+      id: v.string(),
+      oaId: v.optional(v.nullable(v.string())),
+      name: v.optional(v.nullable(v.string())),
+      color: v.optional(v.nullable(v.string())),
+      createdAt: v.optional(v.nullable(v.number())),
+      updatedAt: v.optional(v.nullable(v.number())),
+    }),
+    delete: v.object({
+      id: v.string(),
+    }),
+    create: v.object({
+      id: v.string(),
+      oaId: v.string(),
+      name: v.string(),
+      color: v.optional(v.string()),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    }),
+    rename: v.object({
+      id: v.string(),
+      oaId: v.string(),
+      name: v.string(),
+      updatedAt: v.number(),
+    }),
+    deleteTag: v.object({
+      id: v.string(),
+      oaId: v.string(),
+    }),
+  },
+  oaContactTagAssignment: {
+    insert: v.object({
+      id: v.string(),
+      oaId: v.string(),
+      userId: v.string(),
+      tagId: v.string(),
+      createdAt: v.number(),
+    }),
+    update: v.object({
+      id: v.string(),
+      oaId: v.optional(v.nullable(v.string())),
+      userId: v.optional(v.nullable(v.string())),
+      tagId: v.optional(v.nullable(v.string())),
+      createdAt: v.optional(v.nullable(v.number())),
+    }),
+    delete: v.object({
+      id: v.string(),
+    }),
+    assign: v.object({
+      id: v.string(),
+      oaId: v.string(),
+      userId: v.string(),
+      tagId: v.string(),
+      createdAt: v.number(),
+    }),
+    remove: v.object({
+      oaId: v.string(),
+      userId: v.string(),
+      tagId: v.string(),
+    }),
+  },
   oaFriendship: {
     insert: v.object({
       id: v.string(),

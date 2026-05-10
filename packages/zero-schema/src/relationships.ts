@@ -113,11 +113,52 @@ export const officialAccountRelationships = relationships(
       destSchema: tables.oaFriendship,
       destField: ['oaId'],
     }),
+    contactProfiles: many({
+      sourceField: ['id'],
+      destSchema: tables.oaContactProfile,
+      destField: ['oaId'],
+    }),
+    contactTags: many({
+      sourceField: ['id'],
+      destSchema: tables.oaContactTag,
+      destField: ['oaId'],
+    }),
+    contactTagAssignments: many({
+      sourceField: ['id'],
+      destSchema: tables.oaContactTagAssignment,
+      destField: ['oaId'],
+    }),
   }),
 )
 
 export const oaFriendshipRelationships = relationships(
   tables.oaFriendship,
+  ({ one, many }) => ({
+    user: one({
+      sourceField: ['userId'],
+      destSchema: tables.userPublic,
+      destField: ['id'],
+    }),
+    oa: one({
+      sourceField: ['oaId'],
+      destSchema: tables.officialAccount,
+      destField: ['id'],
+    }),
+    profile: one({
+      sourceField: ['oaId', 'userId'],
+      destSchema: tables.oaContactProfile,
+      destField: ['oaId', 'userId'],
+    }),
+    tagAssignments: many({
+      sourceField: ['oaId', 'userId'],
+      destSchema: tables.oaContactTagAssignment,
+      destField: ['oaId', 'userId'],
+    }),
+  }),
+)
+
+export const oaContactProfileRelationships = relationships(
+  tables.oaContactProfile,
   ({ one }) => ({
     user: one({
       sourceField: ['userId'],
@@ -127,6 +168,43 @@ export const oaFriendshipRelationships = relationships(
     oa: one({
       sourceField: ['oaId'],
       destSchema: tables.officialAccount,
+      destField: ['id'],
+    }),
+  }),
+)
+
+export const oaContactTagRelationships = relationships(
+  tables.oaContactTag,
+  ({ one, many }) => ({
+    oa: one({
+      sourceField: ['oaId'],
+      destSchema: tables.officialAccount,
+      destField: ['id'],
+    }),
+    assignments: many({
+      sourceField: ['id'],
+      destSchema: tables.oaContactTagAssignment,
+      destField: ['tagId'],
+    }),
+  }),
+)
+
+export const oaContactTagAssignmentRelationships = relationships(
+  tables.oaContactTagAssignment,
+  ({ one }) => ({
+    oa: one({
+      sourceField: ['oaId'],
+      destSchema: tables.officialAccount,
+      destField: ['id'],
+    }),
+    user: one({
+      sourceField: ['userId'],
+      destSchema: tables.userPublic,
+      destField: ['id'],
+    }),
+    tag: one({
+      sourceField: ['tagId'],
+      destSchema: tables.oaContactTag,
       destField: ['id'],
     }),
   }),
@@ -204,6 +282,9 @@ export const allRelationships = [
   oaProviderRelationships,
   officialAccountRelationships,
   oaFriendshipRelationships,
+  oaContactProfileRelationships,
+  oaContactTagRelationships,
+  oaContactTagAssignmentRelationships,
   messageRelationships,
   entitlementRelationships,
   creatorProfileRelationships,

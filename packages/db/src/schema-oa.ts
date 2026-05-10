@@ -84,6 +84,68 @@ export const oaFriendship = pgTable(
   ],
 )
 
+export const oaContactProfile = pgTable(
+  'oaContactProfile',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    oaId: uuid('oaId')
+      .notNull()
+      .references(() => officialAccount.id, { onDelete: 'cascade' }),
+    userId: text('userId').notNull(),
+    noteText: text('noteText').notNull().default(''),
+    noteUpdatedAt: timestamp('noteUpdatedAt', { mode: 'string' }),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('oaContactProfile_oaId_userId_unique').on(table.oaId, table.userId),
+    index('oaContactProfile_oaId_idx').on(table.oaId),
+    index('oaContactProfile_userId_idx').on(table.userId),
+  ],
+)
+
+export const oaContactTag = pgTable(
+  'oaContactTag',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    oaId: uuid('oaId')
+      .notNull()
+      .references(() => officialAccount.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    color: text('color'),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('oaContactTag_oaId_name_unique').on(table.oaId, table.name),
+    index('oaContactTag_oaId_idx').on(table.oaId),
+  ],
+)
+
+export const oaContactTagAssignment = pgTable(
+  'oaContactTagAssignment',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    oaId: uuid('oaId')
+      .notNull()
+      .references(() => officialAccount.id, { onDelete: 'cascade' }),
+    userId: text('userId').notNull(),
+    tagId: uuid('tagId')
+      .notNull()
+      .references(() => oaContactTag.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('oaContactTagAssignment_contact_tag_unique').on(
+      table.oaId,
+      table.userId,
+      table.tagId,
+    ),
+    index('oaContactTagAssignment_oaId_userId_idx').on(table.oaId, table.userId),
+    index('oaContactTagAssignment_tagId_idx').on(table.tagId),
+  ],
+)
+
 export const oaAccessToken = pgTable(
   'oaAccessToken',
   {

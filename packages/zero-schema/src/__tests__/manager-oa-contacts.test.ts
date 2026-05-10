@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { getRawWhere } from 'on-zero'
 import { describe, expect, it } from 'vitest'
 import { managerOwnedOaFriendshipPermission } from '../models/oaFriendship'
@@ -59,5 +61,16 @@ describe('manager OA contact permissions', () => {
   it('exports a valid OA contact query builder', () => {
     expect(typeof oaContactsByOfficialAccountId).toBe('function')
     expect(oaContactsByOfficialAccountId.length).toBe(1)
+  })
+
+  it('loads CRM profile and assigned tags with OA contact rows', () => {
+    const querySource = readFileSync(
+      fileURLToPath(new URL('../queries/oaFriendship.ts', import.meta.url)),
+      'utf8',
+    )
+
+    expect(querySource).toContain(".related('profile')")
+    expect(querySource).toContain(".related('tagAssignments'")
+    expect(querySource).toContain(".related('tag')")
   })
 })
