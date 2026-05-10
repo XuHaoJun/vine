@@ -10,6 +10,8 @@ export const oaContactsByOfficialAccountId = (props: {
     .where('oaId', props.oaId)
     .where('status', 'friend')
     .related('user')
+    .related('profile')
+    .related('tagAssignments', (q) => q.related('tag'))
     .orderBy('createdAt', 'desc')
     .limit(props.limit ?? 100)
 }

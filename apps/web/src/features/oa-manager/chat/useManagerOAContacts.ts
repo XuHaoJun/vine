@@ -3,6 +3,12 @@ import { useMemo } from 'react'
 import { useZeroQuery } from '~/zero/client'
 import type { ManagerOAChatListItem } from './useManagerOAChats'
 
+export type ManagerOAContactTag = {
+  id: string
+  name: string
+  color: string | null
+}
+
 export type ManagerOAContactListItem = {
   id: string
   userId: string
@@ -14,6 +20,10 @@ export type ManagerOAContactListItem = {
   chatId: string | null
   hasUnread: boolean
   chatStatus: 'unread' | 'active' | 'no_chat'
+  profileId: string | null
+  noteText: string
+  noteUpdatedAt: string | null
+  tags: ManagerOAContactTag[]
 }
 
 export function useManagerOAContacts(
@@ -38,6 +48,16 @@ export function useManagerOAContacts(
         const name = user?.name ?? 'Unknown user'
         const hasUnread = chat?.hasUnread ?? false
 
+        const tags =
+          contact.tagAssignments
+            ?.map((assignment) => assignment.tag)
+            .filter((tag): tag is NonNullable<typeof tag> => Boolean(tag))
+            .map((tag) => ({
+              id: tag.id,
+              name: tag.name,
+              color: tag.color ?? null,
+            })) ?? []
+
         return {
           id: contact.id,
           userId: contact.userId,
@@ -53,6 +73,10 @@ export function useManagerOAContacts(
             : chat
               ? 'active'
               : 'no_chat') as ManagerOAContactListItem['chatStatus'],
+          profileId: contact.profile?.id ?? null,
+          noteText: contact.profile?.noteText ?? '',
+          noteUpdatedAt: contact.profile?.noteUpdatedAt ?? null,
+          tags,
         }
       })
       .filter((item) => {

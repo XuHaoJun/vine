@@ -1,4 +1,11 @@
-import type { ChatMember, Friendship, Message } from './generated/types'
+import type {
+  ChatMember,
+  Friendship,
+  Message,
+  OaContactProfile,
+  OaContactTag,
+  OaContactTagAssignment,
+} from './generated/types'
 import type { Todo, User, UserState } from './generated/types'
 
 export type * from './generated/types'
@@ -39,4 +46,19 @@ export type ChatWithMembers = {
 
 export type MessageWithSender = Message & {
   sender?: User
+}
+
+export type OaContactTagAssignmentWithTag = OaContactTagAssignment & {
+  tag?: OaContactTag
+}
+
+export type OaFriendshipWithCrm = {
+  id: string
+  oaId: string
+  userId: string
+  status: string
+  createdAt: number
+  user?: User
+  profile?: OaContactProfile | null
+  tagAssignments?: readonly OaContactTagAssignmentWithTag[]
 }
