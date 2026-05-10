@@ -243,6 +243,25 @@ export const mutationValidators = {
       createdAt: v.number(),
     }),
   },
+  oaFriendship: {
+    insert: v.object({
+      id: v.string(),
+      oaId: v.string(),
+      userId: v.string(),
+      status: v.string(),
+      createdAt: v.number(),
+    }),
+    update: v.object({
+      id: v.string(),
+      oaId: v.optional(v.nullable(v.string())),
+      userId: v.optional(v.nullable(v.string())),
+      status: v.optional(v.nullable(v.string())),
+      createdAt: v.optional(v.nullable(v.number())),
+    }),
+    delete: v.object({
+      id: v.string(),
+    }),
+  },
   oaProvider: {},
   officialAccount: {},
   stickerAsset: {},

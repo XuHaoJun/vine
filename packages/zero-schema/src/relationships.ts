@@ -108,6 +108,27 @@ export const officialAccountRelationships = relationships(
       destSchema: tables.chatMember,
       destField: ['oaId'],
     }),
+    oaFriendships: many({
+      sourceField: ['id'],
+      destSchema: tables.oaFriendship,
+      destField: ['oaId'],
+    }),
+  }),
+)
+
+export const oaFriendshipRelationships = relationships(
+  tables.oaFriendship,
+  ({ one }) => ({
+    user: one({
+      sourceField: ['userId'],
+      destSchema: tables.userPublic,
+      destField: ['id'],
+    }),
+    oa: one({
+      sourceField: ['oaId'],
+      destSchema: tables.officialAccount,
+      destField: ['id'],
+    }),
   }),
 )
 
@@ -182,6 +203,7 @@ export const allRelationships = [
   chatOaLoadingRelationships,
   oaProviderRelationships,
   officialAccountRelationships,
+  oaFriendshipRelationships,
   messageRelationships,
   entitlementRelationships,
   creatorProfileRelationships,
