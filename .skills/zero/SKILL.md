@@ -85,7 +85,19 @@ export const mutate = mutations(schema, permissions)
 
 Passing `(schema, permissions)` to `mutations()` auto-generates CRUD: `zero.mutate.todo.insert(row)`, `.update({ id, ...patch })`, `.delete({ id })`. The permission gates both reads (via the synced query) and writes.
 
-**Column types** (from `@rocicorp/zero`): `string()`, `number()`, `boolean()`, `json()`. Append `.optional()` for nullable. Booleans in vine are sometimes stored as `number()` 0/1 when the column also feeds Postgres types that need integers — see `chat.requireApproval`. Match the existing column type from `@vine/db` rather than inventing one.
+**Column types** (from `@rocicorp/zero`): `string()`, `number()`, `boolean()`, `json()`. Append `.optional()` for nullable. Match the upstream Postgres type mapping, not the TypeScript shape you wish the field had. Zero maps Postgres date/time columns to numbers:
+
+| Postgres type | Zero column | Client value |
+| --- | --- | --- |
+| `timestamp`, `timestamptz`, `timestamp with/without time zone` | `number()` | Unix epoch milliseconds; use `Date.now()` for new values |
+| `date` | `number()` | UTC midnight epoch milliseconds |
+| `time`, `timetz`, `time with/without time zone` | `number()` | milliseconds since midnight |
+
+Do not model synced timestamp columns as `string()` or pass `new Date().toISOString()` to Zero mutations. This has caused `SchemaVersionNotSupported` regressions when generated mutation validators disagreed with Zero's upstream schema. After adding or changing timestamp-like columns, check `packages/zero-schema/src/generated/syncedMutations.ts`: validators should use `v.number()` or `v.optional(v.nullable(v.number()))`.
+
+When in doubt, verify against `learn-projects/zero-mono/packages/zero-cache/src/types/pg-data-type.ts`: `dataTypeToZqlValueType()` is the source-of-truth map for Postgres type to ZQL value type. The companion parsers in `types/pg.ts` and binary decoder in `db/pg-copy-binary.ts` convert timestamp values to floating-point Unix epoch milliseconds.
+
+Booleans in vine are sometimes stored as `number()` 0/1 when the column also feeds Postgres types that need integers — see `chat.requireApproval`. Match the existing column type from `@vine/db` rather than inventing one.
 
 **Naming gotcha:** the user table is registered as `table('userPublic')`, so client-side queries use `zql.userPublic` and mutations use `zero.mutate.userPublic.*`. The model file is `models/user.ts` only because there's also a private auth table elsewhere.
 
