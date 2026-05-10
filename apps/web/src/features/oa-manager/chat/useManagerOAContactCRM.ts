@@ -32,7 +32,7 @@ export function useManagerOAContactCRM(
         oaId,
         userId: contact.userId,
         noteText,
-        updatedAt: new Date().toISOString(),
+        updatedAt: Date.now(),
       })
     },
     [contact, oaId],
@@ -42,7 +42,7 @@ export function useManagerOAContactCRM(
     async (name: string) => {
       const trimmed = name.trim()
       if (!trimmed) return
-      const now = new Date().toISOString()
+      const now = Date.now()
       const color = TAG_COLORS[(allTags?.length ?? 0) % TAG_COLORS.length]
       await zero.mutate.oaContactTag.create({
         id: crypto.randomUUID(),
@@ -64,7 +64,7 @@ export function useManagerOAContactCRM(
         id,
         oaId,
         name: trimmed,
-        updatedAt: new Date().toISOString(),
+        updatedAt: Date.now(),
       })
     },
     [oaId],
@@ -85,7 +85,7 @@ export function useManagerOAContactCRM(
         oaId,
         userId: contact.userId,
         tagId,
-        createdAt: new Date().toISOString(),
+        createdAt: Date.now(),
       })
     },
     [contact, oaId],

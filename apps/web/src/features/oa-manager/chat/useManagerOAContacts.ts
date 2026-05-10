@@ -22,7 +22,7 @@ export type ManagerOAContactListItem = {
   chatStatus: 'unread' | 'active' | 'no_chat'
   profileId: string | null
   noteText: string
-  noteUpdatedAt: string | null
+  noteUpdatedAt: number | null
   tags: ManagerOAContactTag[]
 }
 

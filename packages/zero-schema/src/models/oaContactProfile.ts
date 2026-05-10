@@ -1,4 +1,4 @@
-import { string, table } from '@rocicorp/zero'
+import { number, string, table } from '@rocicorp/zero'
 /* eslint-disable @typescript-eslint/no-deprecated -- tx.query is the current Zero mutations API */
 import { mutations, run, serverWhere, zql } from 'on-zero'
 import type { TableInsertRow } from 'on-zero'
@@ -54,9 +54,9 @@ export const schema = table('oaContactProfile')
     oaId: string(),
     userId: string(),
     noteText: string(),
-    noteUpdatedAt: string().optional(),
-    createdAt: string(),
-    updatedAt: string(),
+    noteUpdatedAt: number().optional(),
+    createdAt: number(),
+    updatedAt: number(),
   })
   .primaryKey('id')
 
@@ -77,7 +77,7 @@ export const mutate = mutations(schema, managerOwnedOaContactProfilePermission, 
       oaId: string
       userId: string
       noteText: string
-      updatedAt: string
+      updatedAt: number
     },
   ) => {
     if (!authData) throw new Error('Unauthorized')
