@@ -87,11 +87,35 @@ export function ManagerOAProfilePanel({ oaId, name, image, contact }: Props) {
   const [editingTagName, setEditingTagName] = useState('')
   const [isSavingNote, setIsSavingNote] = useState(false)
   const [isSavingTag, setIsSavingTag] = useState(false)
-  const crm = useManagerOAContactCRM(oaId, contact)
+  const [pendingRemovedAssignmentIds, setPendingRemovedAssignmentIds] = useState<string[]>(
+    [],
+  )
+  const [pendingDeletedTagIds, setPendingDeletedTagIds] = useState<string[]>([])
+  const visibleContact = contact
+    ? {
+        ...contact,
+        tags: contact.tags.filter(
+          (tag) =>
+            !pendingRemovedAssignmentIds.includes(tag.assignmentId) &&
+            !pendingDeletedTagIds.includes(tag.id),
+        ),
+      }
+    : contact
+  const visibleTags = visibleContact?.tags ?? []
+  const crm = useManagerOAContactCRM(oaId, visibleContact)
+  const availableTags = crm.availableTags.filter(
+    (tag) => !pendingDeletedTagIds.includes(tag.id),
+  )
+  const allTags = crm.allTags.filter((tag) => !pendingDeletedTagIds.includes(tag.id))
 
   useEffect(() => {
     setNoteDraft(contact?.noteText ?? '')
   }, [contact?.id, contact?.noteText])
+
+  useEffect(() => {
+    setPendingRemovedAssignmentIds([])
+    setPendingDeletedTagIds([])
+  }, [contact?.id])
 
   const saveNote = async () => {
     if (!contact || isSavingNote) return
@@ -139,11 +163,27 @@ export function ManagerOAProfilePanel({ oaId, name, image, contact }: Props) {
     })
     if (!confirmed) return
 
+    setPendingDeletedTagIds((ids) => (ids.includes(id) ? ids : [...ids, id]))
+
     try {
       await crm.deleteTag(id)
       showToast('Tag deleted', { type: 'success' })
     } catch {
+      setPendingDeletedTagIds((ids) => ids.filter((tagId) => tagId !== id))
       showToast('Tag failed to delete', { type: 'error' })
+    }
+  }
+
+  const removeTag = async (assignmentId: string) => {
+    setPendingRemovedAssignmentIds((ids) =>
+      ids.includes(assignmentId) ? ids : [...ids, assignmentId],
+    )
+
+    try {
+      await crm.removeTag(assignmentId)
+    } catch {
+      setPendingRemovedAssignmentIds((ids) => ids.filter((id) => id !== assignmentId))
+      showToast('Tag failed to remove', { type: 'error' })
     }
   }
 
@@ -181,23 +221,23 @@ export function ManagerOAProfilePanel({ oaId, name, image, contact }: Props) {
               Tags
             </SizableText>
             <XStack gap="$1" flexWrap="wrap">
-              {contact.tags.length === 0 ? (
+              {visibleTags.length === 0 ? (
                 <SizableText size="$2" color="$color10">
                   No tags
                 </SizableText>
               ) : (
-                contact.tags.map((tag) => (
+                visibleTags.map((tag) => (
                   <TagChip
                     key={tag.id}
                     tag={tag}
                     actionLabel="Remove"
-                    onAction={() => crm.removeTag(tag.id)}
+                    onAction={() => removeTag(tag.assignmentId)}
                   />
                 ))
               )}
             </XStack>
             <YStack gap="$2">
-              {crm.availableTags.map((tag) => (
+              {availableTags.map((tag) => (
                 <Button
                   key={tag.id}
                   size="$2"
@@ -221,7 +261,7 @@ export function ManagerOAProfilePanel({ oaId, name, image, contact }: Props) {
               </Button>
             </XStack>
             <YStack gap="$2">
-              {crm.allTags.map((tag) =>
+              {allTags.map((tag) =>
                 editingTagId === tag.id ? (
                   <XStack key={tag.id} gap="$2" items="center">
                     <Input

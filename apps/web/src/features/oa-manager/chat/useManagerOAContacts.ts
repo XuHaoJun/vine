@@ -5,6 +5,7 @@ import type { ManagerOAChatListItem } from './useManagerOAChats'
 
 export type ManagerOAContactTag = {
   id: string
+  assignmentId: string
   name: string
   color: string | null
 }
@@ -50,12 +51,18 @@ export function useManagerOAContacts(
 
         const tags =
           contact.tagAssignments
-            ?.map((assignment) => assignment.tag)
-            .filter((tag): tag is NonNullable<typeof tag> => Boolean(tag))
-            .map((tag) => ({
-              id: tag.id,
-              name: tag.name,
-              color: tag.color ?? null,
+            .filter(
+              (
+                assignment,
+              ): assignment is typeof assignment & {
+                tag: NonNullable<typeof assignment.tag>
+              } => Boolean(assignment.tag),
+            )
+            .map((assignment) => ({
+              id: assignment.tag.id,
+              assignmentId: assignment.id,
+              name: assignment.tag.name,
+              color: assignment.tag.color ?? null,
             })) ?? []
 
         return {

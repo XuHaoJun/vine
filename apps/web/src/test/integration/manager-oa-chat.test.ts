@@ -18,7 +18,7 @@ test.describe('Manager OA chat', () => {
     const testBotRow = page.getByText('@testbot').locator('xpath=../..')
     await testBotRow.getByRole('button', { name: 'Manage' }).click()
     await page.waitForURL(/\/manager\/[^/]+$/, { timeout: 15000 })
-    await page.getByText('Chats', { exact: true }).click()
+    await page.getByRole('link', { name: 'Chats' }).click()
     await page.waitForURL(/\/manager\/.+\/chat$/, { timeout: 15000 })
     managerChatPath = new URL(page.url()).pathname
 
@@ -80,7 +80,9 @@ test.describe('Manager OA chat', () => {
 
     await page.getByPlaceholder('Add a private note').fill('Follow up about onboarding')
     await page.getByRole('button', { name: 'Save note' }).click()
-    await expect(page.getByText('Note saved')).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText('Note saved', { exact: true })).toBeVisible({
+      timeout: 10000,
+    })
 
     await page.getByRole('button', { name: 'Show Chats' }).click()
     await expect(page.getByText('Priority').first()).toBeVisible({ timeout: 10000 })

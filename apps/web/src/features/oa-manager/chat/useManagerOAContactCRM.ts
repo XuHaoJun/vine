@@ -92,15 +92,11 @@ export function useManagerOAContactCRM(
   )
 
   const removeTag = useCallback(
-    async (tagId: string) => {
+    async (assignmentId: string) => {
       if (!contact) return
-      await zero.mutate.oaContactTagAssignment.remove({
-        oaId,
-        userId: contact.userId,
-        tagId,
-      })
+      await zero.mutate.oaContactTagAssignment.delete({ id: assignmentId })
     },
-    [contact, oaId],
+    [contact],
   )
 
   return {
