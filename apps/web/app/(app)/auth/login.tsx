@@ -16,7 +16,7 @@ import { LineIcon } from '~/interface/icons/LineIcon'
 import { H2 } from '~/interface/text/Headings'
 import { showToast } from '~/interface/toast/helpers'
 
-const LINE_GREEN = '#06C755'
+const VINE_GREEN = '#06C755'
 const LOGIN_REDIRECT_KEY = 'auth.login.target'
 
 const schema = v.object({
@@ -160,8 +160,8 @@ export const LoginPage = () => {
       >
         {/* Logo */}
         <YStack items="center" gap="$3">
-          <LineIcon size={56} fill={LINE_GREEN} />
-          <H2 text="center">Log in to LINE</H2>
+          <LineIcon size={56} fill={VINE_GREEN} />
+          <H2 text="center">Log in to VINE</H2>
         </YStack>
 
         {/* Form */}
@@ -214,9 +214,9 @@ export const LoginPage = () => {
           width="100%"
           disabled={isSubmitting}
           onPress={handleSubmit(onSubmit)}
-          bg={LINE_GREEN}
-          hoverStyle={{ bg: LINE_GREEN, opacity: 0.9 }}
-          pressStyle={{ bg: LINE_GREEN, opacity: 0.7 }}
+          bg={VINE_GREEN}
+          hoverStyle={{ bg: VINE_GREEN, opacity: 0.9 }}
+          pressStyle={{ bg: VINE_GREEN, opacity: 0.7 }}
         >
           {isSubmitting ? (
             <Spinner size="small" color="white" />
@@ -258,7 +258,7 @@ export const LoginPage = () => {
           <SizableText size="$3" color="$color10">
             Don't have an account?
           </SizableText>
-          <Link href="/auth/signup/email" size="$3" color={LINE_GREEN} fontWeight="600">
+          <Link href="/auth/signup/email" size="$3" color={VINE_GREEN} fontWeight="600">
             Create one
           </Link>
         </XStack>

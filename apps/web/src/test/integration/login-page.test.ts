@@ -41,7 +41,7 @@ test('login page shows login form elements', async ({ page }) => {
   })
 
   // wait for the heading - this proves the page fully rendered
-  await expect(page.getByText('Log in to LINE')).toBeVisible({ timeout: 10000 })
+  await expect(page.getByText('Log in to VINE')).toBeVisible({ timeout: 10000 })
 
   // email and password inputs should be present
   await expect(page.getByPlaceholder('Email')).toBeVisible()

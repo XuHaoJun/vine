@@ -9,7 +9,7 @@ import { H2 } from '~/interface/text/Headings'
 import { showToast } from '~/interface/toast/helpers'
 import { useTanMutation, useTanQuery } from '~/query'
 
-const LINE_GREEN = '#06C755'
+const VINE_GREEN = '#06C755'
 const CONSENT_SEARCH_KEY = 'auth.consent.search'
 
 const SCOPE_LABELS: Record<string, string> = {
@@ -194,7 +194,7 @@ export const ConsentPage = () => {
             justify="center"
             items="center"
           >
-            <LineIcon size={36} fill={LINE_GREEN} />
+            <LineIcon size={36} fill={VINE_GREEN} />
           </YStack>
           <H2 text="center">{displayAppName}</H2>
           <SizableText size="$3" color="$color10" text="center">
@@ -229,7 +229,7 @@ export const ConsentPage = () => {
                 width={44}
                 height={24}
                 rounded={12}
-                bg={LINE_GREEN}
+                bg={VINE_GREEN}
                 justify="flex-end"
                 items="center"
                 pr="$1"
@@ -246,9 +246,9 @@ export const ConsentPage = () => {
             width="100%"
             disabled={isSubmitting}
             onPress={() => postConsent(true)}
-            bg={LINE_GREEN}
-            hoverStyle={{ bg: LINE_GREEN, opacity: 0.9 }}
-            pressStyle={{ bg: LINE_GREEN, opacity: 0.7 }}
+            bg={VINE_GREEN}
+            hoverStyle={{ bg: VINE_GREEN, opacity: 0.9 }}
+            pressStyle={{ bg: VINE_GREEN, opacity: 0.7 }}
           >
             {isSubmitting ? <Spinner size="small" color="white" /> : 'Allow'}
           </Button>
