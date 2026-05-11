@@ -114,6 +114,7 @@ function dbWebhookStatusToProto(status: string | undefined): WebhookStatus {
       return WebhookStatus.VERIFIED
     case 'failed':
       return WebhookStatus.FAILED
+    case undefined:
     default:
       return WebhookStatus.UNSPECIFIED
   }
