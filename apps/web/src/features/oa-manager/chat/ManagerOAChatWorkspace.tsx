@@ -3,6 +3,7 @@ import { XStack } from 'tamagui'
 import { ManagerOAChatList } from './ManagerOAChatList'
 import { ManagerOAChatModeNav, type ManagerOAChatMode } from './ManagerOAChatModeNav'
 import { ManagerOAChatRoom } from './ManagerOAChatRoom'
+import { ManagerOACustomFiltersPage } from './ManagerOACustomFiltersPage'
 import { resolveManagerOAProfileContact } from './managerOAChatSelection'
 import { ManagerOAContactList } from './ManagerOAContactList'
 import { ManagerOAProfilePanel } from './ManagerOAProfilePanel'
@@ -15,10 +16,11 @@ import {
 type Props = {
   oaId: string
   chatId?: string
+  initialMode?: ManagerOAChatMode
 }
 
-export function ManagerOAChatWorkspace({ oaId, chatId }: Props) {
-  const [mode, setMode] = useState<ManagerOAChatMode>('chats')
+export function ManagerOAChatWorkspace({ oaId, chatId, initialMode }: Props) {
+  const [mode, setMode] = useState<ManagerOAChatMode>(initialMode ?? 'chats')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedContact, setSelectedContact] = useState<ManagerOAContactListItem | null>(
     null,
@@ -56,44 +58,50 @@ export function ManagerOAChatWorkspace({ oaId, chatId }: Props) {
           setSearchQuery('')
         }}
       />
-      {mode === 'contacts' ? (
-        <ManagerOAContactList
-          oaId={oaId}
-          selectedUserId={profileContact?.userId}
-          searchQuery={searchQuery}
-          onSearchQueryChange={setSearchQuery}
-          contacts={contacts}
-          isLoading={contactsLoading}
-          onSelectContact={setSelectedContact}
-        />
+      {mode === 'custom-filters' ? (
+        <ManagerOACustomFiltersPage oaId={oaId} onBackToChat={() => setMode('chats')} />
       ) : (
-        <ManagerOAChatList
-          oaId={oaId}
-          selectedChatId={chatId}
-          searchQuery={searchQuery}
-          onSearchQueryChange={setSearchQuery}
-          chats={chats}
-          contacts={contacts}
-          isLoading={isLoading}
-        />
+        <>
+          {mode === 'contacts' ? (
+            <ManagerOAContactList
+              oaId={oaId}
+              selectedUserId={profileContact?.userId}
+              searchQuery={searchQuery}
+              onSearchQueryChange={setSearchQuery}
+              contacts={contacts}
+              isLoading={contactsLoading}
+              onSelectContact={setSelectedContact}
+            />
+          ) : (
+            <ManagerOAChatList
+              oaId={oaId}
+              selectedChatId={chatId}
+              searchQuery={searchQuery}
+              onSearchQueryChange={setSearchQuery}
+              chats={chats}
+              contacts={contacts}
+              isLoading={isLoading}
+            />
+          )}
+          <ManagerOAChatRoom
+            oaId={oaId}
+            chatId={effectiveChatId}
+            emptyStateLabel={
+              mode === 'contacts' && profileContact?.chatId === null
+                ? 'This contact has no chat yet'
+                : undefined
+            }
+          />
+          {selected || profileContact ? (
+            <ManagerOAProfilePanel
+              oaId={oaId}
+              name={profileContact?.userName ?? selected?.userName ?? 'Unknown user'}
+              image={profileContact?.userImage ?? selected?.userImage ?? null}
+              contact={profileContact}
+            />
+          ) : null}
+        </>
       )}
-      <ManagerOAChatRoom
-        oaId={oaId}
-        chatId={effectiveChatId}
-        emptyStateLabel={
-          mode === 'contacts' && profileContact?.chatId === null
-            ? 'This contact has no chat yet'
-            : undefined
-        }
-      />
-      {selected || profileContact ? (
-        <ManagerOAProfilePanel
-          oaId={oaId}
-          name={profileContact?.userName ?? selected?.userName ?? 'Unknown user'}
-          image={profileContact?.userImage ?? selected?.userImage ?? null}
-          contact={profileContact}
-        />
-      ) : null}
     </XStack>
   )
 }
