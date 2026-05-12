@@ -27,7 +27,7 @@ Changes to Phase 2 scope should update both files together.
   provider-scoped user ID, chat status, tags, and notes.
 - Add OA-scoped tag management and assignment.
 - Add manager-only notes for OA contacts.
-- Add default and saved filters for triage.
+- Add default and saved custom filters for chat list filtering.
 - Define Vine's minimum retention and export policy for OA chat CRM data.
 - Preserve tag data in a form that Phase 3 can use for tag-based audiences.
 
@@ -82,27 +82,45 @@ Notes:
 - support editing from the profile panel;
 - should update without changing user-side chat behavior.
 
-### Phase 2C: Filters And Triage
+### Phase 2C: Filters
 
-Add default triage filters based on the CRM reference:
+Triage status (pending, done, assigned) is deferred to Phase 6 when
+multi-operator roles make it meaningful. Phase 2C focuses on default filters and
+saved custom filters only.
 
-- unread;
-- pending;
-- done;
-- assigned or owned, implemented as an interim manager-side status until
-  multi-operator roles exist.
+Default filters (built-in, no schema change):
 
-Add saved custom filters based on chat status and tags. The first version should
-avoid pretending to support unsupported dimensions. If message text, note text,
-or date-range filtering is not backed by reliable queries, the UI should not
-offer those conditions yet.
+- All: show every chat (default);
+- Unread: chats where the last message is from the user and the OA member has
+  not read it yet (derived from existing `lastReadMessageId`).
 
-Saved filter behavior:
+Saved custom filters:
 
 - operators can create, rename, update, and delete filters;
-- saved filters are scoped to the OA;
-- each filter stores selected statuses, selected tags, and match mode;
-- cap the number of saved filters to keep the UI and sync payload bounded.
+- saved filters are scoped to the OA, max 20 per OA;
+- each filter stores a name, selected tag IDs, and match mode (AND or OR);
+- filters match chats whose user has tag assignments satisfying the selected
+  tags and match mode;
+- the create/edit modal shows a live hit count: how many chat rooms match the
+  current criteria in real time, computed client-side from Zero-synced data.
+
+Filter management UI:
+
+- accessed from COL1 sidebar under a "Custom filters" entry;
+- clicking it navigates to a settings-style page (sidebar + full content area),
+  not the four-column chat workspace;
+- the page shows a list of saved filters with sort, edit, and delete controls;
+- create and edit open a modal with: filter name input, tag chips selector,
+  AND/OR match mode toggle, and live hit count;
+- a "Back to chat" link returns to the chat workspace.
+
+Filter selection UI (applying a filter):
+
+- a dropdown above the search bar in the chat list (COL2, chats mode only);
+- dropdown sections: default filters (All, Unread) at top, then a collapsible
+  "Custom filters" group listing saved filters;
+- selecting a filter filters the chat list in-place; the active filter name
+  is shown as the dropdown label.
 
 ### Phase 2D: Retention And Export Policy
 
@@ -126,13 +144,12 @@ workspace:
 - tag definitions;
 - tag assignments;
 - contact notes;
-- chat triage status;
 - saved filters.
 
 Likely entities:
 
 - `oaContactProfile`: one row per OA/user relationship for manager-only CRM
-  fields such as status, last interaction, and internal note summary.
+  fields such as note text and internal metadata.
 - `oaContactTag`: OA-scoped tag definition.
 - `oaContactTagAssignment`: relation between a tag and a user/OA contact.
 - `oaChatFilter`: saved filter definition for a manager or OA.
@@ -159,15 +176,16 @@ Profile panel additions:
 - provider-scoped user ID;
 - friendship status;
 - last interaction;
-- current triage status;
 - tag chips with add/remove controls;
 - editable note area.
 
 Filtering UI:
 
-- default filters should be one-click entries;
-- saved filters should be listed below default filters;
-- filter creation should use status and tag controls only in the first version.
+- a dropdown above the chat list search bar for selecting the active filter;
+- default filters (All, Unread) shown at the top of the dropdown;
+- saved custom filters shown in a collapsible group below default filters;
+- filter management on a separate settings-style page accessible from the
+  sidebar, not inside the chat workspace columns.
 
 ## Phase 3 Handoff
 
@@ -188,7 +206,7 @@ remain Phase 3 work.
 Add focused tests as each slice ships:
 
 - Zero permission tests for contact CRM rows, tag definitions, assignments,
-  notes, triage status, and saved filters.
+  notes, and saved filters.
 - Zero mutation tests for create/update/delete operations.
 - Query tests that manager-owned OA data is visible only to the OA owner.
 - Web integration coverage for contact list mode, tag assignment, note editing,
@@ -205,7 +223,7 @@ export surface exists.
 - Operators can see CRM profile fields for an OA contact.
 - Operators can create CRM tags and assign or remove them from contacts.
 - Operators can write manager-only notes on OA contacts.
-- Operators can use default triage filters and saved status/tag filters.
+- Operators can use default filters (All, Unread) and saved custom tag filters.
 - Retention/export behavior is documented and implemented for the selected
   minimum surface.
 - Scheduled sending, standard replies, response hours, and broadcast sending are

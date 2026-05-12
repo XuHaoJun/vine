@@ -44,7 +44,7 @@ It should combine three jobs:
    (Messaging API operations — webhook, token, quota — are handled in the
    developer console.)
 2. Customer operations: one-on-one chats, contact management, CRM tags, notes,
-   saved filters, triage status, retention/export policy, and tag-based audience
+   saved filters, retention/export policy, and tag-based audience
    handoff.
 3. Growth operations: broadcasts, audiences, rich menus, coupons, add-friend
    assets, insights, and campaign measurement.
@@ -71,7 +71,7 @@ navigation to the features Vine already has."
 | --- | --- | --- | --- | --- |
 | 0 | OA Detail Home | Fix entry flow and add `/manager/:oaId` overview. | Existing account list | Done |
 | 1 | Profile and Basic Settings | Make account identity editable and remove mock profile gaps. | Phase 0 | Done |
-| 2 | Chat CRM | Evolve chat MVP into contact CRM, tagging, notes, and triage filters. | Existing chat MVP | Next |
+| 2 | Chat CRM | Evolve chat MVP into contact CRM, tagging, notes, and custom filters. | Existing chat MVP | Next |
 | 3 | Broadcast and Audiences | Add outbound campaign workflows and targeting. | Friendship data | Planned |
 | 4 | Interactive Content | Complete rich menus and add reusable content/coupon surfaces. | Existing rich menu MVP | Planned |
 | 5 | Insights and Growth | Provide friend, message, click, webhook, and growth analytics. | Phases 3, 4 | Planned |
@@ -161,9 +161,9 @@ Scope:
     chat status.
   - 2B Tags and notes: OA-scoped tag CRUD, assigning/removing tags from users,
     and manager-only notes on OA contacts.
-  - 2C Filters and triage: default filters for unread, pending, done, and
-    assigned/owned conversations, plus saved custom filters based on chat
-    status and tags.
+  - 2C Filters: default filters (All, Unread) plus saved custom filters based
+    on tags with AND/OR match mode. Triage status (pending, done, assigned)
+    deferred to Phase 6 with multi-operator roles.
   - 2D Retention and export policy: define what Vine retains, what operators can
     export, and what remains unavailable.
 - Preserve tag data in a form that Phase 3 can use for tag-based audiences, but
@@ -179,7 +179,7 @@ Non-goals:
 
 Acceptance criteria:
 
-- Operators can triage user conversations without switching tools.
+- Operators can filter chat lists by unread status and custom tag filters.
 - Operators can create CRM tags, assign them to contacts, and use them in saved
   filters.
 - Operators can record internal notes on OA contacts.
@@ -335,7 +335,7 @@ Do this first:
 1. Phase 0 `/manager/:oaId` detail home. *(done)*
 2. Phase 1 profile/basic settings. *(done)*
 3. Phase 2 chat CRM additions that reuse existing chat MVP, split into contact
-   CRM, tags/notes, filters/triage, and retention/export policy.
+   CRM, tags/notes, custom filters, and retention/export policy.
 4. Phase 4 rich menu completion, because routes already exist.
 5. Phase 3 broadcast/audience once friendship data is available.
 6. Phase 5 insights once events are consistently tracked.
