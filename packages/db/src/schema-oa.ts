@@ -341,3 +341,20 @@ export const oaBusinessProfileDraft = pgTable('oaBusinessProfileDraft', {
   createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
   updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
 })
+
+export const oaChatFilter = pgTable(
+  'oaChatFilter',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    oaId: uuid('oaId')
+      .notNull()
+      .references(() => officialAccount.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    matchMode: text('matchMode').notNull().default('any'),
+    tagIds: text('tagIds').notNull().default('[]'),
+    sortOrder: integer('sortOrder').notNull().default(0),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [index('oaChatFilter_oaId_idx').on(table.oaId)],
+)
