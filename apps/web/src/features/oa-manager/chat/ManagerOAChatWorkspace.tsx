@@ -8,6 +8,8 @@ import { resolveManagerOAProfileContact } from './managerOAChatSelection'
 import { ManagerOAContactList } from './ManagerOAContactList'
 import { ManagerOAProfilePanel } from './ManagerOAProfilePanel'
 import { useManagerOAChats } from './useManagerOAChats'
+import { useManagerOAChatFilters } from './useManagerOAChatFilters'
+import { type ActiveFilter } from './ManagerOAChatFilterDropdown'
 import {
   useManagerOAContacts,
   type ManagerOAContactListItem,
@@ -22,6 +24,7 @@ type Props = {
 export function ManagerOAChatWorkspace({ oaId, chatId, initialMode }: Props) {
   const [mode, setMode] = useState<ManagerOAChatMode>(initialMode ?? 'chats')
   const [searchQuery, setSearchQuery] = useState('')
+  const [activeFilter, setActiveFilter] = useState<ActiveFilter>({ type: 'all' })
   const [selectedContact, setSelectedContact] = useState<ManagerOAContactListItem | null>(
     null,
   )
@@ -31,6 +34,23 @@ export function ManagerOAChatWorkspace({ oaId, chatId, initialMode }: Props) {
     searchQuery,
     chats,
   )
+  const { filters: customFilters } = useManagerOAChatFilters(oaId)
+  const filteredChats = useMemo(() => {
+    if (activeFilter.type === 'all') return chats
+    if (activeFilter.type === 'unread') return chats.filter((c) => c.hasUnread)
+
+    const filter = customFilters.find((f) => f.id === activeFilter.filterId)
+    if (!filter || filter.tagIds.length === 0) return chats
+
+    return chats.filter((chat) => {
+      const contact = contacts.find((c) => c.userId === chat.userId)
+      if (!contact) return false
+      const contactTagIds = new Set(contact.tags.map((t) => t.id))
+      return filter.matchMode === 'all'
+        ? filter.tagIds.every((id) => contactTagIds.has(id))
+        : filter.tagIds.some((id) => contactTagIds.has(id))
+    })
+  }, [chats, contacts, activeFilter, customFilters])
   const selected = useMemo(
     () => chats.find((chat) => chat.id === chatId) ?? null,
     [chatId, chats],
@@ -78,9 +98,12 @@ export function ManagerOAChatWorkspace({ oaId, chatId, initialMode }: Props) {
               selectedChatId={chatId}
               searchQuery={searchQuery}
               onSearchQueryChange={setSearchQuery}
-              chats={chats}
+              chats={filteredChats}
               contacts={contacts}
               isLoading={isLoading}
+              activeFilter={activeFilter}
+              onFilterChange={setActiveFilter}
+              customFilters={customFilters}
             />
           )}
           <ManagerOAChatRoom
