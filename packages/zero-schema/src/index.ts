@@ -37,6 +37,7 @@ export * as creatorProfileQueries from './queries/creatorProfile'
 export * as stickerAssetQueries from './queries/stickerAsset'
 export * as oaFriendshipQueries from './queries/oaFriendship'
 export * as oaContactTagQueries from './queries/oaContactTag'
+export * as oaChatFilterQueries from './queries/oaChatFilter'
 
 // Generated
 export * as tables from './generated/tables'
