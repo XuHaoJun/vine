@@ -69,14 +69,15 @@ export function ManagerOAFilterModal({ oaId, filter, allTags, onSave, onClose }:
   return (
     <YStack
       position="absolute"
-      top={0}
-      left={0}
-      right={0}
-      bottom={0}
+      $platform-web={{ position: 'fixed' as any }}
+      t={0}
+      l={0}
+      r={0}
+      b={0}
       bg="rgba(0,0,0,0.4)"
       items="center"
       justify="center"
-      zi={100}
+      z={100}
     >
       <YStack
         bg="$background"

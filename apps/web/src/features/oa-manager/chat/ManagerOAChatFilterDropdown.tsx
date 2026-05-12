@@ -59,18 +59,17 @@ export function ManagerOAChatFilterDropdown({
       {open && (
         <YStack
           position="absolute"
-          top="100%"
-          left={0}
-          right={0}
+          t="100%"
+          l={0}
+          r={0}
           mt="$1"
           bg="$background"
           rounded="$3"
           borderWidth={1}
           borderColor="$borderColor"
-          zi={50}
-          elevation="$2"
-          $platform-web={{ overflowY: 'auto' }}
+          z={50}
           maxH={300}
+          $platform-web={{ overflowY: 'auto' } as any}
         >
           <FilterOption
             label="All"
