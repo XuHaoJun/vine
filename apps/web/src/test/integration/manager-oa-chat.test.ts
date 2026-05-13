@@ -74,6 +74,10 @@ test.describe('Manager OA chat', () => {
       timeout: 10000,
     })
     await expect(page.getByText('Contact list')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Export contacts CSV' })).toBeVisible({
+      timeout: 10000,
+    })
+    await expect(page.getByRole('button', { name: 'Export chat history' })).toHaveCount(0)
     await expect(page.getByRole('button', { name: /Open contact Test One/ })).toBeVisible(
       { timeout: 20000 },
     )
