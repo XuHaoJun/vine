@@ -27,6 +27,7 @@ export function ManagerOAChatFilterDropdown({
   customFilters,
 }: Props) {
   const [open, setOpen] = useState(false)
+  const [customFiltersOpen, setCustomFiltersOpen] = useState(true)
 
   const selectFilter = (filter: ActiveFilter) => {
     onFilterChange(filter)
@@ -84,21 +85,38 @@ export function ManagerOAChatFilterDropdown({
 
           {customFilters.length > 0 && (
             <>
-              <YStack px="$3" py="$2" borderTopWidth={1} borderColor="$borderColor">
-                <SizableText size="$1" color="$color10" fontWeight="600">
-                  Custom filters
-                </SizableText>
-              </YStack>
-              {customFilters.map((filter) => (
-                <FilterOption
-                  key={filter.id}
-                  label={filter.name}
-                  active={
-                    activeFilter.type === 'custom' && activeFilter.filterId === filter.id
-                  }
-                  onPress={() => selectFilter({ type: 'custom', filterId: filter.id })}
-                />
-              ))}
+              <Pressable
+                role="button"
+                aria-label="Toggle custom filters"
+                onPress={() => setCustomFiltersOpen((prev) => !prev)}
+                px="$3"
+                py="$2"
+                borderTopWidth={1}
+                borderColor="$borderColor"
+                cursor="pointer"
+                hoverStyle={{ bg: '$color2' }}
+              >
+                <XStack items="center" justify="space-between">
+                  <SizableText size="$1" color="$color10" fontWeight="600">
+                    Custom filters
+                  </SizableText>
+                  <SizableText size="$1" color="$color10">
+                    {customFiltersOpen ? '▲' : '▼'}
+                  </SizableText>
+                </XStack>
+              </Pressable>
+              {customFiltersOpen &&
+                customFilters.map((filter) => (
+                  <FilterOption
+                    key={filter.id}
+                    label={filter.name}
+                    active={
+                      activeFilter.type === 'custom' &&
+                      activeFilter.filterId === filter.id
+                    }
+                    onPress={() => selectFilter({ type: 'custom', filterId: filter.id })}
+                  />
+                ))}
             </>
           )}
         </YStack>

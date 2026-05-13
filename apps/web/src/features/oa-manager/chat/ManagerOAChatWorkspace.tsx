@@ -1,3 +1,4 @@
+import { useRouter } from 'one'
 import { useMemo, useState } from 'react'
 import { XStack } from 'tamagui'
 import { type ActiveFilter } from './ManagerOAChatFilterDropdown'
@@ -22,6 +23,7 @@ type Props = {
 }
 
 export function ManagerOAChatWorkspace({ oaId, chatId, initialMode }: Props) {
+  const router = useRouter()
   const [mode, setMode] = useState<ManagerOAChatMode>(initialMode ?? 'chats')
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<ActiveFilter>({ type: 'all' })
@@ -74,12 +76,21 @@ export function ManagerOAChatWorkspace({ oaId, chatId, initialMode }: Props) {
       <ManagerOAChatModeNav
         mode={mode}
         onModeChange={(nextMode) => {
+          if (nextMode === 'custom-filters') {
+            router.push(`/manager/${oaId}/chat/custom-filters` as any)
+          }
           setMode(nextMode)
           setSearchQuery('')
         }}
       />
       {mode === 'custom-filters' ? (
-        <ManagerOACustomFiltersPage oaId={oaId} onBackToChat={() => setMode('chats')} />
+        <ManagerOACustomFiltersPage
+          oaId={oaId}
+          onBackToChat={() => {
+            router.push(`/manager/${oaId}/chat` as any)
+            setMode('chats')
+          }}
+        />
       ) : (
         <>
           {mode === 'contacts' ? (

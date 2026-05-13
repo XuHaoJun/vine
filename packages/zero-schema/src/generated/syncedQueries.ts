@@ -129,6 +129,16 @@ const message = {
   ),
 }
 
+const oaChatFilter = {
+  oaChatFiltersByOfficialAccountId: defineQuery(
+    v.object({
+      oaId: v.string(),
+      limit: v.optional(v.number()),
+    }),
+    ({ args }) => Queries.oaChatFilter.oaChatFiltersByOfficialAccountId(args),
+  ),
+}
+
 const oaContactTag = {
   oaContactTagsByOfficialAccountId: defineQuery(
     v.object({
@@ -221,6 +231,7 @@ export const queries = defineQueries({
   entitlement,
   friendship,
   message,
+  oaChatFilter,
   oaContactTag,
   oaFriendship,
   stickerAsset,
