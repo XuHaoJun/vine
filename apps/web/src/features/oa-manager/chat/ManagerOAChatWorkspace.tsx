@@ -1,15 +1,15 @@
 import { useMemo, useState } from 'react'
 import { XStack } from 'tamagui'
+import { type ActiveFilter } from './ManagerOAChatFilterDropdown'
 import { ManagerOAChatList } from './ManagerOAChatList'
 import { ManagerOAChatModeNav, type ManagerOAChatMode } from './ManagerOAChatModeNav'
 import { ManagerOAChatRoom } from './ManagerOAChatRoom'
-import { ManagerOACustomFiltersPage } from './ManagerOACustomFiltersPage'
 import { resolveManagerOAProfileContact } from './managerOAChatSelection'
 import { ManagerOAContactList } from './ManagerOAContactList'
+import { ManagerOACustomFiltersPage } from './ManagerOACustomFiltersPage'
 import { ManagerOAProfilePanel } from './ManagerOAProfilePanel'
-import { useManagerOAChats } from './useManagerOAChats'
 import { useManagerOAChatFilters } from './useManagerOAChatFilters'
-import { type ActiveFilter } from './ManagerOAChatFilterDropdown'
+import { useManagerOAChats } from './useManagerOAChats'
 import {
   useManagerOAContacts,
   type ManagerOAContactListItem,

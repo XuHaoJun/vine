@@ -1,5 +1,5 @@
-import type { TableInsertRow, TableUpdateRow } from 'on-zero'
 import type * as schema from './tables'
+import type { TableInsertRow, TableUpdateRow } from 'on-zero'
 
 export type Chat = TableInsertRow<typeof schema.chat>
 export type ChatUpdate = TableUpdateRow<typeof schema.chat>
@@ -32,7 +32,9 @@ export type OaContactTag = TableInsertRow<typeof schema.oaContactTag>
 export type OaContactTagUpdate = TableUpdateRow<typeof schema.oaContactTag>
 
 export type OaContactTagAssignment = TableInsertRow<typeof schema.oaContactTagAssignment>
-export type OaContactTagAssignmentUpdate = TableUpdateRow<typeof schema.oaContactTagAssignment>
+export type OaContactTagAssignmentUpdate = TableUpdateRow<
+  typeof schema.oaContactTagAssignment
+>
 
 export type OaFriendship = TableInsertRow<typeof schema.oaFriendship>
 export type OaFriendshipUpdate = TableUpdateRow<typeof schema.oaFriendship>

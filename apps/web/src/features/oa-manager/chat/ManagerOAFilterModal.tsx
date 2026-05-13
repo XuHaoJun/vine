@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react'
 import { SizableText, XStack, YStack } from 'tamagui'
 import { Button } from '~/interface/buttons/Button'
-import { Input } from '~/interface/forms/Input'
 import { Pressable } from '~/interface/buttons/Pressable'
-import type { ChatFilterItem } from './useManagerOAChatFilters'
+import { Input } from '~/interface/forms/Input'
 import { useManagerOAChats } from './useManagerOAChats'
 import { useManagerOAContacts } from './useManagerOAContacts'
+import type { ChatFilterItem } from './useManagerOAChatFilters'
 
 type TagOption = {
   id: string
@@ -23,12 +23,8 @@ type Props = {
 
 export function ManagerOAFilterModal({ oaId, filter, allTags, onSave, onClose }: Props) {
   const [name, setName] = useState(filter?.name ?? '')
-  const [matchMode, setMatchMode] = useState<'all' | 'any'>(
-    filter?.matchMode ?? 'any',
-  )
-  const [selectedTagIds, setSelectedTagIds] = useState<string[]>(
-    filter?.tagIds ?? [],
-  )
+  const [matchMode, setMatchMode] = useState<'all' | 'any'>(filter?.matchMode ?? 'any')
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>(filter?.tagIds ?? [])
   const [isSaving, setIsSaving] = useState(false)
 
   const { chats } = useManagerOAChats(oaId, '')
@@ -153,10 +149,7 @@ export function ManagerOAFilterModal({ oaId, filter, allTags, onSave, onClose }:
                     cursor="pointer"
                     hoverStyle={{ bg: selected ? '$color8' : '$color4' }}
                   >
-                    <SizableText
-                      size="$2"
-                      color={selected ? '$color1' : undefined}
-                    >
+                    <SizableText size="$2" color={selected ? '$color1' : undefined}>
                       {tag.name}
                     </SizableText>
                   </Pressable>
@@ -166,13 +159,7 @@ export function ManagerOAFilterModal({ oaId, filter, allTags, onSave, onClose }:
           )}
         </YStack>
 
-        <XStack
-          p="$3"
-          rounded="$3"
-          bg="$color3"
-          items="center"
-          justify="center"
-        >
+        <XStack p="$3" rounded="$3" bg="$color3" items="center" justify="center">
           <SizableText size="$3" fontWeight="600">
             {hitCount} chat{hitCount !== 1 ? 's' : ''} match
           </SizableText>
@@ -182,11 +169,7 @@ export function ManagerOAFilterModal({ oaId, filter, allTags, onSave, onClose }:
           <Button size="$3" variant="outlined" onPress={onClose}>
             Cancel
           </Button>
-          <Button
-            size="$3"
-            onPress={handleSave}
-            disabled={!name.trim() || isSaving}
-          >
+          <Button size="$3" onPress={handleSave} disabled={!name.trim() || isSaving}>
             {filter ? 'Save' : 'Create'}
           </Button>
         </XStack>

@@ -215,13 +215,16 @@ export const oaContactTagAssignmentRelationships = relationships(
   }),
 )
 
-export const oaChatFilterRelationships = relationships(tables.oaChatFilter, ({ one }) => ({
-  oa: one({
-    sourceField: ['oaId'],
-    destSchema: tables.officialAccount,
-    destField: ['id'],
+export const oaChatFilterRelationships = relationships(
+  tables.oaChatFilter,
+  ({ one }) => ({
+    oa: one({
+      sourceField: ['oaId'],
+      destSchema: tables.officialAccount,
+      destField: ['id'],
+    }),
   }),
-}))
+)
 
 export const messageRelationships = relationships(tables.message, ({ many, one }) => ({
   sender: one({

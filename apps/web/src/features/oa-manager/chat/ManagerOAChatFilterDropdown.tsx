@@ -84,12 +84,7 @@ export function ManagerOAChatFilterDropdown({
 
           {customFilters.length > 0 && (
             <>
-              <YStack
-                px="$3"
-                py="$2"
-                borderTopWidth={1}
-                borderColor="$borderColor"
-              >
+              <YStack px="$3" py="$2" borderTopWidth={1} borderColor="$borderColor">
                 <SizableText size="$1" color="$color10" fontWeight="600">
                   Custom filters
                 </SizableText>
@@ -99,12 +94,9 @@ export function ManagerOAChatFilterDropdown({
                   key={filter.id}
                   label={filter.name}
                   active={
-                    activeFilter.type === 'custom' &&
-                    activeFilter.filterId === filter.id
+                    activeFilter.type === 'custom' && activeFilter.filterId === filter.id
                   }
-                  onPress={() =>
-                    selectFilter({ type: 'custom', filterId: filter.id })
-                  }
+                  onPress={() => selectFilter({ type: 'custom', filterId: filter.id })}
                 />
               ))}
             </>

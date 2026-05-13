@@ -90,11 +90,7 @@ export function ManagerOAChatModeNav({ mode, onModeChange }: Props) {
                 hoverStyle={{ bg: active ? '$color3' : '$color2' }}
               >
                 <Icon size={16} />
-                <SizableText
-                  size="$1"
-                  fontWeight={active ? '700' : '500'}
-                  text="center"
-                >
+                <SizableText size="$1" fontWeight={active ? '700' : '500'} text="center">
                   {item.label}
                 </SizableText>
               </Pressable>

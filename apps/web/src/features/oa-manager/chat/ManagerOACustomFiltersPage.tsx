@@ -5,10 +5,7 @@ import { Pressable } from '~/interface/buttons/Pressable'
 import { dialogConfirm } from '~/interface/dialogs/actions'
 import { showToast } from '~/interface/toast/Toast'
 import { ManagerOAFilterModal } from './ManagerOAFilterModal'
-import {
-  useManagerOAChatFilters,
-  type ChatFilterItem,
-} from './useManagerOAChatFilters'
+import { useManagerOAChatFilters, type ChatFilterItem } from './useManagerOAChatFilters'
 
 type Props = {
   oaId: string
@@ -45,14 +42,16 @@ export function ManagerOACustomFiltersPage({ oaId, onBackToChat }: Props) {
     }
   }
 
-  const handleSave = async (
-    name: string,
-    matchMode: 'all' | 'any',
-    tagIds: string[],
-  ) => {
+  const handleSave = async (name: string, matchMode: 'all' | 'any', tagIds: string[]) => {
     try {
       if (editingFilter) {
-        await updateFilter(editingFilter.id, name, matchMode, tagIds, editingFilter.sortOrder)
+        await updateFilter(
+          editingFilter.id,
+          name,
+          matchMode,
+          tagIds,
+          editingFilter.sortOrder,
+        )
         showToast('Filter updated', { type: 'success' })
       } else {
         await createFilter(name, matchMode, tagIds)
@@ -84,18 +83,13 @@ export function ManagerOACustomFiltersPage({ oaId, onBackToChat }: Props) {
             Custom Filters
           </SizableText>
         </XStack>
-        <Button
-          size="$3"
-          onPress={handleCreate}
-          disabled={filters.length >= 20}
-        >
+        <Button size="$3" onPress={handleCreate} disabled={filters.length >= 20}>
           New filter
         </Button>
       </XStack>
 
       <SizableText size="$2" color="$color10">
-        Create filters to quickly find chats by tag. You can create up to 20
-        filters.
+        Create filters to quickly find chats by tag. You can create up to 20 filters.
       </SizableText>
 
       {filters.length === 0 ? (
@@ -140,11 +134,7 @@ export function ManagerOACustomFiltersPage({ oaId, onBackToChat }: Props) {
                   </XStack>
                 </YStack>
                 <XStack gap="$2">
-                  <Button
-                    size="$2"
-                    variant="outlined"
-                    onPress={() => handleEdit(filter)}
-                  >
+                  <Button size="$2" variant="outlined" onPress={() => handleEdit(filter)}>
                     Edit
                   </Button>
                   <Button

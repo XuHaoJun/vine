@@ -3,10 +3,13 @@ import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
 import { Avatar } from '~/interface/avatars/Avatar'
 import { Pressable } from '~/interface/buttons/Pressable'
 import { Input } from '~/interface/forms/Input'
+import {
+  ManagerOAChatFilterDropdown,
+  type ActiveFilter,
+} from './ManagerOAChatFilterDropdown'
+import type { ChatFilterItem } from './useManagerOAChatFilters'
 import type { ManagerOAChatListItem } from './useManagerOAChats'
 import type { ManagerOAContactListItem } from './useManagerOAContacts'
-import { ManagerOAChatFilterDropdown, type ActiveFilter } from './ManagerOAChatFilterDropdown'
-import type { ChatFilterItem } from './useManagerOAChatFilters'
 
 type Props = {
   oaId: string

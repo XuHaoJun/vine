@@ -70,7 +70,8 @@ function cleanName(name: string): string {
 }
 
 function validateMatchMode(mode: string): 'all' | 'any' {
-  if (mode !== 'all' && mode !== 'any') throw new Error('matchMode must be "all" or "any"')
+  if (mode !== 'all' && mode !== 'any')
+    throw new Error('matchMode must be "all" or "any"')
   return mode
 }
 
@@ -109,9 +110,7 @@ export const mutate = mutations(schema, managerOwnedOaChatFilterPermission, {
     const matchMode = validateMatchMode(args.matchMode)
     validateTagIds(args.tagIds)
 
-    const existing = await readRows(tx, 'oaChatFilter', (q) =>
-      q.where('oaId', args.oaId),
-    )
+    const existing = await readRows(tx, 'oaChatFilter', (q) => q.where('oaId', args.oaId))
     if (existing.length >= MAX_FILTERS_PER_OA) {
       throw new Error(`Cannot create more than ${MAX_FILTERS_PER_OA} filters`)
     }
