@@ -16,6 +16,7 @@ import { createAuthServer, authPlugin } from './plugins/auth'
 import { liffFixturesPublicPlugin } from './plugins/liff-fixtures-public'
 import { liffPublicPlugin } from './plugins/liff-public'
 import { mediaUploadPlugin } from './plugins/media-upload'
+import { oaContactExportPlugin } from './plugins/oa-contact-export'
 import { miniAppNotifierPlugin } from './plugins/mini-app-notifier'
 import { miniAppPublicPlugin } from './plugins/mini-app-public'
 import { locationMapPlugin } from './plugins/oa-location-map'
@@ -30,6 +31,7 @@ import { createMiniAppService } from './services/mini-app'
 import { createMiniAppServiceMessageService } from './services/mini-app-service-message'
 import { createMiniAppTemplateService } from './services/mini-app-service-message-templates'
 import { createOAService } from './services/oa'
+import { createOAContactExportService } from './services/oa-contact-export'
 import { createOAMessagingService } from './services/oa-messaging'
 import { createOAWebhookDeliveryService } from './services/oa-webhook-delivery'
 import { createPayments, registerPaymentsWebhookRoutes } from './services/payments'
@@ -65,6 +67,7 @@ if (path.resolve(uploadRoot) !== driveBasePath) {
 }
 
 const oa = createOAService({ db, database })
+const oaContactExport = createOAContactExportService({ db })
 const oaMessaging = createOAMessagingService({
   db,
   instanceId: process.env['HOSTNAME'] ?? `server-${process.pid}`,
@@ -160,6 +163,7 @@ const zero = createZeroService({
 await authPlugin(app, { auth, db })
 await zeroPlugin(app, { auth, zero })
 await mediaUploadPlugin(app, { auth, drive })
+await oaContactExportPlugin(app, { auth, contactExport: oaContactExport })
 await locationMapPlugin(app, { db, auth })
 await oaMessagingPlugin(app, { oa, messaging: oaMessaging, db, drive })
 await oaRichMenuPlugin(app, { oa, db, drive })

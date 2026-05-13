@@ -188,7 +188,7 @@ export function createOAContactExportService(deps: OAContactExportDeps) {
           displayName: contact.displayName ?? '',
           friendshipStatus: contact.friendshipStatus,
           lastInteractionAt: chatInfo?.lastInteractionAt ?? '',
-          chatStatus: chatInfo ? 'active' : 'no_chat',
+          chatStatus: chatInfo ? ('active' as const) : ('no_chat' as const),
           tagIds: tags.map((tag) => tag.id),
           tagNames: tags.map((tag) => tag.name),
           managerNoteText: contact.noteText ?? '',
