@@ -3,6 +3,11 @@ import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
 import { Avatar } from '~/interface/avatars/Avatar'
 import { Pressable } from '~/interface/buttons/Pressable'
 import { Input } from '~/interface/forms/Input'
+import {
+  ManagerOAChatFilterDropdown,
+  type ActiveFilter,
+} from './ManagerOAChatFilterDropdown'
+import type { ChatFilterItem } from './useManagerOAChatFilters'
 import type { ManagerOAChatListItem } from './useManagerOAChats'
 import type { ManagerOAContactListItem } from './useManagerOAContacts'
 
@@ -14,6 +19,9 @@ type Props = {
   chats: ManagerOAChatListItem[]
   contacts: ManagerOAContactListItem[]
   isLoading: boolean
+  activeFilter: ActiveFilter
+  onFilterChange: (filter: ActiveFilter) => void
+  customFilters: ChatFilterItem[]
 }
 
 function formatChatTime(ts: number | null): string {
@@ -46,13 +54,21 @@ export function ManagerOAChatList({
   chats,
   contacts,
   isLoading,
+  activeFilter,
+  onFilterChange,
+  customFilters,
 }: Props) {
   const router = useRouter()
   const contactsByUserId = new Map(contacts.map((contact) => [contact.userId, contact]))
 
   return (
     <YStack width={280} shrink={0} borderRightWidth={1} borderColor="$borderColor">
-      <YStack p="$3" borderBottomWidth={1} borderColor="$borderColor">
+      <YStack p="$3" gap="$2" borderBottomWidth={1} borderColor="$borderColor">
+        <ManagerOAChatFilterDropdown
+          activeFilter={activeFilter}
+          onFilterChange={onFilterChange}
+          customFilters={customFilters}
+        />
         <Input
           value={searchQuery}
           onChangeText={onSearchQueryChange}

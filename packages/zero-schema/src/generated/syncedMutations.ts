@@ -243,6 +243,44 @@ export const mutationValidators = {
       createdAt: v.number(),
     }),
   },
+  oaChatFilter: {
+    insert: v.object({
+      id: v.string(),
+      oaId: v.string(),
+      name: v.string(),
+      matchMode: v.string(),
+      tagIds: v.string(),
+      sortOrder: v.number(),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    }),
+    update: v.object({
+      id: v.string(),
+      oaId: v.string(),
+      name: v.string(),
+      matchMode: v.string(),
+      tagIds: v.string(),
+      sortOrder: v.number(),
+      updatedAt: v.number(),
+    }),
+    delete: v.object({
+      id: v.string(),
+    }),
+    create: v.object({
+      id: v.string(),
+      oaId: v.string(),
+      name: v.string(),
+      matchMode: v.string(),
+      tagIds: v.string(),
+      sortOrder: v.number(),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    }),
+    deleteFilter: v.object({
+      id: v.string(),
+      oaId: v.string(),
+    }),
+  },
   oaContactProfile: {
     insert: v.object({
       id: v.string(),

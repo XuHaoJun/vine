@@ -128,6 +128,11 @@ export const officialAccountRelationships = relationships(
       destSchema: tables.oaContactTagAssignment,
       destField: ['oaId'],
     }),
+    chatFilters: many({
+      sourceField: ['id'],
+      destSchema: tables.oaChatFilter,
+      destField: ['oaId'],
+    }),
   }),
 )
 
@@ -210,6 +215,17 @@ export const oaContactTagAssignmentRelationships = relationships(
   }),
 )
 
+export const oaChatFilterRelationships = relationships(
+  tables.oaChatFilter,
+  ({ one }) => ({
+    oa: one({
+      sourceField: ['oaId'],
+      destSchema: tables.officialAccount,
+      destField: ['id'],
+    }),
+  }),
+)
+
 export const messageRelationships = relationships(tables.message, ({ many, one }) => ({
   sender: one({
     sourceField: ['senderId'],
@@ -285,6 +301,7 @@ export const allRelationships = [
   oaContactProfileRelationships,
   oaContactTagRelationships,
   oaContactTagAssignmentRelationships,
+  oaChatFilterRelationships,
   messageRelationships,
   entitlementRelationships,
   creatorProfileRelationships,

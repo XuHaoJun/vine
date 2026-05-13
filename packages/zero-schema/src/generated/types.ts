@@ -22,6 +22,9 @@ export type FriendshipUpdate = TableUpdateRow<typeof schema.friendship>
 export type Message = TableInsertRow<typeof schema.message>
 export type MessageUpdate = TableUpdateRow<typeof schema.message>
 
+export type OaChatFilter = TableInsertRow<typeof schema.oaChatFilter>
+export type OaChatFilterUpdate = TableUpdateRow<typeof schema.oaChatFilter>
+
 export type OaContactProfile = TableInsertRow<typeof schema.oaContactProfile>
 export type OaContactProfileUpdate = TableUpdateRow<typeof schema.oaContactProfile>
 
