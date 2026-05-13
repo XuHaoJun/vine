@@ -82,4 +82,18 @@ describe('OA contact CRM CSV export', () => {
     expect(csv).not.toContain('message_body')
     expect(csv).not.toContain('hello from chat')
   })
+
+  it('hardens spreadsheet formula-leading cells', () => {
+    const csv = buildOAContactExportCsv([
+      makeRow({
+        displayName: '=IMPORTXML("https://example.com")',
+        tagNames: ['+VIP'],
+        managerNoteText: '@SUM(1,2)',
+      }),
+    ])
+
+    expect(csv).toContain('\'=IMPORTXML(""https://example.com"")')
+    expect(csv).toContain("'+VIP")
+    expect(csv).toContain('"\'@SUM(1,2)"')
+  })
 })

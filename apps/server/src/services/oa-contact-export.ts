@@ -52,8 +52,9 @@ type ExportContactsResult = {
 }
 
 function csvCell(value: string): string {
-  if (!/[",\n\r]/.test(value)) return value
-  return `"${value.replaceAll('"', '""')}"`
+  const safeValue = /^[=+\-@]/.test(value) ? `'${value}` : value
+  if (!/[",\n\r]/.test(safeValue)) return safeValue
+  return `"${safeValue.replaceAll('"', '""')}"`
 }
 
 function rowToCsv(row: OAContactExportRow): string {
