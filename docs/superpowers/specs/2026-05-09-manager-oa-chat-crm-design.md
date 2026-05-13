@@ -124,13 +124,41 @@ Filter selection UI (applying a filter):
 
 ### Phase 2D: Retention And Export Policy
 
-Define Vine's minimum policy for OA CRM data:
+Define Vine's minimum policy for OA CRM data and ship the first export surface.
+This is not a backup/compliance system; it is a pragmatic owner-only CRM export
+that gives managers a portable contact snapshot.
 
-- what chat messages are retained;
-- what contact tags and notes are retained;
-- whether operators can export chat/contact CRM data;
-- what export format is supported first;
-- what data is intentionally not exportable yet.
+Retention policy:
+
+- chat messages continue to be retained by Vine's normal message storage with
+  no LINE-style six-month or five-year paid-plan cutoff;
+- Phase 2D does not add automatic message pruning, archive tiers, or legal-hold
+  workflows;
+- contact tags, tag assignments, saved filters, and manager notes are retained
+  until the manager deletes the CRM data, the OA is deleted, or a later account
+  erasure flow removes the related OA/user data;
+- manager notes and tags remain manager-only CRM data and do not change
+  user-side chat behavior.
+
+First export surface:
+
+- an OA owner can export a UTF-8 CSV contact CRM snapshot for one OA;
+- the export contains one row per OA contact/friendship visible to the manager;
+- columns: provider-scoped user ID, display name, friendship status, last
+  interaction time, current chat status when available, tag IDs, tag names,
+  manager note text, and export timestamp;
+- tag values are flattened for CSV: IDs and names are each semicolon-separated
+  in stable name order;
+- note text is CSV-escaped and exported as plain text.
+
+Intentionally unavailable in Phase 2D:
+
+- chat message body export;
+- chat attachment/media binary export;
+- full workspace backup and restore;
+- scheduled recurring exports;
+- export of deleted user data;
+- export by non-owner operators before Phase 6 roles exist.
 
 This slice should not copy LINE's paid-plan limits. It should state Vine's own
 behavior and make unsupported export/backup features explicit.
@@ -187,6 +215,14 @@ Filtering UI:
 - filter management on a separate settings-style page accessible from the
   sidebar, not inside the chat workspace columns.
 
+Export UI:
+
+- expose one owner-only "Export contacts CSV" action from the CRM/contact
+  management area;
+- label the action as a contact CRM export, not a chat history backup;
+- show a lightweight unavailable state or disabled copy for chat history export
+  so managers understand that message backup is not part of Phase 2D.
+
 ## Phase 3 Handoff
 
 Phase 2 does not send broadcasts. It must still shape tag data so Phase 3 can
@@ -211,11 +247,14 @@ Add focused tests as each slice ships:
 - Query tests that manager-owned OA data is visible only to the OA owner.
 - Web integration coverage for contact list mode, tag assignment, note editing,
   default filters, and saved custom filters.
+- Server or integration coverage that the contact CRM CSV export is owner-only,
+  includes the selected columns, escapes notes safely, and excludes chat message
+  bodies.
 - Regression coverage that user-side chat behavior and existing OA chat send
   behavior are unchanged.
 
-Retention/export policy tests should cover the chosen export boundary once the
-export surface exists.
+Retention/export policy tests should cover that unsupported chat history export
+does not appear as an available Phase 2 action.
 
 ## Acceptance Criteria
 
@@ -224,8 +263,10 @@ export surface exists.
 - Operators can create CRM tags and assign or remove them from contacts.
 - Operators can write manager-only notes on OA contacts.
 - Operators can use default filters (All, Unread) and saved custom tag filters.
-- Retention/export behavior is documented and implemented for the selected
-  minimum surface.
+- Retention behavior is documented without LINE paid-plan limits.
+- OA owners can export a contact CRM CSV snapshot for an OA.
+- Chat message body export, media export, full backup/restore, scheduled
+  exports, and non-owner export are unavailable in Phase 2.
 - Scheduled sending, standard replies, response hours, and broadcast sending are
   absent from Phase 2 UI unless a later approved spec changes the roadmap.
 - User-side chat behavior remains unchanged.

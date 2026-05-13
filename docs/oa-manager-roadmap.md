@@ -164,8 +164,10 @@ Scope:
   - 2C Filters: default filters (All, Unread) plus saved custom filters based
     on tags with AND/OR match mode. Triage status (pending, done, assigned)
     deferred to Phase 6 with multi-operator roles.
-  - 2D Retention and export policy: define what Vine retains, what operators can
-    export, and what remains unavailable.
+  - 2D Retention and export policy: keep Vine's own retention behavior explicit
+    without LINE paid-plan limits, add an owner-only contact CRM CSV export, and
+    state that chat history export, media export, full backup/restore,
+    scheduled exports, and non-owner export remain unavailable.
 - Preserve tag data in a form that Phase 3 can use for tag-based audiences, but
   do not ship broadcast sending in Phase 2.
 
@@ -183,6 +185,8 @@ Acceptance criteria:
 - Operators can create CRM tags, assign them to contacts, and use them in saved
   filters.
 - Operators can record internal notes on OA contacts.
+- OA owners can export a contact CRM CSV snapshot that excludes chat message
+  bodies and media.
 - The roadmap and Phase 2 spec agree on what belongs to Phase 2 and what is
   deferred.
 - User-side chat behavior remains unchanged.

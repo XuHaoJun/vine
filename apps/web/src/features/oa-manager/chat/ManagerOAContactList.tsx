@@ -1,6 +1,8 @@
 import { useRouter } from 'one'
 import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
+import { SERVER_URL } from '~/constants/urls'
 import { Avatar } from '~/interface/avatars/Avatar'
+import { Button } from '~/interface/buttons/Button'
 import { Pressable } from '~/interface/buttons/Pressable'
 import { Input } from '~/interface/forms/Input'
 import type { ManagerOAContactListItem } from './useManagerOAContacts'
@@ -42,6 +44,14 @@ function ContactTagChips({ tags }: { tags: ManagerOAContactListItem['tags'] }) {
   )
 }
 
+function openContactExport(oaId: string) {
+  if (typeof window === 'undefined') return
+  const url = `${SERVER_URL}/api/manager/oa/${encodeURIComponent(
+    oaId,
+  )}/contacts/export.csv`
+  window.open(url, '_blank', 'noopener,noreferrer')
+}
+
 export function ManagerOAContactList({
   oaId,
   selectedUserId,
@@ -56,15 +66,23 @@ export function ManagerOAContactList({
   return (
     <YStack width={300} shrink={0} borderRightWidth={1} borderColor="$borderColor">
       <YStack p="$3" gap="$2" borderBottomWidth={1} borderColor="$borderColor">
-        <SizableText size="$3" fontWeight="700">
-          Contact list
-        </SizableText>
+        <XStack items="center" justify="space-between" gap="$2">
+          <SizableText size="$3" fontWeight="700">
+            Contact list
+          </SizableText>
+          <Button size="$2" onPress={() => openContactExport(oaId)}>
+            Export contacts CSV
+          </Button>
+        </XStack>
         <Input
           value={searchQuery}
           onChangeText={onSearchQueryChange}
           placeholder="Search contacts"
           size="$3"
         />
+        <SizableText size="$1" color="$color10">
+          Contact CSV only. Chat history backup is unavailable in Phase 2.
+        </SizableText>
       </YStack>
       <ScrollView>
         {isLoading ? (
