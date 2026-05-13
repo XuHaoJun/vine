@@ -226,16 +226,17 @@ Export UI:
 ## Phase 3 Handoff
 
 Phase 2 does not send broadcasts. It must still shape tag data so Phase 3 can
-build tag-based audiences without reworking CRM tags.
+build audience filters without reworking CRM tags.
 
 The Phase 3 handoff is:
 
 - tag definitions are stable and OA-scoped;
 - tag assignments are queryable by OA and tag;
-- contact list and filters can identify the users that belong to a tag.
+- contact list and filters can identify the users that belong to a tag;
+- CRM tag IDs and names are usable as Phase 3 audience filter fields.
 
-Broadcast send flow, quota checks, recipient expansion, and campaign statistics
-remain Phase 3 work.
+Campaign send flow, quota checks, recipient snapshots, external Messaging API
+compatibility, and campaign statistics remain Phase 3 work.
 
 ## Testing
 

@@ -191,36 +191,41 @@ Acceptance criteria:
   deferred.
 - User-side chat behavior remains unchanged.
 
-### Phase 3: Broadcast and Audiences
+### Phase 3: Audience Filters and Campaign Broadcasts
 
 Goal: support outbound communication beyond one-on-one chat.
 
 Scope:
 
-- Add `Broadcast list` and `New broadcast`.
-- Build a reusable message composer for text first, then rich message types.
-- Support broadcast to all current friends.
-- Support multicast to selected contacts.
-- Add audience primitives:
-  - uploaded user IDs;
-  - message click audience;
-  - message impression/open audience;
-  - rich menu click audience if Vine tracks it.
-- Add narrowcast only after audience data and privacy thresholds are defined.
-- Enforce quota before enqueueing sends.
-- Add retry-key and idempotency behavior aligned with `docs/messaging-api-vine.md`.
+- Split Phase 3 into:
+  - Phase 3A: Vine-native audience filters and campaign broadcast MVP.
+  - Phase 3B: LINE-compatible external Messaging API facade.
+- Add reusable audience filters as named, versioned, controlled Mongo-like
+  predicates over OA contact fields.
+- Add campaign records for outbound bulk sends, including text content,
+  recipient snapshot, send status, delivery counts, and quota usage.
+- Support text campaigns to all current friends or a saved audience filter.
+- Preserve Phase 2 CRM tags as first-class audience query fields.
+- Enforce quota before enqueueing sends and count usage per recipient.
+- Make send behavior idempotent and recoverable.
+- In Phase 3B, compile supported LINE-shaped broadcast, multicast, narrowcast,
+  and audience upload requests into Vine-native audience filters and campaigns.
 
 LINE reference concepts used:
 
 - Broadcast, push, multicast, and narrowcast message families.
-- Audience groups and audience sharing ideas.
+- Audience groups as external API facade inputs, not Vine's internal model.
 - Unit-based message statistics.
 
 Acceptance criteria:
 
-- A manager can send a text broadcast to current OA friends.
+- A manager can create reusable audience filters for one OA.
+- A manager can send a text campaign to all current OA friends or a saved
+  audience filter.
+- Each send stores a durable recipient snapshot.
 - Message usage is counted per recipient.
-- Future targeting is backed by explicit audience records, not ad hoc filters.
+- Future LINE-compatible Messaging API endpoints are backed by Vine-native
+  audience filters and campaigns, not LINE-specific internal tables.
 
 ### Phase 4: Interactive Content
 
