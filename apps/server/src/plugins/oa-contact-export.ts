@@ -1,8 +1,8 @@
 import { getAuthDataFromRequest } from '@take-out/better-auth-utils/server'
 import { logger } from '../lib/logger'
 import { toWebRequest } from '../utils'
-import type { createAuthServer } from './auth'
 import type { createOAContactExportService } from '../services/oa-contact-export'
+import type { createAuthServer } from './auth'
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 
 type OAContactExportPluginDeps = {
@@ -20,10 +20,7 @@ export async function oaContactExportPlugin(
 ) {
   fastify.get(
     '/api/manager/oa/:oaId/contacts/export.csv',
-    async (
-      request: FastifyRequest<{ Params: ExportParams }>,
-      reply: FastifyReply,
-    ) => {
+    async (request: FastifyRequest<{ Params: ExportParams }>, reply: FastifyReply) => {
       const webReq = toWebRequest(request)
       const authData = await getAuthDataFromRequest(deps.auth, webReq).catch(() => null)
       if (!authData?.id) {

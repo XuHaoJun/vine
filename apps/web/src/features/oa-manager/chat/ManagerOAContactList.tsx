@@ -1,10 +1,10 @@
 import { useRouter } from 'one'
 import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
+import { SERVER_URL } from '~/constants/urls'
 import { Avatar } from '~/interface/avatars/Avatar'
 import { Button } from '~/interface/buttons/Button'
 import { Pressable } from '~/interface/buttons/Pressable'
 import { Input } from '~/interface/forms/Input'
-import { SERVER_URL } from '~/constants/urls'
 import type { ManagerOAContactListItem } from './useManagerOAContacts'
 
 type Props = {

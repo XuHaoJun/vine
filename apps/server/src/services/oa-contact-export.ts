@@ -95,7 +95,9 @@ export function createOAContactExportService(deps: OAContactExportDeps) {
       })
       .from(officialAccount)
       .innerJoin(oaProvider, eq(officialAccount.providerId, oaProvider.id))
-      .where(and(eq(officialAccount.id, input.oaId), eq(oaProvider.ownerId, input.ownerId)))
+      .where(
+        and(eq(officialAccount.id, input.oaId), eq(oaProvider.ownerId, input.ownerId)),
+      )
       .limit(1)
 
     if (!account) return null
