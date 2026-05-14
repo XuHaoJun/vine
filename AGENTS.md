@@ -236,6 +236,19 @@ Important notes:
 - Never commit secrets, keys, or `.env` files
 - Run relevant checks before committing
 
+### Branch Workflow
+
+- Prefer the traditional single-checkout branch workflow:
+  `git checkout -b <branch-name>`
+- Do not create or enter `git worktree` checkouts by default, even when a
+  Superpowers workflow suggests isolated worktrees.
+- If isolation is needed, ask explicitly before creating a worktree and explain
+  the setup cost: separate `node_modules`, separate `.code-review-graph`, and
+  Docker Compose / integration-test port conflicts.
+- Do not run multiple Vine integration stacks from multiple checkout directories
+  at the same time; `scripts/integration.ts` and `docker-compose.yml` use fixed
+  local ports and shared Docker Compose resources.
+
 <!-- code-review-graph MCP tools -->
 
 ## MCP Tools: code-review-graph
