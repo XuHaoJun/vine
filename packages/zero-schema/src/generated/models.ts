@@ -6,6 +6,8 @@ import * as creatorProfile from '../models/creatorProfile'
 import * as entitlement from '../models/entitlement'
 import * as friendship from '../models/friendship'
 import * as message from '../models/message'
+import * as oaAudienceFilter from '../models/oaAudienceFilter'
+import * as oaCampaign from '../models/oaCampaign'
 import * as oaChatFilter from '../models/oaChatFilter'
 import * as oaContactProfile from '../models/oaContactProfile'
 import * as oaContactTag from '../models/oaContactTag'
@@ -27,6 +29,8 @@ export const models = {
   entitlement,
   friendship,
   message,
+  oaAudienceFilter,
+  oaCampaign,
   oaChatFilter,
   oaContactProfile,
   oaContactTag,

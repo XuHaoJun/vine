@@ -358,3 +358,56 @@ export const oaChatFilter = pgTable(
   },
   (table) => [index('oaChatFilter_oaId_idx').on(table.oaId)],
 )
+
+export const oaAudienceFilter = pgTable(
+  'oaAudienceFilter',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    oaId: uuid('oaId')
+      .notNull()
+      .references(() => officialAccount.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    queryVersion: integer('queryVersion').notNull().default(1),
+    queryJson: jsonb('queryJson').notNull(),
+    createdByManagerId: text('createdByManagerId').notNull(),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('oaAudienceFilter_oaId_idx').on(table.oaId),
+    uniqueIndex('oaAudienceFilter_oaId_name_unique').on(table.oaId, table.name),
+  ],
+)
+
+export const oaCampaign = pgTable(
+  'oaCampaign',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    oaId: uuid('oaId')
+      .notNull()
+      .references(() => officialAccount.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    messageType: text('messageType').notNull().default('text'),
+    messageText: text('messageText').notNull(),
+    audienceFilterId: uuid('audienceFilterId').references(() => oaAudienceFilter.id, {
+      onDelete: 'set null',
+    }),
+    inlineAudienceQueryJson: jsonb('inlineAudienceQueryJson'),
+    messageRequestId: uuid('messageRequestId'),
+    status: text('status').notNull().default('draft'),
+    recipientSnapshotCount: integer('recipientSnapshotCount').notNull().default(0),
+    successCount: integer('successCount').notNull().default(0),
+    failedCount: integer('failedCount').notNull().default(0),
+    quotaUsed: integer('quotaUsed').notNull().default(0),
+    createdByManagerId: text('createdByManagerId').notNull(),
+    createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'string' }).defaultNow().notNull(),
+    queuedAt: timestamp('queuedAt', { mode: 'string' }),
+    sentAt: timestamp('sentAt', { mode: 'string' }),
+  },
+  (table) => [
+    index('oaCampaign_oaId_createdAt_idx').on(table.oaId, table.createdAt),
+    index('oaCampaign_oaId_status_idx').on(table.oaId, table.status),
+    index('oaCampaign_messageRequestId_idx').on(table.messageRequestId),
+  ],
+)

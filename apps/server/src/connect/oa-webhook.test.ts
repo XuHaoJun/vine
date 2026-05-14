@@ -123,7 +123,14 @@ function makeDeps(
   const auth = {} as any
   const drive = {} as any
 
-  oaHandler({ oa: oa as any, auth, drive, webhookDelivery })(mockRouter as any)
+  oaHandler({
+    oa: oa as any,
+    auth,
+    drive,
+    webhookDelivery,
+    oaAudience: {} as any,
+    oaCampaign: {} as any,
+  })(mockRouter as any)
 
   return { capturedImpl, oa, webhookDelivery }
 }

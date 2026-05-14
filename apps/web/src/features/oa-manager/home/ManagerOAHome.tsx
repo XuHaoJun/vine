@@ -124,6 +124,13 @@ export function ManagerOAHome({ oaId }: ManagerOAHomeProps) {
           }
         />
         <OperationCard
+          title="Campaigns"
+          description="Send text campaigns to saved audiences."
+          value="Audience filters ready"
+          actionLabel="Open"
+          onPress={() => router.navigate(`/manager/${oaId}/campaigns` as any)}
+        />
+        <OperationCard
           title="Quota"
           description="Read-only monthly message usage."
           value={formatQuota(data)}

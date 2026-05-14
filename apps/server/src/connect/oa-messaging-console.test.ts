@@ -45,6 +45,8 @@ function makeDeps(ownerId = 'user-1') {
     drive: {} as any,
     webhookDelivery: {} as any,
     oa: oa as any,
+    oaAudience: {} as any,
+    oaCampaign: {} as any,
   })(router as any)
   return { capturedImpl, oa }
 }

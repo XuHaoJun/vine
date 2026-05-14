@@ -19,6 +19,8 @@ import type { createMiniAppService } from '../services/mini-app'
 import type { createMiniAppServiceMessageService } from '../services/mini-app-service-message'
 import type { createMiniAppTemplateService } from '../services/mini-app-service-message-templates'
 import type { createOAService } from '../services/oa'
+import type { createOAAudienceService } from '../services/oa-audience'
+import type { createOACampaignService } from '../services/oa-campaign'
 import type { createOAWebhookDeliveryService } from '../services/oa-webhook-delivery'
 import type { StickerMarketAdminHandlerDeps } from './stickerMarketAdmin'
 import type { StickerMarketCreatorHandlerDeps } from './stickerMarketCreator'
@@ -29,6 +31,8 @@ import type { DriveService } from '@vine/drive'
 
 type ConnectDeps = {
   oa: ReturnType<typeof createOAService>
+  oaAudience: ReturnType<typeof createOAAudienceService>
+  oaCampaign: ReturnType<typeof createOACampaignService>
   webhookDelivery: ReturnType<typeof createOAWebhookDeliveryService>
   liff: ReturnType<typeof createLiffService>
   miniApp: ReturnType<typeof createMiniAppService>

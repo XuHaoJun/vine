@@ -129,6 +129,26 @@ const message = {
   ),
 }
 
+const oaAudienceFilter = {
+  oaAudienceFiltersByOfficialAccountId: defineQuery(
+    v.object({
+      oaId: v.string(),
+      limit: v.optional(v.number()),
+    }),
+    ({ args }) => Queries.oaAudienceFilter.oaAudienceFiltersByOfficialAccountId(args),
+  ),
+}
+
+const oaCampaign = {
+  oaCampaignsByOfficialAccountId: defineQuery(
+    v.object({
+      oaId: v.string(),
+      limit: v.optional(v.number()),
+    }),
+    ({ args }) => Queries.oaCampaign.oaCampaignsByOfficialAccountId(args),
+  ),
+}
+
 const oaChatFilter = {
   oaChatFiltersByOfficialAccountId: defineQuery(
     v.object({
@@ -231,6 +251,8 @@ export const queries = defineQueries({
   entitlement,
   friendship,
   message,
+  oaAudienceFilter,
+  oaCampaign,
   oaChatFilter,
   oaContactTag,
   oaFriendship,

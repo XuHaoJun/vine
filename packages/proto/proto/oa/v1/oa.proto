@@ -886,6 +886,30 @@ message RemoveBusinessProfileImageResponse {
   bool is_dirty = 2;
 }
 
+// ── OA Campaigns ──
+
+message PreviewAudienceFilterRequest {
+  string official_account_id = 1;
+  string query_json = 2;
+}
+
+message PreviewAudienceFilterResponse {
+  int32 count = 1;
+}
+
+message SendTextCampaignRequest {
+  string official_account_id = 1;
+  string campaign_id = 2;
+  string name = 3;
+  string message_text = 4;
+  optional string audience_filter_id = 5;
+  optional string inline_audience_query_json = 6;
+}
+
+message SendTextCampaignResponse {
+  string campaign_id = 1;
+}
+
 // ── Service ──
 
 service OAService {
@@ -949,4 +973,6 @@ service OAService {
   rpc PublishBusinessProfile(PublishBusinessProfileRequest) returns (PublishBusinessProfileResponse);
   rpc UploadBusinessProfileImage(UploadBusinessProfileImageRequest) returns (UploadBusinessProfileImageResponse);
   rpc RemoveBusinessProfileImage(RemoveBusinessProfileImageRequest) returns (RemoveBusinessProfileImageResponse);
+  rpc PreviewAudienceFilter(PreviewAudienceFilterRequest) returns (PreviewAudienceFilterResponse);
+  rpc SendTextCampaign(SendTextCampaignRequest) returns (SendTextCampaignResponse);
 }
