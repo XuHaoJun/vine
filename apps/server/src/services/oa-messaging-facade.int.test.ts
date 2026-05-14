@@ -11,8 +11,8 @@ import { describe, expect, it } from 'vitest'
 import { withRollbackDb } from '../test/integration-db'
 import { createOAAudienceService } from './oa-audience'
 import { createOACampaignService } from './oa-campaign'
-import { createOAMessagingFacadeService } from './oa-messaging-facade'
 import { createOAMessagingService } from './oa-messaging'
+import { createOAMessagingFacadeService } from './oa-messaging-facade'
 
 async function seedOaWithFriends(db: any, suffix: string, userIds: string[]) {
   const [provider] = await db

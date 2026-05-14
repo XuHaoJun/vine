@@ -187,7 +187,7 @@ describe('oa campaign external sends', () => {
     })
 
     expect(result.ok).toBe(true)
-    expect(result.accepted?.httpRequestId).toBe('req_external')
+    expect((result as any).accepted?.httpRequestId).toBe('req_external')
     expect(messaging.acceptMessagingExecution).toHaveBeenCalledWith(
       expect.objectContaining({
         requestType: 'campaign',

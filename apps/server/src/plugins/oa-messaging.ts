@@ -12,8 +12,8 @@ import { and, eq } from 'drizzle-orm'
 import * as v from 'valibot'
 import { oaApiPath } from './oa-routes'
 import type { createOAService } from '../services/oa'
-import type { createOAMessagingFacadeService } from '../services/oa-messaging-facade'
 import type { createOAMessagingService } from '../services/oa-messaging'
+import type { createOAMessagingFacadeService } from '../services/oa-messaging-facade'
 import type { schema } from '@vine/db'
 import type { DriveService } from '@vine/drive'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
@@ -480,13 +480,19 @@ export async function oaMessagingPlugin(
         return await sendFacadeResult(reply, result)
       } catch (err) {
         if (err instanceof Error && err.message === 'Missing Bearer token') {
-          return reply.code(401).send({ message: 'Missing Bearer token', code: 'INVALID_TOKEN' })
+          return reply
+            .code(401)
+            .send({ message: 'Missing Bearer token', code: 'INVALID_TOKEN' })
         }
         if (err instanceof Error && err.message === 'Invalid access token') {
-          return reply.code(401).send({ message: 'Invalid access token', code: 'INVALID_TOKEN' })
+          return reply
+            .code(401)
+            .send({ message: 'Invalid access token', code: 'INVALID_TOKEN' })
         }
         if (err instanceof Error && err.message === 'Access token expired') {
-          return reply.code(401).send({ message: 'Access token expired', code: 'TOKEN_EXPIRED' })
+          return reply
+            .code(401)
+            .send({ message: 'Access token expired', code: 'TOKEN_EXPIRED' })
         }
         return reply.code(500).send({ message: 'Internal server error' })
       }
@@ -512,13 +518,19 @@ export async function oaMessagingPlugin(
         })
       } catch (err) {
         if (err instanceof Error && err.message === 'Missing Bearer token') {
-          return reply.code(401).send({ message: 'Missing Bearer token', code: 'INVALID_TOKEN' })
+          return reply
+            .code(401)
+            .send({ message: 'Missing Bearer token', code: 'INVALID_TOKEN' })
         }
         if (err instanceof Error && err.message === 'Invalid access token') {
-          return reply.code(401).send({ message: 'Invalid access token', code: 'INVALID_TOKEN' })
+          return reply
+            .code(401)
+            .send({ message: 'Invalid access token', code: 'INVALID_TOKEN' })
         }
         if (err instanceof Error && err.message === 'Access token expired') {
-          return reply.code(401).send({ message: 'Access token expired', code: 'TOKEN_EXPIRED' })
+          return reply
+            .code(401)
+            .send({ message: 'Access token expired', code: 'TOKEN_EXPIRED' })
         }
         return reply.code(500).send({ message: 'Internal server error' })
       }
@@ -539,13 +551,19 @@ export async function oaMessagingPlugin(
         return reply.send(result)
       } catch (err) {
         if (err instanceof Error && err.message === 'Missing Bearer token') {
-          return reply.code(401).send({ message: 'Missing Bearer token', code: 'INVALID_TOKEN' })
+          return reply
+            .code(401)
+            .send({ message: 'Missing Bearer token', code: 'INVALID_TOKEN' })
         }
         if (err instanceof Error && err.message === 'Invalid access token') {
-          return reply.code(401).send({ message: 'Invalid access token', code: 'INVALID_TOKEN' })
+          return reply
+            .code(401)
+            .send({ message: 'Invalid access token', code: 'INVALID_TOKEN' })
         }
         if (err instanceof Error && err.message === 'Access token expired') {
-          return reply.code(401).send({ message: 'Access token expired', code: 'TOKEN_EXPIRED' })
+          return reply
+            .code(401)
+            .send({ message: 'Access token expired', code: 'TOKEN_EXPIRED' })
         }
         return reply.code(500).send({ message: 'Internal server error' })
       }
@@ -560,22 +578,33 @@ export async function oaMessagingPlugin(
         const oaId = await extractOaFromToken(request, db)
         const query = request.query as { requestId?: string }
         if (!query.requestId) {
-          return reply.code(400).send({ message: 'requestId is required', code: 'INVALID_REQUEST' })
+          return reply
+            .code(400)
+            .send({ message: 'requestId is required', code: 'INVALID_REQUEST' })
         }
-        const result = await facade.getMessageEventInsight({ oaId, requestId: query.requestId })
+        const result = await facade.getMessageEventInsight({
+          oaId,
+          requestId: query.requestId,
+        })
         if (!result.ok) {
           return reply.code(400).send({ message: result.message, code: result.code })
         }
         return reply.send({ overview: result.overview })
       } catch (err) {
         if (err instanceof Error && err.message === 'Missing Bearer token') {
-          return reply.code(401).send({ message: 'Missing Bearer token', code: 'INVALID_TOKEN' })
+          return reply
+            .code(401)
+            .send({ message: 'Missing Bearer token', code: 'INVALID_TOKEN' })
         }
         if (err instanceof Error && err.message === 'Invalid access token') {
-          return reply.code(401).send({ message: 'Invalid access token', code: 'INVALID_TOKEN' })
+          return reply
+            .code(401)
+            .send({ message: 'Invalid access token', code: 'INVALID_TOKEN' })
         }
         if (err instanceof Error && err.message === 'Access token expired') {
-          return reply.code(401).send({ message: 'Access token expired', code: 'TOKEN_EXPIRED' })
+          return reply
+            .code(401)
+            .send({ message: 'Access token expired', code: 'TOKEN_EXPIRED' })
         }
         return reply.code(500).send({ message: 'Internal server error' })
       }

@@ -180,7 +180,13 @@ await zeroPlugin(app, { auth, zero })
 await mediaUploadPlugin(app, { auth, drive })
 await oaContactExportPlugin(app, { auth, contactExport: oaContactExport })
 await locationMapPlugin(app, { db, auth })
-await oaMessagingPlugin(app, { oa, messaging: oaMessaging, facade: oaMessagingFacade, db, drive })
+await oaMessagingPlugin(app, {
+  oa,
+  messaging: oaMessaging,
+  facade: oaMessagingFacade,
+  db,
+  drive,
+})
 await oaRichMenuPlugin(app, { oa, db, drive })
 await oaWebhookPlugin(app, { oa, db, auth, webhookDelivery })
 await oaWebhookEndpointPlugin(app, { oa, db })

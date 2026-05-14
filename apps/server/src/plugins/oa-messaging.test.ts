@@ -121,7 +121,10 @@ function createTestApp(
       mockMessagingOverrides?.facade?.narrowcast ??
       vi.fn().mockResolvedValue({
         ok: true,
-        accepted: { httpRequestId: 'req_narrowcast', acceptedRequestId: 'acc_narrowcast' },
+        accepted: {
+          httpRequestId: 'req_narrowcast',
+          acceptedRequestId: 'acc_narrowcast',
+        },
         recipientCount: 1,
       }),
     uploadAudienceGroup:
@@ -772,7 +775,10 @@ describe('oaMessagingPlugin — Multicast Message', () => {
       facade: {
         multicast: vi.fn().mockResolvedValue({
           ok: true,
-          accepted: { httpRequestId: 'req_multicast', acceptedRequestId: 'acc_multicast' },
+          accepted: {
+            httpRequestId: 'req_multicast',
+            acceptedRequestId: 'acc_multicast',
+          },
           recipientCount: 1,
         }),
       },

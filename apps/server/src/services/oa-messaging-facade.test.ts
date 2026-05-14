@@ -92,7 +92,9 @@ describe('oa messaging campaign facade', () => {
       service.broadcast({
         oaId: 'oa-1',
         retryKey: undefined,
-        body: { messages: [{ type: 'image', originalContentUrl: 'https://example.test/a.jpg' }] },
+        body: {
+          messages: [{ type: 'image', originalContentUrl: 'https://example.test/a.jpg' }],
+        },
       }),
     ).resolves.toEqual({
       ok: false,
@@ -125,7 +127,9 @@ describe('oa messaging campaign facade', () => {
       values: vi.fn().mockReturnValue({
         returning: vi
           .fn()
-          .mockRejectedValue(new Error('duplicate key value violates oaAudienceFilter_oaId_name_unique')),
+          .mockRejectedValue(
+            new Error('duplicate key value violates oaAudienceFilter_oaId_name_unique'),
+          ),
       }),
     })
 

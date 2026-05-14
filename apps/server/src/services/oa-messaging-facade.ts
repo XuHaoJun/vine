@@ -1,10 +1,10 @@
 import { randomUUID } from 'crypto'
 import { oaAudienceFilter, oaCampaign } from '@vine/db/schema-oa'
 import { oaMessageRequest } from '@vine/db/schema-private'
+import { validateAudienceQuery, type AudienceQueryJson } from '@vine/zero-schema'
 import { and, eq, or } from 'drizzle-orm'
 import type { createOACampaignService } from './oa-campaign'
 import type { schema } from '@vine/db'
-import { validateAudienceQuery, type AudienceQueryJson } from '@vine/zero-schema'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 type TextMessage = { type: 'text'; text: string }
@@ -60,7 +60,9 @@ function readSingleTextMessage(body: CampaignBody): TextMessage | FacadeError {
 }
 
 function isFacadeError(value: unknown): value is FacadeError {
-  return typeof value === 'object' && value !== null && (value as FacadeError).ok === false
+  return (
+    typeof value === 'object' && value !== null && (value as FacadeError).ok === false
+  )
 }
 
 function compileRecipient(
@@ -113,8 +115,11 @@ function compileOperator(
   const andList = value.and
   const orList = value.or
   const notValue = value.not
-  const providedOperators = [andList !== undefined, orList !== undefined, notValue !== undefined]
-    .filter(Boolean).length
+  const providedOperators = [
+    andList !== undefined,
+    orList !== undefined,
+    notValue !== undefined,
+  ].filter(Boolean).length
   if (providedOperators !== 1) {
     return {
       ok: false,
@@ -193,7 +198,9 @@ function compileOperator(
   }
 }
 
-function validateCompiledQuery(query: AudienceQueryJson | undefined): FacadeError | undefined {
+function validateCompiledQuery(
+  query: AudienceQueryJson | undefined,
+): FacadeError | undefined {
   if (!query) return undefined
   const result = validateAudienceQuery(query)
   if (result.ok) return undefined
@@ -251,7 +258,11 @@ export function createOAMessagingFacadeService(deps: FacadeDeps) {
       return { ok: false as const, code: 'INVALID_REQUEST', message: 'to is required' }
     }
     if (!input.body.to.every((userId) => typeof userId === 'string')) {
-      return { ok: false as const, code: 'INVALID_REQUEST', message: 'to must contain strings' }
+      return {
+        ok: false as const,
+        code: 'INVALID_REQUEST',
+        message: 'to must contain strings',
+      }
     }
     if (input.body.to.length > 500) {
       return {
@@ -321,7 +332,9 @@ export function createOAMessagingFacadeService(deps: FacadeDeps) {
     const audiences = Array.isArray(input.body.audiences) ? input.body.audiences : []
     const userIds = audiences
       .map((item) =>
-        typeof item === 'object' && item !== null ? (item as { id?: unknown }).id : undefined,
+        typeof item === 'object' && item !== null
+          ? (item as { id?: unknown }).id
+          : undefined,
       )
       .filter((id): id is string => typeof id === 'string')
     if (userIds.length === 0) {
@@ -349,7 +362,10 @@ export function createOAMessagingFacadeService(deps: FacadeDeps) {
       if (!createdFilter) throw new Error('Audience group was not created')
       filter = createdFilter
     } catch (err) {
-      if (err instanceof Error && err.message.includes('oaAudienceFilter_oaId_name_unique')) {
+      if (
+        err instanceof Error &&
+        err.message.includes('oaAudienceFilter_oaId_name_unique')
+      ) {
         return {
           ok: false as const,
           code: 'INVALID_REQUEST',
@@ -411,7 +427,11 @@ export function createOAMessagingFacadeService(deps: FacadeDeps) {
       )
       .limit(1)
     if (!row) {
-      return { ok: false as const, code: 'INVALID_REQUEST', message: 'requestId not found' }
+      return {
+        ok: false as const,
+        code: 'INVALID_REQUEST',
+        message: 'requestId not found',
+      }
     }
     return {
       ok: true as const,
