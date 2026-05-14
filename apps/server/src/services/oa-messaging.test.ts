@@ -10,6 +10,7 @@ import {
   checkRetryKeyForRequest,
   createOAMessagingService,
   resolveMulticastRecipients,
+  summarizeDeliveryStatuses,
 } from './oa-messaging'
 
 describe('oa messaging request utilities', () => {
@@ -255,6 +256,31 @@ describe('oa messaging multicast', () => {
     expect(getInitialAcceptedRequestStatus({ recipientCount: 1 })).toBe('processing')
   })
 
+  it('derives campaign counters from delivery statuses', () => {
+    expect(
+      summarizeDeliveryStatuses([
+        { status: 'delivered' },
+        { status: 'failed' },
+        { status: 'pending' },
+      ]),
+    ).toEqual({
+      campaignStatus: 'processing',
+      delivered: 1,
+      failed: 1,
+      pending: 1,
+      requestStatus: 'processing',
+    })
+    expect(
+      summarizeDeliveryStatuses([{ status: 'delivered' }, { status: 'delivered' }]),
+    ).toEqual({
+      campaignStatus: 'sent',
+      delivered: 2,
+      failed: 0,
+      pending: 0,
+      requestStatus: 'completed',
+    })
+  })
+
   it('keeps multicast retry-key hashes separate from push and broadcast', () => {
     const multicast = createRequestHash({
       endpoint: 'multicast',
@@ -276,5 +302,88 @@ describe('oa messaging multicast', () => {
         messages: [{ type: 'text', text: 'hello' }],
       }),
     )
+  })
+})
+
+function makeAcceptExecutionDb() {
+  const calls: string[] = []
+  let insertCount = 0
+  const tx = {
+    select: vi.fn(() => ({
+      from: vi.fn(() => ({
+        where: vi.fn(() => ({
+          limit: vi.fn(async () => []),
+        })),
+      })),
+    })),
+    insert: vi.fn(() => {
+      insertCount += 1
+      const current = insertCount
+      return {
+        values: vi.fn(() => {
+          if (current === 1) {
+            calls.push('request')
+            return {
+              returning: vi.fn(async () => [{ id: 'request-1' }]),
+            }
+          }
+          calls.push('deliveries')
+          return {
+            onConflictDoNothing: vi.fn(async () => undefined),
+          }
+        }),
+      }
+    }),
+  }
+  const db = {
+    transaction: vi.fn(async (cb) => cb(tx)),
+  } as any
+  return { calls, db, tx }
+}
+
+describe('oa messaging campaign acceptance hook', () => {
+  it('runs onAccepted after request and delivery rows are created', async () => {
+    const { calls, db } = makeAcceptExecutionDb()
+    const service = createOAMessagingService({
+      db,
+      instanceId: 'test',
+      now: () => new Date('2026-05-01T00:00:00.000Z'),
+    })
+
+    const result = await service.acceptMessagingExecution({
+      oaId: 'oa-1',
+      requestType: 'campaign',
+      target: { campaignId: 'campaign-1' },
+      messages: [{ type: 'text', text: 'hello' }],
+      resolveRecipients: async () => ['user-1'],
+      onAccepted: async ({ request, recipientCount }) => {
+        calls.push(`callback:${request.id}:${recipientCount}`)
+      },
+    })
+
+    expect(result).toMatchObject({ ok: true, recipientCount: 1 })
+    expect(calls).toEqual(['request', 'deliveries', 'callback:request-1:1'])
+  })
+
+  it('propagates onAccepted failures from inside the transaction', async () => {
+    const { db } = makeAcceptExecutionDb()
+    const service = createOAMessagingService({
+      db,
+      instanceId: 'test',
+      now: () => new Date('2026-05-01T00:00:00.000Z'),
+    })
+
+    await expect(
+      service.acceptMessagingExecution({
+        oaId: 'oa-1',
+        requestType: 'campaign',
+        target: { campaignId: 'campaign-1' },
+        messages: [{ type: 'text', text: 'hello' }],
+        resolveRecipients: async () => ['user-1'],
+        onAccepted: async () => {
+          throw new Error('campaign insert failed')
+        },
+      }),
+    ).rejects.toThrow('campaign insert failed')
   })
 })

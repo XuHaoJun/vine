@@ -20,6 +20,8 @@ export * as oaContactProfileModel from './models/oaContactProfile'
 export * as oaContactTagModel from './models/oaContactTag'
 export * as oaContactTagAssignmentModel from './models/oaContactTagAssignment'
 export * as oaChatFilterModel from './models/oaChatFilter'
+export * as oaAudienceFilterModel from './models/oaAudienceFilter'
+export * as oaCampaignModel from './models/oaCampaign'
 export * as messageModel from './models/message'
 export * as stickerPackageModel from './models/stickerPackage'
 export * as entitlementModel from './models/entitlement'
@@ -38,6 +40,11 @@ export * as stickerAssetQueries from './queries/stickerAsset'
 export * as oaFriendshipQueries from './queries/oaFriendship'
 export * as oaContactTagQueries from './queries/oaContactTag'
 export * as oaChatFilterQueries from './queries/oaChatFilter'
+export * as oaAudienceFilterQueries from './queries/oaAudienceFilter'
+export * as oaCampaignQueries from './queries/oaCampaign'
+
+// Audience
+export * from './audience/query'
 
 // Generated
 export * as tables from './generated/tables'

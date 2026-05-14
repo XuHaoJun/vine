@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from 'crypto'
-import { oaFriendship, oaQuota, oaReplyToken } from '@vine/db/schema-oa'
+import { oaCampaign, oaFriendship, oaQuota, oaReplyToken } from '@vine/db/schema-oa'
 import { oaMessageDelivery, oaMessageRequest, oaRetryKey } from '@vine/db/schema-private'
 import { chat, chatMember, chatOaLoading, message } from '@vine/db/schema-public'
 import { and, eq, gt, inArray, isNull, lt, lte, or, sql } from 'drizzle-orm'
@@ -54,7 +54,7 @@ export function createAcceptedRequestId(): string {
   return `acc_${randomUUID().replace(/-/g, '')}`
 }
 
-export type SendRequestType = 'reply' | 'push' | 'multicast' | 'broadcast'
+export type SendRequestType = 'reply' | 'push' | 'multicast' | 'broadcast' | 'campaign'
 
 export function calculateMessagingQuotaDelta(input: {
   recipientCount: number
@@ -67,6 +67,23 @@ export function getInitialAcceptedRequestStatus(input: {
   recipientCount: number
 }): 'processing' | 'completed' {
   return input.recipientCount === 0 ? 'completed' : 'processing'
+}
+
+export function summarizeDeliveryStatuses(rows: { status: string }[]) {
+  const delivered = rows.filter((row) => row.status === 'delivered').length
+  const failed = rows.filter((row) => row.status === 'failed').length
+  const pending = rows.length - delivered - failed
+  const requestStatus =
+    pending > 0
+      ? 'processing'
+      : failed === 0
+        ? 'completed'
+        : delivered > 0
+          ? 'partially_failed'
+          : 'failed'
+  const campaignStatus = requestStatus === 'completed' ? 'sent' : requestStatus
+
+  return { campaignStatus, delivered, failed, pending, requestStatus }
 }
 
 export async function resolveMulticastRecipients(
@@ -253,30 +270,28 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
 
     if (rows.length === 0) return
 
-    const delivered = rows.filter(
-      (row: { status: string }) => row.status === 'delivered',
-    ).length
-    const failed = rows.filter(
-      (row: { status: string }) => row.status === 'failed',
-    ).length
-    const pending = rows.length - delivered - failed
-    const nextStatus =
-      pending > 0
-        ? 'processing'
-        : failed === 0
-          ? 'completed'
-          : delivered > 0
-            ? 'partially_failed'
-            : 'failed'
+    const summary = summarizeDeliveryStatuses(rows)
+    const nowIso = now().toISOString()
 
     await tx
       .update(oaMessageRequest)
       .set({
-        status: nextStatus,
-        updatedAt: now().toISOString(),
-        completedAt: pending === 0 ? now().toISOString() : null,
+        status: summary.requestStatus,
+        updatedAt: nowIso,
+        completedAt: summary.pending === 0 ? nowIso : null,
       })
       .where(eq(oaMessageRequest.id, requestId))
+
+    await tx
+      .update(oaCampaign)
+      .set({
+        status: summary.campaignStatus,
+        successCount: summary.delivered,
+        failedCount: summary.failed,
+        updatedAt: nowIso,
+        sentAt: summary.pending === 0 ? nowIso : null,
+      })
+      .where(eq(oaCampaign.messageRequestId, requestId))
   }
 
   async function processPendingDeliveries(input: {
@@ -535,6 +550,12 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
     target: unknown
     messages: NormalizedMessage[]
     resolveRecipients: (tx: any, nowIso: string) => Promise<string[] | { error: string }>
+    onAccepted?: (ctx: {
+      tx: any
+      request: typeof oaMessageRequest.$inferSelect
+      recipientCount: number
+      nowIso: string
+    }) => Promise<void>
   }) {
     const checked = await checkRetryKeyForRequest({
       db: deps.db,
@@ -602,6 +623,14 @@ export function createOAMessagingService(deps: OAMessagingDeps) {
           userIds: recipients,
           messageCount: input.messages.length,
         })
+        if (input.onAccepted) {
+          await input.onAccepted({
+            tx,
+            request,
+            recipientCount: recipients.length,
+            nowIso,
+          })
+        }
 
         return {
           ok: true as const,

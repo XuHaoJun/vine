@@ -9,6 +9,8 @@ import {
 import { logger } from '../lib/logger'
 import { requireAuthData, withAuthService } from './auth-context'
 import type { createOAService } from '../services/oa'
+import type { createOAAudienceService } from '../services/oa-audience'
+import type { createOACampaignService } from '../services/oa-campaign'
 import type { createOAWebhookDeliveryService } from '../services/oa-webhook-delivery'
 import type { ServiceImpl } from '@connectrpc/connect'
 import type { AuthServer } from '@take-out/better-auth-utils/server'
@@ -16,6 +18,8 @@ import type { DriveService } from '@vine/drive'
 
 type OAHandlerDeps = {
   oa: ReturnType<typeof createOAService>
+  oaAudience: ReturnType<typeof createOAAudienceService>
+  oaCampaign: ReturnType<typeof createOACampaignService>
   auth: AuthServer
   drive: DriveService
   webhookDelivery: ReturnType<typeof createOAWebhookDeliveryService>
@@ -131,6 +135,14 @@ function toProtoWebhook(
     status: dbWebhookStatusToProto(db.status),
     lastVerifiedAt: db.lastVerifiedAt ?? undefined,
     createdAt: db.createdAt,
+  }
+}
+
+function parseAudienceQueryJson(value: string) {
+  try {
+    return JSON.parse(value)
+  } catch {
+    throw new ConnectError('Invalid audience query JSON', Code.InvalidArgument)
   }
 }
 
@@ -1295,6 +1307,39 @@ export function oaHandler(deps: OAHandlerDeps) {
         )
         if (!state) throw new ConnectError('Official account not found', Code.NotFound)
         return { draft: toProtoBusinessProfile(state.draft), isDirty: state.isDirty }
+      },
+      async previewAudienceFilter(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+
+        const query = parseAudienceQueryJson(req.queryJson)
+        const result = await deps.oaAudience.preview({
+          oaId: req.officialAccountId,
+          query,
+        })
+        if (!result.ok) {
+          throw new ConnectError(result.message, Code.InvalidArgument)
+        }
+        return { count: result.count }
+      },
+      async sendTextCampaign(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+
+        const inlineAudienceQuery = req.inlineAudienceQueryJson
+          ? parseAudienceQueryJson(req.inlineAudienceQueryJson)
+          : undefined
+        const result = await deps.oaCampaign.sendTextCampaign({
+          campaignId: req.campaignId,
+          oaId: req.officialAccountId,
+          managerId: auth.id,
+          name: req.name,
+          messageText: req.messageText,
+          audienceFilterId: req.audienceFilterId,
+          inlineAudienceQuery,
+        })
+
+        return { campaignId: result.campaignId }
       },
     }
 

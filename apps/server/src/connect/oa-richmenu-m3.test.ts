@@ -74,9 +74,14 @@ function makeDeps(oaOverrides: Partial<Record<string, any>> = {}) {
       Object.assign(capturedImpl, impl)
     },
   }
-  oaHandler({ oa: oa as any, auth: {} as any, drive: {} as any, webhookDelivery })(
-    mockRouter as any,
-  )
+  oaHandler({
+    oa: oa as any,
+    auth: {} as any,
+    drive: {} as any,
+    webhookDelivery,
+    oaAudience: {} as any,
+    oaCampaign: {} as any,
+  })(mockRouter as any)
   return { capturedImpl, oa, webhookDelivery }
 }
 

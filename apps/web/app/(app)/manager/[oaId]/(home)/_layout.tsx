@@ -17,8 +17,13 @@ export default function ManagerHomeLayout() {
   const homePath = `/manager/${oaId}`
   const chatPath = `/manager/${oaId}/chat`
   const richMenuPath = `/manager/${oaId}/richmenu`
+  const campaignsPath = `/manager/${oaId}/campaigns`
+  const audiencesPath = `/manager/${oaId}/campaigns/audiences`
   const homeActive = path === homePath
   const richMenuActive = path.startsWith(richMenuPath)
+  const campaignsActive = path === campaignsPath
+  const campaignsTopActive = path.startsWith(campaignsPath)
+  const audiencesActive = path.startsWith(audiencesPath)
 
   const summary = useTanQuery({
     queryKey: ['oa', 'manager-summary', oaId],
@@ -86,6 +91,13 @@ export default function ManagerHomeLayout() {
             </SizableText>
           </Pressable>
         </Link>
+        <Link href={campaignsPath as any}>
+          <Pressable py="$3">
+            <SizableText size="$2" fontWeight={campaignsTopActive ? '700' : '500'}>
+              Campaigns
+            </SizableText>
+          </Pressable>
+        </Link>
       </XStack>
 
       <XStack flex={1} style={{ minHeight: 0 }} $platform-web={{ overflow: 'hidden' }}>
@@ -121,6 +133,49 @@ export default function ManagerHomeLayout() {
                 color={richMenuActive ? '$color12' : '$color11'}
               >
                 Rich menus
+              </SizableText>
+            </Pressable>
+          </Link>
+          <SizableText
+            size="$1"
+            fontWeight="700"
+            color="$color9"
+            textTransform="uppercase"
+            mt="$4"
+          >
+            Messaging
+          </SizableText>
+          <Link href={campaignsPath as any}>
+            <Pressable
+              py="$2"
+              px="$3"
+              rounded="$3"
+              bg={campaignsActive ? '$color3' : 'transparent'}
+              hoverStyle={{ bg: campaignsActive ? '$color3' : '$color2' }}
+            >
+              <SizableText
+                size="$2"
+                fontWeight={campaignsActive ? '700' : '500'}
+                color={campaignsActive ? '$color12' : '$color11'}
+              >
+                Campaigns
+              </SizableText>
+            </Pressable>
+          </Link>
+          <Link href={audiencesPath as any}>
+            <Pressable
+              py="$2"
+              px="$3"
+              rounded="$3"
+              bg={audiencesActive ? '$color3' : 'transparent'}
+              hoverStyle={{ bg: audiencesActive ? '$color3' : '$color2' }}
+            >
+              <SizableText
+                size="$2"
+                fontWeight={audiencesActive ? '700' : '500'}
+                color={audiencesActive ? '$color12' : '$color11'}
+              >
+                Audiences
               </SizableText>
             </Pressable>
           </Link>

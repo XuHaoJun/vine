@@ -31,6 +31,8 @@ import { createMiniAppService } from './services/mini-app'
 import { createMiniAppServiceMessageService } from './services/mini-app-service-message'
 import { createMiniAppTemplateService } from './services/mini-app-service-message-templates'
 import { createOAService } from './services/oa'
+import { createOAAudienceService } from './services/oa-audience'
+import { createOACampaignService } from './services/oa-campaign'
 import { createOAContactExportService } from './services/oa-contact-export'
 import { createOAMessagingService } from './services/oa-messaging'
 import { createOAWebhookDeliveryService } from './services/oa-webhook-delivery'
@@ -72,6 +74,12 @@ const oaMessaging = createOAMessagingService({
   db,
   instanceId: process.env['HOSTNAME'] ?? `server-${process.pid}`,
 })
+const oaAudience = createOAAudienceService({ db })
+const oaCampaign = createOACampaignService({
+  db,
+  audience: oaAudience,
+  messaging: oaMessaging,
+})
 const webhookDelivery = createOAWebhookDeliveryService({ db, oa, logger })
 const liff = createLiffService({ db })
 const miniApp = createMiniAppService({ db })
@@ -109,6 +117,8 @@ await registerPaymentsWebhookRoutes(app, { ...payments, db })
 await app.register(fastifyConnectPlugin, {
   routes: connectRoutes({
     oa,
+    oaAudience,
+    oaCampaign,
     webhookDelivery,
     liff,
     miniApp,
