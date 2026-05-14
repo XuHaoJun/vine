@@ -23,6 +23,10 @@ type SendTextCampaignInput = {
   inlineAudienceQuery: AudienceQueryJson | undefined
 }
 
+type ExternalTextCampaignInput = Omit<SendTextCampaignInput, 'managerId'> & {
+  retryKey: string | undefined
+}
+
 function cleanCampaignName(name: string): string {
   const trimmed = name.trim()
   if (trimmed.length === 0) throw new Error('Campaign name is required')
@@ -68,7 +72,9 @@ export function createOACampaignService(deps: OACampaignDeps) {
     return deps.audience.preview(input)
   }
 
-  async function sendTextCampaign(input: SendTextCampaignInput) {
+  async function acceptTextCampaign(
+    input: SendTextCampaignInput & { retryKey?: string },
+  ) {
     const name = cleanCampaignName(input.name)
     const messageText = cleanMessageText(input.messageText)
     const query = await loadAudienceQuery(input)
@@ -83,6 +89,7 @@ export function createOACampaignService(deps: OACampaignDeps) {
     const accepted = await deps.messaging.acceptMessagingExecution({
       oaId: input.oaId,
       requestType: 'campaign',
+      retryKey: input.retryKey,
       target: {
         campaignId: input.campaignId,
         audienceFilterId: input.audienceFilterId,
@@ -115,6 +122,13 @@ export function createOACampaignService(deps: OACampaignDeps) {
         })
       },
     })
+
+    return { accepted, acceptedRequestId, acceptedRecipientCount }
+  }
+
+  async function sendTextCampaign(input: SendTextCampaignInput) {
+    const { accepted, acceptedRequestId, acceptedRecipientCount } =
+      await acceptTextCampaign(input)
     if (!accepted.ok) {
       throw new Error(accepted.code)
     }
@@ -127,5 +141,14 @@ export function createOACampaignService(deps: OACampaignDeps) {
     }
   }
 
-  return { previewAudience, sendTextCampaign }
+  async function sendExternalTextCampaign(input: ExternalTextCampaignInput) {
+    const { accepted } = await acceptTextCampaign({
+      ...input,
+      managerId: 'messaging-api',
+      retryKey: input.retryKey,
+    })
+    return accepted
+  }
+
+  return { previewAudience, sendTextCampaign, sendExternalTextCampaign }
 }
