@@ -129,11 +129,18 @@ async function loadContactsForOa(
 }
 
 export function createOAAudienceService(deps: OAAudienceServiceDeps) {
+  function deliveryQuery(query: AudienceQueryJson): AudienceQueryJson {
+    return {
+      $and: [{ 'friendship.status': 'friend' }, query],
+    }
+  }
+
   async function resolveRecipients(input: {
     oaId: string
     query: AudienceQueryJson
   }): Promise<OAAudienceResolveResult> {
-    const validation = validateAudienceQuery(input.query)
+    const resolvedQuery = deliveryQuery(input.query)
+    const validation = validateAudienceQuery(resolvedQuery)
     if (!validation.ok) {
       return {
         ok: false,
@@ -146,7 +153,7 @@ export function createOAAudienceService(deps: OAAudienceServiceDeps) {
     return {
       ok: true,
       userIds: contacts
-        .filter((contact) => evaluateAudienceQuery(input.query, contact))
+        .filter((contact) => evaluateAudienceQuery(resolvedQuery, contact))
         .map((contact) => contact.providerUserId),
     }
   }

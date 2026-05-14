@@ -26,7 +26,7 @@ type SendTextCampaignInput = {
 function cleanCampaignName(name: string): string {
   const trimmed = name.trim()
   if (trimmed.length === 0) throw new Error('Campaign name is required')
-  if (trimmed.length > 80) throw new Error('Campaign name too long (max 80)')
+  if (trimmed.length > 100) throw new Error('Campaign name too long (max 100)')
   return trimmed
 }
 

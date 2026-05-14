@@ -1329,17 +1329,39 @@ export function oaHandler(deps: OAHandlerDeps) {
         const inlineAudienceQuery = req.inlineAudienceQueryJson
           ? parseAudienceQueryJson(req.inlineAudienceQueryJson)
           : undefined
-        const result = await deps.oaCampaign.sendTextCampaign({
-          campaignId: req.campaignId,
-          oaId: req.officialAccountId,
-          managerId: auth.id,
-          name: req.name,
-          messageText: req.messageText,
-          audienceFilterId: req.audienceFilterId,
-          inlineAudienceQuery,
-        })
 
-        return { campaignId: result.campaignId }
+        try {
+          const result = await deps.oaCampaign.sendTextCampaign({
+            campaignId: req.campaignId,
+            oaId: req.officialAccountId,
+            managerId: auth.id,
+            name: req.name,
+            messageText: req.messageText,
+            audienceFilterId: req.audienceFilterId,
+            inlineAudienceQuery,
+          })
+          return { campaignId: result.campaignId }
+        } catch (err) {
+          if (!(err instanceof Error)) throw err
+          const msg = err.message
+          if (
+            msg.startsWith('Campaign name') ||
+            msg.startsWith('Campaign text') ||
+            msg.startsWith('INVALID_AUDIENCE_QUERY')
+          ) {
+            throw new ConnectError(msg, Code.InvalidArgument)
+          }
+          if (msg === 'Audience filter not found') {
+            throw new ConnectError(msg, Code.NotFound)
+          }
+          if (msg === 'QUOTA_EXCEEDED') {
+            throw new ConnectError(msg, Code.ResourceExhausted)
+          }
+          if (msg === 'RETRY_KEY_ACCEPTED' || msg === 'RETRY_KEY_CONFLICT') {
+            throw new ConnectError(msg, Code.AlreadyExists)
+          }
+          throw err
+        }
       },
     }
 
