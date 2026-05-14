@@ -263,6 +263,30 @@ describe('repository DB integration', () => {
 - forgetting integration prerequisites and blaming the app for a stale local stack
 - rewriting assertions during refactors when the behavior itself has not changed
 
+### Playwright: Never Use Blind Waits
+
+**Do not use `page.waitForTimeout()` or arbitrary fixed delays** to wait for data, renders, or state. Blind waits are the #1 cause of CI-only flakes — a CI container that runs slightly slower than your machine will fail, while the same test passes locally.
+
+**Always prefer condition-based waiting.** Playwright's `expect(...).toBeVisible({ timeout })` retries until the condition is met or the timeout expires. This is deterministic: it passes as soon as data arrives, not after an arbitrary delay that might be too short.
+
+```ts
+// ❌ BAD — flakes on slow CI
+await page.waitForTimeout(2000)
+
+// ✅ GOOD — waits exactly as long as needed
+await expect(
+  page.getByRole('button', { name: /Open chat/ }),
+).toBeVisible({ timeout: 20000 })
+```
+
+This rule applies to:
+- Waiting for Zero sync to land query results
+- Waiting for network responses to update the DOM
+- Waiting for animations, transitions, or lazy-loaded content
+- Any situation where you are "giving it time to finish"
+
+The only acceptable exception: a sub-second pause to **debounce input events** (e.g., `page.waitForTimeout(300)` after `.fill()` before asserting autocomplete results). Even then, prefer `expect(...).toBeVisible({ timeout })` when the target DOM is known.
+
 ## Reference Files
 
 - `apps/server/src/services/oa.test.ts`
