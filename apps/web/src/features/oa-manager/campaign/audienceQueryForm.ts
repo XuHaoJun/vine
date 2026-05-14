@@ -7,9 +7,9 @@ export const defaultAudienceQuery: AudienceQueryJson = {
   'friendship.status': 'friend',
 }
 
-export function parseAudienceQueryText(text: string):
-  | { ok: true; query: AudienceQueryJson }
-  | { ok: false; error: string } {
+export function parseAudienceQueryText(
+  text: string,
+): { ok: true; query: AudienceQueryJson } | { ok: false; error: string } {
   let parsed: unknown
   try {
     parsed = JSON.parse(text)

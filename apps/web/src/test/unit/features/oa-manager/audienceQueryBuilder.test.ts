@@ -9,19 +9,13 @@ describe('audience query builder helpers', () => {
     expect(
       parseAudienceQueryText(
         JSON.stringify({
-          $and: [
-            { 'friendship.status': 'friend' },
-            { 'tags.names': { $in: ['VIP'] } },
-          ],
+          $and: [{ 'friendship.status': 'friend' }, { 'tags.names': { $in: ['VIP'] } }],
         }),
       ),
     ).toEqual({
       ok: true,
       query: {
-        $and: [
-          { 'friendship.status': 'friend' },
-          { 'tags.names': { $in: ['VIP'] } },
-        ],
+        $and: [{ 'friendship.status': 'friend' }, { 'tags.names': { $in: ['VIP'] } }],
       },
     })
   })

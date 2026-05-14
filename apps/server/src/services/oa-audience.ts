@@ -95,7 +95,8 @@ async function loadContactsForOa(
     const existing = chatByUserId.get(row.userId)
     if (
       !existing ||
-      (row.lastMessageAt && (!existing.lastMessageAt || row.lastMessageAt > existing.lastMessageAt))
+      (row.lastMessageAt &&
+        (!existing.lastMessageAt || row.lastMessageAt > existing.lastMessageAt))
     ) {
       chatByUserId.set(row.userId, {
         lastMessageAt: row.lastMessageAt,
@@ -109,7 +110,7 @@ async function loadContactsForOa(
     const chatRow = chatByUserId.get(friend.userId)
     const hasUnread = Boolean(
       chatRow?.lastMessageAt &&
-        (!chatRow.lastReadAt || chatRow.lastReadAt < chatRow.lastMessageAt),
+      (!chatRow.lastReadAt || chatRow.lastReadAt < chatRow.lastMessageAt),
     )
 
     return {

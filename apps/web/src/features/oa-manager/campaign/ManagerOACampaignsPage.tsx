@@ -40,7 +40,10 @@ function formatDate(timestamp: number | null | undefined): string {
   return timestamp ? new Date(timestamp).toLocaleString() : '-'
 }
 
-function formatCampaignAudience(campaign: CampaignItem, filterNameById: Map<string, string>) {
+function formatCampaignAudience(
+  campaign: CampaignItem,
+  filterNameById: Map<string, string>,
+) {
   if (campaign.audienceFilterId) {
     return filterNameById.get(campaign.audienceFilterId) ?? 'Deleted filter'
   }
@@ -128,11 +131,7 @@ export function ManagerOACampaignsPage({ oaId }: Props) {
 
   return (
     <YStack gap="$6">
-      <XStack
-        items="flex-start"
-        gap="$4"
-        $platform-web={{ flexWrap: 'wrap' }}
-      >
+      <XStack items="flex-start" gap="$4" $platform-web={{ flexWrap: 'wrap' }}>
         <YStack
           flex={1}
           minW={360}
@@ -149,7 +148,9 @@ export function ManagerOACampaignsPage({ oaId }: Props) {
             <Button
               size="$2"
               variant="outlined"
-              onPress={() => router.navigate(`/manager/${oaId}/campaigns/audiences` as any)}
+              onPress={() =>
+                router.navigate(`/manager/${oaId}/campaigns/audiences` as any)
+              }
             >
               Audiences
             </Button>
@@ -223,7 +224,9 @@ export function ManagerOACampaignsPage({ oaId }: Props) {
             gap="$3"
           >
             <SizableText size="$3" fontWeight="700">
-              {previewCount === null ? 'Audience not previewed' : `${previewCount} recipients`}
+              {previewCount === null
+                ? 'Audience not previewed'
+                : `${previewCount} recipients`}
             </SizableText>
             <Button
               size="$2"
@@ -257,7 +260,13 @@ export function ManagerOACampaignsPage({ oaId }: Props) {
           </XStack>
 
           {campaigns.length === 0 ? (
-            <YStack py="$6" items="center" borderWidth={1} borderColor="$borderColor" rounded="$3">
+            <YStack
+              py="$6"
+              items="center"
+              borderWidth={1}
+              borderColor="$borderColor"
+              rounded="$3"
+            >
               <SizableText size="$3" color="$color10">
                 No campaigns sent
               </SizableText>
@@ -276,11 +285,17 @@ export function ManagerOACampaignsPage({ oaId }: Props) {
                   >
                     <XStack items="center" justify="space-between" gap="$3">
                       <YStack flex={1} minW={0} gap="$1">
-                        <SizableText size="$3" fontWeight="700" color="$color12" numberOfLines={1}>
+                        <SizableText
+                          size="$3"
+                          fontWeight="700"
+                          color="$color12"
+                          numberOfLines={1}
+                        >
                           {campaign.name}
                         </SizableText>
                         <SizableText size="$1" color="$color10">
-                          {formatCampaignAudience(campaign, filterNameById)} - {formatDate(campaign.createdAt)}
+                          {formatCampaignAudience(campaign, filterNameById)} -{' '}
+                          {formatDate(campaign.createdAt)}
                         </SizableText>
                       </YStack>
                       <YStack px="$2" py="$1" rounded="$2" bg="$color3">

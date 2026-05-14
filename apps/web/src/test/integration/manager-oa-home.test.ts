@@ -2,7 +2,9 @@ import { expect, test } from '@playwright/test'
 import { BASE_URL, loginAsDemo } from './helpers'
 
 test.describe('Manager OA home', () => {
-  test('owner lands on OA home and can reach chat, rich menus, and campaigns', async ({ page }) => {
+  test('owner lands on OA home and can reach chat, rich menus, and campaigns', async ({
+    page,
+  }) => {
     test.setTimeout(60000)
 
     await loginAsDemo(page)

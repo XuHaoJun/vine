@@ -160,14 +160,22 @@ function validateFieldCondition(
 function evaluateNode(query: AudienceQueryJson, contact: AudienceContact): boolean {
   for (const [key, condition] of Object.entries(query)) {
     if (key === '$and') {
-      if (!(condition as AudienceQueryJson[]).every((branch) => evaluateNode(branch, contact))) {
+      if (
+        !(condition as AudienceQueryJson[]).every((branch) =>
+          evaluateNode(branch, contact),
+        )
+      ) {
         return false
       }
       continue
     }
 
     if (key === '$or') {
-      if (!(condition as AudienceQueryJson[]).some((branch) => evaluateNode(branch, contact))) {
+      if (
+        !(condition as AudienceQueryJson[]).some((branch) =>
+          evaluateNode(branch, contact),
+        )
+      ) {
         return false
       }
       continue

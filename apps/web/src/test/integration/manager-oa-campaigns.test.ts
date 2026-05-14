@@ -2,7 +2,9 @@ import { expect, test } from '@playwright/test'
 import { BASE_URL, loginAsDemo } from './helpers'
 
 test.describe('Manager OA campaigns', () => {
-  test('owner can create an audience filter and send a text campaign', async ({ page }) => {
+  test('owner can create an audience filter and send a text campaign', async ({
+    page,
+  }) => {
     test.setTimeout(90000)
     const suffix = `${Date.now()}-${test.info().retry}`
     const filterName = `Friends audience ${suffix}`

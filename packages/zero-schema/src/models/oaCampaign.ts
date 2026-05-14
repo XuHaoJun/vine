@@ -28,15 +28,12 @@ export const schema = table('oaCampaign')
   })
   .primaryKey('id')
 
-export const managerOwnedOaCampaignPermission = serverWhere(
-  'oaCampaign',
-  (eb, auth) => {
-    const userId = auth?.id || ''
-    return eb.exists('oa', (oaQ) =>
-      oaQ.whereExists('provider', (providerQ) => providerQ.where('ownerId', userId)),
-    )
-  },
-)
+export const managerOwnedOaCampaignPermission = serverWhere('oaCampaign', (eb, auth) => {
+  const userId = auth?.id || ''
+  return eb.exists('oa', (oaQ) =>
+    oaQ.whereExists('provider', (providerQ) => providerQ.where('ownerId', userId)),
+  )
+})
 
 async function rejectCampaignMutation(): Promise<void> {
   throw new Error('Use campaign service actions')

@@ -114,12 +114,12 @@ describe('audience query validation and evaluation', () => {
     expect(evaluateAudienceQuery({ 'tags.ids': { $eq: 'tag-vip' } }, vipContact)).toBe(
       true,
     )
-    expect(evaluateAudienceQuery({ 'tags.ids': { $eq: 'tag-missing' } }, vipContact)).toBe(
-      false,
-    )
-    expect(evaluateAudienceQuery({ 'tags.ids': { $ne: 'tag-missing' } }, vipContact)).toBe(
-      true,
-    )
+    expect(
+      evaluateAudienceQuery({ 'tags.ids': { $eq: 'tag-missing' } }, vipContact),
+    ).toBe(false)
+    expect(
+      evaluateAudienceQuery({ 'tags.ids': { $ne: 'tag-missing' } }, vipContact),
+    ).toBe(true)
     expect(evaluateAudienceQuery({ 'tags.ids': { $ne: 'tag-vip' } }, vipContact)).toBe(
       false,
     )
@@ -135,9 +135,9 @@ describe('audience query validation and evaluation', () => {
     expect(
       evaluateAudienceQuery({ 'tags.names': { $nin: ['Dormant'] } }, vipContact),
     ).toBe(true)
-    expect(
-      evaluateAudienceQuery({ 'tags.names': { $nin: ['VIP'] } }, vipContact),
-    ).toBe(false)
+    expect(evaluateAudienceQuery({ 'tags.names': { $nin: ['VIP'] } }, vipContact)).toBe(
+      false,
+    )
   })
 
   it('does not satisfy lastInteractionAt comparisons when the contact value is null', () => {
@@ -216,13 +216,9 @@ describe('audience query validation and evaluation', () => {
 
     expect(evaluateAudienceQuery({ 'note.exists': true }, vipContact)).toBe(true)
     expect(evaluateAudienceQuery({ 'note.exists': false }, vipContact)).toBe(false)
-    expect(evaluateAudienceQuery({ 'note.exists': false }, contactWithoutNote)).toBe(
-      true,
-    )
+    expect(evaluateAudienceQuery({ 'note.exists': false }, contactWithoutNote)).toBe(true)
     expect(evaluateAudienceQuery({ 'chat.unread': true }, vipContact)).toBe(true)
-    expect(evaluateAudienceQuery({ 'chat.unread': false }, contactWithoutNote)).toBe(
-      true,
-    )
+    expect(evaluateAudienceQuery({ 'chat.unread': false }, contactWithoutNote)).toBe(true)
   })
 
   it('evaluates object-form boolean comparisons for boolean pseudo-fields', () => {

@@ -364,9 +364,9 @@ describe('raw audience filter mutations', () => {
     await expect((audienceFilterMutate as any).upsert(ctx, {})).rejects.toThrow(
       'Use audience filter actions',
     )
-    await expect((audienceFilterMutate as any).delete(ctx, { id: 'filter-1' })).rejects.toThrow(
-      'Use audience filter actions',
-    )
+    await expect(
+      (audienceFilterMutate as any).delete(ctx, { id: 'filter-1' }),
+    ).rejects.toThrow('Use audience filter actions')
   })
 })
 
@@ -381,11 +381,11 @@ describe('raw campaign mutations', () => {
     await expect((campaignMutate as any).upsert(ctx, {})).rejects.toThrow(
       'Use campaign service actions',
     )
-    await expect((campaignMutate as any).update(ctx, { id: 'campaign-1' })).rejects.toThrow(
-      'Use campaign service actions',
-    )
-    await expect((campaignMutate as any).delete(ctx, { id: 'campaign-1' })).rejects.toThrow(
-      'Use campaign service actions',
-    )
+    await expect(
+      (campaignMutate as any).update(ctx, { id: 'campaign-1' }),
+    ).rejects.toThrow('Use campaign service actions')
+    await expect(
+      (campaignMutate as any).delete(ctx, { id: 'campaign-1' }),
+    ).rejects.toThrow('Use campaign service actions')
   })
 })

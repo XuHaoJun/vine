@@ -252,21 +252,18 @@ export const oaAudienceFilterRelationships = relationships(
   }),
 )
 
-export const oaCampaignRelationships = relationships(
-  tables.oaCampaign,
-  ({ one }) => ({
-    oa: one({
-      sourceField: ['oaId'],
-      destSchema: tables.officialAccount,
-      destField: ['id'],
-    }),
-    audienceFilter: one({
-      sourceField: ['audienceFilterId'],
-      destSchema: tables.oaAudienceFilter,
-      destField: ['id'],
-    }),
+export const oaCampaignRelationships = relationships(tables.oaCampaign, ({ one }) => ({
+  oa: one({
+    sourceField: ['oaId'],
+    destSchema: tables.officialAccount,
+    destField: ['id'],
   }),
-)
+  audienceFilter: one({
+    sourceField: ['audienceFilterId'],
+    destSchema: tables.oaAudienceFilter,
+    destField: ['id'],
+  }),
+}))
 
 export const messageRelationships = relationships(tables.message, ({ many, one }) => ({
   sender: one({

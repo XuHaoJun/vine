@@ -133,11 +133,7 @@ export function ManagerOAAudienceFiltersPage({ oaId }: Props) {
 
   return (
     <YStack gap="$6">
-      <XStack
-        gap="$4"
-        items="flex-start"
-        $platform-web={{ flexWrap: 'wrap' }}
-      >
+      <XStack gap="$4" items="flex-start" $platform-web={{ flexWrap: 'wrap' }}>
         <YStack flex={1} minW={320} gap="$4">
           <XStack items="center" justify="space-between" gap="$3">
             <YStack gap="$1">
@@ -154,7 +150,13 @@ export function ManagerOAAudienceFiltersPage({ oaId }: Props) {
           </XStack>
 
           {filters.length === 0 ? (
-            <YStack py="$6" items="center" borderWidth={1} borderColor="$borderColor" rounded="$3">
+            <YStack
+              py="$6"
+              items="center"
+              borderWidth={1}
+              borderColor="$borderColor"
+              rounded="$3"
+            >
               <SizableText size="$3" color="$color10">
                 No audience filters
               </SizableText>
@@ -168,12 +170,19 @@ export function ManagerOAAudienceFiltersPage({ oaId }: Props) {
                     p="$3"
                     rounded="$3"
                     borderWidth={1}
-                    borderColor={editingFilter?.id === filter.id ? '$color8' : '$borderColor'}
+                    borderColor={
+                      editingFilter?.id === filter.id ? '$color8' : '$borderColor'
+                    }
                     gap="$2"
                   >
                     <XStack items="center" justify="space-between" gap="$3">
                       <YStack flex={1} minW={0} gap="$1">
-                        <SizableText size="$3" fontWeight="700" color="$color12" numberOfLines={1}>
+                        <SizableText
+                          size="$3"
+                          fontWeight="700"
+                          color="$color12"
+                          numberOfLines={1}
+                        >
                           {filter.name}
                         </SizableText>
                         <SizableText size="$1" color="$color10">
@@ -181,10 +190,18 @@ export function ManagerOAAudienceFiltersPage({ oaId }: Props) {
                         </SizableText>
                       </YStack>
                       <XStack gap="$2">
-                        <Button size="$2" variant="outlined" onPress={() => startEdit(filter)}>
+                        <Button
+                          size="$2"
+                          variant="outlined"
+                          onPress={() => startEdit(filter)}
+                        >
                           Edit
                         </Button>
-                        <Button size="$2" variant="outlined" onPress={() => handleDelete(filter)}>
+                        <Button
+                          size="$2"
+                          variant="outlined"
+                          onPress={() => handleDelete(filter)}
+                        >
                           Delete
                         </Button>
                       </XStack>

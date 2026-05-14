@@ -1,9 +1,9 @@
-import type { AudienceQueryJson } from '@vine/zero-schema/audience/query'
 import { oaAudienceFiltersByOfficialAccountId } from '@vine/zero-schema/queries/oaAudienceFilter'
 import { useMemo } from 'react'
 import { oaClient } from '~/features/oa/client'
 import { useTanMutation } from '~/query'
 import { useZeroQuery, zero } from '~/zero/client'
+import type { AudienceQueryJson } from '@vine/zero-schema/audience/query'
 
 export type AudienceFilterItem = {
   id: string
@@ -55,11 +55,7 @@ export function useManagerOAAudienceFilters(oaId: string | undefined) {
     })
   }
 
-  const updateFilter = async (
-    id: string,
-    name: string,
-    queryJson: AudienceQueryJson,
-  ) => {
+  const updateFilter = async (id: string, name: string, queryJson: AudienceQueryJson) => {
     if (!oaId) return
     await zero.mutate.oaAudienceFilter.update({
       id,

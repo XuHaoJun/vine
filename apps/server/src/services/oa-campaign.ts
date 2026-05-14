@@ -1,10 +1,10 @@
 import { oaAudienceFilter, oaCampaign } from '@vine/db/schema-oa'
 import { and, eq } from 'drizzle-orm'
+import type { createOAAudienceService } from './oa-audience'
+import type { createOAMessagingService } from './oa-messaging'
 import type { schema } from '@vine/db'
 import type { AudienceQueryJson } from '@vine/zero-schema'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import type { createOAAudienceService } from './oa-audience'
-import type { createOAMessagingService } from './oa-messaging'
 
 type OACampaignDeps = {
   db: NodePgDatabase<typeof schema>
