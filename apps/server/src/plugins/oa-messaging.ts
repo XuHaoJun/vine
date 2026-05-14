@@ -12,6 +12,7 @@ import { and, eq } from 'drizzle-orm'
 import * as v from 'valibot'
 import { oaApiPath } from './oa-routes'
 import type { createOAService } from '../services/oa'
+import type { createOAMessagingFacadeService } from '../services/oa-messaging-facade'
 import type { createOAMessagingService } from '../services/oa-messaging'
 import type { schema } from '@vine/db'
 import type { DriveService } from '@vine/drive'
@@ -34,6 +35,7 @@ function getExtensionForContentType(contentType: string, msgType: string): strin
 type MessagingPluginDeps = {
   oa: ReturnType<typeof createOAService>
   messaging: ReturnType<typeof createOAMessagingService>
+  facade: ReturnType<typeof createOAMessagingFacadeService>
   db: NodePgDatabase<typeof schema>
   drive: DriveService
 }
@@ -263,6 +265,14 @@ function sendMessagingResult(reply: FastifyReply, result: any) {
   return reply.send({})
 }
 
+function sendFacadeResult(reply: FastifyReply, result: any) {
+  if (!result.ok && result.message) {
+    const status = result.code === 'AUDIENCE_GROUP_NOT_FOUND' ? 404 : 400
+    return reply.code(status).send({ message: result.message, code: result.code })
+  }
+  return sendMessagingResult(reply, result)
+}
+
 // ============ Plugin ============
 
 type MessageItem = { type: string; text?: string; [key: string]: unknown }
@@ -271,7 +281,7 @@ export async function oaMessagingPlugin(
   fastify: FastifyInstance,
   deps: MessagingPluginDeps,
 ) {
-  const { oa, messaging, db, drive } = deps
+  const { oa, messaging, facade, db, drive } = deps
 
   // Reply Messages
   fastify.post(
@@ -394,43 +404,13 @@ export async function oaMessagingPlugin(
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const oaId = await extractOaFromToken(request, db)
-        const body = request.body as { to: string[]; messages: MessageItem[] }
-
-        if (!Array.isArray(body.to) || body.to.length === 0 || !body.messages?.length) {
-          return await reply
-            .code(400)
-            .send({ message: 'to and messages are required', code: 'INVALID_REQUEST' })
-        }
-        if (body.to.length > 500) {
-          return await reply.code(400).send({
-            message: 'to must contain 500 or fewer user IDs',
-            code: 'INVALID_REQUEST',
-          })
-        }
-        if (new Set(body.to).size !== body.to.length) {
-          return await reply.code(400).send({
-            message: 'to must not contain duplicate user IDs',
-            code: 'INVALID_REQUEST',
-          })
-        }
-
-        const validated = body.messages.map((msg) => validateMessage(msg))
-        const failed = validated.find((r) => !r.valid)
-        if (failed && !failed.valid) {
-          return await reply.code(400).send({
-            message: failed.error,
-            code: failed.code ?? 'INVALID_MESSAGE_TYPE',
-          })
-        }
-
-        const validMessages = validated as ValidationSuccess[]
-        const result = await messaging.multicast({
+        const body = request.body as Record<string, unknown>
+        const result = await facade.multicast({
           oaId,
           retryKey: request.headers['x-line-retry-key'] as string | undefined,
-          to: body.to,
-          messages: validMessages,
+          body,
         })
-        return await sendMessagingResult(reply, result)
+        return await sendFacadeResult(reply, result)
       } catch (err) {
         if (err instanceof Error && err.message === 'Missing Bearer token') {
           return reply
@@ -458,32 +438,13 @@ export async function oaMessagingPlugin(
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const oaId = await extractOaFromToken(request, db)
-        const body = request.body as { messages: MessageItem[] }
-
-        if (!body.messages?.length) {
-          return await reply
-            .code(400)
-            .send({ message: 'messages are required', code: 'INVALID_REQUEST' })
-        }
-
-        // Validate all messages first
-        const validated = body.messages.map((msg) => validateMessage(msg))
-
-        const failed = validated.find((r) => !r.valid)
-        if (failed && !failed.valid) {
-          return await reply.code(400).send({
-            message: failed.error,
-            code: failed.code ?? 'INVALID_MESSAGE_TYPE',
-          })
-        }
-
-        const validMessages = validated as ValidationSuccess[]
-        const result = await messaging.broadcast({
+        const body = request.body as Record<string, unknown>
+        const result = await facade.broadcast({
           oaId,
           retryKey: request.headers['x-line-retry-key'] as string | undefined,
-          messages: validMessages,
+          body,
         })
-        return await sendMessagingResult(reply, result)
+        return await sendFacadeResult(reply, result)
       } catch (err) {
         if (err instanceof Error && err.message === 'Missing Bearer token') {
           return reply
@@ -499,6 +460,122 @@ export async function oaMessagingPlugin(
           return reply
             .code(401)
             .send({ message: 'Access token expired', code: 'TOKEN_EXPIRED' })
+        }
+        return reply.code(500).send({ message: 'Internal server error' })
+      }
+    },
+  )
+
+  // Narrowcast Messages
+  fastify.post(
+    oaApiPath('/bot/message/narrowcast'),
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const oaId = await extractOaFromToken(request, db)
+        const result = await facade.narrowcast({
+          oaId,
+          retryKey: request.headers['x-line-retry-key'] as string | undefined,
+          body: request.body as Record<string, unknown>,
+        })
+        return await sendFacadeResult(reply, result)
+      } catch (err) {
+        if (err instanceof Error && err.message === 'Missing Bearer token') {
+          return reply.code(401).send({ message: 'Missing Bearer token', code: 'INVALID_TOKEN' })
+        }
+        if (err instanceof Error && err.message === 'Invalid access token') {
+          return reply.code(401).send({ message: 'Invalid access token', code: 'INVALID_TOKEN' })
+        }
+        if (err instanceof Error && err.message === 'Access token expired') {
+          return reply.code(401).send({ message: 'Access token expired', code: 'TOKEN_EXPIRED' })
+        }
+        return reply.code(500).send({ message: 'Internal server error' })
+      }
+    },
+  )
+
+  // Upload Audience Group
+  fastify.post(
+    oaApiPath('/bot/audienceGroup/upload'),
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const oaId = await extractOaFromToken(request, db)
+        const result = await facade.uploadAudienceGroup({
+          oaId,
+          body: request.body as Record<string, unknown>,
+        })
+        if (!result.ok) {
+          return reply.code(400).send({ message: result.message, code: result.code })
+        }
+        return reply.send({
+          audienceGroupId: result.audienceGroupId,
+          description: result.description,
+        })
+      } catch (err) {
+        if (err instanceof Error && err.message === 'Missing Bearer token') {
+          return reply.code(401).send({ message: 'Missing Bearer token', code: 'INVALID_TOKEN' })
+        }
+        if (err instanceof Error && err.message === 'Invalid access token') {
+          return reply.code(401).send({ message: 'Invalid access token', code: 'INVALID_TOKEN' })
+        }
+        if (err instanceof Error && err.message === 'Access token expired') {
+          return reply.code(401).send({ message: 'Access token expired', code: 'TOKEN_EXPIRED' })
+        }
+        return reply.code(500).send({ message: 'Internal server error' })
+      }
+    },
+  )
+
+  // Get Audience Group
+  fastify.get(
+    oaApiPath('/bot/audienceGroup/:id'),
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const oaId = await extractOaFromToken(request, db)
+        const params = request.params as { id: string }
+        const result = await facade.getAudienceGroup({ oaId, audienceGroupId: params.id })
+        if (!result.ok) {
+          return reply.code(404).send({ message: result.message, code: result.code })
+        }
+        return reply.send(result)
+      } catch (err) {
+        if (err instanceof Error && err.message === 'Missing Bearer token') {
+          return reply.code(401).send({ message: 'Missing Bearer token', code: 'INVALID_TOKEN' })
+        }
+        if (err instanceof Error && err.message === 'Invalid access token') {
+          return reply.code(401).send({ message: 'Invalid access token', code: 'INVALID_TOKEN' })
+        }
+        if (err instanceof Error && err.message === 'Access token expired') {
+          return reply.code(401).send({ message: 'Access token expired', code: 'TOKEN_EXPIRED' })
+        }
+        return reply.code(500).send({ message: 'Internal server error' })
+      }
+    },
+  )
+
+  // Get Message Event Insight
+  fastify.get(
+    oaApiPath('/bot/insight/message/event'),
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const oaId = await extractOaFromToken(request, db)
+        const query = request.query as { requestId?: string }
+        if (!query.requestId) {
+          return reply.code(400).send({ message: 'requestId is required', code: 'INVALID_REQUEST' })
+        }
+        const result = await facade.getMessageEventInsight({ oaId, requestId: query.requestId })
+        if (!result.ok) {
+          return reply.code(400).send({ message: result.message, code: result.code })
+        }
+        return reply.send({ overview: result.overview })
+      } catch (err) {
+        if (err instanceof Error && err.message === 'Missing Bearer token') {
+          return reply.code(401).send({ message: 'Missing Bearer token', code: 'INVALID_TOKEN' })
+        }
+        if (err instanceof Error && err.message === 'Invalid access token') {
+          return reply.code(401).send({ message: 'Invalid access token', code: 'INVALID_TOKEN' })
+        }
+        if (err instanceof Error && err.message === 'Access token expired') {
+          return reply.code(401).send({ message: 'Access token expired', code: 'TOKEN_EXPIRED' })
         }
         return reply.code(500).send({ message: 'Internal server error' })
       }
