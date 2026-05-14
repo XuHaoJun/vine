@@ -30,17 +30,21 @@ test.describe('Manager OA chat', () => {
     await page.waitForURL(/\/manager\/.+\/chat$/, { timeout: 15000 })
     managerChatPath = new URL(page.url()).pathname
 
-    await page.waitForTimeout(2000)
-
     await expect(page.getByPlaceholder('Search chats')).toBeVisible({
       timeout: 10000,
     })
+
+    // Wait for Zero sync to land chat data before applying filters
+    await expect(
+      page.getByRole('button', { name: /Open chat with Test One/ }),
+    ).toBeVisible({ timeout: 20000 })
+
     await page.getByRole('button', { name: 'Select chat filter' }).click()
     await page.getByRole('button', { name: 'Filter: Unread' }).click()
 
     await expect(
       page.getByRole('button', { name: /Open chat with Test One/ }),
-    ).toBeVisible({ timeout: 20000 })
+    ).toBeVisible({ timeout: 15000 })
     await page.getByRole('button', { name: 'Select chat filter' }).click()
     await page.getByRole('button', { name: 'Filter: All' }).click()
     if (test.info().retry === 0) {
