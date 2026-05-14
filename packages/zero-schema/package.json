@@ -13,7 +13,7 @@
     "./server/*": "./src/server/*.ts"
   },
   "scripts": {
-    "build": "echo 'zero-schema package - no build step'",
+    "build": "mkdir -p dist && touch dist/.build && echo 'zero-schema package - no build step'",
     "dev": "echo 'zero-schema package - no dev step'",
     "test": "vitest run",
     "zero:generate": "on-zero generate src --after 'bun lint:fix'",

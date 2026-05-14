@@ -35,10 +35,10 @@ export async function oaContactExportPlugin(
         })
 
         if (!result) {
-          return reply.code(404).send({ message: 'Official account not found' })
+          return await reply.code(404).send({ message: 'Official account not found' })
         }
 
-        return reply
+        return await reply
           .header('Content-Type', 'text/csv; charset=utf-8')
           .header('Content-Disposition', `attachment; filename="${result.filename}"`)
           .send(result.csv)
