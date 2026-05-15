@@ -30,7 +30,8 @@ ConnectRPC services, and `/api/oa/v2` Messaging API surface.
   3. no rich menu.
 - Keep active rich menu resolution correct even if delayed worker jobs are late
   or temporarily unavailable.
-- Tighten image validation, template outline selection, status labels, and
+- Audit existing LINE-like rich menu validation and fill parity gaps around
+  uploaded image dimensions, template outline selection, status labels, and
   manager visibility around aliases, per-user assignment, and click stats.
 - Integrate `graphile-worker@0.17.0-rc.0` in `apps/server` for delayed display
   period jobs using a dedicated `graphile_worker` PostgreSQL schema in the same
@@ -65,6 +66,21 @@ The current repo already includes:
 
 Phase 4A should first verify these behaviors against LINE-like rules, then add
 the display period and manager-quality status model around them.
+
+## Validation Audit
+
+The existing implementation already validates rich menu objects and basic image
+upload requirements. Phase 4A should not rewrite that path. It should audit the
+current checks against LINE-like rich menu requirements and fill only focused
+gaps needed for parity:
+
+- uploaded image content type remains limited to JPEG and PNG;
+- uploaded image file size remains limited to 1 MB;
+- uploaded image dimensions must match supported rich menu size rules;
+- rich menu size must stay within the supported width, height, and aspect-ratio
+  range;
+- tappable areas must stay within the rich menu bounds;
+- any Vine-specific stricter limits must be intentional and documented.
 
 ## Display Period
 
@@ -103,16 +119,24 @@ The manager UI should expose a small status vocabulary:
 ```ts
 type RichMenuManagerStatus =
   | "draft"
+  | "inactive"
   | "scheduled"
   | "active"
   | "ended"
 ```
 
+LINE Developers documents rich menu display priority, display period support in
+LINE Official Account Manager, statistics, API validation, and API operation
+statuses. It does not define this manager lifecycle vocabulary. Vine derives
+these labels for manager visibility.
+
 Status is derived from durable fields instead of trusted as the sole source of
 truth:
 
-- `draft`: menu exists but is not eligible to be active because it lacks an
-  image, is not default, or is otherwise incomplete;
+- `draft`: menu exists but is not eligible to be active because it is
+  incomplete, such as missing its uploaded image;
+- `inactive`: menu is complete enough to be used but is not the OA default rich
+  menu;
 - `scheduled`: menu is default-eligible but `displayStartsAt` is in the future;
 - `active`: menu is default and the current DB time is inside its display
   period;
@@ -209,6 +233,11 @@ The Fastify `onClose` hook stops the runner and releases worker utils.
 Phase 4A embeds the runner in `apps/server` instead of adding a new Docker
 Compose service. A separate `apps/worker` process can be added later if Vine
 needs independent scaling or crash isolation for background jobs.
+
+Graphile Worker drives scheduled manager-side recomputation, such as cached
+status or manager summary refreshes. It is not the source of truth for chat
+display. `getActiveRichMenu()` must still recompute eligibility from durable DB
+fields and DB time so worker downtime or late jobs cannot show the wrong menu.
 
 ## Worker Tasks
 
@@ -333,7 +362,8 @@ enqueueing worker jobs.
 The external `/api/oa/v2` Messaging API rich menu endpoints do not need display
 period fields in Phase 4A. Display period is an OA Manager feature, not part of
 the current LINE-shaped Messaging API subset. External API default-setting
-continues to set or clear the default menu immediately.
+continues to set or clear the default menu pointer immediately, but chat display
+still resolves through the same display-period eligibility rules.
 
 ## Failure Modes
 
@@ -355,6 +385,8 @@ Server unit tests:
 
 - display period validation;
 - manager status derivation;
+- rich menu validation parity gaps, including size range, area bounds, and
+  uploaded image dimensions when those checks are added;
 - stale worker payload no-op;
 - schedule edit job-key generation.
 
@@ -375,8 +407,10 @@ ConnectRPC tests:
 
 Web unit or integration tests:
 
-- manager list shows `Scheduled`, `Active`, and `Ended` states;
+- manager list shows `Draft`, `Inactive`, `Scheduled`, `Active`, and `Ended`
+  states;
 - editor validates end-before-start;
+- editor or upload flow shows validation errors for image/spec violations;
 - existing alias, per-user, and click stats sections remain reachable.
 
 Worker integration can be tested without waiting for real time by enqueueing
@@ -386,11 +420,16 @@ controlled DB state.
 ## Acceptance Criteria
 
 - A manager can set or clear a display period for a rich menu.
-- Rich menu list and editor show clear status for draft, scheduled, active, and
-  ended menus.
+- Rich menu list and editor show clear status for draft, inactive, scheduled,
+  active, and ended menus.
+- Complete non-default menus are shown as inactive, not draft.
 - User chat only displays a default rich menu when the current DB time is inside
   the display period.
+- External `/api/oa/v2` default-setting changes the default pointer immediately,
+  while chat display still respects display-period eligibility.
 - Per-user rich menu priority remains higher than default rich menu priority.
+- Existing rich menu validation is audited against LINE-like requirements, and
+  Phase 4A fills focused gaps without rewriting the editor or upload flow.
 - Updating a display period replaces stale future worker jobs.
 - Worker downtime cannot cause `getActiveRichMenu()` to return the wrong menu.
 - Existing rich menu alias, per-user assignment, richmenuswitch, and click stats
