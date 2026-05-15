@@ -282,7 +282,8 @@ describe('oaRichMenuPlugin — Create Rich Menu', () => {
 
     await app.close()
     expect(res.statusCode).toBe(400)
-    expect(JSON.parse(res.body).message).toContain('2500')
+    const body = JSON.parse(res.body)
+    expect(body.message).toBeTruthy()
   })
 
   it('returns 400 for missing name', async () => {

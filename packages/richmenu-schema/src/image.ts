@@ -30,18 +30,27 @@ function readJpegDimensions(bytes: Uint8Array) {
       continue
     }
     const marker = bytes[offset + 1]
+    if (marker === undefined) return null
     if (marker === 0x01 || marker === 0xD8 || marker === 0xD9 || (marker >= 0xD0 && marker <= 0xD7)) {
       offset += 2
       continue
     }
     if (offset + 4 >= bytes.length) return null
-    const length = (bytes[offset + 2] << 8) + bytes[offset + 3]
+    const lenHi = bytes[offset + 2]
+    const lenLo = bytes[offset + 3]
+    if (lenHi === undefined || lenLo === undefined) return null
+    const length = (lenHi << 8) + lenLo
     if (length < 2) return null
     if (marker >= 0xc0 && marker <= 0xc3) {
       if (offset + 8 >= bytes.length) return null
+      const h = bytes[offset + 5]
+      const h2 = bytes[offset + 6]
+      const w = bytes[offset + 7]
+      const w2 = bytes[offset + 8]
+      if (h === undefined || h2 === undefined || w === undefined || w2 === undefined) return null
       return {
-        height: (bytes[offset + 5] << 8) + bytes[offset + 6],
-        width: (bytes[offset + 7] << 8) + bytes[offset + 8],
+        height: (h << 8) + h2,
+        width: (w << 8) + w2,
       }
     }
     offset += 2 + length
