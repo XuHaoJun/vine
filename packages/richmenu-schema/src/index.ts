@@ -21,6 +21,8 @@ export {
 } from './richmenu'
 export type { RichMenuObject, RichMenuArea, RichMenuBounds } from './richmenu'
 
+export * from './image'
+
 export type RichMenuValidationSuccess = {
   success: true
   data: v.InferOutput<typeof RichMenuObjectSchema>

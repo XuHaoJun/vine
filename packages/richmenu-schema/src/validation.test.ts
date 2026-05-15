@@ -61,6 +61,33 @@ describe('validateRichMenu', () => {
     const result = validateRichMenu(invalidMenu)
     expect(result.success).toBe(false)
   })
+
+  it('rejects unsupported rich menu object height', () => {
+    const result = validateRichMenu({
+      size: { width: 2500, height: 1000 },
+      selected: false,
+      name: 'Test Menu',
+      chatBarText: 'Open menu',
+      areas: [],
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects tappable areas outside menu bounds', () => {
+    const result = validateRichMenu({
+      size: { width: 2500, height: 843 },
+      selected: false,
+      name: 'Test Menu',
+      chatBarText: 'Open menu',
+      areas: [
+        {
+          bounds: { x: 2400, y: 0, width: 200, height: 100 },
+          action: { type: 'message', text: 'outside' },
+        },
+      ],
+    })
+    expect(result.success).toBe(false)
+  })
 })
 
 describe('RichMenuActionSchema', () => {
