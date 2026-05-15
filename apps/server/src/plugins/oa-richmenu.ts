@@ -1,5 +1,5 @@
 import { oaAccessToken } from '@vine/db/schema-oa'
-import { validateRichMenu } from '@vine/richmenu-schema'
+import { validateRichMenu, validateRichMenuImageUpload } from '@vine/richmenu-schema'
 import { and, eq } from 'drizzle-orm'
 import { oaApiPath } from './oa-routes'
 import type { createOAService } from '../services/oa'
@@ -74,6 +74,14 @@ export async function oaRichMenuPlugin(
   deps: RichMenuPluginDeps,
 ) {
   const { oa, db, drive } = deps
+
+  fastify.addContentTypeParser(
+    ['image/png', 'image/jpeg'],
+    { parseAs: 'buffer' },
+    (_req, body, done) => {
+      done(null, body as Buffer)
+    },
+  )
 
   fastify.setErrorHandler((err, _request, reply) => {
     if (err instanceof MissingBearerTokenError) {
@@ -150,20 +158,24 @@ export async function oaRichMenuPlugin(
         return reply.code(404).send({ message: 'Not found' })
       }
 
-      const contentType = request.headers['content-type']
-      if (
-        !contentType ||
-        (!contentType.includes('image/png') && !contentType.includes('image/jpeg'))
-      ) {
-        return reply.code(415).send({ message: 'Unsupported media type' })
-      }
-
+      const contentType = request.headers['content-type'] ?? ''
       const body = request.body as Buffer
-      if (body.length > 1024 * 1024) {
-        return reply.code(400).send({ message: 'Image size exceeds 1MB limit' })
+      const validation = validateRichMenuImageUpload({
+        contentType,
+        bytes: body,
+        expectedWidth: menu.sizeWidth,
+        expectedHeight: menu.sizeHeight,
+      })
+      if (!validation.success) {
+        const code = validation.message.includes('JPEG or PNG') ? 415 : 400
+        return reply.code(code).send({ message: validation.message })
       }
 
-      const key = `richmenu/${oaId}/${richMenuId}.${contentType.includes('jpeg') ? 'jpg' : 'png'}`
+      for (const ext of ['jpg', 'png'] as const) {
+        await drive.delete(`richmenu/${oaId}/${richMenuId}.${ext}`).catch(() => {})
+      }
+
+      const key = `richmenu/${oaId}/${richMenuId}.${validation.extension}`
       await drive.put(key, Buffer.from(body), contentType)
 
       await oa.setRichMenuImage(oaId, richMenuId, true)

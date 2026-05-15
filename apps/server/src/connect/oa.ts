@@ -16,6 +16,7 @@ import type { ServiceImpl } from '@connectrpc/connect'
 import type { AuthServer } from '@take-out/better-auth-utils/server'
 import type { DriveService } from '@vine/drive'
 import type { RichMenuDisplayScheduler } from '../workers/rich-menu-scheduler'
+import { validateRichMenuImageUpload } from '@vine/richmenu-schema'
 import {
   displayPeriodChanged,
   parseDisplayPeriodInput,
@@ -1094,8 +1095,27 @@ export function oaHandler(deps: OAHandlerDeps) {
       async uploadRichMenuImage(req, ctx) {
         const auth = requireAuthData(ctx)
         await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
-        const key = `richmenu/${req.officialAccountId}/${req.richMenuId}.jpg`
+
+        const menu = await deps.oa.getRichMenu(req.officialAccountId, req.richMenuId)
+        if (!menu) throw new ConnectError('Rich menu not found', Code.NotFound)
+
         const buffer = Buffer.from(req.image)
+        const validation = validateRichMenuImageUpload({
+          contentType: req.contentType,
+          bytes: buffer,
+          expectedWidth: menu.sizeWidth,
+          expectedHeight: menu.sizeHeight,
+        })
+        if (!validation.success) {
+          throw new ConnectError(validation.message, Code.InvalidArgument)
+        }
+
+        for (const ext of ['jpg', 'png'] as const) {
+          const staleKey = `richmenu/${req.officialAccountId}/${req.richMenuId}.${ext}`
+          if (await deps.drive.exists(staleKey)) await deps.drive.delete(staleKey)
+        }
+        const key = `richmenu/${req.officialAccountId}/${req.richMenuId}.${validation.extension}`
+
         await deps.drive.put(key, buffer, req.contentType)
         await deps.oa.setRichMenuImage(req.officialAccountId, req.richMenuId, true)
         return {}

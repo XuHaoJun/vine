@@ -19,6 +19,15 @@ const sampleRichMenuBody = {
   ],
 }
 
+function makePngHeader(width: number, height: number) {
+  const bytes = new Uint8Array(24)
+  bytes.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a], 0)
+  const view = new DataView(bytes.buffer)
+  view.setUint32(16, width)
+  view.setUint32(20, height)
+  return Buffer.from(bytes)
+}
+
 function createMockDb(tokenResult: unknown[]) {
   const selectCallIndex = { count: 0 }
   const mockSelect = vi.fn().mockImplementation(() => {
@@ -722,6 +731,31 @@ describe('oaRichMenuPlugin — Batch Validate', () => {
 
     await app.close()
     expect(res.statusCode).toBe(200)
+  })
+})
+
+describe('oaRichMenuPlugin — Upload Rich Menu Content', () => {
+  it('rejects rich menu images with mismatched dimensions', async () => {
+    const app = createTestApp({
+      richMenuData: {
+        richMenuId: 'rm-1',
+        sizeWidth: 2500,
+        sizeHeight: 843,
+        hasImage: false,
+      },
+    } as any)
+    await app.ready()
+    const res = await app.inject({
+      method: 'POST',
+      url: oaApiPath('/bot/richmenu/rm-1/content'),
+      headers: {
+        authorization: `Bearer ${validToken}`,
+        'content-type': 'image/png',
+      },
+      payload: makePngHeader(2500, 1686),
+    })
+    await app.close()
+    expect(res.statusCode).toBe(400)
   })
 })
 
