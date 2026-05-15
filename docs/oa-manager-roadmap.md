@@ -48,8 +48,8 @@ It should combine three jobs:
 2. Customer operations: one-on-one chats, contact management, CRM tags, notes,
    saved filters, retention/export policy, and tag-based audience
    handoff.
-3. Growth operations: broadcasts, audiences, rich menus, coupons, add-friend
-   assets, insights, and campaign measurement.
+3. Growth operations: broadcasts, audiences, rich menus, add-friend assets,
+   insights, and campaign measurement.
 
 The first milestone is not "clone all of LINE OA Manager". The first milestone
 is "when a manager selects an OA, they reach a useful home page with stable
@@ -77,7 +77,6 @@ navigation to the features Vine already has."
 | 3 | Broadcast and Audiences | Add outbound campaign workflows and targeting. | Friendship data | Done |
 | 4A | Rich Menu LINE Parity | Complete rich menu manager parity, display period, status, validation, and worker-backed schedule jobs. | Existing rich menu MVP | Spec approved |
 | 4B | Rich Message Authoring | Add LINE-compatible authoring surfaces for template messages, imagemap, Flex presets, quick replies, and postback actions. | Existing message renderers | Planned |
-| 4C | Coupons | Add coupon content type only after Vine defines non-payment redemption value. | Phase 4B and redemption policy | Deferred |
 | 5 | Insights and Growth | Provide friend, message, click, webhook, and growth analytics. | Phases 3, 4A | Planned |
 | 6 | Collaboration and Governance | Add roles, audit logs, plan/quota policy, and account lifecycle controls. | Phases 0-5 | Planned |
 
@@ -319,30 +318,20 @@ Acceptance criteria:
   validators and renderers.
 - The first send/attach channel is clearly defined by the Phase 4B spec.
 
-#### Phase 4C: Coupons
+#### Parking Lot: Coupons
 
-Goal: add coupons only when Vine has a useful redemption model without assuming
-LINE Pay.
-
-Scope:
-
-- Define Vine's coupon lifecycle and redemption policy before implementation.
-- Consider create, list, discontinue, and send surfaces after Phase 4B.
-- Keep coupon value independent from LINE Pay unless Vine later chooses to clone
-  or integrate a payment flow.
-
-Non-goals:
-
-- No Phase 4A/4B dependency on coupons.
-- No LINE Pay requirement.
-- No reward cards or surveys until coupons and broadcasts are stable.
+Coupons are removed from the active Phase 4 roadmap. They may be reconsidered
+only if Vine defines a useful redemption model that does not depend on LINE Pay
+or third-party payment integration. Until then, coupons are not a planned 4A,
+4B, or 4C implementation slice.
 
 LINE reference concepts used:
 
 - Rich menu structure, scopes, priority, and per-user behavior.
 - Rich menu display period and rich menu insights from OA Manager references.
 - Template/Flex/action objects.
-- Coupon creation and coupon messages, deferred to Phase 4C.
+- Coupon creation and coupon messages are reference-only and not currently
+  planned.
 
 ### Phase 5: Insights and Growth
 
@@ -436,9 +425,9 @@ Reasoning:
   developer console and do not need duplication in the OA manager.
 - Chat CRM and broadcast/audience work are now implemented enough for Phase 4A
   to build on their manager navigation and event surfaces.
-- Rich menu parity is the next LINE-clone slice because coupons depend on
-  redemption/payment decisions and a broad content library would be Vine-only
-  before the LINE-compatible surfaces are complete.
+- Rich menu parity is the next LINE-clone slice because coupons have low value
+  without a redemption or payment model, and a broad content library would be
+  Vine-only before the LINE-compatible surfaces are complete.
 - Insights depend on consistent event capture from campaigns and rich menus.
 - Roles are important, but owner-only is acceptable until there is enough
   manager surface area to justify multi-operator complexity.
@@ -464,7 +453,8 @@ Approved current spec:
   Vine may only need provider owner/admin/member at first.
 - Should Phase 4B first target one-on-one OA chat, campaign broadcast, or both
   for authored rich messages?
-- What non-payment redemption model makes coupons valuable enough for Phase 4C?
+- Should coupons ever return to the roadmap, and what non-payment redemption
+  model would make them valuable enough?
 - When background jobs grow beyond display-period scheduling, should Vine split
   embedded Graphile Worker execution out of `apps/server` into a dedicated
   worker service?
