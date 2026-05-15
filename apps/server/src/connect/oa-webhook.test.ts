@@ -130,6 +130,7 @@ function makeDeps(
     webhookDelivery,
     oaAudience: {} as any,
     oaCampaign: {} as any,
+    richMenuDisplayScheduler: {} as any,
   })(mockRouter as any)
 
   return { capturedImpl, oa, webhookDelivery }

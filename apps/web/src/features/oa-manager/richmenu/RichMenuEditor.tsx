@@ -14,6 +14,7 @@ import { Input } from '~/interface/forms/Input'
 import { showToast } from '~/interface/toast/Toast'
 import { AreaOverlay } from './AreaOverlay'
 import { TEMPLATES } from './templates'
+import { validateDisplayPeriodInput } from './displayPeriod'
 import { boundsToProto } from './types'
 import type { Area, AreaBounds, EditorState, MenuSize } from './types'
 
@@ -22,6 +23,8 @@ const SettingsSchema = v.object({
   chatBarText: v.pipe(v.string(), v.maxLength(14, 'Max 14 chars')),
   size: v.picklist(['2500x1686', '2500x843'] as const),
   selected: v.boolean(),
+  displayStartsAt: v.string(),
+  displayEndsAt: v.string(),
 })
 type SettingsForm = v.InferInput<typeof SettingsSchema>
 
@@ -53,6 +56,7 @@ export const RichMenuEditor = memo((props: Props) => {
           selectedAreaId: null,
           imageDataUrl: null,
           imageChanged: false,
+          displayPeriod: { displayStartsAt: '', displayEndsAt: '' },
         }
 
   const { control, handleSubmit, watch, setValue } = useForm<SettingsForm>({
@@ -62,6 +66,8 @@ export const RichMenuEditor = memo((props: Props) => {
       chatBarText: initialState.chatBarText,
       size: initialState.size,
       selected: initialState.selected,
+      displayStartsAt: initialState.displayPeriod.displayStartsAt,
+      displayEndsAt: initialState.displayPeriod.displayEndsAt,
     },
   })
 
@@ -222,6 +228,15 @@ export const RichMenuEditor = memo((props: Props) => {
       return
     }
 
+    const displayPeriod = validateDisplayPeriodInput(
+      settings.displayStartsAt,
+      settings.displayEndsAt,
+    )
+    if (!displayPeriod.success) {
+      showError(new Error(displayPeriod.message), 'Validation failed')
+      return
+    }
+
     setIsSaving(true)
     try {
       const areaPayload = areas.map((a) => ({
@@ -250,6 +265,8 @@ export const RichMenuEditor = memo((props: Props) => {
           sizeWidth: 2500,
           sizeHeight: canvasHeightPx,
           areas: areaPayload,
+          displayStartsAt: displayPeriod.displayStartsAt,
+          displayEndsAt: displayPeriod.displayEndsAt,
         })
         richMenuId = res.richMenuId
       } else {
@@ -262,6 +279,8 @@ export const RichMenuEditor = memo((props: Props) => {
           sizeWidth: 2500,
           sizeHeight: canvasHeightPx,
           areas: areaPayload,
+          displayStartsAt: displayPeriod.displayStartsAt,
+          displayEndsAt: displayPeriod.displayEndsAt,
         })
         richMenuId = props.richMenuId
       }
@@ -383,6 +402,43 @@ export const RichMenuEditor = memo((props: Props) => {
             </XStack>
           )}
         />
+
+        <YStack gap="$1" style={{ minWidth: 180 }}>
+          <SizableText size="$1" color="$color10">
+            Display starts
+          </SizableText>
+          <Controller
+            control={control}
+            name="displayStartsAt"
+            render={({ field: { onChange, value } }) => (
+              <Input value={value} onChangeText={onChange} placeholder="YYYY-MM-DDTHH:mm" />
+            )}
+          />
+        </YStack>
+
+        <YStack gap="$1" style={{ minWidth: 180 }}>
+          <SizableText size="$1" color="$color10">
+            Display ends
+          </SizableText>
+          <Controller
+            control={control}
+            name="displayEndsAt"
+            render={({ field: { onChange, value } }) => (
+              <Input value={value} onChangeText={onChange} placeholder="YYYY-MM-DDTHH:mm" />
+            )}
+          />
+        </YStack>
+
+        <Button
+          size="$2"
+          variant="outlined"
+          onPress={() => {
+            setValue('displayStartsAt', '')
+            setValue('displayEndsAt', '')
+          }}
+        >
+          Clear period
+        </Button>
       </XStack>
 
       <XStack gap="$4" items="flex-start">

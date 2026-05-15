@@ -28,6 +28,7 @@ import type { StickerMarketDiscoveryHandlerDeps } from './stickerMarketDiscovery
 import type { StickerMarketUserHandlerDeps } from './stickerMarketUser'
 import type { AuthServer } from '@take-out/better-auth-utils/server'
 import type { DriveService } from '@vine/drive'
+import type { RichMenuDisplayScheduler } from '../workers/rich-menu-scheduler'
 
 type ConnectDeps = {
   oa: ReturnType<typeof createOAService>
@@ -40,6 +41,7 @@ type ConnectDeps = {
   miniAppSvcMsg: ReturnType<typeof createMiniAppServiceMessageService>
   auth: AuthServer
   drive: DriveService
+  richMenuDisplayScheduler: RichMenuDisplayScheduler
   stickerMarketUser: StickerMarketUserHandlerDeps
   stickerMarketAdmin: StickerMarketAdminHandlerDeps
   stickerMarketCreator: StickerMarketCreatorHandlerDeps

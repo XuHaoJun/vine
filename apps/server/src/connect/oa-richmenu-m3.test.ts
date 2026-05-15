@@ -68,6 +68,9 @@ function makeDeps(oaOverrides: Partial<Record<string, any>> = {}) {
     sendTestWebhookEvent: vi.fn(),
     cleanupExpiredDeliveries: vi.fn(),
   }
+  const richMenuDisplayScheduler = {
+    enqueueDisplayPeriodJobs: vi.fn().mockResolvedValue(undefined),
+  }
   const capturedImpl: any = {}
   const mockRouter = {
     service: (_desc: any, impl: any) => {
@@ -81,8 +84,9 @@ function makeDeps(oaOverrides: Partial<Record<string, any>> = {}) {
     webhookDelivery,
     oaAudience: {} as any,
     oaCampaign: {} as any,
+    richMenuDisplayScheduler,
   })(mockRouter as any)
-  return { capturedImpl, oa, webhookDelivery }
+  return { capturedImpl, oa, webhookDelivery, richMenuDisplayScheduler }
 }
 
 beforeEach(() => {
@@ -451,5 +455,91 @@ describe('getRichMenuStats', () => {
     )
     expect(result.stats).toHaveLength(2)
     expect(result.stats[0].clickCount).toBe(10)
+  })
+})
+
+describe('rich menu display periods', () => {
+  it('rejects invalid update display period', async () => {
+    mockedGetAuthDataFromRequest.mockResolvedValue({ id: 'user-1' } as any)
+    const { capturedImpl } = makeDeps({
+      getProvider: vi.fn().mockResolvedValue({ id: 'p-1', ownerId: 'user-1' }),
+      getRichMenu: vi.fn().mockResolvedValue({
+        richMenuId: 'rm-1',
+        displayStartsAt: null,
+        displayEndsAt: null,
+      }),
+    })
+    const ctx = makeAuthCtx('user-1')
+    await expect(
+      capturedImpl.updateRichMenu(
+        {
+          officialAccountId: 'oa-1',
+          richMenuId: 'rm-1',
+          name: 'Menu',
+          chatBarText: 'Menu',
+          selected: false,
+          sizeWidth: 2500,
+          sizeHeight: 843,
+          areas: [],
+          displayStartsAt: '2026-05-15T10:00:00.000Z',
+          displayEndsAt: '2026-05-15T09:00:00.000Z',
+        },
+        ctx,
+      ),
+    ).rejects.toMatchObject({ code: Code.InvalidArgument })
+  })
+
+  it('enqueues replacement jobs when the display period changes', async () => {
+    mockedGetAuthDataFromRequest.mockResolvedValue({ id: 'user-1' } as any)
+    const { capturedImpl, richMenuDisplayScheduler } = makeDeps({
+      getProvider: vi.fn().mockResolvedValue({ id: 'p-1', ownerId: 'user-1' }),
+      getRichMenu: vi.fn().mockResolvedValue({
+        richMenuId: 'rm-1',
+        hasImage: true,
+        displayStartsAt: null,
+        displayEndsAt: null,
+      }),
+      updateRichMenu: vi.fn().mockResolvedValue({
+        richMenuId: 'rm-1',
+        displayScheduleRevision: 2,
+      }),
+    })
+    const ctx = makeAuthCtx('user-1')
+    await capturedImpl.updateRichMenu(
+      {
+        officialAccountId: 'oa-1',
+        richMenuId: 'rm-1',
+        name: 'Menu',
+        chatBarText: 'Menu',
+        selected: false,
+        sizeWidth: 2500,
+        sizeHeight: 843,
+        areas: [],
+        displayStartsAt: '2026-05-15T10:00:00.000Z',
+      },
+      ctx,
+    )
+    expect(richMenuDisplayScheduler.enqueueDisplayPeriodJobs).toHaveBeenCalledWith(
+      expect.objectContaining({
+        oaId: 'oa-1',
+        richMenuId: 'rm-1',
+        displayScheduleRevision: 2,
+      }),
+    )
+  })
+
+  it('rejects setting a menu without image as default', async () => {
+    mockedGetAuthDataFromRequest.mockResolvedValue({ id: 'user-1' } as any)
+    const { capturedImpl } = makeDeps({
+      getProvider: vi.fn().mockResolvedValue({ id: 'p-1', ownerId: 'user-1' }),
+      getRichMenu: vi.fn().mockResolvedValue({ richMenuId: 'rm-1', hasImage: false }),
+    })
+    const ctx = makeAuthCtx('user-1')
+    await expect(
+      capturedImpl.setDefaultRichMenu(
+        { officialAccountId: 'oa-1', richMenuId: 'rm-1' },
+        ctx,
+      ),
+    ).rejects.toMatchObject({ code: Code.FailedPrecondition })
   })
 })
