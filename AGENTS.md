@@ -124,6 +124,7 @@ Superpowers owns the default development lifecycle:
 idea/change request
   -> superpowers:brainstorming
   -> superpowers:writing-plans
+  -> branch gate for planned work
   -> implementation workflow
   -> superpowers verification/review before completion
 ```
@@ -240,6 +241,12 @@ Important notes:
 
 - Prefer the traditional single-checkout branch workflow:
   `git checkout -b <branch-name>`
+- Before implementing work that went through a written spec or implementation
+  plan, check the current branch. If it is `main`, create a feature or fix
+  branch first, for example `git checkout -b feat/<short-name>` or
+  `git checkout -b fix/<short-name>`.
+- Small surgical edits may stay on `main`, especially docs-only changes,
+  typo fixes, and narrow single-file updates such as this `AGENTS.md` policy.
 - Do not create or enter `git worktree` checkouts by default, even when a
   Superpowers workflow suggests isolated worktrees.
 - If isolation is needed, ask explicitly before creating a worktree and explain
