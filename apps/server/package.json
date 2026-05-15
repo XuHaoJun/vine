@@ -39,6 +39,7 @@
     "drizzle-orm": "1.0.0-beta.9-e89174b",
     "fastify": "^5.8.5",
     "fflate": "^0.8.2",
+    "graphile-worker": "0.17.0-rc.0",
     "jose": "^6.2.3",
     "on-zero": "0.4.4",
     "pino": "^10.3.1",
