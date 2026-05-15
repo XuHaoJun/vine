@@ -24,12 +24,21 @@ function readPngDimensions(bytes: Uint8Array) {
 function readJpegDimensions(bytes: Uint8Array) {
   if (bytes.length < 4 || bytes[0] !== 0xff || bytes[1] !== 0xd8) return null
   let offset = 2
-  while (offset + 9 < bytes.length) {
-    if (bytes[offset] !== 0xff) return null
+  while (offset + 4 < bytes.length) {
+    if (bytes[offset] !== 0xff) {
+      offset++
+      continue
+    }
     const marker = bytes[offset + 1]
+    if (marker === 0x01 || marker === 0xD8 || marker === 0xD9 || (marker >= 0xD0 && marker <= 0xD7)) {
+      offset += 2
+      continue
+    }
+    if (offset + 4 >= bytes.length) return null
     const length = (bytes[offset + 2] << 8) + bytes[offset + 3]
     if (length < 2) return null
     if (marker >= 0xc0 && marker <= 0xc3) {
+      if (offset + 8 >= bytes.length) return null
       return {
         height: (bytes[offset + 5] << 8) + bytes[offset + 6],
         width: (bytes[offset + 7] << 8) + bytes[offset + 8],
