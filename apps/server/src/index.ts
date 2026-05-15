@@ -297,8 +297,7 @@ app.addHook('onClose', async () => {
 })
 
 app.addHook('onClose', async () => {
-  await workerRunner.stop()
-  await workerUtils.release()
+  await workerRunner.stop().finally(() => workerUtils.release())
 })
 
 const port = Number(process.env['PORT'] ?? 3001)
