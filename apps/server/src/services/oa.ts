@@ -17,10 +17,11 @@ import {
   officialAccount,
 } from '@vine/db/schema-oa'
 import { chat, chatMember, message, userPublic } from '@vine/db/schema-public'
-import { and, count, eq, ilike, inArray, lt, or, sql } from 'drizzle-orm'
+import { and, count, eq, gt, ilike, inArray, isNull, lt, lte, or, sql } from 'drizzle-orm'
 import type { schema } from '@vine/db'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { Pool } from 'pg'
+import { deriveRichMenuManagerStatus } from './oa-richmenu-display'
 
 type OADeps = {
   db: NodePgDatabase<typeof schema>
@@ -29,6 +30,11 @@ type OADeps = {
 
 export function createOAService(deps: OADeps) {
   const { db } = deps
+
+  async function getDatabaseNow() {
+    const result = await db.execute(sql`SELECT now()::text AS "now"`)
+    return (result.rows[0] as any)?.now ?? new Date().toISOString()
+  }
 
   async function createProvider(input: { name: string; ownerId: string }) {
     const [provider] = await db
@@ -1307,6 +1313,8 @@ export function createOAService(deps: OADeps) {
     sizeWidth: number
     sizeHeight: number
     areas: unknown[]
+    displayStartsAt?: string | null | undefined
+    displayEndsAt?: string | null | undefined
   }) {
     const richMenuId = generateRichMenuId()
     const [menu] = await db
@@ -1321,6 +1329,8 @@ export function createOAService(deps: OADeps) {
         sizeHeight: input.sizeHeight,
         areas: input.areas,
         hasImage: false,
+        displayStartsAt: input.displayStartsAt ?? null,
+        displayEndsAt: input.displayEndsAt ?? null,
       })
       .returning()
     return menu
@@ -1336,9 +1346,12 @@ export function createOAService(deps: OADeps) {
       sizeWidth: number
       sizeHeight: number
       areas: unknown[]
+      displayStartsAt: string | null
+      displayEndsAt: string | null
+      incrementDisplayScheduleRevision: boolean
     },
   ) {
-    await db
+    const [updated] = await db
       .update(oaRichMenu)
       .set({
         name: input.name,
@@ -1347,9 +1360,16 @@ export function createOAService(deps: OADeps) {
         sizeWidth: input.sizeWidth,
         sizeHeight: input.sizeHeight,
         areas: input.areas,
+        displayStartsAt: input.displayStartsAt,
+        displayEndsAt: input.displayEndsAt,
+        displayScheduleRevision: input.incrementDisplayScheduleRevision
+          ? sql`${oaRichMenu.displayScheduleRevision} + 1`
+          : oaRichMenu.displayScheduleRevision,
         updatedAt: new Date().toISOString(),
       })
       .where(and(eq(oaRichMenu.oaId, oaId), eq(oaRichMenu.richMenuId, richMenuId)))
+      .returning()
+    return updated ?? null
   }
 
   async function getRichMenu(oaId: string, richMenuId: string) {
@@ -1363,6 +1383,34 @@ export function createOAService(deps: OADeps) {
 
   async function getRichMenuList(oaId: string) {
     return db.select().from(oaRichMenu).where(eq(oaRichMenu.oaId, oaId))
+  }
+
+  async function getRichMenuListForManager(oaId: string) {
+    const [nowRow, menus, defaultMenu, clickRows] = await Promise.all([
+      getDatabaseNow(),
+      getRichMenuList(oaId),
+      getDefaultRichMenu(oaId),
+      db
+        .select({
+          richMenuId: oaRichMenuClick.richMenuId,
+          clickCount: count(),
+        })
+        .from(oaRichMenuClick)
+        .where(eq(oaRichMenuClick.oaId, oaId))
+        .groupBy(oaRichMenuClick.richMenuId),
+    ])
+    const clickCounts = new Map(clickRows.map((row) => [row.richMenuId, row.clickCount]))
+    return menus.map((menu) => ({
+      ...menu,
+      managerStatus: deriveRichMenuManagerStatus({
+        isDefault: defaultMenu?.richMenuId === menu.richMenuId,
+        hasImage: menu.hasImage,
+        displayStartsAt: menu.displayStartsAt,
+        displayEndsAt: menu.displayEndsAt,
+        now: nowRow,
+      }),
+      clickCount: clickCounts.get(menu.richMenuId) ?? 0,
+    }))
   }
 
   async function deleteRichMenu(oaId: string, richMenuId: string) {
@@ -1403,6 +1451,51 @@ export function createOAService(deps: OADeps) {
 
   async function clearDefaultRichMenu(oaId: string) {
     await db.delete(oaDefaultRichMenu).where(eq(oaDefaultRichMenu.oaId, oaId))
+  }
+
+  async function getActiveRichMenuForUser(input: { oaId: string; userId: string }) {
+    const [linked] = await db
+      .select({
+        richMenu: oaRichMenu,
+      })
+      .from(oaRichMenuUserLink)
+      .innerJoin(
+        oaRichMenu,
+        and(
+          eq(oaRichMenu.oaId, oaRichMenuUserLink.oaId),
+          eq(oaRichMenu.richMenuId, oaRichMenuUserLink.richMenuId),
+        ),
+      )
+      .where(
+        and(
+          eq(oaRichMenuUserLink.oaId, input.oaId),
+          eq(oaRichMenuUserLink.userId, input.userId),
+          eq(oaRichMenu.hasImage, true),
+        ),
+      )
+      .limit(1)
+    if (linked?.richMenu) return linked.richMenu
+
+    const [defaulted] = await db
+      .select({ richMenu: oaRichMenu })
+      .from(oaDefaultRichMenu)
+      .innerJoin(
+        oaRichMenu,
+        and(
+          eq(oaRichMenu.oaId, oaDefaultRichMenu.oaId),
+          eq(oaRichMenu.richMenuId, oaDefaultRichMenu.richMenuId),
+        ),
+      )
+      .where(
+        and(
+          eq(oaDefaultRichMenu.oaId, input.oaId),
+          eq(oaRichMenu.hasImage, true),
+          or(isNull(oaRichMenu.displayStartsAt), lte(oaRichMenu.displayStartsAt, sql`now()`)),
+          or(isNull(oaRichMenu.displayEndsAt), gt(oaRichMenu.displayEndsAt, sql`now()`)),
+        ),
+      )
+      .limit(1)
+    return defaulted?.richMenu ?? null
   }
 
   async function linkRichMenuToUser(oaId: string, userId: string, richMenuId: string) {
@@ -1694,6 +1787,7 @@ export function createOAService(deps: OADeps) {
   }
 
   return {
+    getDatabaseNow,
     createProvider,
     getProvider,
     updateProvider,
@@ -1744,11 +1838,13 @@ export function createOAService(deps: OADeps) {
     updateRichMenu,
     getRichMenu,
     getRichMenuList,
+    getRichMenuListForManager,
     deleteRichMenu,
     setRichMenuImage,
     setDefaultRichMenu,
     getDefaultRichMenu,
     clearDefaultRichMenu,
+    getActiveRichMenuForUser,
     linkRichMenuToUser,
     unlinkRichMenuFromUser,
     unlinkAllRichMenuFromUsers,
