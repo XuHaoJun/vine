@@ -510,9 +510,9 @@ export async function oaMessagingPlugin(
           body: request.body as Record<string, unknown>,
         })
         if (!result.ok) {
-          return reply.code(400).send({ message: result.message, code: result.code })
+          return await reply.code(400).send({ message: result.message, code: result.code })
         }
-        return reply.send({
+        return await reply.send({
           audienceGroupId: result.audienceGroupId,
           description: result.description,
         })
@@ -546,9 +546,9 @@ export async function oaMessagingPlugin(
         const params = request.params as { id: string }
         const result = await facade.getAudienceGroup({ oaId, audienceGroupId: params.id })
         if (!result.ok) {
-          return reply.code(404).send({ message: result.message, code: result.code })
+          return await reply.code(404).send({ message: result.message, code: result.code })
         }
-        return reply.send(result)
+        return await reply.send(result)
       } catch (err) {
         if (err instanceof Error && err.message === 'Missing Bearer token') {
           return reply
@@ -578,7 +578,7 @@ export async function oaMessagingPlugin(
         const oaId = await extractOaFromToken(request, db)
         const query = request.query as { requestId?: string }
         if (!query.requestId) {
-          return reply
+          return await reply
             .code(400)
             .send({ message: 'requestId is required', code: 'INVALID_REQUEST' })
         }
@@ -587,9 +587,9 @@ export async function oaMessagingPlugin(
           requestId: query.requestId,
         })
         if (!result.ok) {
-          return reply.code(400).send({ message: result.message, code: result.code })
+          return await reply.code(400).send({ message: result.message, code: result.code })
         }
-        return reply.send({ overview: result.overview })
+        return await reply.send({ overview: result.overview })
       } catch (err) {
         if (err instanceof Error && err.message === 'Missing Bearer token') {
           return reply
