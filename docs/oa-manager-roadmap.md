@@ -1,6 +1,6 @@
 # Vine OA Manager Roadmap
 
-> Snapshot date: 2026-05-09
+> Snapshot date: 2026-05-15
 >
 > Vine is not the official LINE platform. This roadmap uses LINE Official
 > Account Manager and LINE Developers documentation as product references only.
@@ -12,14 +12,16 @@
 Observed implementation:
 
 - `/manager` lists the current user's official accounts and has a create flow.
-- The account list currently exposes `Manage`, but it routes directly to
-  `/manager/:oaId/richmenu`.
-- There is no `/manager/:oaId` home/detail route today. Clicking a specific OA
-  therefore cannot land on an OA overview page.
+- Selecting an OA lands on `/manager/:oaId`, the manager home/detail route.
+- `/manager/:oaId` has stable navigation to home, chats, rich menus, campaigns,
+  and audiences.
 - `/manager/:oaId/chat` and `/manager/:oaId/chat/:chatId` exist for the OA-side
-  chat workspace.
-- `/manager/:oaId/richmenu` exists, including create/edit/default/per-user rich
-  menu routes.
+  chat CRM workspace, including contact CRM, tags, notes, filters, and export
+  policy slices from Phase 2.
+- `/manager/:oaId/campaigns` and `/manager/:oaId/campaigns/audiences` exist for
+  campaign and audience-filter workflows from Phase 3.
+- `/manager/:oaId/richmenu` exists, including create/edit/default/per-user,
+  alias, richmenuswitch, and click-stat routes or sections.
 - `apps/web/src/interface/oa/OADetailContent.tsx` is a user-facing OA profile
   sheet. It should not be treated as the manager detail page.
 
@@ -71,10 +73,12 @@ navigation to the features Vine already has."
 | --- | --- | --- | --- | --- |
 | 0 | OA Detail Home | Fix entry flow and add `/manager/:oaId` overview. | Existing account list | Done |
 | 1 | Profile and Basic Settings | Make account identity editable and remove mock profile gaps. | Phase 0 | Done |
-| 2 | Chat CRM | Evolve chat MVP into contact CRM, tagging, notes, and custom filters. | Existing chat MVP | Next |
-| 3 | Broadcast and Audiences | Add outbound campaign workflows and targeting. | Friendship data | Planned |
-| 4 | Interactive Content | Complete rich menus and add reusable content/coupon surfaces. | Existing rich menu MVP | Planned |
-| 5 | Insights and Growth | Provide friend, message, click, webhook, and growth analytics. | Phases 3, 4 | Planned |
+| 2 | Chat CRM | Evolve chat MVP into contact CRM, tagging, notes, and custom filters. | Existing chat MVP | Done |
+| 3 | Broadcast and Audiences | Add outbound campaign workflows and targeting. | Friendship data | Done |
+| 4A | Rich Menu LINE Parity | Complete rich menu manager parity, display period, status, validation, and worker-backed schedule jobs. | Existing rich menu MVP | Spec approved |
+| 4B | Rich Message Authoring | Add LINE-compatible authoring surfaces for template messages, imagemap, Flex presets, quick replies, and postback actions. | Existing message renderers | Planned |
+| 4C | Coupons | Add coupon content type only after Vine defines non-payment redemption value. | Phase 4B and redemption policy | Deferred |
+| 5 | Insights and Growth | Provide friend, message, click, webhook, and growth analytics. | Phases 3, 4A | Planned |
 | 6 | Collaboration and Governance | Add roles, audit logs, plan/quota policy, and account lifecycle controls. | Phases 0-5 | Planned |
 
 ## 5. Phase Details
@@ -231,6 +235,19 @@ Acceptance criteria:
 
 Goal: make OA conversations richer without forcing managers into API-only work.
 
+Phase 4 is split into LINE-clone-first slices. Phase 4A is the approved next
+slice. Vine-only content-library features are intentionally deferred until the
+LINE-parity surfaces are stable.
+
+#### Phase 4A: Rich Menu LINE Parity
+
+Goal: make rich menus behave like a stable LINE OA Manager feature, including
+display period scheduling.
+
+Approved spec:
+
+- `docs/superpowers/specs/2026-05-15-manager-oa-richmenu-line-parity-design.md`
+
 Scope:
 
 - Complete rich menu manager:
@@ -240,31 +257,92 @@ Scope:
   - rich menu aliases;
   - click analytics from `oaRichMenuClick`;
   - template outlines and image validation.
-- Add rich message/content library:
-  - template messages;
-  - imagemap;
-  - Flex Message presets;
-  - reusable assets.
-- Add quick replies and postback action authoring.
-- Add coupons as a separate content type:
-  - create;
-  - list;
-  - discontinue;
-  - send in chat/broadcast where supported.
-- Defer reward cards and surveys until coupons and broadcasts are stable.
+- Add `graphile-worker@0.17.0-rc.0` to `apps/server` for delayed display-period
+  jobs.
+- Use a dedicated `graphile_worker` PostgreSQL schema in the same database.
+- Keep `getActiveRichMenu()` correct from DB time even if worker jobs are late.
+- Preserve existing alias, per-user assignment, richmenuswitch, and click-stat
+  behavior.
 
-LINE reference concepts used:
+Non-goals:
 
-- Rich menu structure, scopes, priority, and per-user behavior.
-- Coupon creation and coupon messages.
-- Template/Flex/action objects.
+- No generic content library.
+- No coupons.
+- No LINE Pay or payment integration.
+- No n8n automation in Phase 4A.
+- No recurring schedules or journey automation.
 
 Acceptance criteria:
 
 - Existing rich menu routes feel like part of the manager home, not a detached
   feature.
-- Managers can author one reusable interactive asset and send or attach it in
-  at least one channel.
+- Managers can set and clear a display period for a rich menu.
+- The manager UI exposes draft, scheduled, active, and ended states.
+- User chat only displays a default rich menu when DB time is inside the display
+  period.
+- Per-user rich menu priority remains higher than default rich menu priority.
+- Updating a display period replaces stale future worker jobs.
+- Worker downtime cannot cause `getActiveRichMenu()` to return the wrong menu.
+
+#### Phase 4B: Rich Message Authoring
+
+Goal: let managers author LINE-compatible interactive messages without writing
+raw API JSON.
+
+Scope:
+
+- Add manager authoring for LINE-compatible message content:
+  - template messages;
+  - imagemap messages;
+  - Flex Message presets;
+  - quick replies;
+  - postback actions.
+- Reuse existing chat rendering and server validation for Flex, imagemap, quick
+  replies, and postbacks.
+- Allow authored content to be sent or attached in at least one manager channel,
+  such as one-on-one OA chat or campaign broadcast.
+- Keep the model LINE-compatible first; do not introduce a broad Vine-only
+  reusable content library in this slice unless a later spec explicitly approves
+  it.
+
+Non-goals:
+
+- No coupons in Phase 4B.
+- No automation journeys.
+- No generic asset library that is unrelated to LINE-compatible message types.
+
+Acceptance criteria:
+
+- Managers can author at least one LINE-compatible rich message type without
+  raw JSON.
+- Authored message payloads use Vine's existing Messaging API-compatible
+  validators and renderers.
+- The first send/attach channel is clearly defined by the Phase 4B spec.
+
+#### Phase 4C: Coupons
+
+Goal: add coupons only when Vine has a useful redemption model without assuming
+LINE Pay.
+
+Scope:
+
+- Define Vine's coupon lifecycle and redemption policy before implementation.
+- Consider create, list, discontinue, and send surfaces after Phase 4B.
+- Keep coupon value independent from LINE Pay unless Vine later chooses to clone
+  or integrate a payment flow.
+
+Non-goals:
+
+- No Phase 4A/4B dependency on coupons.
+- No LINE Pay requirement.
+- No reward cards or surveys until coupons and broadcasts are stable.
+
+LINE reference concepts used:
+
+- Rich menu structure, scopes, priority, and per-user behavior.
+- Rich menu display period and rich menu insights from OA Manager references.
+- Template/Flex/action objects.
+- Coupon creation and coupon messages, deferred to Phase 4C.
 
 ### Phase 5: Insights and Growth
 
@@ -344,70 +422,52 @@ Do this first:
 1. Phase 0 `/manager/:oaId` detail home. *(done)*
 2. Phase 1 profile/basic settings. *(done)*
 3. Phase 2 chat CRM additions that reuse existing chat MVP, split into contact
-   CRM, tags/notes, custom filters, and retention/export policy.
-4. Phase 4 rich menu completion, because routes already exist.
-5. Phase 3 broadcast/audience once friendship data is available.
-6. Phase 5 insights once events are consistently tracked.
-7. Phase 6 roles/governance when more than one operator per OA matters.
+   CRM, tags/notes, custom filters, and retention/export policy. *(done)*
+4. Phase 3 broadcast/audience campaign workflows. *(done)*
+5. Phase 4A rich menu LINE parity and display period, because routes already
+   exist and this stays closest to LINE-clone behavior.
+6. Phase 4B rich message authoring once rich menu parity is stable.
+7. Phase 5 insights once events are consistently tracked.
+8. Phase 6 roles/governance when more than one operator per OA matters.
 
 Reasoning:
 
 - Messaging API operations (webhook, token, quota) are already handled in the
   developer console and do not need duplication in the OA manager.
-- Chat CRM is the next high-value addition for day-to-day operator work.
-- Broadcast/audience/insights depend on tracking and deliverability primitives;
-  shipping them too early creates misleading manager UI.
+- Chat CRM and broadcast/audience work are now implemented enough for Phase 4A
+  to build on their manager navigation and event surfaces.
+- Rich menu parity is the next LINE-clone slice because coupons depend on
+  redemption/payment decisions and a broad content library would be Vine-only
+  before the LINE-compatible surfaces are complete.
+- Insights depend on consistent event capture from campaigns and rich menus.
 - Roles are important, but owner-only is acceptable until there is enough
   manager surface area to justify multi-operator complexity.
 
-## 7. Completed Implementation Slice
+## 7. Completed Implementation Slices
 
-Completed spec: `manager-oa-detail-home-mvp`.
+Completed specs:
 
-Files likely involved:
+- Phase 0: `docs/superpowers/specs/2026-05-08-oa-manager-phase-0-home-design.md`
+- Phase 1:
+  `docs/superpowers/specs/2026-05-09-manager-oa-profile-basic-settings-design.md`
+- Phase 2:
+  `docs/superpowers/specs/2026-05-09-manager-oa-chat-crm-design.md`
+- Phase 3:
+  `docs/superpowers/specs/2026-05-13-manager-oa-broadcast-campaign-design.md`
 
-- `apps/web/app/(app)/manager/index.tsx`
-- `apps/web/app/(app)/manager/[oaId]/_layout.tsx`
-- new `apps/web/app/(app)/manager/[oaId]/index.tsx`
-- new or reused `apps/web/src/features/oa-manager/home/*`
-- `apps/web/src/features/oa/client.ts` only if existing RPCs are insufficient
-- `packages/proto/proto/oa/v1/oa.proto` and server handlers only if the home
-  needs data not currently returned by existing endpoints
-
-Minimal UI:
-
-- Header: account name, `@uniqueId`, status.
-- Left nav: `Home`, `Chats`, `Rich menus`, `Settings` placeholder only if it
-  routes somewhere real.
-- Main overview:
-  - profile summary;
-  - setup checklist;
-  - chat card linking to `/manager/:oaId/chat`;
-  - rich menu card linking to `/manager/:oaId/richmenu`;
-  - webhook/quota cards only if current data exists.
-
-Minimal verification completed by Phase 0:
-
-- Unit or integration test that `/manager` `Manage` navigates to
-  `/manager/:oaId`.
-- Integration coverage that `/manager/:oaId` loads account data and shows
-  child navigation.
-- Existing manager chat and rich menu tests still pass.
-
-Recommended next spec:
-`docs/superpowers/specs/2026-05-09-manager-oa-chat-crm-design.md`.
+Approved current spec:
+`docs/superpowers/specs/2026-05-15-manager-oa-richmenu-line-parity-design.md`.
 
 ## 8. Open Decisions
 
-- Should the OA manager use "LINE Official Account Manager" text permanently,
-  or should UI copy switch to "Vine Official Account Manager" to avoid implying
-  official LINE affiliation?
-- Should `uniqueId` be called `@id`, `Vine ID`, or `Official Account ID` in the
-  manager UI?
-- Should Phase 0 show unavailable metrics as disabled setup cards, or hide them
-  until the backing data exists?
 - Should roles be provider-scoped first or OA-scoped first? LINE has both, but
   Vine may only need provider owner/admin/member at first.
+- Should Phase 4B first target one-on-one OA chat, campaign broadcast, or both
+  for authored rich messages?
+- What non-payment redemption model makes coupons valuable enough for Phase 4C?
+- When background jobs grow beyond display-period scheduling, should Vine split
+  embedded Graphile Worker execution out of `apps/server` into a dedicated
+  worker service?
 
 ## 9. Reference Notes
 
