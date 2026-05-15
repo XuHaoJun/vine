@@ -7,8 +7,9 @@ test.describe('Manager OA campaigns', () => {
   }) => {
     test.setTimeout(90000)
     const suffix = `${Date.now()}-${test.info().retry}`
-    const filterName = `Friends audience ${suffix}`
+    const filterName = `Empty audience ${suffix}`
     const campaignName = `Campaign ${suffix}`
+    const audienceQuery = { 'tags.ids': { $eq: `missing-tag-${suffix}` } }
 
     await loginAsDemo(page)
     await page.goto(`${BASE_URL}/manager`, { waitUntil: 'domcontentloaded' })
@@ -28,9 +29,9 @@ test.describe('Manager OA campaigns', () => {
     await page.getByPlaceholder('VIP customers').fill(filterName)
     await page
       .getByPlaceholder('Audience query JSON')
-      .fill(JSON.stringify({ 'friendship.status': 'friend' }, null, 2))
+      .fill(JSON.stringify(audienceQuery, null, 2))
     await page.getByRole('button', { name: 'Preview' }).click()
-    await expect(page.getByText(/\d+ recipients/)).toBeVisible({ timeout: 15000 })
+    await expect(page.getByText('0 recipients')).toBeVisible({ timeout: 15000 })
     await page.getByRole('button', { name: 'Create' }).click()
     await expect(page.getByText('Audience filter created', { exact: true })).toBeVisible({
       timeout: 15000,
@@ -44,11 +45,13 @@ test.describe('Manager OA campaigns', () => {
       timeout: 10000,
     })
     await page.getByPlaceholder('May promotion').fill(campaignName)
+    await page.getByRole('combobox').click()
+    await page.getByRole('option', { name: filterName }).click()
     await page
       .getByPlaceholder('Write the outbound message')
       .fill(`Hello from ${campaignName}`)
     await page.getByRole('button', { name: 'Preview' }).click()
-    await expect(page.getByText(/\d+ recipients/)).toBeVisible({ timeout: 15000 })
+    await expect(page.getByText('0 recipients')).toBeVisible({ timeout: 15000 })
     await page.getByRole('button', { name: 'Send' }).click()
     await expect(page.getByText('Send campaign?')).toBeVisible()
     await page.getByRole('button', { name: 'Confirm' }).click()
