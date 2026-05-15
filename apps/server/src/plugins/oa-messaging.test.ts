@@ -18,6 +18,14 @@ function createTestApp(
     push?: ReturnType<typeof vi.fn>
     multicast?: ReturnType<typeof vi.fn>
     broadcast?: ReturnType<typeof vi.fn>
+    facade?: Partial<{
+      broadcast: ReturnType<typeof vi.fn>
+      multicast: ReturnType<typeof vi.fn>
+      narrowcast: ReturnType<typeof vi.fn>
+      uploadAudienceGroup: ReturnType<typeof vi.fn>
+      getAudienceGroup: ReturnType<typeof vi.fn>
+      getMessageEventInsight: ReturnType<typeof vi.fn>
+    }>
   },
 ) {
   const { mockSelect, mockInsert, mockUpdate } = mockDb
@@ -94,14 +102,65 @@ function createTestApp(
         recipientCount: 1,
       }),
   }
+  const mockFacade = {
+    broadcast:
+      mockMessagingOverrides?.facade?.broadcast ??
+      vi.fn().mockResolvedValue({
+        ok: true,
+        accepted: { httpRequestId: 'req_broadcast', acceptedRequestId: 'acc_broadcast' },
+        recipientCount: 1,
+      }),
+    multicast:
+      mockMessagingOverrides?.facade?.multicast ??
+      vi.fn().mockResolvedValue({
+        ok: true,
+        accepted: { httpRequestId: 'req_multicast', acceptedRequestId: 'acc_multicast' },
+        recipientCount: 2,
+      }),
+    narrowcast:
+      mockMessagingOverrides?.facade?.narrowcast ??
+      vi.fn().mockResolvedValue({
+        ok: true,
+        accepted: {
+          httpRequestId: 'req_narrowcast',
+          acceptedRequestId: 'acc_narrowcast',
+        },
+        recipientCount: 1,
+      }),
+    uploadAudienceGroup:
+      mockMessagingOverrides?.facade?.uploadAudienceGroup ??
+      vi.fn().mockResolvedValue({
+        ok: true,
+        audienceGroupId: 'filter-1',
+        description: 'VIP import',
+      }),
+    getAudienceGroup:
+      mockMessagingOverrides?.facade?.getAudienceGroup ??
+      vi.fn().mockResolvedValue({
+        ok: true,
+        audienceGroupId: 'filter-1',
+        description: 'VIP import',
+        created: 1778716800,
+        permission: 'READ_WRITE',
+        createRoute: 'MESSAGING_API',
+        audienceCount: null,
+      }),
+    getMessageEventInsight:
+      mockMessagingOverrides?.facade?.getMessageEventInsight ??
+      vi.fn().mockResolvedValue({
+        ok: true,
+        overview: { requestId: 'campaign-1', delivered: 2, failed: 0, target: 2 },
+      }),
+  }
   const app = Fastify()
   app.register(oaMessagingPlugin, {
     oa: mockOa as any,
     messaging: mockMessaging as any,
+    facade: mockFacade as any,
     db,
     drive: mockDrive,
   })
-  return { app, mockOa, mockMessaging }
+  return { app, mockOa, mockMessaging, mockFacade }
 }
 
 function makeMockDb(tokenResult: unknown[], friendshipResult: unknown[]) {
@@ -661,16 +720,15 @@ describe('oaMessagingPlugin — Push Message', () => {
   })
 
   describe('broadcast message delivery', () => {
-    it('sends broadcast through the messaging service', async () => {
+    it('routes broadcast through the campaign facade', async () => {
       const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
-      const { app, mockMessaging } = createTestApp(mockDb)
-      mockMessaging.broadcast.mockResolvedValue({
+      const { app, mockFacade } = createTestApp(mockDb)
+      mockFacade.broadcast.mockResolvedValue({
         ok: true,
         accepted: {
           httpRequestId: 'req_broadcast',
           acceptedRequestId: 'acc_broadcast',
         },
-        processed: { processed: 2 },
         recipientCount: 2,
       })
       await app.ready()
@@ -685,10 +743,10 @@ describe('oaMessagingPlugin — Push Message', () => {
       await app.close()
       expect(res.statusCode).toBe(200)
       expect(res.headers['x-line-request-id']).toBe('req_broadcast')
-      expect(mockMessaging.broadcast).toHaveBeenCalledWith({
+      expect(mockFacade.broadcast).toHaveBeenCalledWith({
         oaId,
         retryKey: undefined,
-        messages: [expect.objectContaining({ type: 'text', text: 'hello' })],
+        body: { messages: [{ type: 'text', text: 'hello' }] },
       })
     })
   })
@@ -711,15 +769,20 @@ describe('oaMessagingPlugin — Multicast Message', () => {
     expect(res.statusCode).toBe(404)
   })
 
-  it('passes validated multicast payload and retry key to the messaging service', async () => {
+  it('passes validated multicast payload and retry key to the facade', async () => {
     const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
-    const multicast = vi.fn().mockResolvedValue({
-      ok: true,
-      accepted: { httpRequestId: 'req_multicast', acceptedRequestId: 'acc_multicast' },
-      processed: { processed: 1 },
-      recipientCount: 1,
+    const { app, mockFacade } = createTestApp(mockDb, {
+      facade: {
+        multicast: vi.fn().mockResolvedValue({
+          ok: true,
+          accepted: {
+            httpRequestId: 'req_multicast',
+            acceptedRequestId: 'acc_multicast',
+          },
+          recipientCount: 1,
+        }),
+      },
     })
-    const { app } = createTestApp(mockDb, { multicast })
     await app.ready()
 
     const res = await app.inject({
@@ -734,17 +797,24 @@ describe('oaMessagingPlugin — Multicast Message', () => {
 
     await app.close()
     expect(res.statusCode).toBe(200)
-    expect(multicast).toHaveBeenCalledWith({
+    expect(mockFacade.multicast).toHaveBeenCalledWith({
       oaId,
       retryKey: '123e4567-e89b-12d3-a456-426614174000',
-      to: [userId],
-      messages: [{ valid: true, type: 'text', text: 'hello', metadata: null }],
+      body: { to: [userId], messages: [{ type: 'text', text: 'hello' }] },
     })
   })
 
   it('returns 400 when multicast recipients are missing', async () => {
     const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
-    const { app } = createTestApp(mockDb)
+    const { app } = createTestApp(mockDb, {
+      facade: {
+        multicast: vi.fn().mockResolvedValue({
+          ok: false,
+          code: 'INVALID_REQUEST',
+          message: 'to is required',
+        }),
+      },
+    })
     await app.ready()
 
     const res = await app.inject({
@@ -761,7 +831,15 @@ describe('oaMessagingPlugin — Multicast Message', () => {
 
   it('returns 400 when multicast has more than 500 recipients', async () => {
     const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
-    const { app } = createTestApp(mockDb)
+    const { app } = createTestApp(mockDb, {
+      facade: {
+        multicast: vi.fn().mockResolvedValue({
+          ok: false,
+          code: 'INVALID_REQUEST',
+          message: 'to must contain 500 or fewer user IDs',
+        }),
+      },
+    })
     await app.ready()
 
     const res = await app.inject({
@@ -781,7 +859,15 @@ describe('oaMessagingPlugin — Multicast Message', () => {
 
   it('returns 400 when multicast recipients contain duplicates', async () => {
     const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
-    const { app } = createTestApp(mockDb)
+    const { app } = createTestApp(mockDb, {
+      facade: {
+        multicast: vi.fn().mockResolvedValue({
+          ok: false,
+          code: 'INVALID_REQUEST',
+          message: 'to must not contain duplicate user IDs',
+        }),
+      },
+    })
     await app.ready()
 
     const res = await app.inject({
@@ -802,11 +888,13 @@ describe('oaMessagingPlugin — Multicast Message', () => {
   it('returns 429 when multicast quota is exceeded', async () => {
     const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
     const { app } = createTestApp(mockDb, {
-      multicast: vi.fn().mockResolvedValue({
-        ok: false,
-        code: 'QUOTA_EXCEEDED',
-        httpRequestId: 'req_q',
-      }),
+      facade: {
+        multicast: vi.fn().mockResolvedValue({
+          ok: false,
+          code: 'QUOTA_EXCEEDED',
+          httpRequestId: 'req_q',
+        }),
+      },
     })
     await app.ready()
 
@@ -825,13 +913,15 @@ describe('oaMessagingPlugin — Multicast Message', () => {
   it('returns 409 with accepted request id for duplicate multicast retry key', async () => {
     const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
     const { app } = createTestApp(mockDb, {
-      multicast: vi.fn().mockResolvedValue({
-        ok: false,
-        code: 'RETRY_KEY_ACCEPTED',
-        httpRequestId: 'req_retry',
-        acceptedRequestId: 'acc_original',
-        sentMessages: [{ id: 'oa:req:request-1:user-1:0' }],
-      }),
+      facade: {
+        multicast: vi.fn().mockResolvedValue({
+          ok: false,
+          code: 'RETRY_KEY_ACCEPTED',
+          httpRequestId: 'req_retry',
+          acceptedRequestId: 'acc_original',
+          sentMessages: [{ id: 'oa:req:request-1:user-1:0' }],
+        }),
+      },
     })
     await app.ready()
 
@@ -1300,5 +1390,172 @@ describe('oaMessagingPlugin — Loading Animation', () => {
     await app.close()
     expect(res.statusCode).toBe(200)
     expect(mockDb.mockInsert).toHaveBeenCalled()
+  })
+})
+
+describe('oaMessagingPlugin — Phase 3B campaign facade', () => {
+  it('routes broadcast through the campaign facade', async () => {
+    const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+    const facade = {
+      broadcast: vi.fn().mockResolvedValue({
+        ok: true,
+        accepted: {
+          httpRequestId: 'req_campaign',
+          acceptedRequestId: 'acc_campaign',
+        },
+      }),
+    }
+    const { app } = createTestApp(mockDb, { facade })
+    await app.ready()
+
+    const res = await app.inject({
+      method: 'POST',
+      url: oaApiPath('/bot/message/broadcast'),
+      headers: {
+        authorization: `Bearer ${validToken}`,
+        'x-line-retry-key': '123e4567-e89b-12d3-a456-426614174000',
+      },
+      payload: { messages: [{ type: 'text', text: 'hello' }] },
+    })
+
+    await app.close()
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['x-line-request-id']).toBe('req_campaign')
+    expect(facade.broadcast).toHaveBeenCalledWith({
+      oaId,
+      retryKey: '123e4567-e89b-12d3-a456-426614174000',
+      body: { messages: [{ type: 'text', text: 'hello' }] },
+    })
+  })
+
+  it('routes narrowcast through the campaign facade', async () => {
+    const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+    const facade = {
+      narrowcast: vi.fn().mockResolvedValue({
+        ok: true,
+        accepted: {
+          httpRequestId: 'req_narrowcast',
+          acceptedRequestId: 'acc_narrowcast',
+        },
+      }),
+    }
+    const { app } = createTestApp(mockDb, { facade })
+    await app.ready()
+
+    const payload = {
+      messages: [{ type: 'text', text: 'hello' }],
+      recipient: { type: 'audience', audienceGroupId: 'filter-1' },
+    }
+    const res = await app.inject({
+      method: 'POST',
+      url: oaApiPath('/bot/message/narrowcast'),
+      headers: { authorization: `Bearer ${validToken}` },
+      payload,
+    })
+
+    await app.close()
+    expect(res.statusCode).toBe(200)
+    expect(facade.narrowcast).toHaveBeenCalledWith({
+      oaId,
+      retryKey: undefined,
+      body: payload,
+    })
+  })
+
+  it('creates uploaded audience groups through the campaign facade', async () => {
+    const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+    const facade = {
+      uploadAudienceGroup: vi.fn().mockResolvedValue({
+        ok: true,
+        audienceGroupId: 'filter-1',
+        description: 'VIP import',
+      }),
+    }
+    const { app } = createTestApp(mockDb, { facade })
+    await app.ready()
+
+    const res = await app.inject({
+      method: 'POST',
+      url: oaApiPath('/bot/audienceGroup/upload'),
+      headers: { authorization: `Bearer ${validToken}` },
+      payload: {
+        description: 'VIP import',
+        audiences: [{ id: 'user-1' }],
+      },
+    })
+
+    await app.close()
+    expect(res.statusCode).toBe(200)
+    expect(JSON.parse(res.body)).toEqual({
+      audienceGroupId: 'filter-1',
+      description: 'VIP import',
+    })
+  })
+
+  it('returns audience group metadata through the campaign facade', async () => {
+    const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+    const facade = {
+      getAudienceGroup: vi.fn().mockResolvedValue({
+        ok: true,
+        audienceGroupId: 'filter-1',
+        description: 'VIP import',
+        created: 1778716800,
+        permission: 'READ_WRITE',
+        createRoute: 'MESSAGING_API',
+        audienceCount: null,
+      }),
+    }
+    const { app } = createTestApp(mockDb, { facade })
+    await app.ready()
+
+    const res = await app.inject({
+      method: 'GET',
+      url: oaApiPath('/bot/audienceGroup/filter-1'),
+      headers: { authorization: `Bearer ${validToken}` },
+    })
+
+    await app.close()
+    expect(res.statusCode).toBe(200)
+    expect(JSON.parse(res.body).audienceGroupId).toBe('filter-1')
+  })
+
+  it('returns campaign insight through the campaign facade', async () => {
+    const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+    const facade = {
+      getMessageEventInsight: vi.fn().mockResolvedValue({
+        ok: true,
+        overview: { requestId: 'campaign-1', delivered: 2, failed: 0, target: 2 },
+      }),
+    }
+    const { app } = createTestApp(mockDb, { facade })
+    await app.ready()
+
+    const res = await app.inject({
+      method: 'GET',
+      url: oaApiPath('/bot/insight/message/event?requestId=campaign-1'),
+      headers: { authorization: `Bearer ${validToken}` },
+    })
+
+    await app.close()
+    expect(res.statusCode).toBe(200)
+    expect(JSON.parse(res.body)).toEqual({
+      overview: { requestId: 'campaign-1', delivered: 2, failed: 0, target: 2 },
+    })
+  })
+
+  it('does not register the root /v2 narrowcast route', async () => {
+    const mockDb = makeMockDb([{ oaId, token: validToken, expiresAt: null }], [])
+    const { app } = createTestApp(mockDb)
+    await app.ready()
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/v2/bot/message/narrowcast',
+      headers: { authorization: `Bearer ${validToken}` },
+      payload: { messages: [{ type: 'text', text: 'hello' }] },
+    })
+
+    await app.close()
+    expect(res.statusCode).toBe(404)
   })
 })

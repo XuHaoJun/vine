@@ -35,6 +35,7 @@ import { createOAAudienceService } from './services/oa-audience'
 import { createOACampaignService } from './services/oa-campaign'
 import { createOAContactExportService } from './services/oa-contact-export'
 import { createOAMessagingService } from './services/oa-messaging'
+import { createOAMessagingFacadeService } from './services/oa-messaging-facade'
 import { createOAWebhookDeliveryService } from './services/oa-webhook-delivery'
 import { createPayments, registerPaymentsWebhookRoutes } from './services/payments'
 import { createStickerMarketServices } from './services/sticker-market'
@@ -79,6 +80,10 @@ const oaCampaign = createOACampaignService({
   db,
   audience: oaAudience,
   messaging: oaMessaging,
+})
+const oaMessagingFacade = createOAMessagingFacadeService({
+  db,
+  campaign: oaCampaign,
 })
 const webhookDelivery = createOAWebhookDeliveryService({ db, oa, logger })
 const liff = createLiffService({ db })
@@ -175,7 +180,13 @@ await zeroPlugin(app, { auth, zero })
 await mediaUploadPlugin(app, { auth, drive })
 await oaContactExportPlugin(app, { auth, contactExport: oaContactExport })
 await locationMapPlugin(app, { db, auth })
-await oaMessagingPlugin(app, { oa, messaging: oaMessaging, db, drive })
+await oaMessagingPlugin(app, {
+  oa,
+  messaging: oaMessaging,
+  facade: oaMessagingFacade,
+  db,
+  drive,
+})
 await oaRichMenuPlugin(app, { oa, db, drive })
 await oaWebhookPlugin(app, { oa, db, auth, webhookDelivery })
 await oaWebhookEndpointPlugin(app, { oa, db })
