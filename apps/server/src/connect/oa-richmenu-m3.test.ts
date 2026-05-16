@@ -29,7 +29,10 @@ function makeAuthCtx(userId: string) {
   } as any
 }
 
-function makeDeps(oaOverrides: Partial<Record<string, any>> = {}) {
+function makeDeps(
+  oaOverrides: Partial<Record<string, any>> = {},
+  driveOverrides: Partial<Record<string, any>> = {},
+) {
   mockedGetAuthDataFromRequest.mockResolvedValue({ id: 'user-1' } as any)
   const oa = {
     getOfficialAccount: vi.fn().mockResolvedValue({ id: 'oa-1', providerId: 'p-1' }),
@@ -57,6 +60,7 @@ function makeDeps(oaOverrides: Partial<Record<string, any>> = {}) {
     listOAUsersWithRichMenus: vi.fn().mockResolvedValue([]),
     addRichMenuClick: vi.fn().mockResolvedValue(undefined),
     getRichMenuClickStats: vi.fn().mockResolvedValue([]),
+    deleteRichMenu: vi.fn().mockResolvedValue(undefined),
     ...oaOverrides,
   }
   const webhookDelivery = {
@@ -71,6 +75,13 @@ function makeDeps(oaOverrides: Partial<Record<string, any>> = {}) {
   const richMenuDisplayScheduler = {
     enqueueDisplayPeriodJobs: vi.fn().mockResolvedValue(undefined),
   }
+  const drive = {
+    exists: vi.fn().mockResolvedValue(false),
+    get: vi.fn(),
+    delete: vi.fn().mockResolvedValue(undefined),
+    put: vi.fn().mockResolvedValue(undefined),
+    ...driveOverrides,
+  }
   const capturedImpl: any = {}
   const mockRouter = {
     service: (_desc: any, impl: any) => {
@@ -80,13 +91,13 @@ function makeDeps(oaOverrides: Partial<Record<string, any>> = {}) {
   oaHandler({
     oa: oa as any,
     auth: {} as any,
-    drive: {} as any,
+    drive: drive as any,
     webhookDelivery,
     oaAudience: {} as any,
     oaCampaign: {} as any,
     richMenuDisplayScheduler,
   })(mockRouter as any)
-  return { capturedImpl, oa, webhookDelivery, richMenuDisplayScheduler }
+  return { capturedImpl, oa, drive, webhookDelivery, richMenuDisplayScheduler }
 }
 
 beforeEach(() => {
@@ -358,6 +369,72 @@ describe('listOAUsersWithRichMenus', () => {
     expect(result.users).toHaveLength(1)
     expect(result.users[0].userId).toBe('u-1')
     expect(result.users[0].assignedRichMenuId).toBe('rm-1')
+  })
+})
+
+describe('getRichMenu', () => {
+  it('loads a stored PNG image for manager editing', async () => {
+    const png = new Uint8Array([1, 2, 3])
+    const { capturedImpl, drive } = makeDeps(
+      {
+        getProvider: vi.fn().mockResolvedValue({ id: 'p-1', ownerId: 'user-1' }),
+        getRichMenu: vi.fn().mockResolvedValue({
+          richMenuId: 'rm-1',
+          name: 'Menu',
+          chatBarText: 'Menu',
+          selected: false,
+          sizeWidth: 2500,
+          sizeHeight: 843,
+          areas: [],
+          hasImage: true,
+        }),
+      },
+      {
+        exists: vi
+          .fn()
+          .mockResolvedValueOnce(false)
+          .mockResolvedValueOnce(true),
+        get: vi.fn().mockResolvedValue({
+          content: png,
+          mimeType: 'image/png',
+        }),
+      },
+    )
+    const ctx = makeAuthCtx('user-1')
+
+    const result = await capturedImpl.getRichMenu(
+      { officialAccountId: 'oa-1', richMenuId: 'rm-1' },
+      ctx,
+    )
+
+    expect(drive.exists).toHaveBeenNthCalledWith(1, 'richmenu/oa-1/rm-1.jpg')
+    expect(drive.exists).toHaveBeenNthCalledWith(2, 'richmenu/oa-1/rm-1.png')
+    expect(drive.get).toHaveBeenCalledWith('richmenu/oa-1/rm-1.png')
+    expect(result.imageContentType).toBe('image/png')
+    expect(result.image).toEqual(png)
+  })
+})
+
+describe('deleteRichMenu', () => {
+  it('removes both JPEG and PNG image objects', async () => {
+    const { capturedImpl, oa, drive } = makeDeps(
+      {
+        getProvider: vi.fn().mockResolvedValue({ id: 'p-1', ownerId: 'user-1' }),
+      },
+      {
+        exists: vi.fn().mockResolvedValue(true),
+      },
+    )
+    const ctx = makeAuthCtx('user-1')
+
+    await capturedImpl.deleteRichMenu(
+      { officialAccountId: 'oa-1', richMenuId: 'rm-1' },
+      ctx,
+    )
+
+    expect(oa.deleteRichMenu).toHaveBeenCalledWith('oa-1', 'rm-1')
+    expect(drive.delete).toHaveBeenCalledWith('richmenu/oa-1/rm-1.jpg')
+    expect(drive.delete).toHaveBeenCalledWith('richmenu/oa-1/rm-1.png')
   })
 })
 

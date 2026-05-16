@@ -968,12 +968,14 @@ export function oaHandler(deps: OAHandlerDeps) {
         let imageBytes: Uint8Array | undefined
         let imageContentType: string | undefined
         if (menu.hasImage) {
-          const key = `richmenu/${req.officialAccountId}/${req.richMenuId}.jpg`
-          const exists = await deps.drive.exists(key)
-          if (exists) {
-            const file = await deps.drive.get(key)
-            imageBytes = new Uint8Array(file.content)
-            imageContentType = file.mimeType ?? 'image/jpeg'
+          for (const ext of ['jpg', 'png'] as const) {
+            const key = `richmenu/${req.officialAccountId}/${req.richMenuId}.${ext}`
+            if (await deps.drive.exists(key)) {
+              const file = await deps.drive.get(key)
+              imageBytes = new Uint8Array(file.content)
+              imageContentType = file.mimeType ?? (ext === 'png' ? 'image/png' : 'image/jpeg')
+              break
+            }
           }
         }
         return { menu: toRichMenuItem(menu), image: imageBytes, imageContentType }
@@ -1067,9 +1069,10 @@ export function oaHandler(deps: OAHandlerDeps) {
         const auth = requireAuthData(ctx)
         await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
         await deps.oa.deleteRichMenu(req.officialAccountId, req.richMenuId)
-        const key = `richmenu/${req.officialAccountId}/${req.richMenuId}.jpg`
-        const exists = await deps.drive.exists(key)
-        if (exists) await deps.drive.delete(key)
+        for (const ext of ['jpg', 'png'] as const) {
+          const key = `richmenu/${req.officialAccountId}/${req.richMenuId}.${ext}`
+          if (await deps.drive.exists(key)) await deps.drive.delete(key)
+        }
         return {}
       },
       async setDefaultRichMenu(req, ctx) {
