@@ -46,6 +46,9 @@ describe('createOAService — RichMenu', () => {
             sizeHeight: 1686,
             areas: [],
             hasImage: false,
+            displayStartsAt: '2026-05-15T10:00:00.000Z',
+            displayEndsAt: '2026-05-16T10:00:00.000Z',
+            displayScheduleRevision: 0,
           },
         ]),
       }),
@@ -60,12 +63,44 @@ describe('createOAService — RichMenu', () => {
       sizeWidth: 2500,
       sizeHeight: 1686,
       areas: [],
+      displayStartsAt: '2026-05-15T10:00:00.000Z',
+      displayEndsAt: '2026-05-16T10:00:00.000Z',
     })
 
     expect(mockDb.insert).toHaveBeenCalled()
     expect(result.richMenuId).toMatch(/^richmenu-/)
     expect(result.name).toBe('Test Menu')
     expect(result.hasImage).toBe(false)
+  })
+
+  it('increments display schedule revision when the display period changes', async () => {
+    const mockDb = createMockDb()
+    const set = vi.fn().mockReturnValue({
+      where: vi.fn().mockReturnValue({
+        returning: vi.fn().mockResolvedValue([{ displayScheduleRevision: 3 }]),
+      }),
+    })
+    mockDb.update.mockReturnValueOnce({ set })
+
+    const oa = createOAService({ db: mockDb as any, database: {} as any })
+    const result = await oa.updateRichMenu('oa-1', 'richmenu-test', {
+      name: 'Menu',
+      chatBarText: 'Menu',
+      selected: false,
+      sizeWidth: 2500,
+      sizeHeight: 843,
+      areas: [],
+      displayStartsAt: '2026-05-15T10:00:00.000Z',
+      displayEndsAt: null,
+      incrementDisplayScheduleRevision: true,
+    })
+
+    expect(set).toHaveBeenCalledWith(
+      expect.objectContaining({
+        displayScheduleRevision: expect.anything(),
+      }),
+    )
+    expect(result?.displayScheduleRevision).toBe(3)
   })
 
   it('creates a rich menu with selected=true', async () => {

@@ -2,6 +2,7 @@ import { useActiveParams, useRouter, createRoute } from 'one'
 import { memo, useState } from 'react'
 import { SizableText, Spinner, XStack, YStack } from 'tamagui'
 import { RichMenuEditor } from '~/features/oa-manager/richmenu/RichMenuEditor'
+import { isoToDatetimeLocal } from '~/features/oa-manager/richmenu/displayPeriod'
 import { boundsFromProto } from '~/features/oa-manager/richmenu/types'
 import { oaClient } from '~/features/oa/client'
 import { Button } from '~/interface/buttons/Button'
@@ -84,6 +85,10 @@ export const EditRichMenuPage = memo(() => {
     selectedAreaId: null,
     imageDataUrl,
     imageChanged: false,
+    displayPeriod: {
+      displayStartsAt: isoToDatetimeLocal(menu.displayStartsAt),
+      displayEndsAt: isoToDatetimeLocal(menu.displayEndsAt),
+    },
   }
 
   const stats = statsData?.stats ?? []

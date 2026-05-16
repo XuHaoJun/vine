@@ -11,7 +11,10 @@ import { createFsDriveService } from '@vine/drive'
 import { eq } from 'drizzle-orm'
 import Fastify from 'fastify'
 import { connectRoutes } from './connect/routes'
+import { makeWorkerUtils, run } from 'graphile-worker'
 import { logger } from './lib/logger'
+import { createRichMenuDisplayTaskList } from './workers/rich-menu-display'
+import { createRichMenuDisplayScheduler } from './workers/rich-menu-scheduler'
 import { createAuthServer, authPlugin } from './plugins/auth'
 import { liffFixturesPublicPlugin } from './plugins/liff-fixtures-public'
 import { liffPublicPlugin } from './plugins/liff-public'
@@ -70,6 +73,21 @@ if (path.resolve(uploadRoot) !== driveBasePath) {
 }
 
 const oa = createOAService({ db, database })
+
+const workerUtils = await makeWorkerUtils({
+  pgPool: database,
+  schema: 'graphile_worker',
+})
+
+const workerRunner = await run({
+  pgPool: database,
+  schema: 'graphile_worker',
+  noHandleSignals: true,
+  taskList: createRichMenuDisplayTaskList({ oa, logger }),
+})
+
+const richMenuDisplayScheduler = createRichMenuDisplayScheduler(workerUtils)
+
 const oaContactExport = createOAContactExportService({ db })
 const oaMessaging = createOAMessagingService({
   db,
@@ -131,6 +149,7 @@ await app.register(fastifyConnectPlugin, {
     miniAppSvcMsg,
     auth,
     drive,
+    richMenuDisplayScheduler,
     stickerMarketUser: {
       db,
       pay: payments.pay,
@@ -275,6 +294,10 @@ void cleanupLoadings()
 const loadingCleanupInterval = setInterval(() => void cleanupLoadings(), 60_000)
 app.addHook('onClose', async () => {
   clearInterval(loadingCleanupInterval)
+})
+
+app.addHook('onClose', async () => {
+  await workerRunner.stop().finally(() => workerUtils.release())
 })
 
 const port = Number(process.env['PORT'] ?? 3001)

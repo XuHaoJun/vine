@@ -572,6 +572,11 @@ message RichMenuItem {
   int32 size_height = 6;
   repeated RichMenuArea areas = 7;
   bool has_image = 8;
+  optional string display_starts_at = 9;
+  optional string display_ends_at = 10;
+  string manager_status = 11;
+  int32 display_schedule_revision = 12;
+  int32 click_count = 13;
 }
 
 message ListRichMenusRequest {
@@ -602,6 +607,8 @@ message CreateRichMenuRequest {
   int32 size_width = 5;
   int32 size_height = 6;
   repeated RichMenuArea areas = 7;
+  optional string display_starts_at = 8;
+  optional string display_ends_at = 9;
 }
 
 message CreateRichMenuResponse {
@@ -617,6 +624,8 @@ message UpdateRichMenuRequest {
   int32 size_width = 6;
   int32 size_height = 7;
   repeated RichMenuArea areas = 8;
+  optional string display_starts_at = 9;
+  optional string display_ends_at = 10;
 }
 
 message UpdateRichMenuResponse {}

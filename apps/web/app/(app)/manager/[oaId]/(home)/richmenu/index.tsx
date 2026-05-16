@@ -7,6 +7,10 @@ import { Button } from '~/interface/buttons/Button'
 import { dialogConfirm, showError } from '~/interface/dialogs/actions'
 import { showToast } from '~/interface/toast/Toast'
 import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
+import {
+  formatDisplayPeriodSummary,
+  managerStatusLabel,
+} from '~/features/oa-manager/richmenu/displayPeriod'
 
 const route = createRoute<'/(app)/manager/[oaId]/(home)/richmenu'>()
 
@@ -261,6 +265,11 @@ type MenuCardProps = {
     sizeHeight: number
     chatBarText: string
     hasImage: boolean
+    displayStartsAt?: string
+    displayEndsAt?: string
+    managerStatus?: string
+    displayScheduleRevision?: number
+    clickCount?: number
   }
   oaId: string
   isDefault: boolean
@@ -270,7 +279,14 @@ type MenuCardProps = {
 }
 
 const MenuCard = memo(
-  ({ menu, oaId, isDefault, onSetDefault, onEdit, onDelete }: MenuCardProps) => (
+  ({ menu, oaId, isDefault, onSetDefault, onEdit, onDelete }: MenuCardProps) => {
+    const statusLabel = managerStatusLabel(menu.managerStatus)
+    const displaySummary = formatDisplayPeriodSummary(
+      menu.displayStartsAt,
+      menu.displayEndsAt,
+    )
+
+    return (
     <XStack
       borderWidth={1}
       borderColor="$borderColor"
@@ -287,12 +303,23 @@ const MenuCard = memo(
       />
 
       <YStack flex={1} gap="$1">
-        <SizableText size="$3" fontWeight="600" color="$color12">
-          {menu.name}
-        </SizableText>
+        <XStack gap="$2" items="center">
+          <SizableText size="$3" fontWeight="600" color="$color12">
+            {menu.name}
+          </SizableText>
+          <YStack px="$2" py="$1" rounded="$2" bg="$color3">
+            <SizableText size="$1" fontWeight="700" color="$color11">
+              {statusLabel.toUpperCase()}
+            </SizableText>
+          </YStack>
+        </XStack>
         <SizableText size="$1" color="$color10">
-          {menu.areas.length} areas · {menu.sizeWidth}×{menu.sizeHeight} · "
-          {menu.chatBarText}"
+          {statusLabel} · {menu.hasImage ? 'Image ready' : 'Image missing'} ·{' '}
+          {displaySummary}
+        </SizableText>
+        <SizableText size="$1" color="$color9">
+          {menu.areas.length} areas · {menu.sizeWidth}x{menu.sizeHeight} ·{' '}
+          {menu.clickCount ?? 0} clicks · "{menu.chatBarText}"
         </SizableText>
       </YStack>
 
@@ -317,7 +344,7 @@ const MenuCard = memo(
         </Button>
       </XStack>
     </XStack>
-  ),
+  )},
 )
 
 export default RichMenuListPage

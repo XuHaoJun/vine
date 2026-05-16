@@ -17,6 +17,18 @@ export type Area = {
 
 export type MenuSize = '2500x1686' | '2500x843'
 
+export type RichMenuManagerStatus =
+  | 'draft'
+  | 'inactive'
+  | 'scheduled'
+  | 'active'
+  | 'ended'
+
+export type DisplayPeriodState = {
+  displayStartsAt: string
+  displayEndsAt: string
+}
+
 export type EditorState = {
   name: string
   size: MenuSize
@@ -26,6 +38,7 @@ export type EditorState = {
   selectedAreaId: string | null
   imageDataUrl: string | null
   imageChanged: boolean
+  displayPeriod: DisplayPeriodState
 }
 
 export function boundsToProto(b: AreaBounds) {

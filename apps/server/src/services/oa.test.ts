@@ -651,6 +651,9 @@ describe('createOAService — updateRichMenu', () => {
           action: { type: 'message', text: 'Hello' },
         },
       ],
+      displayStartsAt: null,
+      displayEndsAt: null,
+      incrementDisplayScheduleRevision: false,
     })
 
     expect(mockDb.update).toHaveBeenCalled()

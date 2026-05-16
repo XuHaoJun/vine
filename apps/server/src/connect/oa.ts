@@ -15,6 +15,12 @@ import type { createOAWebhookDeliveryService } from '../services/oa-webhook-deli
 import type { ServiceImpl } from '@connectrpc/connect'
 import type { AuthServer } from '@take-out/better-auth-utils/server'
 import type { DriveService } from '@vine/drive'
+import type { RichMenuDisplayScheduler } from '../workers/rich-menu-scheduler'
+import { validateRichMenuImageUpload } from '@vine/richmenu-schema'
+import {
+  displayPeriodChanged,
+  parseDisplayPeriodInput,
+} from '../services/oa-richmenu-display'
 
 type OAHandlerDeps = {
   oa: ReturnType<typeof createOAService>
@@ -23,6 +29,7 @@ type OAHandlerDeps = {
   auth: AuthServer
   drive: DriveService
   webhookDelivery: ReturnType<typeof createOAWebhookDeliveryService>
+  richMenuDisplayScheduler: RichMenuDisplayScheduler
 }
 
 async function assertProviderOwnedByUser(
@@ -200,6 +207,11 @@ type DbRichMenuRow = {
   sizeHeight: number
   areas: unknown
   hasImage: boolean
+  displayStartsAt?: string | null
+  displayEndsAt?: string | null
+  managerStatus?: string
+  displayScheduleRevision?: number
+  clickCount?: number
 }
 
 function toRichMenuItem(m: DbRichMenuRow) {
@@ -235,6 +247,11 @@ function toRichMenuItem(m: DbRichMenuRow) {
     sizeHeight: m.sizeHeight,
     areas,
     hasImage: m.hasImage,
+    displayStartsAt: m.displayStartsAt ?? undefined,
+    displayEndsAt: m.displayEndsAt ?? undefined,
+    managerStatus: m.managerStatus ?? 'inactive',
+    displayScheduleRevision: m.displayScheduleRevision ?? 0,
+    clickCount: m.clickCount ?? 0,
   }
 }
 
@@ -875,24 +892,7 @@ export function oaHandler(deps: OAHandlerDeps) {
         const userId = auth.id
         const oaId = req.officialAccountId
 
-        const userLink = await deps.oa.getRichMenuIdOfUser(oaId, userId)
-        let richMenuId: string | null = null
-        if (userLink) {
-          richMenuId = userLink.richMenuId
-        }
-
-        if (!richMenuId) {
-          const defaultMenu = await deps.oa.getDefaultRichMenu(oaId)
-          if (defaultMenu) {
-            richMenuId = defaultMenu.richMenuId
-          }
-        }
-
-        if (!richMenuId) {
-          return {}
-        }
-
-        const menu = await deps.oa.getRichMenu(oaId, richMenuId)
+        const menu = await deps.oa.getActiveRichMenuForUser({ oaId, userId })
         if (!menu) {
           return {}
         }
@@ -908,7 +908,7 @@ export function oaHandler(deps: OAHandlerDeps) {
           const exts = ['jpg', 'png']
           let found = false
           for (const ext of exts) {
-            const key = `richmenu/${oaId}/${richMenuId}.${ext}`
+            const key = `richmenu/${oaId}/${menu.richMenuId}.${ext}`
             if (await deps.drive.exists(key)) {
               const file = await deps.drive.get(key)
               imageBytes = new Uint8Array(file.content)
@@ -953,7 +953,7 @@ export function oaHandler(deps: OAHandlerDeps) {
       async listRichMenus(req, ctx) {
         const auth = requireAuthData(ctx)
         await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
-        const menus = await deps.oa.getRichMenuList(req.officialAccountId)
+        const menus = await deps.oa.getRichMenuListForManager(req.officialAccountId)
         const defaultMenu = await deps.oa.getDefaultRichMenu(req.officialAccountId)
         return {
           menus: menus.map(toRichMenuItem),
@@ -968,12 +968,14 @@ export function oaHandler(deps: OAHandlerDeps) {
         let imageBytes: Uint8Array | undefined
         let imageContentType: string | undefined
         if (menu.hasImage) {
-          const key = `richmenu/${req.officialAccountId}/${req.richMenuId}.jpg`
-          const exists = await deps.drive.exists(key)
-          if (exists) {
-            const file = await deps.drive.get(key)
-            imageBytes = new Uint8Array(file.content)
-            imageContentType = file.mimeType ?? 'image/jpeg'
+          for (const ext of ['jpg', 'png'] as const) {
+            const key = `richmenu/${req.officialAccountId}/${req.richMenuId}.${ext}`
+            if (await deps.drive.exists(key)) {
+              const file = await deps.drive.get(key)
+              imageBytes = new Uint8Array(file.content)
+              imageContentType = file.mimeType ?? (ext === 'png' ? 'image/png' : 'image/jpeg')
+              break
+            }
           }
         }
         return { menu: toRichMenuItem(menu), image: imageBytes, imageContentType }
@@ -981,6 +983,18 @@ export function oaHandler(deps: OAHandlerDeps) {
       async createRichMenu(req, ctx) {
         const auth = requireAuthData(ctx)
         await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        let displayPeriod
+        try {
+          displayPeriod = parseDisplayPeriodInput({
+            displayStartsAt: req.displayStartsAt,
+            displayEndsAt: req.displayEndsAt,
+          })
+        } catch (err) {
+          throw new ConnectError(
+            err instanceof Error ? err.message : 'Invalid display period',
+            Code.InvalidArgument,
+          )
+        }
         const menu = await deps.oa.createRichMenu({
           oaId: req.officialAccountId,
           name: req.name,
@@ -989,34 +1003,89 @@ export function oaHandler(deps: OAHandlerDeps) {
           sizeWidth: req.sizeWidth,
           sizeHeight: req.sizeHeight,
           areas: req.areas.map(areaToDb),
+          displayStartsAt: displayPeriod.displayStartsAt,
+          displayEndsAt: displayPeriod.displayEndsAt,
         })
+        if (displayPeriod.displayStartsAt || displayPeriod.displayEndsAt) {
+          await deps.richMenuDisplayScheduler.enqueueDisplayPeriodJobs({
+            oaId: req.officialAccountId,
+            richMenuId: menu.richMenuId,
+            displayScheduleRevision: menu.displayScheduleRevision,
+            displayPeriod,
+          })
+        }
         return { richMenuId: menu.richMenuId }
       },
       async updateRichMenu(req, ctx) {
         const auth = requireAuthData(ctx)
         await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
-        await deps.oa.updateRichMenu(req.officialAccountId, req.richMenuId, {
+        const existing = await deps.oa.getRichMenu(req.officialAccountId, req.richMenuId)
+        if (!existing) throw new ConnectError('Rich menu not found', Code.NotFound)
+
+        let displayPeriod
+        try {
+          displayPeriod = parseDisplayPeriodInput({
+            displayStartsAt: req.displayStartsAt,
+            displayEndsAt: req.displayEndsAt,
+          })
+        } catch (err) {
+          throw new ConnectError(
+            err instanceof Error ? err.message : 'Invalid display period',
+            Code.InvalidArgument,
+          )
+        }
+
+        const incrementDisplayScheduleRevision = displayPeriodChanged(
+          {
+            displayStartsAt: existing.displayStartsAt,
+            displayEndsAt: existing.displayEndsAt,
+          },
+          displayPeriod,
+        )
+
+        const updated = await deps.oa.updateRichMenu(req.officialAccountId, req.richMenuId, {
           name: req.name,
           chatBarText: req.chatBarText,
           selected: req.selected,
           sizeWidth: req.sizeWidth,
           sizeHeight: req.sizeHeight,
           areas: req.areas.map(areaToDb),
+          displayStartsAt: displayPeriod.displayStartsAt,
+          displayEndsAt: displayPeriod.displayEndsAt,
+          incrementDisplayScheduleRevision,
         })
+
+        if (updated && incrementDisplayScheduleRevision) {
+          await deps.richMenuDisplayScheduler.enqueueDisplayPeriodJobs({
+            oaId: req.officialAccountId,
+            richMenuId: req.richMenuId,
+            displayScheduleRevision: updated.displayScheduleRevision,
+            displayPeriod,
+          })
+        }
         return {}
       },
       async deleteRichMenu(req, ctx) {
         const auth = requireAuthData(ctx)
         await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
         await deps.oa.deleteRichMenu(req.officialAccountId, req.richMenuId)
-        const key = `richmenu/${req.officialAccountId}/${req.richMenuId}.jpg`
-        const exists = await deps.drive.exists(key)
-        if (exists) await deps.drive.delete(key)
+        for (const ext of ['jpg', 'png'] as const) {
+          const key = `richmenu/${req.officialAccountId}/${req.richMenuId}.${ext}`
+          if (await deps.drive.exists(key)) await deps.drive.delete(key)
+        }
         return {}
       },
       async setDefaultRichMenu(req, ctx) {
         const auth = requireAuthData(ctx)
         await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+        const menu = await deps.oa.getRichMenu(req.officialAccountId, req.richMenuId)
+        if (!menu) throw new ConnectError('Rich menu not found', Code.NotFound)
+        if (!menu.hasImage) {
+          throw new ConnectError(
+            'Upload a rich menu image before setting it as default',
+            Code.FailedPrecondition,
+          )
+        }
         await deps.oa.setDefaultRichMenu(req.officialAccountId, req.richMenuId)
         return {}
       },
@@ -1029,8 +1098,27 @@ export function oaHandler(deps: OAHandlerDeps) {
       async uploadRichMenuImage(req, ctx) {
         const auth = requireAuthData(ctx)
         await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
-        const key = `richmenu/${req.officialAccountId}/${req.richMenuId}.jpg`
+
+        const menu = await deps.oa.getRichMenu(req.officialAccountId, req.richMenuId)
+        if (!menu) throw new ConnectError('Rich menu not found', Code.NotFound)
+
         const buffer = Buffer.from(req.image)
+        const validation = validateRichMenuImageUpload({
+          contentType: req.contentType,
+          bytes: buffer,
+          expectedWidth: menu.sizeWidth,
+          expectedHeight: menu.sizeHeight,
+        })
+        if (!validation.success) {
+          throw new ConnectError(validation.message, Code.InvalidArgument)
+        }
+
+        for (const ext of ['jpg', 'png'] as const) {
+          const staleKey = `richmenu/${req.officialAccountId}/${req.richMenuId}.${ext}`
+          if (await deps.drive.exists(staleKey)) await deps.drive.delete(staleKey)
+        }
+        const key = `richmenu/${req.officialAccountId}/${req.richMenuId}.${validation.extension}`
+
         await deps.drive.put(key, buffer, req.contentType)
         await deps.oa.setRichMenuImage(req.officialAccountId, req.richMenuId, true)
         return {}

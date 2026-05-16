@@ -99,6 +99,7 @@ function makeDeps(ownerId = 'user-1') {
     oa: oa as any,
     oaAudience: {} as any,
     oaCampaign: {} as any,
+    richMenuDisplayScheduler: {} as any,
   })(router as any)
   return { capturedImpl, oa, drive }
 }
