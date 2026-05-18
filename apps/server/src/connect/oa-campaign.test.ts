@@ -44,6 +44,7 @@ function makeDeps(ownerId = 'user-1') {
   }
   const oaCampaign = {
     sendTextCampaign: vi.fn(async () => ({ ok: true, campaignId: 'campaign-1' })),
+    sendRichCampaign: vi.fn(async () => ({ ok: true, campaignId: 'campaign-1' })),
   }
 
   oaHandler({
@@ -144,7 +145,10 @@ describe('OA connect campaign actions', () => {
 
   it('passes rich campaign payloads to the campaign service', async () => {
     const { capturedImpl, oaCampaign } = makeDeps('manager-1')
-    oaCampaign.sendRichCampaign = vi.fn(async () => ({ ok: true, campaignId: 'campaign-1' }))
+    oaCampaign.sendRichCampaign = vi.fn(async () => ({
+      ok: true,
+      campaignId: 'campaign-1',
+    }))
     mockedGetAuthDataFromRequest.mockResolvedValue({ id: 'manager-1' } as any)
 
     await expect(

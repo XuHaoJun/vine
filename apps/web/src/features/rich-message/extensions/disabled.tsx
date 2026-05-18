@@ -8,7 +8,7 @@ function DisabledIcon() {
 export function createDisabledMessageExtension(
   type: 'imagemap' | 'sticker' | 'location',
   label: string,
-): RichMessageExtension<MessageDraft> {
+): RichMessageExtension {
   return {
     type,
     label,

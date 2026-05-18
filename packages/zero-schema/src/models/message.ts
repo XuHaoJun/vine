@@ -180,8 +180,8 @@ export const mutate = mutations(schema, messageReadPermission, {
     await assertOaOwner(tx as { query?: Record<string, any> }, args.oaId, authData.id)
     await assertOaChat(tx as { query?: Record<string, any> }, args.chatId, args.oaId)
 
-    for (let index = 0; index < args.messages.length; index++) {
-      const item = args.messages[index]
+    let index = 0
+    for (const item of args.messages) {
       if (!item.id) throw new Error('Message id is required')
       if (item.type === 'template') throw new Error('Template messages are not supported')
       if (item.type === 'text' && !item.text?.trim()) {
@@ -197,9 +197,10 @@ export const mutate = mutations(schema, messageReadPermission, {
         metadata: item.metadata ?? null,
         createdAt: args.createdAt + index,
       })
+      index++
     }
 
-    const last = args.messages[args.messages.length - 1]
+    const last = args.messages[args.messages.length - 1]!
     const lastCreatedAt = args.createdAt + args.messages.length - 1
     await tx.mutate.chat.update({
       id: args.chatId,
