@@ -8,7 +8,9 @@ import type { AudienceQueryJson } from '@vine/zero-schema/audience/query'
 export type CampaignItem = {
   id: string
   name: string
-  messageText: string
+  messageText: string | null | undefined
+  messagePayloadJson: Array<Record<string, any>>
+  messageSummary: string
   audienceFilterId: string | null | undefined
   inlineAudienceQueryJson: AudienceQueryJson | null | undefined
   messageRequestId: string | null | undefined
@@ -30,6 +32,13 @@ export type SendTextCampaignInput = {
   inlineAudienceQueryJson?: AudienceQueryJson | undefined
 }
 
+export type SendRichCampaignInput = {
+  name: string
+  messagePayload: unknown[]
+  audienceFilterId?: string | undefined
+  inlineAudienceQueryJson?: AudienceQueryJson | undefined
+}
+
 export function useManagerOACampaigns(oaId: string | undefined) {
   const [rawCampaigns] = useZeroQuery(
     oaCampaignsByOfficialAccountId,
@@ -43,6 +52,8 @@ export function useManagerOACampaigns(oaId: string | undefined) {
         id: campaign.id,
         name: campaign.name,
         messageText: campaign.messageText,
+        messagePayloadJson: campaign.messagePayloadJson,
+        messageSummary: campaign.messageSummary,
         audienceFilterId: campaign.audienceFilterId,
         inlineAudienceQueryJson: campaign.inlineAudienceQueryJson,
         messageRequestId: campaign.messageRequestId,
@@ -76,5 +87,22 @@ export function useManagerOACampaigns(oaId: string | undefined) {
     },
   })
 
-  return { campaigns, sendTextCampaign }
+  const sendRichCampaign = useTanMutation({
+    mutationFn: async (input: SendRichCampaignInput) => {
+      if (!oaId) throw new Error('Missing official account id')
+      const campaignId = crypto.randomUUID()
+      return oaClient.sendRichCampaign({
+        officialAccountId: oaId,
+        campaignId,
+        name: input.name,
+        messagePayloadJson: JSON.stringify(input.messagePayload),
+        audienceFilterId: input.audienceFilterId,
+        inlineAudienceQueryJson: input.inlineAudienceQueryJson
+          ? JSON.stringify(input.inlineAudienceQueryJson)
+          : undefined,
+      })
+    },
+  })
+
+  return { campaigns, sendTextCampaign, sendRichCampaign }
 }
