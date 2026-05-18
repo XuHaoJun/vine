@@ -919,6 +919,19 @@ message SendTextCampaignResponse {
   string campaign_id = 1;
 }
 
+message SendRichCampaignRequest {
+  string official_account_id = 1;
+  string campaign_id = 2;
+  string name = 3;
+  string message_payload_json = 4;
+  optional string audience_filter_id = 5;
+  optional string inline_audience_query_json = 6;
+}
+
+message SendRichCampaignResponse {
+  string campaign_id = 1;
+}
+
 // ── Service ──
 
 service OAService {
@@ -984,4 +997,5 @@ service OAService {
   rpc RemoveBusinessProfileImage(RemoveBusinessProfileImageRequest) returns (RemoveBusinessProfileImageResponse);
   rpc PreviewAudienceFilter(PreviewAudienceFilterRequest) returns (PreviewAudienceFilterResponse);
   rpc SendTextCampaign(SendTextCampaignRequest) returns (SendTextCampaignResponse);
+  rpc SendRichCampaign(SendRichCampaignRequest) returns (SendRichCampaignResponse);
 }
