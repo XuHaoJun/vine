@@ -400,6 +400,48 @@ describe('message.sendAsOA', () => {
       },
     ])
   })
+
+  it('inserts multiple OA rich messages and points chat metadata to the last row', async () => {
+    const { tx, inserted, chatUpdates } = makeTx()
+
+    await (messageMutate as any).sendRichAsOA(
+      { authData: { id: 'manager-1' }, tx },
+      {
+        chatId: 'chat-1',
+        oaId: 'oa-1',
+        createdAt: 1000,
+        messages: [
+          { id: 'msg-1', type: 'text', text: 'hello', metadata: null },
+          {
+            id: 'msg-2',
+            type: 'image',
+            text: null,
+            metadata: JSON.stringify({
+              originalContentUrl: 'https://cdn.example.com/a.jpg',
+              previewImageUrl: 'https://cdn.example.com/p.jpg',
+            }),
+          },
+        ],
+      },
+    )
+
+    expect(inserted).toEqual([
+      expect.objectContaining({ id: 'msg-1', type: 'text', text: 'hello', createdAt: 1000 }),
+      expect.objectContaining({ id: 'msg-2', type: 'image', text: null, createdAt: 1001 }),
+    ])
+    expect(chatUpdates).toEqual([{ id: 'chat-1', lastMessageId: 'msg-2', lastMessageAt: 1001 }])
+  })
+
+  it('rejects empty OA rich sends', async () => {
+    const { tx } = makeTx()
+
+    await expect(
+      (messageMutate as any).sendRichAsOA(
+        { authData: { id: 'manager-1' }, tx },
+        { chatId: 'chat-1', oaId: 'oa-1', createdAt: 1000, messages: [] },
+      ),
+    ).rejects.toThrow('At least one message is required')
+  })
 })
 
 describe('chatMember.markOARead', () => {

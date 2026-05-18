@@ -222,6 +222,17 @@ export const mutationValidators = {
     text: v.string(),
     createdAt: v.number(),
   }),
+    sendRichAsOA: v.object({
+    chatId: v.string(),
+    oaId: v.string(),
+    createdAt: v.number(),
+    messages: v.array(v.object({
+    id: v.string(),
+    type: v.string(),
+    text: v.optional(v.nullable(v.string())),
+    metadata: v.optional(v.nullable(v.string())),
+  })),
+  }),
     sendSticker: v.object({
     senderId: v.optional(v.nullable(v.string())),
     text: v.optional(v.nullable(v.string())),

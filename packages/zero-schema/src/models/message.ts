@@ -5,6 +5,13 @@ import type { TableInsertRow } from 'on-zero'
 
 export type Message = TableInsertRow<typeof schema>
 
+type OARichMessageInput = {
+  id: string
+  type: Message['type']
+  text?: string | null
+  metadata?: string | null
+}
+
 async function readRows(
   tx: { query?: Record<string, any> },
   tableName: string,
@@ -156,6 +163,48 @@ export const mutate = mutations(schema, messageReadPermission, {
       id: args.chatId,
       lastMessageId: args.id,
       lastMessageAt: args.createdAt,
+    })
+  },
+  sendRichAsOA: async (
+    { authData, tx },
+    args: {
+      chatId: string
+      oaId: string
+      createdAt: number
+      messages: OARichMessageInput[]
+    },
+  ) => {
+    if (!authData) throw new Error('Unauthorized')
+    if (args.messages.length === 0) throw new Error('At least one message is required')
+
+    await assertOaOwner(tx as { query?: Record<string, any> }, args.oaId, authData.id)
+    await assertOaChat(tx as { query?: Record<string, any> }, args.chatId, args.oaId)
+
+    for (let index = 0; index < args.messages.length; index++) {
+      const item = args.messages[index]
+      if (!item.id) throw new Error('Message id is required')
+      if (item.type === 'template') throw new Error('Template messages are not supported')
+      if (item.type === 'text' && !item.text?.trim()) {
+        throw new Error('Message text is required')
+      }
+      await tx.mutate.message.insert({
+        id: item.id,
+        chatId: args.chatId,
+        senderType: 'oa',
+        oaId: args.oaId,
+        type: item.type,
+        text: item.type === 'text' ? item.text!.trim() : (item.text ?? null),
+        metadata: item.metadata ?? null,
+        createdAt: args.createdAt + index,
+      })
+    }
+
+    const last = args.messages[args.messages.length - 1]
+    const lastCreatedAt = args.createdAt + args.messages.length - 1
+    await tx.mutate.chat.update({
+      id: args.chatId,
+      lastMessageId: last.id,
+      lastMessageAt: lastCreatedAt,
     })
   },
   sendSticker: async ({ authData, tx }, message: Message) => {
