@@ -1,6 +1,9 @@
 import { oaChatMembersByChatId } from '@vine/zero-schema/queries/chat'
 import { oaMessagesByChatId } from '@vine/zero-schema/queries/message'
 import { useCallback, useMemo } from 'react'
+import { toMessagingApiMessages } from '~/features/rich-message/core/serialization'
+import { RichMessageStarterKit } from '~/features/rich-message/RichMessageStarterKit'
+import type { MessageDraft } from '~/features/rich-message/core/types'
 import { zero, useZeroQuery } from '~/zero/client'
 
 export function useManagerOAMessages(
@@ -45,6 +48,30 @@ export function useManagerOAMessages(
     [chatId, oaId],
   )
 
+  const sendRichMessages = useCallback(
+    async (drafts: MessageDraft[]) => {
+      if (!oaId || !chatId || drafts.length === 0) return
+      const extensions = RichMessageStarterKit.configure()
+      const apiMessages = toMessagingApiMessages(drafts, extensions)
+      await zero.mutate.message.sendRichAsOA({
+        chatId,
+        oaId,
+        createdAt: Date.now(),
+        messages: apiMessages.map((message) => {
+          const raw = message as Record<string, unknown>
+          const { type, text, ...metadata } = raw
+          return {
+            id: crypto.randomUUID(),
+            type: type as any,
+            text: typeof text === 'string' ? text : null,
+            metadata: Object.keys(metadata).length > 0 ? JSON.stringify(metadata) : null,
+          }
+        }),
+      })
+    },
+    [chatId, oaId],
+  )
+
   const markRead = useCallback(
     (lastReadMessageId: string) => {
       if (!oaId || !chatId || !lastReadMessageId) return
@@ -65,6 +92,7 @@ export function useManagerOAMessages(
     userMember,
     oaMember,
     sendMessage,
+    sendRichMessages,
     markRead,
   }
 }

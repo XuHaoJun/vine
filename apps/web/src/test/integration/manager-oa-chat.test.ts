@@ -71,6 +71,14 @@ test.describe('Manager OA chat', () => {
       timeout: 10000,
     })
 
+    await page.getByRole('button', { name: 'Open rich message editor' }).click()
+    await page.getByLabel('Add text message').click()
+    await page.getByPlaceholder('Message text').fill('Rich hello from manager')
+    await page.getByRole('button', { name: 'Send rich message' }).click()
+    await expect(page.getByText('Rich hello from manager').last()).toBeVisible({
+      timeout: 10000,
+    })
+
     // Contact list mode
     await page.getByRole('button', { name: 'Show Contacts' }).click()
 
