@@ -41,9 +41,12 @@ describe('validateMessage', () => {
       expect(result.valid).toBe(true)
     })
 
-    it('accepts empty string text', () => {
+    it('rejects empty string text', () => {
       const result = validateMessage({ type: 'text', text: '' })
-      expect(result.valid).toBe(true)
+      expect(result.valid).toBe(false)
+      if (!result.valid) {
+        expect(result.error).toContain('non-empty')
+      }
     })
   })
 
@@ -184,13 +187,16 @@ describe('validateMessage', () => {
       expect(result.valid).toBe(true)
     })
 
-    it('accepts template message', () => {
+    it('rejects template message', () => {
       const result = validateMessage({
         type: 'template',
         altText: 'template',
         template: { type: 'buttons', text: 'Choose', actions: [] },
       })
-      expect(result.valid).toBe(true)
+      expect(result.valid).toBe(false)
+      if (!result.valid) {
+        expect(result.error).toContain('Unsupported message type: "template"')
+      }
     })
   })
 
