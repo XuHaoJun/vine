@@ -75,8 +75,8 @@ navigation to the features Vine already has."
 | 1 | Profile and Basic Settings | Make account identity editable and remove mock profile gaps. | Phase 0 | Done |
 | 2 | Chat CRM | Evolve chat MVP into contact CRM, tagging, notes, and custom filters. | Existing chat MVP | Done |
 | 3 | Broadcast and Audiences | Add outbound campaign workflows and targeting. | Friendship data | Done |
-| 4A | Rich Menu LINE Parity | Complete rich menu manager parity, display period, status, validation, and worker-backed schedule jobs. | Existing rich menu MVP | Spec approved |
-| 4B | Rich Message Authoring | Add LINE-compatible authoring surfaces for template messages, imagemap, Flex presets, quick replies, and postback actions. | Existing message renderers | Planned |
+| 4A | Rich Menu LINE Parity | Complete rich menu manager parity, display period, status, validation, and worker-backed schedule jobs. | Existing rich menu MVP | Done |
+| 4B | Rich Message Editor | Add a shared manager composer for Vine-supported rich message drafts, including text, media URL messages, Flex, imagemap, and quick replies. | Existing message renderers | Spec approved |
 | 5 | Insights and Growth | Provide friend, message, click, webhook, and growth analytics. | Phases 3, 4A | Planned |
 | 6 | Collaboration and Governance | Add roles, audit logs, plan/quota policy, and account lifecycle controls. | Phases 0-5 | Planned |
 
@@ -283,40 +283,56 @@ Acceptance criteria:
 - Updating a display period replaces stale future worker jobs.
 - Worker downtime cannot cause `getActiveRichMenu()` to return the wrong menu.
 
-#### Phase 4B: Rich Message Authoring
+#### Phase 4B: Rich Message Editor
 
-Goal: let managers author LINE-compatible interactive messages without writing
+Goal: let managers compose Vine-supported rich message payloads without writing
 raw API JSON.
+
+Approved spec:
+
+- `docs/superpowers/specs/2026-05-18-manager-oa-rich-message-editor-design.md`
 
 Scope:
 
-- Add manager authoring for LINE-compatible message content:
-  - template messages;
+- Add a shared controlled Rich Message Editor using `MessageDraft[]` input and
+  output.
+- Use a Tiptap-like headless editor core with message extensions, a configurable
+  starter kit, commands, validation, serialization, and preview renderers.
+- Use a slim manager composer UI: live preview with bottom toolbar icon buttons.
+- Reuse the real talks chat bubble rendering style for preview, while keeping
+  the product context as an OA manager marketing composer rather than the user
+  chat composer.
+- Support first-version authoring for:
+  - text;
+  - image, video, and audio by HTTPS URL form;
+  - Flex Messages through a shared Flex editor dialog;
   - imagemap messages;
-  - Flex Message presets;
-  - quick replies;
-  - postback actions.
-- Reuse existing chat rendering and server validation for Flex, imagemap, quick
-  replies, and postbacks.
-- Allow authored content to be sent or attached in at least one manager channel,
-  such as one-on-one OA chat or campaign broadcast.
-- Keep the model LINE-compatible first; do not introduce a broad Vine-only
-  reusable content library in this slice unless a later spec explicitly approves
-  it.
+  - quick replies attached to supported message drafts.
+- Keep sticker and location toolbar actions disabled or coming soon in this
+  slice.
+- Integrate authored rich message payloads with both one-on-one OA chat and
+  campaign broadcast.
+- Add campaign rich payload storage and summaries; mark `messageText` as
+  deprecated for new campaign flows.
 
 Non-goals:
 
+- No template messages in Phase 4B.
 - No coupons in Phase 4B.
 - No automation journeys.
-- No generic asset library that is unrelated to LINE-compatible message types.
+- No generic asset library, media upload picker, reusable message package, or
+  saved content library.
 
 Acceptance criteria:
 
-- Managers can author at least one LINE-compatible rich message type without
-  raw JSON.
+- Managers can author text, media URL, Flex, imagemap, and quick reply rich
+  message drafts without raw Messaging API JSON.
+- The Rich Message Editor is shared across manager OA chat and campaign
+  broadcast surfaces.
 - Authored message payloads use Vine's existing Messaging API-compatible
-  validators and renderers.
-- The first send/attach channel is clearly defined by the Phase 4B spec.
+  validators and chat renderers where available.
+- Campaigns persist `messagePayloadJson` and `messageSummary`; `messageText` is
+  retained only for backward compatibility.
 
 #### Parking Lot: Coupons
 
@@ -329,7 +345,7 @@ LINE reference concepts used:
 
 - Rich menu structure, scopes, priority, and per-user behavior.
 - Rich menu display period and rich menu insights from OA Manager references.
-- Template/Flex/action objects.
+- Flex, imagemap, quick reply, and action objects.
 - Coupon creation and coupon messages are reference-only and not currently
   planned.
 
@@ -414,8 +430,8 @@ Do this first:
    CRM, tags/notes, custom filters, and retention/export policy. *(done)*
 4. Phase 3 broadcast/audience campaign workflows. *(done)*
 5. Phase 4A rich menu LINE parity and display period, because routes already
-   exist and this stays closest to LINE-clone behavior.
-6. Phase 4B rich message authoring once rich menu parity is stable.
+   exist and this stays closest to LINE-clone behavior. *(done)*
+6. Phase 4B rich message editor for shared chat and campaign authoring.
 7. Phase 5 insights once events are consistently tracked.
 8. Phase 6 roles/governance when more than one operator per OA matters.
 
@@ -445,14 +461,15 @@ Completed specs:
   `docs/superpowers/specs/2026-05-13-manager-oa-broadcast-campaign-design.md`
 
 Approved current spec:
+`docs/superpowers/specs/2026-05-18-manager-oa-rich-message-editor-design.md`.
+
+Recently completed spec:
 `docs/superpowers/specs/2026-05-15-manager-oa-richmenu-line-parity-design.md`.
 
 ## 8. Open Decisions
 
 - Should roles be provider-scoped first or OA-scoped first? LINE has both, but
   Vine may only need provider owner/admin/member at first.
-- Should Phase 4B first target one-on-one OA chat, campaign broadcast, or both
-  for authored rich messages?
 - Should coupons ever return to the roadmap, and what non-payment redemption
   model would make them valuable enough?
 - When background jobs grow beyond display-period scheduling, should Vine split
