@@ -23,6 +23,10 @@ Important constraints:
 - If implementing from `main`, create a feature branch first.
 - Do not introduce `@tiptap/*` dependencies.
 - Do not add template message authoring.
+- Treat template messages as unsupported in Phase 4B server rich payload validation.
+- Keep Messaging API server support for sticker and location messages; the editor shows them disabled and cannot send them.
+- Do not add quick reply UI in Phase 4B. Keep payload/core compatibility only.
+- Do not make imagemap sendable in Phase 4B. Show it as disabled/coming-soon in the editor.
 - Do not make `maxMessages` default to a hard limit. Leave it undefined unless a caller explicitly passes a value.
 
 Branch gate:
@@ -56,10 +60,8 @@ Create these new frontend files:
   Image/video/audio URL extensions.
 - `apps/web/src/features/rich-message/extensions/flex.tsx`  
   Flex extension and dialog adapter.
-- `apps/web/src/features/rich-message/extensions/imagemap.tsx`  
-  Imagemap extension and dialog adapter.
 - `apps/web/src/features/rich-message/extensions/disabled.tsx`  
-  Disabled sticker/location toolbar extensions.
+  Disabled imagemap/sticker/location toolbar extensions.
 - `apps/web/src/features/rich-message/RichMessageStarterKit.ts`  
   Default extension kit with `.configure(...)`.
 - `apps/web/src/features/rich-message/RichMessageEditor.tsx`  
@@ -72,8 +74,6 @@ Create these new frontend files:
   Image/video/audio URL dialog.
 - `apps/web/src/features/rich-message/dialogs/FlexMessageDialog.tsx`  
   Flex dialog using shared editor.
-- `apps/web/src/features/rich-message/dialogs/ImagemapDialog.tsx`  
-  Imagemap structured dialog.
 - `apps/web/src/features/rich-message/dialogs/draftFactories.ts`  
   Pure draft builders used by dialogs and unit tests.
 - `apps/web/src/features/rich-message/flex/defaultFlexMessage.ts`  
@@ -132,6 +132,7 @@ Test files:
 - Modify `packages/zero-schema/src/__tests__/manager-oa-chat.test.ts`
 - Modify `packages/zero-schema/src/__tests__/manager-oa-campaigns.test.ts`
 - Create or modify `apps/server/src/services/oa-message-payload.test.ts`
+- Modify `apps/server/src/plugins/oa-messaging.validate.test.ts`
 - Modify `apps/server/src/services/oa-campaign.test.ts`
 - Modify `apps/server/src/connect/oa-campaign.test.ts`
 - Modify `apps/web/src/test/integration/manager-oa-chat.test.ts`
@@ -219,6 +220,10 @@ export async function up(client: PoolClient): Promise<void> {
 
 export async function down(client: PoolClient): Promise<void> {
   await client.query(`
+    UPDATE "oaCampaign"
+    SET "messageText" = COALESCE(NULLIF("messageText", ''), NULLIF("messageSummary", ''), 'Rich message campaign')
+    WHERE "messageText" IS NULL;
+
     ALTER TABLE "oaCampaign"
       ALTER COLUMN "messageText" SET NOT NULL,
       DROP COLUMN IF EXISTS "messagePayloadJson",
@@ -303,6 +308,7 @@ rtk git commit -m "feat: add rich campaign payload schema"
 - Create: `apps/server/src/services/oa-message-payload.ts`
 - Test: `apps/server/src/services/oa-message-payload.test.ts`
 - Modify: `apps/server/src/plugins/oa-messaging.ts`
+- Modify: `apps/server/src/plugins/oa-messaging.validate.test.ts`
 
 - [ ] **Step 1: Write failing server utility tests**
 
@@ -329,7 +335,7 @@ const flex = {
 }
 
 describe('oa message payload utility', () => {
-  it('normalizes text, media, flex, imagemap, and quick reply payloads', () => {
+  it('normalizes text, media, and flex payloads', () => {
     const messages = normalizeMessagingApiMessages([
       { type: 'text', text: 'hello' },
       {
@@ -352,6 +358,30 @@ describe('oa message payload utility', () => {
     expect(() =>
       normalizeMessagingApiMessages([{ type: 'template', altText: 'No' }]),
     ).toThrow('Unsupported message type: "template"')
+  })
+
+  it('keeps sticker and location supported for Messaging API compatibility', () => {
+    const messages = normalizeMessagingApiMessages([
+      { type: 'sticker', packageId: '1', stickerId: '100' },
+      { type: 'location', title: 'Tokyo', latitude: 35.6762, longitude: 139.6503 },
+    ])
+
+    expect(messages).toEqual([
+      {
+        type: 'sticker',
+        text: null,
+        metadata: JSON.stringify({ packageId: '1', stickerId: '100' }),
+      },
+      {
+        type: 'location',
+        text: null,
+        metadata: JSON.stringify({
+          title: 'Tokyo',
+          latitude: 35.6762,
+          longitude: 139.6503,
+        }),
+      },
+    ])
   })
 
   it('summarizes multi-message rich payloads', () => {
@@ -473,6 +503,12 @@ export function normalizeMessagingApiMessage(msg: unknown): ValidationSuccess {
       }
       return { type, text: null, metadata: attachQuickReply(result.output as Record<string, unknown>, quickReply) }
     }
+    case 'sticker':
+    case 'location': {
+      return { type, text: null, metadata: attachQuickReply(restWithoutQuickReply, quickReply) }
+    }
+    case 'template':
+      throw new Error('Unsupported message type: "template"')
     default:
       throw new Error(`Unsupported message type: "${type}"`)
   }
@@ -533,6 +569,24 @@ export function validateMessage(msg: unknown): ValidationSuccess | ValidationFai
 Remove now-unused direct imports of `FlexMessageSchema`, `QuickReplySchema`,
 `ImagemapMessageSchema`, and `valibot` from `oa-messaging.ts`.
 
+Update `apps/server/src/plugins/oa-messaging.validate.test.ts` so sticker and
+location continue to pass, but template messages are rejected:
+
+```ts
+it('rejects template message', () => {
+  const result = validateMessage({
+    type: 'template',
+    altText: 'template',
+    template: { type: 'buttons', text: 'Choose', actions: [] },
+  })
+
+  expect(result.valid).toBe(false)
+  if (!result.valid) {
+    expect(result.error).toContain('Unsupported message type: "template"')
+  }
+})
+```
+
 - [ ] **Step 5: Verify GREEN and existing validation tests**
 
 Run:
@@ -546,7 +600,7 @@ Expected: PASS.
 - [ ] **Step 6: Commit**
 
 ```bash
-rtk git add apps/server/src/services/oa-message-payload.ts apps/server/src/services/oa-message-payload.test.ts apps/server/src/plugins/oa-messaging.ts
+rtk git add apps/server/src/services/oa-message-payload.ts apps/server/src/services/oa-message-payload.test.ts apps/server/src/plugins/oa-messaging.ts apps/server/src/plugins/oa-messaging.validate.test.ts
 rtk git commit -m "feat: add oa message payload normalization"
 ```
 
@@ -1011,7 +1065,6 @@ rtk git commit -m "feat: send rich oa chat messages"
 - Create: `apps/web/src/features/rich-message/extensions/basic.tsx`
 - Create: `apps/web/src/features/rich-message/extensions/mediaUrl.tsx`
 - Create: `apps/web/src/features/rich-message/extensions/flex.tsx`
-- Create: `apps/web/src/features/rich-message/extensions/imagemap.tsx`
 - Create: `apps/web/src/features/rich-message/extensions/disabled.tsx`
 - Test: `apps/web/src/test/unit/features/rich-message/richMessageCore.test.ts`
 - Test: `apps/web/src/test/unit/features/rich-message/richMessageSerialization.test.ts`
@@ -1324,14 +1377,13 @@ import { createTextExtension } from './extensions/basic'
 import { createDisabledMessageExtension } from './extensions/disabled'
 import { createAudioUrlExtension, createImageUrlExtension, createVideoUrlExtension } from './extensions/mediaUrl'
 import { createFlexExtension } from './extensions/flex'
-import { createImagemapExtension } from './extensions/imagemap'
 import type { RichMessageExtension } from './core/types'
 
 type StarterKitOptions = {
   text?: boolean
   mediaUrl?: boolean
   flex?: boolean
-  imagemap?: boolean
+  imagemap?: false | { status: 'disabled' }
   sticker?: false | { status: 'disabled' }
   location?: false | { status: 'disabled' }
 }
@@ -1344,7 +1396,7 @@ export const RichMessageStarterKit = {
       extensions.push(createImageUrlExtension(), createVideoUrlExtension(), createAudioUrlExtension())
     }
     if (options.flex !== false) extensions.push(createFlexExtension())
-    if (options.imagemap !== false) extensions.push(createImagemapExtension())
+    if (options.imagemap !== false) extensions.push(createDisabledMessageExtension('imagemap', 'Imagemap'))
     if (options.sticker !== false) extensions.push(createDisabledMessageExtension('sticker', 'Sticker'))
     if (options.location !== false) extensions.push(createDisabledMessageExtension('location', 'Location'))
     return extensions
@@ -1356,6 +1408,7 @@ Create `extensions/basic.tsx`:
 
 ```tsx
 import { SizableText } from 'tamagui'
+import { Input } from '~/interface/forms/Input'
 import type { RichMessageExtension, TextMessageDraft } from '../core/types'
 
 function TextIcon() {
@@ -1384,7 +1437,13 @@ export function createTextExtension(): RichMessageExtension<TextMessageDraft> {
         ? { id: crypto.randomUUID(), type: 'text', text: raw.text }
         : null
     },
-    renderEditor: () => null,
+    renderEditor: ({ draft, update }) => (
+      <Input
+        value={draft.text}
+        onChangeText={(text) => update({ ...draft, text })}
+        placeholder="Message text"
+      />
+    ),
     renderPreview: () => null,
   }
 }
@@ -1401,7 +1460,7 @@ function DisabledIcon() {
 }
 
 export function createDisabledMessageExtension(
-  type: 'sticker' | 'location',
+  type: 'imagemap' | 'sticker' | 'location',
   label: string,
 ): RichMessageExtension<MessageDraft> {
   return {
@@ -1553,50 +1612,9 @@ export function createFlexExtension(): RichMessageExtension<FlexMessageDraft> {
 }
 ```
 
-Create `extensions/imagemap.tsx`:
-
-```tsx
-import { SizableText } from 'tamagui'
-import type { ImagemapMessageDraft, RichMessageExtension } from '../core/types'
-
-function ImagemapIcon() {
-  return <SizableText size="$2">I</SizableText>
-}
-
-export function createImagemapExtension(): RichMessageExtension<ImagemapMessageDraft> {
-  return {
-    type: 'imagemap',
-    label: 'Imagemap',
-    icon: ImagemapIcon,
-    group: 'interactive',
-    status: 'enabled',
-    priority: 700,
-    createDraft: () => ({
-      id: crypto.randomUUID(),
-      type: 'imagemap',
-      altText: '',
-      baseUrl: '',
-      baseSize: { width: 1040, height: 1040 },
-      actions: [],
-    }),
-    validate: (draft) =>
-      draft.altText.trim() && draft.baseUrl.startsWith('https://')
-        ? { ok: true }
-        : { ok: false, message: 'Imagemap message requires altText and an HTTPS baseUrl.' },
-    toMessagingApi: (draft) => ({
-      type: 'imagemap',
-      altText: draft.altText,
-      baseUrl: draft.baseUrl,
-      baseSize: draft.baseSize,
-      actions: draft.actions,
-      ...(draft.quickReply ? { quickReply: draft.quickReply } : {}),
-    }),
-    fromMessagingApi: () => null,
-    renderEditor: () => null,
-    renderPreview: () => null,
-  }
-}
-```
+Imagemap is intentionally represented by `createDisabledMessageExtension` in
+Phase 4B. Do not add a sendable imagemap extension until the editor has a real
+action/area editor that satisfies `@vine/imagemap-schema`.
 
 - [ ] **Step 6: Implement serialization**
 
@@ -1900,7 +1918,7 @@ describe('getRichMessageToolbarItems', () => {
   it('projects enabled extension buttons and count label without default limit', () => {
     const items = getRichMessageToolbarItems({
       extensions: RichMessageStarterKit.configure(),
-      canInsert: (type) => type !== 'sticker' && type !== 'location',
+      canInsert: (type) => type !== 'imagemap' && type !== 'sticker' && type !== 'location',
       count: 2,
       maxMessages: undefined,
     })
@@ -1912,6 +1930,10 @@ describe('getRichMessageToolbarItems', () => {
     })
     expect(items.buttons.find((button) => button.type === 'sticker')).toMatchObject({
       ariaLabel: 'Add sticker message',
+      disabled: true,
+    })
+    expect(items.buttons.find((button) => button.type === 'imagemap')).toMatchObject({
+      ariaLabel: 'Add imagemap message',
       disabled: true,
     })
   })
@@ -2029,6 +2051,7 @@ export function getRichMessageToolbarItems({
     buttons: extensions.map((extension) => ({
       type: extension.type,
       label: extension.label,
+      Icon: extension.icon,
       ariaLabel: `Add ${extension.type} message`,
       disabled: !canInsert(extension.type),
     })),
@@ -2042,16 +2065,22 @@ export function RichMessageToolbar({ extensions, canInsert, insert, count, maxMe
   return (
     <XStack p="$2" gap="$2" items="center" borderTopWidth={1} borderColor="$borderColor">
       {items.buttons.map((button) => (
-        <Button
-          key={button.type}
-          size="$2"
-          variant="transparent"
-          aria-label={button.ariaLabel}
-          disabled={button.disabled}
-          onPress={() => insert(button.type)}
-        >
-          {button.label}
-        </Button>
+        (() => {
+          const Icon = button.Icon
+          return (
+            <Button
+              key={button.type}
+              size="$2"
+              variant="transparent"
+              aria-label={button.ariaLabel}
+              title={button.label}
+              disabled={button.disabled}
+              onPress={() => insert(button.type)}
+            >
+              <Icon size={18} />
+            </Button>
+          )
+        })()
       ))}
       <SizableText size="$1" color="$color10" ml="auto">
         {items.countLabel}
@@ -2065,7 +2094,7 @@ Create `RichMessageEditor.tsx`:
 
 ```tsx
 import { useMemo, useState } from 'react'
-import { YStack } from 'tamagui'
+import { SizableText, YStack } from 'tamagui'
 import { createRichMessageEditor } from './core/editor'
 import type { MessageDraft, RichMessageExtension } from './core/types'
 import { RichMessageStarterKit } from './RichMessageStarterKit'
@@ -2085,7 +2114,7 @@ export function RichMessageEditor(props: Props) {
     () => props.extensions ?? RichMessageStarterKit.configure(),
     [props.extensions],
   )
-  const [, setSelectedDraftId] = useState<string | null>(null)
+  const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null)
   const editor = createRichMessageEditor({
     value: props.value,
     onChange: props.onChange,
@@ -2093,14 +2122,42 @@ export function RichMessageEditor(props: Props) {
     maxMessages: props.maxMessages,
     disabledTypes: props.disabledTypes,
   })
+  const selectedDraft = props.value.find((draft) => draft.id === selectedDraftId) ?? null
+  const selectedExtension = selectedDraft
+    ? editor.extensions.find((extension) => extension.type === selectedDraft.type)
+    : null
+
+  const insertFromToolbar = (type: string) => {
+    const extension = editor.extensions.find((item) => item.type === type)
+    if (!extension || !editor.can().insertMessage(type)) return
+    const draft = extension.createDraft()
+    props.onChange([...props.value, draft])
+    setSelectedDraftId(draft.id)
+  }
+
+  const updateSelectedDraft = (next: MessageDraft) => {
+    editor.commands.replaceMessage(next.id, next)
+    setSelectedDraftId(next.id)
+  }
 
   return (
     <YStack borderWidth={1} borderColor="$borderColor" rounded="$3" overflow="hidden">
       <RichMessagePreview drafts={props.value} onSelectDraft={setSelectedDraftId} />
+      {selectedDraft && selectedExtension ? (
+        <YStack p="$3" gap="$2" borderTopWidth={1} borderColor="$borderColor">
+          <SizableText size="$2" fontWeight="700" color="$color10">
+            Edit {selectedExtension.label}
+          </SizableText>
+          {selectedExtension.renderEditor({
+            draft: selectedDraft as never,
+            update: updateSelectedDraft as never,
+          })}
+        </YStack>
+      ) : null}
       <RichMessageToolbar
         extensions={editor.extensions}
         canInsert={editor.can().insertMessage}
-        insert={editor.commands.insertMessage}
+        insert={insertFromToolbar}
         count={props.value.length}
         maxMessages={props.maxMessages}
       />
@@ -2132,13 +2189,12 @@ rtk git commit -m "feat: add rich message composer ui"
 
 ---
 
-### Task 8: Message Type Dialogs
+### Task 8: Media And Flex Message Dialogs
 
 **Files:**
 
 - Create: `apps/web/src/features/rich-message/dialogs/MediaUrlDialog.tsx`
 - Create: `apps/web/src/features/rich-message/dialogs/FlexMessageDialog.tsx`
-- Create: `apps/web/src/features/rich-message/dialogs/ImagemapDialog.tsx`
 - Create: `apps/web/src/features/rich-message/dialogs/draftFactories.ts`
 - Modify: `apps/web/src/features/rich-message/RichMessageEditor.tsx`
 - Modify: `apps/web/src/features/rich-message/RichMessageToolbar.tsx`
@@ -2152,7 +2208,6 @@ Create `apps/web/src/test/unit/features/rich-message/richMessageDialogDrafts.tes
 import { describe, expect, it } from 'vitest'
 import {
   buildFlexDraftFromJson,
-  buildImagemapDraft,
   buildMediaUrlDraft,
 } from '~/features/rich-message/dialogs/draftFactories'
 
@@ -2193,23 +2248,6 @@ describe('rich message dialog draft factories', () => {
       })
     }
   })
-
-  it('builds imagemap drafts from structured fields', () => {
-    const result = buildImagemapDraft({
-      id: 'map-1',
-      altText: 'Promo image',
-      baseUrl: 'https://cdn.example.com/imagemap',
-      height: 1040,
-    })
-
-    expect(result).toMatchObject({
-      id: 'map-1',
-      type: 'imagemap',
-      altText: 'Promo image',
-      baseSize: { width: 1040, height: 1040 },
-      actions: [],
-    })
-  })
 })
 ```
 
@@ -2233,7 +2271,6 @@ import type {
   AudioMessageDraft,
   FlexMessageDraft,
   ImageMessageDraft,
-  ImagemapMessageDraft,
   VideoMessageDraft,
 } from '../core/types'
 
@@ -2279,26 +2316,6 @@ export function buildFlexDraftFromJson({
   }
 }
 
-export function buildImagemapDraft({
-  id,
-  altText,
-  baseUrl,
-  height,
-}: {
-  id: string
-  altText: string
-  baseUrl: string
-  height: number
-}): ImagemapMessageDraft {
-  return {
-    id,
-    type: 'imagemap',
-    altText: altText.trim(),
-    baseUrl,
-    baseSize: { width: 1040, height },
-    actions: [],
-  }
-}
 ```
 
 - [ ] **Step 4: Implement media URL dialog**
@@ -2425,77 +2442,31 @@ export function FlexMessageDialog({ onCancel, onSave }: Props) {
 }
 ```
 
-- [ ] **Step 6: Implement imagemap dialog**
-
-Create `ImagemapDialog.tsx`:
-
-```tsx
-import { useState } from 'react'
-import { XStack, YStack, SizableText } from 'tamagui'
-import { Button } from '~/interface/buttons/Button'
-import { Input } from '~/interface/forms/Input'
-import type { ImagemapMessageDraft } from '../core/types'
-import { buildImagemapDraft } from './draftFactories'
-
-type Props = {
-  onCancel(): void
-  onSave(draft: ImagemapMessageDraft): void
-}
-
-export function ImagemapDialog({ onCancel, onSave }: Props) {
-  const [altText, setAltText] = useState('')
-  const [baseUrl, setBaseUrl] = useState('')
-  const [height, setHeight] = useState('1040')
-  const canSave = altText.trim().length > 0 && baseUrl.startsWith('https://') && Number(height) > 0
-
-  return (
-    <YStack p="$4" gap="$3" borderWidth={1} borderColor="$borderColor" rounded="$3">
-      <SizableText size="$5" fontWeight="700">Imagemap message</SizableText>
-      <Input value={altText} onChangeText={setAltText} placeholder="Alt text" />
-      <Input value={baseUrl} onChangeText={setBaseUrl} placeholder="https://cdn.example.com/imagemap" />
-      <Input value={height} onChangeText={setHeight} placeholder="Base height" />
-      <XStack justify="flex-end" gap="$2">
-        <Button size="$2" variant="outlined" onPress={onCancel}>Cancel</Button>
-        <Button
-          size="$2"
-          disabled={!canSave}
-          onPress={() =>
-            onSave(
-              buildImagemapDraft({
-                id: crypto.randomUUID(),
-                altText,
-                baseUrl,
-                height: Number(height),
-              }),
-            )
-          }
-        >
-          Save imagemap message
-        </Button>
-      </XStack>
-    </YStack>
-  )
-}
-```
-
-- [ ] **Step 7: Wire dialogs into editor**
+- [ ] **Step 6: Wire dialogs into editor**
 
 In `RichMessageEditor.tsx`, add:
 
 ```tsx
 const [dialogType, setDialogType] = useState<string | null>(null)
-const appendDraft = (draft: MessageDraft) => props.onChange([...props.value, draft])
+const appendDraft = (draft: MessageDraft) => {
+  props.onChange([...props.value, draft])
+  setSelectedDraftId(draft.id)
+}
 ```
 
-Change toolbar insert behavior:
+Update the existing `insertFromToolbar` from Task 7:
 
 ```tsx
 const insertFromToolbar = (type: string) => {
-  if (type === 'image' || type === 'video' || type === 'audio' || type === 'flex' || type === 'imagemap') {
+  if (type === 'image' || type === 'video' || type === 'audio' || type === 'flex') {
     setDialogType(type)
     return
   }
-  editor.commands.insertMessage(type)
+  const extension = editor.extensions.find((item) => item.type === type)
+  if (!extension || !editor.can().insertMessage(type)) return
+  const draft = extension.createDraft()
+  props.onChange([...props.value, draft])
+  setSelectedDraftId(draft.id)
 }
 ```
 
@@ -2521,18 +2492,9 @@ Render below the toolbar:
     }}
   />
 ) : null}
-{dialogType === 'imagemap' ? (
-  <ImagemapDialog
-    onCancel={() => setDialogType(null)}
-    onSave={(draft) => {
-      appendDraft(draft)
-      setDialogType(null)
-    }}
-  />
-) : null}
 ```
 
-- [ ] **Step 8: Verify GREEN**
+- [ ] **Step 7: Verify GREEN**
 
 Run:
 
@@ -2543,7 +2505,7 @@ rtk bun --cwd apps/web typecheck
 
 Expected: PASS.
 
-- [ ] **Step 9: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
 rtk git add apps/web/src/features/rich-message apps/web/src/test/unit/features/rich-message/richMessageDialogDrafts.test.ts
@@ -2650,9 +2612,18 @@ Render above the text input:
       <Button
         size="$2"
         onPress={async () => {
-          await sendRichMessages(richDrafts)
-          setRichDrafts([])
-          setRichOpen(false)
+          setIsSending(true)
+          try {
+            await sendRichMessages(richDrafts)
+            setRichDrafts([])
+            setRichOpen(false)
+          } catch (err) {
+            showToast(err instanceof Error ? err.message : 'Rich message failed to send', {
+              type: 'error',
+            })
+          } finally {
+            setIsSending(false)
+          }
         }}
         disabled={richDrafts.length === 0 || isSending}
       >
@@ -2891,7 +2862,20 @@ rtk ss -ltnp
 
 Expected: Docker Compose is available and Vine ports are not blocked by non-Compose processes.
 
-- [ ] **Step 4: Run targeted integration**
+- [ ] **Step 4: Apply migrations and rebuild Zero publication**
+
+Run:
+
+```bash
+rtk docker compose run --rm migrate
+rtk docker compose restart zero server
+rtk docker compose logs --tail=120 zero
+```
+
+Expected: migration completes, Zero publication is rebuilt, and Zero logs do
+not contain `SchemaVersionNotSupported`.
+
+- [ ] **Step 5: Run targeted integration**
 
 Run:
 
@@ -2903,7 +2887,7 @@ rtk bun scripts/integration.ts --web-only integration/manager-oa-campaigns.test.
 
 Expected: PASS.
 
-- [ ] **Step 5: Run full check if targeted suites pass**
+- [ ] **Step 6: Run full check if targeted suites pass**
 
 Run:
 
@@ -2913,7 +2897,7 @@ rtk bun run check:all
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit final cleanup if needed**
+- [ ] **Step 7: Commit final cleanup if needed**
 
 Only if verification fixes changed files:
 
@@ -2933,14 +2917,15 @@ Spec coverage:
 - Slim composer with bottom toolbar and preview: Task 7.
 - Preview uses talks bubble rendering style: Task 7.
 - Flex Simulator extraction: Task 6.
-- Message type dialogs: Task 8.
-- Quick reply payload attachment support: Tasks 2, 5.
+- Message type dialogs for media URL and Flex: Task 8.
+- Quick reply payload/core compatibility but no Phase 4B UI: Tasks 2, 5.
+- Imagemap disabled in the editor until a future visual/action-area editor exists: Task 5.
 - Chat integration: Tasks 4, 9.
 - Campaign integration and `messageText` deprecation: Tasks 1, 3, 10.
 - No default `maxMessages` hard limit: Tasks 5, 7, 9, 10.
-- Disabled sticker/location and no template messages: Tasks 2, 5, 7.
+- Disabled imagemap/sticker/location editor toolbar actions and no template messages: Tasks 2, 5, 7.
 
 Residual risk:
 
 - The plan intentionally keeps existing `SendTextCampaign` for compatibility.
-- The first imagemap UI is structured form-first, not a visual area editor.
+- The Messaging API validator keeps sticker/location support while rejecting template messages.

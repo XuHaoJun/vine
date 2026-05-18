@@ -35,11 +35,11 @@ dependency for this phase.
   - image by URL;
   - video by URL;
   - audio by URL;
-  - Flex Message;
-  - imagemap;
-  - quick reply attachment on supported message drafts.
-- Show sticker and location toolbar actions as disabled or coming-soon entries
-  without allowing invalid sends.
+  - Flex Message.
+- Keep quick reply payload/core compatibility, but do not expose quick reply UI
+  in Phase 4B.
+- Show imagemap, sticker, and location toolbar actions as disabled or
+  coming-soon entries without allowing editor sends.
 - Reuse the existing Flex Simulator editor/preview by extracting a shared
   `FlexMessageJsonEditor`.
 - Integrate the editor with both OA one-on-one manager chat and campaign
@@ -54,6 +54,8 @@ dependency for this phase.
   library.
 - No media upload picker or asset library. Image, video, and audio authoring
   use HTTPS URL forms in this phase.
+- No quick reply editor UI in the first version.
+- No sendable imagemap authoring in the first version.
 - No sticker picker and no manual sticker ID form in the first version.
 - No location picker and no manual coordinate form in the first version.
 - No automation journeys, coupons, payments, recurring schedules, or n8n-style
@@ -165,8 +167,7 @@ const extensions = RichMessageStarterKit.configure({
   text: true,
   mediaUrl: true,
   flex: true,
-  imagemap: true,
-  quickReply: true,
+  imagemap: { status: 'disabled' },
   sticker: { status: 'disabled' },
   location: { status: 'disabled' },
 })
@@ -183,7 +184,7 @@ The default UI is a slim composer:
 - bottom toolbar shows icon buttons generated from enabled and disabled
   extensions;
 - text inserts a draft directly;
-- image/video/audio/Flex/imagemap open dialogs because they need structured
+- image/video/audio/Flex open dialogs because they need structured
   fields;
 - preview blocks can be selected and reopened for editing;
 - reaching `maxMessages` disables insert buttons and shows inline status text;
@@ -312,7 +313,10 @@ The dialog behavior:
 
 ### Imagemap
 
-Imagemap drafts use a structured dialog for:
+Imagemap authoring is deferred. The toolbar may show imagemap as a disabled
+or coming-soon action, but Phase 4B does not produce sendable imagemap drafts.
+
+A future imagemap editor should use a structured dialog for:
 
 - `altText`;
 - `baseUrl`;
@@ -321,22 +325,24 @@ Imagemap drafts use a structured dialog for:
 - optional video fields in an advanced section, using the existing
   `@vine/imagemap-schema` video shape.
 
-Validation reuses `@vine/imagemap-schema` semantics. The dialog may start as a
-structured form with compact action rows rather than a visual area editor.
+Validation must reuse `@vine/imagemap-schema` semantics. A future dialog may
+start as a structured form with compact action rows rather than a visual area
+editor, but it must still provide valid `actions`.
 
 ### Quick Reply
 
 Quick reply is not a standalone message draft. It is an attachment on a message
-draft. The editor should expose quick reply editing as a toolbar action or
-per-block action.
+draft. Phase 4B keeps core/server payload compatibility only and does not expose
+quick reply editing UI.
 
 Validation reuses the existing `QuickReplySchema`. Postback actions remain
 Vine-owned webhook dispatch behavior, not LINE cloud behavior.
 
 ### Disabled Types
 
-Sticker and location appear in the toolbar as disabled or coming-soon actions.
-They are excluded from sendable validation in Phase 4B.
+Imagemap, sticker, and location appear in the toolbar as disabled or
+coming-soon actions. They are excluded from editor sendable validation in Phase
+4B. Messaging API server validation still supports sticker and location.
 
 ## Preview Rendering
 
@@ -344,7 +350,7 @@ The live preview should use the same visual language as the real chat surface:
 
 - reuse `MessageBubbleFactory` or extract a shared preview-friendly wrapper
   around the same bubble components;
-- render text, image, video, audio, Flex, and imagemap as close to recipient
+- render text, image, video, audio, and Flex as close to recipient
   chat as possible;
 - avoid copying the user-side chat input, chat membership behavior, read state,
   or conversation navigation into the manager editor;
@@ -396,7 +402,6 @@ array and becomes the source of truth for new campaigns.
 - text: first text content, truncated for display;
 - flex: `Flex: {altText}`;
 - image/video/audio: type label;
-- imagemap: `Imagemap: {altText}`;
 - multi-message: include a count such as `3 messages` when useful.
 
 Mark `messageText` as deprecated:
@@ -444,6 +449,9 @@ schemas where available:
 - `ImagemapMessageSchema`;
 - existing server `validateMessage()` behavior.
 
+`ImagemapMessageSchema` remains relevant for server-side Messaging API
+compatibility, but the Phase 4B editor does not produce imagemap drafts.
+
 ## Data Fetching And API Boundaries
 
 - Use Zero for synced OA chat message rows and manager chat state.
@@ -467,10 +475,14 @@ Required coverage:
   - disabled extension types cannot be inserted;
   - validation blocks unknown sendable drafts;
 - serialization unit tests:
-  - text, image, video, audio, Flex, imagemap, and quick reply serialize to
+  - text, image, video, audio, and Flex serialize to
     Messaging API-compatible objects;
-  - invalid URLs and invalid Flex/imagemap payloads fail validation;
-  - summaries are stable for text, media, Flex, imagemap, and multi-message
+  - quick reply metadata remains supported by core/server payload helpers but
+    has no editor UI in this phase;
+  - imagemap remains supported by server validation where applicable but has no
+    editor send path in this phase;
+  - invalid URLs and invalid Flex payloads fail validation;
+  - summaries are stable for text, media, Flex, and multi-message
     payloads;
 - Flex refactor unit or integration coverage:
   - existing Flex Simulator still validates and previews JSON;
@@ -500,9 +512,10 @@ manager OA chat/campaign flows.
 - The default UI is a slim composer with live preview and bottom toolbar.
 - Preview bubbles visually match the real talks chat rendering closely enough
   that managers can trust the output.
-- Text, image URL, video URL, audio URL, Flex, imagemap, and quick reply can be
+- Text, image URL, video URL, audio URL, and Flex can be
   authored and validated.
-- Sticker and location are visible only as disabled or coming-soon actions.
+- Imagemap, sticker, and location are visible only as disabled or coming-soon
+  actions.
 - The Flex Simulator and Rich Message Editor share `FlexMessageJsonEditor`.
 - OA chat can send multiple rich message drafts as OA messages.
 - Campaigns can send rich message payloads, persist `messagePayloadJson`, and
