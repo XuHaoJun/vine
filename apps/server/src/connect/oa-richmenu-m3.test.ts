@@ -390,10 +390,7 @@ describe('getRichMenu', () => {
         }),
       },
       {
-        exists: vi
-          .fn()
-          .mockResolvedValueOnce(false)
-          .mockResolvedValueOnce(true),
+        exists: vi.fn().mockResolvedValueOnce(false).mockResolvedValueOnce(true),
         get: vi.fn().mockResolvedValue({
           content: png,
           mimeType: 'image/png',

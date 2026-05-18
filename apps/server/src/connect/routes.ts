@@ -22,13 +22,13 @@ import type { createOAService } from '../services/oa'
 import type { createOAAudienceService } from '../services/oa-audience'
 import type { createOACampaignService } from '../services/oa-campaign'
 import type { createOAWebhookDeliveryService } from '../services/oa-webhook-delivery'
+import type { RichMenuDisplayScheduler } from '../workers/rich-menu-scheduler'
 import type { StickerMarketAdminHandlerDeps } from './stickerMarketAdmin'
 import type { StickerMarketCreatorHandlerDeps } from './stickerMarketCreator'
 import type { StickerMarketDiscoveryHandlerDeps } from './stickerMarketDiscovery'
 import type { StickerMarketUserHandlerDeps } from './stickerMarketUser'
 import type { AuthServer } from '@take-out/better-auth-utils/server'
 import type { DriveService } from '@vine/drive'
-import type { RichMenuDisplayScheduler } from '../workers/rich-menu-scheduler'
 
 type ConnectDeps = {
   oa: ReturnType<typeof createOAService>

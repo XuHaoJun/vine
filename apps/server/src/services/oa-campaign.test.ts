@@ -120,7 +120,11 @@ describe('OA campaign service', () => {
 
   it('persists rich message campaigns with payload summary and null deprecated text', async () => {
     const inserted: unknown[] = []
-    const tx = { insert: vi.fn(() => ({ values: vi.fn(async (row: unknown) => inserted.push(row)) })) }
+    const tx = {
+      insert: vi.fn(() => ({
+        values: vi.fn(async (row: unknown) => inserted.push(row)),
+      })),
+    }
     const audience = {
       resolveRecipients: vi.fn(async () => ({ ok: true as const, userIds: ['user-1'] })),
     }

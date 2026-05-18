@@ -1,6 +1,6 @@
-import type { WorkerUtils } from 'graphile-worker'
-import type { RichMenuDisplayPeriod } from '../services/oa-richmenu-display'
 import { buildRichMenuDisplayJobKeys } from '../services/oa-richmenu-display'
+import type { RichMenuDisplayPeriod } from '../services/oa-richmenu-display'
+import type { WorkerUtils } from 'graphile-worker'
 
 export type RichMenuDisplayScheduler = {
   enqueueDisplayPeriodJobs(input: {

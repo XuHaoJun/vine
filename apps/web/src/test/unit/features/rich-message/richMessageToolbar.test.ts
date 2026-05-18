@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { getRichMessageToolbarItems } from '~/features/rich-message/RichMessageToolbar'
 import { RichMessageStarterKit } from '~/features/rich-message/RichMessageStarterKit'
+import { getRichMessageToolbarItems } from '~/features/rich-message/RichMessageToolbar'
 
 describe('getRichMessageToolbarItems', () => {
   it('projects enabled extension buttons and count label without default limit', () => {
     const items = getRichMessageToolbarItems({
       extensions: RichMessageStarterKit.configure(),
-      canInsert: (type) => type !== 'imagemap' && type !== 'sticker' && type !== 'location',
+      canInsert: (type) =>
+        type !== 'imagemap' && type !== 'sticker' && type !== 'location',
       count: 2,
       maxMessages: undefined,
     })
@@ -28,7 +29,12 @@ describe('getRichMessageToolbarItems', () => {
 
   it('uses bounded count labels only when maxMessages is provided', () => {
     const items = getRichMessageToolbarItems({
-      extensions: RichMessageStarterKit.configure({ text: true, mediaUrl: false, flex: false, imagemap: false }),
+      extensions: RichMessageStarterKit.configure({
+        text: true,
+        mediaUrl: false,
+        flex: false,
+        imagemap: false,
+      }),
       canInsert: () => false,
       count: 1,
       maxMessages: 1,

@@ -6,21 +6,21 @@ import {
   OAStatus,
   WebhookStatus,
 } from '@vine/proto/oa'
+import { validateRichMenuImageUpload } from '@vine/richmenu-schema'
 import { logger } from '../lib/logger'
+import {
+  displayPeriodChanged,
+  parseDisplayPeriodInput,
+} from '../services/oa-richmenu-display'
 import { requireAuthData, withAuthService } from './auth-context'
 import type { createOAService } from '../services/oa'
 import type { createOAAudienceService } from '../services/oa-audience'
 import type { createOACampaignService } from '../services/oa-campaign'
 import type { createOAWebhookDeliveryService } from '../services/oa-webhook-delivery'
+import type { RichMenuDisplayScheduler } from '../workers/rich-menu-scheduler'
 import type { ServiceImpl } from '@connectrpc/connect'
 import type { AuthServer } from '@take-out/better-auth-utils/server'
 import type { DriveService } from '@vine/drive'
-import type { RichMenuDisplayScheduler } from '../workers/rich-menu-scheduler'
-import { validateRichMenuImageUpload } from '@vine/richmenu-schema'
-import {
-  displayPeriodChanged,
-  parseDisplayPeriodInput,
-} from '../services/oa-richmenu-display'
 
 type OAHandlerDeps = {
   oa: ReturnType<typeof createOAService>
@@ -986,7 +986,8 @@ export function oaHandler(deps: OAHandlerDeps) {
             if (await deps.drive.exists(key)) {
               const file = await deps.drive.get(key)
               imageBytes = new Uint8Array(file.content)
-              imageContentType = file.mimeType ?? (ext === 'png' ? 'image/png' : 'image/jpeg')
+              imageContentType =
+                file.mimeType ?? (ext === 'png' ? 'image/png' : 'image/jpeg')
               break
             }
           }
@@ -1056,17 +1057,21 @@ export function oaHandler(deps: OAHandlerDeps) {
           displayPeriod,
         )
 
-        const updated = await deps.oa.updateRichMenu(req.officialAccountId, req.richMenuId, {
-          name: req.name,
-          chatBarText: req.chatBarText,
-          selected: req.selected,
-          sizeWidth: req.sizeWidth,
-          sizeHeight: req.sizeHeight,
-          areas: req.areas.map(areaToDb),
-          displayStartsAt: displayPeriod.displayStartsAt,
-          displayEndsAt: displayPeriod.displayEndsAt,
-          incrementDisplayScheduleRevision,
-        })
+        const updated = await deps.oa.updateRichMenu(
+          req.officialAccountId,
+          req.richMenuId,
+          {
+            name: req.name,
+            chatBarText: req.chatBarText,
+            selected: req.selected,
+            sizeWidth: req.sizeWidth,
+            sizeHeight: req.sizeHeight,
+            areas: req.areas.map(areaToDb),
+            displayStartsAt: displayPeriod.displayStartsAt,
+            displayEndsAt: displayPeriod.displayEndsAt,
+            incrementDisplayScheduleRevision,
+          },
+        )
 
         if (updated && incrementDisplayScheduleRevision) {
           await deps.richMenuDisplayScheduler.enqueueDisplayPeriodJobs({

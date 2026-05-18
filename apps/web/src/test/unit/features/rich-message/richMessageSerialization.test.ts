@@ -37,8 +37,8 @@ describe('rich message serialization', () => {
   })
 
   it('summarizes multi-message payloads', () => {
-    expect(summarizeMessagingMessages([{ type: 'text', text: 'hello' }, { type: 'image' }])).toBe(
-      '2 messages: hello',
-    )
+    expect(
+      summarizeMessagingMessages([{ type: 'text', text: 'hello' }, { type: 'image' }]),
+    ).toBe('2 messages: hello')
   })
 })

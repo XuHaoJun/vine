@@ -13,8 +13,8 @@ import { showError } from '~/interface/dialogs/actions'
 import { Input } from '~/interface/forms/Input'
 import { showToast } from '~/interface/toast/Toast'
 import { AreaOverlay } from './AreaOverlay'
-import { TEMPLATES } from './templates'
 import { validateDisplayPeriodInput } from './displayPeriod'
+import { TEMPLATES } from './templates'
 import { boundsToProto } from './types'
 import type { Area, AreaBounds, EditorState, MenuSize } from './types'
 
@@ -411,7 +411,11 @@ export const RichMenuEditor = memo((props: Props) => {
             control={control}
             name="displayStartsAt"
             render={({ field: { onChange, value } }) => (
-              <Input value={value} onChangeText={onChange} placeholder="YYYY-MM-DDTHH:mm" />
+              <Input
+                value={value}
+                onChangeText={onChange}
+                placeholder="YYYY-MM-DDTHH:mm"
+              />
             )}
           />
         </YStack>
@@ -424,7 +428,11 @@ export const RichMenuEditor = memo((props: Props) => {
             control={control}
             name="displayEndsAt"
             render={({ field: { onChange, value } }) => (
-              <Input value={value} onChangeText={onChange} placeholder="YYYY-MM-DDTHH:mm" />
+              <Input
+                value={value}
+                onChangeText={onChange}
+                placeholder="YYYY-MM-DDTHH:mm"
+              />
             )}
           />
         </YStack>

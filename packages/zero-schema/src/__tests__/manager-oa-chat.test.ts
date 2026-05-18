@@ -426,10 +426,22 @@ describe('message.sendAsOA', () => {
     )
 
     expect(inserted).toEqual([
-      expect.objectContaining({ id: 'msg-1', type: 'text', text: 'hello', createdAt: 1000 }),
-      expect.objectContaining({ id: 'msg-2', type: 'image', text: null, createdAt: 1001 }),
+      expect.objectContaining({
+        id: 'msg-1',
+        type: 'text',
+        text: 'hello',
+        createdAt: 1000,
+      }),
+      expect.objectContaining({
+        id: 'msg-2',
+        type: 'image',
+        text: null,
+        createdAt: 1001,
+      }),
     ])
-    expect(chatUpdates).toEqual([{ id: 'chat-1', lastMessageId: 'msg-2', lastMessageAt: 1001 }])
+    expect(chatUpdates).toEqual([
+      { id: 'chat-1', lastMessageId: 'msg-2', lastMessageAt: 1001 },
+    ])
   })
 
   it('rejects empty OA rich sends', async () => {

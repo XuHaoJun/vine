@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useState } from 'react'
 import { YStack } from 'tamagui'
-import { FlexMessageJsonEditor } from '~/features/rich-message/flex/FlexMessageJsonEditor'
 import { defaultFlexMessageJson } from '~/features/rich-message/flex/defaultFlexMessage'
+import { FlexMessageJsonEditor } from '~/features/rich-message/flex/FlexMessageJsonEditor'
 import { useOADetailSheet } from '~/interface/dialogs/OADetailSheet'
 import { useFlexSimulatorHeader } from './FlexSimulatorHeaderContext'
 import { FlexSimulatorSendDialog } from './FlexSimulatorSendDialog'

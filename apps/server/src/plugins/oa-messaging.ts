@@ -7,8 +7,8 @@ import {
   userPublic,
 } from '@vine/db/schema-public'
 import { and, eq } from 'drizzle-orm'
-import { oaApiPath } from './oa-routes'
 import { normalizeMessagingApiMessage } from '../services/oa-message-payload'
+import { oaApiPath } from './oa-routes'
 import type { createOAService } from '../services/oa'
 import type { createOAMessagingService } from '../services/oa-messaging'
 import type { createOAMessagingFacadeService } from '../services/oa-messaging-facade'
@@ -55,10 +55,17 @@ export type ValidationFailure = {
 export function validateMessage(msg: unknown): ValidationSuccess | ValidationFailure {
   try {
     const result = normalizeMessagingApiMessage(msg)
-    return { valid: true, type: result.type, text: result.text, metadata: result.metadata }
+    return {
+      valid: true,
+      type: result.type,
+      text: result.text,
+      metadata: result.metadata,
+    }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
-    const code = message.startsWith('Invalid quickReply') ? ('INVALID_QUICK_REPLY' as const) : undefined
+    const code = message.startsWith('Invalid quickReply')
+      ? ('INVALID_QUICK_REPLY' as const)
+      : undefined
     return { valid: false, error: message, code }
   }
 }
@@ -373,7 +380,9 @@ export async function oaMessagingPlugin(
           body: request.body as Record<string, unknown>,
         })
         if (!result.ok) {
-          return await reply.code(400).send({ message: result.message, code: result.code })
+          return await reply
+            .code(400)
+            .send({ message: result.message, code: result.code })
         }
         return await reply.send({
           audienceGroupId: result.audienceGroupId,
@@ -409,7 +418,9 @@ export async function oaMessagingPlugin(
         const params = request.params as { id: string }
         const result = await facade.getAudienceGroup({ oaId, audienceGroupId: params.id })
         if (!result.ok) {
-          return await reply.code(404).send({ message: result.message, code: result.code })
+          return await reply
+            .code(404)
+            .send({ message: result.message, code: result.code })
         }
         return await reply.send(result)
       } catch (err) {
@@ -450,7 +461,9 @@ export async function oaMessagingPlugin(
           requestId: query.requestId,
         })
         if (!result.ok) {
-          return await reply.code(400).send({ message: result.message, code: result.code })
+          return await reply
+            .code(400)
+            .send({ message: result.message, code: result.code })
         }
         return await reply.send({ overview: result.overview })
       } catch (err) {

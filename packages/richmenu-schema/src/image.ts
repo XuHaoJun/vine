@@ -31,7 +31,12 @@ function readJpegDimensions(bytes: Uint8Array) {
     }
     const marker = bytes[offset + 1]
     if (marker === undefined) return null
-    if (marker === 0x01 || marker === 0xD8 || marker === 0xD9 || (marker >= 0xD0 && marker <= 0xD7)) {
+    if (
+      marker === 0x01 ||
+      marker === 0xd8 ||
+      marker === 0xd9 ||
+      (marker >= 0xd0 && marker <= 0xd7)
+    ) {
       offset += 2
       continue
     }
@@ -47,7 +52,8 @@ function readJpegDimensions(bytes: Uint8Array) {
       const h2 = bytes[offset + 6]
       const w = bytes[offset + 7]
       const w2 = bytes[offset + 8]
-      if (h === undefined || h2 === undefined || w === undefined || w2 === undefined) return null
+      if (h === undefined || h2 === undefined || w === undefined || w2 === undefined)
+        return null
       return {
         height: (h << 8) + h2,
         width: (w << 8) + w2,
@@ -70,7 +76,9 @@ export function validateRichMenuImageUpload(
   if (input.bytes.length > MAX_RICH_MENU_IMAGE_BYTES) {
     return { success: false, message: 'Uploaded image must be 1 MB or smaller' }
   }
-  const dimensions = isPng ? readPngDimensions(input.bytes) : readJpegDimensions(input.bytes)
+  const dimensions = isPng
+    ? readPngDimensions(input.bytes)
+    : readJpegDimensions(input.bytes)
   if (!dimensions) {
     return { success: false, message: 'Uploaded image dimensions could not be read' }
   }

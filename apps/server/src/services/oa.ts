@@ -18,10 +18,10 @@ import {
 } from '@vine/db/schema-oa'
 import { chat, chatMember, message, userPublic } from '@vine/db/schema-public'
 import { and, count, eq, gt, ilike, inArray, isNull, lt, lte, or, sql } from 'drizzle-orm'
+import { deriveRichMenuManagerStatus } from './oa-richmenu-display'
 import type { schema } from '@vine/db'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { Pool } from 'pg'
-import { deriveRichMenuManagerStatus } from './oa-richmenu-display'
 
 type OADeps = {
   db: NodePgDatabase<typeof schema>
@@ -1490,7 +1490,10 @@ export function createOAService(deps: OADeps) {
         and(
           eq(oaDefaultRichMenu.oaId, input.oaId),
           eq(oaRichMenu.hasImage, true),
-          or(isNull(oaRichMenu.displayStartsAt), lte(oaRichMenu.displayStartsAt, sql`now()`)),
+          or(
+            isNull(oaRichMenu.displayStartsAt),
+            lte(oaRichMenu.displayStartsAt, sql`now()`),
+          ),
           or(isNull(oaRichMenu.displayEndsAt), gt(oaRichMenu.displayEndsAt, sql`now()`)),
         ),
       )

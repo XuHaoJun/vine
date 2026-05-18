@@ -21,9 +21,9 @@ describe('rich menu display period UI helpers', () => {
 
   it('formats open-ended summaries', () => {
     expect(formatDisplayPeriodSummary(undefined, undefined)).toBe('Always eligible')
-    expect(
-      formatDisplayPeriodSummary('2026-05-15T10:00:00.000Z', undefined),
-    ).toContain('Starts')
+    expect(formatDisplayPeriodSummary('2026-05-15T10:00:00.000Z', undefined)).toContain(
+      'Starts',
+    )
     expect(formatDisplayPeriodSummary(undefined, '2026-05-16T10:00:00.000Z')).toContain(
       'Ends',
     )
@@ -39,9 +39,7 @@ describe('rich menu display period UI helpers', () => {
   })
 
   it('rejects display end before display start', () => {
-    expect(
-      validateDisplayPeriodInput('2026-05-15T10:00', '2026-05-15T09:00'),
-    ).toEqual({
+    expect(validateDisplayPeriodInput('2026-05-15T10:00', '2026-05-15T09:00')).toEqual({
       success: false,
       message: 'End must be after start',
     })
