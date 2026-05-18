@@ -141,4 +141,33 @@ describe('OA connect campaign actions', () => {
     ).rejects.toMatchObject({ code: Code.InvalidArgument })
     expect(oaAudience.preview).not.toHaveBeenCalled()
   })
+
+  it('passes rich campaign payloads to the campaign service', async () => {
+    const { capturedImpl, oaCampaign } = makeDeps('manager-1')
+    oaCampaign.sendRichCampaign = vi.fn(async () => ({ ok: true, campaignId: 'campaign-1' }))
+    mockedGetAuthDataFromRequest.mockResolvedValue({ id: 'manager-1' } as any)
+
+    await expect(
+      capturedImpl.sendRichCampaign(
+        {
+          officialAccountId: 'oa-1',
+          campaignId: 'campaign-1',
+          name: 'Rich',
+          messagePayloadJson: JSON.stringify([{ type: 'text', text: 'hello' }]),
+          inlineAudienceQueryJson: JSON.stringify({ 'friendship.status': 'friend' }),
+        },
+        makeAuthCtx('manager-1'),
+      ),
+    ).resolves.toEqual({ campaignId: 'campaign-1' })
+
+    expect(oaCampaign.sendRichCampaign).toHaveBeenCalledWith({
+      campaignId: 'campaign-1',
+      oaId: 'oa-1',
+      managerId: 'manager-1',
+      name: 'Rich',
+      messages: [{ type: 'text', text: 'hello' }],
+      audienceFilterId: undefined,
+      inlineAudienceQuery: { 'friendship.status': 'friend' },
+    })
+  })
 })

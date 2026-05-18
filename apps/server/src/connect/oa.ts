@@ -153,6 +153,19 @@ function parseAudienceQueryJson(value: string) {
   }
 }
 
+function parseMessagePayloadJson(value: string) {
+  try {
+    const parsed = JSON.parse(value)
+    if (!Array.isArray(parsed)) {
+      throw new ConnectError('Message payload must be an array', Code.InvalidArgument)
+    }
+    return parsed
+  } catch (err) {
+    if (err instanceof ConnectError) throw err
+    throw new ConnectError('Invalid message payload JSON', Code.InvalidArgument)
+  }
+}
+
 function toProtoWebhookSettings(
   db: Awaited<ReturnType<ReturnType<typeof createOAService>['getWebhook']>>,
 ) {
@@ -1447,6 +1460,44 @@ export function oaHandler(deps: OAHandlerDeps) {
           }
           if (msg === 'RETRY_KEY_ACCEPTED' || msg === 'RETRY_KEY_CONFLICT') {
             throw new ConnectError(msg, Code.AlreadyExists)
+          }
+          throw err
+        }
+      },
+      async sendRichCampaign(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+
+        const inlineAudienceQuery = req.inlineAudienceQueryJson
+          ? parseAudienceQueryJson(req.inlineAudienceQueryJson)
+          : undefined
+        const messages = parseMessagePayloadJson(req.messagePayloadJson)
+
+        try {
+          const result = await deps.oaCampaign.sendRichCampaign({
+            campaignId: req.campaignId,
+            oaId: req.officialAccountId,
+            managerId: auth.id,
+            name: req.name,
+            messages,
+            audienceFilterId: req.audienceFilterId,
+            inlineAudienceQuery,
+          })
+          return { campaignId: result.campaignId }
+        } catch (err) {
+          if (!(err instanceof Error)) throw err
+          if (
+            err.message.startsWith('Campaign name') ||
+            err.message.startsWith('Invalid') ||
+            err.message.startsWith('Unsupported message type')
+          ) {
+            throw new ConnectError(err.message, Code.InvalidArgument)
+          }
+          if (err.message === 'Audience filter not found') {
+            throw new ConnectError(err.message, Code.NotFound)
+          }
+          if (err.message === 'QUOTA_EXCEEDED') {
+            throw new ConnectError(err.message, Code.ResourceExhausted)
           }
           throw err
         }
