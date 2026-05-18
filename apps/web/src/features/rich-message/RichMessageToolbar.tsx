@@ -21,7 +21,8 @@ export function getRichMessageToolbarItems({
       ariaLabel: `Add ${extension.type} message`,
       disabled: !canInsert(extension.type),
     })),
-    countLabel: maxMessages === undefined ? `${count} messages` : `${count} / ${maxMessages}`,
+    countLabel:
+      maxMessages === undefined ? `${count} messages` : `${count} / ${maxMessages}`,
   }
 }
 
@@ -33,7 +34,13 @@ type Props = {
   maxMessages?: number
 }
 
-export function RichMessageToolbar({ extensions, canInsert, insert, count, maxMessages }: Props) {
+export function RichMessageToolbar({
+  extensions,
+  canInsert,
+  insert,
+  count,
+  maxMessages,
+}: Props) {
   const items = getRichMessageToolbarItems({ extensions, canInsert, count, maxMessages })
 
   return (

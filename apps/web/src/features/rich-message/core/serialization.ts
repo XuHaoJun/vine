@@ -41,5 +41,7 @@ export function summarizeMessagingMessages(messages: unknown[]): string {
         : first.type === 'imagemap' && typeof first.altText === 'string'
           ? `Imagemap: ${first.altText}`
           : `${String(first.type ?? 'Message')} message`
-  return messages.length > 1 ? `${messages.length} messages: ${firstSummary}` : firstSummary
+  return messages.length > 1
+    ? `${messages.length} messages: ${firstSummary}`
+    : firstSummary
 }

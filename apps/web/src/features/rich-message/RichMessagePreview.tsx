@@ -56,34 +56,40 @@ type RichMessagePreviewProps = {
   onSelectDraft(id: string): void
 }
 
-export const RichMessagePreview = memo(({ drafts, onSelectDraft }: RichMessagePreviewProps) => (
-  <YStack flex={1} bg="$color1" p="$3" gap="$2" minH={240}>
-    <SizableText size="$2" color="$color10" fontWeight="700">
-      Live preview
-    </SizableText>
-    {drafts.length === 0 ? (
-      <YStack flex={1} items="center" justify="center">
-        <SizableText size="$2" color="$color10">
-          Add a message from the toolbar
-        </SizableText>
-      </YStack>
-    ) : (
-      drafts.map((draft) => {
-        const bubble = draftToBubble(draft)
-        return (
-          <YStack key={draft.id} onPress={() => onSelectDraft(draft.id)} cursor="pointer">
-            <MessageBubbleFactory
-              type={bubble.type}
-              text={bubble.text}
-              metadata={bubble.metadata}
-              isMine={false}
-              chatId="preview"
-              otherMemberOaId={null}
-              sendMessage={() => undefined}
-            />
-          </YStack>
-        )
-      })
-    )}
-  </YStack>
-))
+export const RichMessagePreview = memo(
+  ({ drafts, onSelectDraft }: RichMessagePreviewProps) => (
+    <YStack flex={1} bg="$color1" p="$3" gap="$2" minH={240}>
+      <SizableText size="$2" color="$color10" fontWeight="700">
+        Live preview
+      </SizableText>
+      {drafts.length === 0 ? (
+        <YStack flex={1} items="center" justify="center">
+          <SizableText size="$2" color="$color10">
+            Add a message from the toolbar
+          </SizableText>
+        </YStack>
+      ) : (
+        drafts.map((draft) => {
+          const bubble = draftToBubble(draft)
+          return (
+            <YStack
+              key={draft.id}
+              onPress={() => onSelectDraft(draft.id)}
+              cursor="pointer"
+            >
+              <MessageBubbleFactory
+                type={bubble.type}
+                text={bubble.text}
+                metadata={bubble.metadata}
+                isMine={false}
+                chatId="preview"
+                otherMemberOaId={null}
+                sendMessage={() => undefined}
+              />
+            </YStack>
+          )
+        })
+      )}
+    </YStack>
+  ),
+)

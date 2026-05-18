@@ -8,8 +8,19 @@ export const defaultFlexMessage = {
       type: 'box',
       layout: 'vertical',
       contents: [
-        { type: 'text', text: 'Hello World', size: 'lg', weight: 'bold', align: 'center' },
-        { type: 'text', text: 'This is a sample Flex Message.', size: 'md', color: '#666666' },
+        {
+          type: 'text',
+          text: 'Hello World',
+          size: 'lg',
+          weight: 'bold',
+          align: 'center',
+        },
+        {
+          type: 'text',
+          text: 'This is a sample Flex Message.',
+          size: 'md',
+          color: '#666666',
+        },
       ],
     },
   },

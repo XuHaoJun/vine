@@ -22,11 +22,19 @@ export function createImageUrlExtension(): RichMessageExtension<ImageMessageDraf
     group: 'media',
     status: 'enabled',
     priority: 900,
-    createDraft: () => ({ id: crypto.randomUUID(), type: 'image', originalContentUrl: '', previewImageUrl: '' }),
+    createDraft: () => ({
+      id: crypto.randomUUID(),
+      type: 'image',
+      originalContentUrl: '',
+      previewImageUrl: '',
+    }),
     validate: (draft) =>
       isHttpsUrl(draft.originalContentUrl) && isHttpsUrl(draft.previewImageUrl)
         ? { ok: true }
-        : { ok: false, message: 'Image message requires HTTPS original and preview URLs.' },
+        : {
+            ok: false,
+            message: 'Image message requires HTTPS original and preview URLs.',
+          },
     toMessagingApi: (draft) => ({
       type: 'image',
       originalContentUrl: draft.originalContentUrl,
@@ -44,11 +52,19 @@ export function createVideoUrlExtension(): RichMessageExtension<VideoMessageDraf
     ...createImageUrlExtension(),
     type: 'video',
     label: 'Video',
-    createDraft: () => ({ id: crypto.randomUUID(), type: 'video', originalContentUrl: '', previewImageUrl: '' }),
+    createDraft: () => ({
+      id: crypto.randomUUID(),
+      type: 'video',
+      originalContentUrl: '',
+      previewImageUrl: '',
+    }),
     validate: (draft) =>
       isHttpsUrl(draft.originalContentUrl) && isHttpsUrl(draft.previewImageUrl)
         ? { ok: true }
-        : { ok: false, message: 'Video message requires HTTPS original and preview URLs.' },
+        : {
+            ok: false,
+            message: 'Video message requires HTTPS original and preview URLs.',
+          },
     toMessagingApi: (draft) => ({
       type: 'video',
       originalContentUrl: draft.originalContentUrl,
@@ -69,7 +85,11 @@ export function createAudioUrlExtension(): RichMessageExtension<AudioMessageDraf
     group: 'media',
     status: 'enabled',
     priority: 880,
-    createDraft: () => ({ id: crypto.randomUUID(), type: 'audio', originalContentUrl: '' }),
+    createDraft: () => ({
+      id: crypto.randomUUID(),
+      type: 'audio',
+      originalContentUrl: '',
+    }),
     validate: (draft) =>
       isHttpsUrl(draft.originalContentUrl)
         ? { ok: true }

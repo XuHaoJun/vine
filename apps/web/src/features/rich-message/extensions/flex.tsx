@@ -17,7 +17,10 @@ export function createFlexExtension(): RichMessageExtension<FlexMessageDraft> {
       id: crypto.randomUUID(),
       type: 'flex',
       altText: 'Flex Message',
-      contents: { type: 'bubble', body: { type: 'box', layout: 'vertical', contents: [] } },
+      contents: {
+        type: 'bubble',
+        body: { type: 'box', layout: 'vertical', contents: [] },
+      },
     }),
     validate: (draft) =>
       draft.altText.trim() && draft.contents

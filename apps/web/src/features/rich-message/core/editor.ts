@@ -16,7 +16,10 @@ export function createRichMessageEditor(options: RichMessageEditorOptions) {
   const canInsert = (type: string) => {
     const extension = byType.get(type)
     if (!extension || extension.status === 'disabled' || disabled.has(type)) return false
-    if (options.maxMessages !== undefined && options.value.length >= options.maxMessages) {
+    if (
+      options.maxMessages !== undefined &&
+      options.value.length >= options.maxMessages
+    ) {
       return false
     }
     return true
@@ -30,7 +33,11 @@ export function createRichMessageEditor(options: RichMessageEditorOptions) {
       return true
     },
     updateMessage(id: string, patch: Partial<MessageDraft>) {
-      emit(options.value.map((draft) => (draft.id === id ? ({ ...draft, ...patch } as MessageDraft) : draft)))
+      emit(
+        options.value.map((draft) =>
+          draft.id === id ? ({ ...draft, ...patch } as MessageDraft) : draft,
+        ),
+      )
       return true
     },
     replaceMessage(id: string, nextDraft: MessageDraft) {
@@ -43,10 +50,18 @@ export function createRichMessageEditor(options: RichMessageEditorOptions) {
     },
     duplicateMessage(id: string) {
       const source = options.value.find((draft) => draft.id === id)
-      if (!source || (options.maxMessages !== undefined && options.value.length >= options.maxMessages)) return false
+      if (
+        !source ||
+        (options.maxMessages !== undefined && options.value.length >= options.maxMessages)
+      )
+        return false
       const clone = { ...source, id: crypto.randomUUID() } as MessageDraft
       const index = options.value.findIndex((draft) => draft.id === id)
-      emit([...options.value.slice(0, index + 1), clone, ...options.value.slice(index + 1)])
+      emit([
+        ...options.value.slice(0, index + 1),
+        clone,
+        ...options.value.slice(index + 1),
+      ])
       return true
     },
     moveMessage(id: string, direction: 'up' | 'down') {
@@ -62,11 +77,13 @@ export function createRichMessageEditor(options: RichMessageEditorOptions) {
       return commands.updateMessage(id, { quickReply } as Partial<MessageDraft>)
     },
     clearQuickReply(id: string) {
-      emit(options.value.map((draft) => {
-        if (draft.id !== id) return draft
-        const { quickReply, ...rest } = draft
-        return rest as MessageDraft
-      }))
+      emit(
+        options.value.map((draft) => {
+          if (draft.id !== id) return draft
+          const { quickReply, ...rest } = draft
+          return rest as MessageDraft
+        }),
+      )
       return true
     },
   }

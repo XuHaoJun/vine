@@ -16,7 +16,9 @@ export function createTextExtension(): RichMessageExtension<TextMessageDraft> {
     priority: 1000,
     createDraft: () => ({ id: crypto.randomUUID(), type: 'text', text: '' }),
     validate: (draft) =>
-      draft.text.trim() ? { ok: true } : { ok: false, message: 'Text message cannot be empty.' },
+      draft.text.trim()
+        ? { ok: true }
+        : { ok: false, message: 'Text message cannot be empty.' },
     toMessagingApi: (draft) => ({
       type: 'text',
       text: draft.text,

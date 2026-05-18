@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react'
 import { SizableText, YStack } from 'tamagui'
 import { createRichMessageEditor } from './core/editor'
-import type { MessageDraft, RichMessageExtension } from './core/types'
-import { RichMessageStarterKit } from './RichMessageStarterKit'
+import { FlexMessageDialog } from './dialogs/FlexMessageDialog'
+import { MediaUrlDialog } from './dialogs/MediaUrlDialog'
 import { RichMessagePreview } from './RichMessagePreview'
+import { RichMessageStarterKit } from './RichMessageStarterKit'
 import { RichMessageToolbar } from './RichMessageToolbar'
+import type { MessageDraft, RichMessageExtension } from './core/types'
 
 type Props = {
   value: MessageDraft[]
@@ -20,6 +22,7 @@ export function RichMessageEditor(props: Props) {
     [props.extensions],
   )
   const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null)
+  const [dialogType, setDialogType] = useState<string | null>(null)
   const editor = createRichMessageEditor({
     value: props.value,
     onChange: props.onChange,
@@ -33,9 +36,18 @@ export function RichMessageEditor(props: Props) {
     : null
 
   const insertFromToolbar = (type: string) => {
+    if (type === 'image' || type === 'video' || type === 'audio' || type === 'flex') {
+      setDialogType(type)
+      return
+    }
     const extension = editor.extensions.find((item) => item.type === type)
     if (!extension || !editor.can().insertMessage(type)) return
     const draft = extension.createDraft()
+    props.onChange([...props.value, draft])
+    setSelectedDraftId(draft.id)
+  }
+
+  const appendDraft = (draft: MessageDraft) => {
     props.onChange([...props.value, draft])
     setSelectedDraftId(draft.id)
   }
@@ -66,6 +78,25 @@ export function RichMessageEditor(props: Props) {
         count={props.value.length}
         maxMessages={props.maxMessages}
       />
+      {dialogType === 'image' || dialogType === 'video' || dialogType === 'audio' ? (
+        <MediaUrlDialog
+          type={dialogType}
+          onCancel={() => setDialogType(null)}
+          onSave={(draft) => {
+            appendDraft(draft)
+            setDialogType(null)
+          }}
+        />
+      ) : null}
+      {dialogType === 'flex' ? (
+        <FlexMessageDialog
+          onCancel={() => setDialogType(null)}
+          onSave={(draft) => {
+            appendDraft(draft)
+            setDialogType(null)
+          }}
+        />
+      ) : null}
     </YStack>
   )
 }
