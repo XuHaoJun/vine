@@ -32,7 +32,17 @@ export function createFlexExtension(): RichMessageExtension<FlexMessageDraft> {
       contents: draft.contents,
       ...(draft.quickReply ? { quickReply: draft.quickReply } : {}),
     }),
-    fromMessagingApi: () => null,
+    fromMessagingApi: (message) => {
+      const raw = message as Record<string, unknown>
+      return raw.type === 'flex' && typeof raw.altText === 'string' && raw.contents
+        ? {
+            id: crypto.randomUUID(),
+            type: 'flex',
+            altText: raw.altText,
+            contents: raw.contents,
+          }
+        : null
+    },
     renderEditor: () => null,
     renderPreview: () => null,
   }

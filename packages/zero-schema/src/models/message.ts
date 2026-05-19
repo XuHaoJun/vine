@@ -12,6 +12,8 @@ type OARichMessageInput = {
   metadata?: string | null
 }
 
+const SENDABLE_OA_RICH_MESSAGE_TYPES = new Set(['text', 'image', 'video', 'audio', 'flex'])
+
 async function readRows(
   tx: { query?: Record<string, any> },
   tableName: string,
@@ -79,6 +81,58 @@ async function assertOaChat(
 function assertUserMessagePayload(message: Message) {
   if (message.senderType !== 'user') throw new Error('Unauthorized')
   if (message.oaId) throw new Error('User message cannot include oaId')
+}
+
+function parseMetadataJson(item: OARichMessageInput): Record<string, unknown> {
+  if (!item.metadata) throw new Error(`${item.type} metadata is required`)
+  try {
+    const parsed = JSON.parse(item.metadata)
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+      throw new Error(`${item.type} metadata must be an object`)
+    }
+    return parsed as Record<string, unknown>
+  } catch (err) {
+    if (err instanceof Error && err.message.endsWith('metadata must be an object')) {
+      throw err
+    }
+    throw new Error(`${item.type} metadata must be valid JSON`)
+  }
+}
+
+function assertHttpsUrl(value: unknown, label: string) {
+  if (typeof value !== 'string' || !value.startsWith('https://')) {
+    throw new Error(`Invalid ${label}`)
+  }
+}
+
+function validateOARichMessageInput(item: OARichMessageInput): OARichMessageInput {
+  if (!item.id) throw new Error('Message id is required')
+  if (!SENDABLE_OA_RICH_MESSAGE_TYPES.has(item.type)) {
+    throw new Error(`Unsupported message type: "${item.type}"`)
+  }
+
+  if (item.type === 'text') {
+    const text = item.text?.trim()
+    if (!text) throw new Error('Message text is required')
+    return { ...item, text }
+  }
+
+  const metadata = parseMetadataJson(item)
+  if (item.type === 'image' || item.type === 'video') {
+    assertHttpsUrl(metadata.originalContentUrl, `${item.type} originalContentUrl`)
+    assertHttpsUrl(metadata.previewImageUrl, `${item.type} previewImageUrl`)
+  }
+  if (item.type === 'audio') {
+    assertHttpsUrl(metadata.originalContentUrl, 'audio originalContentUrl')
+    if (metadata.duration !== undefined && typeof metadata.duration !== 'number') {
+      throw new Error('Audio duration must be a number')
+    }
+  }
+  if (item.type === 'flex' && !metadata.contents) {
+    throw new Error('Invalid flex contents')
+  }
+
+  return item
 }
 
 // A user can read messages if they are a member of the chat or manage the OA in it
@@ -180,13 +234,10 @@ export const mutate = mutations(schema, messageReadPermission, {
     await assertOaOwner(tx as { query?: Record<string, any> }, args.oaId, authData.id)
     await assertOaChat(tx as { query?: Record<string, any> }, args.chatId, args.oaId)
 
+    const messages = args.messages.map(validateOARichMessageInput)
+
     let index = 0
-    for (const item of args.messages) {
-      if (!item.id) throw new Error('Message id is required')
-      if (item.type === 'template') throw new Error('Template messages are not supported')
-      if (item.type === 'text' && !item.text?.trim()) {
-        throw new Error('Message text is required')
-      }
+    for (const item of messages) {
       await tx.mutate.message.insert({
         id: item.id,
         chatId: args.chatId,
@@ -200,8 +251,8 @@ export const mutate = mutations(schema, messageReadPermission, {
       index++
     }
 
-    const last = args.messages[args.messages.length - 1]!
-    const lastCreatedAt = args.createdAt + args.messages.length - 1
+    const last = messages[messages.length - 1]!
+    const lastCreatedAt = args.createdAt + messages.length - 1
     await tx.mutate.chat.update({
       id: args.chatId,
       lastMessageId: last.id,

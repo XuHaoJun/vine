@@ -41,7 +41,19 @@ export function createImageUrlExtension(): RichMessageExtension<ImageMessageDraf
       previewImageUrl: draft.previewImageUrl,
       ...(draft.quickReply ? { quickReply: draft.quickReply } : {}),
     }),
-    fromMessagingApi: () => null,
+    fromMessagingApi: (message) => {
+      const raw = message as Record<string, unknown>
+      return raw.type === 'image' &&
+        typeof raw.originalContentUrl === 'string' &&
+        typeof raw.previewImageUrl === 'string'
+        ? {
+            id: crypto.randomUUID(),
+            type: 'image',
+            originalContentUrl: raw.originalContentUrl,
+            previewImageUrl: raw.previewImageUrl,
+          }
+        : null
+    },
     renderEditor: () => null,
     renderPreview: () => null,
   }
@@ -71,7 +83,19 @@ export function createVideoUrlExtension(): RichMessageExtension<VideoMessageDraf
       previewImageUrl: draft.previewImageUrl,
       ...(draft.quickReply ? { quickReply: draft.quickReply } : {}),
     }),
-    fromMessagingApi: () => null,
+    fromMessagingApi: (message) => {
+      const raw = message as Record<string, unknown>
+      return raw.type === 'video' &&
+        typeof raw.originalContentUrl === 'string' &&
+        typeof raw.previewImageUrl === 'string'
+        ? {
+            id: crypto.randomUUID(),
+            type: 'video',
+            originalContentUrl: raw.originalContentUrl,
+            previewImageUrl: raw.previewImageUrl,
+          }
+        : null
+    },
     renderEditor: () => null,
     renderPreview: () => null,
   }
@@ -100,7 +124,17 @@ export function createAudioUrlExtension(): RichMessageExtension<AudioMessageDraf
       ...(draft.duration ? { duration: draft.duration } : {}),
       ...(draft.quickReply ? { quickReply: draft.quickReply } : {}),
     }),
-    fromMessagingApi: () => null,
+    fromMessagingApi: (message) => {
+      const raw = message as Record<string, unknown>
+      return raw.type === 'audio' && typeof raw.originalContentUrl === 'string'
+        ? {
+            id: crypto.randomUUID(),
+            type: 'audio',
+            originalContentUrl: raw.originalContentUrl,
+            duration: typeof raw.duration === 'number' ? raw.duration : undefined,
+          }
+        : null
+    },
     renderEditor: () => null,
     renderPreview: () => null,
   }

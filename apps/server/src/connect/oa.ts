@@ -166,6 +166,19 @@ function parseMessagePayloadJson(value: string) {
   }
 }
 
+function isCampaignInputError(err: Error) {
+  return (
+    err.message.startsWith('Campaign name') ||
+    err.message.startsWith('Invalid') ||
+    err.message.startsWith('Unsupported message type') ||
+    err.message.startsWith('Message must') ||
+    err.message.startsWith('messages must') ||
+    err.message.startsWith('Text message') ||
+    err.message.startsWith('Audio duration') ||
+    err.message.startsWith('Invalid quickReply')
+  )
+}
+
 function toProtoWebhookSettings(
   db: Awaited<ReturnType<ReturnType<typeof createOAService>['getWebhook']>>,
 ) {
@@ -1491,11 +1504,7 @@ export function oaHandler(deps: OAHandlerDeps) {
           return { campaignId: result.campaignId }
         } catch (err) {
           if (!(err instanceof Error)) throw err
-          if (
-            err.message.startsWith('Campaign name') ||
-            err.message.startsWith('Invalid') ||
-            err.message.startsWith('Unsupported message type')
-          ) {
+          if (isCampaignInputError(err)) {
             throw new ConnectError(err.message, Code.InvalidArgument)
           }
           if (err.message === 'Audience filter not found') {

@@ -454,6 +454,47 @@ describe('message.sendAsOA', () => {
       ),
     ).rejects.toThrow('At least one message is required')
   })
+
+  it('rejects unsupported OA rich message types', async () => {
+    const { tx } = makeTx()
+
+    await expect(
+      (messageMutate as any).sendRichAsOA(
+        { authData: { id: 'manager-1' }, tx },
+        {
+          chatId: 'chat-1',
+          oaId: 'oa-1',
+          createdAt: 1000,
+          messages: [{ id: 'msg-1', type: 'imagemap', metadata: '{}' }],
+        },
+      ),
+    ).rejects.toThrow('Unsupported message type')
+  })
+
+  it('rejects malformed OA rich media metadata', async () => {
+    const { tx } = makeTx()
+
+    await expect(
+      (messageMutate as any).sendRichAsOA(
+        { authData: { id: 'manager-1' }, tx },
+        {
+          chatId: 'chat-1',
+          oaId: 'oa-1',
+          createdAt: 1000,
+          messages: [
+            {
+              id: 'msg-1',
+              type: 'image',
+              metadata: JSON.stringify({
+                originalContentUrl: 'http://cdn.example.com/a.jpg',
+                previewImageUrl: 'https://cdn.example.com/p.jpg',
+              }),
+            },
+          ],
+        },
+      ),
+    ).rejects.toThrow('Invalid image originalContentUrl')
+  })
 })
 
 describe('chatMember.markOARead', () => {

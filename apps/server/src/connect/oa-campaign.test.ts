@@ -174,4 +174,24 @@ describe('OA connect campaign actions', () => {
       inlineAudienceQuery: { 'friendship.status': 'friend' },
     })
   })
+
+  it('maps invalid rich campaign payloads to invalid argument', async () => {
+    const { capturedImpl, oaCampaign } = makeDeps('manager-1')
+    oaCampaign.sendRichCampaign = vi.fn(async () => {
+      throw new Error('Text message must have a non-empty "text" field')
+    })
+    mockedGetAuthDataFromRequest.mockResolvedValue({ id: 'manager-1' } as any)
+
+    await expect(
+      capturedImpl.sendRichCampaign(
+        {
+          officialAccountId: 'oa-1',
+          campaignId: 'campaign-1',
+          name: 'Rich',
+          messagePayloadJson: JSON.stringify([{ type: 'text', text: '' }]),
+        },
+        makeAuthCtx('manager-1'),
+      ),
+    ).rejects.toMatchObject({ code: Code.InvalidArgument })
+  })
 })

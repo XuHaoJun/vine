@@ -30,6 +30,29 @@ export function toMessagingApiMessages(
   return drafts.map((draft) => byType.get(draft.type)!.toMessagingApi(draft as never))
 }
 
+export function fromMessagingApiMessages(
+  messages: unknown[],
+  extensions: RichMessageExtension[],
+): MessageDraft[] {
+  return messages.map((message) => {
+    const raw =
+      typeof message === 'object' && message !== null
+        ? (message as Record<string, unknown>)
+        : null
+    if (raw) {
+      for (const extension of extensions) {
+        const draft = extension.fromMessagingApi(message)
+        if (draft) return draft
+      }
+    }
+    return {
+      id: crypto.randomUUID(),
+      type: typeof raw?.type === 'string' ? raw.type : 'unknown',
+      raw: message,
+    }
+  })
+}
+
 export function summarizeMessagingMessages(messages: unknown[]): string {
   const first = messages[0] as Record<string, unknown> | undefined
   if (!first) return ''
