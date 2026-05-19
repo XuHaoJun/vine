@@ -6,21 +6,21 @@ import {
   OAStatus,
   WebhookStatus,
 } from '@vine/proto/oa'
+import { validateRichMenuImageUpload } from '@vine/richmenu-schema'
 import { logger } from '../lib/logger'
+import {
+  displayPeriodChanged,
+  parseDisplayPeriodInput,
+} from '../services/oa-richmenu-display'
 import { requireAuthData, withAuthService } from './auth-context'
 import type { createOAService } from '../services/oa'
 import type { createOAAudienceService } from '../services/oa-audience'
 import type { createOACampaignService } from '../services/oa-campaign'
 import type { createOAWebhookDeliveryService } from '../services/oa-webhook-delivery'
+import type { RichMenuDisplayScheduler } from '../workers/rich-menu-scheduler'
 import type { ServiceImpl } from '@connectrpc/connect'
 import type { AuthServer } from '@take-out/better-auth-utils/server'
 import type { DriveService } from '@vine/drive'
-import type { RichMenuDisplayScheduler } from '../workers/rich-menu-scheduler'
-import { validateRichMenuImageUpload } from '@vine/richmenu-schema'
-import {
-  displayPeriodChanged,
-  parseDisplayPeriodInput,
-} from '../services/oa-richmenu-display'
 
 type OAHandlerDeps = {
   oa: ReturnType<typeof createOAService>
@@ -151,6 +151,32 @@ function parseAudienceQueryJson(value: string) {
   } catch {
     throw new ConnectError('Invalid audience query JSON', Code.InvalidArgument)
   }
+}
+
+function parseMessagePayloadJson(value: string) {
+  try {
+    const parsed = JSON.parse(value)
+    if (!Array.isArray(parsed)) {
+      throw new ConnectError('Message payload must be an array', Code.InvalidArgument)
+    }
+    return parsed
+  } catch (err) {
+    if (err instanceof ConnectError) throw err
+    throw new ConnectError('Invalid message payload JSON', Code.InvalidArgument)
+  }
+}
+
+function isCampaignInputError(err: Error) {
+  return (
+    err.message.startsWith('Campaign name') ||
+    err.message.startsWith('Invalid') ||
+    err.message.startsWith('Unsupported message type') ||
+    err.message.startsWith('Message must') ||
+    err.message.startsWith('messages must') ||
+    err.message.startsWith('Text message') ||
+    err.message.startsWith('Audio duration') ||
+    err.message.startsWith('Invalid quickReply')
+  )
 }
 
 function toProtoWebhookSettings(
@@ -973,7 +999,8 @@ export function oaHandler(deps: OAHandlerDeps) {
             if (await deps.drive.exists(key)) {
               const file = await deps.drive.get(key)
               imageBytes = new Uint8Array(file.content)
-              imageContentType = file.mimeType ?? (ext === 'png' ? 'image/png' : 'image/jpeg')
+              imageContentType =
+                file.mimeType ?? (ext === 'png' ? 'image/png' : 'image/jpeg')
               break
             }
           }
@@ -1043,17 +1070,21 @@ export function oaHandler(deps: OAHandlerDeps) {
           displayPeriod,
         )
 
-        const updated = await deps.oa.updateRichMenu(req.officialAccountId, req.richMenuId, {
-          name: req.name,
-          chatBarText: req.chatBarText,
-          selected: req.selected,
-          sizeWidth: req.sizeWidth,
-          sizeHeight: req.sizeHeight,
-          areas: req.areas.map(areaToDb),
-          displayStartsAt: displayPeriod.displayStartsAt,
-          displayEndsAt: displayPeriod.displayEndsAt,
-          incrementDisplayScheduleRevision,
-        })
+        const updated = await deps.oa.updateRichMenu(
+          req.officialAccountId,
+          req.richMenuId,
+          {
+            name: req.name,
+            chatBarText: req.chatBarText,
+            selected: req.selected,
+            sizeWidth: req.sizeWidth,
+            sizeHeight: req.sizeHeight,
+            areas: req.areas.map(areaToDb),
+            displayStartsAt: displayPeriod.displayStartsAt,
+            displayEndsAt: displayPeriod.displayEndsAt,
+            incrementDisplayScheduleRevision,
+          },
+        )
 
         if (updated && incrementDisplayScheduleRevision) {
           await deps.richMenuDisplayScheduler.enqueueDisplayPeriodJobs({
@@ -1447,6 +1478,40 @@ export function oaHandler(deps: OAHandlerDeps) {
           }
           if (msg === 'RETRY_KEY_ACCEPTED' || msg === 'RETRY_KEY_CONFLICT') {
             throw new ConnectError(msg, Code.AlreadyExists)
+          }
+          throw err
+        }
+      },
+      async sendRichCampaign(req, ctx) {
+        const auth = requireAuthData(ctx)
+        await assertOfficialAccountOwnedByUser(deps, req.officialAccountId, auth.id)
+
+        const inlineAudienceQuery = req.inlineAudienceQueryJson
+          ? parseAudienceQueryJson(req.inlineAudienceQueryJson)
+          : undefined
+        const messages = parseMessagePayloadJson(req.messagePayloadJson)
+
+        try {
+          const result = await deps.oaCampaign.sendRichCampaign({
+            campaignId: req.campaignId,
+            oaId: req.officialAccountId,
+            managerId: auth.id,
+            name: req.name,
+            messages,
+            audienceFilterId: req.audienceFilterId,
+            inlineAudienceQuery,
+          })
+          return { campaignId: result.campaignId }
+        } catch (err) {
+          if (!(err instanceof Error)) throw err
+          if (isCampaignInputError(err)) {
+            throw new ConnectError(err.message, Code.InvalidArgument)
+          }
+          if (err.message === 'Audience filter not found') {
+            throw new ConnectError(err.message, Code.NotFound)
+          }
+          if (err.message === 'QUOTA_EXCEEDED') {
+            throw new ConnectError(err.message, Code.ResourceExhausted)
           }
           throw err
         }

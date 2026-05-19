@@ -47,9 +47,8 @@ test.describe('Manager OA campaigns', () => {
     await page.getByPlaceholder('May promotion').fill(campaignName)
     await page.getByRole('combobox').click()
     await page.getByRole('option', { name: filterName }).click()
-    await page
-      .getByPlaceholder('Write the outbound message')
-      .fill(`Hello from ${campaignName}`)
+    await page.getByLabel('Add text message').click()
+    await page.getByPlaceholder('Message text').fill(`Hello from ${campaignName}`)
     await page.getByRole('button', { name: 'Preview' }).click()
     await expect(page.getByText('0 recipients')).toBeVisible({ timeout: 15000 })
     await page.getByRole('button', { name: 'Send' }).click()
@@ -58,7 +57,7 @@ test.describe('Manager OA campaigns', () => {
     await expect(page.getByText('Campaign queued', { exact: true })).toBeVisible({
       timeout: 15000,
     })
-    await expect(page.getByText(campaignName, { exact: true })).toBeVisible({
+    await expect(page.getByText(`Hello from ${campaignName}`)).toBeVisible({
       timeout: 15000,
     })
   })

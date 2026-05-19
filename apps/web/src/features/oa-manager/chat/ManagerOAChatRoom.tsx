@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ScrollView, SizableText, XStack, YStack } from 'tamagui'
+import { RichMessageEditor } from '~/features/rich-message/RichMessageEditor'
+import type { MessageDraft } from '~/features/rich-message/core/types'
 import { Avatar } from '~/interface/avatars/Avatar'
 import { Button } from '~/interface/buttons/Button'
 import { Input } from '~/interface/forms/Input'
@@ -17,7 +19,10 @@ export function ManagerOAChatRoom({ oaId, chatId, emptyStateLabel }: Props) {
   const scrollRef = useRef<ScrollView>(null)
   const [draft, setDraft] = useState('')
   const [isSending, setIsSending] = useState(false)
-  const { messages, isLoading, userMember, sendMessage, markRead } = useManagerOAMessages(
+  const [richOpen, setRichOpen] = useState(false)
+  const [richDrafts, setRichDrafts] = useState<MessageDraft[]>([])
+  const { messages, isLoading, userMember, sendMessage, sendRichMessages, markRead } =
+    useManagerOAMessages(
     oaId,
     chatId,
   )
@@ -112,6 +117,44 @@ export function ManagerOAChatRoom({ oaId, chatId, emptyStateLabel }: Props) {
           </YStack>
         )}
       </ScrollView>
+
+      {richOpen ? (
+        <YStack p="$3" borderTopWidth={1} borderColor="$borderColor" gap="$2">
+          <RichMessageEditor value={richDrafts} onChange={setRichDrafts} />
+          <XStack justify="flex-end" gap="$2">
+            <Button size="$2" variant="outlined" onPress={() => setRichOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              size="$2"
+              onPress={async () => {
+                setIsSending(true)
+                try {
+                  await sendRichMessages(richDrafts)
+                  setRichDrafts([])
+                  setRichOpen(false)
+                } catch (err) {
+                  showToast(
+                    err instanceof Error ? err.message : 'Rich message failed to send',
+                    { type: 'error' },
+                  )
+                } finally {
+                  setIsSending(false)
+                }
+              }}
+              disabled={richDrafts.length === 0 || isSending}
+            >
+              Send rich message
+            </Button>
+          </XStack>
+        </YStack>
+      ) : (
+        <XStack px="$3" pt="$3">
+          <Button size="$2" variant="outlined" onPress={() => setRichOpen(true)}>
+            Open rich message editor
+          </Button>
+        </XStack>
+      )}
 
       <XStack p="$3" gap="$2" borderTopWidth={1} borderColor="$borderColor">
         <Input

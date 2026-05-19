@@ -2,15 +2,15 @@ import { useActiveParams, useRouter, createRoute } from 'one'
 import { memo } from 'react'
 import { Image } from 'react-native'
 import { SizableText, Spinner, XStack, YStack } from 'tamagui'
+import {
+  formatDisplayPeriodSummary,
+  managerStatusLabel,
+} from '~/features/oa-manager/richmenu/displayPeriod'
 import { oaClient } from '~/features/oa/client'
 import { Button } from '~/interface/buttons/Button'
 import { dialogConfirm, showError } from '~/interface/dialogs/actions'
 import { showToast } from '~/interface/toast/Toast'
 import { useTanMutation, useTanQuery, useTanQueryClient } from '~/query'
-import {
-  formatDisplayPeriodSummary,
-  managerStatusLabel,
-} from '~/features/oa-manager/richmenu/displayPeriod'
 
 const route = createRoute<'/(app)/manager/[oaId]/(home)/richmenu'>()
 
@@ -287,64 +287,65 @@ const MenuCard = memo(
     )
 
     return (
-    <XStack
-      borderWidth={1}
-      borderColor="$borderColor"
-      rounded="$3"
-      p="$3"
-      gap="$3"
-      items="center"
-      bg={isDefault ? '$green1' : '$background'}
-    >
-      <RichMenuThumbnail
-        oaId={oaId}
-        richMenuId={menu.richMenuId}
-        hasImage={menu.hasImage}
-      />
+      <XStack
+        borderWidth={1}
+        borderColor="$borderColor"
+        rounded="$3"
+        p="$3"
+        gap="$3"
+        items="center"
+        bg={isDefault ? '$green1' : '$background'}
+      >
+        <RichMenuThumbnail
+          oaId={oaId}
+          richMenuId={menu.richMenuId}
+          hasImage={menu.hasImage}
+        />
 
-      <YStack flex={1} gap="$1">
-        <XStack gap="$2" items="center">
-          <SizableText size="$3" fontWeight="600" color="$color12">
-            {menu.name}
+        <YStack flex={1} gap="$1">
+          <XStack gap="$2" items="center">
+            <SizableText size="$3" fontWeight="600" color="$color12">
+              {menu.name}
+            </SizableText>
+            <YStack px="$2" py="$1" rounded="$2" bg="$color3">
+              <SizableText size="$1" fontWeight="700" color="$color11">
+                {statusLabel.toUpperCase()}
+              </SizableText>
+            </YStack>
+          </XStack>
+          <SizableText size="$1" color="$color10">
+            {statusLabel} · {menu.hasImage ? 'Image ready' : 'Image missing'} ·{' '}
+            {displaySummary}
           </SizableText>
-          <YStack px="$2" py="$1" rounded="$2" bg="$color3">
-            <SizableText size="$1" fontWeight="700" color="$color11">
-              {statusLabel.toUpperCase()}
-            </SizableText>
-          </YStack>
-        </XStack>
-        <SizableText size="$1" color="$color10">
-          {statusLabel} · {menu.hasImage ? 'Image ready' : 'Image missing'} ·{' '}
-          {displaySummary}
-        </SizableText>
-        <SizableText size="$1" color="$color9">
-          {menu.areas.length} areas · {menu.sizeWidth}x{menu.sizeHeight} ·{' '}
-          {menu.clickCount ?? 0} clicks · "{menu.chatBarText}"
-        </SizableText>
-      </YStack>
+          <SizableText size="$1" color="$color9">
+            {menu.areas.length} areas · {menu.sizeWidth}x{menu.sizeHeight} ·{' '}
+            {menu.clickCount ?? 0} clicks · "{menu.chatBarText}"
+          </SizableText>
+        </YStack>
 
-      <XStack gap="$2" items="center">
-        {isDefault && (
-          <YStack px="$2" py="$1" rounded="$2" bg="$green3">
-            <SizableText size="$1" fontWeight="700" color="$green10">
-              DEFAULT
-            </SizableText>
-          </YStack>
-        )}
-        {!isDefault && onSetDefault && (
-          <Button size="$2" variant="outlined" onPress={onSetDefault}>
-            Set default
+        <XStack gap="$2" items="center">
+          {isDefault && (
+            <YStack px="$2" py="$1" rounded="$2" bg="$green3">
+              <SizableText size="$1" fontWeight="700" color="$green10">
+                DEFAULT
+              </SizableText>
+            </YStack>
+          )}
+          {!isDefault && onSetDefault && (
+            <Button size="$2" variant="outlined" onPress={onSetDefault}>
+              Set default
+            </Button>
+          )}
+          <Button size="$2" onPress={onEdit}>
+            Edit
           </Button>
-        )}
-        <Button size="$2" onPress={onEdit}>
-          Edit
-        </Button>
-        <Button size="$2" variant="outlined" theme="red" onPress={onDelete}>
-          Delete
-        </Button>
+          <Button size="$2" variant="outlined" theme="red" onPress={onDelete}>
+            Delete
+          </Button>
+        </XStack>
       </XStack>
-    </XStack>
-  )},
+    )
+  },
 )
 
 export default RichMenuListPage

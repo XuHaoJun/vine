@@ -118,6 +118,60 @@ describe('OA campaign service', () => {
     )
   })
 
+  it('persists rich message campaigns with payload summary and null deprecated text', async () => {
+    const inserted: unknown[] = []
+    const tx = {
+      insert: vi.fn(() => ({
+        values: vi.fn(async (row: unknown) => inserted.push(row)),
+      })),
+    }
+    const audience = {
+      resolveRecipients: vi.fn(async () => ({ ok: true as const, userIds: ['user-1'] })),
+    }
+    const messaging = {
+      acceptMessagingExecution: vi.fn(async (input: any) => {
+        await input.onAccepted({
+          tx,
+          request: { id: 'request-1' },
+          recipientCount: 1,
+          nowIso: '2026-05-18T00:00:00.000Z',
+        })
+        return { ok: true, accepted: { request: { id: 'request-1' } }, recipientCount: 1 }
+      }),
+    }
+    const service = createOACampaignService({
+      db: {} as any,
+      audience: audience as any,
+      messaging: messaging as any,
+      now: () => new Date('2026-05-18T00:00:00.000Z'),
+    })
+
+    const messages = [{ type: 'text', text: 'Rich hello' }]
+    await service.sendRichCampaign({
+      campaignId: 'campaign-1',
+      oaId: 'oa-1',
+      managerId: 'manager-1',
+      name: 'Rich',
+      messages,
+      audienceFilterId: undefined,
+      inlineAudienceQuery: { 'friendship.status': 'friend' },
+    })
+
+    expect(messaging.acceptMessagingExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        messages: [{ type: 'text', text: 'Rich hello', metadata: null }],
+      }),
+    )
+    expect(inserted).toEqual([
+      expect.objectContaining({
+        messageType: 'rich',
+        messageText: null,
+        messagePayloadJson: messages,
+        messageSummary: 'Rich hello',
+      }),
+    ])
+  })
+
   it('rejects saved filters from another OA', async () => {
     const db = createDbReturningFilters([])
     const service = createOACampaignService({

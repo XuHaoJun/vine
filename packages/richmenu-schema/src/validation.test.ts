@@ -1,7 +1,7 @@
 import * as v from 'valibot'
 import { describe, expect, it } from 'vitest'
-import { validateRichMenu, RichMenuObjectSchema, RichMenuActionSchema } from './index'
 import { validateRichMenuImageUpload } from './image'
+import { validateRichMenu, RichMenuObjectSchema, RichMenuActionSchema } from './index'
 
 describe('validateRichMenu', () => {
   it('validates a valid rich menu object', () => {
@@ -239,12 +239,17 @@ describe('validateRichMenuImageUpload', () => {
 
   it('accepts JPEG content type with .jpg extension', () => {
     const buf = new Uint8Array(19)
-    buf[0] = 0xff; buf[1] = 0xd8
-    buf[2] = 0xff; buf[3] = 0xc0
-    buf[4] = 0x00; buf[5] = 0x11
+    buf[0] = 0xff
+    buf[1] = 0xd8
+    buf[2] = 0xff
+    buf[3] = 0xc0
+    buf[4] = 0x00
+    buf[5] = 0x11
     buf[6] = 0x08
-    buf[7] = 0x09; buf[8] = 0xc4
-    buf[9] = 0x03; buf[10] = 0x4b
+    buf[7] = 0x09
+    buf[8] = 0xc4
+    buf[9] = 0x03
+    buf[10] = 0x4b
     buf[11] = 0x01
     const result = validateRichMenuImageUpload({
       contentType: 'image/jpeg',

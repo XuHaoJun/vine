@@ -1,5 +1,9 @@
 import { oaAudienceFilter, oaCampaign } from '@vine/db/schema-oa'
 import { and, eq } from 'drizzle-orm'
+import {
+  normalizeMessagingApiMessages,
+  summarizeMessagingMessages,
+} from './oa-message-payload'
 import type { createOAAudienceService } from './oa-audience'
 import type { createOAMessagingService } from './oa-messaging'
 import type { schema } from '@vine/db'
@@ -19,6 +23,16 @@ type SendTextCampaignInput = {
   managerId: string
   name: string
   messageText: string
+  audienceFilterId: string | undefined
+  inlineAudienceQuery: AudienceQueryJson | undefined
+}
+
+type SendRichCampaignInput = {
+  campaignId: string
+  oaId: string
+  managerId: string
+  name: string
+  messages: unknown[]
   audienceFilterId: string | undefined
   inlineAudienceQuery: AudienceQueryJson | undefined
 }
@@ -141,6 +155,75 @@ export function createOACampaignService(deps: OACampaignDeps) {
     }
   }
 
+  async function acceptRichCampaign(input: SendRichCampaignInput) {
+    const name = cleanCampaignName(input.name)
+    const normalized = normalizeMessagingApiMessages(input.messages)
+    const summary = summarizeMessagingMessages(input.messages)
+    const query = await loadAudienceQuery(input)
+    const recipients = await deps.audience.resolveRecipients({
+      oaId: input.oaId,
+      query,
+    })
+    if (!recipients.ok) throw new Error(recipients.message)
+
+    let acceptedRequestId = ''
+    let acceptedRecipientCount = 0
+    const accepted = await deps.messaging.acceptMessagingExecution({
+      oaId: input.oaId,
+      requestType: 'campaign',
+      target: {
+        campaignId: input.campaignId,
+        audienceFilterId: input.audienceFilterId,
+        audience: query,
+      },
+      messages: normalized,
+      resolveRecipients: async () => recipients.userIds,
+      onAccepted: async ({ tx, request, recipientCount, nowIso }) => {
+        acceptedRequestId = request.id
+        acceptedRecipientCount = recipientCount
+        await tx.insert(oaCampaign).values({
+          id: input.campaignId,
+          oaId: input.oaId,
+          name,
+          messageType: 'rich',
+          messageText: null,
+          messagePayloadJson: input.messages,
+          messageSummary: summary,
+          audienceFilterId: input.audienceFilterId,
+          inlineAudienceQueryJson: input.inlineAudienceQuery ?? null,
+          messageRequestId: request.id,
+          status: recipientCount === 0 ? 'sent' : 'queued',
+          recipientSnapshotCount: recipientCount,
+          successCount: 0,
+          failedCount: 0,
+          quotaUsed: recipientCount,
+          createdByManagerId: input.managerId,
+          createdAt: nowIso,
+          updatedAt: nowIso,
+          queuedAt: nowIso,
+          sentAt: recipientCount === 0 ? nowIso : null,
+        })
+      },
+    })
+
+    return { accepted, acceptedRequestId, acceptedRecipientCount }
+  }
+
+  async function sendRichCampaign(input: SendRichCampaignInput) {
+    const { accepted, acceptedRequestId, acceptedRecipientCount } =
+      await acceptRichCampaign(input)
+    if (!accepted.ok) {
+      throw new Error(accepted.code)
+    }
+
+    return {
+      ok: true as const,
+      campaignId: input.campaignId,
+      messageRequestId: acceptedRequestId,
+      recipientCount: acceptedRecipientCount,
+    }
+  }
+
   async function sendExternalTextCampaign(input: ExternalTextCampaignInput) {
     const { accepted } = await acceptTextCampaign({
       ...input,
@@ -150,5 +233,5 @@ export function createOACampaignService(deps: OACampaignDeps) {
     return accepted
   }
 
-  return { previewAudience, sendTextCampaign, sendExternalTextCampaign }
+  return { previewAudience, sendTextCampaign, sendRichCampaign, sendExternalTextCampaign }
 }

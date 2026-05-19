@@ -1,7 +1,7 @@
-import type { Logger as PinoLogger } from 'pino'
-import type { TaskList } from 'graphile-worker'
 import type { createOAService } from '../services/oa'
 import type { RichMenuDisplayJobPayload } from '../services/oa-richmenu-display'
+import type { TaskList } from 'graphile-worker'
+import type { Logger as PinoLogger } from 'pino'
 
 type RichMenuDisplayTaskDeps = {
   oa: ReturnType<typeof createOAService>
@@ -17,9 +17,7 @@ function isPayload(value: unknown): value is RichMenuDisplayJobPayload {
   )
 }
 
-export function createRichMenuDisplayTaskList(
-  deps: RichMenuDisplayTaskDeps,
-): TaskList {
+export function createRichMenuDisplayTaskList(deps: RichMenuDisplayTaskDeps): TaskList {
   async function recompute(payload: unknown) {
     if (!isPayload(payload)) {
       deps.logger.warn({ payload }, '[rich-menu-display] invalid payload')

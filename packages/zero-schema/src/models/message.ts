@@ -5,6 +5,15 @@ import type { TableInsertRow } from 'on-zero'
 
 export type Message = TableInsertRow<typeof schema>
 
+type OARichMessageInput = {
+  id: string
+  type: Message['type']
+  text?: string | null
+  metadata?: string | null
+}
+
+const SENDABLE_OA_RICH_MESSAGE_TYPES = new Set(['text', 'image', 'video', 'audio', 'flex'])
+
 async function readRows(
   tx: { query?: Record<string, any> },
   tableName: string,
@@ -72,6 +81,58 @@ async function assertOaChat(
 function assertUserMessagePayload(message: Message) {
   if (message.senderType !== 'user') throw new Error('Unauthorized')
   if (message.oaId) throw new Error('User message cannot include oaId')
+}
+
+function parseMetadataJson(item: OARichMessageInput): Record<string, unknown> {
+  if (!item.metadata) throw new Error(`${item.type} metadata is required`)
+  try {
+    const parsed = JSON.parse(item.metadata)
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+      throw new Error(`${item.type} metadata must be an object`)
+    }
+    return parsed as Record<string, unknown>
+  } catch (err) {
+    if (err instanceof Error && err.message.endsWith('metadata must be an object')) {
+      throw err
+    }
+    throw new Error(`${item.type} metadata must be valid JSON`)
+  }
+}
+
+function assertHttpsUrl(value: unknown, label: string) {
+  if (typeof value !== 'string' || !value.startsWith('https://')) {
+    throw new Error(`Invalid ${label}`)
+  }
+}
+
+function validateOARichMessageInput(item: OARichMessageInput): OARichMessageInput {
+  if (!item.id) throw new Error('Message id is required')
+  if (!SENDABLE_OA_RICH_MESSAGE_TYPES.has(item.type)) {
+    throw new Error(`Unsupported message type: "${item.type}"`)
+  }
+
+  if (item.type === 'text') {
+    const text = item.text?.trim()
+    if (!text) throw new Error('Message text is required')
+    return { ...item, text }
+  }
+
+  const metadata = parseMetadataJson(item)
+  if (item.type === 'image' || item.type === 'video') {
+    assertHttpsUrl(metadata.originalContentUrl, `${item.type} originalContentUrl`)
+    assertHttpsUrl(metadata.previewImageUrl, `${item.type} previewImageUrl`)
+  }
+  if (item.type === 'audio') {
+    assertHttpsUrl(metadata.originalContentUrl, 'audio originalContentUrl')
+    if (metadata.duration !== undefined && typeof metadata.duration !== 'number') {
+      throw new Error('Audio duration must be a number')
+    }
+  }
+  if (item.type === 'flex' && !metadata.contents) {
+    throw new Error('Invalid flex contents')
+  }
+
+  return item
 }
 
 // A user can read messages if they are a member of the chat or manage the OA in it
@@ -156,6 +217,46 @@ export const mutate = mutations(schema, messageReadPermission, {
       id: args.chatId,
       lastMessageId: args.id,
       lastMessageAt: args.createdAt,
+    })
+  },
+  sendRichAsOA: async (
+    { authData, tx },
+    args: {
+      chatId: string
+      oaId: string
+      createdAt: number
+      messages: OARichMessageInput[]
+    },
+  ) => {
+    if (!authData) throw new Error('Unauthorized')
+    if (args.messages.length === 0) throw new Error('At least one message is required')
+
+    await assertOaOwner(tx as { query?: Record<string, any> }, args.oaId, authData.id)
+    await assertOaChat(tx as { query?: Record<string, any> }, args.chatId, args.oaId)
+
+    const messages = args.messages.map(validateOARichMessageInput)
+
+    let index = 0
+    for (const item of messages) {
+      await tx.mutate.message.insert({
+        id: item.id,
+        chatId: args.chatId,
+        senderType: 'oa',
+        oaId: args.oaId,
+        type: item.type,
+        text: item.type === 'text' ? item.text!.trim() : (item.text ?? null),
+        metadata: item.metadata ?? null,
+        createdAt: args.createdAt + index,
+      })
+      index++
+    }
+
+    const last = messages[messages.length - 1]!
+    const lastCreatedAt = args.createdAt + messages.length - 1
+    await tx.mutate.chat.update({
+      id: args.chatId,
+      lastMessageId: last.id,
+      lastMessageAt: lastCreatedAt,
     })
   },
   sendSticker: async ({ authData, tx }, message: Message) => {

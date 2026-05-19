@@ -6,10 +6,8 @@ import {
   message,
   userPublic,
 } from '@vine/db/schema-public'
-import { FlexMessageSchema, QuickReplySchema } from '@vine/flex-schema'
-import { ImagemapMessageSchema } from '@vine/imagemap-schema'
 import { and, eq } from 'drizzle-orm'
-import * as v from 'valibot'
+import { normalizeMessagingApiMessage } from '../services/oa-message-payload'
 import { oaApiPath } from './oa-routes'
 import type { createOAService } from '../services/oa'
 import type { createOAMessagingService } from '../services/oa-messaging'
@@ -54,149 +52,21 @@ export type ValidationFailure = {
   code?: 'INVALID_QUICK_REPLY'
 }
 
-function attachQuickReply(
-  baseMetadata: Record<string, unknown> | null,
-  rawQuickReply: unknown,
-):
-  | { ok: true; metadata: string | null }
-  | { ok: false; error: string; code: 'INVALID_QUICK_REPLY' } {
-  if (rawQuickReply === undefined) {
-    return {
-      ok: true,
-      metadata: baseMetadata !== null ? JSON.stringify(baseMetadata) : null,
-    }
-  }
-  const result = v.safeParse(QuickReplySchema, rawQuickReply)
-  if (!result.success) {
-    const flat = v.flatten<typeof QuickReplySchema>(result.issues)
-    return {
-      ok: false,
-      error: `Invalid quickReply: ${JSON.stringify(flat.nested)}`,
-      code: 'INVALID_QUICK_REPLY' as const,
-    }
-  }
-  return {
-    ok: true,
-    metadata: JSON.stringify({ ...(baseMetadata ?? {}), quickReply: result.output }),
-  }
-}
-
 export function validateMessage(msg: unknown): ValidationSuccess | ValidationFailure {
-  if (typeof msg !== 'object' || msg === null) {
-    return { valid: false, error: 'Message must be an object' }
-  }
-
-  const { type, text, ...rest } = msg as Record<string, unknown>
-
-  if (!type || typeof type !== 'string') {
-    return { valid: false, error: 'Message must have a "type" field' }
-  }
-
-  // Pull quickReply out of the rest bag so each arm can decide where it goes.
-  const { quickReply, ...restWithoutQuickReply } = rest as Record<string, unknown>
-
-  switch (type) {
-    case 'text': {
-      if (typeof text !== 'string') {
-        return { valid: false, error: 'Text message must have a "text" field' }
-      }
-      if (text.length > 5000) {
-        return { valid: false, error: 'Text message must not exceed 5000 characters' }
-      }
-      const qr = attachQuickReply(null, quickReply)
-      if (!qr.ok) return { valid: false, error: qr.error, code: qr.code }
-      return { valid: true, type, text, metadata: qr.metadata }
+  try {
+    const result = normalizeMessagingApiMessage(msg)
+    return {
+      valid: true,
+      type: result.type,
+      text: result.text,
+      metadata: result.metadata,
     }
-
-    case 'flex': {
-      const result = v.safeParse(FlexMessageSchema, msg)
-      if (!result.success) {
-        const flatResult = v.flatten<typeof FlexMessageSchema>(result.issues)
-        return {
-          valid: false,
-          error: `Invalid flex message: ${JSON.stringify(flatResult.nested)}`,
-        }
-      }
-      const qr = attachQuickReply(result.output as Record<string, unknown>, quickReply)
-      if (!qr.ok) return { valid: false, error: qr.error, code: qr.code }
-      return { valid: true, type, text: null, metadata: qr.metadata }
-    }
-
-    case 'image':
-    case 'video': {
-      const { originalContentUrl, previewImageUrl } = restWithoutQuickReply as Record<
-        string,
-        unknown
-      >
-      if (typeof originalContentUrl !== 'string') {
-        return {
-          valid: false,
-          error: `${type} message must have "originalContentUrl" field`,
-        }
-      }
-      if (!originalContentUrl.startsWith('https://')) {
-        return { valid: false, error: `"originalContentUrl" must be an HTTPS URL` }
-      }
-      if (typeof previewImageUrl !== 'string') {
-        return {
-          valid: false,
-          error: `${type} message must have "previewImageUrl" field`,
-        }
-      }
-      if (!previewImageUrl.startsWith('https://')) {
-        return { valid: false, error: `"previewImageUrl" must be an HTTPS URL` }
-      }
-      const qr = attachQuickReply(restWithoutQuickReply, quickReply)
-      if (!qr.ok) return { valid: false, error: qr.error, code: qr.code }
-      return { valid: true, type, text: null, metadata: qr.metadata }
-    }
-
-    case 'audio': {
-      const { originalContentUrl, duration } = restWithoutQuickReply as Record<
-        string,
-        unknown
-      >
-      if (typeof originalContentUrl !== 'string') {
-        return {
-          valid: false,
-          error: 'audio message must have "originalContentUrl" field',
-        }
-      }
-      if (!originalContentUrl.startsWith('https://')) {
-        return { valid: false, error: `"originalContentUrl" must be an HTTPS URL` }
-      }
-      if (duration !== undefined && typeof duration !== 'number') {
-        return { valid: false, error: '"duration" must be a number (milliseconds)' }
-      }
-      const qr = attachQuickReply(restWithoutQuickReply, quickReply)
-      if (!qr.ok) return { valid: false, error: qr.error, code: qr.code }
-      return { valid: true, type, text: null, metadata: qr.metadata }
-    }
-
-    case 'imagemap': {
-      const result = v.safeParse(ImagemapMessageSchema, msg)
-      if (!result.success) {
-        const flat = v.flatten<typeof ImagemapMessageSchema>(result.issues)
-        return {
-          valid: false,
-          error: `Invalid imagemap message: ${JSON.stringify(flat.nested)}`,
-        }
-      }
-      const qr = attachQuickReply(result.output as Record<string, unknown>, quickReply)
-      if (!qr.ok) return { valid: false, error: qr.error, code: qr.code }
-      return { valid: true, type, text: null, metadata: qr.metadata }
-    }
-
-    case 'sticker':
-    case 'location':
-    case 'template': {
-      const qr = attachQuickReply(restWithoutQuickReply, quickReply)
-      if (!qr.ok) return { valid: false, error: qr.error, code: qr.code }
-      return { valid: true, type, text: null, metadata: qr.metadata }
-    }
-
-    default:
-      return { valid: false, error: `Unsupported message type: "${type}"` }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error'
+    const code = message.startsWith('Invalid quickReply')
+      ? ('INVALID_QUICK_REPLY' as const)
+      : undefined
+    return { valid: false, error: message, code }
   }
 }
 
@@ -510,7 +380,9 @@ export async function oaMessagingPlugin(
           body: request.body as Record<string, unknown>,
         })
         if (!result.ok) {
-          return await reply.code(400).send({ message: result.message, code: result.code })
+          return await reply
+            .code(400)
+            .send({ message: result.message, code: result.code })
         }
         return await reply.send({
           audienceGroupId: result.audienceGroupId,
@@ -546,7 +418,9 @@ export async function oaMessagingPlugin(
         const params = request.params as { id: string }
         const result = await facade.getAudienceGroup({ oaId, audienceGroupId: params.id })
         if (!result.ok) {
-          return await reply.code(404).send({ message: result.message, code: result.code })
+          return await reply
+            .code(404)
+            .send({ message: result.message, code: result.code })
         }
         return await reply.send(result)
       } catch (err) {
@@ -587,7 +461,9 @@ export async function oaMessagingPlugin(
           requestId: query.requestId,
         })
         if (!result.ok) {
-          return await reply.code(400).send({ message: result.message, code: result.code })
+          return await reply
+            .code(400)
+            .send({ message: result.message, code: result.code })
         }
         return await reply.send({ overview: result.overview })
       } catch (err) {

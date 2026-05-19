@@ -8,8 +8,11 @@ import { Button } from '~/interface/buttons/Button'
 import { dialogConfirm } from '~/interface/dialogs/actions'
 import { Input } from '~/interface/forms/Input'
 import { Select } from '~/interface/forms/Select'
-import { TextArea } from '~/interface/forms/TextArea'
 import { showToast } from '~/interface/toast/Toast'
+import { RichMessageEditor } from '~/features/rich-message/RichMessageEditor'
+import type { MessageDraft } from '~/features/rich-message/core/types'
+import { toMessagingApiMessages } from '~/features/rich-message/core/serialization'
+import { RichMessageStarterKit } from '~/features/rich-message/RichMessageStarterKit'
 import { defaultAudienceQuery } from './audienceQueryForm'
 import { useManagerOAAudienceFilters } from './useManagerOAAudienceFilters'
 import { useManagerOACampaigns, type CampaignItem } from './useManagerOACampaigns'
@@ -23,11 +26,6 @@ const campaignSchema = v.object({
     v.maxLength(100, 'Campaign name must be 100 characters or less'),
   ),
   audienceFilterId: v.string(),
-  messageText: v.pipe(
-    v.string(),
-    v.nonEmpty('Message text is required'),
-    v.maxLength(5000, 'Message text must be 5000 characters or less'),
-  ),
 })
 
 type CampaignFormData = v.InferInput<typeof campaignSchema>
@@ -54,8 +52,9 @@ function formatCampaignAudience(
 export function ManagerOACampaignsPage({ oaId }: Props) {
   const router = useRouter()
   const { filters, previewAudience } = useManagerOAAudienceFilters(oaId)
-  const { campaigns, sendTextCampaign } = useManagerOACampaigns(oaId)
+  const { campaigns, sendRichCampaign } = useManagerOACampaigns(oaId)
   const [previewCount, setPreviewCount] = useState<number | null>(null)
+  const [messageDrafts, setMessageDrafts] = useState<MessageDraft[]>([])
 
   const filterNameById = useMemo(
     () => new Map(filters.map((filter) => [filter.id, filter.name])),
@@ -80,7 +79,6 @@ export function ManagerOACampaignsPage({ oaId }: Props) {
     defaultValues: {
       name: '',
       audienceFilterId: defaultAudienceValue,
-      messageText: '',
     },
   })
 
@@ -107,9 +105,15 @@ export function ManagerOACampaignsPage({ oaId }: Props) {
     if (!confirmed) return
 
     try {
-      await sendTextCampaign.mutateAsync({
+      const extensions = RichMessageStarterKit.configure()
+      const messagePayload = toMessagingApiMessages(messageDrafts, extensions)
+      if (messagePayload.length === 0) {
+        showToast('Add at least one message', { type: 'error' })
+        return
+      }
+      await sendRichCampaign.mutateAsync({
         name: data.name,
-        messageText: data.messageText,
+        messagePayload,
         audienceFilterId:
           data.audienceFilterId === defaultAudienceValue
             ? undefined
@@ -117,10 +121,10 @@ export function ManagerOACampaignsPage({ oaId }: Props) {
       })
       showToast('Campaign queued', { type: 'success' })
       setPreviewCount(null)
+      setMessageDrafts([])
       reset({
         name: '',
         audienceFilterId: data.audienceFilterId,
-        messageText: '',
       })
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Failed to send campaign', {
@@ -200,19 +204,7 @@ export function ManagerOACampaignsPage({ oaId }: Props) {
             <SizableText size="$2" fontWeight="600">
               Message
             </SizableText>
-            <Controller
-              control={control}
-              name="messageText"
-              render={({ field: { onChange, value }, fieldState: { error } }) => (
-                <TextArea
-                  value={value}
-                  onChangeText={onChange}
-                  placeholder="Write the outbound message"
-                  minH={160}
-                  error={error?.message}
-                />
-              )}
-            />
+            <RichMessageEditor value={messageDrafts} onChange={setMessageDrafts} />
           </YStack>
 
           <XStack
@@ -242,7 +234,7 @@ export function ManagerOACampaignsPage({ oaId }: Props) {
             <Button
               size="$3"
               onPress={() => sendCampaign()}
-              disabled={isSubmitting || sendTextCampaign.isPending}
+              disabled={isSubmitting || sendRichCampaign.isPending}
             >
               Send
             </Button>
@@ -305,7 +297,7 @@ export function ManagerOACampaignsPage({ oaId }: Props) {
                       </YStack>
                     </XStack>
                     <SizableText size="$2" color="$color10" numberOfLines={2}>
-                      {campaign.messageText}
+                      {campaign.messageSummary || campaign.messageText || 'Rich message campaign'}
                     </SizableText>
                     <XStack gap="$3" $platform-web={{ flexWrap: 'wrap' }}>
                       <SizableText size="$1" color="$color10">

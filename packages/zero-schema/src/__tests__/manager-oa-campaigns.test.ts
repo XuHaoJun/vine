@@ -4,6 +4,7 @@ import {
   managerOwnedOaAudienceFilterPermission,
   mutate as audienceFilterMutate,
 } from '../models/oaAudienceFilter'
+import * as campaignModel from '../models/oaCampaign'
 import {
   managerOwnedOaCampaignPermission,
   mutate as campaignMutate,
@@ -387,5 +388,14 @@ describe('raw campaign mutations', () => {
     await expect(
       (campaignMutate as any).delete(ctx, { id: 'campaign-1' }),
     ).rejects.toThrow('Use campaign service actions')
+  })
+})
+
+describe('rich campaign schema', () => {
+  it('models rich campaign payload fields and deprecated messageText', () => {
+    const columns = (campaignModel.schema as any).schema.columns
+    expect(columns.messagePayloadJson).toBeTruthy()
+    expect(columns.messageSummary).toBeTruthy()
+    expect(columns.messageText).toBeTruthy()
   })
 })

@@ -391,7 +391,9 @@ export const oaCampaign = pgTable(
       .references(() => officialAccount.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
     messageType: text('messageType').notNull().default('text'),
-    messageText: text('messageText').notNull(),
+    messageText: text('messageText'),
+    messagePayloadJson: jsonb('messagePayloadJson').notNull().default([]),
+    messageSummary: text('messageSummary').notNull().default(''),
     audienceFilterId: uuid('audienceFilterId').references(() => oaAudienceFilter.id, {
       onDelete: 'set null',
     }),
